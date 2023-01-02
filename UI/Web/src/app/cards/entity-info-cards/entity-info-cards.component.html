@@ -2,7 +2,7 @@
     <ng-container *ngIf="chapter !== undefined && chapter.releaseDate && (chapter.releaseDate | date: 'shortDate') !== '1/1/01'">
         <div class="col-auto mb-2">
             <app-icon-and-title label="Release Date" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
-                {{chapter.releaseDate | date:'shortDate'}}
+                {{chapter.releaseDate | date:'shortDate' | defaultDate}}
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
@@ -50,7 +50,16 @@
         <div class="vr d-none d-lg-block m-2"></div>
         <div class="col-auto">
             <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                {{chapter.created | date:'short' || '-'}}
+                {{chapter.created | date:'short' | defaultDate}}
+            </app-icon-and-title>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="showExtendedProperties && size > 0">
+        <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto">
+            <app-icon-and-title label="Size" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" title="ID">
+                {{size | bytes}}
             </app-icon-and-title>
         </div>
     </ng-container>

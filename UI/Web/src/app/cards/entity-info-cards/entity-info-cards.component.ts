@@ -37,6 +37,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   totalPages: number = 0;
   totalWordCount: number = 0;
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
+  size: number = 0;
 
   private readonly onDestroy: Subject<void> = new Subject();
 
@@ -58,6 +59,17 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     this.isChapter = this.utilityService.isChapter(this.entity);
 
     this.chapter = this.utilityService.isChapter(this.entity) ? (this.entity as Chapter) : (this.entity as Volume).chapters[0];
+
+
+    if (this.isChapter) {
+      this.size = this.utilityService.asChapter(this.entity).files.reduce((sum, v) => sum + v.bytes, 0);
+    } else {
+      this.size = this.utilityService.asVolume(this.entity).chapters.reduce((sum1, chapter) => {
+        return sum1 + chapter.files.reduce((sum2, file) => {
+          return sum2 + file.bytes;
+        }, 0);
+      }, 0);
+    }
 
     if (this.includeMetadata) {
       this.seriesService.getChapterMetadata(this.chapter.id).subscribe(metadata => {
