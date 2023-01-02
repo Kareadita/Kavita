@@ -57,4 +57,8 @@ export class ServerService {
   convertBookmarks() {
     return this.httpClient.post(this.baseUrl + 'server/convert-bookmarks', {});
   }
+
+  convertCovers() {
+    return this.httpClient.post(this.baseUrl + 'server/convert-covers', {});
+  }
 }

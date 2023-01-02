@@ -70,6 +70,10 @@ public class StatisticService : IStatisticService
             .Where(c => chapterIds.Contains(c.Id))
             .SumAsync(c => c.AvgHoursToRead);
 
+        var totalWordsRead = await _context.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .SumAsync(c => c.WordCount);
+
         var chaptersRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => libraryIds.Contains(p.LibraryId))
@@ -90,8 +94,7 @@ public class StatisticService : IStatisticService
             .AsEnumerable()
             .GroupBy(g => g.series.LibraryId)
             .ToDictionary(g => g.Key, g => g.Sum(c => c.chapter.Pages));
-        //
-        //
+
         var totalProgressByLibrary = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => p.LibraryId > 0)
@@ -108,11 +111,12 @@ public class StatisticService : IStatisticService
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
                 (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
-            .Average() / 7;
+            .Average() / 7.0;
 
         return new UserReadStatistics()
         {
             TotalPagesRead = totalPagesRead,
+            TotalWordsRead = totalWordsRead,
             TimeSpentReading = timeSpentReading,
             ChaptersRead = chaptersRead,
             LastActive = lastActive,
@@ -314,7 +318,7 @@ public class StatisticService : IStatisticService
             .Select(u => new ReadHistoryEvent
             {
                 UserId = u.AppUserId,
-                UserName = _context.AppUser.Single(u => u.Id == userId).UserName,
+                UserName = _context.AppUser.Single(u2 => u2.Id == userId).UserName,
                 SeriesName = _context.Series.Single(s => s.Id == u.SeriesId).Name,
                 SeriesId = u.SeriesId,
                 LibraryId = u.LibraryId,

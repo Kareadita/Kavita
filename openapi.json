@@ -7146,6 +7146,19 @@
         }
       }
     },
+    "/api/Server/convert-covers": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Triggers the scheduling of the convert covers job. Only one job will run at a time.",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/logs": {
       "get": {
         "tags": [
@@ -11153,6 +11166,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "bytes": {
+            "type": "integer",
+            "format": "int64"
+          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
@@ -14148,6 +14165,11 @@
           "totalPagesRead": {
             "type": "integer",
             "description": "Total number of pages read",
+            "format": "int64"
+          },
+          "totalWordsRead": {
+            "type": "integer",
+            "description": "Total number of words read",
             "format": "int64"
           },
           "timeSpentReading": {

@@ -479,11 +479,14 @@ public class ReaderService : IReaderService
         var volumeChapters = volumes
             .Where(v => v.Number != 0)
             .SelectMany(v => v.Chapters)
-            .OrderBy(c => float.Parse(c.Number))
+            //.OrderBy(c => float.Parse(c.Number))
             .ToList();
 
+        // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+        var currentlyReadingChapter = volumeChapters
+            .OrderBy(c => double.Parse(c.Range), _chapterSortComparer)
+            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order

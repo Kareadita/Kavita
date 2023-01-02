@@ -27,6 +27,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 })
 export class AllSeriesComponent implements OnInit, OnDestroy {
 
+  title: string = 'All Series';
   series: Series[] = [];
   loadingSeries = false;
   pagination!: Pagination;
@@ -93,7 +94,9 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     private readonly cdRef: ChangeDetectorRef) {
     
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.titleService.setTitle('Kavita - All Series');
+
+    this.title = this.route.snapshot.queryParamMap.get('title') || 'All Series';
+    this.titleService.setTitle('Kavita - ' + this.title);
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);

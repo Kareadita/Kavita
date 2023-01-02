@@ -9,6 +9,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core
 export class UserStatsInfoCardsComponent implements OnInit {
 
   @Input() totalPagesRead: number = 0;
+  @Input() totalWordsRead: number = 0;
   @Input() timeSpentReading: number = 0;
   @Input() chaptersRead: number = 0;
   @Input() lastActive: string = '';

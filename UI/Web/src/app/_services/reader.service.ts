@@ -191,12 +191,14 @@ export class ReaderService {
    */
   imageUrlToPageNum(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
-    return parseInt(imageSrc.split('&page=')[1], 10);
+    const params = new URLSearchParams(new URL(imageSrc).search);
+    return parseInt(params.get('page') || '-1', 10);
   }
 
   imageUrlToChapterId(imageSrc: string) {
     if (imageSrc === undefined || imageSrc === '') { return -1; }
-    return parseInt(imageSrc.split('chapterId=')[1].split('&')[0], 10);
+    const params = new URLSearchParams(new URL(imageSrc).search);
+    return parseInt(params.get('chapterId') || '-1', 10);
   }
 
   getNextChapterUrl(url: string, nextChapterId: number, incognitoMode: boolean = false, readingListMode: boolean = false, readingListId: number = -1) {

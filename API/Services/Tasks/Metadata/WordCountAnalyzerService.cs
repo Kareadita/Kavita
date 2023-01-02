@@ -243,8 +243,9 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         var doc = new HtmlDocument();
         doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
 
-        return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
-            .DefaultIfEmpty()
+        var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
+        if (textNodes == null) return 0;
+        return textNodes
             .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
             .Sum(words => words.Count());

@@ -369,18 +369,24 @@
                     </div>
                     <div class="row g-0 mb-2">
                         <div class="col-md-6">Created: {{series.created | date:'shortDate'}}</div>
-                        <div class="col-md-6">Last Read: {{series.latestReadDate | date:'shortDate' | defaultDate}}</div>
-                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | date:'short' | defaultDate}}</div>
-                        <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | date:'short' | defaultDate}}</div>
-                        <div class="col-md-6">Folder Path: {{series.folderPath | defaultValue}}</div>
+                        <div class="col-md-6">Last Read: {{series.latestReadDate | defaultDate | timeAgo}}</div>
+                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
+                        <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
+                    </div>
+
+                    <div class="row g-0 mb-2">
+                        <div class="col-auto">Folder Path: {{series.folderPath | defaultValue}}</div>
                     </div>
                     <div class="row g-0 mb-2" *ngIf="metadata">
-                        <!-- TODO: Put tooltips in here to explain to the user what these are (ComicInfo tags) -->
-                        <div class="col-md-6">Max Items: {{metadata.maxCount}}</div>
-                        <div class="col-md-6">Total Items: {{metadata.totalCount}}</div>
+                        <div class="col-md-6">
+                            Max Items: {{metadata.maxCount}} <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max of Volume/Issue field in ComicInfo. Used in conjunction with total items to determine publication status." role="button" tabindex="0"></i>
+                        </div>
+                        <div class="col-md-6" title="">
+                            Total Items: {{metadata.totalCount}} <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Total number of issues/volumes in the series" role="button" tabindex="0"></i>
+                        </div>
                         <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
                         <div class="col-md-6">Total Pages: {{series.pages}}</div>
-
+                        <div class="col-md-6">Size: {{size | bytes}}</div>
                     </div>
                     <h4>Volumes</h4>
                     <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">

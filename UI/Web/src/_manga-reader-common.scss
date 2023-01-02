@@ -14,7 +14,7 @@ img {
 
   &.full-height {
     height: 100vh;
-    display: inline-block;
+    display: flex; // changed from inline-block to fix the centering on tablets not working
   }
 
   &.original {

@@ -14,7 +14,7 @@ import { SelectionCompareFn, TypeaheadSettings } from '../_models/typeahead-sett
    * @param selectedOptions Optional data elements to inform the SelectionModel of. If not passed, as toggle() occur, items are tracked.
    * @param propAccessor Optional string that points to a unique field within the T type. Used for quickly looking up.
    */
-export class SelectionModel<T> {
+export class SelectionModel<T extends object> {
   _data!: Array<{value: T, selected: boolean}>;
   _propAccessor: string = '';
 
@@ -137,13 +137,13 @@ const ANIMATION_SPEED = 200;
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
     trigger('slideFromTop', [
-      state('in', style({ height: '0px', overflow: 'hidden'})),
+      state('in', style({ height: '0px'})),
       transition('void => *', [
         style({ height: '100%', overflow: 'auto' }),
         animate(ANIMATION_SPEED)
       ]),
       transition('* => void', [
-        animate(ANIMATION_SPEED, style({ height: '0px', overflow: 'hidden' })),
+        animate(ANIMATION_SPEED, style({ height: '0px' })),
       ])
     ])
   ]

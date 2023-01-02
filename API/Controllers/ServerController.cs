@@ -143,6 +143,19 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Triggers the scheduling of the convert covers job. Only one job will run at a time.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("convert-covers")]
+    public ActionResult ScheduleConvertCovers()
+    {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true)) return Ok();
+        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllCoverToWebP());
+        return Ok();
+    }
+
     [HttpGet("logs")]
     public ActionResult GetLogs()
     {
