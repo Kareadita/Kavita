@@ -14,7 +14,7 @@ import { SelectionCompareFn, TypeaheadSettings } from '../_models/typeahead-sett
    * @param selectedOptions Optional data elements to inform the SelectionModel of. If not passed, as toggle() occur, items are tracked.
    * @param propAccessor Optional string that points to a unique field within the T type. Used for quickly looking up.
    */
-export class SelectionModel<T> {
+export class SelectionModel<T extends object> {
   _data!: Array<{value: T, selected: boolean}>;
   _propAccessor: string = '';
 
