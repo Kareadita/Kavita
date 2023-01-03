@@ -7,7 +7,7 @@ import { SharedModule } from '../shared/shared.module';
 import { ServerStatsComponent } from './_components/server-stats/server-stats.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { StatListComponent } from './_components/stat-list/stat-list.component';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { PublicationStatusStatsComponent } from './_components/publication-status-stats/publication-status-stats.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MangaFormatStatsComponent } from './_components/manga-format-stats/manga-format-stats.component';
@@ -15,6 +15,7 @@ import { FileBreakdownStatsComponent } from './_components/file-breakdown-stats/
 import { PipeModule } from '../pipe/pipe.module';
 import { TopReadersComponent } from './_components/top-readers/top-readers.component';
 import { ReadByDayAndComponent } from './_components/read-by-day-and/read-by-day-and.component';
+import { GenericListModalComponent } from './_components/_modals/generic-list-modal/generic-list-modal.component';
 
 
 
@@ -28,13 +29,15 @@ import { ReadByDayAndComponent } from './_components/read-by-day-and/read-by-day
     MangaFormatStatsComponent,
     FileBreakdownStatsComponent,
     TopReadersComponent,
-    ReadByDayAndComponent
+    ReadByDayAndComponent,
+    GenericListModalComponent
   ],
   imports: [
     CommonModule,
     TableModule,
     SharedModule,
     NgbTooltipModule,
+    NgbModalModule,
     ReactiveFormsModule,
     PipeModule,
 

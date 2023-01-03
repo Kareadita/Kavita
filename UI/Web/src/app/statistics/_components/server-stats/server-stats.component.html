@@ -2,7 +2,7 @@
     <div class="row g-0 mt-4 mb-3 d-flex justify-content-around" *ngIf="stats$ | async as stats">
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Series" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Total Series">
+                <app-icon-and-title label="Total Series" [clickable]="false" fontClasses="fa-solid fa-book-open" title="Total Series">
                     {{stats.seriesCount | compactNumber}} Series
                 </app-icon-and-title>
             </div>
@@ -11,7 +11,7 @@
     
         <ng-container >
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Volumes" [clickable]="false" fontClasses="fas fa-eye" title="Total Volumes">
+                <app-icon-and-title label="Total Volumes" [clickable]="false" fontClasses="fas fa-book" title="Total Volumes">
                     {{stats.volumeCount | compactNumber}} Volumes
                 </app-icon-and-title>
             </div>
@@ -38,7 +38,7 @@
     
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Size" [clickable]="false" fontClasses="fa-solid fa-weight-scale" title="Total Size">
+                <app-icon-and-title label="Total Size" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" title="Total Size">
                     {{stats.totalSize | bytes}}
                 </app-icon-and-title>
             </div>
@@ -47,7 +47,7 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Genres" [clickable]="false" fontClasses="fa-solid fa-tags" title="Total Genres">
+                <app-icon-and-title label="Total Genres" [clickable]="true" fontClasses="fa-solid fa-tags" title="Total Genres" (click)="openGenreList();$event.stopPropagation();">
                     {{stats.totalGenres | compactNumber}} Genres
                 </app-icon-and-title>
             </div>
@@ -56,7 +56,7 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total Tags" [clickable]="false" fontClasses="fa-solid fa-tags" title="Total Tags">
+                <app-icon-and-title label="Total Tags" [clickable]="true" fontClasses="fa-solid fa-tags" title="Total Tags" (click)="openTagList();$event.stopPropagation();">
                     {{stats.totalTags | compactNumber}} Tags
                 </app-icon-and-title>
             </div>
@@ -65,7 +65,7 @@
 
         <ng-container>
             <div class="col-auto mb-2">
-                <app-icon-and-title label="Total People" [clickable]="false" fontClasses="fa-solid fa-user-tag" title="Total People">
+                <app-icon-and-title label="Total People" [clickable]="true" fontClasses="fa-solid fa-user-tag" title="Total People" (click)="openPeopleList();$event.stopPropagation();">
                     {{stats.totalPeople | compactNumber}} People
                 </app-icon-and-title>
             </div>
@@ -74,7 +74,7 @@
 
     <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
         <div class="col-auto">
-            <app-stat-list [data$]="releaseYears$" title="Release Years" lable="series"></app-stat-list>
+            <app-stat-list [data$]="releaseYears$" title="Release Years" label="series"></app-stat-list>
         </div>
         <div class="col-auto">
             <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="reads"></app-stat-list>
