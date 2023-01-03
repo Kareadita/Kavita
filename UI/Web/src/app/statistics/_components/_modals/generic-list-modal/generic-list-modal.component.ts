@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -10,6 +10,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 export class GenericListModalComponent {
   @Input() items: Array<string> = [];
   @Input() title: string = '';
+  @Input() clicked: ((item: string) => void) | undefined = undefined;
 
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
@@ -23,5 +24,11 @@ export class GenericListModalComponent {
 
   close() {
     this.modal.close();
+  }
+
+  handleClick(item: string) {
+    if (this.clicked) {
+      this.clicked(item);
+    }
   }
 }

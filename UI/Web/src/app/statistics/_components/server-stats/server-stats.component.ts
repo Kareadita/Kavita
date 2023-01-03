@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map, Observable, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Series } from 'src/app/_models/series';
 import { ImageService } from 'src/app/_services/image.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -86,6 +87,12 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = genres.map(t => t.title);
       ref.componentInstance.title = 'Genres';
+      ref.componentInstance.clicked = (item: string) => {
+        const params: any = {};
+        params[FilterQueryParam.Genres] = item;
+        params[FilterQueryParam.Page] = 1;
+        this.router.navigate(['all-series'], {queryParams: params});
+      };
     });
   }
 
@@ -94,6 +101,12 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = tags.map(t => t.title);
       ref.componentInstance.title = 'Tags';
+      ref.componentInstance.clicked = (item: string) => {
+        const params: any = {};
+        params[FilterQueryParam.Tags] = item;
+        params[FilterQueryParam.Page] = 1;
+        this.router.navigate(['all-series'], {queryParams: params});
+      };
     });
   }
 
