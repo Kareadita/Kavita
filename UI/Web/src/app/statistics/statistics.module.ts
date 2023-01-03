@@ -16,6 +16,8 @@ import { PipeModule } from '../pipe/pipe.module';
 import { TopReadersComponent } from './_components/top-readers/top-readers.component';
 import { ReadByDayAndComponent } from './_components/read-by-day-and/read-by-day-and.component';
 import { GenericListModalComponent } from './_components/_modals/generic-list-modal/generic-list-modal.component';
+import { DayBreakdownComponent } from './_components/day-breakdown/day-breakdown.component';
+import { DayOfWeekPipe } from './_pipes/day-of-week.pipe';
 
 
 
@@ -30,7 +32,9 @@ import { GenericListModalComponent } from './_components/_modals/generic-list-mo
     FileBreakdownStatsComponent,
     TopReadersComponent,
     ReadByDayAndComponent,
-    GenericListModalComponent
+    GenericListModalComponent,
+    DayBreakdownComponent,
+    DayOfWeekPipe
   ],
   imports: [
     CommonModule,
