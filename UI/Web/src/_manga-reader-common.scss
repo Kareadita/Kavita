@@ -7,7 +7,6 @@ img {
   align-items: center;
 
   &.full-width {
-    width: 100vw;
     height: calc(var(--vh)*100);
     display: grid;
   }
