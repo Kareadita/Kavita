@@ -30,6 +30,7 @@ import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.comp
 import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
+import { ChapterInfo } from '../../_models/chapter-info';
 
 
 const PREFETCH_PAGES = 10;
@@ -40,6 +41,12 @@ const CHAPTER_ID_DOESNT_EXIST = -1;
 const ANIMATION_SPEED = 200;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
+
+enum ChapterInfoPosition {
+  Previous = 0,
+  Current = 1,
+  Next = 2
+}
 
 @Component({
   selector: 'app-manga-reader',
@@ -138,6 +145,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoading = true;
   hasBookmarkRights: boolean = false; // TODO: This can be an observable
+  
 
   getPageFn!: (pageNum: number) => HTMLImageElement;
 
@@ -164,6 +172,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @see Stack
    */
   continuousChaptersStack: Stack<number> = new Stack();
+
+  continuousChapterInfos: Array<ChapterInfo | undefined> = [undefined, undefined, undefined];
 
   /**
    * An event emitter when a page change occurs. Used solely by the webtoon reader.
@@ -713,7 +723,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.mangaReaderService.loadPageDimensions(results.chapterInfo.pageDimensions);
-
+      this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
@@ -755,6 +765,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           // Fetch the first page of next chapter
           this.getPage(0, this.nextChapterId);
+          
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -1131,15 +1142,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Tell server to cache the next chapter
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+          this.continuousChapterInfos[ChapterInfoPosition.Next] = res;
           this.nextChapterPrefetched = true;
-          this.prefetchStartOfChapter(this.nextChapterId);
+          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.FORWARD);
         });
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+          this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
           this.prevChapterPrefetched = true;
-          this.prefetchStartOfChapter(this.nextChapterId);
+          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.BACKWARDS);
         });
       }
     }
@@ -1158,14 +1171,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Loads the first 5 images (throwaway cache) from the given chapterId
    * @param chapterId 
+   * @param direction Used to indicate if the chapter is behind or ahead of curent chapter
    */
-  prefetchStartOfChapter(chapterId: number) {
+  prefetchStartOfChapter(chapterId: number, direction: PAGING_DIRECTION) {
+    let pages = [];
+    
+    if (direction === PAGING_DIRECTION.BACKWARDS) {
+      if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;
+      const n = this.continuousChapterInfos[ChapterInfoPosition.Previous]!.pages;
+      pages = Array.from({length: n + 1}, (v, k) => n - k);
+    } else {
+      pages = [0, 1, 2, 3, 4];
+    }
+    
     let images = [];
-    for(let i = 0; i < 5; i++) {
+    pages.forEach((_, i: number) => {
       let img = new Image();
       img.src = this.getPageUrl(i, chapterId);
       images.push(img)
-    }
+    });
   }
 
   goToPage(pageNum: number) {
