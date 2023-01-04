@@ -1028,27 +1028,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // NOTE: This doesn't allow for any directionality
     // NOTE: This doesn't maintain 1 image behind at all times
     // NOTE: I may want to provide a different prefetcher for double renderer
+    let chapterId = this.chapterId;
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
-      const numOffset = this.pageNum + i;
+      let numOffset = this.pageNum + i;
       //console.log('numOffset: ', numOffset);
-      if (numOffset > this.maxPages - 1) continue;
+
+      if (numOffset > this.maxPages - 1) {
+        console.log('Offset has reached end of chapter ', this.chapterId, ' and should reset with next chapter');
+        // if (this.nextChapterId != CHAPTER_ID_DOESNT_EXIST && this.nextChapterId != CHAPTER_ID_NOT_FETCHED) {
+        //   numOffset = 0;
+        //   chapterId = this.nextChapterId;
+        // }
+        continue;
+      }
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       const cachedImagePageNum = this.readerService.imageUrlToPageNum(this.cachedImages[index].src);
       const cachedImageChapterId = this.readerService.imageUrlToChapterId(this.cachedImages[index].src);
       //console.log('chapter id for ', cachedImagePageNum, ' = ', cachedImageChapterId)
-      if (cachedImagePageNum !== numOffset) { //  && cachedImageChapterId === this.chapterId
+      if (cachedImagePageNum !== numOffset) { //  && cachedImageChapterId === chapterId
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
       }
     }
 
-    const pages = this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src));
-    const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
-    const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
+    // const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
+    // const pagesBefore = pages.filter(p => p[1] >= 0 && p[1] < this.pageNum).length;
+    // const pagesAfter = pages.filter(p => p[1] >= 0 && p[1] > this.pageNum).length;
     //console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
     // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
-    //   if (this.pageNum === p) return '[' + p + ']';
+    //   if (this.pageNum === p[1]) return '[' + p + ']';
     //   return '' + p
     // }));
   }
@@ -1123,12 +1132,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
           this.nextChapterPrefetched = true;
+          this.prefetchStartOfChapter(this.nextChapterId);
         });
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
           this.prevChapterPrefetched = true;
+          this.prefetchStartOfChapter(this.nextChapterId);
         });
       }
     }
@@ -1141,6 +1152,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!this.incognitoMode && !this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
+    }
+  }
+
+  /**
+   * Loads the first 5 images (throwaway cache) from the given chapterId
+   * @param chapterId 
+   */
+  prefetchStartOfChapter(chapterId: number) {
+    let images = [];
+    for(let i = 0; i < 5; i++) {
+      let img = new Image();
+      img.src = this.getPageUrl(i, chapterId);
+      images.push(img)
     }
   }
 
