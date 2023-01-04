@@ -204,8 +204,9 @@ public class ReaderController : BaseApiController
             ChapterTitle = dto.ChapterTitle ?? string.Empty,
             Subtitle = string.Empty,
             Title = dto.SeriesName,
-            PageDimensions = _cacheService.GetCachedFileDimensions(chapterId)
         };
+
+        if (includeDimensions) info.PageDimensions = _cacheService.GetCachedFileDimensions(chapterId);
 
         if (info.ChapterTitle is {Length: > 0}) {
             info.Title += " - " + info.ChapterTitle;
