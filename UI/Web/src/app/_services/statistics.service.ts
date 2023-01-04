@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { UserReadStatistics } from '../statistics/_models/user-read-statistics';
@@ -13,6 +13,16 @@ import { StatCount } from '../statistics/_models/stat-count';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import { MangaFormat } from '../_models/manga-format';
 
+export enum DayOfWeek
+{
+    Sunday = 0,
+    Monday = 1,
+    Tuesday = 2,
+    Wednesday = 3,
+    Thursday = 4,
+    Friday = 5,
+    Saturday = 6,
+}
 
 const publicationStatusPipe = new PublicationStatusPipe();
 const mangaFormatPipe = new MangaFormatPipe();
@@ -84,5 +94,9 @@ export class StatisticsService {
 
   getReadCountByDay(userId: number = 0, days: number = 0) {
     return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
+  }
+
+  getDayBreakdown() {
+    return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown');
   }
 }

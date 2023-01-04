@@ -121,6 +121,14 @@ public class StatsController : BaseApiController
         return Ok(await _statService.ReadCountByDay(userId, days));
     }
 
+    [HttpGet("day-breakdown")]
+    [Authorize("RequireAdminRole")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public ActionResult<IEnumerable<StatCount<DayOfWeek>>> GetDayBreakdown()
+    {
+        return Ok(_statService.GetDayBreakdown());
+    }
+
 
     [HttpGet("user/reading-history")]
     [ResponseCache(CacheProfileName = "Statistics")]

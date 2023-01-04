@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.18"
+    "version": "0.6.1.21"
   },
   "servers": [
     {
@@ -8033,6 +8033,44 @@
         }
       }
     },
+    "/api/Stats/day-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/reading-history": {
       "get": {
         "tags": [
@@ -10289,6 +10327,32 @@
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DayOfWeek": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DayOfWeekStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/DayOfWeek"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -27,6 +27,7 @@ public interface IStatisticService
     Task<IEnumerable<TopReadDto>> GetTopUsers(int days);
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
+    IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown();
 }
 
 /// <summary>
@@ -383,6 +384,17 @@ public class StatisticService : IStatisticService
         }
 
         return results;
+    }
+
+    public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown()
+    {
+        return _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsNoTracking()
+            .GroupBy(p => p.LastModified.DayOfWeek)
+            .OrderBy(g => g.Key)
+            .Select(g => new StatCount<DayOfWeek>{ Value = g.Key, Count = g.Count() })
+            .AsEnumerable();
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

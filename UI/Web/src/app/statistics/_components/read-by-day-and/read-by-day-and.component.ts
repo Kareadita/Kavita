@@ -59,7 +59,7 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
       shareReplay(),
     );
     
-    this.data$.subscribe(_ => console.log('hi'));
+    this.data$.subscribe();
   }
 
   ngOnInit(): void {

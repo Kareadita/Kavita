@@ -60,6 +60,10 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
+  filterList = (listItem: ReadingList) => {
+    return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
+  }
+
 
   constructor(private modal: NgbActiveModal, private readingListService: ReadingListService, private toastr: ToastrService) { }
 
@@ -128,9 +132,4 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
     }
     
   }
-
-  filterList = (listItem: ReadingList) => {
-    return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
-  }
-
 }
