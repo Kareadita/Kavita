@@ -1045,7 +1045,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       //console.log('numOffset: ', numOffset);
 
       if (numOffset > this.maxPages - 1) {
-        console.log('Offset has reached end of chapter ', this.chapterId, ' and should reset with next chapter');
+        //console.log('Offset has reached end of chapter ', this.chapterId, ' and should reset with next chapter');
         // if (this.nextChapterId != CHAPTER_ID_DOESNT_EXIST && this.nextChapterId != CHAPTER_ID_NOT_FETCHED) {
         //   numOffset = 0;
         //   chapterId = this.nextChapterId;
@@ -1164,6 +1164,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (!this.incognitoMode && !this.bookmarkMode) {
+      console.log('Saving progress');
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
   }
