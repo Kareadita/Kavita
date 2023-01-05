@@ -57,7 +57,7 @@
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, 'right')"
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
                                 'left': 'inherit',
-                                'right': rightPaginationOffset + 'px'}">
+                                'right': RightPaginationOffset + 'px'}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                          title="Next Page" aria-hidden="true"></i>
