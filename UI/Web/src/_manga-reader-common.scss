@@ -12,7 +12,7 @@ img {
   }
 
   &.full-height {
-    height: calc(100vh - 34px);
+    height: calc(100vh - 34px); // 34px is the height of the horizontal scrollbar that will appear
     display: flex; // changed from inline-block to fix the centering on tablets not working
   }
 
