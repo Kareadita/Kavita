@@ -1258,7 +1258,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.currentImage.next(this.canvasImage);
       this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
       //this.isLoading = true;
-      this.cdRef.markForCheck();
+      this.cdRef.detectChanges(); // Must use detectChanges to ensure ViewChildren get updated again
     }
 
     this.updateForm();

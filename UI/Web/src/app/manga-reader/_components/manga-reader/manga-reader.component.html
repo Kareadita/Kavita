@@ -35,7 +35,7 @@
             appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         
-        <ng-container > <!--*ngIf="readerMode !== ReaderMode.Webtoon; else webtoon"-->
+        <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div (dblclick)="bookmarkPage($event)">
                 <app-canvas-renderer 
                     [readerSettings$]="readerSettings$"
@@ -46,7 +46,7 @@
             </div>
 
             <!-- Pagination controls and screen hints-->
-            <div class="pagination-area" *ngIf="readerMode !== ReaderMode.Webtoon">
+            <div class="pagination-area">
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, 'left')" 
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
                     <div *ngIf="showClickOverlay">
@@ -92,22 +92,8 @@
 
         </ng-container>
 
-        <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
-            <app-infinite-scroller [pageNum]="pageNum"
-                [bufferPages]="5"
-                [goToPage]="goToPageEvent"
-                (pageNumberChange)="handleWebtoonPageChange($event)"
-                [totalPages]="maxPages"
-                [urlProvider]="getPageUrl"
-                (loadNextChapter)="loadNextChapter()"
-                (loadPrevChapter)="loadPrevChapter()"
-                [bookmarkPage]="showBookmarkEffectEvent"
-                [fullscreenToggled]="fullscreenEvent">
-            </app-infinite-scroller>
-        </div>
-
-        <!-- <ng-template #webtoon>
-            <div class="webtoon-images" *ngIf="readerMode === ReaderMode.Webtoon && !isLoading && !inSetup">
+        <ng-template #webtoon>
+            <div class="webtoon-images" *ngIf="!isLoading && !inSetup">
                 <app-infinite-scroller [pageNum]="pageNum"
                     [bufferPages]="5"
                     [goToPage]="goToPageEvent"
@@ -120,7 +106,7 @@
                     [fullscreenToggled]="fullscreenEvent">
                 </app-infinite-scroller>
             </div>
-        </ng-template> -->
+        </ng-template>
 
 
     </div>
