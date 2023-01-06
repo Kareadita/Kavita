@@ -70,6 +70,7 @@ public static class LogLevelOptions
             e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) == "Serilog.AspNetCore.RequestLoggingMiddleware")
         {
             if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/api/health") return false;
+            if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/hubs/messages") return false;
         }
         return true;
     }
