@@ -994,6 +994,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     const page = [this.canvasImage];
+
+    // After switching from webtoon mode, these are all undefined
+
     this.canvasRenderer?.renderPage(page); 
     this.singleRenderer?.renderPage(page);
     this.doubleRenderer?.renderPage(page);
@@ -1251,10 +1254,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
-      this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
+      this.canvasImage = this.getPage(this.pageNum);
       this.currentImage.next(this.canvasImage);
       this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
-      this.isLoading = true;
+      //this.isLoading = true;
+      this.cdRef.markForCheck();
     }
 
     this.updateForm();

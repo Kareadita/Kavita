@@ -115,6 +115,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   }
 
   isValid() {
+    console.log('[SingleRenderer] Is Valid: ', this.layoutMode === LayoutMode.Single)
     return this.layoutMode === LayoutMode.Single;
   }
 
