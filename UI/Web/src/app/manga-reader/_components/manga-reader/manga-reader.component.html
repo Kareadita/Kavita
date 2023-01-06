@@ -26,11 +26,7 @@
             </div>
         </div>
     </div>
-    <!-- <ng-container *ngIf="isLoading">
-        <div class="spinner-border text-secondary loading" role="status">
-            <span class="invisible">Loading...</span>
-        </div>
-    </ng-container> -->
+    <app-loading [loading]="isLoading"></app-loading>
     <div class="reading-area" 
             appSwipe (swipeEvent)="onSwipeEvent($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>

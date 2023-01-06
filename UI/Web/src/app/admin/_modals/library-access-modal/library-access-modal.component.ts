@@ -5,6 +5,7 @@ import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 
+// TODO: Change to OnPush
 @Component({
   selector: 'app-library-access-modal',
   templateUrl: './library-access-modal.component.html',
@@ -17,7 +18,6 @@ export class LibraryAccessModalComponent implements OnInit {
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
-  isLoading: boolean = false;
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
@@ -49,7 +49,6 @@ export class LibraryAccessModalComponent implements OnInit {
 
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.allLibraries);
-    this.isLoading = false;
       
     // If a member is passed in, then auto-select their libraries
     if (this.member !== undefined) {

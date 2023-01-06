@@ -19,14 +19,14 @@ export class ManagaReaderService {
   }
 
   load(chapterInfo: ChapterInfo) {
-    chapterInfo.pageDimensions.forEach(d => {
+    chapterInfo.pageDimensions!.forEach(d => {
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
         width: d.width,
         isWide: d.isWide
       };
     });
-    this.pairs = chapterInfo.doublePairs;
+    this.pairs = chapterInfo.doublePairs!;
   }
   
   adjustForDoubleReader(page: number) {

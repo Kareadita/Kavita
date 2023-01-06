@@ -47,11 +47,7 @@
     </div>
 </ng-template>
 
-<div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
-    <div class="spinner-border text-secondary loading" role="status">
-        <span class="invisible">Loading...</span>
-    </div>
-</div>
+<app-loading [loading]="true"></app-loading>
 
 <ng-template #jumpBar>
     <div class="jump-bar">
