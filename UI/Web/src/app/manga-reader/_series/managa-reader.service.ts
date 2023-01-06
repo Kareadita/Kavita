@@ -14,6 +14,7 @@ export class ManagaReaderService {
   private pageDimensions: DimensionMap = {};
   private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
+
   constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
@@ -46,6 +47,14 @@ export class ManagaReaderService {
   isWidePage(pageNum: number) {
     if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
     return this.pageDimensions[pageNum].isWide;
+  }
+
+  maxHeight() {
+    return  Object.values(this.pageDimensions).reduce((max, obj) => Math.max(max, obj.height), 0);
+  }
+
+  maxWidth() {
+    return  Object.values(this.pageDimensions).reduce((max, obj) => Math.max(max, obj.width), 0);
   }
 
 
