@@ -473,7 +473,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-    this.readerService.exitFullscreen();
 
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -1203,13 +1202,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleFullscreen() {
     this.isFullscreen = this.readerService.checkFullscreenMode();
     if (this.isFullscreen) {
-      this.readerService.exitFullscreen(() => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = false;
         this.cdRef.markForCheck();
         this.renderer.removeStyle(this.reader.nativeElement, 'background');
       });
     } else {
-      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.cdRef.markForCheck();
         // HACK: This is a bug with how browsers change the background color for fullscreen mode

@@ -101,7 +101,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-    this.readerService.exitFullscreen();
 
     this.onDestroy.next();
     this.onDestroy.complete();

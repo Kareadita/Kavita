@@ -521,7 +521,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.showBookmarkEffectEvent.complete();
-    this.readerService.exitFullscreen();
     if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
   }
 
@@ -1228,20 +1227,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   toggleFullscreen() {
-    this.isFullscreen = this.readerService.checkFullscreenMode();
-    if (this.isFullscreen) {
-      this.readerService.exitFullscreen(() => {
-        this.isFullscreen = false;
-        this.fullscreenEvent.next(false);
-        this.render();
-      });
-    } else {
-      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.fullscreenEvent.next(true);
         this.render();
       });
-    }
   }
 
   // This is menu only code
