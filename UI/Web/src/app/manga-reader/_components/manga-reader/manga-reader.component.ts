@@ -723,7 +723,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.mangaReaderService.loadPageDimensions(results.chapterInfo.pageDimensions);
       this.mangaReaderService.load(results.chapterInfo);
 
       this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;

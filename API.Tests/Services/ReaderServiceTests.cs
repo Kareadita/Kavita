@@ -2567,35 +2567,26 @@ public class ReaderServiceTests
     #region GetPairs
 
     [Theory]
-    [InlineData(new [] {false, false, false}, new [] {"0,0", "1,1", "2,1"})]
-    // Test_odd_spread_1.zip
-    [InlineData(new [] {false, false, false, false, false, true},
+    [InlineData("No Wides", new [] {false, false, false}, new [] {"0,0", "1,1", "2,1"})]
+    [InlineData("Test_odd_spread_1.zip", new [] {false, false, false, false, false, true},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5"})]
-    // Test_odd_spread_2.zip
-    [InlineData(new [] {false, false, false, false, false, true, false, false},
+    [InlineData("Test_odd_spread_2.zip", new [] {false, false, false, false, false, true, false, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6"})]
-    // Test_even_spread_1.zip
-    [InlineData(new [] {false, false, false, false, false, false, true},
+    [InlineData("Test_even_spread_1.zip", new [] {false, false, false, false, false, false, true},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6"})]
-    // Test_even_spread_2.zip
-    [InlineData(new [] {false, false, false, false, false, false, true, false, false},
+    [InlineData("Test_even_spread_2.zip", new [] {false, false, false, false, false, false, true, false, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7"})]
-    // Edge_cases_SP01.zip
-    [InlineData(new [] {true, false, false, false},
-        new [] {"0,0", "1,1", "2,1", "3,3", "4,3"})]
-    // Edge_cases_SP02.zip
-    [InlineData(new [] {false, true, false, false, false},
-        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5"})]
-    // Edge_cases_SP03.zip
-    [InlineData(new [] {false, false, false, false, false, true, true, false, false, false},
+    [InlineData("Edge_cases_SP01.zip", new [] {true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3"})]
+    [InlineData("Edge_cases_SP02.zip", new [] {false, true, false, false, false},
+        new [] {"0,0", "1,1", "2,2", "3,2", "4,4"})]
+    [InlineData("Edge_cases_SP03.zip", new [] {false, false, false, false, false, true, true, false, false, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9"})]
-    // Edge_cases_SP04.zip
-    [InlineData(new [] {false, false, false, false, false, true, false, true, false, false},
-        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,8", "9,8"})]
-    // Edge_cases_SP05.zip
-    [InlineData(new [] {false, false, false, false, false, true, false, false, true, false},
-        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9", "10,10"})]
-    public void GetPairs_ShouldReturnPairsForNoWideImages(IList<bool> wides, IList<string> expectedPairs)
+    [InlineData("Edge_cases_SP04.zip", new [] {false, false, false, false, false, true, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,8"})]
+    [InlineData("Edge_cases_SP05.zip", new [] {false, false, false, false, false, true, false, false, true, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,9"})]
+    public void GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
     {
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
@@ -2607,10 +2598,11 @@ public class ReaderServiceTests
             expectedDict.Add(int.Parse(token[0]), int.Parse(token[1]));
         }
 
+        _testOutputHelper.WriteLine("Case: {0}", caseName);
         _testOutputHelper.WriteLine("Expected: {0}", string.Join(", ", expectedDict.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
         _testOutputHelper.WriteLine("Actual: {0}", string.Join(", ", pairs.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
 
-        Assert.Equivalent(expectedDict, pairs);
+        Assert.Equal(expectedDict, pairs);
     }
 
     #endregion

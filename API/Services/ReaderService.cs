@@ -621,30 +621,38 @@ public class ReaderService : IReaderService
     public IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions)
     {
         var pairs = new Dictionary<int, int>();
-        var counter = 0;
-        var i = 0;
-        var prevWasWide = false;
+        var files = dimensions.ToList();
+        if (files.Count == 0) return pairs;
 
-        foreach(var dimension in dimensions)
+        var pairStart = true;
+        var previousPage = files[0];
+        pairs.Add(previousPage.PageNumber, previousPage.PageNumber);
+
+        foreach(var dimension in files.Skip(1))
         {
             if (dimension.IsWide)
             {
                 pairs.Add(dimension.PageNumber, dimension.PageNumber);
-                counter = dimension.PageNumber + 1;
-                prevWasWide = true;
+                pairStart = true;
             }
             else
             {
-                pairs.Add(dimension.PageNumber, counter % 2 == 0 ? Math.Max(i - 1, 0) : counter);
-                counter++;
-                prevWasWide = false;
+                if (previousPage.IsWide || previousPage.PageNumber == 0)
+                {
+                    pairs.Add(dimension.PageNumber, dimension.PageNumber);
+                    pairStart = true;
+                }
+                else
+                {
+                    pairs.Add(dimension.PageNumber, pairStart ? dimension.PageNumber - 1 : dimension.PageNumber);
+                    pairStart = !pairStart;
+                }
             }
 
-            i++;
+            previousPage = dimension;
         }
 
         return pairs;
-
     }
 
     /// <summary>

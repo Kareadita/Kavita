@@ -11,8 +11,8 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 })
 export class ManagaReaderService {
 
-  pageDimensions: DimensionMap = {};
-  pairs: {[key: number]: number} = {};
+  private pageDimensions: DimensionMap = {};
+  private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
   constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
@@ -28,38 +28,7 @@ export class ManagaReaderService {
     });
     this.pairs = chapterInfo.doublePairs;
   }
-
-  loadPageDimensions(dims: Array<FileDimension>) {
-    this.pageDimensions = {};
-    let counter = 0;
-    let i = 0;
-
-    dims.forEach(d => {
-      this.pageDimensions[d.pageNumber] = {
-        height: d.height,
-        width: d.width,
-        isWide: d.isWide
-      };
-
-      //console.log('Page Number: ', d.pageNumber);
-
-      if (d.isWide) {
-        console.log('\tPage is wide, counter: ', counter, 'i: ', i);
-        this.pairs[d.pageNumber] = d.pageNumber;
-        //this.pairs[d.pageNumber] = this.pairs[d.pageNumber - 1] + 1;
-      } else {
-        //console.log('\tPage is single, counter: ', counter, 'i: ', i);
-        this.pairs[d.pageNumber] =  counter % 2 === 0 ? Math.max(i - 1, 0) : counter;
-        counter++;
-      }
-      //console.log('\t\tMapped to ', this.pairs[d.pageNumber]);
-
-      i++;
-    });
-    console.log('wides: ', dims.map(d => d.isWide));
-    console.log('pairs: ', this.pairs);
-  }
-
+  
   adjustForDoubleReader(page: number) {
     if (!this.pairs.hasOwnProperty(page)) return page;
     return this.pairs[page];
