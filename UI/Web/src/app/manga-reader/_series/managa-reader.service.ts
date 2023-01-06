@@ -2,6 +2,7 @@ import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/co
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
+import { ChapterInfo } from '../_models/chapter-info';
 import { DimensionMap, FileDimension } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
@@ -10,11 +11,22 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 })
 export class ManagaReaderService {
 
-  private pageDimensions: DimensionMap = {};
-  private pairs: {[key: number]: number} = {};
+  pageDimensions: DimensionMap = {};
+  pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
   constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
+  }
+
+  load(chapterInfo: ChapterInfo) {
+    chapterInfo.pageDimensions.forEach(d => {
+      this.pageDimensions[d.pageNumber] = {
+        height: d.height,
+        width: d.width,
+        isWide: d.isWide
+      };
+    });
+    this.pairs = chapterInfo.doublePairs;
   }
 
   loadPageDimensions(dims: Array<FileDimension>) {
@@ -23,16 +35,15 @@ export class ManagaReaderService {
     let i = 0;
 
     dims.forEach(d => {
-      const isWide = (d.width > d.height);
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
         width: d.width,
-        isWide: isWide
+        isWide: d.isWide
       };
 
       //console.log('Page Number: ', d.pageNumber);
 
-      if (isWide) {
+      if (d.isWide) {
         console.log('\tPage is wide, counter: ', counter, 'i: ', i);
         this.pairs[d.pageNumber] = d.pageNumber;
         //this.pairs[d.pageNumber] = this.pairs[d.pageNumber - 1] + 1;
@@ -45,7 +56,8 @@ export class ManagaReaderService {
 
       i++;
     });
-    //console.log('pairs: ', this.pairs);
+    console.log('wides: ', dims.map(d => d.isWide));
+    console.log('pairs: ', this.pairs);
   }
 
   adjustForDoubleReader(page: number) {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -18,11 +20,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
 public class ReaderServiceTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
 
     private readonly IUnitOfWork _unitOfWork;
 
@@ -33,8 +37,9 @@ public class ReaderServiceTests
     private const string BackupDirectory = "C:/kavita/config/backups/";
     private const string DataDirectory = "C:/data/";
 
-    public ReaderServiceTests()
+    public ReaderServiceTests(ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
         var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
 
         _context = new DataContext(contextOptions);
@@ -2559,4 +2564,54 @@ public class ReaderServiceTests
 
     #endregion
 
+    #region GetPairs
+
+    [Theory]
+    [InlineData(new [] {false, false, false}, new [] {"0,0", "1,1", "2,1"})]
+    // Test_odd_spread_1.zip
+    [InlineData(new [] {false, false, false, false, false, true},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5"})]
+    // Test_odd_spread_2.zip
+    [InlineData(new [] {false, false, false, false, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6"})]
+    // Test_even_spread_1.zip
+    [InlineData(new [] {false, false, false, false, false, false, true},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6"})]
+    // Test_even_spread_2.zip
+    [InlineData(new [] {false, false, false, false, false, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7"})]
+    // Edge_cases_SP01.zip
+    [InlineData(new [] {true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3"})]
+    // Edge_cases_SP02.zip
+    [InlineData(new [] {false, true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5"})]
+    // Edge_cases_SP03.zip
+    [InlineData(new [] {false, false, false, false, false, true, true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9"})]
+    // Edge_cases_SP04.zip
+    [InlineData(new [] {false, false, false, false, false, true, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,8", "9,8"})]
+    // Edge_cases_SP05.zip
+    [InlineData(new [] {false, false, false, false, false, true, false, false, true, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9", "10,10"})]
+    public void GetPairs_ShouldReturnPairsForNoWideImages(IList<bool> wides, IList<string> expectedPairs)
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
+        var pairs = readerService.GetPairs(files);
+        var expectedDict = new Dictionary<int, int>();
+        foreach (var pair in expectedPairs)
+        {
+            var token = pair.Split(',');
+            expectedDict.Add(int.Parse(token[0]), int.Parse(token[1]));
+        }
+
+        _testOutputHelper.WriteLine("Expected: {0}", string.Join(", ", expectedDict.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
+        _testOutputHelper.WriteLine("Actual: {0}", string.Join(", ", pairs.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
+
+        Assert.Equivalent(expectedDict, pairs);
+    }
+
+    #endregion
 }

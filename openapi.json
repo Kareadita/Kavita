@@ -10059,6 +10059,16 @@
             "items": {
               "$ref": "#/components/schemas/FileDimensionDto"
             },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
           }
         },
@@ -10527,6 +10537,9 @@
             "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
             "nullable": true,
             "example": "chapter01_page01.png"
+          },
+          "isWide": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

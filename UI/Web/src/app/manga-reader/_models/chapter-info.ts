@@ -21,4 +21,8 @@ export interface ChapterInfo {
      * This will not always be present. Depends on if asked from backend.
      */
     pageDimensions: Array<FileDimension>;
+    /**
+     * This will not always be present. Depends on if asked from backend.
+     */
+    doublePairs: {[key: number]: number};
 }

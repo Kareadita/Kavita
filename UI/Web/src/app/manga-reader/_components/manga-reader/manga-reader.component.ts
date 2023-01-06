@@ -724,6 +724,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       this.mangaReaderService.loadPageDimensions(results.chapterInfo.pageDimensions);
+      this.mangaReaderService.load(results.chapterInfo);
+
       this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;

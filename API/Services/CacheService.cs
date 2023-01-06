@@ -82,6 +82,7 @@ public class CacheService : ICacheService
                 PageNumber = i,
                 Height = image.Height,
                 Width = image.Width,
+                IsWide = image.Width > image.Height,
                 FileName = file.Replace(path, string.Empty)
             });
         }

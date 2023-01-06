@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +33,7 @@ public interface IReaderService
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
+    IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
 }
 
 public class ReaderService : IReaderService
@@ -608,6 +610,41 @@ public class ReaderService : IReaderService
             MaxHours = maxHoursPages,
             AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
         };
+    }
+
+    /// <summary>
+    /// This is used exclusively for double page renderer. The goal is to break up all files into pairs respecting the reader.
+    /// wide images should count as 2 pages.
+    /// </summary>
+    /// <param name="dimensions"></param>
+    /// <returns></returns>
+    public IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions)
+    {
+        var pairs = new Dictionary<int, int>();
+        var counter = 0;
+        var i = 0;
+        var prevWasWide = false;
+
+        foreach(var dimension in dimensions)
+        {
+            if (dimension.IsWide)
+            {
+                pairs.Add(dimension.PageNumber, dimension.PageNumber);
+                counter = dimension.PageNumber + 1;
+                prevWasWide = true;
+            }
+            else
+            {
+                pairs.Add(dimension.PageNumber, counter % 2 == 0 ? Math.Max(i - 1, 0) : counter);
+                counter++;
+                prevWasWide = false;
+            }
+
+            i++;
+        }
+
+        return pairs;
+
     }
 
     /// <summary>

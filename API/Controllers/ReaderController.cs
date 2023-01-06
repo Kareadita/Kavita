@@ -206,7 +206,11 @@ public class ReaderController : BaseApiController
             Title = dto.SeriesName,
         };
 
-        if (includeDimensions) info.PageDimensions = _cacheService.GetCachedFileDimensions(chapterId);
+        if (includeDimensions)
+        {
+            info.PageDimensions = _cacheService.GetCachedFileDimensions(chapterId);
+            info.DoublePairs = _readerService.GetPairs(info.PageDimensions);
+        }
 
         if (info.ChapterTitle is {Length: > 0}) {
             info.Title += " - " + info.ChapterTitle;
