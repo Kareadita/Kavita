@@ -66,8 +66,17 @@ public static class LogLevelOptions
 
     private static  bool ShouldIncludeLogStatement(LogEvent e)
     {
-        if (e.Properties.ContainsKey("SourceContext") &&
-            e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) == "Serilog.AspNetCore.RequestLoggingMiddleware")
+        var isRequestLoggingMiddleware = e.Properties.ContainsKey("SourceContext") &&
+                                         e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
+                                         "Serilog.AspNetCore.RequestLoggingMiddleware";
+
+        // If Minimum log level is Information, swallow all Request Logging messages
+        if (isRequestLoggingMiddleware && LogLevelSwitch.MinimumLevel >= LogEventLevel.Information)
+        {
+            return false;
+        }
+
+        if (isRequestLoggingMiddleware)
         {
             if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/api/health") return false;
             if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/hubs/messages") return false;
