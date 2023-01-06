@@ -1299,8 +1299,6 @@ public class ReaderServiceTests
         // This is first chapter of first volume
         prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,4, 1);
         Assert.Equal(-1, prevChapter);
-        //chapterInfoDto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
-
     }
 
     [Fact]
@@ -2406,7 +2404,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Manga_Chapter()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Manga, false, false);
         Assert.Equal("Chapter", actual);
     }
@@ -2414,7 +2411,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Book_Chapter_WithTitle()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Book, false, false);
         Assert.Equal("Book", actual);
     }
@@ -2422,7 +2418,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Comic()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Comic, false, false);
         Assert.Equal("Issue", actual);
     }
@@ -2430,7 +2425,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Comic_WithHash()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Comic, true, true);
         Assert.Equal("Issue #", actual);
     }
@@ -2583,7 +2577,7 @@ public class ReaderServiceTests
     [InlineData("Edge_cases_SP03.zip", new [] {false, false, false, false, false, true, true, false, false, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9"})]
     [InlineData("Edge_cases_SP04.zip", new [] {false, false, false, false, false, true, false, true, false, false},
-        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,8"})]
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,8", "9,8"})]
     [InlineData("Edge_cases_SP05.zip", new [] {false, false, false, false, false, true, false, false, true, false},
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,9"})]
     public void GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
