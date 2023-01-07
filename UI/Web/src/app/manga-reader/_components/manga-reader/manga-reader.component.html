@@ -28,7 +28,7 @@
     </div>
     <app-loading [loading]="isLoading"></app-loading>
     <div class="reading-area" 
-            ngSwipe (swipeEnd)="onSwipeEnd($event)"
+            ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeStart($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">

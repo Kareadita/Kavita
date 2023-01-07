@@ -1,7 +1,7 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, filter, forkJoin, fromEvent, map, merge, Observable, of, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
 import { LabelType, ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
@@ -31,7 +31,6 @@ import { DoubleRendererComponent } from '../double-renderer/double-renderer.comp
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { ChapterInfo } from '../../_models/chapter-info';
-import { SwipeDirection } from '../../_directives/swipe.directive';
 import { SwipeEvent } from 'ng-swipe';
 
 
@@ -300,6 +299,15 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   rightPaginationOffset = 0;
 
+  /**
+   * Previous amount of scroll left. Used for swipe to paginate functionaliy.
+   */
+  prevScrollLeft = 0;
+  /**
+   * Previous amount of scroll top. Used for swipe to paginate functionaliy.
+   */
+  prevScrollTop = 0;
+
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
@@ -318,11 +326,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  get SwipeDirection() {
-    if (this.readerMode === ReaderMode.LeftRight) return SwipeDirection.RightLeft;
-    if (this.readerMode === ReaderMode.UpDown) return SwipeDirection.UpDown;
-    return SwipeDirection.Disabled;
-  }
   get PageNumber() {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
@@ -904,9 +907,37 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  onSwipeStart(event: SwipeEvent) {
+    if (this.prevScrollLeft !== 0) return;
+    switch (this.readerMode) {
+      case ReaderMode.Webtoon: break;
+      case ReaderMode.LeftRight:
+        {
+          if (event.direction !== 'x') return;
+          const direction = event.distance < 0 ? KeyDirection.Right : KeyDirection.Left;
+          const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
+          if (!isThereScrollLeft) {
+            this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
+            return;
+          }
+          
+          break;
+        }
+      case ReaderMode.UpDown:
+        {
+          if (event.direction !== 'y') return;
+          const direction = event.distance < 0 ? KeyDirection.Down : KeyDirection.Up;
+          const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
+          if (!isThereScrollLeft) return;
+          this.prevScrollLeft = this.readingArea?.nativeElement?.scrollTop || 0;
+          break;
+        }
+    }
+  }
+
   onSwipeEnd(event: SwipeEvent) {
-    console.log(`SwipeEnd direction: ${event.direction} and distance: ${event.distance}`);
-    const threshold = .12; // 25% of max width
+    //console.log(`SwipeEnd direction: ${event.direction} and distance: ${event.distance}`);
+    const threshold = .12;
 
     // Positive number means swiping right/down, negative means left
     switch (this.readerMode) {
@@ -914,20 +945,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case ReaderMode.LeftRight:
         {
           if (event.direction !== 'x') return;
-          // We need to check if there is space to scroll then check threshold vs total width
           const direction = event.distance < 0 ? KeyDirection.Right : KeyDirection.Left;
           const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
           if (!isThereScrollLeft) return;
 
-          const thresholdWidth = (this.readingArea?.nativeElement.scrollWidth === this.readingArea?.nativeElement.clientWidth) 
+          const width = (this.readingArea?.nativeElement.scrollWidth === this.readingArea?.nativeElement.clientWidth) 
           ? this.readingArea?.nativeElement.clientWidth : this.ReadingAreaWidth;
 
-          const thresholdMet = Math.abs(event.distance) >= thresholdWidth * threshold;
-          //console.log('distance: ', Math.abs(event.distance), 'width: ', thresholdWidth, 'threshold width: ', thresholdWidth);
-          //console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((thresholdWidth * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100));
+          //console.log('scroll left: ', this.readingArea?.nativeElement?.scrollLeft || 0, 'total width: ', width, 'prev scroll left: ', this.prevScrollLeft);
+
+          if (direction === KeyDirection.Right && this.readingArea?.nativeElement?.scrollLeft === width && this.prevScrollLeft != 0) {
+            //console.log('We hit the end but we had come from a place that had scroll left')
+            this.prevScrollLeft = 0;
+            return;
+          }
+
+          if (direction === KeyDirection.Left && this.readingArea?.nativeElement?.scrollLeft === 0 && this.prevScrollLeft != 0) {
+            //console.log('We hit the beginning but we had come from a place that had scroll left')
+            this.prevScrollLeft = 0;
+            return;
+          }
+
+          
+
+          const thresholdMet = Math.abs(event.distance) >= width * threshold;
+          //console.log('distance: ', Math.abs(event.distance), 'width: ', width, 'threshold width: ', width);
+          //console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((width * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100));
           
           
           if (!thresholdMet) return;
+          this.prevScrollLeft = 0;
           if (direction === KeyDirection.Right) this.nextPage();
           else this.prevPage();
           break;
@@ -940,10 +987,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
           if (!isThereScrollLeft) return;
 
-          const thresholdHeight = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
+          const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
           ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
 
-          const thresholdMet = Math.abs(event.distance) >= thresholdHeight * threshold;
+          if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
+            //console.log('We hit the end but we had come from a place that had scroll left')
+            this.prevScrollLeft = 0;
+            return;
+          }
+
+          if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
+            //console.log('We hit the beginning but we had come from a place that had scroll left')
+            this.prevScrollLeft = 0;
+            return;
+          }
+
+          const thresholdMet = Math.abs(event.distance) >= height * threshold;
 
           if (!thresholdMet) return;
           if (direction === KeyDirection.Down) this.nextPage();
@@ -951,16 +1010,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-
-    
   }
-
-  // onSwipeMove(event: SwipeEvent) {
-  //   console.log(`SwipeMove direction: ${event.direction} and distance: ${event.distance}`);
-  // }
-
-  // onSwipeEvent(event: any) {
-  // }
 
   handlePageChange(event: any, direction: string) {
     if (this.readerMode === ReaderMode.Webtoon) {
