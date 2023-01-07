@@ -18,6 +18,7 @@ import { DoubleRendererComponent } from './_components/double-renderer/double-re
 import { DoubleReverseRendererComponent } from './_components/double-reverse-renderer/double-reverse-renderer.component';
 import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
+import { SwipeModule } from 'ng-swipe';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,8 @@ import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
     NgxSliderModule,
     SharedModule,
     ReaderSharedModule,
+
+    SwipeModule
   ],
   exports: [
     MangaReaderComponent

@@ -31,6 +31,8 @@ import { DoubleRendererComponent } from '../double-renderer/double-renderer.comp
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { ChapterInfo } from '../../_models/chapter-info';
+import { SwipeDirection } from '../../_directives/swipe.directive';
+import { SwipeEvent } from 'ng-swipe';
 
 
 const PREFETCH_PAGES = 10;
@@ -316,6 +318,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
+  get SwipeDirection() {
+    if (this.readerMode === ReaderMode.LeftRight) return SwipeDirection.RightLeft;
+    if (this.readerMode === ReaderMode.UpDown) return SwipeDirection.UpDown;
+    return SwipeDirection.Disabled;
+  }
   get PageNumber() {
     return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
@@ -647,6 +654,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return img;
   }
 
+  get ReadingAreaWidth() {
+    return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
+  }
+
+  get ReadingAreaHeight() {
+    return this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight;
+  }
+
+  isHorizontalScrollLeft() {
+    const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
+    return scrollLeft < this.ReadingAreaWidth;
+  }
+
+  isVerticalScrollLeft() {
+    const scrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
+    return scrollTop < this.ReadingAreaHeight;
+  }
+  
+
   // if there is scroll room and on original, then don't paginate
   checkIfPaginationAllowed(direction: KeyDirection) {
     // This is not used atm due to the complexity it adds with keyboard.
@@ -657,22 +683,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     switch (direction) {
       case KeyDirection.Right:
-        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth) {
+        if (this.isHorizontalScrollLeft()) {
           return false;
         }
         break;
       case KeyDirection.Left:
-        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft > 0) {
+        if (scrollLeft > 0) {
           return false;
         }
         break;
       case KeyDirection.Up:
-        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop > 0) {
+        if (scrollTop > 0) {
           return false;
         }
         break;
       case KeyDirection.Down:
-        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop < this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight) {
+        if (this.isVerticalScrollLeft()) {
           return false;
         }
         break;
@@ -878,8 +904,63 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  onSwipeEvent(event: any) {
+  onSwipeEnd(event: SwipeEvent) {
+    console.log(`SwipeEnd direction: ${event.direction} and distance: ${event.distance}`);
+    const threshold = .12; // 25% of max width
+
+    // Positive number means swiping right/down, negative means left
+    switch (this.readerMode) {
+      case ReaderMode.Webtoon: break;
+      case ReaderMode.LeftRight:
+        {
+          if (event.direction !== 'x') return;
+          // We need to check if there is space to scroll then check threshold vs total width
+          const direction = event.distance < 0 ? KeyDirection.Right : KeyDirection.Left;
+          const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
+          if (!isThereScrollLeft) return;
+
+          const thresholdWidth = (this.readingArea?.nativeElement.scrollWidth === this.readingArea?.nativeElement.clientWidth) 
+          ? this.readingArea?.nativeElement.clientWidth : this.ReadingAreaWidth;
+
+          const thresholdMet = Math.abs(event.distance) >= thresholdWidth * threshold;
+          //console.log('distance: ', Math.abs(event.distance), 'width: ', thresholdWidth, 'threshold width: ', thresholdWidth);
+          //console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((thresholdWidth * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100));
+          
+          
+          if (!thresholdMet) return;
+          if (direction === KeyDirection.Right) this.nextPage();
+          else this.prevPage();
+          break;
+        }
+      case ReaderMode.UpDown:
+        {
+          if (event.direction !== 'y') return;
+          // We need to check if there is space to scroll then check threshold vs total width
+          const direction = event.distance < 0 ? KeyDirection.Down : KeyDirection.Up;
+          const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
+          if (!isThereScrollLeft) return;
+
+          const thresholdHeight = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
+          ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
+
+          const thresholdMet = Math.abs(event.distance) >= thresholdHeight * threshold;
+
+          if (!thresholdMet) return;
+          if (direction === KeyDirection.Down) this.nextPage();
+          else this.prevPage();
+        }
+    }
+
+
+    
   }
+
+  // onSwipeMove(event: SwipeEvent) {
+  //   console.log(`SwipeMove direction: ${event.direction} and distance: ${event.distance}`);
+  // }
+
+  // onSwipeEvent(event: any) {
+  // }
 
   handlePageChange(event: any, direction: string) {
     if (this.readerMode === ReaderMode.Webtoon) {
