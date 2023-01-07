@@ -10,4 +10,5 @@ public class FileDimensionDto
     /// </summary>
     /// <example>chapter01_page01.png</example>
     public string FileName { get; set; } = default!;
+    public bool IsWide { get; set; }
 }

@@ -73,17 +73,31 @@ public class CacheService : ICacheService
         }
 
         var dimensions = new List<FileDimensionDto>();
-        for (var i = 0; i < files.Length; i++)
+        var originalCacheSize = Cache.MaxFiles;
+        try
         {
-            var file = files[i];
-            using var image = Image.NewFromFile(file, memory:false, access: Enums.Access.SequentialUnbuffered);
-            dimensions.Add(new FileDimensionDto()
+            Cache.MaxFiles = 0;
+            for (var i = 0; i < files.Length; i++)
             {
-                PageNumber = i,
-                Height = image.Height,
-                Width = image.Width,
-                FileName = file.Replace(path, string.Empty)
-            });
+                var file = files[i];
+                using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
+                dimensions.Add(new FileDimensionDto()
+                {
+                    PageNumber = i,
+                    Height = image.Height,
+                    Width = image.Width,
+                    IsWide = image.Width > image.Height,
+                    FileName = file.Replace(path, string.Empty)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("There was an error calculating image dimensions for {ChapterId}", chapterId);
+        }
+        finally
+        {
+            Cache.MaxFiles = originalCacheSize;
         }
 
         _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);
@@ -250,7 +264,7 @@ public class CacheService : ICacheService
     {
         // Calculate what chapter the page belongs to
         var path = GetCachePath(chapterId);
-        // TODO: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
+        // NOTE: We can optimize this by extracting and renaming, so we don't need to scan for the files and can do a direct access
         var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();

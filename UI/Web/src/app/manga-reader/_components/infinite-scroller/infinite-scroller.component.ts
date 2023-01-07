@@ -6,6 +6,7 @@ import { ScrollService } from 'src/app/_services/scroll.service';
 import { ReaderService } from '../../../_services/reader.service';
 import { PAGING_DIRECTION } from '../../_models/reader-enums';
 import { WebtoonImage } from '../../_models/webtoon-image';
+import { ManagaReaderService } from '../../_series/managa-reader.service';
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -129,7 +130,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -153,7 +154,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private readerService: ReaderService, private renderer: Renderer2, 
     @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) {
     // This will always exist at this point in time since this is used within manga reader
     const reader = document.querySelector('.reading-area');
     if (reader !== null) {
@@ -453,7 +454,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.webtoonImageWidth = event.target.width;
     }
 
-    this.renderer.setAttribute(event.target, 'width', this.webtoonImageWidth + '');
+    this.renderer.setAttribute(event.target, 'width', this.mangaReaderService.maxWidth() + '');
     this.renderer.setAttribute(event.target, 'height', event.target.height + '');
 
     this.attachIntersectionObserverElem(event.target);

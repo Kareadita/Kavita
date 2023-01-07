@@ -1,7 +1,7 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, Renderer2, SimpleChanges, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, filter, forkJoin, fromEvent, map, merge, Observable, of, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
 import { LabelType, ChangeContext, Options } from '@angular-slider/ngx-slider';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
@@ -30,6 +30,7 @@ import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.comp
 import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
+import { ChapterInfo } from '../../_models/chapter-info';
 
 
 const PREFETCH_PAGES = 10;
@@ -40,6 +41,19 @@ const CHAPTER_ID_DOESNT_EXIST = -1;
 const ANIMATION_SPEED = 200;
 const OVERLAY_AUTO_CLOSE_TIME = 3000;
 const CLICK_OVERLAY_TIMEOUT = 3000;
+
+enum ChapterInfoPosition {
+  Previous = 0,
+  Current = 1,
+  Next = 2
+}
+
+enum KeyDirection {
+  Right = 0,
+  Left = 1,
+  Up = 2, 
+  Down = 3
+}
 
 @Component({
   selector: 'app-manga-reader',
@@ -138,6 +152,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   isLoading = true;
   hasBookmarkRights: boolean = false; // TODO: This can be an observable
+  
 
   getPageFn!: (pageNum: number) => HTMLImageElement;
 
@@ -164,6 +179,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @see Stack
    */
   continuousChaptersStack: Stack<number> = new Stack();
+
+  continuousChapterInfos: Array<ChapterInfo | undefined> = [undefined, undefined, undefined];
 
   /**
    * An event emitter when a page change occurs. Used solely by the webtoon reader.
@@ -511,7 +528,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.onDestroy.next();
     this.onDestroy.complete();
     this.showBookmarkEffectEvent.complete();
-    this.readerService.exitFullscreen();
     if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
   }
 
@@ -526,14 +542,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
-          //if (!this.checkIfPaginationAllowed()) return;
+          if (!this.checkIfPaginationAllowed(KeyDirection.Right)) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
-          //if (!this.checkIfPaginationAllowed()) return;
+          if (!this.checkIfPaginationAllowed(KeyDirection.Left)) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
         }
         break;
       case ReaderMode.UpDown:
+        if (event.key === KEY_CODES.UP_ARROW) {
+          if (!this.checkIfPaginationAllowed(KeyDirection.Up)) return;
+          this.prevPage();
+        } else if (event.key === KEY_CODES.DOWN_ARROW) {
+          if (!this.checkIfPaginationAllowed(KeyDirection.Down)) return;
+          this.nextPage();
+        }
+        break;
       case ReaderMode.Webtoon:
         if (event.key === KEY_CODES.DOWN_ARROW) {
           this.nextPage()
@@ -624,17 +648,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // if there is scroll room and on original, then don't paginate
-  checkIfPaginationAllowed() {
+  checkIfPaginationAllowed(direction: KeyDirection) {
     // This is not used atm due to the complexity it adds with keyboard.
     if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
 
     const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
-    const totalScrollWidth = this.readingArea?.nativeElement?.scrollWidth;
-    // need to also check if there is scroll needed
+    const scrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
 
-    if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
-      return false;
+    switch (direction) {
+      case KeyDirection.Right:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth) {
+          return false;
+        }
+        break;
+      case KeyDirection.Left:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft > 0) {
+          return false;
+        }
+        break;
+      case KeyDirection.Up:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop > 0) {
+          return false;
+        }
+        break;
+      case KeyDirection.Down:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop < this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight) {
+          return false;
+        }
+        break;
     }
+
     return true;
   }
 
@@ -712,8 +755,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return;
       }
 
-      this.mangaReaderService.loadPageDimensions(results.chapterInfo.pageDimensions);
+      this.mangaReaderService.load(results.chapterInfo);
 
+      this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
       let page = results.progress.pageNum;
@@ -755,6 +799,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           // Fetch the first page of next chapter
           this.getPage(0, this.nextChapterId);
+          
         }
       });
       this.readerService.getPrevChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).pipe(take(1)).subscribe(chapterId => {
@@ -984,6 +1029,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   renderPage() {
     const page = [this.canvasImage];
+
+    // After switching from webtoon mode, these are all undefined
+
     this.canvasRenderer?.renderPage(page); 
     this.singleRenderer?.renderPage(page);
     this.doubleRenderer?.renderPage(page);
@@ -1027,28 +1075,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     // NOTE: This doesn't allow for any directionality
     // NOTE: This doesn't maintain 1 image behind at all times
-    // NOTE: I may want to provide a different prefetcher for double renderer
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
-      const numOffset = this.pageNum + i;
-      //console.log('numOffset: ', numOffset);
-      if (numOffset > this.maxPages - 1) continue;
+      let numOffset = this.pageNum + i;
+
+      if (numOffset > this.maxPages - 1) {
+        continue;
+      }
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       const cachedImagePageNum = this.readerService.imageUrlToPageNum(this.cachedImages[index].src);
-      const cachedImageChapterId = this.readerService.imageUrlToChapterId(this.cachedImages[index].src);
-      //console.log('chapter id for ', cachedImagePageNum, ' = ', cachedImageChapterId)
-      if (cachedImagePageNum !== numOffset) { //  && cachedImageChapterId === this.chapterId
+      if (cachedImagePageNum !== numOffset) {
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
       }
     }
 
-    const pages = this.cachedImages.map(img => this.readerService.imageUrlToPageNum(img.src));
-    const pagesBefore = pages.filter(p => p >= 0 && p < this.pageNum).length;
-    const pagesAfter = pages.filter(p => p >= 0 && p > this.pageNum).length;
-    //console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
+    // const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
     // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
-    //   if (this.pageNum === p) return '[' + p + ']';
+    //   if (this.pageNum === p[1]) return '[' + p + ']';
     //   return '' + p
     // }));
   }
@@ -1061,7 +1105,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readerMode === ReaderMode.Webtoon) return;
     
     this.isLoading = true;
-    this.setPageNum(this.pageNum);
     this.setCanvasImage();
     this.cdRef.markForCheck();
 
@@ -1094,6 +1137,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // This will update the value for value except when in webtoon due to how the webtoon reader
     // responds to page changes
     if (this.readerMode !== ReaderMode.Webtoon) {
+      console.log('Setting Page Number as slider drag occured');
       this.setPageNum(context.value);
     }
   }
@@ -1107,6 +1151,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
+    console.log('Setting Page Number as slider page update occurred');
     this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.refreshSlider.emit();
     this.goToPageEvent.next(this.pageNum);
@@ -1122,13 +1167,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Tell server to cache the next chapter
       if (this.nextChapterId > 0 && !this.nextChapterPrefetched) {
         this.readerService.getChapterInfo(this.nextChapterId).pipe(take(1)).subscribe(res => {
+          this.continuousChapterInfos[ChapterInfoPosition.Next] = res;
           this.nextChapterPrefetched = true;
+          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.FORWARD);
         });
       }
     } else if (this.pageNum <= 10) {
       if (this.prevChapterId > 0 && !this.prevChapterPrefetched) {
         this.readerService.getChapterInfo(this.prevChapterId).pipe(take(1)).subscribe(res => {
+          this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
           this.prevChapterPrefetched = true;
+          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.BACKWARDS);
         });
       }
     }
@@ -1142,6 +1191,30 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.incognitoMode && !this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
+  }
+
+  /**
+   * Loads the first 5 images (throwaway cache) from the given chapterId
+   * @param chapterId 
+   * @param direction Used to indicate if the chapter is behind or ahead of curent chapter
+   */
+  prefetchStartOfChapter(chapterId: number, direction: PAGING_DIRECTION) {
+    let pages = [];
+    
+    if (direction === PAGING_DIRECTION.BACKWARDS) {
+      if (this.continuousChapterInfos[ChapterInfoPosition.Previous] === undefined) return;
+      const n = this.continuousChapterInfos[ChapterInfoPosition.Previous]!.pages;
+      pages = Array.from({length: n + 1}, (v, k) => n - k);
+    } else {
+      pages = [0, 1, 2, 3, 4];
+    }
+    
+    let images = [];
+    pages.forEach((_, i: number) => {
+      let img = new Image();
+      img.src = this.getPageUrl(i, chapterId);
+      images.push(img)
+    });
   }
 
   goToPage(pageNum: number) {
@@ -1165,6 +1238,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
+    console.log('Setting Page Number as goto page');
     this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.goToPageEvent.next(page);
     this.render();
@@ -1179,20 +1253,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   toggleFullscreen() {
-    this.isFullscreen = this.readerService.checkFullscreenMode();
-    if (this.isFullscreen) {
-      this.readerService.exitFullscreen(() => {
-        this.isFullscreen = false;
-        this.fullscreenEvent.next(false);
-        this.render();
-      });
-    } else {
-      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.fullscreenEvent.next(true);
         this.render();
       });
-    }
   }
 
   // This is menu only code
@@ -1212,10 +1277,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // We must set this here because loadPage from render doesn't call if we aren't page splitting
     if (this.readerMode !== ReaderMode.Webtoon) {
-      this.canvasImage = this.cachedImages[this.pageNum & this.cachedImages.length];
+      this.canvasImage = this.getPage(this.pageNum);
       this.currentImage.next(this.canvasImage);
       this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
-      this.isLoading = true;
+      //this.isLoading = true;
+      this.cdRef.detectChanges(); // Must use detectChanges to ensure ViewChildren get updated again
     }
 
     this.updateForm();
@@ -1243,6 +1309,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
+    console.log('Setting Page Number as webtoon page changed');
     this.setPageNum(updatedPageNum);
   }
 

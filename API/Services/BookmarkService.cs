@@ -23,6 +23,7 @@ public interface IBookmarkService
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     Task ConvertAllBookmarkToWebP();
     Task ConvertAllCoverToWebP();
+    Task ConvertBookmarkToWebP(int bookmarkId);
 
 }
 
@@ -232,7 +233,7 @@ public class BookmarkService : IBookmarkService
     /// <summary>
     /// This is a job that runs after a bookmark is saved
     /// </summary>
-    private async Task ConvertBookmarkToWebP(int bookmarkId)
+    public async Task ConvertBookmarkToWebP(int bookmarkId)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;

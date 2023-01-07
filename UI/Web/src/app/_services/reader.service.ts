@@ -14,6 +14,7 @@ import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FileDimension } from '../manga-reader/_models/file-dimension';
+import screenfull from 'screenfull';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -235,25 +236,10 @@ export class ReaderService {
     return params;
   }
 
-  enterFullscreen(el: Element, callback?: VoidFunction) {
-    if (!document.fullscreenElement) {
-      if (el.requestFullscreen) {
-        el.requestFullscreen().then(() => {
-          if (callback) {
-            callback();
-          }
-        });
-      }
-    }
-  }
+  toggleFullscreen(el: Element, callback?: VoidFunction) {
 
-  exitFullscreen(callback?: VoidFunction) {
-    if (document.exitFullscreen && this.checkFullscreenMode()) {
-      document.exitFullscreen().then(() => {
-        if (callback) {
-          callback();
-        }
-      });
+    if (screenfull.isEnabled) {
+      screenfull.toggle();
     }
   }
 

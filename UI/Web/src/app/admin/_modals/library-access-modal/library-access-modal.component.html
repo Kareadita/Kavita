@@ -6,7 +6,7 @@
     </button>
 </div>
 <div class="modal-body">
-    <div class="list-group" *ngIf="!isLoading">
+    <div class="list-group">
         <div class="form-check">
             <input id="selectall" type="checkbox" class="form-check-input" 
                 [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
