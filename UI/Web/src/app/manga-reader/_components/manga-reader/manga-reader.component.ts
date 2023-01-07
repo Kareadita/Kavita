@@ -48,6 +48,13 @@ enum ChapterInfoPosition {
   Next = 2
 }
 
+enum KeyDirection {
+  Right = 0,
+  Left = 1,
+  Up = 2, 
+  Down = 3
+}
+
 @Component({
   selector: 'app-manga-reader',
   templateUrl: './manga-reader.component.html',
@@ -536,14 +543,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     switch (this.readerMode) {
       case ReaderMode.LeftRight:
         if (event.key === KEY_CODES.RIGHT_ARROW) {
-          //if (!this.checkIfPaginationAllowed()) return;
+          if (!this.checkIfPaginationAllowed(KeyDirection.Right)) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
         } else if (event.key === KEY_CODES.LEFT_ARROW) {
-          //if (!this.checkIfPaginationAllowed()) return;
+          if (!this.checkIfPaginationAllowed(KeyDirection.Left)) return;
           this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
         }
         break;
       case ReaderMode.UpDown:
+        if (event.key === KEY_CODES.UP_ARROW) {
+          if (!this.checkIfPaginationAllowed(KeyDirection.Up)) return;
+          this.prevPage();
+        } else if (event.key === KEY_CODES.DOWN_ARROW) {
+          if (!this.checkIfPaginationAllowed(KeyDirection.Down)) return;
+          this.nextPage();
+        }
+        break;
       case ReaderMode.Webtoon:
         if (event.key === KEY_CODES.DOWN_ARROW) {
           this.nextPage()
@@ -634,17 +649,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // if there is scroll room and on original, then don't paginate
-  checkIfPaginationAllowed() {
+  checkIfPaginationAllowed(direction: KeyDirection) {
     // This is not used atm due to the complexity it adds with keyboard.
     if (this.readingArea === undefined || this.readingArea.nativeElement === undefined) return true;
 
     const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
-    const totalScrollWidth = this.readingArea?.nativeElement?.scrollWidth;
-    // need to also check if there is scroll needed
+    const scrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
 
-    if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < totalScrollWidth) {
-      return false;
+    switch (direction) {
+      case KeyDirection.Right:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft < this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth) {
+          return false;
+        }
+        break;
+      case KeyDirection.Left:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollLeft > 0) {
+          return false;
+        }
+        break;
+      case KeyDirection.Up:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop > 0) {
+          return false;
+        }
+        break;
+      case KeyDirection.Down:
+        if (this.FittingOption === FITTING_OPTION.ORIGINAL && scrollTop < this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight) {
+          return false;
+        }
+        break;
     }
+
     return true;
   }
 
