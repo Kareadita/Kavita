@@ -473,7 +473,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Re-render the current page when we switch layouts
         if (changeOccurred) {
-          console.log('Setting Page Number as a layout mode has occured');
           this.setPageNum(this.adjustPagesForDoubleRenderer(this.pageNum));
           this.loadPage();
         }
@@ -719,7 +718,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.bookmarkMode) {
       this.readerService.getBookmarkInfo(this.seriesId).subscribe(bookmarkInfo => {
-        console.log('Setting Page Number as bookmark loaded page');
         this.setPageNum(0);
         this.title = bookmarkInfo.seriesName;
         this.subtitle = 'Bookmarks';
@@ -769,7 +767,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       page = this.adjustPagesForDoubleRenderer(page);
 
-      console.log('Setting Page Number as first load');
       this.setPageNum(page); // first call
       this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
@@ -919,7 +916,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    console.log('Setting Page Number as next page');
     this.setPageNum(this.pageNum + pageAmount);
     this.loadPage();
   }
@@ -945,7 +941,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     
-    console.log('Setting Page Number as prev page');
     this.setPageNum(this.pageNum - pageAmount);
     this.loadPage();
   }
@@ -1080,35 +1075,22 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   prefetch() {
     // NOTE: This doesn't allow for any directionality
     // NOTE: This doesn't maintain 1 image behind at all times
-    // NOTE: I may want to provide a different prefetcher for double renderer
-    let chapterId = this.chapterId;
     for(let i = 0; i <= PREFETCH_PAGES - 3; i++) {
       let numOffset = this.pageNum + i;
-      //console.log('numOffset: ', numOffset);
 
       if (numOffset > this.maxPages - 1) {
-        //console.log('Offset has reached end of chapter ', this.chapterId, ' and should reset with next chapter');
-        // if (this.nextChapterId != CHAPTER_ID_DOESNT_EXIST && this.nextChapterId != CHAPTER_ID_NOT_FETCHED) {
-        //   numOffset = 0;
-        //   chapterId = this.nextChapterId;
-        // }
         continue;
       }
 
       const index = (numOffset % this.cachedImages.length + this.cachedImages.length) % this.cachedImages.length;
       const cachedImagePageNum = this.readerService.imageUrlToPageNum(this.cachedImages[index].src);
-      const cachedImageChapterId = this.readerService.imageUrlToChapterId(this.cachedImages[index].src);
-      //console.log('chapter id for ', cachedImagePageNum, ' = ', cachedImageChapterId)
-      if (cachedImagePageNum !== numOffset) { //  && cachedImageChapterId === chapterId
+      if (cachedImagePageNum !== numOffset) {
         this.cachedImages[index] = new Image();
         this.cachedImages[index].src = this.getPageUrl(numOffset);
       }
     }
 
     // const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
-    // const pagesBefore = pages.filter(p => p[1] >= 0 && p[1] < this.pageNum).length;
-    // const pagesAfter = pages.filter(p => p[1] >= 0 && p[1] > this.pageNum).length;
-    //console.log('Buffer Health: Before: ', pagesBefore, ' After: ', pagesAfter);
     // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
     //   if (this.pageNum === p[1]) return '[' + p + ']';
     //   return '' + p
