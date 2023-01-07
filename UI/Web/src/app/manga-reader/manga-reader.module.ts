@@ -11,7 +11,7 @@ import { PipeModule } from '../pipe/pipe.module';
 import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
 import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
 import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
-import { SwipeDirective } from './swipe.directive';
+import { SwipeDirective } from './_directives/swipe.directive';
 import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';

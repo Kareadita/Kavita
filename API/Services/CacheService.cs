@@ -93,7 +93,7 @@ public class CacheService : ICacheService
         }
         catch (Exception ex)
         {
-            _logger.LogError("There was an error calculating image dimensions for {ChapterId}", chapterId);
+            _logger.LogError(ex, "There was an error calculating image dimensions for {ChapterId}", chapterId);
         }
         finally
         {
