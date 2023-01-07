@@ -287,15 +287,15 @@ public class ReaderService : IReaderService
     /// <returns></returns>
     public async Task<int> CapPageToChapter(int chapterId, int page)
     {
+        if (page < 0)
+        {
+            page = 0;
+        }
+
         var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
         if (page > totalPages)
         {
             page = totalPages;
-        }
-
-        if (page < 0)
-        {
-            page = 0;
         }
 
         return page;
