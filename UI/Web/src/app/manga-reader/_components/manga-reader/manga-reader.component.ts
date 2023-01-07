@@ -908,11 +908,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSwipeStart(event: SwipeEvent) {
-    if (this.prevScrollLeft !== 0) return;
     switch (this.readerMode) {
       case ReaderMode.Webtoon: break;
       case ReaderMode.LeftRight:
         {
+          if (this.prevScrollLeft !== 0) return;
           if (event.direction !== 'x') return;
           const direction = event.distance < 0 ? KeyDirection.Right : KeyDirection.Left;
           const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
@@ -920,11 +920,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
             return;
           }
-          
           break;
         }
       case ReaderMode.UpDown:
         {
+          if (this.prevScrollTop !== 0) return;
           if (event.direction !== 'y') return;
           const direction = event.distance < 0 ? KeyDirection.Down : KeyDirection.Up;
           const isThereScrollLeft = this.checkIfPaginationAllowed(direction);
@@ -935,8 +935,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  logMessage = '';
   onSwipeEnd(event: SwipeEvent) {
-    //console.log(`SwipeEnd direction: ${event.direction} and distance: ${event.distance}`);
+    this.logMessage = '';
+    this.logMessage = `SwipeEnd direction: ${event.direction} and distance: ${event.distance}<br/>`;
+    console.log(`SwipeEnd direction: ${event.direction} and distance: ${event.distance}`);
+    this.cdRef.markForCheck();
+    
     const threshold = .12;
 
     // Positive number means swiping right/down, negative means left
@@ -951,30 +956,40 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           const width = (this.readingArea?.nativeElement.scrollWidth === this.readingArea?.nativeElement.clientWidth) 
           ? this.readingArea?.nativeElement.clientWidth : this.ReadingAreaWidth;
+          const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
 
-          //console.log('scroll left: ', this.readingArea?.nativeElement?.scrollLeft || 0, 'total width: ', width, 'prev scroll left: ', this.prevScrollLeft);
+          this.logMessage += `scroll left: ${scrollLeft} Total Width: ${width} Prev Scroll Left: ${this.prevScrollLeft}<br/>`;
 
-          if (direction === KeyDirection.Right && this.readingArea?.nativeElement?.scrollLeft === width && this.prevScrollLeft != 0) {
-            //console.log('We hit the end but we had come from a place that had scroll left')
+          console.log('scroll left: ', scrollLeft, 'total width: ', width, 'prev scroll left: ', this.prevScrollLeft);
+
+          if (direction === KeyDirection.Right && scrollLeft === width && this.prevScrollLeft != 0) {
+            this.logMessage += `We hit the end but we had come from a place that had scroll left<br/>`;
+            console.log('We hit the end but we had come from a place that had scroll left')
             this.prevScrollLeft = 0;
+            this.cdRef.markForCheck();
             return;
           }
 
-          if (direction === KeyDirection.Left && this.readingArea?.nativeElement?.scrollLeft === 0 && this.prevScrollLeft != 0) {
-            //console.log('We hit the beginning but we had come from a place that had scroll left')
+          if (direction === KeyDirection.Left && scrollLeft === 0 && this.prevScrollLeft != 0) {
+            console.log('We hit the beginning but we had come from a place that had scroll left')
+            this.logMessage += `We hit the beginning but we had come from a place that had scroll left<br/>`;
             this.prevScrollLeft = 0;
+            this.cdRef.markForCheck();
             return;
           }
 
           
 
           const thresholdMet = Math.abs(event.distance) >= width * threshold;
-          //console.log('distance: ', Math.abs(event.distance), 'width: ', width, 'threshold width: ', width);
-          //console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((width * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100));
-          
-          
+          console.log('distance: ', Math.abs(event.distance), 'width: ', width, 'threshold width: ', width * threshold);
+          this.logMessage += `distance: ${Math.abs(event.distance)} width: ${width} threshold width: ${width * threshold}<br/>`;
+          console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((width * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100));
+          this.logMessage += `Threshold Met: ${thresholdMet} Actual Width: ${((width * threshold) / (this.readingArea?.nativeElement.clientWidth * 1.0) * 100)}<br/>`;
+          this.cdRef.markForCheck();
+
           if (!thresholdMet) return;
           this.prevScrollLeft = 0;
+
           if (direction === KeyDirection.Right) this.nextPage();
           else this.prevPage();
           break;
@@ -992,13 +1007,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
           if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
             //console.log('We hit the end but we had come from a place that had scroll left')
-            this.prevScrollLeft = 0;
+            this.prevScrollTop = 0;
             return;
           }
 
           if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
             //console.log('We hit the beginning but we had come from a place that had scroll left')
-            this.prevScrollLeft = 0;
+            this.prevScrollTop = 0;
             return;
           }
 

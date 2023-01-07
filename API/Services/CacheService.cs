@@ -164,7 +164,7 @@ public class CacheService : ICacheService
     {
         var removeNonImages = true;
         var fileCount = files.Count;
-        var extraPath = "";
+        var extraPath = string.Empty;
         var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
