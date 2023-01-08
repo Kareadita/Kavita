@@ -40,8 +40,6 @@ export class ReadingListDetailComponent implements OnInit {
 
   libraryTypes: {[key: number]: LibraryType} = {};
 
-  readingListImage: string = '';
-
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
   }
