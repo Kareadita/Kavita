@@ -318,11 +318,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Has the user scrolled once for the current page
    */
-  hasScrolled: boolean = false;
+  hasScrolledX: boolean = false;
+  /**
+   * Has the user scrolled once in the Y axis for the current page
+   */
+  hasScrolledY: boolean = false;
   /**
    * Has the user scrolled to far left size. This doesn't include starting from no scroll
    */
   hasHitZeroScroll: boolean = false;
+  /**
+   * Has the user scrolled to the far top of the screen
+   */
+  hasHitZeroTopScroll: boolean = false;
+  /**
+   * Has the user scrolled to the far bottom of the screen
+   */
+  hasHitBottomTopScroll: boolean = false;
 
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
@@ -547,10 +559,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntil(this.onDestroy)).subscribe((event: MouseEvent | any) => {
-      console.log('Scroll occured');
       this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
       this.prevScrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
-      this.hasScrolled = true;
+      this.hasScrolledX = true;
+      this.hasScrolledY = true;
     });
   }
 
@@ -935,6 +947,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  resetSwipeModifiers() {
+    this.prevScrollLeft = 0;
+    this.prevScrollTop = 0;
+    this.hasScrolledX = false;
+    this.hasScrolledY = false;
+    this.hasHitRightScroll = false;
+    this.hasHitZeroScroll = false;
+    this.hasHitBottomTopScroll = false;
+    this.hasHitZeroTopScroll = false;
+  }
   
   /**
    * This executes BEFORE fromEvent('scroll')
@@ -956,8 +978,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case KeyDirection.Left:
           this.prevPage();
           break;
-      
     }
+    
   }
 
   onSwipeEnd(event: SwipeEvent) {
@@ -988,61 +1010,63 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
             // If we have not scrolled then let the user page back
             if (scrollLeft === 0 && this.prevScrollLeft === 0) {
-              if (!this.hasScrolled || this.hasHitZeroScroll) {
+              if (!this.hasScrolledX || this.hasHitZeroScroll) {
                 this.triggerSwipePagination(direction);
                 return;
               }
               this.hasHitZeroScroll = true;
               return;
             }
-            this.hasHitZeroScroll = false;
-            
           }
 
           if (!this.hasHitRightScroll) {
-            console.log('last check, returning before page change');
             return;
           }
-          this.hasHitRightScroll = false;
 
-          // const width = (this.readingArea?.nativeElement.scrollWidth === this.readingArea?.nativeElement.clientWidth) 
-          //                 ? this.readingArea?.nativeElement.clientWidth 
-          //                 : this.ReadingAreaWidth;
-
-          // console.log('direction: ', direction, 'scroll left: ', scrollLeft, 'total width: ', width, 'prev scroll left: ', this.prevScrollLeft, 'horizontal scroll left: ', this.horizonatalScrollLeft);
-
-          // // The bug is that prevScrollLeft will be 0 if swipping all the way from the left hand side 
-          // if (direction === KeyDirection.Right && ((scrollLeft === width && this.prevScrollLeft != 0) || this.horizonatalScrollLeft)) {
-          //   console.log('We hit the end but we had come from a place that had scroll left')
-          //   this.prevScrollLeft = 0;
-          //   return;
-          // }
-
-          // if (direction === KeyDirection.Left && scrollLeft === 0 && this.prevScrollLeft != 0) {
-          //   console.log('We hit the beginning but we had come from a place that had scroll left')
-          //   //this.prevScrollLeft = 0;
-          //   return;
-          // }
-
-          // const thresholdMet = Math.abs(event.distance) >= (width * threshold);
-
-          // console.log('distance: ', Math.abs(event.distance), 'width: ', width, 'threshold width: ', width * threshold);
-          // console.log('Threshold Met: ', thresholdMet, 'Actual Width: ', ((width * threshold) / (width * 1.0) * 100));
-
-          // if (!thresholdMet) return;
-          // this.prevScrollLeft = 0;
-
-          
           console.log('Next page triggered');
-          if (direction === KeyDirection.Right) this.nextPage();
-          else this.prevPage();
+          this.triggerSwipePagination(direction);
           break;
         }
       case ReaderMode.UpDown:
         {
           if (event.direction !== 'y') return;
           const direction = event.distance < 0 ? KeyDirection.Down : KeyDirection.Up;
+          const scrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
           if (!this.checkIfPaginationAllowed(direction)) return;
+
+
+          if (direction === KeyDirection.Down) {
+            this.hasHitZeroTopScroll = false;
+            if (!this.hasHitBottomTopScroll && this.checkIfPaginationAllowed(direction)) {
+              this.hasHitBottomTopScroll = true;
+              return;
+            }
+          } else if (direction === KeyDirection.Up) {
+            this.hasHitBottomTopScroll = false;
+
+            // If we have not scrolled then let the user page back
+            if (scrollTop === 0 && this.prevScrollTop === 0) {
+              if (!this.hasScrolledY || this.hasHitZeroTopScroll) {
+                this.triggerSwipePagination(direction);
+                return;
+              }
+              this.hasHitZeroTopScroll = true;
+              return;
+            }
+          }
+
+          if (!this.hasHitBottomTopScroll) {
+            return;
+          }
+
+          console.log('Next page triggered');
+          this.triggerSwipePagination(direction);
+          break;
+
+
+
+
+
 
           const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
           ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
@@ -1087,11 +1111,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.preventDefault();
     }
 
-    this.prevScrollLeft = 0;
-    this.prevScrollTop = 0;
-    this.hasScrolled = false;
-    this.hasHitRightScroll = false;
-
+    this.resetSwipeModifiers();
+    
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), 
@@ -1114,9 +1135,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       event.stopPropagation();
       event.preventDefault();
     }
-    this.prevScrollLeft = 0;
-    this.prevScrollTop = 0;
-    this.hasScrolled = false;
+    
+    this.resetSwipeModifiers();
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
