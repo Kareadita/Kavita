@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
     <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
@@ -166,10 +166,6 @@
     <Content Update="bin\$(Configuration)\$(AssemblyName).xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Drawing.Common" />
   </ItemGroup>
 
   <ItemGroup>
