@@ -963,20 +963,29 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @param event 
    * @returns 
    */
-  onSwipeMove(event: SwipeEvent) {
+  onSwipeMove(_: SwipeEvent) {
     this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
     this.prevScrollTop = this.readingArea?.nativeElement?.scrollTop || 0
   }
 
   triggerSwipePagination(direction: KeyDirection) {
+
+    if (this.readingDirection === ReadingDirection.LeftToRight) {
+      if (direction === KeyDirection.Right)
+      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+    }
     switch(direction) {
       case KeyDirection.Down:
-      case KeyDirection.Right:
         this.nextPage();
         break;
+      case KeyDirection.Right:
+        this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
+        break;
       case KeyDirection.Up:
+        this.prevPage();
+        break;
       case KeyDirection.Left:
-          this.prevPage();
+          this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage() : this.nextPage();
           break;
     }
     
