@@ -14,6 +14,8 @@ export class LayoutModeIconPipe implements PipeTransform {
         return 'double';
       case LayoutMode.DoubleReversed:
         return 'double-reversed';
+      case LayoutMode.DoubleNoCover:
+        return 'double';
     }
   }
 

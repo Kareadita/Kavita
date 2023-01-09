@@ -18,6 +18,7 @@ import { DoubleReverseRendererComponent } from './_components/double-reverse-ren
 import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
 import { SwipeModule } from 'ng-swipe';
+import { DoubleNoCoverRendererComponent } from './_components/double-renderer-no-cover/double-no-cover-renderer.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { SwipeModule } from 'ng-swipe';
     DoubleRendererComponent,
     DoubleReverseRendererComponent,
     FittingIconPipe,
+    DoubleNoCoverRendererComponent,
   ],
   imports: [
     CommonModule,

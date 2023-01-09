@@ -32,6 +32,7 @@ import { DoubleReverseRendererComponent } from '../double-reverse-renderer/doubl
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { ChapterInfo } from '../../_models/chapter-info';
 import { SwipeEvent } from 'ng-swipe';
+import { DoubleNoCoverRendererComponent } from '../double-renderer-no-cover/double-no-cover-renderer.component';
 
 
 const PREFETCH_PAGES = 10;
@@ -96,6 +97,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(SingleRendererComponent, { static: false }) singleRenderer!: SingleRendererComponent;
   @ViewChild(DoubleRendererComponent, { static: false }) doubleRenderer!: DoubleRendererComponent;
   @ViewChild(DoubleReverseRendererComponent, { static: false }) doubleReverseRenderer!: DoubleReverseRendererComponent;
+  @ViewChild(DoubleNoCoverRendererComponent, { static: false }) doubleNoCoverRenderer!: DoubleNoCoverRendererComponent;
 
 
   libraryId!: number;
@@ -1127,8 +1129,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD), 
-    this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
-    this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD));
+                                this.doubleRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
+                                this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
+                                this.doubleNoCoverRenderer.getPageAmount(PAGING_DIRECTION.FORWARD)
+                              );
     const notInSplit = this.canvasRenderer.shouldMovePrev();
 
     if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) { 
@@ -1153,9 +1157,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
     const pageAmount = Math.max(this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
-      this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
-      this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
-      this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS));
+                                this.singleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS), 
+                                this.doubleRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.doubleNoCoverRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS)
+                              );
 
     const notInSplit = this.canvasRenderer.shouldMovePrev();
 
@@ -1257,6 +1263,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.canvasRenderer?.renderPage(page); 
     this.singleRenderer?.renderPage(page);
     this.doubleRenderer?.renderPage(page);
+    this.doubleNoCoverRenderer?.renderPage(page);
     this.doubleReverseRenderer?.renderPage(page);
 
     // Originally this was only for fit to height, but when swiping was introduced, it made more sense to do it always to reset to the same view
@@ -1558,7 +1565,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const pageNum = this.pageNum;
     const isDouble = Math.max(this.canvasRenderer.getBookmarkPageCount(), this.singleRenderer.getBookmarkPageCount(), 
-      this.doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer.getBookmarkPageCount()) > 1;
+      this.doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer.getBookmarkPageCount(), this.doubleNoCoverRenderer.getBookmarkPageCount()) > 1;
 
     if (this.CurrentPageBookmarked) {
       let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
