@@ -390,6 +390,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
+  get KeyDirection() { return KeyDirection; }
   get ReaderMode() { return ReaderMode; }
   get LayoutMode() { return LayoutMode; }
   get ReadingDirection() { return ReadingDirection; }
@@ -397,6 +398,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get Breakpoint() { return Breakpoint; }
   get FITTING_OPTION() { return FITTING_OPTION; }
   get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
+  get ReadingAreaWidth() {
+    return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
+  }
+
+  get ReadingAreaHeight() {
+    return this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight;
+  }
 
   constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
               public readerService: ReaderService, private formBuilder: FormBuilder, private navService: NavService,
@@ -693,13 +701,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return img;
   }
 
-  get ReadingAreaWidth() {
-    return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
-  }
-
-  get ReadingAreaHeight() {
-    return this.readingArea?.nativeElement.scrollHeight - this.readingArea?.nativeElement.clientHeight;
-  }
+  
 
   isHorizontalScrollLeft() {
     const scrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
@@ -1098,18 +1100,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  handlePageChange(event: any, direction: string) {
+  handlePageChange(event: any, direction: KeyDirection) {
     if (this.readerMode === ReaderMode.Webtoon) {
-      if (direction === 'right') {
+      if (direction === KeyDirection.Right) {
         this.nextPage(event);
       } else {
         this.prevPage(event);
       }
       return;
     }
-    if (direction === 'right') {
+    if (direction === KeyDirection.Right) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage(event) : this.prevPage(event);
-    } else if (direction === 'left') {
+    } else if (direction === KeyDirection.Left) {
       this.readingDirection === ReadingDirection.LeftToRight ? this.prevPage(event) : this.nextPage(event);
     }
   }
