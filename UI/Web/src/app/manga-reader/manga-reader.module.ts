@@ -11,13 +11,13 @@ import { PipeModule } from '../pipe/pipe.module';
 import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
 import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
 import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
-import { SwipeDirective } from './swipe.directive';
 import { CanvasRendererComponent } from './_components/canvas-renderer/canvas-renderer.component';
 import { SingleRendererComponent } from './_components/single-renderer/single-renderer.component';
 import { DoubleRendererComponent } from './_components/double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from './_components/double-reverse-renderer/double-reverse-renderer.component';
 import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
+import { SwipeModule } from 'ng-swipe';
 
 @NgModule({
   declarations: [
@@ -26,7 +26,6 @@ import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
     FullscreenIconPipe,
     ReaderModeIconPipe,
     LayoutModeIconPipe,
-    SwipeDirective,
     CanvasRendererComponent,
     SingleRendererComponent,
     DoubleRendererComponent,
@@ -43,6 +42,8 @@ import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
     NgxSliderModule,
     SharedModule,
     ReaderSharedModule,
+
+    SwipeModule
   ],
   exports: [
     MangaReaderComponent

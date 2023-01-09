@@ -993,7 +993,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
 
-    const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
+    const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
     const columnGap = 20;
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + columnGap;
   }

@@ -93,7 +93,7 @@ public class CacheService : ICacheService
         }
         catch (Exception ex)
         {
-            _logger.LogError("There was an error calculating image dimensions for {ChapterId}", chapterId);
+            _logger.LogError(ex, "There was an error calculating image dimensions for {ChapterId}", chapterId);
         }
         finally
         {
@@ -164,7 +164,7 @@ public class CacheService : ICacheService
     {
         var removeNonImages = true;
         var fileCount = files.Count;
-        var extraPath = "";
+        var extraPath = string.Empty;
         var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
