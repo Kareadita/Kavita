@@ -50,7 +50,7 @@
                          title="Previous Page" aria-hidden="true"></i>
                     </div>
                 </div>
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Left)"
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
                                 'left': 'inherit',
                                 'right': RightPaginationOffset + 'px'}">
@@ -84,6 +84,14 @@
                     [pageNum$]="pageNum$"
                     [getPage]="getPageFn">
                 </app-double-reverse-renderer>
+
+                <app-double-no-cover-renderer [image$]="currentImage$" 
+                    [readerSettings$]="readerSettings$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$"
+                    [pageNum$]="pageNum$"
+                    [getPage]="getPageFn">
+                </app-double-no-cover-renderer>
             </div>
 
         </ng-container>
