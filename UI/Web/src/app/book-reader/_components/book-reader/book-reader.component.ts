@@ -262,9 +262,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reader', {static: true}) reader!: ElementRef;
 
 
-
-
-
   get BookPageLayoutMode() {
     return BookPageLayoutMode;
   }
