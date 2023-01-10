@@ -65,6 +65,14 @@ export class ThemeService implements OnDestroy {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
 
+  /**
+   * --theme-color from theme. Updates the meta tag
+   * @returns 
+   */
+  getThemeColor() {
+    return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
+  }
+
   getCssVariable(variable: string) {
     return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
   }
@@ -137,11 +145,23 @@ export class ThemeService implements OnDestroy {
             this.setTheme('dark');
             return;
           }
-          const styleElem = document.createElement('style');
+          const styleElem = this.document.createElement('style');
           styleElem.id = 'theme-' + theme.name;
           styleElem.appendChild(this.document.createTextNode(content));
 
           this.renderer.appendChild(this.document.head, styleElem);
+
+          // Check if the theme has --theme-color and apply it to meta tag
+          const themeColor = this.getThemeColor();
+          if (themeColor) {
+            this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+          }
+
+          const colorScheme = this.getColorScheme();
+          if (themeColor) {
+            this.document.querySelector('body')?.setAttribute('theme', colorScheme);
+          }
+
           this.currentThemeSource.next(theme);
         });
       } else {
