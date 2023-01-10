@@ -12,6 +12,7 @@ import { ServerStatistics } from '../statistics/_models/server-statistics';
 import { StatCount } from '../statistics/_models/stat-count';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import { MangaFormat } from '../_models/manga-format';
+import { TextResonse } from '../_types/text-response';
 
 export enum DayOfWeek
 {
@@ -85,7 +86,7 @@ export class StatisticsService {
   }
 
   getTotalSize() {
-    return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', { responseType: 'text' as 'json'});
+    return this.httpClient.get<number>(this.baseUrl + 'stats/server/file-size', TextResonse);
   }
 
   getFileBreakdown() {

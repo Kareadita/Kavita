@@ -3,12 +3,12 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
-import { map, ReplaySubject, Subject, takeUntil, take, distinctUntilChanged, Observable } from 'rxjs';
+import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../shared/confirm.service';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
 import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
-import { AccountService } from './account.service';
+import { TextResonse } from '../_types/text-response';
 import { EVENTS, MessageHubService } from './message-hub.service';
 
 
@@ -161,8 +161,7 @@ export class ThemeService implements OnDestroy {
   }
 
   private fetchThemeContent(themeId: number) {
-    // TODO: Refactor {responseType: 'text' as 'json'} into a type so i don't have to retype it
-    return this.httpClient.get<string>(this.baseUrl + 'theme/download-content?themeId=' + themeId, {responseType: 'text' as 'json'}).pipe(map(encodedCss => {
+    return this.httpClient.get<string>(this.baseUrl + 'theme/download-content?themeId=' + themeId, TextResonse).pipe(map(encodedCss => {
       return this.domSantizer.sanitize(SecurityContext.STYLE, encodedCss);
     }));
   }

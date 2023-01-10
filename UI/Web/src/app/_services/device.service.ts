@@ -4,6 +4,7 @@ import { ReplaySubject, shareReplay, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Device } from '../_models/device/device';
 import { DevicePlatform } from '../_models/device/device-platform';
+import { TextResonse } from '../_types/text-response';
 import { AccountService } from './account.service';
 
 @Injectable({
@@ -32,11 +33,11 @@ export class DeviceService {
   }
 
   createDevice(name: string, platform: DevicePlatform, emailAddress: string) {
-    return this.httpClient.post(this.baseUrl + 'device/create', {name, platform, emailAddress}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'device/create', {name, platform, emailAddress}, TextResonse);
   }
 
   updateDevice(id: number, name: string, platform: DevicePlatform, emailAddress: string) {
-    return this.httpClient.post(this.baseUrl + 'device/update', {id, name, platform, emailAddress}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'device/update', {id, name, platform, emailAddress}, TextResonse);
   }
 
   deleteDevice(id: number) {
@@ -50,7 +51,7 @@ export class DeviceService {
   }
 
   sendTo(chapterIds: Array<number>, deviceId: number) {
-    return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterIds}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterIds}, TextResonse);
   }
 
   
