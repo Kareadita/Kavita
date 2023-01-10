@@ -83,6 +83,7 @@ public class StatisticService : IStatisticService
 
         var lastActive = await _context.AppUserProgresses
             .OrderByDescending(p => p.LastModified)
+            .Where(p => p.AppUserId == userId)
             .Select(p => p.LastModified)
             .FirstOrDefaultAsync();
 
@@ -434,9 +435,8 @@ public class StatisticService : IStatisticService
             .ToList();
 
         var chapterLibLookup = new Dictionary<int, int>();
-        foreach (var cl in chapterIdWithLibraryId)
+        foreach (var cl in chapterIdWithLibraryId.Where(cl => !chapterLibLookup.ContainsKey(cl.ChapterId)))
         {
-            if (chapterLibLookup.ContainsKey(cl.ChapterId)) continue;
             chapterLibLookup.Add(cl.ChapterId, cl.LibraryId);
         }
 
@@ -457,19 +457,14 @@ public class StatisticService : IStatisticService
             user[userChapter.User.Id] = libraryTimes;
         }
 
-        var ret = new List<TopReadDto>();
-        foreach (var userId in user.Keys)
-        {
-            ret.Add(new TopReadDto()
+        return user.Keys.Select(userId => new TopReadDto()
             {
                 UserId = userId,
                 Username = users.First(u => u.Id == userId).UserName,
                 BooksTime = user[userId].ContainsKey(LibraryType.Book) ? user[userId][LibraryType.Book] : 0,
                 ComicsTime = user[userId].ContainsKey(LibraryType.Comic) ? user[userId][LibraryType.Comic] : 0,
                 MangaTime = user[userId].ContainsKey(LibraryType.Manga) ? user[userId][LibraryType.Manga] : 0,
-            });
-        }
-
-        return ret;
+            })
+            .ToList();
     }
 }
