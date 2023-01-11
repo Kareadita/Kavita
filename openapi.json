@@ -8119,6 +8119,108 @@
         }
       }
     },
+    "/api/Stats/pages-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of pages read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/words-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of words read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Tachiyomi/latest-chapter": {
       "get": {
         "tags": [
@@ -10333,7 +10435,7 @@
           "count": {
             "type": "integer",
             "description": "Number of pages read",
-            "format": "int32"
+            "format": "int64"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
@@ -10362,7 +10464,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -10901,7 +11003,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11145,7 +11247,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11277,7 +11379,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11563,7 +11665,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -12590,7 +12692,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13270,7 +13372,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -14113,7 +14215,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false

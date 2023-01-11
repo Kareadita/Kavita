@@ -59,7 +59,21 @@ export class StatisticsService {
   getTopYears() {
     return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/server/top/years').pipe(
       map(spreads => spreads.map(spread => {
-      return {name: spread.value + '', value: spread.count};
+        return {name: spread.value + '', value: spread.count};
+      })));
+  }
+
+  getPagesPerYear(userId = 0) {
+    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/pages-per-year?userId=' + userId).pipe(
+      map(spreads => spreads.map(spread => {
+        return {name: spread.value + '', value: spread.count};
+      })));
+  }
+
+  getWordsPerYear(userId = 0) {
+    return this.httpClient.get<StatCount<number>[]>(this.baseUrl + 'stats/words-per-year?userId=' + userId).pipe(
+      map(spreads => spreads.map(spread => {
+        return {name: spread.value + '', value: spread.count};
       })));
   }
 

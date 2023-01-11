@@ -28,6 +28,8 @@ public interface IStatisticService
     Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId);
     Task<IEnumerable<PagesReadOnADayCount<DateTime>>> ReadCountByDay(int userId = 0, int days = 0);
     IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown();
+    IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
+    IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
 }
 
 /// <summary>
@@ -71,9 +73,12 @@ public class StatisticService : IStatisticService
             .Where(c => chapterIds.Contains(c.Id))
             .SumAsync(c => c.AvgHoursToRead);
 
-        var totalWordsRead = await _context.Chapter
-            .Where(c => chapterIds.Contains(c.Id))
-            .SumAsync(c => c.WordCount);
+        var totalWordsRead =  (long) Math.Round(await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Where(p => libraryIds.Contains(p.LibraryId))
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (progress, chapter) => new {chapter, progress})
+            .Where(p => p.chapter.WordCount > 0)
+            .SumAsync(p => p.chapter.WordCount * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
 
         var chaptersRead = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -87,7 +92,6 @@ public class StatisticService : IStatisticService
             .Select(p => p.LastModified)
             .FirstOrDefaultAsync();
 
-        // Reading Progress by Library Name
 
         // First get the total pages per library
         var totalPageCountByLibrary = _context.Chapter
@@ -395,6 +399,50 @@ public class StatisticService : IStatisticService
             .GroupBy(p => p.LastModified.DayOfWeek)
             .OrderBy(g => g.Key)
             .Select(g => new StatCount<DayOfWeek>{ Value = g.Key, Count = g.Count() })
+            .AsEnumerable();
+    }
+
+    /// <summary>
+    /// Return a list of years for the given userId
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0)
+    {
+        var query = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        if (userId > 0)
+        {
+            query = query.Where(p => p.AppUserId == userId);
+        }
+
+        return query.GroupBy(p => p.LastModified.Year)
+            .OrderBy(g => g.Key)
+            .Select(g => new StatCount<int> {Value = g.Key, Count = g.Sum(x => x.PagesRead)})
+            .AsEnumerable();
+    }
+
+    public IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0)
+    {
+        var query = _context.AppUserProgresses
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        if (userId > 0)
+        {
+            query = query.Where(p => p.AppUserId == userId);
+        }
+
+        return query
+            .Join(_context.Chapter, p => p.ChapterId, c => c.Id, (progress, chapter) => new {chapter, progress})
+            .Where(p => p.chapter.WordCount > 0)
+            .GroupBy(p => p.progress.LastModified.Year)
+            .Select(g => new StatCount<int>{
+                Value = g.Key,
+                Count = (long) Math.Round(g.Sum(p => p.chapter.WordCount * ((1.0f * p.progress.PagesRead) / p.chapter.Pages)))
+            })
             .AsEnumerable();
     }
 

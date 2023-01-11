@@ -1,4 +1,9 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CompactNumberPipe } from 'src/app/pipe/compact-number.pipe';
+import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
+import { StatisticsService } from 'src/app/_services/statistics.service';
+import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
 
 @Component({
   selector: 'app-user-stats-info-cards',
@@ -15,9 +20,27 @@ export class UserStatsInfoCardsComponent implements OnInit {
   @Input() lastActive: string = '';
   @Input() avgHoursPerWeekSpentReading: number = 0;
 
-  constructor() { }
+  constructor(private statsService: StatisticsService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
+  }
+
+  openPageByYearList() {
+    const numberPipe = new CompactNumberPipe();
+    this.statsService.getPagesPerYear().subscribe(yearCounts => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} pages`);
+      ref.componentInstance.title = 'Pages Read By Year';
+    });
+  }
+
+  openWordByYearList() {
+    const numberPipe = new CompactNumberPipe();
+    this.statsService.getWordsPerYear().subscribe(yearCounts => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} pages`);
+      ref.componentInstance.title = 'Words Read By Year';
+    });
   }
 
 }
