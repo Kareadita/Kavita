@@ -603,15 +603,6 @@ public class ScannerService : IScannerService
         return scanElapsedTime;
     }
 
-    /// <summary>
-    /// Remove any user progress rows that no longer exist since scan library ran and deleted series/volumes/chapters
-    /// </summary>
-    private async Task CleanupAbandonedChapters()
-    {
-        var cleanedUp = await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
-        _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
-    }
-
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)
     {
         return existingSeries.Where(es => !ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(es, parsedSeries));

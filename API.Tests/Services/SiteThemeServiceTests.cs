@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -20,25 +21,29 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
-public class SiteThemeServiceTests
-{
-    private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
-    private readonly DbConnection _connection;
-    private readonly DataContext _context;
-    private readonly IUnitOfWork _unitOfWork;
+public abstract class SiteThemeServiceTest
+{
+    protected readonly ITestOutputHelper _testOutputHelper;
+    protected readonly IEventHub _messageHub = Substitute.For<IEventHub>();
+
+    protected readonly DbConnection _connection;
+    protected readonly DataContext _context;
+    protected readonly IUnitOfWork _unitOfWork;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
     private const string BackupDirectory = "C:/kavita/config/backups/";
     private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-    private const string SiteThemeDirectory = "C:/kavita/config/themes/";
+    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
 
-    public SiteThemeServiceTests()
+    protected SiteThemeServiceTest(ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
         var contextOptions = new DbContextOptionsBuilder()
             .UseSqlite(CreateInMemoryDatabase())
             .Options;
@@ -69,6 +74,7 @@ public class SiteThemeServiceTests
         var filesystem = CreateFileSystem();
 
         await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
+        await Seed.SeedThemes(_context);
 
         var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
         setting.Value = CacheDirectory;
@@ -104,7 +110,7 @@ public class SiteThemeServiceTests
         return await _context.SaveChangesAsync() > 0;
     }
 
-    private static MockFileSystem CreateFileSystem()
+    protected static MockFileSystem CreateFileSystem()
     {
         var fileSystem = new MockFileSystem();
         fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
@@ -119,7 +125,7 @@ public class SiteThemeServiceTests
         return fileSystem;
     }
 
-    private async Task ResetDb()
+    protected async Task ResetDb()
     {
         _context.SiteTheme.RemoveRange(_context.SiteTheme);
         await _context.SaveChangesAsync();
@@ -128,11 +134,56 @@ public class SiteThemeServiceTests
     }
 
     #endregion
+}
+
+
+
+[Collection("SiteThemeServiceTest1")]
+public class SiteThemeServiceTest1 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest1(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
+
+    [Fact]
+    public async Task UpdateDefault_ShouldThrowOnInvalidId()
+    {
+        await ResetDb();
+        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldThrowOnInvalidId] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
+        var filesystem = CreateFileSystem();
+        filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
+        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
+
+        _context.SiteTheme.Add(new SiteTheme()
+        {
+            Name = "Custom",
+            NormalizedName = "Custom".ToNormalized(),
+            Provider = ThemeProvider.User,
+            FileName = "custom.css",
+            IsDefault = false
+        });
+        await _context.SaveChangesAsync();
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(async () => await siteThemeService.UpdateDefault(10));
+        Assert.Equal("Theme file missing or invalid", ex.Message);
+
+    }
+
+}
+
+[Collection("SiteThemeServiceTest2")]
+public class SiteThemeServiceTest2 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest2(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
 
     [Fact]
     public async Task Scan_ShouldFindCustomFile()
     {
         await ResetDb();
+        _testOutputHelper.WriteLine($"[Scan_ShouldOnlyInsertOnceOnSecondScan] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
@@ -141,11 +192,21 @@ public class SiteThemeServiceTests
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
     }
+}
+
+[Collection("SiteThemeServiceTest3")]
+public class SiteThemeServiceTest3 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest3(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
 
     [Fact]
     public async Task Scan_ShouldOnlyInsertOnceOnSecondScan()
     {
         await ResetDb();
+        _testOutputHelper.WriteLine(
+            $"[Scan_ShouldOnlyInsertOnceOnSecondScan] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
@@ -161,11 +222,20 @@ public class SiteThemeServiceTests
 
         Assert.Single(customThemes);
     }
+}
+
+[Collection("SiteThemeServiceTest4")]
+public class SiteThemeServiceTest4 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest4(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
 
     [Fact]
     public async Task Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan()
     {
         await ResetDb();
+        _testOutputHelper.WriteLine($"[Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData(""));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
@@ -183,11 +253,20 @@ public class SiteThemeServiceTests
 
         Assert.Empty(customThemes);
     }
+}
+
+[Collection("SiteThemeServiceTest5")]
+public class SiteThemeServiceTest5 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest5(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
 
     [Fact]
     public async Task GetContent_ShouldReturnContent()
     {
         await ResetDb();
+        _testOutputHelper.WriteLine($"[GetContent_ShouldReturnContent] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
@@ -208,11 +287,20 @@ public class SiteThemeServiceTests
         Assert.NotEmpty(content);
         Assert.Equal("123", content);
     }
+}
+
+[Collection("SiteThemeServiceTest6")]
+public class SiteThemeServiceTest6 : SiteThemeServiceTest
+{
+    public SiteThemeServiceTest6(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
+    {
+    }
 
     [Fact]
     public async Task UpdateDefault_ShouldHaveOneDefault()
     {
         await ResetDb();
+        _testOutputHelper.WriteLine($"[UpdateDefault_ShouldHaveOneDefault] All Themes: {(await _unitOfWork.SiteThemeRepository.GetThemes()).Count(t => t.IsDefault)}");
         var filesystem = CreateFileSystem();
         filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
@@ -236,32 +324,7 @@ public class SiteThemeServiceTests
 
         Assert.Equal(customTheme.Id, (await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Id);
     }
-
-    [Fact]
-    public async Task UpdateDefault_ShouldThrowOnInvalidId()
-    {
-        await ResetDb();
-        var filesystem = CreateFileSystem();
-        filesystem.AddFile($"{SiteThemeDirectory}custom.css", new MockFileData("123"));
-        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-        var siteThemeService = new ThemeService(ds, _unitOfWork, _messageHub);
-
-        _context.SiteTheme.Add(new SiteTheme()
-        {
-            Name = "Custom",
-            NormalizedName = "Custom".ToNormalized(),
-            Provider = ThemeProvider.User,
-            FileName = "custom.css",
-            IsDefault = false
-        });
-        await _context.SaveChangesAsync();
-
-
-
-        var ex = await Assert.ThrowsAsync<KavitaException>(async () => await siteThemeService.UpdateDefault(10));
-        Assert.Equal("Theme file missing or invalid", ex.Message);
-
-    }
-
-
 }
+
+
+
