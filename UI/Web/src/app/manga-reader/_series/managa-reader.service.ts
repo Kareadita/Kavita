@@ -3,7 +3,7 @@ import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { ChapterInfo } from '../_models/chapter-info';
-import { DimensionMap, FileDimension } from '../_models/file-dimension';
+import { DimensionMap } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
