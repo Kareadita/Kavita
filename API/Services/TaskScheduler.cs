@@ -46,11 +46,13 @@ public class TaskScheduler : ITaskScheduler
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+    private readonly IStatisticService _statisticService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
+    public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
     public const string BackupTaskId = "backup";
@@ -65,7 +67,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService)
+        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -78,6 +80,7 @@ public class TaskScheduler : ITaskScheduler
         _versionUpdaterService = versionUpdaterService;
         _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+        _statisticService = statisticService;
     }
 
     public async Task ScheduleTasks()
@@ -111,6 +114,7 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
         RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, TimeZoneInfo.Local);
     }
 
     #region StatsTasks

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.DTOs.Statistics;
+using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using AutoMapper;
@@ -17,7 +18,7 @@ namespace API.Services;
 
 public interface IStatisticService
 {
-    Task<ServerStatistics> GetServerStatistics();
+    Task<ServerStatisticsDto> GetServerStatistics();
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds);
     Task<IEnumerable<StatCount<int>>> GetYearCount();
     Task<IEnumerable<StatCount<int>>> GetTopYears();
@@ -30,6 +31,7 @@ public interface IStatisticService
     IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown();
     IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
+    Task UpdateServerStatistics();
 }
 
 /// <summary>
@@ -195,7 +197,7 @@ public class StatisticService : IStatisticService
     }
 
 
-    public async Task<ServerStatistics> GetServerStatistics()
+    public async Task<ServerStatisticsDto> GetServerStatistics()
     {
         var mostActiveUsers = _context.AppUserProgresses
             .AsSplitQuery()
@@ -273,7 +275,7 @@ public class StatisticService : IStatisticService
             .Distinct()
             .Count();
 
-        return new ServerStatistics()
+        return new ServerStatisticsDto()
         {
             ChapterCount = await _context.Chapter.CountAsync(),
             SeriesCount = await _context.Series.CountAsync(),
@@ -444,6 +446,41 @@ public class StatisticService : IStatisticService
                 Count = (long) Math.Round(g.Sum(p => p.chapter.WordCount * ((1.0f * p.progress.PagesRead) / p.chapter.Pages)))
             })
             .AsEnumerable();
+    }
+
+    /// <summary>
+    /// Updates the ServerStatistics table for the current year
+    /// </summary>
+    /// <remarks>This commits</remarks>
+    /// <returns></returns>
+    public async Task UpdateServerStatistics()
+    {
+        var year = DateTime.Today.Year;
+
+        var existingRecord = await _context.ServerStatistics.SingleOrDefaultAsync(s => s.Year == year) ?? new ServerStatistics();
+
+        existingRecord.Year = year;
+        existingRecord.ChapterCount = await _context.Chapter.CountAsync();
+        existingRecord.VolumeCount = await _context.Volume.CountAsync();
+        existingRecord.FileCount = await _context.MangaFile.CountAsync();
+        existingRecord.SeriesCount = await _context.Series.CountAsync();
+        existingRecord.UserCount = await _context.Users.CountAsync();
+        existingRecord.GenreCount = await _context.Genre.CountAsync();
+        existingRecord.TagCount = await _context.Tag.CountAsync();
+        existingRecord.PersonCount =  _context.Person
+            .AsSplitQuery()
+            .AsEnumerable()
+            .GroupBy(sm => sm.NormalizedName)
+            .Select(sm => sm.Key)
+            .Distinct()
+            .Count();
+
+        _context.ServerStatistics.Attach(existingRecord);
+        if (existingRecord.Id > 0)
+        {
+            _context.Entry(existingRecord).State = EntityState.Modified;
+        }
+        await _unitOfWork.CommitAsync();
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

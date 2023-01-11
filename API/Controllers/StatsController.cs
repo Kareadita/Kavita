@@ -41,7 +41,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<ServerStatistics>> GetHighLevelStats()
+    public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
     {
         return Ok(await _statService.GetServerStatistics());
     }
