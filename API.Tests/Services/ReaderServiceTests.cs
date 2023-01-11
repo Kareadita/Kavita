@@ -1537,6 +1537,7 @@ public class ReaderServiceTests
         _context.Series.Add(new Series()
         {
             Name = "Test",
+            NormalizedName = "test",
             Library = new Library() {
                 Name = "Test LIb",
                 Type = LibraryType.Manga,

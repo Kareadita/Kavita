@@ -20,12 +20,12 @@ public class OpenSearchDescription
     /// <summary>
     /// https://github.com/dewitt/opensearch/blob/master/opensearch-1-1-draft-6.md#the-url-element
     /// </summary>
-    public SearchLink Url { get; set; }
+    public SearchLink Url { get; set; } = default!;
     /// <summary>
     /// Contains a set of words that are used as keywords to identify and categorize this search content.
     /// Tags must be a single word and are delimited by the space character (' ').
     /// </summary>
-    public string Tags { get; set; }
+    public string Tags { get; set; } = string.Empty;
     /// <summary>
     /// Contains a URL that identifies the location of an image that can be used in association with this search content.
     /// <example><Image height="64" width="64" type="image/png">http://example.com/websearch.png</Image></example>

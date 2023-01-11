@@ -29,7 +29,7 @@ public class MangaFile : IEntityDate
     /// <summary>
     /// File extension
     /// </summary>
-    public string Extension { get; set; }
+    public string? Extension { get; set; }
     /// <inheritdoc cref="IEntityDate.Created"/>
     public DateTime Created { get; set; }
     /// <summary>

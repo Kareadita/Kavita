@@ -123,7 +123,7 @@ public partial class DirectoryService : IDirectoryService
         SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
         if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
-        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
+        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
         return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
             .Where(file =>
@@ -199,7 +199,7 @@ public partial class DirectoryService : IDirectoryService
 
         if (fileNameRegex != string.Empty)
         {
-            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase);
+            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
             return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
                 {

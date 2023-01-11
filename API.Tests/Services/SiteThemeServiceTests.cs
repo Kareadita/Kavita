@@ -25,7 +25,6 @@ namespace API.Tests.Services;
 
 public class SiteThemeServiceTests
 {
-    private readonly ILogger<ThemeService> _logger = Substitute.For<ILogger<ThemeService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
     private readonly DbConnection _connection;
@@ -159,6 +158,7 @@ public class SiteThemeServiceTests
 
         var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
             t.Name.ToNormalized().Equals("custom".ToNormalized()));
+
         Assert.Single(customThemes);
     }
 
@@ -177,7 +177,8 @@ public class SiteThemeServiceTests
         filesystem.RemoveFile($"{SiteThemeDirectory}custom.css");
         await siteThemeService.Scan();
 
-        var customThemes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos()).Where(t =>
+        var themes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos());
+        var customThemes = themes.Where(t =>
             t.Name.ToNormalized().Equals("custom".ToNormalized()));
 
         Assert.Empty(customThemes);

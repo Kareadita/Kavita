@@ -163,7 +163,7 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
-        if (chapterId <= 0) return null;
+        if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
         return Ok(_cacheService.GetCachedFileDimensions(chapterId));
