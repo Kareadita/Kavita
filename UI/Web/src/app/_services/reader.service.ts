@@ -14,6 +14,8 @@ import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FileDimension } from '../manga-reader/_models/file-dimension';
+import screenfull from 'screenfull';
+import { TextResonse } from '../_types/text-response';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -77,10 +79,10 @@ export class ReaderService {
   }
 
   clearBookmarks(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'reader/remove-bookmarks', {seriesId}, TextResonse);
   }
   clearMultipleBookmarks(seriesIds: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'reader/bulk-remove-bookmarks', {seriesIds}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'reader/bulk-remove-bookmarks', {seriesIds}, TextResonse);
   }
 
   /**
@@ -235,25 +237,10 @@ export class ReaderService {
     return params;
   }
 
-  enterFullscreen(el: Element, callback?: VoidFunction) {
-    if (!document.fullscreenElement) {
-      if (el.requestFullscreen) {
-        el.requestFullscreen().then(() => {
-          if (callback) {
-            callback();
-          }
-        });
-      }
-    }
-  }
+  toggleFullscreen(el: Element, callback?: VoidFunction) {
 
-  exitFullscreen(callback?: VoidFunction) {
-    if (document.exitFullscreen && this.checkFullscreenMode()) {
-      document.exitFullscreen().then(() => {
-        if (callback) {
-          callback();
-        }
-      });
+    if (screenfull.isEnabled) {
+      screenfull.toggle();
     }
   }
 

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.19"
+    "version": "0.6.1.26"
   },
   "servers": [
     {
@@ -7712,17 +7712,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               }
             }
@@ -8033,6 +8033,44 @@
         }
       }
     },
+    "/api/Stats/day-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/reading-history": {
       "get": {
         "tags": [
@@ -8073,6 +8111,108 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/pages-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of pages read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/words-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of words read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               }
@@ -10021,6 +10161,16 @@
             "items": {
               "$ref": "#/components/schemas/FileDimensionDto"
             },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
           }
         },
@@ -10285,10 +10435,36 @@
           "count": {
             "type": "integer",
             "description": "Number of pages read",
-            "format": "int32"
+            "format": "int64"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DayOfWeek": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DayOfWeekStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/DayOfWeek"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -10463,6 +10639,9 @@
             "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
             "nullable": true,
             "example": "chapter01_page01.png"
+          },
+          "isWide": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10824,7 +11003,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11068,7 +11247,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11200,7 +11379,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11330,6 +11509,9 @@
           "password": {
             "type": "string",
             "nullable": true
+          },
+          "sendEmail": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -11483,7 +11665,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11732,11 +11914,11 @@
             "type": "string",
             "nullable": true
           },
-          "volumeNumber": {
+          "chapterTitleName": {
             "type": "string",
             "nullable": true
           },
-          "chapterTitleName": {
+          "volumeNumber": {
             "type": "string",
             "nullable": true
           },
@@ -11748,12 +11930,12 @@
             "type": "integer",
             "format": "int32"
           },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
+          },
           "title": {
             "type": "string",
             "nullable": true
-          },
-          "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
           },
           "releaseDate": {
             "type": "string",
@@ -12510,7 +12692,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13106,7 +13288,7 @@
         },
         "additionalProperties": false
       },
-      "ServerStatistics": {
+      "ServerStatisticsDto": {
         "type": "object",
         "properties": {
           "chapterCount": {
@@ -13190,7 +13372,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13983,15 +14165,12 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
-        "required": [
-          "url"
-        ],
         "type": "object",
         "properties": {
           "url": {
-            "minLength": 1,
             "type": "string",
-            "description": "External url"
+            "description": "External url",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14036,7 +14215,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -14064,8 +14243,7 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints",
-          "theme"
+          "showScreenHints"
         ],
         "type": "object",
         "properties": {

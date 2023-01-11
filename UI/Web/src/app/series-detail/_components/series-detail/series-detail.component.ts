@@ -670,7 +670,8 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       return;
     }
 
-    this.seriesService.updateRating(this.series?.id, this.series?.userRating, this.series?.userReview).subscribe(() => {
+    this.seriesService.updateRating(this.series?.id, rating, this.series?.userReview).subscribe(() => {
+      this.series.userRating = rating;
       this.createHTML();
     });
   }

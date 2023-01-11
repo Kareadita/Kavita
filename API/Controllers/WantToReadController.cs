@@ -42,7 +42,7 @@ public class WantToReadController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<bool>> GetWantToRead([FromQuery] int seriesId)
+    public async Task<ActionResult<bool>> IsSeriesInWantToRead([FromQuery] int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();

@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { map, Observable, shareReplay, Subject, takeUntil, tap } from 'rxjs';
-import { DownloadService } from 'src/app/shared/_services/download.service';
+import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Series } from 'src/app/_models/series';
-import { User } from 'src/app/_models/user';
 import { ImageService } from 'src/app/_services/image.service';
+import { MetadataService } from 'src/app/_services/metadata.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { ServerStatistics } from '../../_models/server-statistics';
+import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
 
 @Component({
   selector: 'app-server-stats',
@@ -25,8 +27,13 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
   stats$!: Observable<ServerStatistics>;
   seriesImage: (data: PieDataItem) => string;
   private readonly onDestroy = new Subject<void>();
+  openSeries = (data: PieDataItem) => {
+    const series = data.extra as Series;
+    this.router.navigate(['library', series.libraryId, 'series', series.id]);
+  }
 
-  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService) {
+  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService, 
+    private metadataService: MetadataService, private modalService: NgbModal) {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';      
@@ -75,9 +82,40 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
     this.onDestroy.complete();
   }
 
-  openSeries = (data: PieDataItem) => {
-    const series = data.extra as Series;
-    this.router.navigate(['library', series.libraryId, 'series', series.id]);
+  openGenreList() {
+    this.metadataService.getAllGenres().subscribe(genres => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = genres.map(t => t.title);
+      ref.componentInstance.title = 'Genres';
+      ref.componentInstance.clicked = (item: string) => {
+        const params: any = {};
+        params[FilterQueryParam.Genres] = item;
+        params[FilterQueryParam.Page] = 1;
+        this.router.navigate(['all-series'], {queryParams: params});
+      };
+    });
+  }
+
+  openTagList() {
+    this.metadataService.getAllTags().subscribe(tags => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = tags.map(t => t.title);
+      ref.componentInstance.title = 'Tags';
+      ref.componentInstance.clicked = (item: string) => {
+        const params: any = {};
+        params[FilterQueryParam.Tags] = item;
+        params[FilterQueryParam.Page] = 1;
+        this.router.navigate(['all-series'], {queryParams: params});
+      };
+    });
+  }
+
+  openPeopleList() {
+    this.metadataService.getAllPeople().subscribe(people => {
+      const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
+      ref.componentInstance.items = [...new Set(people.map(person => person.name))];
+      ref.componentInstance.title = 'People';
+    });
   }
 
   

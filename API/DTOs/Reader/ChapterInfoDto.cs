@@ -20,7 +20,6 @@ public class ChapterInfoDto : IChapterInfoDto
     /// Volume entity Id
     /// </summary>
     public int VolumeId { get; set; }
-
     /// <summary>
     /// Series Name
     /// </summary>
@@ -65,8 +64,16 @@ public class ChapterInfoDto : IChapterInfoDto
     /// Series Title
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
-    public string Title { get; set; } = default! ;
-
+    public string Title { get; set; } = default!;
+    /// <summary>
+    /// List of all files with their inner archive structure maintained in filename and dimensions
+    /// </summary>
+    /// <remarks>This is optionally returned by includeDimensions</remarks>
     public IEnumerable<FileDimensionDto> PageDimensions { get; set; }
+    /// <summary>
+    /// For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page
+    /// </summary>
+    /// <remarks>This is optionally returned by includeDimensions</remarks>
+    public IDictionary<int, int> DoublePairs { get; set; }
 
 }

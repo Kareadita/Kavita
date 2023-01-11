@@ -37,7 +37,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
@@ -53,7 +53,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
@@ -69,7 +69,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
@@ -85,7 +85,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         Response.AddCacheHeader(path);
 
@@ -103,7 +103,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
@@ -119,7 +119,7 @@ public class ImageController : BaseApiController
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
@@ -143,7 +143,7 @@ public class ImageController : BaseApiController
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
-        var format = Path.GetExtension(file.FullName).Replace(".", "");
+        var format = Path.GetExtension(file.FullName).Replace(".", string.Empty);
 
         return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
     }
@@ -162,7 +162,7 @@ public class ImageController : BaseApiController
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
-        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", "");
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }

@@ -176,6 +176,7 @@ $pointer-offset: 5px;
       top: 0px;
       width: $side-width;
       background: $pagination-bg;
+      max-height: calc(var(--vh)*100);
       z-index: 100;
     }
     
@@ -194,6 +195,7 @@ $pointer-offset: 5px;
         top: 0px;
         width: $side-width;
         background: $pagination-bg;
+        max-height: calc(var(--vh)*100);
         z-index: 100;
     }
     

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -72,17 +72,31 @@ public class CacheService : ICacheService
         }
 
         var dimensions = new List<FileDimensionDto>();
-        for (var i = 0; i < files.Length; i++)
+        var originalCacheSize = Cache.MaxFiles;
+        try
         {
-            var file = files[i];
-            using var image = Image.NewFromFile(file, memory:false, access: Enums.Access.SequentialUnbuffered);
-            dimensions.Add(new FileDimensionDto()
+            Cache.MaxFiles = 0;
+            for (var i = 0; i < files.Length; i++)
             {
-                PageNumber = i,
-                Height = image.Height,
-                Width = image.Width,
-                FileName = file.Replace(path, string.Empty)
-            });
+                var file = files[i];
+                using var image = Image.NewFromFile(file, memory: false, access: Enums.Access.SequentialUnbuffered);
+                dimensions.Add(new FileDimensionDto()
+                {
+                    PageNumber = i,
+                    Height = image.Height,
+                    Width = image.Width,
+                    IsWide = image.Width > image.Height,
+                    FileName = file.Replace(path, string.Empty)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error calculating image dimensions for {ChapterId}", chapterId);
+        }
+        finally
+        {
+            Cache.MaxFiles = originalCacheSize;
         }
 
         _logger.LogDebug("File Dimensions call for {Length} images took {Time}ms", dimensions.Count, sw.ElapsedMilliseconds);

@@ -56,7 +56,7 @@ public class CollectionController : BaseApiController
     [HttpGet("search")]
     public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string queryString)
     {
-        queryString ??= "";
+        queryString ??= string.Empty;
         queryString = queryString.Replace(@"%", string.Empty);
         if (queryString.Length == 0) return await GetAllTags();
 

@@ -17,6 +17,7 @@ import { SeriesGroup } from '../_models/series-group';
 import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
+import { TextResonse } from '../_types/text-response';
 
 @Injectable({
   providedIn: 'root'
@@ -131,7 +132,7 @@ export class SeriesService {
   }
 
   isWantToRead(seriesId: number) {
-    return this.httpClient.get<string>(this.baseUrl + 'want-to-read?seriesId=' + seriesId, {responseType: 'text' as 'json'})
+    return this.httpClient.get<string>(this.baseUrl + 'want-to-read?seriesId=' + seriesId, TextResonse)
     .pipe(map(val => {
       return val === 'true';
     }));
@@ -174,7 +175,7 @@ export class SeriesService {
       seriesMetadata,
       collectionTags,
     };
-    return this.httpClient.post(this.baseUrl + 'series/metadata', data, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }
 
   getSeriesForTag(collectionTagId: number, pageNum?: number, itemsPerPage?: number) {

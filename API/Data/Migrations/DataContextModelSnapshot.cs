@@ -949,6 +949,44 @@ namespace API.Data.Migrations
                     b.ToTable("ServerSetting");
                 });
 
+            modelBuilder.Entity("API.Entities.ServerStatistics", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ChapterCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("FileCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("GenreCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PersonCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("SeriesCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TagCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("VolumeCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServerStatistics");
+                });
+
             modelBuilder.Entity("API.Entities.SiteTheme", b =>
                 {
                     b.Property<int>("Id")
