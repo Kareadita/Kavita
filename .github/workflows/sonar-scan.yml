@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Swashbuckle CLI
         shell: powershell
-        run: dotnet tool install -g --version 6.5.0
+        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
