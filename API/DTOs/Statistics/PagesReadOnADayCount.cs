@@ -12,10 +12,9 @@ public class PagesReadOnADayCount<T> : ICount<T>
     /// <summary>
     /// Number of pages read
     /// </summary>
-    public int Count { get; set; }
+    public long Count { get; set; }
     /// <summary>
     /// Format of those files
     /// </summary>
     public MangaFormat Format { get; set; }
-
 }

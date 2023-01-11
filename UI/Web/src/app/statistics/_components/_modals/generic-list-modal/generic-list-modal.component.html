@@ -15,7 +15,7 @@
         <div class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of items | filter: filterList; let i = index">
                 {{item}}
-                <button class="btn btn-primary" [disabled]="clicked === undefined" (click)="handleClick(item)">
+                <button class="btn btn-primary" *ngIf="clicked !== undefined" (click)="handleClick(item)">
                     <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
                     <span class="visually-hidden">Open a filtered search for {{item}}</span>
                 </button>

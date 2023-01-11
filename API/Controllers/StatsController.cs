@@ -41,7 +41,7 @@ public class StatsController : BaseApiController
     [Authorize("RequireAdminRole")]
     [HttpGet("server/stats")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public async Task<ActionResult<ServerStatistics>> GetHighLevelStats()
+    public async Task<ActionResult<ServerStatisticsDto>> GetHighLevelStats()
     {
         return Ok(await _statService.GetServerStatistics());
     }
@@ -140,5 +140,35 @@ public class StatsController : BaseApiController
 
         return Ok(await _statService.GetReadingHistory(userId));
     }
+
+    /// <summary>
+    /// Returns a count of pages read per year for a given userId.
+    /// </summary>
+    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <returns></returns>
+    [HttpGet("pages-per-year")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetPagesReadPerYear(int userId = 0)
+    {
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        return Ok(_statService.GetPagesReadCountByYear(userId));
+    }
+
+    /// <summary>
+    /// Returns a count of words read per year for a given userId.
+    /// </summary>
+    /// <param name="userId">If userId is 0 and user is not an admin, API will default to userId</param>
+    /// <returns></returns>
+    [HttpGet("words-per-year")]
+    [ResponseCache(CacheProfileName = "Statistics")]
+    public async Task<ActionResult<IEnumerable<StatCount<int>>>> GetWordsReadPerYear(int userId = 0)
+    {
+        var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
+        if (!isAdmin) userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        return Ok(_statService.GetWordsReadCountByYear(userId));
+    }
+
+
 
 }

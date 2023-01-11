@@ -1,4 +1,6 @@
-:root, :root .bg-dark {
+//
+:root, :root .default {
+    --theme-color: #000000;
     --color-scheme: dark;
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
@@ -240,4 +242,7 @@
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+
+    /* Bootstrap overrides */
+    --hr-color: transparent;
   }

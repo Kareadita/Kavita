@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { CollectionTag } from '../_models/collection-tag';
+import { TextResonse } from '../_types/text-response';
 import { ImageService } from './image.service';
 
 @Injectable({
@@ -26,15 +27,15 @@ export class CollectionTagService {
   }
 
   updateTag(tag: CollectionTag) {
-    return this.httpClient.post(this.baseUrl + 'collection/update', tag, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
   }
 
   updateSeriesForTag(tag: CollectionTag, seriesIdsToRemove: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'collection/update-series', {tag, seriesIdsToRemove}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'collection/update-series', {tag, seriesIdsToRemove}, TextResonse);
   }
 
   addByMultiple(tagId: number, seriesIds: Array<number>, tagTitle: string = '') {
-    return this.httpClient.post(this.baseUrl + 'collection/update-for-series', {collectionTagId: tagId, collectionTagTitle: tagTitle, seriesIds}, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'collection/update-for-series', {collectionTagId: tagId, collectionTagTitle: tagTitle, seriesIds}, TextResonse);
   }
 
   tagNameExists(name: string) {

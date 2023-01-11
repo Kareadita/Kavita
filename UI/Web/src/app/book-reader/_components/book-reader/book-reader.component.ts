@@ -262,9 +262,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('reader', {static: true}) reader!: ElementRef;
 
 
-
-
-
   get BookPageLayoutMode() {
     return BookPageLayoutMode;
   }
@@ -722,16 +719,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * from 'kavita-part', which will cause the reader to scroll to the marker.
    */
   addLinkClickHandlers() {
-    var links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
+    const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
+          console.log('Link clicked: ', e);
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
-          var page = parseInt(e.target.attributes['kavita-page'].value, 10);
+          const page = parseInt(e.target.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
             this.adhocPageHistory.push({page: this.pageNum, scrollPart: this.lastSeenScrollPartPath});
           }
 
-          var partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
+          const partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
           if (partValue && page === this.pageNum) {
             this.scrollTo(e.target.attributes['kavita-part'].value);
             return;

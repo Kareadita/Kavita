@@ -252,6 +252,13 @@ export class DoubleNoCoverRendererComponent implements OnInit {
         this.debugLog('Moving forward 2 pages');
         return 2;
       case PAGING_DIRECTION.BACKWARDS:
+
+      if (this.mangaReaderService.isCoverImage(this.pageNum - 1)) {
+        // TODO: If we are moving back and prev page is cover and we are not showing on right side, then move back twice as if we did once, we would show pageNum twice
+        this.debugLog('Moving back 1 page as on cover image');
+        return 2;
+      }
+
         if (this.mangaReaderService.isCoverImage(this.pageNum)) {
           this.debugLog('Moving back 1 page as on cover image');
           return 2;
