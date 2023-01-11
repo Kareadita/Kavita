@@ -24,7 +24,7 @@ jobs:
 
       - name: Install Swashbuckle CLI
         shell: powershell
-        run: dotnet tool install -g --version 6.5.0-preview-2124 --add-source https://www.myget.org/F/domaindrivendev/api/v3/index.json Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.5.0
 
       - name: Install dependencies
         run: dotnet restore
@@ -91,7 +91,7 @@ jobs:
             dotnet-version: 7.0.x
 
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
@@ -181,7 +181,7 @@ jobs:
             dotnet-version: 7.0.x
 
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
 
       - run: ./monorepo-build.sh
 
@@ -297,7 +297,7 @@ jobs:
         with:
             dotnet-version: 7.0.x
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
 
       - run: ./monorepo-build.sh
 
