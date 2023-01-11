@@ -138,7 +138,7 @@ public abstract class SiteThemeServiceTest
 
 
 
-[Collection("SiteThemeServiceTest1")]
+[Collection("UpdateDefault_ShouldThrowOnInvalidId")]
 public class SiteThemeServiceTest1 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest1(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -172,7 +172,7 @@ public class SiteThemeServiceTest1 : SiteThemeServiceTest
 
 }
 
-[Collection("SiteThemeServiceTest2")]
+[Collection("Scan_ShouldFindCustomFile")]
 public class SiteThemeServiceTest2 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest2(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -194,7 +194,7 @@ public class SiteThemeServiceTest2 : SiteThemeServiceTest
     }
 }
 
-[Collection("SiteThemeServiceTest3")]
+[Collection("Scan_ShouldOnlyInsertOnceOnSecondScan")]
 public class SiteThemeServiceTest3 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest3(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -224,7 +224,7 @@ public class SiteThemeServiceTest3 : SiteThemeServiceTest
     }
 }
 
-[Collection("SiteThemeServiceTest4")]
+[Collection("Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan")]
 public class SiteThemeServiceTest4 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest4(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -248,14 +248,13 @@ public class SiteThemeServiceTest4 : SiteThemeServiceTest
         await siteThemeService.Scan();
 
         var themes = (await _unitOfWork.SiteThemeRepository.GetThemeDtos());
-        var customThemes = themes.Where(t =>
-            t.Name.ToNormalized().Equals("custom".ToNormalized()));
 
-        Assert.Empty(customThemes);
+        Assert.Equal(0, themes.Count(t =>
+            t.Name.ToNormalized().Equals("custom".ToNormalized())));
     }
 }
 
-[Collection("SiteThemeServiceTest5")]
+[Collection("GetContent_ShouldReturnContent")]
 public class SiteThemeServiceTest5 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest5(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
@@ -289,7 +288,7 @@ public class SiteThemeServiceTest5 : SiteThemeServiceTest
     }
 }
 
-[Collection("SiteThemeServiceTest6")]
+[Collection("UpdateDefault_ShouldHaveOneDefault")]
 public class SiteThemeServiceTest6 : SiteThemeServiceTest
 {
     public SiteThemeServiceTest6(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
