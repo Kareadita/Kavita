@@ -19,7 +19,7 @@ public static class ReadingListHelper
         }
 
         if (item.SeriesFormat == MangaFormat.Epub) {
-            var specialTitle = Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
+            var specialTitle = Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber!);
             if (specialTitle == Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
             {
                 if (!string.IsNullOrEmpty(item.ChapterTitleName))
@@ -28,7 +28,7 @@ public static class ReadingListHelper
                 }
                 else
                 {
-                    title = $"Volume {Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.VolumeNumber)}";
+                    title = $"Volume {Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.VolumeNumber!)}";
                 }
             } else {
                 title = $"Volume {specialTitle}";
@@ -36,8 +36,8 @@ public static class ReadingListHelper
         }
 
         var chapterNum = item.ChapterNumber;
-        if (!string.IsNullOrEmpty(chapterNum) && !JustNumbers.Match(item.ChapterNumber).Success) {
-            chapterNum = Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
+        if (!string.IsNullOrEmpty(chapterNum) && !JustNumbers.Match(chapterNum).Success) {
+            chapterNum = Services.Tasks.Scanner.Parser.Parser.CleanSpecialTitle(chapterNum);
         }
 
         if (title == string.Empty) {

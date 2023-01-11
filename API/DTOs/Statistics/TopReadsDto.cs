@@ -5,7 +5,7 @@ namespace API.DTOs.Statistics;
 public class TopReadDto
 {
     public int UserId { get; set; }
-    public string Username { get; set; }
+    public string Username { get; set; } = default!;
     /// <summary>
     /// Amount of time read on Comic libraries
     /// </summary>
