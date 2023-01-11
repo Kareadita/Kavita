@@ -8,7 +8,7 @@ namespace API.DTOs.Statistics;
 public class ReadHistoryEvent
 {
     public int UserId { get; set; }
-    public required string UserName { get; set; } = default!;
+    public required string? UserName { get; set; } = default!;
     public int LibraryId { get; set; }
     public int SeriesId { get; set; }
     public required string SeriesName { get; set; } = default!;

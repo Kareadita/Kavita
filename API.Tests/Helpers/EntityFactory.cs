@@ -38,7 +38,7 @@ public static class EntityFactory
         };
     }
 
-    public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0, string? title = null)
+    public static Chapter CreateChapter(string range, bool isSpecial, List<MangaFile> files = null, int pageCount = 0, string title = null)
     {
         return new Chapter()
         {

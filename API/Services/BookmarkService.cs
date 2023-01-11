@@ -215,6 +215,8 @@ public class BookmarkService : IBookmarkService
         var count = 1F;
         foreach (var chapter in chapters)
         {
+            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
+
             var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
             chapter.CoverImage = newFile;
             _unitOfWork.ChapterRepository.Update(chapter);

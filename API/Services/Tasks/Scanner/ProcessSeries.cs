@@ -579,7 +579,7 @@ public class ProcessSeries : IProcessSeries
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-        var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(info.FullFilePath);
+        var fileInfo = _directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
             existingFile.Format = info.Format;

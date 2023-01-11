@@ -116,7 +116,7 @@ public class ScannerService : IScannerService
 
         foreach (var file in missingExtensions)
         {
-            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(file.FilePath);
+            var fileInfo = _directoryService.FileSystem.FileInfo.New(file.FilePath);
             if (!fileInfo.Exists)continue;
             file.Extension = fileInfo.Extension.ToLowerInvariant();
             file.Bytes = fileInfo.Length;
@@ -610,17 +610,6 @@ public class ScannerService : IScannerService
     {
         var cleanedUp = await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
         _logger.LogInformation("Removed {Count} abandoned progress rows", cleanedUp);
-    }
-
-
-    /// <summary>
-    /// Cleans up any abandoned rows due to removals from Scan loop
-    /// </summary>
-    private async Task CleanupDbEntities()
-    {
-        await CleanupAbandonedChapters();
-        var cleanedUp = await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-        _logger.LogInformation("Removed {Count} abandoned collection tags", cleanedUp);
     }
 
     public static IEnumerable<Series> FindSeriesNotOnDisk(IEnumerable<Series> existingSeries, Dictionary<ParsedSeries, IList<ParserInfo>> parsedSeries)

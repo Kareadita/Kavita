@@ -143,6 +143,7 @@ public class CacheService : ICacheService
     /// Caches the files for the given chapter to CacheDirectory
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <param name="extractPdfToImages">Defaults to false. Extract pdf file into images rather than copying just the pdf file</param>
     /// <returns>This will always return the Chapter for the chapterId</returns>
     public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false)
     {

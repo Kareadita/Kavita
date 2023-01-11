@@ -105,6 +105,7 @@ public class ReaderService : IReaderService
     {
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) throw new KavitaException("Series suddenly doesn't exist, cannot mark as read");
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -227,7 +228,7 @@ public class ReaderService : IReaderService
 
         try
         {
-            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
+            // TODO: Rewrite this code to just pull user object with progress for that particular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
