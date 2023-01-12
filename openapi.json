@@ -13231,6 +13231,10 @@
             "type": "integer",
             "description": "Total reading hours of all users",
             "format": "int64"
+          },
+          "storeCoversAsWebP": {
+            "type": "boolean",
+            "description": "Is the Server saving covers as WebP"
           }
         },
         "additionalProperties": false,

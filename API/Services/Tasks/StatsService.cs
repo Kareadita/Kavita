@@ -124,6 +124,11 @@ public class StatsService : IStatsService
             UsersWithEmulateComicBook = await _context.AppUserPreferences.CountAsync(p => p.EmulateBook),
             TotalReadingHours = await _statisticService.TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty),
 
+            PercentOfLibrariesWithFolderWatchingEnabled = await GetPercentageOfLibrariesWithFolderWatchingEnabled(),
+            PercentOfLibrariesIncludedInRecommended = await GetPercentageOfLibrariesIncludedInRecommended(),
+            PercentOfLibrariesIncludedInDashboard = await GetPercentageOfLibrariesIncludedInDashboard(),
+            PercentOfLibrariesIncludedInSearch = await GetPercentageOfLibrariesIncludedInSearch(),
+
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
             NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
@@ -135,6 +140,7 @@ public class StatsService : IStatsService
             TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
             UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
             StoreBookmarksAsWebP = serverSettings.ConvertBookmarkToWebP,
+            StoreCoversAsWebP = serverSettings.ConvertCoverToWebP,
             MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
             MaxVolumesInASeries = await MaxVolumesInASeries(),
             MaxChaptersInASeries = await MaxChaptersInASeries(),
@@ -196,6 +202,30 @@ public class StatsService : IStatsService
         {
             _logger.LogError(e, "An error happened during the request to KavitaStats");
         }
+    }
+
+    private async Task<float> GetPercentageOfLibrariesWithFolderWatchingEnabled()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        return libraries.Count(l => l.FolderWatching) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInRecommended()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        return libraries.Count(l => l.IncludeInRecommended) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInDashboard()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        return libraries.Count(l => l.IncludeInDashboard) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInSearch()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        return libraries.Count(l => l.IncludeInSearch) / (1.0f * libraries.Count);
     }
 
     private Task<bool> GetIfUsingSeriesRelationship()

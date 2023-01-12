@@ -175,4 +175,9 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Introduced in v0.7.0</remarks>
     public long TotalReadingHours { get; set; }
+    /// <summary>
+    /// Is the Server saving covers as WebP
+    /// </summary>
+    /// <remarks>Added in v0.7.0</remarks>
+    public bool StoreCoversAsWebP { get; set; }
 }
