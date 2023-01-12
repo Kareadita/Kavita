@@ -294,7 +294,8 @@ public class StatisticService : IStatisticService
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
             MostReadSeries = mostReadSeries,
-            RecentlyRead = recentlyRead
+            RecentlyRead = recentlyRead,
+            TotalReadingTime = await TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty)
         };
     }
 

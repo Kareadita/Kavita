@@ -20,7 +20,7 @@
     <ng-container >
         <div class="col-auto mb-2">
             <app-icon-and-title label="Time Spent Reading" [clickable]="false" fontClasses="fas fa-eye" title="Time Spent Reading">
-                {{timeSpentReading}} hours
+                {{timeSpentReading | compactNumber}} hours
             </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
