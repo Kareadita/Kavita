@@ -973,8 +973,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   triggerSwipePagination(direction: KeyDirection) {
-
-    console.log('Pagination triggered');
     switch(direction) {
       case KeyDirection.Down:
         this.nextPage();
@@ -993,8 +991,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSwipeEnd(event: SwipeEvent) {
-    const threshold = .12;
-
     // Positive number means swiping right/down, negative means left
     switch (this.readerMode) {
       case ReaderMode.Webtoon: break;
@@ -1068,32 +1064,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
 
-          console.log('Next page triggered');
           this.triggerSwipePagination(direction);
           break;
-
-
-
-
-
-
-          // const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
-          // ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
-
-          // if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
-          //   this.prevScrollTop = 0;
-          //   return;
-          // }
-
-          // if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
-          //   this.prevScrollTop = 0;
-          //   return;
-          // }
-
-          // const thresholdMet = Math.abs(event.distance) >= height * threshold;
-          // if (!thresholdMet) return;
-
-          // this.triggerSwipePagination(direction);
         }
     }
   }
