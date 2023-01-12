@@ -974,10 +974,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   triggerSwipePagination(direction: KeyDirection) {
 
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      if (direction === KeyDirection.Right)
-      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-    }
+    console.log('Pagination triggered');
     switch(direction) {
       case KeyDirection.Down:
         this.nextPage();
@@ -1036,7 +1033,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
 
-          console.log('Next page triggered');
           this.triggerSwipePagination(direction);
           break;
         }
@@ -1081,23 +1077,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-          const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
-          ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
+          // const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
+          // ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
 
-          if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
-            this.prevScrollTop = 0;
-            return;
-          }
+          // if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
+          //   this.prevScrollTop = 0;
+          //   return;
+          // }
 
-          if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
-            this.prevScrollTop = 0;
-            return;
-          }
+          // if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
+          //   this.prevScrollTop = 0;
+          //   return;
+          // }
 
-          const thresholdMet = Math.abs(event.distance) >= height * threshold;
-          if (!thresholdMet) return;
+          // const thresholdMet = Math.abs(event.distance) >= height * threshold;
+          // if (!thresholdMet) return;
 
-          this.triggerSwipePagination(direction);
+          // this.triggerSwipePagination(direction);
         }
     }
   }
