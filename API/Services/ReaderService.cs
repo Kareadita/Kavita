@@ -575,39 +575,20 @@ public class ReaderService : IReaderService
         {
             var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
             var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
-            if (maxHours < minHours)
-            {
-                return new HourEstimateRangeDto
-                {
-                    MinHours = maxHours,
-                    MaxHours = minHours,
-                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
-                };
-            }
             return new HourEstimateRangeDto
             {
-                MinHours = minHours,
-                MaxHours = maxHours,
+                MinHours = Math.Min(minHours, maxHours),
+                MaxHours = Math.Max(minHours, maxHours),
                 AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
             };
         }
 
         var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
         var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
-        if (maxHoursPages < minHoursPages)
-        {
-            return new HourEstimateRangeDto
-            {
-                MinHours = maxHoursPages,
-                MaxHours = minHoursPages,
-                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
-            };
-        }
-
         return new HourEstimateRangeDto
         {
-            MinHours = minHoursPages,
-            MaxHours = maxHoursPages,
+            MinHours = Math.Min(minHoursPages, maxHoursPages),
+            MaxHours = Math.Max(minHoursPages, maxHoursPages),
             AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
         };
     }
