@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Filtering;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -501,6 +502,62 @@ public class CleanupServiceTests : AbstractDbTest
     }
 
     #endregion
+
+    #region CleanupWantToRead
+
+    [Fact]
+    public async Task CleanupWantToRead_ShouldRemoveFullyReadSeries()
+    {
+        await ResetDb();
+
+        var s = new Series()
+        {
+            Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+            {
+                PublicationStatus = PublicationStatus.Completed
+            }
+        };
+        _context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            WantToRead = new List<Series>()
+            {
+                s
+            }
+        };
+        _context.AppUser.Add(user);
+
+        await _unitOfWork.CommitAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>());
+
+        await readerService.MarkSeriesAsRead(user, s.Id);
+        await _unitOfWork.CommitAsync();
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+
+        await cleanupService.CleanupWantToRead();
+
+        var wantToRead =
+            await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, new UserParams(), new FilterDto());
+
+        Assert.Equal(0, wantToRead.TotalCount);
+    }
+    #endregion
+
     // #region CleanupBookmarks
     //
     // [Fact]
