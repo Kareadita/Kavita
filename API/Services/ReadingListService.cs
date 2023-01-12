@@ -107,7 +107,7 @@ public class ReadingListService : IReadingListService
     public async Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
-        readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).ToList();
+        readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).OrderBy(r => r.Order).ToList();
 
         var index = 0;
         foreach (var readingListItem in readingList.Items)

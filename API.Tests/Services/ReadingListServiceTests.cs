@@ -181,6 +181,96 @@ public class ReadingListServiceTests
         Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
     }
 
+    [Fact]
+    public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift_ThenDeleteSecond_OrderShouldBeCorrect()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone,
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "3",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        // Existing (order, chapterId): (0, 1), (1, 2), (2, 3)
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await _unitOfWork.CommitAsync();
+        Assert.Equal(3, readingList.Items.Count);
+
+        // From 3 to 1
+        // New (order, chapterId): (0, 3), (1, 2), (2, 1)
+        await _readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
+        {
+            FromPosition = 2, ToPosition = 0, ReadingListId = 1, ReadingListItemId = 3
+        });
+
+
+
+        Assert.Equal(3, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
+        Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
+
+        // New (order, chapterId): (0, 3), (2, 1): Delete 2nd item
+        await _readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
+        {
+            ReadingListId = 1, ReadingListItemId = readingList.Items.Single(i => i.ChapterId == 2).Id
+        });
+
+        Assert.Equal(2, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
+    }
+
 
     #endregion
 
