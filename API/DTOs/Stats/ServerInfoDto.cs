@@ -145,4 +145,34 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Introduced in v0.6.0</remarks>
     public bool UsingRestrictedProfiles { get; set; }
+    /// <summary>
+    /// Number of users using the Emulate Comic Book setting
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public int UsersWithEmulateComicBook { get; set; }
+    /// <summary>
+    /// Percent (0.0-1.0) of libraries with folder watching enabled
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public float PercentOfLibrariesWithFolderWatchingEnabled { get; set; }
+    /// <summary>
+    /// Percent (0.0-1.0) of libraries included in Search
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public float PercentOfLibrariesIncludedInSearch { get; set; }
+    /// <summary>
+    /// Percent (0.0-1.0) of libraries included in Recommended
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public float PercentOfLibrariesIncludedInRecommended { get; set; }
+    /// <summary>
+    /// Percent (0.0-1.0) of libraries included in Dashboard
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public float PercentOfLibrariesIncludedInDashboard { get; set; }
+    /// <summary>
+    /// Total reading hours of all users
+    /// </summary>
+    /// <remarks>Introduced in v0.7.0</remarks>
+    public long TotalReadingHours { get; set; }
 }
