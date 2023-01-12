@@ -1390,7 +1390,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary()
     {
         await ResetDb();
-        _context.Library.Add(new Library()
+        var lib = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1406,20 +1406,21 @@ public class SeriesServiceTests : AbstractDbTest
                 new Series()
                 {
                     Name = "Test Series",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 },
                 new Series()
                 {
                     Name = "Test Series Prequels",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 },
                 new Series()
                 {
                     Name = "Test Series Sequels",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 }
             }
-        });
+        };
+        _context.Library.Add(lib);
 
         await _context.SaveChangesAsync();
 
@@ -1430,7 +1431,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib.Id);
         _unitOfWork.LibraryRepository.Delete(library);
 
         try
@@ -1449,7 +1450,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary_WhenSeriesCrossLibraries()
     {
         await ResetDb();
-        _context.Library.Add(new Library()
+        var lib1 = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1489,17 +1490,17 @@ public class SeriesServiceTests : AbstractDbTest
                 new Series()
                 {
                     Name = "Test Series Prequels",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 },
                 new Series()
                 {
                     Name = "Test Series Sequels",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 }
             }
-        });
-
-        _context.Library.Add(new Library()
+        };
+        _context.Library.Add(lib1);
+        var lib2 = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1515,20 +1516,21 @@ public class SeriesServiceTests : AbstractDbTest
                 new Series()
                 {
                     Name = "Test Series 2",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 },
                 new Series()
                 {
                     Name = "Test Series Prequels 2",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 },
                 new Series()
                 {
                     Name = "Test Series Sequels 2",
-                    Volumes = new List<Volume>(){}
+                    Volumes = new List<Volume>() { }
                 }
             }
-        });
+        };
+        _context.Library.Add(lib2);
 
         await _context.SaveChangesAsync();
 
@@ -1538,7 +1540,7 @@ public class SeriesServiceTests : AbstractDbTest
         addRelationDto.Adaptations.Add(4); // cross library link
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib1.Id, LibraryIncludes.Series);
         _unitOfWork.LibraryRepository.Delete(library);
 
         try
