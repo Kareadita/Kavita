@@ -1007,6 +1007,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           // We just came from a swipe where pagination was required and we are now at the end of the swipe, so make the user do it once more
           if (direction === KeyDirection.Right) {
             this.hasHitZeroScroll = false;
+            if (scrollLeft === 0 && this.ReadingAreaWidth === 0) {
+              this.triggerSwipePagination(direction);
+              return;
+            }
             if (!this.hasHitRightScroll && this.checkIfPaginationAllowed(direction)) {
               this.hasHitRightScroll = true;
               return;
