@@ -204,8 +204,8 @@ export class AccountService implements OnDestroy {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
-  updateEmail(email: string) {
-    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
+  updateEmail(email: string, password: string) {
+    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email, password});
   }
 
   updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {

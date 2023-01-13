@@ -207,6 +207,7 @@ public class StatsService : IStatsService
     private async Task<float> GetPercentageOfLibrariesWithFolderWatchingEnabled()
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
         return libraries.Count(l => l.FolderWatching) / (1.0f * libraries.Count);
     }
 
