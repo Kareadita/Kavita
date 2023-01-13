@@ -973,11 +973,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   triggerSwipePagination(direction: KeyDirection) {
-
-    if (this.readingDirection === ReadingDirection.LeftToRight) {
-      if (direction === KeyDirection.Right)
-      this.readingDirection === ReadingDirection.LeftToRight ? this.nextPage() : this.prevPage();
-    }
     switch(direction) {
       case KeyDirection.Down:
         this.nextPage();
@@ -996,8 +991,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   onSwipeEnd(event: SwipeEvent) {
-    const threshold = .12;
-
     // Positive number means swiping right/down, negative means left
     switch (this.readerMode) {
       case ReaderMode.Webtoon: break;
@@ -1014,6 +1007,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           // We just came from a swipe where pagination was required and we are now at the end of the swipe, so make the user do it once more
           if (direction === KeyDirection.Right) {
             this.hasHitZeroScroll = false;
+            if (scrollLeft === 0 && this.ReadingAreaWidth === 0) {
+              this.triggerSwipePagination(direction);
+              return;
+            }
             if (!this.hasHitRightScroll && this.checkIfPaginationAllowed(direction)) {
               this.hasHitRightScroll = true;
               return;
@@ -1036,7 +1033,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
 
-          console.log('Next page triggered');
           this.triggerSwipePagination(direction);
           break;
         }
@@ -1072,32 +1068,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             return;
           }
 
-          console.log('Next page triggered');
           this.triggerSwipePagination(direction);
           break;
-
-
-
-
-
-
-          const height = (this.readingArea?.nativeElement.scrollHeight === this.readingArea?.nativeElement.clientHeight) 
-          ? this.readingArea?.nativeElement.clientHeight : this.ReadingAreaHeight;
-
-          if (direction === KeyDirection.Down && this.readingArea?.nativeElement?.scrollTop === height && this.prevScrollTop != 0) {
-            this.prevScrollTop = 0;
-            return;
-          }
-
-          if (direction === KeyDirection.Up && this.readingArea?.nativeElement?.scrollTop === 0 && this.prevScrollTop != 0) {
-            this.prevScrollTop = 0;
-            return;
-          }
-
-          const thresholdMet = Math.abs(event.distance) >= height * threshold;
-          if (!thresholdMet) return;
-
-          this.triggerSwipePagination(direction);
         }
     }
   }

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.26"
+    "version": "0.6.1.27"
   },
   "servers": [
     {
@@ -13201,6 +13201,40 @@
           "usingRestrictedProfiles": {
             "type": "boolean",
             "description": "If there is at least one user that is using an age restricted profile on the instance"
+          },
+          "usersWithEmulateComicBook": {
+            "type": "integer",
+            "description": "Number of users using the Emulate Comic Book setting",
+            "format": "int32"
+          },
+          "percentOfLibrariesWithFolderWatchingEnabled": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries with folder watching enabled",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInSearch": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Search",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInRecommended": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Recommended",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInDashboard": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Dashboard",
+            "format": "float"
+          },
+          "totalReadingHours": {
+            "type": "integer",
+            "description": "Total reading hours of all users",
+            "format": "int64"
+          },
+          "storeCoversAsWebP": {
+            "type": "boolean",
+            "description": "Is the Server saving covers as WebP"
           }
         },
         "additionalProperties": false,
@@ -13320,6 +13354,10 @@
             "format": "int64"
           },
           "totalPeople": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalReadingTime": {
             "type": "integer",
             "format": "int64"
           },

@@ -299,6 +299,8 @@ public class ArchiveService : IArchiveService
         try
         {
             ZipFile.CreateFromDirectory(tempLocation, zipPath);
+            // Remove the folder as we have the zip
+            _directoryService.ClearAndDeleteDirectory(tempLocation);
         }
         catch (AggregateException ex)
         {

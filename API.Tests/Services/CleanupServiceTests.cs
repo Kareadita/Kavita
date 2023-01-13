@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs.Filtering;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
@@ -28,70 +29,14 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class CleanupServiceTests
+public class CleanupServiceTests : AbstractDbTest
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
-    private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
-    private readonly DbConnection _connection;
-    private readonly DataContext _context;
 
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string LogDirectory = "C:/kavita/config/logs/";
-    private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-
-
-    public CleanupServiceTests()
+    public CleanupServiceTests() : base()
     {
-        var contextOptions = new DbContextOptionsBuilder()
-            .UseSqlite(CreateInMemoryDatabase())
-            .Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
-
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
-    }
-
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
-        setting.Value = BookmarkDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
-        setting.Value = "10";
-
-        _context.ServerSetting.Update(setting);
-
         _context.Library.Add(new Library()
         {
             Name = "Manga",
@@ -103,30 +48,18 @@ public class CleanupServiceTests
                 }
             }
         });
-        return await _context.SaveChangesAsync() > 0;
     }
 
-    private async Task ResetDB()
+    #region Setup
+
+
+    protected override async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
         _context.Users.RemoveRange(_context.Users.ToList());
         _context.AppUserBookmark.RemoveRange(_context.AppUserBookmark.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory("C:/data/");
-
-        return fileSystem;
     }
 
     #endregion
@@ -142,7 +75,7 @@ public class CleanupServiceTests
         filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
-        await ResetDB();
+        await ResetDb();
 
         var s = DbFactory.Series("Test 1");
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
@@ -175,7 +108,7 @@ public class CleanupServiceTests
         filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetSeriesFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
-        await ResetDB();
+        await ResetDb();
 
         // Add 2 series with cover images
         var s = DbFactory.Series("Test 1");
@@ -209,7 +142,7 @@ public class CleanupServiceTests
         filesystem.AddFile($"{CoverImageDirectory}v01_c1000.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
-        await ResetDB();
+        await ResetDb();
 
         // Add 2 series with cover images
         var s = DbFactory.Series("Test 1");
@@ -259,7 +192,7 @@ public class CleanupServiceTests
         filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(1000)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
-        await ResetDB();
+        await ResetDb();
 
         // Add 2 series with cover images
         var s = DbFactory.Series("Test 1");
@@ -307,7 +240,7 @@ public class CleanupServiceTests
         filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetReadingListFormat(3)}.jpg", new MockFileData(""));
 
         // Delete all Series to reset state
-        await ResetDB();
+        await ResetDb();
 
         _context.Users.Add(new AppUser()
         {
@@ -569,6 +502,62 @@ public class CleanupServiceTests
     }
 
     #endregion
+
+    #region CleanupWantToRead
+
+    [Fact]
+    public async Task CleanupWantToRead_ShouldRemoveFullyReadSeries()
+    {
+        await ResetDb();
+
+        var s = new Series()
+        {
+            Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+            {
+                PublicationStatus = PublicationStatus.Completed
+            }
+        };
+        _context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            WantToRead = new List<Series>()
+            {
+                s
+            }
+        };
+        _context.AppUser.Add(user);
+
+        await _unitOfWork.CommitAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>());
+
+        await readerService.MarkSeriesAsRead(user, s.Id);
+        await _unitOfWork.CommitAsync();
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+
+        await cleanupService.CleanupWantToRead();
+
+        var wantToRead =
+            await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, new UserParams(), new FilterDto());
+
+        Assert.Equal(0, wantToRead.TotalCount);
+    }
+    #endregion
+
     // #region CleanupBookmarks
     //
     // [Fact]
@@ -579,7 +568,7 @@ public class CleanupServiceTests
     //     filesystem.AddFile($"{BookmarkDirectory}1/1/1/0002.jpg", new MockFileData(""));
     //
     //     // Delete all Series to reset state
-    //     await ResetDB();
+    //     await ResetDb();
     //
     //     _context.Series.Add(new Series()
     //     {
@@ -651,7 +640,7 @@ public class CleanupServiceTests
     //     filesystem.AddFile($"{BookmarkDirectory}1/1/2/0002.jpg", new MockFileData(""));
     //
     //     // Delete all Series to reset state
-    //     await ResetDB();
+    //     await ResetDb();
     //
     //     _context.Series.Add(new Series()
     //     {

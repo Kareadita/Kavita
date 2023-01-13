@@ -32,6 +32,7 @@ public interface IStatisticService
     IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
+    Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
 }
 
 /// <summary>
@@ -62,18 +63,20 @@ public class StatisticService : IStatisticService
             .Where(p => libraryIds.Contains(p.LibraryId))
             .SumAsync(p => p.PagesRead);
 
-        var ids = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => libraryIds.Contains(p.LibraryId))
-            .Where(p => p.PagesRead > 0)
-            .Select(p => new {p.ChapterId, p.SeriesId})
-            .ToListAsync();
+        // var ids = await _context.AppUserProgresses
+        //     .Where(p => p.AppUserId == userId)
+        //     .Where(p => libraryIds.Contains(p.LibraryId))
+        //     .Where(p => p.PagesRead > 0)
+        //     .Select(p => new {p.ChapterId, p.SeriesId})
+        //     .ToListAsync();
 
-        var chapterIds = ids.Select(id => id.ChapterId);
+        //var chapterIds = ids.Select(id => id.ChapterId);
 
-        var timeSpentReading = await _context.Chapter
-            .Where(c => chapterIds.Contains(c.Id))
-            .SumAsync(c => c.AvgHoursToRead);
+        // var timeSpentReading = await _context.Chapter
+        //     .Where(c => chapterIds.Contains(c.Id))
+        //     .SumAsync(c => c.AvgHoursToRead);
+
+        var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
 
         var totalWordsRead =  (long) Math.Round(await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -275,6 +278,8 @@ public class StatisticService : IStatisticService
             .Distinct()
             .Count();
 
+
+
         return new ServerStatisticsDto()
         {
             ChapterCount = await _context.Chapter.CountAsync(),
@@ -289,7 +294,8 @@ public class StatisticService : IStatisticService
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
             MostReadSeries = mostReadSeries,
-            RecentlyRead = recentlyRead
+            RecentlyRead = recentlyRead,
+            TotalReadingTime = await TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty)
         };
     }
 
@@ -481,6 +487,30 @@ public class StatisticService : IStatisticService
             _context.Entry(existingRecord).State = EntityState.Modified;
         }
         await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds)
+    {
+        var query = _context.AppUserProgresses
+            .AsSplitQuery();
+
+        if (userIds.Any())
+        {
+            query = query.Where(p => userIds.Contains(p.AppUserId));
+        }
+        if (libraryIds.Any())
+        {
+            query = query.Where(p => libraryIds.Contains(p.LibraryId));
+        }
+
+        return (long) Math.Round(await query
+            .Join(_context.Chapter,
+                p => p.ChapterId,
+                c => c.Id,
+                (progress, chapter) => new {chapter, progress})
+            .Where(p => p.chapter.AvgHoursToRead > 0)
+            .SumAsync(p =>
+                p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

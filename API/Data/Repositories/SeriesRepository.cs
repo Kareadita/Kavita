@@ -184,7 +184,8 @@ public class SeriesRepository : ISeriesRepository
         return await _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Includes(includes)
-            .OrderBy(s => s.SortName).ToListAsync();
+            .OrderBy(s => s.SortName.ToLower())
+            .ToListAsync();
     }
 
     /// <summary>
@@ -223,7 +224,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
-            .OrderBy(s => s.SortName);
+            .OrderBy(s => s.SortName.ToLower());
 
         return await PagedList<Series>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
@@ -316,7 +317,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(l => libraryIds.Contains(l.Id))
             .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .IsRestricted(QueryContext.Search)
-            .OrderBy(l => l.Name)
+            .OrderBy(l => l.Name.ToLower())
             .AsSplitQuery()
             .Take(maxRecords)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
@@ -335,7 +336,7 @@ public class SeriesRepository : ISeriesRepository
                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
-            .OrderBy(s => s.SortName)
+            .OrderBy(s => s.SortName.ToLower())
             .AsNoTracking()
             .AsSplitQuery()
             .Take(maxRecords)
@@ -356,7 +357,7 @@ public class SeriesRepository : ISeriesRepository
                         || EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%"))
             .Where(c => c.Promoted || isAdmin)
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.Title)
+            .OrderBy(s => s.NormalizedTitle)
             .AsNoTracking()
             .AsSplitQuery()
             .Take(maxRecords)
@@ -377,7 +378,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.Title)
+            .OrderBy(t => t.NormalizedTitle)
             .Distinct()
             .Take(maxRecords)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
@@ -387,7 +388,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(sm => seriesIds.Contains(sm.SeriesId))
             .SelectMany(sm => sm.Tags.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
-            .OrderBy(t => t.Title)
+            .OrderBy(t => t.NormalizedTitle)
             .Distinct()
             .Take(maxRecords)
             .ProjectTo<TagDto>(_mapper.ConfigurationProvider)
@@ -719,7 +720,8 @@ public class SeriesRepository : ISeriesRepository
             })
             .Where(s => s.PagesRead > 0
                         && s.PagesRead < s.Series.Pages)
-            .Where(d => d.LatestReadDate >= cutoffProgressPoint || d.LastChapterAdded >= cutoffLastAddedPoint).OrderByDescending(s => s.LatestReadDate)
+            .Where(d => d.LatestReadDate >= cutoffProgressPoint || d.LastChapterAdded >= cutoffLastAddedPoint)
+                .OrderByDescending(s => s.LatestReadDate)
             .ThenByDescending(s => s.LastChapterAdded)
             .Select(s => s.Series)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
@@ -777,7 +779,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderBy(s => s.SortName),
+                SortField.SortName => query.OrderBy(s => s.SortName.ToLower()),
                 SortField.CreatedDate => query.OrderBy(s => s.Created),
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
@@ -790,7 +792,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderByDescending(s => s.SortName),
+                SortField.SortName => query.OrderByDescending(s => s.SortName.ToLower()),
                 SortField.CreatedDate => query.OrderByDescending(s => s.Created),
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
@@ -844,7 +846,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderBy(s => s.SortName),
+                SortField.SortName => query.OrderBy(s => s.SortName.ToLower()),
                 SortField.CreatedDate => query.OrderBy(s => s.Created),
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
@@ -856,7 +858,7 @@ public class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderByDescending(s => s.SortName),
+                SortField.SortName => query.OrderByDescending(s => s.SortName.ToLower()),
                 SortField.CreatedDate => query.OrderByDescending(s => s.Created),
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
@@ -887,7 +889,7 @@ public class SeriesRepository : ISeriesRepository
                 .Where(t => t.SeriesMetadatas.Select(s => s.SeriesId).Contains(seriesId))
                 .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
-                .OrderBy(t => t.Title)
+                .OrderBy(t => t.Title.ToLower())
                 .AsSplitQuery()
                 .ToListAsync();
         }
@@ -911,7 +913,7 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(m => m.Series)
             .SelectMany(c => c.SeriesMetadatas.Select(sm => sm.Series).Where(s => userLibraries.Contains(s.LibraryId)))
             .OrderBy(s => s.LibraryId)
-            .ThenBy(s => s.SortName)
+            .ThenBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .AsNoTracking();
@@ -941,7 +943,7 @@ public class SeriesRepository : ISeriesRepository
 
         return await _context.Series
             .Where(s => seriesIds.Contains(s.Id) && allowedLibraries.Contains(s.LibraryId))
-            .OrderBy(s => s.SortName)
+            .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsNoTracking()
             .AsSplitQuery()

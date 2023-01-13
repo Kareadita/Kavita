@@ -1429,6 +1429,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_NoProgress()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1479,6 +1480,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1_WithProgress()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1524,6 +1526,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1596,6 +1599,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1674,6 +1678,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1743,6 +1748,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1785,6 +1791,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1851,6 +1858,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1914,6 +1922,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1959,6 +1968,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2020,6 +2030,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress()
     {
+        await ResetDb();
         var series = new Series()
         {
             Name = "Test",
@@ -2079,6 +2090,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAllChaptersAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2121,6 +2133,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkUptTillChapterNumberAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2165,6 +2178,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
