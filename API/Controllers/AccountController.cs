@@ -289,7 +289,15 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
 
-        if (dto == null || string.IsNullOrEmpty(dto.Email)) return BadRequest("Invalid payload");
+        if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password)) return BadRequest("Invalid payload");
+
+
+        // Validate this user's password
+        if (! await _userManager.CheckPasswordAsync(user, dto.Password))
+        {
+            _logger.LogCritical("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
+            return BadRequest("You do not have permission");
+        }
 
         // Validate no other users exist with this email
         if (user.Email.Equals(dto.Email)) return Ok("Nothing to do");

@@ -207,24 +207,28 @@ public class StatsService : IStatsService
     private async Task<float> GetPercentageOfLibrariesWithFolderWatchingEnabled()
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
         return libraries.Count(l => l.FolderWatching) / (1.0f * libraries.Count);
     }
 
     private async Task<float> GetPercentageOfLibrariesIncludedInRecommended()
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
         return libraries.Count(l => l.IncludeInRecommended) / (1.0f * libraries.Count);
     }
 
     private async Task<float> GetPercentageOfLibrariesIncludedInDashboard()
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
         return libraries.Count(l => l.IncludeInDashboard) / (1.0f * libraries.Count);
     }
 
     private async Task<float> GetPercentageOfLibrariesIncludedInSearch()
     {
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
         return libraries.Count(l => l.IncludeInSearch) / (1.0f * libraries.Count);
     }
 
