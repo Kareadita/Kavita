@@ -1164,6 +1164,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) { 
       this.toastr.info('No Next Chapter');
+      this.closeReader();
       return;
      }
 
