@@ -3,14 +3,14 @@
         <p class="text-warning pt-2">Port and Swagger require a manual restart of Kavita to take effect.</p>
         <div class="mb-3">
             <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
-            <ng-template #cacheDirectoryTooltip>Where the server place temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Where the server place temporary files when reading. This will be cleaned up on a regular basis.</span>
+            <ng-template #cacheDirectoryTooltip>Where the server places temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
+            <span class="visually-hidden" id="settings-cachedir-help">Where the server places temporary files when reading. This will be cleaned up on a regular basis.</span>
             <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
         </div>
 
         <div class="mb-3">
             <label for="settings-bookmarksdir" class="form-label">Bookmarks Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="bookmarksDirectoryTooltip" role="button" tabindex="0"></i>
-            <ng-template #bookmarksDirectoryTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed, other files within directory will be deleted. If docker, mount an additional volume and use that.</ng-template>
+            <ng-template #bookmarksDirectoryTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed; other files within directory will be deleted. If Docker, mount an additional volume and use that.</ng-template>
             <span class="visually-hidden" id="settings-bookmarksdir-help"><ng-container [ngTemplateOutlet]="bookmarksDirectoryTooltip"></ng-container></span>
             <div class="input-group">
                 <input readonly id="settings-bookmarksdir" aria-describedby="settings-bookmarksdir-help" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir">
@@ -32,8 +32,8 @@
                 <label for="backup-tasks" class="form-label">Days of Backups</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
                 <ng-template #backupTasksTooltip>The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="backup-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
-                <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups" 
-                type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57" 
+                <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups"
+                type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                 [class.is-invalid]="settingsForm.get('totalBackups')?.invalid && settingsForm.get('totalBackups')?.touched">
                 <ng-container *ngIf="settingsForm.get('totalBackups')?.errors as errors">
                     <p class="invalid-feedback" *ngIf="errors.min">
@@ -52,7 +52,7 @@
                 <label for="log-tasks" class="form-label">Days of Logs</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="logTasksTooltip" role="button" tabindex="0"></i>
                 <ng-template #logTasksTooltip>The number of logs to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="log-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
-                <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs" 
+                <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs"
                 type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                 [class.is-invalid]="settingsForm.get('totalLogs')?.invalid && settingsForm.get('totalLogs')?.touched">
                 <ng-container *ngIf="settingsForm.get('totalLogs')?.errors as errors">
@@ -67,7 +67,7 @@
                     </p>
                 </ng-container>
             </div>
-    
+
             <div class="col-md-3 col-sm-12">
                 <label for="logging-level-port" class="form-label">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
                 <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space.</ng-template>
@@ -81,7 +81,7 @@
 
         <div class="mb-3">
             <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
-            <p class="accent" id="collection-info">Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, kavita install version, cpu and memory. We will use this information to prioritize features, bug fixes, and preformance tuning. Requires restart to take effect. See <a href="https://wiki.kavitareader.com/en/faq" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> for what is collected.</p>
+            <p class="accent" id="collection-info">Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, Kavita install version, CPU, and memory. We will use this information to prioritize features, bug fixes, and performance tuning. Requires restart to take effect. See the <a href="https://wiki.kavitareader.com/en/faq" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> for what is collected.</p>
             <div class="form-check form-switch">
                 <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
                 <label for="stat-collection" class="form-check-label">Send Data</label>
@@ -106,7 +106,7 @@
                 <label for="folder-watching" class="form-check-label">Enable Folder Watching</label>
             </div>
         </div>
-    
+
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
