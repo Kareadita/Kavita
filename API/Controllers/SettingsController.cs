@@ -104,7 +104,7 @@ public class SettingsController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
-        _logger.LogInformation("{UserName}  is updating Server Settings", User.GetUsername());
+        _logger.LogInformation("{UserName} is updating Server Settings", User.GetUsername());
 
         // We do not allow CacheDirectory changes, so we will ignore.
         var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
