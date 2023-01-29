@@ -14,4 +14,5 @@ export interface ServerSettings {
     totalBackups: number;
     totalLogs: number;
     enableFolderWatching: boolean;
+    hostName: string;
 }

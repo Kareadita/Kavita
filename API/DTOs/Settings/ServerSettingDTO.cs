@@ -66,4 +66,8 @@ public class ServerSettingDto
     /// If the server should save covers as WebP encoding
     /// </summary>
     public bool ConvertCoverToWebP { get; set; }
+    /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server
+    /// </summary>
+    public string HostName { get; set; }
 }

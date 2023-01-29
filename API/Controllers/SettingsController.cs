@@ -182,6 +182,13 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.HostName + string.Empty;
+                if (setting.Value.EndsWith("/")) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
 
             if (setting.Key == ServerSettingKey.BookmarkDirectory && bookmarkDirectory != setting.Value)
             {

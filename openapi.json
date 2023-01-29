@@ -13322,6 +13322,11 @@
           "convertCoverToWebP": {
             "type": "boolean",
             "description": "If the server should save covers as WebP encoding"
+          },
+          "hostName": {
+            "type": "string",
+            "description": "The Host name (ie Reverse proxy domain name) for the server",
+            "nullable": true
           }
         },
         "additionalProperties": false
