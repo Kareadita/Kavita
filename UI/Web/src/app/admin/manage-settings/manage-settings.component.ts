@@ -51,7 +51,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
-      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern('(http:|https:)+[^\s]+[\w]$')]));
+      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
     });
   }
 
