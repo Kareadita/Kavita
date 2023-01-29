@@ -729,10 +729,12 @@
         "tags": [
           "Account"
         ],
+        "summary": "Resend an invite to a user already invited",
         "parameters": [
           {
             "name": "userId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -7245,6 +7247,7 @@
           "Server"
         ],
         "summary": "Is this server accessible to the outside net",
+        "description": "If the instance has the HostName set, this will return true whether or not it is accessible externally",
         "responses": {
           "200": {
             "description": "Success",
