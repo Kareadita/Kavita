@@ -19,6 +19,7 @@ export interface Preferences {
     backgroundColor: string;
     showScreenHints: boolean;
     emulateBook: boolean;
+    swipeToPaginate: boolean;
 
     // Book Reader
     bookReaderMargin: number;

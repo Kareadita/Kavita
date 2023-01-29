@@ -111,6 +111,7 @@ public class UsersController : BaseApiController
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
+        existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

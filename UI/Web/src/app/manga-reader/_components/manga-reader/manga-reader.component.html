@@ -233,6 +233,15 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" >
+                                    <label class="form-check-label" for="swipe-to-paginate">Swipe Enabled</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3 col-sm-12">
                         <div class="mb-3">
@@ -251,8 +260,10 @@
                         <input type="range" class="form-range" id="darkness" 
                                 min="10" max="100" step="1" formControlName="darkness">
                     </div>
+
+
                     <div class="col-md-6 col-sm-12">
-                        <button class="btn btn-primary" (click)="savePref()">Save to Preferences</button>
+                        <button class="btn btn-primary" (click)="savePref()">Save Globally</button>
                     </div>
                 </div>
             </form>

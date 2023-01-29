@@ -9511,6 +9511,10 @@
             "description": "Manga Reader Option: Background color of the reader",
             "nullable": true
           },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
+          },
           "bookReaderMargin": {
             "type": "integer",
             "description": "Book Reader Option: Override extra Margin",
@@ -14285,7 +14289,8 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints"
+          "showScreenHints",
+          "swipeToPaginate"
         ],
         "type": "object",
         "properties": {
@@ -14312,6 +14317,9 @@
             "minLength": 1,
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean"
           },
           "autoCloseMenu": {
             "type": "boolean",
