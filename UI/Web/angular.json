@@ -26,8 +26,14 @@
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "inlineStyleLanguage": "scss",
             "tsConfig": "tsconfig.app.json",
+            "stylePreprocessorOptions": {
+              "includePaths": ["node_modules"]
+            },
             "assets": [
               "src/assets",
               "src/site.webmanifest",
@@ -37,11 +43,6 @@
                 "output": "/assets/"
               }
             ],
-            "sourceMap": {
-              "hidden": false,
-              "scripts": true,
-              "styles": true
-            },
             "styles": [
               "src/styles.scss",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
