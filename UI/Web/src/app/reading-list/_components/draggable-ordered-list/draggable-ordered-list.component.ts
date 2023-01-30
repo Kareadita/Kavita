@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnInit, Output, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -18,7 +18,7 @@ export interface ItemRemoveEvent {
   styleUrls: ['./draggable-ordered-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DraggableOrderedListComponent implements OnInit {
+export class DraggableOrderedListComponent {
 
   @Input() accessibilityMode: boolean = false;
   /**
@@ -31,9 +31,6 @@ export class DraggableOrderedListComponent implements OnInit {
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
   constructor(private readonly cdRef: ChangeDetectorRef) { }
-
-  ngOnInit(): void {
-  }
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousIndex === event.currentIndex)  return;

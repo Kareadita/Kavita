@@ -1,6 +1,6 @@
 import { Component, HostListener, Inject, OnInit } from '@angular/core';
 import { NavigationStart, Router } from '@angular/router';
-import { distinctUntilChanged, map, take } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { MessageHubService } from './_services/message-hub.service';
@@ -8,7 +8,6 @@ import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
-import { DeviceService } from './_services/device.service';
 import { Observable } from 'rxjs';
 
 @Component({

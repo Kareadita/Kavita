@@ -19,7 +19,7 @@
 
     <div class="row g-0 mt-2">
         <h4>Devices</h4>
-        <p *ngIf="devices.length == 0">
+        <p *ngIf="devices.length === 0">
             There are no devices setup yet
         </p>
         <ng-container *ngFor="let device of devices">

@@ -53,7 +53,7 @@
                 </h4>
                 <div class="user-info">
                     <div>Last Active:
-                        <span *ngIf="member.lastActive == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                        <span *ngIf="member.lastActive === '0001-01-01T00:00:00'; else activeDate">Never</span>
                         <ng-template #activeDate>
                             {{member.lastActive | date: 'short'}}
                         </ng-template>

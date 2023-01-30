@@ -117,7 +117,7 @@
 
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
 
-        <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
+        <div class="mb-3" *ngIf="pageOptions !== undefined && pageOptions.ceil !== undefined">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">
                 <button class="btn btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>

@@ -95,7 +95,7 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="!(isAdmin$ | async)">
+            <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="(isAdmin$ | async) === false">
                 <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
                 <ng-template ngbNavContent>
                     <app-cover-image-chooser [(imageUrls)]="imageUrls" 
@@ -108,7 +108,7 @@
                 </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="!(isAdmin$ | async)">
+            <li [ngbNavItem]="tabs[TabID.Files]" [disabled]="(isAdmin$ | async) === false">
                 <a ngbNavLink>{{tabs[TabID.Files].title}}</a>
                 <ng-template ngbNavContent>
                     <h4 *ngIf="!utilityService.isChapter(data)">{{utilityService.formatChapterName(libraryType) + 's'}}</h4>
@@ -145,7 +145,7 @@
                                             <div class="col" *ngIf="data.hasOwnProperty('created')">
                                                 Added: 
                                                 <!-- TODO: This data.created can be removed after v0.5.5 release -->
-                                                <ng-container *ngIf="file.created == '0001-01-01T00:00:00'; else fileDate">
+                                                <ng-container *ngIf="file.created === '0001-01-01T00:00:00'; else fileDate">
                                                     {{data.created | date: 'short' | defaultDate}}
                                                 </ng-container>
                                                 <ng-template #fileDate>

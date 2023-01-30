@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingListItem } from 'src/app/_models/reading-list';
@@ -11,7 +10,7 @@ import { ImageService } from 'src/app/_services/image.service';
   styleUrls: ['./reading-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReadingListItemComponent implements OnInit {
+export class ReadingListItemComponent {
 
   @Input() item!: ReadingListItem;
   @Input() position: number = 0;
@@ -28,10 +27,7 @@ export class ReadingListItemComponent implements OnInit {
     return MangaFormat;
   }
 
-  constructor(public imageService: ImageService, private utilityService: UtilityService, 
-    private readonly cdRef: ChangeDetectorRef) { }
-
-  ngOnInit(): void {}
+  constructor(public imageService: ImageService) { }
 
   readChapter(item: ReadingListItem) {
     this.read.emit(item);

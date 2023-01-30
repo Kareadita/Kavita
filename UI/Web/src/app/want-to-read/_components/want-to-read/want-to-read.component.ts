@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, take, debounceTime, takeUntil } from 'rxjs';
@@ -27,7 +27,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   styleUrls: ['./want-to-read.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WantToReadComponent implements OnInit, OnDestroy {
+export class WantToReadComponent implements OnInit, OnDestroy, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;

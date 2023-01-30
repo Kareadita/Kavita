@@ -41,7 +41,7 @@
             <span class="visually-hidden">(promoted)</span>
           </span>
           <ng-container *ngIf="format | mangaFormat as formatString">
-            <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+            <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format !== MangaFormat.UNKNOWN" title="{{formatString}}"></i>
             <span class="visually-hidden">{{formatString}}</span>
           </ng-container>
           {{title}}

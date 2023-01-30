@@ -138,7 +138,7 @@
                             <div class="card-container row g-0" #container>
                                 <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
-                                        <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number != 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
+                                        <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number !== 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
                                         [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
                                         [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions" 
                                         (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)" 
@@ -159,7 +159,7 @@
                                 <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                                     <ng-container *ngIf="!item.isChapter; else chapterListItem">
                                         <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
-                                            [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number != 0"
+                                            [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number !== 0"
                                             [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                             [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)"
                                             [blur]="user?.preferences?.blurUnreadSummaries || false">

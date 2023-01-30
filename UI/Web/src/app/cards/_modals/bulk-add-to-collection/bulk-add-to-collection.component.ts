@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -13,7 +13,7 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
   styleUrls: ['./bulk-add-to-collection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BulkAddToCollectionComponent implements OnInit {
+export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 
   @Input() title!: string;
   /**

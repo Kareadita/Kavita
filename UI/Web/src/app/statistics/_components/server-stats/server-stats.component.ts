@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Series } from 'src/app/_models/series';
@@ -18,7 +18,7 @@ import { GenericListModalComponent } from '../_modals/generic-list-modal/generic
   styleUrls: ['./server-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServerStatsComponent implements OnInit, OnDestroy {
+export class ServerStatsComponent implements OnDestroy {
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;
@@ -87,9 +87,6 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       })),
       takeUntil(this.onDestroy)
     );
-  }
-
-  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {
