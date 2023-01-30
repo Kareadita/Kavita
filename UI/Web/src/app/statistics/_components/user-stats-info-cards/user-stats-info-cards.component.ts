@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CompactNumberPipe } from 'src/app/pipe/compact-number.pipe';
-import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
 
@@ -11,7 +10,7 @@ import { GenericListModalComponent } from '../_modals/generic-list-modal/generic
   styleUrls: ['./user-stats-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserStatsInfoCardsComponent implements OnInit {
+export class UserStatsInfoCardsComponent {
 
   @Input() totalPagesRead: number = 0;
   @Input() totalWordsRead: number = 0;
@@ -21,9 +20,6 @@ export class UserStatsInfoCardsComponent implements OnInit {
   @Input() avgHoursPerWeekSpentReading: number = 0;
 
   constructor(private statsService: StatisticsService, private modalService: NgbModal) { }
-
-  ngOnInit(): void {
-  }
 
   openPageByYearList() {
     const numberPipe = new CompactNumberPipe();

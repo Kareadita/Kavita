@@ -40,7 +40,7 @@
                     </div>
                     <div *ngIf="!isAddLibrary">
                         Last Scanned: 
-                        <span *ngIf="library.lastScanned == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                        <span *ngIf="library.lastScanned === '0001-01-01T00:00:00'; else activeDate">Never</span>
                         <ng-template #activeDate>
                             {{library.lastScanned | date: 'short'}}
                         </ng-template>
@@ -157,7 +157,7 @@
     <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
     
-    <ng-container *ngIf="isAddLibrary && setupStep != 3; else editLibraryButton">
+    <ng-container *ngIf="isAddLibrary && setupStep !== 3; else editLibraryButton">
         <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">Next</button>
     </ng-container>
     <ng-template #editLibraryButton>

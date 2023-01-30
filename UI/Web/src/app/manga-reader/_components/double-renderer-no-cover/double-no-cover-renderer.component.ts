@@ -19,7 +19,7 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
   styleUrls: ['./double-no-cover-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoubleNoCoverRendererComponent implements OnInit {
+export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
   
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;

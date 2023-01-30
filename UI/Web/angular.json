@@ -1,7 +1,10 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
-    "analytics": "6b518972-3ce0-486d-bc55-740bf8308c77"
+    "analytics": "6b518972-3ce0-486d-bc55-740bf8308c77",
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -104,28 +107,12 @@
           }
         },
         "lint": {
-          "builder": "@angular-devkit/build-angular:tslint",
+          "builder": "@angular-eslint/builder:lint",
           "options": {
-            "tsConfig": [
-              "tsconfig.app.json",
-              "tsconfig.spec.json",
-              "e2e/tsconfig.json"
-            ],
-            "exclude": [
-              "**/node_modules/**"
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
             ]
-          }
-        },
-        "e2e": {
-          "builder": "@angular-devkit/build-angular:protractor",
-          "options": {
-            "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "kavita-webui:serve"
-          },
-          "configurations": {
-            "production": {
-              "devServerTarget": "kavita-webui:serve:production"
-            }
           }
         }
       }

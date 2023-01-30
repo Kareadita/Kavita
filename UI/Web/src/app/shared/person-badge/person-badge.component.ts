@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Person } from '../../_models/metadata/person';
 
 @Component({
@@ -7,13 +7,9 @@ import { Person } from '../../_models/metadata/person';
   styleUrls: ['./person-badge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PersonBadgeComponent implements OnInit {
+export class PersonBadgeComponent {
 
   @Input() person!: Person;
 
   constructor() { }
-
-  ngOnInit(): void {
-  }
-
 }

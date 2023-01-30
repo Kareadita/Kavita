@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -15,7 +15,7 @@ import { MemberService } from 'src/app/_services/member.service';
   styleUrls: ['./register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
 
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.email]),
@@ -32,9 +32,6 @@ export class RegisterComponent implements OnInit {
         return;
       }
     });
-  }
-
-  ngOnInit(): void {
   }
 
   submit() {

@@ -22,7 +22,7 @@
                 </button>
             </h5>
             <!-- This isn't perfect, but it might work. TODO: Polish this-->
-            <h6 class="text-muted" [ngClass]="{'subtitle-with-actionables' : actions.length > 0}" *ngIf="Title != '' && showTitle">{{Title}}</h6>
+            <h6 class="text-muted" [ngClass]="{'subtitle-with-actionables' : actions.length > 0}" *ngIf="Title !== '' && showTitle">{{Title}}</h6>
             <ng-container *ngIf="summary.length > 0">
                 <div class="mt-2 ps-2">
                     <app-read-more [text]="summary" [blur]="pagesRead === 0 && blur" [maxLength]="250"></app-read-more>

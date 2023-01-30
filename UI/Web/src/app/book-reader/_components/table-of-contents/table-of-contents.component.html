@@ -11,7 +11,7 @@
     </div>
     <ng-template #nestedChildren>
         <ul *ngFor="let chapterGroup of chapters" class="chapter-title">
-            <li class="{{chapterGroup.page == pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
+            <li class="{{chapterGroup.page === pageNum ? 'active': ''}}" (click)="loadChapterPage(chapterGroup.page, '')">
                 {{chapterGroup.title}}
             </li>
             <ul *ngFor="let chapter of chapterGroup.children">

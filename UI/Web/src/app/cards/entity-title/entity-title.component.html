@@ -1,26 +1,26 @@
 <ng-container [ngSwitch]="libraryType">
     <ng-container *ngSwitchCase="LibraryType.Comic">
-        <ng-container *ngIf="titleName != '' && prioritizeTitleName; else fullComicTitle">
+        <ng-container *ngIf="titleName !== '' && prioritizeTitleName; else fullComicTitle">
             {{titleName}}
         </ng-container>
         <ng-template #fullComicTitle>
             {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-            <ng-container *ngIf="includeVolume && volumeTitle != ''">
-                {{entity.number != 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+            <ng-container *ngIf="includeVolume && volumeTitle !== ''">
+                {{entity.number !== 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
             </ng-container>
-            {{entity.number != 0 ? (isChapter ? 'Issue #' + entity.number : volumeTitle) : 'Special'}}
+            {{entity.number !== 0 ? (isChapter ? 'Issue #' + entity.number : volumeTitle) : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Manga">
-        <ng-container *ngIf="titleName != '' && prioritizeTitleName; else fullMangaTitle">
+        <ng-container *ngIf="titleName !== '' && prioritizeTitleName; else fullMangaTitle">
             {{titleName}}
         </ng-container>
         <ng-template #fullMangaTitle>
             {{seriesName.length > 0 ? seriesName + ' - ' : ''}}
-            <ng-container *ngIf="includeVolume && volumeTitle != ''">
-                {{entity.number != 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
+            <ng-container *ngIf="includeVolume && volumeTitle !== ''">
+                {{entity.number !== 0 ? (isChapter && includeVolume ? volumeTitle : '') : ''}}
             </ng-container>
-            {{entity.number != 0 ? (isChapter ? 'Chapter '  + entity.number : volumeTitle) : 'Special'}}
+            {{entity.number !== 0 ? (isChapter ? 'Chapter '  + entity.number : volumeTitle) : 'Special'}}
         </ng-template>
     </ng-container>
     <ng-container *ngSwitchCase="LibraryType.Book">
