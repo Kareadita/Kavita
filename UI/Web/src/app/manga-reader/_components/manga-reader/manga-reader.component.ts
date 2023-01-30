@@ -1100,6 +1100,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.resetSwipeModifiers();
+
+    this.isLoading = true;
+    this.cdRef.markForCheck();
     
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
@@ -1127,6 +1130,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     
     this.resetSwipeModifiers();
+
+    this.isLoading = true;
+    this.cdRef.markForCheck();
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
@@ -1244,6 +1250,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Originally this was only for fit to height, but when swiping was introduced, it made more sense to do it always to reset to the same view
     this.readingArea.nativeElement.scroll(0,0);
 
+    this.isLoading = false;
     this.cdRef.markForCheck();
   }
 

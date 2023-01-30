@@ -10,10 +10,15 @@ export class LoadingComponent implements OnInit {
 
   @Input() loading: boolean = false;
   @Input() message: string = '';
+  /**
+   * Uses absolute positioning to ensure it loads over content
+   */
+  @Input() absolute: boolean = false;
   
   constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    console.log('absolute: ', this.absolute);
   }
 
 }
