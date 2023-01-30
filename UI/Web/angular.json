@@ -52,7 +52,11 @@
               "node_modules/lazysizes/plugins/rias/ls.rias.min.js",
               "node_modules/lazysizes/plugins/attrchange/ls.attrchange.min.js"
             ],
-            "sourceMap": true,
+            "sourceMap": {
+              "hidden": false,
+              "scripts": true,
+              "styles": true
+            },
             "vendorChunk": true,
             "extractLicenses": false,
             "buildOptimizer": false,
