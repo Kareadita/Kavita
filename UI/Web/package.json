@@ -68,7 +68,6 @@
     "jest-preset-angular": "^11.1.2",
     "karma-coverage": "~2.2.0",
     "playwright": "^1.30.0",
-    "protractor": "~7.0.0",
     "ts-node": "~10.5.0",
     "typescript": "~4.9.4"
   },

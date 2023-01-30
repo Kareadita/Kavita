@@ -31,9 +31,6 @@
             ],
             "inlineStyleLanguage": "scss",
             "tsConfig": "tsconfig.app.json",
-            "stylePreprocessorOptions": {
-              "includePaths": ["node_modules"]
-            },
             "assets": [
               "src/assets",
               "src/site.webmanifest",
