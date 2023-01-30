@@ -135,6 +135,8 @@ public class WordCountAnalysisTests : AbstractDbTest
                 MangaFormat.Epub, 0)
         });
 
+        series.Volumes.Add(EntityFactory.CreateVolume("1", new List<Chapter>() {chapter2}));
+
         series.Volumes.First().Chapters.Add(chapter2);
         await _unitOfWork.CommitAsync();
 
@@ -145,17 +147,29 @@ public class WordCountAnalysisTests : AbstractDbTest
         Assert.Equal(AvgHoursToRead * 2, series.AvgHoursToRead);
         Assert.Equal((MaxHoursToRead * 2) - 1, series.MaxHoursToRead); // This is just a rounding issue
 
-        // Validate the Chapter gets updated correctly
-        var volume = series.Volumes.First();
-        Assert.Equal(WordCount * 2L, volume.WordCount);
-        Assert.Equal(MinHoursToRead * 2, volume.MinHoursToRead);
-        Assert.Equal(AvgHoursToRead * 2, volume.AvgHoursToRead);
-        Assert.Equal((MaxHoursToRead * 2) - 1, volume.MaxHoursToRead);
+        var firstVolume = series.Volumes.ElementAt(0);
+        Assert.Equal(WordCount, firstVolume.WordCount);
+        Assert.Equal(MinHoursToRead, firstVolume.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, firstVolume.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, firstVolume.MaxHoursToRead);
 
+        var secondVolume = series.Volumes.ElementAt(1);
+        Assert.Equal(WordCount, secondVolume.WordCount);
+        Assert.Equal(MinHoursToRead, secondVolume.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, secondVolume.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, secondVolume.MaxHoursToRead);
+
+        // Validate original chapter doesn't change
         Assert.Equal(WordCount, chapter.WordCount);
         Assert.Equal(MinHoursToRead, chapter.MinHoursToRead);
         Assert.Equal(AvgHoursToRead, chapter.AvgHoursToRead);
         Assert.Equal(MaxHoursToRead, chapter.MaxHoursToRead);
+
+        // Validate new chapter gets updated
+        Assert.Equal(WordCount, chapter2.WordCount);
+        Assert.Equal(MinHoursToRead, chapter2.MinHoursToRead);
+        Assert.Equal(AvgHoursToRead, chapter2.AvgHoursToRead);
+        Assert.Equal(MaxHoursToRead, chapter2.MaxHoursToRead);
     }
 
 
