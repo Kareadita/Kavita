@@ -402,21 +402,7 @@ public class BookService : IBookService
             {
                 publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
             }
-            var dateParsed = DateTime.TryParse(publicationDate, out var date);
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            switch (dateParsed)
-            {
-                case true:
-                    year = date.Year;
-                    month = date.Month;
-                    day = date.Day;
-                    break;
-                case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
-                    int.TryParse(publicationDate, out year);
-                    break;
-            }
+            var (year, month, day) = GetPublicationDate(publicationDate);
 
             var info =  new ComicInfo()
             {
@@ -473,7 +459,28 @@ public class BookService : IBookService
         return null;
     }
 
-    #nullable enable
+    private static (int year, int month, int day) GetPublicationDate(string publicationDate)
+    {
+        var dateParsed = DateTime.TryParse(publicationDate, out var date);
+        var year = 0;
+        var month = 0;
+        var day = 0;
+        switch (dateParsed)
+        {
+            case true:
+                year = date.Year;
+                month = date.Month;
+                day = date.Day;
+                break;
+            case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
+                int.TryParse(publicationDate, out year);
+                break;
+        }
+
+        return (year, month, day);
+    }
+
+#nullable enable
     private static string ValidateLanguage(string? language)
     {
         if (string.IsNullOrEmpty(language)) return string.Empty;
