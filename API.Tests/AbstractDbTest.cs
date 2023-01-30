@@ -17,9 +17,9 @@ using NSubstitute;
 
 namespace API.Tests;
 
-public abstract class BasicTest
+public abstract class AbstractDbTest
 {
-    private readonly DbConnection _connection;
+    protected readonly DbConnection _connection;
     protected readonly DataContext _context;
     protected readonly IUnitOfWork _unitOfWork;
 
@@ -30,8 +30,9 @@ public abstract class BasicTest
     protected const string LogDirectory = "C:/kavita/config/logs/";
     protected const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
     protected const string TempDirectory = "C:/kavita/config/temp/";
+    protected const string DataDirectory = "C:/data/";
 
-    protected BasicTest()
+    protected AbstractDbTest()
     {
         var contextOptions = new DbContextOptionsBuilder()
             .UseSqlite(CreateInMemoryDatabase())
@@ -50,13 +51,12 @@ public abstract class BasicTest
     private static DbConnection CreateInMemoryDatabase()
     {
         var connection = new SqliteConnection("Filename=:memory:");
-
         connection.Open();
 
         return connection;
     }
 
-    private async Task<bool> SeedDb()
+    protected async Task<bool> SeedDb()
     {
         await _context.Database.MigrateAsync();
         var filesystem = CreateFileSystem();
@@ -91,14 +91,7 @@ public abstract class BasicTest
         return await _context.SaveChangesAsync() > 0;
     }
 
-    protected async Task ResetDb()
-    {
-        _context.Series.RemoveRange(_context.Series.ToList());
-        _context.Users.RemoveRange(_context.Users.ToList());
-        _context.AppUserBookmark.RemoveRange(_context.AppUserBookmark.ToList());
-
-        await _context.SaveChangesAsync();
-    }
+    protected abstract Task ResetDb();
 
     protected static MockFileSystem CreateFileSystem()
     {
@@ -111,7 +104,7 @@ public abstract class BasicTest
         fileSystem.AddDirectory(BookmarkDirectory);
         fileSystem.AddDirectory(LogDirectory);
         fileSystem.AddDirectory(TempDirectory);
-        fileSystem.AddDirectory("C:/data/");
+        fileSystem.AddDirectory(DataDirectory);
 
         return fileSystem;
     }

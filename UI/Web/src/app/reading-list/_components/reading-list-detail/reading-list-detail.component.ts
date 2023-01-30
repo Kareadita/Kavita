@@ -37,10 +37,9 @@ export class ReadingListDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
 
   readingListSummary: string = '';
+  readingListImage: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
-
-  readingListImage: string = '';
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -60,6 +59,7 @@ export class ReadingListDetailComponent implements OnInit {
       return;
     }
     this.listId = parseInt(listId, 10);
+    this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     forkJoin([
       this.libraryService.getLibraries(), 
@@ -134,6 +134,7 @@ export class ReadingListDetailComponent implements OnInit {
           // Reload information around list
           this.readingList = readingList;
           this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+          this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
           this.cdRef.markForCheck();
         });
         break;

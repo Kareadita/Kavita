@@ -429,7 +429,7 @@ public class OpdsController : BaseApiController
         {
             return BadRequest("You must pass a query parameter");
         }
-        query = query.Replace(@"%", "");
+        query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
 
@@ -828,7 +828,7 @@ public class OpdsController : BaseApiController
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
 
             var content = await _directoryService.ReadFileAsync(path);
-            var format = Path.GetExtension(path).Replace(".", "");
+            var format = Path.GetExtension(path).Replace(".", string.Empty);
 
             // Calculates SHA1 Hash for byte[]
             Response.AddCacheHeader(content);
@@ -860,7 +860,7 @@ public class OpdsController : BaseApiController
         if (files.Length == 0) return BadRequest("Cannot find icon");
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
-        var format = Path.GetExtension(path).Replace(".", "");
+        var format = Path.GetExtension(path).Replace(".", string.Empty);
 
         return File(content, "image/" + format);
     }

@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter, combineLatest } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -225,7 +225,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return true;
   }
   getPageAmount(direction: PAGING_DIRECTION): number {
-    if (this.layoutMode !== LayoutMode.Double) return 0;
+    if (!this.isValid()) return 0;
 
     switch (direction) {
       case PAGING_DIRECTION.FORWARD:
@@ -295,5 +295,4 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       console.log(message);
     }
   }
-
 }

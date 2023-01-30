@@ -59,11 +59,7 @@
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
       </ng-container>
-      <ng-container *ngIf="isLoading">
-        <div class="spinner-border text-secondary" role="status">
-          <span class="invisible">Loading...</span>
-      </div>
-      </ng-container>
+      <app-loading [loading]="isLoading"></app-loading>
     </div>
 
     <!-- TODO: This needs virtualization -->

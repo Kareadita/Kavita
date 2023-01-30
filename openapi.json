@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.18"
+    "version": "0.6.1.29"
   },
   "servers": [
     {
@@ -729,10 +729,12 @@
         "tags": [
           "Account"
         ],
+        "summary": "Resend an invite to a user already invited",
         "parameters": [
           {
             "name": "userId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -7245,6 +7247,7 @@
           "Server"
         ],
         "summary": "Is this server accessible to the outside net",
+        "description": "If the instance has the HostName set, this will return true whether or not it is accessible externally",
         "responses": {
           "200": {
             "description": "Success",
@@ -7712,17 +7715,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ServerStatistics"
+                  "$ref": "#/components/schemas/ServerStatisticsDto"
                 }
               }
             }
@@ -8033,6 +8036,44 @@
         }
       }
     },
+    "/api/Stats/day-breakdown": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DayOfWeekStatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Stats/user/reading-history": {
       "get": {
         "tags": [
@@ -8073,6 +8114,108 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ReadHistoryEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/pages-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of pages read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stats/words-per-year": {
+      "get": {
+        "tags": [
+          "Stats"
+        ],
+        "summary": "Returns a count of words read per year for a given userId.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "If userId is 0 and user is not an admin, API will default to userId",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Int32StatCount"
                   }
                 }
               }
@@ -9371,6 +9514,10 @@
             "description": "Manga Reader Option: Background color of the reader",
             "nullable": true
           },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
+          },
           "bookReaderMargin": {
             "type": "integer",
             "description": "Book Reader Option: Override extra Margin",
@@ -10021,6 +10168,16 @@
             "items": {
               "$ref": "#/components/schemas/FileDimensionDto"
             },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
           }
         },
@@ -10285,10 +10442,36 @@
           "count": {
             "type": "integer",
             "description": "Number of pages read",
-            "format": "int32"
+            "format": "int64"
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DayOfWeek": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DayOfWeekStatCount": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/DayOfWeek"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -10463,6 +10646,9 @@
             "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
             "nullable": true,
             "example": "chapter01_page01.png"
+          },
+          "isWide": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -10824,7 +11010,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11068,7 +11254,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11200,7 +11386,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -11486,7 +11672,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -12513,7 +12699,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13022,6 +13208,40 @@
           "usingRestrictedProfiles": {
             "type": "boolean",
             "description": "If there is at least one user that is using an age restricted profile on the instance"
+          },
+          "usersWithEmulateComicBook": {
+            "type": "integer",
+            "description": "Number of users using the Emulate Comic Book setting",
+            "format": "int32"
+          },
+          "percentOfLibrariesWithFolderWatchingEnabled": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries with folder watching enabled",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInSearch": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Search",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInRecommended": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Recommended",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInDashboard": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Dashboard",
+            "format": "float"
+          },
+          "totalReadingHours": {
+            "type": "integer",
+            "description": "Total reading hours of all users",
+            "format": "int64"
+          },
+          "storeCoversAsWebP": {
+            "type": "boolean",
+            "description": "Is the Server saving covers as WebP"
           }
         },
         "additionalProperties": false,
@@ -13105,11 +13325,16 @@
           "convertCoverToWebP": {
             "type": "boolean",
             "description": "If the server should save covers as WebP encoding"
+          },
+          "hostName": {
+            "type": "string",
+            "description": "The Host name (ie Reverse proxy domain name) for the server",
+            "nullable": true
           }
         },
         "additionalProperties": false
       },
-      "ServerStatistics": {
+      "ServerStatisticsDto": {
         "type": "object",
         "properties": {
           "chapterCount": {
@@ -13141,6 +13366,10 @@
             "format": "int64"
           },
           "totalPeople": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalReadingTime": {
             "type": "integer",
             "format": "int64"
           },
@@ -13193,7 +13422,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -13471,6 +13700,10 @@
         "type": "object",
         "properties": {
           "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "password": {
             "type": "string",
             "nullable": true
           }
@@ -14036,7 +14269,7 @@
           },
           "count": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -14064,7 +14297,8 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints"
+          "showScreenHints",
+          "swipeToPaginate"
         ],
         "type": "object",
         "properties": {
@@ -14091,6 +14325,9 @@
             "minLength": 1,
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean"
           },
           "autoCloseMenu": {
             "type": "boolean",

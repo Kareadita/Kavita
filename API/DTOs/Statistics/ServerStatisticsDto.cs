@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace API.DTOs.Statistics;
 
-public class ServerStatistics
+public class ServerStatisticsDto
 {
     public long ChapterCount { get; set; }
     public long VolumeCount { get; set; }
@@ -13,6 +13,7 @@ public class ServerStatistics
     public long TotalGenres { get; set; }
     public long TotalTags { get; set; }
     public long TotalPeople { get; set; }
+    public long TotalReadingTime { get; set; }
     public IEnumerable<ICount<SeriesDto>> MostReadSeries { get; set; }
     /// <summary>
     /// Total users who have started/reading/read per series

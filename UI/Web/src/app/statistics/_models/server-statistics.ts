@@ -12,6 +12,7 @@ export interface ServerStatistics {
     totalGenres: number;
     totalTags: number;
     totalPeople: number;
+    totalReadingTime: number;
     mostActiveUsers: Array<StatCount<User>>;
     mostActiveLibraries: Array<StatCount<Library>>;
     mostReadSeries: Array<StatCount<Series>>;

@@ -2,7 +2,8 @@ import { ElementRef, Injectable, Renderer2, RendererFactory2 } from '@angular/co
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
 import { ReaderService } from 'src/app/_services/reader.service';
-import { DimensionMap, FileDimension } from '../_models/file-dimension';
+import { ChapterInfo } from '../_models/chapter-info';
+import { DimensionMap } from '../_models/file-dimension';
 import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Injectable({
@@ -13,41 +14,22 @@ export class ManagaReaderService {
   private pageDimensions: DimensionMap = {};
   private pairs: {[key: number]: number} = {};
   private renderer: Renderer2;
+
   constructor(rendererFactory: RendererFactory2, private readerService: ReaderService) {
     this.renderer = rendererFactory.createRenderer(null, null);
   }
 
-  loadPageDimensions(dims: Array<FileDimension>) {
-    this.pageDimensions = {};
-    let counter = 0;
-    let i = 0;
-
-    dims.forEach(d => {
-      const isWide = (d.width > d.height);
+  load(chapterInfo: ChapterInfo) {
+    chapterInfo.pageDimensions!.forEach(d => {
       this.pageDimensions[d.pageNumber] = {
         height: d.height,
         width: d.width,
-        isWide: isWide
+        isWide: d.isWide
       };
-
-      //console.log('Page Number: ', d.pageNumber);
-
-      if (isWide) {
-        console.log('\tPage is wide, counter: ', counter, 'i: ', i);
-        this.pairs[d.pageNumber] = d.pageNumber;
-        //this.pairs[d.pageNumber] = this.pairs[d.pageNumber - 1] + 1;
-      } else {
-        //console.log('\tPage is single, counter: ', counter, 'i: ', i);
-        this.pairs[d.pageNumber] =  counter % 2 === 0 ? Math.max(i - 1, 0) : counter;
-        counter++;
-      }
-      //console.log('\t\tMapped to ', this.pairs[d.pageNumber]);
-
-      i++;
     });
-    //console.log('pairs: ', this.pairs);
+    this.pairs = chapterInfo.doublePairs!;
   }
-
+  
   adjustForDoubleReader(page: number) {
     if (!this.pairs.hasOwnProperty(page)) return page;
     return this.pairs[page];
@@ -65,6 +47,14 @@ export class ManagaReaderService {
   isWidePage(pageNum: number) {
     if (!this.pageDimensions.hasOwnProperty(pageNum)) return false;
     return this.pageDimensions[pageNum].isWide;
+  }
+
+  maxHeight() {
+    return  Object.values(this.pageDimensions).reduce((max, obj) => Math.max(max, obj.height), 0);
+  }
+
+  maxWidth() {
+    return  Object.values(this.pageDimensions).reduce((max, obj) => Math.max(max, obj.width), 0);
   }
 
 

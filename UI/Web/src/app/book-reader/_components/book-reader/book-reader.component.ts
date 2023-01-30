@@ -256,13 +256,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * book-content class
    */
-  @ViewChild('bookContentElemRef', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('readingHtml', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('reader', {static: true}) reader!: ElementRef;
-
-
-
 
 
   get BookPageLayoutMode() {
@@ -382,7 +379,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
-
       // if the book content is less than the height of the container, override and return height of container for pagination area
       if (this.bookContainerElemRef?.nativeElement?.clientHeight > this.bookContentElemRef?.nativeElement?.clientHeight) {
         return (this.bookContainerElemRef?.nativeElement?.clientHeight || 0) + 'px';
@@ -474,7 +470,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-    this.readerService.exitFullscreen();
 
     this.onDestroy.next();
     this.onDestroy.complete();
@@ -724,16 +719,17 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * from 'kavita-part', which will cause the reader to scroll to the marker.
    */
   addLinkClickHandlers() {
-    var links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
+    const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
+          console.log('Link clicked: ', e);
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
-          var page = parseInt(e.target.attributes['kavita-page'].value, 10);
+          const page = parseInt(e.target.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
             this.adhocPageHistory.push({page: this.pageNum, scrollPart: this.lastSeenScrollPartPath});
           }
 
-          var partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
+          const partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
           if (partValue && page === this.pageNum) {
             this.scrollTo(e.target.attributes['kavita-part'].value);
             return;
@@ -995,7 +991,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
 
-    const margin = (this.readingSectionElemRef.nativeElement.clientWidth*(parseInt(this.pageStyles['margin-left'], 10) / 100))*2;
+    const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
     const columnGap = 20;
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + columnGap;
   }
@@ -1204,13 +1200,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   toggleFullscreen() {
     this.isFullscreen = this.readerService.checkFullscreenMode();
     if (this.isFullscreen) {
-      this.readerService.exitFullscreen(() => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = false;
         this.cdRef.markForCheck();
         this.renderer.removeStyle(this.reader.nativeElement, 'background');
       });
     } else {
-      this.readerService.enterFullscreen(this.reader.nativeElement, () => {
+      this.readerService.toggleFullscreen(this.reader.nativeElement, () => {
         this.isFullscreen = true;
         this.cdRef.markForCheck();
         // HACK: This is a bug with how browsers change the background color for fullscreen mode
