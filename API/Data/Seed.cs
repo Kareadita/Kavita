@@ -102,6 +102,7 @@ public static class Seed
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             new() {Key = ServerSettingKey.ConvertCoverToWebP, Value = "false"},
+            new() {Key = ServerSettingKey.HostName, Value = string.Empty},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

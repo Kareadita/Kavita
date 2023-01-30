@@ -55,7 +55,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
 
   constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
     private accountService: AccountService, private confirmService: ConfirmService,
-    private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) { }
+    private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) {
+    }
 
   ngOnDestroy(): void {
     this.onDestroy.next();

@@ -467,7 +467,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         fittingOption: new FormControl(this.mangaReaderService.translateScalingOption(this.scalingOption)),
         layoutMode: new FormControl(this.layoutMode),
         darkness: new FormControl(100),
-        emulateBook: new FormControl(this.user.preferences.emulateBook)
+        emulateBook: new FormControl(this.user.preferences.emulateBook),
+        swipeToPaginate: new FormControl(this.user.preferences.swipeToPaginate)
       });
 
       this.readerModeSubject.next(this.readerMode);
@@ -973,6 +974,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   triggerSwipePagination(direction: KeyDirection) {
+    if (!this.generalSettingsForm.get('swipeToPaginate')?.value) return;
+    
     switch(direction) {
       case KeyDirection.Down:
         this.nextPage();
@@ -1097,6 +1100,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.resetSwipeModifiers();
+
+    this.isLoading = true;
+    this.cdRef.markForCheck();
     
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
@@ -1124,6 +1130,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     
     this.resetSwipeModifiers();
+
+    this.isLoading = true;
+    this.cdRef.markForCheck();
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
@@ -1241,6 +1250,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // Originally this was only for fit to height, but when swiping was introduced, it made more sense to do it always to reset to the same view
     this.readingArea.nativeElement.scroll(0,0);
 
+    this.isLoading = false;
     this.cdRef.markForCheck();
   }
 
@@ -1601,6 +1611,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.autoCloseMenu = this.autoCloseMenu;
       data.readingDirection = this.readingDirection;
       data.emulateBook = modelSettings.emulateBook;
+      data.swipeToPaginate = modelSettings.swipeToPaginate;
       this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
         this.toastr.success('User preferences updated');
         if (this.user) {

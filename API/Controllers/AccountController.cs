@@ -324,10 +324,11 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email-update", dto.Email);
+            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
             _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var accessible = await _emailService.CheckIfAccessible(host);
+
+
+            var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
                 try
@@ -495,7 +496,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.ConfirmationToken))
             return BadRequest("Manual setup is unable to be completed. Please cancel and recreate the invite.");
 
-        return GenerateEmailLink(user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
+        return await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
     }
 
 
@@ -603,11 +604,10 @@ public class AccountController : BaseApiController
 
         try
         {
-            var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email", dto.Email);
+            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var accessible = await _emailService.CheckIfAccessible(host);
+            var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
                 try
@@ -795,10 +795,9 @@ public class AccountController : BaseApiController
             return BadRequest("You do not have an email on account or it has not been confirmed");
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-        var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-        if (await _emailService.CheckIfAccessible(host))
+        if (await _accountService.CheckIfAccessible(Request))
         {
             await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
             {
@@ -851,6 +850,11 @@ public class AccountController : BaseApiController
         };
     }
 
+    /// <summary>
+    /// Resend an invite to a user already invited
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
     public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
@@ -863,26 +867,22 @@ public class AccountController : BaseApiController
         if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailLink = GenerateEmailLink(token, "confirm-email", user.Email);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
         _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
-        await _emailService.SendMigrationEmail(new EmailMigrationDto()
+        if (await _accountService.CheckIfAccessible(Request))
         {
-            EmailAddress = user.Email,
-            Username = user.UserName,
-            ServerConfirmationLink = emailLink,
-            InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-        });
+            await _emailService.SendMigrationEmail(new EmailMigrationDto()
+            {
+                EmailAddress = user.Email,
+                Username = user.UserName,
+                ServerConfirmationLink = emailLink,
+                InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
+            });
+            return Ok(emailLink);
+        }
 
-
-        return Ok(emailLink);
-    }
-
-    private string GenerateEmailLink(string token, string routePart, string email, bool withHost = true)
-    {
-        var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-        if (withHost) return $"{Request.Scheme}://{host}{Request.PathBase}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
-        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return Ok("The server is not accessible externally. Please ");
     }
 
     /// <summary>

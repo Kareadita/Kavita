@@ -105,4 +105,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("ConvertCoverToWebP")]
     ConvertCoverToWebP = 19,
+    /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server. Used for email link generation
+    /// </summary>
+    [Description("HostName")]
+    HostName = 20,
+
 }

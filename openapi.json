@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.28"
+    "version": "0.6.1.29"
   },
   "servers": [
     {
@@ -729,10 +729,12 @@
         "tags": [
           "Account"
         ],
+        "summary": "Resend an invite to a user already invited",
         "parameters": [
           {
             "name": "userId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -7245,6 +7247,7 @@
           "Server"
         ],
         "summary": "Is this server accessible to the outside net",
+        "description": "If the instance has the HostName set, this will return true whether or not it is accessible externally",
         "responses": {
           "200": {
             "description": "Success",
@@ -9510,6 +9513,10 @@
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader",
             "nullable": true
+          },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
           },
           "bookReaderMargin": {
             "type": "integer",
@@ -13318,6 +13325,11 @@
           "convertCoverToWebP": {
             "type": "boolean",
             "description": "If the server should save covers as WebP encoding"
+          },
+          "hostName": {
+            "type": "string",
+            "description": "The Host name (ie Reverse proxy domain name) for the server",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14285,7 +14297,8 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
-          "showScreenHints"
+          "showScreenHints",
+          "swipeToPaginate"
         ],
         "type": "object",
         "properties": {
@@ -14312,6 +14325,9 @@
             "minLength": 1,
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean"
           },
           "autoCloseMenu": {
             "type": "boolean",
