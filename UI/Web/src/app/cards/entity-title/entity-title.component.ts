@@ -36,10 +36,7 @@ export class EntityTitleComponent implements OnInit {
     return LibraryType;
   }
 
-  
-
-  constructor(private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {
-  }
+  constructor(private utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.isChapter = this.utilityService.isChapter(this.entity);
