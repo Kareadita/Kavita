@@ -143,7 +143,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     }
 
 
-    public async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
+    private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
         var existingWordCount = series.WordCount;
