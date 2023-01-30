@@ -16,14 +16,13 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "ES6",
+    "target": "ES2022",
     "module": "es2020",
+    "useDefineForClassFields": false,
     "lib": [
-      "es2019",
-      "es2018",
+      "ES2022",
       "dom"
     ],
-    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

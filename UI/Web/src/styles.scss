@@ -9,7 +9,8 @@
 @import './theme/variables';
 
 // Bootstrap must be after _colors since we define the colors there
-@import '~bootstrap/scss/bootstrap';
+//@import '~bootstrap/scss/bootstrap';
+@import '../node_modules/bootstrap/scss/bootstrap';
 
 
 // Import all the customized theme overrides
