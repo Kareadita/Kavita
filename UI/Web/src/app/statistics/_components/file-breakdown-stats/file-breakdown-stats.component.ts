@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, shareReplay } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
-import { MangaFormat } from 'src/app/_models/manga-format';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
@@ -22,7 +21,7 @@ const mangaFormatPipe = new MangaFormatPipe();
   styleUrls: ['./file-breakdown-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FileBreakdownStatsComponent implements OnInit {
+export class FileBreakdownStatsComponent implements OnDestroy {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
@@ -69,9 +68,6 @@ export class FileBreakdownStatsComponent implements OnInit {
     this.vizData2$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => data.map(d => {
       return {name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize};
     })));
-  }
-
-  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {

@@ -213,6 +213,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
     });
 
     this.download$ = this.downloadService.activeDownloads$.pipe(takeUntil(this.onDestroy), map((events) => {
+      console.log('Active downloads: ', events);
       if(this.utilityService.isSeries(this.entity)) return events.find(e => e.entityType === 'series' && e.subTitle === this.downloadService.downloadSubtitle('series', (this.entity as Series))) || null;
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
