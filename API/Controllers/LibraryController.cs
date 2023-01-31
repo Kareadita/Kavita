@@ -247,11 +247,9 @@ public class LibraryController : BaseApiController
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
-                // TODO: Figure out how to cancel a job
-
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
-                    "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
+                    "You cannot delete a library while a scan is in progress. Please wait for scan to complete or restart Kavita then try to delete");
             }
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
@@ -336,6 +334,7 @@ public class LibraryController : BaseApiController
         library.IncludeInDashboard = dto.IncludeInDashboard;
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
+        library.ManageCollections = dto.CreateCollections;
 
         _unitOfWork.LibraryRepository.Update(library);
 

@@ -104,6 +104,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.IncludeInSearch)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageCollections)
+            .HasDefaultValue(true);
     }
 
 

@@ -73,6 +73,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Number of the Total Count (progress the Series is complete)
     /// </summary>
     public int Count { get; set; } = 0;
+    /// <summary>
+    /// SeriesGroup tag in ComicInfo
+    /// </summary>
+    public string SeriesGroup { get; set; }
 
     /// <summary>
     /// Total Word count of all chapters in this chapter.

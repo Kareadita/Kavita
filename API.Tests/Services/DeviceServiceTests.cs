@@ -51,7 +51,6 @@ public class DeviceServiceDbTests : AbstractDbTest
         }, user);
 
         Assert.NotNull(device);
-
     }
 
     [Fact]

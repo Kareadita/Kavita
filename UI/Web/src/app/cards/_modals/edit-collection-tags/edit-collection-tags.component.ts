@@ -151,16 +151,15 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
   async save() {
     const selectedIndex = this.collectionTagForm.get('coverImageIndex')?.value || 0;
     const unselectedIds = this.selections.unselected().map(s => s.id);
-    const tag: CollectionTag = {...this.tag};
-    tag.summary = this.collectionTagForm.get('summary')?.value;
-    tag.coverImageLocked = this.collectionTagForm.get('coverImageLocked')?.value;
-    tag.promoted  = this.collectionTagForm.get('promoted')?.value;
+    const tag = this.collectionTagForm.value;
+    tag.id = this.tag.id;
     
     if (unselectedIds.length == this.series.length && !await this.confirmSerivce.confirm('Warning! No series are selected, saving will delete the tag. Are you sure you want to continue?')) {
       return;
     }
 
-    const apis = [this.collectionService.updateTag(tag),
+    const apis = [
+      this.collectionService.updateTag(tag),
       this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
     ];
     
