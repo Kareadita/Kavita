@@ -19,6 +19,8 @@ public interface ICollectionTagService
     Task<bool> UpdateTag(CollectionTagDto dto);
     Task<bool> AddTagToSeries(CollectionTag tag, IEnumerable<int> seriesIds);
     Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds);
+    Task<CollectionTag> GetTagOrCreate(int tagId, string title);
+    void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata);
 }
 
 
@@ -94,15 +96,27 @@ public class CollectionTagService : ICollectionTagService
         var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesIds);
         foreach (var metadata in metadatas)
         {
-            if (!metadata.CollectionTags.Any(t => t.Title.Equals(tag.Title, StringComparison.InvariantCulture)))
-            {
-                metadata.CollectionTags.Add(tag);
-                _unitOfWork.SeriesMetadataRepository.Update(metadata);
-            }
+            AddTagToSeriesMetadata(tag, metadata);
         }
 
         if (!_unitOfWork.HasChanges()) return true;
         return await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Adds a collection tag to a SeriesMetadata
+    /// </summary>
+    /// <remarks>Does not commit</remarks>
+    /// <param name="tag"></param>
+    /// <param name="metadata"></param>
+    /// <returns></returns>
+    public void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata)
+    {
+        metadata.CollectionTags ??= new List<CollectionTag>();
+        if (metadata.CollectionTags.Any(t => t.Title.Equals(tag.Title, StringComparison.InvariantCulture))) return;
+
+        metadata.CollectionTags.Add(tag);
+        _unitOfWork.SeriesMetadataRepository.Update(metadata);
     }
 
     public async Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds)
@@ -121,5 +135,23 @@ public class CollectionTagService : ICollectionTagService
         if (!_unitOfWork.HasChanges()) return true;
 
         return await _unitOfWork.CommitAsync();
+    }
+
+    /// <summary>
+    /// Tries to fetch the full tag, else returns a new tag. Adds to tracking but does not commit
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
+    {
+        var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId);
+        if (tag == null)
+        {
+            tag = DbFactory.CollectionTag(0, title, string.Empty, false);
+            _unitOfWork.CollectionTagRepository.Add(tag);
+        }
+
+        return tag;
     }
 }

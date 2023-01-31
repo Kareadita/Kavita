@@ -45,6 +45,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IFileService _fileService;
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+    private readonly ICollectionTagService _collectionTagService;
 
     private IList<Genre> _genres;
     private IList<Person> _people;
@@ -52,7 +53,8 @@ public class ProcessSeries : IProcessSeries
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
-        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService)
+        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
+        ICollectionTagService collectionTagService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -63,6 +65,7 @@ public class ProcessSeries : IProcessSeries
         _fileService = fileService;
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+        _collectionTagService = collectionTagService;
     }
 
     /// <summary>
@@ -151,7 +154,7 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
-            UpdateSeriesMetadata(series, library.Type);
+            await UpdateSeriesMetadata(series, library);
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -223,10 +226,10 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    private static void UpdateSeriesMetadata(Series series, LibraryType libraryType)
+    private async Task UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-        var isBook = libraryType == LibraryType.Book;
+        var isBook = library.Type == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
@@ -276,6 +279,14 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(firstChapter.Language) && !series.Metadata.LanguageLocked)
         {
             series.Metadata.Language = firstChapter.Language;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.SeriesGroup) && library.ManageCollections)
+        {
+            _logger.LogDebug("Collection tag found for {SeriesName}", series.Name);
+
+            var tag = await _collectionTagService.GetTagOrCreate(0, firstChapter.SeriesGroup);
+            _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
         }
 
         // Handle People
@@ -627,6 +638,11 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(comicInfo.LanguageISO))
         {
             chapter.Language = comicInfo.LanguageISO;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.SeriesGroup))
+        {
+            chapter.SeriesGroup = comicInfo.SeriesGroup;
         }
 
         if (comicInfo.Count > 0)

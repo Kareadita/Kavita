@@ -109,12 +109,7 @@ public class CollectionController : BaseApiController
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
         // Create a new tag and save
-        var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(dto.CollectionTagId);
-        if (tag == null)
-        {
-            tag = DbFactory.CollectionTag(0, dto.CollectionTagTitle, string.Empty, false);
-            _unitOfWork.CollectionTagRepository.Add(tag);
-        }
+        var tag = await _collectionService.GetTagOrCreate(dto.CollectionTagId, dto.CollectionTagTitle);
 
         if (await _collectionService.AddTagToSeries(tag, dto.SeriesIds)) return Ok();
 
