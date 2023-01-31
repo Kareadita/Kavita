@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -70,13 +71,6 @@ public static class EntityFactory
 
     public static CollectionTag CreateCollectionTag(int id, string title, string summary, bool promoted)
     {
-        return new CollectionTag()
-        {
-            Id = id,
-            NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize(title).ToUpper(),
-            Title = title,
-            Summary = summary,
-            Promoted = promoted
-        };
+        return DbFactory.CollectionTag(id, title, summary, promoted);
     }
 }

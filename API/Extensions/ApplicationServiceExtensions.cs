@@ -55,6 +55,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
         services.AddScoped<ILibraryWatcher, LibraryWatcher>();
         services.AddScoped<ITachiyomiService, TachiyomiService>();
+        services.AddScoped<ICollectionTagService, CollectionTagService>();
 
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IEventHub, EventHub>();

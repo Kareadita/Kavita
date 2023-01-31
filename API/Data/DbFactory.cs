@@ -95,7 +95,7 @@ public static class DbFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
             Title = title?.Trim(),
             Summary = summary?.Trim(),
             Promoted = promoted
@@ -106,7 +106,7 @@ public static class DbFactory
     {
         return new ReadingList()
         {
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
             Title = title?.Trim(),
             Summary = summary?.Trim(),
             Promoted = promoted,

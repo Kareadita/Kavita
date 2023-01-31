@@ -17,7 +17,12 @@
         Cannot Read
       </div>
       
-      <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
+      <ng-container *ngIf="read === 0 && total > 0">
+        <div class="badge-container">
+          <div class="not-read-badge" ></div>
+        </div>
+      </ng-container>
+      
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>

@@ -56,7 +56,7 @@ public abstract class AbstractDbTest
         return connection;
     }
 
-    protected async Task<bool> SeedDb()
+    private async Task<bool> SeedDb()
     {
         await _context.Database.MigrateAsync();
         var filesystem = CreateFileSystem();
@@ -86,7 +86,8 @@ public abstract class AbstractDbTest
                 {
                     Path = "C:/data/"
                 }
-            }
+            },
+            Series = new List<Series>()
         });
         return await _context.SaveChangesAsync() > 0;
     }

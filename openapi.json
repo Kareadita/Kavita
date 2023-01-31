@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.31"
+    "version": "0.6.1.32"
   },
   "servers": [
     {
@@ -9943,6 +9943,11 @@
             "description": "Number of the Total Count (progress the Series is complete)",
             "format": "int32"
           },
+          "seriesGroup": {
+            "type": "string",
+            "description": "SeriesGroup tag in ComicInfo",
+            "nullable": true
+          },
           "wordCount": {
             "type": "integer",
             "description": "Total Word count of all chapters in this chapter.",
@@ -11159,6 +11164,10 @@
             "type": "boolean",
             "description": "Include library series in Search"
           },
+          "manageCollections": {
+            "type": "boolean",
+            "description": "Should this library create and manage collections from Metadata"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -11231,6 +11240,10 @@
           "includeInRecommended": {
             "type": "boolean",
             "description": "Include Library series on Recommended Streams"
+          },
+          "manageCollections": {
+            "type": "boolean",
+            "description": "Should this library create and manage collections from Metadata"
           },
           "includeInSearch": {
             "type": "boolean",
@@ -13711,6 +13724,17 @@
         "additionalProperties": false
       },
       "UpdateLibraryDto": {
+        "required": [
+          "createCollections",
+          "folders",
+          "folderWatching",
+          "id",
+          "includeInDashboard",
+          "includeInRecommended",
+          "includeInSearch",
+          "name",
+          "type"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -13718,8 +13742,8 @@
             "format": "int32"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "type": {
             "$ref": "#/components/schemas/LibraryType"
@@ -13728,8 +13752,7 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "nullable": true
+            }
           },
           "folderWatching": {
             "type": "boolean"
@@ -13741,6 +13764,9 @@
             "type": "boolean"
           },
           "includeInSearch": {
+            "type": "boolean"
+          },
+          "createCollections": {
             "type": "boolean"
           }
         },
