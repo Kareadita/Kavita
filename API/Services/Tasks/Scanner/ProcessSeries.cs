@@ -285,8 +285,11 @@ public class ProcessSeries : IProcessSeries
         {
             _logger.LogDebug("Collection tag found for {SeriesName}", series.Name);
 
-            var tag = await _collectionTagService.GetTagOrCreate(0, firstChapter.SeriesGroup);
-            _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            {
+                var tag = await _collectionTagService.GetTagOrCreate(0, collection);
+                _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+            }
         }
 
         // Handle People
