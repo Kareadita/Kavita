@@ -45,7 +45,7 @@ public class ReadingListService : IReadingListService
     public static string FormatTitle(ReadingListItemDto item)
     {
         var title = string.Empty;
-        if (item.ChapterNumber == Tasks.Scanner.Parser.Parser.DefaultChapter) {
+        if (item.ChapterNumber == Tasks.Scanner.Parser.Parser.DefaultChapter && item.VolumeNumber != Tasks.Scanner.Parser.Parser.DefaultVolume) {
             title = $"Volume {item.VolumeNumber}";
         }
 
@@ -71,7 +71,15 @@ public class ReadingListService : IReadingListService
             chapterNum = Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
         }
 
-        if (title == string.Empty) {
+        if (title != string.Empty) return title;
+
+        if (item.ChapterNumber == Tasks.Scanner.Parser.Parser.DefaultChapter &&
+            !string.IsNullOrEmpty(item.ChapterTitleName))
+        {
+            title = item.ChapterTitleName;
+        }
+        else
+        {
             title = ReaderService.FormatChapterName(item.LibraryType, true, true) + chapterNum;
         }
         return title;
