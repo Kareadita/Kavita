@@ -31,7 +31,7 @@ public interface ICollectionTagRepository
     Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata);
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
-    Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
+    Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title);
 }
@@ -77,10 +77,11 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
+    public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
             .OrderBy(c => c.NormalizedTitle)
+            .Includes(includes)
             .ToListAsync();
     }
 

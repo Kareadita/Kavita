@@ -5,6 +5,7 @@ namespace API.Data.Repositories;
 public interface ISeriesMetadataRepository
 {
     void Update(SeriesMetadata seriesMetadata);
+    void Attach(SeriesMetadata seriesMetadata);
 }
 
 public class SeriesMetadataRepository : ISeriesMetadataRepository
@@ -19,5 +20,10 @@ public class SeriesMetadataRepository : ISeriesMetadataRepository
     public void Update(SeriesMetadata seriesMetadata)
     {
         _context.SeriesMetadata.Update(seriesMetadata);
+    }
+
+    public void Attach(SeriesMetadata seriesMetadata)
+    {
+        _context.SeriesMetadata.Attach(seriesMetadata);
     }
 }

@@ -432,7 +432,6 @@ public class ReadingListServiceTests
 
     #endregion
 
-
     #region CalculateAgeRating
 
     [Fact]
@@ -559,6 +558,16 @@ public class ReadingListServiceTests
 
         await _readingListService.CalculateReadingListAgeRating(readingList);
         Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
+    }
+
+    #endregion
+
+    #region FormatTitle
+
+    [Fact]
+    public void FormatTitle_ShouldFormatCorrectly()
+    {
+
     }
 
     #endregion
