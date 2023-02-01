@@ -27,7 +27,7 @@ public static class DbFactory
             NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -46,7 +46,7 @@ public static class DbFactory
             NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -76,11 +76,6 @@ public static class DbFactory
         };
     }
 
-    public static SeriesMetadata SeriesMetadata(ComicInfo info)
-    {
-        return SeriesMetadata(Array.Empty<CollectionTag>());
-    }
-
     public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
     {
         return new SeriesMetadata()
@@ -98,7 +93,8 @@ public static class DbFactory
             NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
             Title = title?.Trim(),
             Summary = summary?.Trim(),
-            Promoted = promoted
+            Promoted = promoted,
+            SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
 

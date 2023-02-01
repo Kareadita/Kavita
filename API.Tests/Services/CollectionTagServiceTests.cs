@@ -110,4 +110,46 @@ public class CollectionTagServiceTests : AbstractDbTest
         Assert.Empty(metadatas.First().CollectionTags);
         Assert.NotEmpty(await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(new[] {2}));
     }
+
+    [Fact]
+    public async Task GetTagOrCreate_ShouldReturnNewTag()
+    {
+        await SeedSeries();
+        var tag = await _service.GetTagOrCreate(0, "GetTagOrCreate_ShouldReturnNewTag");
+        Assert.NotNull(tag);
+        Assert.NotSame(0, tag.Id);
+    }
+
+    [Fact]
+    public async Task GetTagOrCreate_ShouldReturnExistingTag()
+    {
+        await SeedSeries();
+        var tag = await _service.GetTagOrCreate(1, string.Empty);
+        Assert.NotNull(tag);
+        Assert.NotSame(1, tag.Id);
+    }
+
+    [Fact]
+    public async Task RemoveTagsWithoutSeries_ShouldRemoveAbandonedEntries()
+    {
+        await SeedSeries();
+        // Setup a tag with one series
+        var tag = await _service.GetTagOrCreate(0, "Tag with a series");
+        await _unitOfWork.CommitAsync();
+
+        var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(new[] {1});
+        tag.SeriesMetadatas.Add(metadatas.First());
+        var tagId = tag.Id;
+        await _unitOfWork.CommitAsync();
+
+        // Validate it doesn't remove tags it shouldn't
+        await _service.RemoveTagsWithoutSeries();
+        Assert.NotNull(await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId));
+
+        await _service.RemoveTagFromSeries(tag, new[] {1});
+
+        // Validate it does remove tags it should
+        await _service.RemoveTagsWithoutSeries();
+        Assert.Null(await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId));
+    }
 }

@@ -200,6 +200,9 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => s.LibraryId == libraryId)
 
             .Include(s => s.Metadata)
+            .ThenInclude(m => m.CollectionTags)
+
+            .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
 
             .Include(s => s.Metadata)

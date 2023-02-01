@@ -21,6 +21,8 @@ public interface ICollectionTagService
     Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds);
     Task<CollectionTag> GetTagOrCreate(int tagId, string title);
     void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata);
+    CollectionTag CreateTag(string title);
+    Task<bool> RemoveTagsWithoutSeries();
 }
 
 
@@ -113,10 +115,13 @@ public class CollectionTagService : ICollectionTagService
     public void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata)
     {
         metadata.CollectionTags ??= new List<CollectionTag>();
-        if (metadata.CollectionTags.Any(t => t.Title.Equals(tag.Title, StringComparison.InvariantCulture))) return;
+        if (metadata.CollectionTags.Any(t => t.NormalizedTitle.Equals(tag.NormalizedTitle, StringComparison.InvariantCulture))) return;
 
         metadata.CollectionTags.Add(tag);
-        _unitOfWork.SeriesMetadataRepository.Update(metadata);
+        if (metadata.Id != 0)
+        {
+            _unitOfWork.SeriesMetadataRepository.Update(metadata);
+        }
     }
 
     public async Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds)
@@ -148,10 +153,26 @@ public class CollectionTagService : ICollectionTagService
         var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId);
         if (tag == null)
         {
-            tag = DbFactory.CollectionTag(0, title, string.Empty, false);
-            _unitOfWork.CollectionTagRepository.Add(tag);
+            tag = CreateTag(title);
         }
 
         return tag;
+    }
+
+    /// <summary>
+    /// This just creates the entity and adds to tracking. Use <see cref="GetTagOrCreate"/> for checks of duplication.
+    /// </summary>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    public CollectionTag CreateTag(string title)
+    {
+        var tag = DbFactory.CollectionTag(0, title, string.Empty, false);
+        _unitOfWork.CollectionTagRepository.Add(tag);
+        return tag;
+    }
+
+    public async Task<bool> RemoveTagsWithoutSeries()
+    {
+        return await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries() > 0;
     }
 }

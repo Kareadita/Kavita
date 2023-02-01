@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -50,6 +51,7 @@ public class ProcessSeries : IProcessSeries
     private IList<Genre> _genres;
     private IList<Person> _people;
     private IList<Tag> _tags;
+    private Dictionary<string, CollectionTag> _collectionTags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -76,6 +78,9 @@ public class ProcessSeries : IProcessSeries
         _genres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
         _people = await _unitOfWork.PersonRepository.GetAllPeople();
         _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
+                            .ToDictionary(t => t.NormalizedTitle);
+
     }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false)
@@ -154,7 +159,7 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
-            await UpdateSeriesMetadata(series, library);
+            UpdateSeriesMetadata(series, library);
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -226,7 +231,7 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    private async Task UpdateSeriesMetadata(Series series, Library library)
+    private void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
         var isBook = library.Type == LibraryType.Book;
@@ -283,10 +288,19 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(firstChapter.SeriesGroup) && library.ManageCollections)
         {
-            _logger.LogDebug("Collection tag found for {SeriesName}", series.Name);
+            _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
 
-            var tag = await _collectionTagService.GetTagOrCreate(0, firstChapter.SeriesGroup);
-            _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            {
+                var normalizedName = Parser.Parser.Normalize(collection);
+                if (!_collectionTags.TryGetValue(normalizedName, out var tag))
+                {
+                    tag = _collectionTagService.CreateTag(collection);
+                    _collectionTags.Add(normalizedName, tag);
+                }
+
+                _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+            }
         }
 
         // Handle People
@@ -519,6 +533,7 @@ public class ProcessSeries : IProcessSeries
             series.Volumes = nonDeletedVolumes;
         }
 
+        // DO I need this anymore?
         _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
             series.Name, startingVolumeCount, series.Volumes.Count);
     }

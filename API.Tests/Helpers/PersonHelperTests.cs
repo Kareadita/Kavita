@@ -103,7 +103,7 @@ public class PersonHelperTests
             DbFactory.Person("Joe Shmo", PersonRole.CoverArtist)
         };
         var peopleRemoved = new List<Person>();
-        PersonHelper.RemovePeople(existingPeople, Array.Empty<string>(), PersonRole.Writer, person =>
+        PersonHelper.RemovePeople(existingPeople, new List<string>(), PersonRole.Writer, person =>
         {
             peopleRemoved.Add(person);
         });
