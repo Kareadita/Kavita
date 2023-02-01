@@ -66,7 +66,6 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// </summary>
     public async Task<int> RemoveTagsWithoutSeries()
     {
-        // TODO: Write a Unit test to validate this works
         var tagsToDelete = await _context.CollectionTag
             .Include(c => c.SeriesMetadatas)
             .Where(c => c.SeriesMetadatas.Count == 0)
