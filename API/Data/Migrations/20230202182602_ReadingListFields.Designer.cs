@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230202132109_AddReadingListComicInfoFields")]
-    partial class AddReadingListComicInfoFields
+    [Migration("20230202182602_ReadingListFields")]
+    partial class ReadingListFields
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -415,6 +415,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("StoryArc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoryArcNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")

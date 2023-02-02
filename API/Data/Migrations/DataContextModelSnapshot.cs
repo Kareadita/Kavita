@@ -415,6 +415,9 @@ namespace API.Data.Migrations
                     b.Property<string>("StoryArc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("StoryArcNumber")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Summary")
                         .HasColumnType("TEXT");
 

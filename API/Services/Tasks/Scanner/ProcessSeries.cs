@@ -675,6 +675,12 @@ public class ProcessSeries : IProcessSeries
             chapter.AlternateNumber = comicInfo.AlternateNumber;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.StoryArcNumber))
+        {
+            chapter.StoryArcNumber = comicInfo.StoryArcNumber;
+        }
+
+
         if (comicInfo.AlternateCount > 0)
         {
             chapter.AlternateCount = comicInfo.AlternateCount;
@@ -685,6 +691,19 @@ public class ProcessSeries : IProcessSeries
         {
             chapter.TotalCount = comicInfo.Count;
         }
+
+        if (!string.IsNullOrEmpty(chapter.StoryArc))
+        {
+            var readingLists = chapter.StoryArc.Split(',');
+            var readingListOrders = chapter.StoryArcNumber.Split(',');
+            if (readingListOrders.Length == 0)
+            {
+                _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
+
+            }
+
+        }
+
 
         // This needs to check against both Number and Volume to calculate Count
         chapter.Count = comicInfo.CalculatedCount();

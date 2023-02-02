@@ -9952,17 +9952,22 @@
             "type": "string",
             "nullable": true
           },
+          "storyArcNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "alternateNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "alternateSeries": {
             "type": "string",
             "nullable": true
           },
           "alternateCount": {
             "type": "integer",
+            "description": "Not currently used in Kavita",
             "format": "int32"
-          },
-          "alternateSeries": {
-            "type": "string",
-            "nullable": true
           },
           "wordCount": {
             "type": "integer",

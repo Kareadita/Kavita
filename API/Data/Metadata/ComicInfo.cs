@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using API.Entities;
 using API.Entities.Enums;
 using Kavita.Common.Extensions;
 
@@ -55,15 +56,26 @@ public class ComicInfo
     /// </summary>
     public float UserRating { get; set; }
     /// <summary>
-    /// Used to generate Collections
+    /// Can contain multiple comma separated strings, each create a <see cref="CollectionTag"/>
     /// </summary>
     public string SeriesGroup { get; set; } = string.Empty;
 
+    /// <summary>
+    ///
+    /// </summary>
     public string StoryArc { get; set; } = string.Empty;
+    /// <summary>
+    /// Can contain multiple comma separated numbers that match with StoryArc
+    /// </summary>
+    public string StoryArcNumber { get; set; } = string.Empty;
     public string AlternateNumber { get; set; } = string.Empty;
+    public string AlternateSeries { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Not used
+    /// </summary>
     [System.ComponentModel.DefaultValueAttribute(0)]
     public int AlternateCount { get; set; } = 0;
-    public string AlternateSeries { get; set; } = string.Empty;
 
     /// <summary>
     /// This is Epub only: calibre:title_sort

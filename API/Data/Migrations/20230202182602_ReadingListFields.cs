@@ -4,7 +4,7 @@
 
 namespace API.Data.Migrations
 {
-    public partial class AddReadingListComicInfoFields : Migration
+    public partial class ReadingListFields : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -32,6 +32,12 @@ namespace API.Data.Migrations
                 table: "Chapter",
                 type: "TEXT",
                 nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "StoryArcNumber",
+                table: "Chapter",
+                type: "TEXT",
+                nullable: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -50,6 +56,10 @@ namespace API.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "StoryArc",
+                table: "Chapter");
+
+            migrationBuilder.DropColumn(
+                name: "StoryArcNumber",
                 table: "Chapter");
         }
     }
