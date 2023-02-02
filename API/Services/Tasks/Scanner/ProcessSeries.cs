@@ -660,6 +660,27 @@ public class ProcessSeries : IProcessSeries
             chapter.SeriesGroup = comicInfo.SeriesGroup;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.StoryArc))
+        {
+            chapter.StoryArc = comicInfo.StoryArc;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.AlternateSeries))
+        {
+            chapter.AlternateSeries = comicInfo.AlternateSeries;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.AlternateNumber))
+        {
+            chapter.AlternateNumber = comicInfo.AlternateNumber;
+        }
+
+        if (comicInfo.AlternateCount > 0)
+        {
+            chapter.AlternateCount = comicInfo.AlternateCount;
+        }
+
+
         if (comicInfo.Count > 0)
         {
             chapter.TotalCount = comicInfo.Count;

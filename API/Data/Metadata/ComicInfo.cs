@@ -54,9 +54,12 @@ public class ComicInfo
     /// User's rating of the content
     /// </summary>
     public float UserRating { get; set; }
+    /// <summary>
+    /// Used to generate Collections
+    /// </summary>
+    public string SeriesGroup { get; set; } = string.Empty;
 
     public string StoryArc { get; set; } = string.Empty;
-    public string SeriesGroup { get; set; } = string.Empty;
     public string AlternateNumber { get; set; } = string.Empty;
     [System.ComponentModel.DefaultValueAttribute(0)]
     public int AlternateCount { get; set; } = 0;
