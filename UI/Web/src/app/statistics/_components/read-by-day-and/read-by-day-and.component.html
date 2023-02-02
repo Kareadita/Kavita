@@ -5,7 +5,7 @@
         </div>
         <div class="col-8">
             <form [formGroup]="formGroup" class="d-inline-flex float-end">
-                <div class="d-flex me-1" *ngIf="isAdmin">
+                <div class="d-flex me-1" *ngIf="isAdmin && !individualUserMode">
                     <label for="time-select-read-by-day" class="form-check-label"></label>
                     <select id="time-select-read-by-day" class="form-select" formControlName="users"
                         [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched"> 

@@ -23,6 +23,7 @@ export class ReadByDayAndComponent implements OnInit, OnDestroy {
    */
   @Input() userId: number = 0;
   @Input() isAdmin: boolean = true;
+  @Input() individualUserMode: boolean = false;
 
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({

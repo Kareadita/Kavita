@@ -63,19 +63,6 @@ public class StatisticService : IStatisticService
             .Where(p => libraryIds.Contains(p.LibraryId))
             .SumAsync(p => p.PagesRead);
 
-        // var ids = await _context.AppUserProgresses
-        //     .Where(p => p.AppUserId == userId)
-        //     .Where(p => libraryIds.Contains(p.LibraryId))
-        //     .Where(p => p.PagesRead > 0)
-        //     .Select(p => new {p.ChapterId, p.SeriesId})
-        //     .ToListAsync();
-
-        //var chapterIds = ids.Select(id => id.ChapterId);
-
-        // var timeSpentReading = await _context.Chapter
-        //     .Where(c => chapterIds.Contains(c.Id))
-        //     .SumAsync(c => c.AvgHoursToRead);
-
         var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
 
         var totalWordsRead =  (long) Math.Round(await _context.AppUserProgresses
@@ -364,12 +351,12 @@ public class StatisticService : IStatisticService
         if (days > 0)
         {
             var date = DateTime.Now.AddDays(days * -1);
-            query = query.Where(x => x.appUserProgresses.LastModified >= date && x.appUserProgresses.Created >= date);
+            query = query.Where(x => x.appUserProgresses.LastModified >= date);
         }
 
         var results = await query.GroupBy(x => new
             {
-                Day = x.appUserProgresses.Created.Date,
+                Day = x.appUserProgresses.LastModified.Date,
                 x.series.Format
             })
             .Select(g => new PagesReadOnADayCount<DateTime>
@@ -389,7 +376,25 @@ public class StatisticService : IStatisticService
                 if (results.Any(d => d.Value == date)) continue;
                 results.Add(new PagesReadOnADayCount<DateTime>()
                 {
-                    Format = MangaFormat.Unknown,
+                    Format = MangaFormat.Archive,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Epub,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Pdf,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Image,
                     Value = date,
                     Count = 0
                 });
