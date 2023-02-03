@@ -56,7 +56,7 @@ public class GenreRepository : IGenreRepository
         var genresWithNoConnections = await _context.Genre
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.Chapters)
-            .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0 && p.ExternalTag == removeExternal)
+            .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0)
             .AsSplitQuery()
             .ToListAsync();
 

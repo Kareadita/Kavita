@@ -13,13 +13,13 @@ public class TagHelperTests
     {
         var allTags = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("action", false),
-            DbFactory.Tag("Sci-fi", false),
+            DbFactory.Tag("Action"),
+            DbFactory.Tag("action"),
+            DbFactory.Tag("Sci-fi"),
         };
         var tagAdded = new List<Tag>();
 
-        TagHelper.UpdateTag(allTags, new[] {"Action", "Adventure"}, false, (tag, added) =>
+        TagHelper.UpdateTag(allTags, new[] {"Action", "Adventure"}, (tag, added) =>
         {
             if (added)
             {
@@ -37,14 +37,14 @@ public class TagHelperTests
     {
         var allTags = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("action", false),
-            DbFactory.Tag("Sci-fi", false),
+            DbFactory.Tag("Action"),
+            DbFactory.Tag("action"),
+            DbFactory.Tag("Sci-fi"),
 
         };
         var tagAdded = new List<Tag>();
 
-        TagHelper.UpdateTag(allTags, new[] {"Action", "Scifi"}, false, (tag, added) =>
+        TagHelper.UpdateTag(allTags, new[] {"Action", "Scifi"}, (tag, added) =>
         {
             if (added)
             {
@@ -62,35 +62,20 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("action", false),
-            DbFactory.Tag("Sci-fi", false),
+            DbFactory.Tag("Action"),
+            DbFactory.Tag("action"),
+            DbFactory.Tag("Sci-fi"),
         };
 
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Action", false));
+        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Action"));
         Assert.Equal(3, existingTags.Count);
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("action", false));
+        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("action"));
         Assert.Equal(3, existingTags.Count);
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Shonen", false));
+        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Shonen"));
         Assert.Equal(4, existingTags.Count);
-    }
-
-    [Fact]
-    public void AddTag_ShouldNotAddSameNameAndExternal()
-    {
-        var existingTags = new List<Tag>
-        {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("action", false),
-            DbFactory.Tag("Sci-fi", false),
-        };
-
-
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Action", true));
-        Assert.Equal(3, existingTags.Count);
     }
 
     [Fact]
@@ -98,13 +83,13 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("Sci-fi", false),
+            DbFactory.Tag("Action"),
+            DbFactory.Tag("Sci-fi"),
         };
 
         var peopleFromChapters = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
+            DbFactory.Tag("Action"),
         };
 
         var tagRemoved = new List<Tag>();
@@ -122,8 +107,8 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action", false),
-            DbFactory.Tag("Sci-fi", false),
+            DbFactory.Tag("Action"),
+            DbFactory.Tag("Sci-fi"),
         };
 
         var peopleFromChapters = new List<Tag>();
