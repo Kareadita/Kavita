@@ -9,6 +9,7 @@
     <TieredCompilation>true</TieredCompilation>
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
+    <LangVersion>latestmajor</LangVersion>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="Build" Condition=" '$(Configuration)' == 'Debug' ">
@@ -58,12 +59,12 @@
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
-    <PackageReference Include="Hangfire" Version="1.7.32" />
-    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.32" />
+    <PackageReference Include="Hangfire" Version="1.7.33" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.7.33" />
     <PackageReference Include="Hangfire.InMemory" Version="0.3.5" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
-    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.2" />
+    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.3" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.2" />
@@ -97,8 +98,8 @@
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.6" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.1" />
-    <PackageReference Include="System.IO.Abstractions" Version="19.1.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.26.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="19.1.14" />
     <PackageReference Include="VersOne.Epub" Version="3.3.0-alpha1" />
   </ItemGroup>
 
