@@ -70,9 +70,10 @@ public static class Configuration
     {
         try
         {
-            var currentToken = GetJwtToken(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace("\"TokenKey\": \"" + currentToken, "\"TokenKey\": \"" + token);
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.TokenKey = token;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
         catch (Exception)
@@ -108,8 +109,10 @@ public static class Configuration
 
         try
         {
-            var currentPort = GetPort(filePath);
-            var json = File.ReadAllText(filePath).Replace("\"Port\": " + currentPort, "\"Port\": " + port);
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.Port = port;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
         catch (Exception)
@@ -158,8 +161,10 @@ public static class Configuration
 
         try
         {
-            var currentIpAddresses = GetIpAddresses(filePath);
-            var json = File.ReadAllText(filePath).Replace("\"IpAddresses\": \"" + currentIpAddresses, "\"IpAddresses\": \"" + ipAddresses);
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.IpAddresses = ipAddresses;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
         catch (Exception)
@@ -194,6 +199,12 @@ public static class Configuration
 
         return defaultIpAddresses;
     }
-
     #endregion
+
+    private class AppSettings
+    {
+        public string TokenKey { get; set; }
+        public int Port { get; set; }
+        public string IpAddresses { get; set; }
+    }
 }
