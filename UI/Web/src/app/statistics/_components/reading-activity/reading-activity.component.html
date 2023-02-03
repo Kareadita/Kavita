@@ -1,52 +1,54 @@
 <ng-container>
-    <div class="row g-0 mb-2 align-items-center">
-        <div class="col-4">
-            <h4>Top Readers</h4>
+    <div class="dashboard-card-content">
+        <div class="row g-0 mb-2 align-items-center">
+            <div class="col-4">
+                <h4>Top Readers</h4>
+            </div>
+            <div class="col-8">
+                <form [formGroup]="formGroup" class="d-inline-flex float-end">
+                    <div class="d-flex me-1" *ngIf="isAdmin && !individualUserMode">
+                        <label for="time-select-read-by-day" class="form-check-label"></label>
+                        <select id="time-select-read-by-day" class="form-select" formControlName="users"
+                            [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched"> 
+                            <option [value]="0">All Users</option>
+                            <option *ngFor="let item of users$ | async" [value]="item.id">{{item.username}}</option>
+                        </select>
+                    </div>
+                    <div class="d-flex">
+                        <label for="time-select-top-reads" class="form-check-label"></label>
+                        <select id="time-select-top-reads" class="form-select" formControlName="days"
+                        [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
+                            <option *ngFor="let item of timePeriods" [value]="item.value">{{item.title}}</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="col-8">
-            <form [formGroup]="formGroup" class="d-inline-flex float-end">
-                <div class="d-flex me-1" *ngIf="isAdmin && !individualUserMode">
-                    <label for="time-select-read-by-day" class="form-check-label"></label>
-                    <select id="time-select-read-by-day" class="form-select" formControlName="users"
-                        [class.is-invalid]="formGroup.get('users')?.invalid && formGroup.get('users')?.touched"> 
-                        <option [value]="0">All Users</option>
-                        <option *ngFor="let item of users$ | async" [value]="item.id">{{item.username}}</option>
-                    </select>
-                </div>
-                <div class="d-flex">
-                    <label for="time-select-top-reads" class="form-check-label"></label>
-                    <select id="time-select-top-reads" class="form-select" formControlName="days"
-                    [class.is-invalid]="formGroup.get('days')?.invalid && formGroup.get('days')?.touched">
-                        <option *ngFor="let item of timePeriods" [value]="item.value">{{item.title}}</option>
-                    </select>
-                </div>
-            </form>
+        <div class="row g-0">
+            <ng-container *ngIf="data$ | async as data">
+                <ngx-charts-line-chart
+                    *ngIf="data.length > 0; else noData"
+                    class="dark"
+                    [legend]="true"
+                    legendTitle="Formats"
+                    [showXAxisLabel]="true"
+                    [showYAxisLabel]="true"
+                    [xAxis]="true"
+                    [yAxis]="true"
+                    [showGridLines]="false"
+                    [showRefLines]="true"
+                    [roundDomains]="true"
+                    [autoScale]="true"
+                    xAxisLabel="Time"
+                    yAxisLabel="Reading Activity"
+                    [timeline]="false"
+                    [results]="data"
+                    >
+                    </ngx-charts-line-chart>
+            </ng-container>
         </div>
+        <ng-template #noData>
+            No Reading progress
+        </ng-template>
     </div>
-    <div class="row g-0">
-        <ng-container *ngIf="data$ | async as data">
-            <ngx-charts-line-chart
-                *ngIf="data.length > 0; else noData"
-                class="dark"
-                [legend]="true"
-                legendTitle="Formats"
-                [showXAxisLabel]="true"
-                [showYAxisLabel]="true"
-                [xAxis]="true"
-                [yAxis]="true"
-                [showGridLines]="false"
-                [showRefLines]="true"
-                [roundDomains]="true"
-                [autoScale]="true"
-                xAxisLabel="Time"
-                yAxisLabel="Reading Activity"
-                [timeline]="false"
-                [results]="data"
-                >
-                </ngx-charts-line-chart>
-        </ng-container>
-    </div>
-    <ng-template #noData>
-        No Reading progress
-    </ng-template>
 </ng-container>
