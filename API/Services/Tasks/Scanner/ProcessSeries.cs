@@ -50,7 +50,7 @@ public class ProcessSeries : IProcessSeries
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
-    private IList<Tag> _tags;
+    private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
@@ -77,7 +77,7 @@ public class ProcessSeries : IProcessSeries
     {
         _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _people = await _unitOfWork.PersonRepository.GetAllPeople();
-        _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
                             .ToDictionary(t => t.NormalizedTitle);
 
@@ -681,7 +681,8 @@ public class ProcessSeries : IProcessSeries
 
         void AddTag(Tag tag, bool added)
         {
-            TagHelper.AddTagIfNotExists(chapter.Tags, tag);
+            //TagHelper.AddTagIfNotExists(chapter.Tags, tag);
+            chapter.Tags.Add(tag);
         }
 
 
@@ -752,8 +753,7 @@ public class ProcessSeries : IProcessSeries
 
         var tags = GetTagValues(comicInfo.Tags);
         TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
-        UpdateTag(tags, false,
-            AddTag);
+        UpdateTag(tags, AddTag);
     }
 
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
@@ -761,7 +761,7 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).ToList();
+            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(s => s.Normalize()).ToList();
         }
         return ImmutableList<string>.Empty;
     }
@@ -831,26 +831,23 @@ public class ProcessSeries : IProcessSeries
     ///
     /// </summary>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
-    private void UpdateTag(IEnumerable<string> names, bool isExternal, Action<Tag, bool> action)
+    private void UpdateTag(IEnumerable<string> names, Action<Tag, bool> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var added = false;
             var normalizedName = Parser.Parser.Normalize(name);
+            _tags.TryGetValue(normalizedName, out var tag);
 
-            var tag = _tags.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+            var added = tag == null;
             if (tag == null)
             {
-                added = true;
                 tag = DbFactory.Tag(name, false);
                 lock (_tags)
                 {
-                    _tags.Add(tag);
+                    _tags.Add(normalizedName, tag);
                 }
             }
 
