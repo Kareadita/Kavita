@@ -161,6 +161,8 @@ public class ProcessSeries : IProcessSeries
 
             UpdateSeriesMetadata(series, library);
 
+            CreateReadingListsFromSeries(series, library);
+
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
@@ -201,6 +203,27 @@ public class ProcessSeries : IProcessSeries
 
         await _metadataService.GenerateCoversForSeries(series, false);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
+    }
+
+    private void CreateReadingListsFromSeries(Series series, Library library)
+    {
+        //if (!library.ManageReadingLists) return;
+        _logger.LogInformation("Generating Reading Lists for {SeriesName}", series.Name);
+
+        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            if (!string.IsNullOrEmpty(chapter.StoryArc))
+            {
+                var readingLists = chapter.StoryArc.Split(',');
+                var readingListOrders = chapter.StoryArcNumber.Split(',');
+                if (readingListOrders.Length == 0)
+                {
+                    _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
+
+                }
+            }
+        }
     }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
@@ -691,19 +714,6 @@ public class ProcessSeries : IProcessSeries
         {
             chapter.TotalCount = comicInfo.Count;
         }
-
-        if (!string.IsNullOrEmpty(chapter.StoryArc))
-        {
-            var readingLists = chapter.StoryArc.Split(',');
-            var readingListOrders = chapter.StoryArcNumber.Split(',');
-            if (readingListOrders.Length == 0)
-            {
-                _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
-
-            }
-
-        }
-
 
         // This needs to check against both Number and Volume to calculate Count
         chapter.Count = comicInfo.CalculatedCount();
