@@ -181,6 +181,96 @@ public class ReadingListServiceTests
         Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
     }
 
+    [Fact]
+    public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift_ThenDeleteSecond_OrderShouldBeCorrect()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone,
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "3",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        // Existing (order, chapterId): (0, 1), (1, 2), (2, 3)
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await _unitOfWork.CommitAsync();
+        Assert.Equal(3, readingList.Items.Count);
+
+        // From 3 to 1
+        // New (order, chapterId): (0, 3), (1, 2), (2, 1)
+        await _readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
+        {
+            FromPosition = 2, ToPosition = 0, ReadingListId = 1, ReadingListItemId = 3
+        });
+
+
+
+        Assert.Equal(3, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
+        Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
+
+        // New (order, chapterId): (0, 3), (2, 1): Delete 2nd item
+        await _readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
+        {
+            ReadingListId = 1, ReadingListItemId = readingList.Items.Single(i => i.ChapterId == 2).Id
+        });
+
+        Assert.Equal(2, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
+    }
+
 
     #endregion
 
@@ -342,7 +432,6 @@ public class ReadingListServiceTests
 
     #endregion
 
-
     #region CalculateAgeRating
 
     [Fact]
@@ -412,6 +501,29 @@ public class ReadingListServiceTests
     public async Task CalculateAgeRating_ShouldUpdateToMax()
     {
         await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Name = "0",
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Number = "1",
+                        },
+                        new Chapter()
+                        {
+                            Number = "2",
+                        }
+                    }
+                }
+            }
+        };
         _context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -424,33 +536,13 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
-                            {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        s
                     }
                 },
             }
         });
+
+        s.Metadata.AgeRating = AgeRating.G;
 
         await _context.SaveChangesAsync();
 
@@ -468,7 +560,66 @@ public class ReadingListServiceTests
         await _unitOfWork.CommitAsync();
 
         await _readingListService.CalculateReadingListAgeRating(readingList);
-        Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
+        Assert.Equal(AgeRating.G, readingList.AgeRating);
+    }
+
+    #endregion
+
+    #region FormatTitle
+
+    [Fact]
+    public void FormatTitle_ShouldFormatCorrectly()
+    {
+        // Manga Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1")));
+        Assert.Equal("Chapter 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1", "1")));
+        Assert.Equal("Chapter 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, chapterTitleName: "The Title")));
+
+        // Comic Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1")));
+        Assert.Equal("Issue #1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1", "1")));
+        Assert.Equal("Issue #1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, chapterTitleName: "The Title")));
+
+        // Book Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1")));
+        Assert.Equal("Book 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1", "1")));
+        Assert.Equal("Book 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, chapterTitleName: "The Title")));
+
+        // Manga Library & EPUB
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1", "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1", "1", "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, chapterTitleName: "The Title")));
+
+        // Book Library & EPUB
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1", "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1", "1", "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, chapterTitleName: "The Title")));
+
+    }
+
+    private static ReadingListItemDto CreateListItemDto(MangaFormat seriesFormat, LibraryType libraryType,
+        string volumeNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+        string chapterNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+        string chapterTitleName = "")
+    {
+        return new ReadingListItemDto()
+        {
+            SeriesFormat = seriesFormat,
+            LibraryType = libraryType,
+            VolumeNumber = volumeNumber,
+            ChapterNumber = chapterNumber,
+            ChapterTitleName = chapterTitleName
+        };
     }
 
     #endregion

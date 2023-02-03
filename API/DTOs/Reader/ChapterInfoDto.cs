@@ -65,7 +65,15 @@ public class ChapterInfoDto : IChapterInfoDto
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
     public string Title { get; set; }
-
+    /// <summary>
+    /// List of all files with their inner archive structure maintained in filename and dimensions
+    /// </summary>
+    /// <remarks>This is optionally returned by includeDimensions</remarks>
     public IEnumerable<FileDimensionDto> PageDimensions { get; set; }
+    /// <summary>
+    /// For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page
+    /// </summary>
+    /// <remarks>This is optionally returned by includeDimensions</remarks>
+    public IDictionary<int, int> DoublePairs { get; set; }
 
 }

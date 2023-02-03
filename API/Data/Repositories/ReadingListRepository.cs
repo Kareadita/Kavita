@@ -5,6 +5,7 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -145,7 +146,7 @@ public class ReadingListRepository : IReadingListRepository
             {
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
-                ReleaseDate = chapter.ReleaseDate,
+                chapter.ReleaseDate,
                 ReadingListItem = data,
                 ChapterTitleName = chapter.TitleName,
 
@@ -201,7 +202,7 @@ public class ReadingListRepository : IReadingListRepository
 
         foreach (var item in items)
         {
-            item.Title = ReadingListHelper.FormatTitle(item);
+            item.Title = ReadingListService.FormatTitle(item);
         }
 
         // Attach progress information

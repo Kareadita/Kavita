@@ -249,6 +249,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("SwipeToPaginate")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("ThemeId")
                         .HasColumnType("INTEGER");
 
@@ -397,6 +400,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("ReleaseDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("SeriesGroup")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Summary")
                         .HasColumnType("TEXT");
 
@@ -522,9 +528,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ExternalTag")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
@@ -533,7 +536,7 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedTitle", "ExternalTag")
+                    b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
                     b.ToTable("Genre");
@@ -576,6 +579,11 @@ namespace API.Data.Migrations
 
                     b.Property<DateTime>("LastScanned")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ManageCollections")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -949,6 +957,44 @@ namespace API.Data.Migrations
                     b.ToTable("ServerSetting");
                 });
 
+            modelBuilder.Entity("API.Entities.ServerStatistics", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ChapterCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("FileCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("GenreCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("PersonCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("SeriesCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TagCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("UserCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("VolumeCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServerStatistics");
+                });
+
             modelBuilder.Entity("API.Entities.SiteTheme", b =>
                 {
                     b.Property<int>("Id")
@@ -987,9 +1033,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ExternalTag")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
@@ -998,7 +1041,7 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedTitle", "ExternalTag")
+                    b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
                     b.ToTable("Tag");

@@ -27,6 +27,10 @@ public class Library : IEntityDate
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
+    /// <summary>
+    /// Should this library create and manage collections from Metadata
+    /// </summary>
+    public bool ManageCollections { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     /// <summary>

@@ -168,17 +168,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const params: any = {};
       params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params[FilterQueryParam.Page] = 1;
+      params['title'] = 'Recently Updated';
       this.router.navigate(['all-series'], {queryParams: params});
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params[FilterQueryParam.ReadStatus] = 'true,false,false';
       params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params[FilterQueryParam.Page] = 1;
+      params['title'] = 'On Deck';
       this.router.navigate(['all-series'], {queryParams: params});
     }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
       params[FilterQueryParam.SortBy] = SortField.Created + ',false'; // sort by created, desc
       params[FilterQueryParam.Page] = 1;
+      params['title'] = 'Newly Added';
       this.router.navigate(['all-series'], {queryParams: params});
     } 
   }

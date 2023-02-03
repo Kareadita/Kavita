@@ -1,9 +1,10 @@
 import { Directive, Input, HostListener, OnInit, ElementRef, Inject } from '@angular/core';
 
 @Directive({
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[a11y-click]'
 })
-export class A11yClickDirective {
+export class A11yClickDirective implements OnInit {
   @Input('a11y-click') keyCodes!: string;
   keyCodeArray!: string[];
   

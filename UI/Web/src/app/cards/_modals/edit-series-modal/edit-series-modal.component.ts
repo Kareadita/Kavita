@@ -54,7 +54,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
+  size: number = 0;
   private readonly onDestroy = new Subject<void>();
+  
 
 
   // Typeaheads
@@ -121,7 +123,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     });
     
     this.initSeries = Object.assign({}, this.series);
-
 
     this.editSeriesForm = this.fb.group({
       id: new FormControl(this.series.id, []),
@@ -232,6 +233,16 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
           return f;
         })).flat();
       });
+
+      if (volumes.length > 0) {
+        this.size = volumes.reduce((sum1, volume) => {
+          return sum1 + volume.chapters.reduce((sum2, chapter) => {
+            return sum2 + chapter.files.reduce((sum3, file) => {
+              return sum3 + file.bytes;
+            }, 0);
+          }, 0);
+        }, 0);
+      }
       this.cdRef.markForCheck();
     });
   }

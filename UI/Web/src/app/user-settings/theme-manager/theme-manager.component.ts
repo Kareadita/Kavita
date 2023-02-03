@@ -12,7 +12,7 @@ import { AccountService } from 'src/app/_services/account.service';
   styleUrls: ['./theme-manager.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ThemeManagerComponent implements OnInit, OnDestroy {
+export class ThemeManagerComponent implements OnDestroy {
 
   currentTheme: SiteTheme | undefined;
   isAdmin: boolean = false;
@@ -38,9 +38,6 @@ export class ThemeManagerComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       }
     });
-  }
-
-  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {

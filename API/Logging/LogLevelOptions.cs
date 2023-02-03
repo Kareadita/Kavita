@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Net;
 using API.Services;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Core;
@@ -57,7 +60,28 @@ public static class LogLevelOptions
             .WriteTo.File(LogFile,
                 shared: true,
                 rollingInterval: RollingInterval.Day,
-                outputTemplate: outputTemplate);
+                outputTemplate: outputTemplate)
+            .Filter.ByIncludingOnly(ShouldIncludeLogStatement);
+    }
+
+    private static  bool ShouldIncludeLogStatement(LogEvent e)
+    {
+        var isRequestLoggingMiddleware = e.Properties.ContainsKey("SourceContext") &&
+                                         e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==
+                                         "Serilog.AspNetCore.RequestLoggingMiddleware";
+
+        // If Minimum log level is Information, swallow all Request Logging messages
+        if (isRequestLoggingMiddleware && LogLevelSwitch.MinimumLevel >= LogEventLevel.Information)
+        {
+            return false;
+        }
+
+        if (isRequestLoggingMiddleware)
+        {
+            if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/api/health") return false;
+            if (e.Properties.ContainsKey("Path") && e.Properties["Path"].ToString().Replace("\"", string.Empty) == "/hubs/messages") return false;
+        }
+        return true;
     }
 
     public static void SwitchLogLevel(string level)

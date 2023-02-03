@@ -84,14 +84,15 @@
                  tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
         </ng-container>
 
-        <div class="book-container" [ngClass]="{'immersive' : immersiveMode}">
+        <div #bookContainer class="book-container" [ngClass]="{'immersive' : immersiveMode}">
 
             <div #readingHtml class="book-content {{ColumnLayout}}" [ngStyle]="{'max-height': ColumnHeight, 'column-width': ColumnWidth}" 
                 [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)"></div>
 
 
-            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();" [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
+            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();" 
+                [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
                 <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
             </div>
         </div>

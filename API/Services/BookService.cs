@@ -33,17 +33,6 @@ public interface IBookService
 {
     int GetNumberOfPages(string filePath);
     string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
-    Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
-
-    /// <summary>
-    /// Scopes styles to .reading-section and replaces img src to the passed apiBase
-    /// </summary>
-    /// <param name="stylesheetHtml"></param>
-    /// <param name="apiBase"></param>
-    /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
-    /// <param name="book">Book Reference, needed for if you expect Import statements</param>
-    /// <returns></returns>
-    Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
     ComicInfo GetComicInfo(string filePath);
     ParserInfo ParseInfo(string filePath);
     /// <summary>
@@ -53,11 +42,9 @@ public interface IBookService
     /// <param name="fileFilePath"></param>
     /// <param name="targetDirectory">Where the files will be extracted to. If doesn't exist, will be created.</param>
     void ExtractPdfImages(string fileFilePath, string targetDirectory);
-
-    Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page);
     Task<ICollection<BookChapterItem>> GenerateTableOfContents(Chapter chapter);
-
     Task<string> GetBookPage(int page, int chapterId, string cachedEpubPath, string baseUrl);
+    Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 }
 
 public class BookService : IBookService
@@ -163,6 +150,14 @@ public class BookService : IBookService
         anchor.Attributes.Add("href", "javascript:void(0)");
     }
 
+    /// <summary>
+    /// Scopes styles to .reading-section and replaces img src to the passed apiBase
+    /// </summary>
+    /// <param name="stylesheetHtml"></param>
+    /// <param name="apiBase"></param>
+    /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
+    /// <param name="book">Book Reference, needed for if you expect Import statements</param>
+    /// <returns></returns>
     public async Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book)
     {
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
@@ -407,21 +402,7 @@ public class BookService : IBookService
             {
                 publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
             }
-            var dateParsed = DateTime.TryParse(publicationDate, out var date);
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            switch (dateParsed)
-            {
-                case true:
-                    year = date.Year;
-                    month = date.Month;
-                    day = date.Day;
-                    break;
-                case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
-                    int.TryParse(publicationDate, out year);
-                    break;
-            }
+            var (year, month, day) = GetPublicationDate(publicationDate);
 
             var info =  new ComicInfo()
             {
@@ -478,7 +459,28 @@ public class BookService : IBookService
         return null;
     }
 
-    #nullable enable
+    private static (int year, int month, int day) GetPublicationDate(string publicationDate)
+    {
+        var dateParsed = DateTime.TryParse(publicationDate, out var date);
+        var year = 0;
+        var month = 0;
+        var day = 0;
+        switch (dateParsed)
+        {
+            case true:
+                year = date.Year;
+                month = date.Month;
+                day = date.Day;
+                break;
+            case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
+                int.TryParse(publicationDate, out year);
+                break;
+        }
+
+        return (year, month, day);
+    }
+
+#nullable enable
     private static string ValidateLanguage(string? language)
     {
         if (string.IsNullOrEmpty(language)) return string.Empty;
@@ -717,12 +719,36 @@ public class BookService : IBookService
         return PrepareFinalHtml(doc, body);
     }
 
+    /// <summary>
+    /// Tries to find the correct key by applying cleaning and remapping if the epub has bad data. Only works for HTML files.
+    /// </summary>
+    /// <param name="book"></param>
+    /// <param name="mappings"></param>
+    /// <param name="key"></param>
+    /// <returns></returns>
     private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
     {
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
         var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        if (!string.IsNullOrEmpty(correctedKey))
+        {
+            key = correctedKey;
+        }
+
+        return key;
+    }
+
+    public static string CoalesceKeyForAnyFile(EpubBookRef book, string key)
+    {
+        if (book.Content.AllFiles.ContainsKey(key)) return key;
+
+        var cleanedKey = CleanContentKeys(key);
+        if (book.Content.AllFiles.ContainsKey(cleanedKey)) return cleanedKey;
+
+        // Fallback to searching for key (bad epub metadata)
+        var correctedKey = book.Content.AllFiles.Keys.SingleOrDefault(s => s.EndsWith(key));
         if (!string.IsNullOrEmpty(correctedKey))
         {
             key = correctedKey;
@@ -844,7 +870,7 @@ public class BookService : IBookService
                 if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) return content;
 
                 // In more cases than not, due to this being XML not HTML, we need to escape the script tags.
-                content = BookService.EscapeTags(content);
+                content = EscapeTags(content);
 
                 doc.LoadHtml(content);
                 var body = doc.DocumentNode.SelectSingleNode("//body");

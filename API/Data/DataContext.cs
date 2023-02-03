@@ -45,6 +45,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<SeriesRelation> SeriesRelation { get; set; }
     public DbSet<FolderPath> FolderPath { get; set; }
     public DbSet<Device> Device { get; set; }
+    public DbSet<ServerStatistics> ServerStatistics { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -102,6 +103,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
         builder.Entity<Library>()
             .Property(b => b.IncludeInSearch)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageCollections)
             .HasDefaultValue(true);
     }
 

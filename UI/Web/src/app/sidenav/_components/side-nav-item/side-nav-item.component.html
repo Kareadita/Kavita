@@ -15,7 +15,7 @@
     <div class="active-highlight"></div>
     <span class="phone-hidden" title="{{title}}">
         <div>
-            <ng-container *ngIf="imageUrl != null && imageUrl != ''; else iconImg">
+            <ng-container *ngIf="imageUrl !== null && imageUrl !== ''; else iconImg">
                 <img [src]="imageUrl" alt="icon" class="side-nav-img">
             </ng-container>
             <ng-template #iconImg><i class="fa {{icon}}" aria-hidden="true"></i></ng-template>

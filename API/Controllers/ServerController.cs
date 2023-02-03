@@ -36,10 +36,11 @@ public class ServerController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IBookmarkService _bookmarkService;
     private readonly IScannerService _scannerService;
+    private readonly IAccountService _accountService;
 
     public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService, IScannerService scannerService)
+        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
@@ -51,6 +52,7 @@ public class ServerController : BaseApiController
         _emailService = emailService;
         _bookmarkService = bookmarkService;
         _scannerService = scannerService;
+        _accountService = accountService;
     }
 
     /// <summary>
@@ -143,6 +145,19 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Triggers the scheduling of the convert covers job. Only one job will run at a time.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("convert-covers")]
+    public ActionResult ScheduleConvertCovers()
+    {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true)) return Ok();
+        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllCoverToWebP());
+        return Ok();
+    }
+
     [HttpGet("logs")]
     public ActionResult GetLogs()
     {
@@ -176,12 +191,13 @@ public class ServerController : BaseApiController
     /// <summary>
     /// Is this server accessible to the outside net
     /// </summary>
+    /// <remarks>If the instance has the HostName set, this will return true whether or not it is accessible externally</remarks>
     /// <returns></returns>
     [HttpGet("accessible")]
     [AllowAnonymous]
     public async Task<ActionResult<bool>> IsServerAccessible()
     {
-        return await _emailService.CheckIfAccessible(Request.Host.ToString());
+        return Ok(await _accountService.CheckIfAccessible(Request));
     }
 
     [HttpGet("jobs")]

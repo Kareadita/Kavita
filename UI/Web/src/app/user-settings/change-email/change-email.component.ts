@@ -34,6 +34,7 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), take(1)).subscribe(user => {
       this.user = user;
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
+      this.form.addControl('password', new FormControl('', [Validators.required]));
       this.cdRef.markForCheck();
       this.accountService.isEmailConfirmed().subscribe((confirmed) => {
         this.emailConfirmed = confirmed;
@@ -60,7 +61,7 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
 
     const model = this.form.value;
     this.errors = [];
-    this.accountService.updateEmail(model.email).subscribe((updateEmailResponse: UpdateEmailResponse) => {
+    this.accountService.updateEmail(model.email, model.password).subscribe((updateEmailResponse: UpdateEmailResponse) => {
       if (updateEmailResponse.emailSent) {
         if (updateEmailResponse.hadNoExistingEmail) {
           this.toastr.success('An email has been sent to ' + model.email + ' for confirmation.');

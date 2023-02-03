@@ -7,14 +7,13 @@ img {
   align-items: center;
 
   &.full-width {
-    width: 100vw;
     height: calc(var(--vh)*100);
     display: grid;
   }
 
   &.full-height {
-    height: 100vh;
-    display: inline-block;
+    height: calc(100vh - 34px); // 34px is the height of the horizontal scrollbar that will appear
+    display: flex; // changed from inline-block to fix the centering on tablets not working
   }
 
   &.original {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 
 @Component({
@@ -7,10 +7,8 @@ import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
   styleUrls: ['./chapter-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChapterMetadataDetailComponent implements OnInit {
+export class ChapterMetadataDetailComponent {
   @Input() chapter: ChapterMetadata | undefined;
 
   constructor() { }
-
-  ngOnInit(): void {}
 }

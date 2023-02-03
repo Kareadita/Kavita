@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -18,11 +20,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace API.Tests.Services;
 
 public class ReaderServiceTests
 {
+    private readonly ITestOutputHelper _testOutputHelper;
 
     private readonly IUnitOfWork _unitOfWork;
 
@@ -33,8 +37,9 @@ public class ReaderServiceTests
     private const string BackupDirectory = "C:/kavita/config/backups/";
     private const string DataDirectory = "C:/data/";
 
-    public ReaderServiceTests()
+    public ReaderServiceTests(ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
         var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
 
         _context = new DataContext(contextOptions);
@@ -1294,8 +1299,6 @@ public class ReaderServiceTests
         // This is first chapter of first volume
         prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,4, 1);
         Assert.Equal(-1, prevChapter);
-        //chapterInfoDto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
-
     }
 
     [Fact]
@@ -1426,6 +1429,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_NoProgress()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1474,8 +1478,55 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1_WithProgress()
+    {
+        await ResetDb();
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 3),
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 2,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1", nextChapter.Range);
+    }
+
+    [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1548,6 +1599,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1626,6 +1678,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1695,6 +1748,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1737,6 +1791,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1803,6 +1858,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1866,6 +1922,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1911,6 +1968,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1972,6 +2030,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress()
     {
+        await ResetDb();
         var series = new Series()
         {
             Name = "Test",
@@ -2031,6 +2090,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAllChaptersAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2073,6 +2133,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkUptTillChapterNumberAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2117,6 +2178,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2356,7 +2418,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Manga_Chapter()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Manga, false, false);
         Assert.Equal("Chapter", actual);
     }
@@ -2364,7 +2425,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Book_Chapter_WithTitle()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Book, false, false);
         Assert.Equal("Book", actual);
     }
@@ -2372,7 +2432,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Comic()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Comic, false, false);
         Assert.Equal("Issue", actual);
     }
@@ -2380,7 +2439,6 @@ public class ReaderServiceTests
     [Fact]
     public void FormatChapterName_Comic_WithHash()
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
         var actual = ReaderService.FormatChapterName(LibraryType.Comic, true, true);
         Assert.Equal("Issue #", actual);
     }
@@ -2514,4 +2572,46 @@ public class ReaderServiceTests
 
     #endregion
 
+    #region GetPairs
+
+    [Theory]
+    [InlineData("No Wides", new [] {false, false, false}, new [] {"0,0", "1,1", "2,1"})]
+    [InlineData("Test_odd_spread_1.zip", new [] {false, false, false, false, false, true},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5"})]
+    [InlineData("Test_odd_spread_2.zip", new [] {false, false, false, false, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6"})]
+    [InlineData("Test_even_spread_1.zip", new [] {false, false, false, false, false, false, true},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6"})]
+    [InlineData("Test_even_spread_2.zip", new [] {false, false, false, false, false, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7"})]
+    [InlineData("Edge_cases_SP01.zip", new [] {true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3"})]
+    [InlineData("Edge_cases_SP02.zip", new [] {false, true, false, false, false},
+        new [] {"0,0", "1,1", "2,2", "3,2", "4,4"})]
+    [InlineData("Edge_cases_SP03.zip", new [] {false, false, false, false, false, true, true, false, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,7", "9,9"})]
+    [InlineData("Edge_cases_SP04.zip", new [] {false, false, false, false, false, true, false, true, false, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,7", "8,8", "9,8"})]
+    [InlineData("Edge_cases_SP05.zip", new [] {false, false, false, false, false, true, false, false, true, false},
+        new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,9"})]
+    public void GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
+    {
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
+        var pairs = readerService.GetPairs(files);
+        var expectedDict = new Dictionary<int, int>();
+        foreach (var pair in expectedPairs)
+        {
+            var token = pair.Split(',');
+            expectedDict.Add(int.Parse(token[0]), int.Parse(token[1]));
+        }
+
+        _testOutputHelper.WriteLine("Case: {0}", caseName);
+        _testOutputHelper.WriteLine("Expected: {0}", string.Join(", ", expectedDict.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
+        _testOutputHelper.WriteLine("Actual: {0}", string.Join(", ", pairs.Select(kvp => $"{kvp.Key}->{kvp.Value}")));
+
+        Assert.Equal(expectedDict, pairs);
+    }
+
+    #endregion
 }

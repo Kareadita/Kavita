@@ -106,8 +106,13 @@ public enum ServerSettingKey
     [Description("ConvertCoverToWebP")]
     ConvertCoverToWebP = 19,
     /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server. Used for email link generation
+    /// </summary>
+    [Description("HostName")]
+    HostName = 20,
+    /// <summary>
     /// Ip addresses the server listens on. Not managed in DB. Managed in appsettings.json and synced to DB.
     /// </summary>
     [Description("IpAddresses")]
-    IpAddresses = 20,
+    IpAddresses = 21,
 }

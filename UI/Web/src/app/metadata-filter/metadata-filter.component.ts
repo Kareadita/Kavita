@@ -629,12 +629,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   apply() {
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
-    this.updateApplied++;
-    
-    if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile) {
+
+    if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();
     }
-    
+
+    this.updateApplied++;
     this.cdRef.markForCheck();
   }
 

@@ -69,6 +69,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.TotalLogs:
                     destination.TotalLogs = int.Parse(row.Value);
                     break;
+                case ServerSettingKey.HostName:
+                    destination.HostName = row.Value;
+                    break;
             }
         }
 

@@ -47,7 +47,7 @@ $primary-color: #0062cc;
 $action-bar-height: 38px;
 
 
-//          Drawer
+// Drawer
 .control-container {
     padding-bottom: 5px;
 }
@@ -84,10 +84,6 @@ $action-bar-height: 38px;
 
 .dark-mode .overlay {
     opacity: 0;
-}
-
-::ng-deep .bg-warning  {
-    background-color: yellow;
 }
 
 
@@ -196,7 +192,8 @@ $action-bar-height: 38px;
     }
 
     &.immersive {
-        height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+        // Note: I removed this for bug: https://github.com/Kareadita/Kavita/issues/1726
+        //height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
     a, :link {

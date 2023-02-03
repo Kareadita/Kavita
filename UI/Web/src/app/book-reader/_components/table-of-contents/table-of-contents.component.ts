@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { BookChapterItem } from '../../_models/book-chapter-item';
 
@@ -8,7 +8,7 @@ import { BookChapterItem } from '../../_models/book-chapter-item';
   styleUrls: ['./table-of-contents.component.scss'],
   changeDetection: ChangeDetectionStrategy.Default
 })
-export class TableOfContentsComponent implements OnInit, OnDestroy {
+export class TableOfContentsComponent implements OnDestroy {
 
   @Input() chapterId!: number;
   @Input() pageNum!: number;
@@ -22,9 +22,6 @@ export class TableOfContentsComponent implements OnInit, OnDestroy {
   pageAnchors: {[n: string]: number } = {};
 
   constructor() {}
-
-  ngOnInit(): void {
-  }
 
   ngOnDestroy(): void {
       this.onDestroy.next();

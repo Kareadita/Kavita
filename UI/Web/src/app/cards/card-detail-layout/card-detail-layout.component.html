@@ -7,7 +7,7 @@
             </span>
             <span *ngIf="header !== undefined && header.length > 0">
                 {{header}}&nbsp;
-                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
             </span>
         </h2>
     </div>
@@ -47,11 +47,7 @@
     </div>
 </ng-template>
 
-<div class="mx-auto" *ngIf="isLoading" style="width: 200px;">
-    <div class="spinner-border text-secondary loading" role="status">
-        <span class="invisible">Loading...</span>
-    </div>
-</div>
+<app-loading [loading]="isLoading"></app-loading>
 
 <ng-template #jumpBar>
     <div class="jump-bar">

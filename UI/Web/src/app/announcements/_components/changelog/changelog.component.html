@@ -21,6 +21,4 @@
 </div>
 
 
-<div class="spinner-border text-secondary" *ngIf="isLoading" role="status">
-    <span class="invisible">Loading...</span>
-</div>
+<app-loading [loading]="isLoading"></app-loading>

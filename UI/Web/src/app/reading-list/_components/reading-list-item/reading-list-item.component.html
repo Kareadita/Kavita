@@ -29,7 +29,7 @@
         </h5>
         <div class="ps-1 d-none d-md-inline-block">
           <ng-container *ngIf="item.seriesFormat | mangaFormat as formatString">
-            <i class="fa {{item.seriesFormat | mangaFormatIcon}}" aria-hidden="true" *ngIf="item.seriesFormat != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+            <i class="fa {{item.seriesFormat | mangaFormatIcon}}" aria-hidden="true" *ngIf="item.seriesFormat !== MangaFormat.UNKNOWN" title="{{formatString}}"></i>
             <span class="visually-hidden">{{formatString}}</span>&nbsp;
           </ng-container>
     

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil } from 'rxjs';
@@ -12,7 +12,7 @@ import { PieDataItem } from '../../_models/pie-data-item';
   styleUrls: ['./manga-format-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MangaFormatStatsComponent implements OnInit {
+export class MangaFormatStatsComponent implements OnInit, OnDestroy {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 

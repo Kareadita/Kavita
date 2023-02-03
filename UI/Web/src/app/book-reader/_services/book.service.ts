@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { TextResonse } from 'src/app/_types/text-response';
 import { environment } from 'src/environments/environment';
 import { BookChapterItem } from '../_models/book-chapter-item';
 import { BookInfo } from '../_models/book-info';
@@ -41,7 +42,7 @@ export class BookService {
   }
 
   getBookPage(chapterId: number, page: number) {
-    return this.http.get<string>(this.baseUrl + 'book/' + chapterId + '/book-page?page=' + page, {responseType: 'text' as 'json'});
+    return this.http.get<string>(this.baseUrl + 'book/' + chapterId + '/book-page?page=' + page, TextResonse);
   }
 
   getBookInfo(chapterId: number) {

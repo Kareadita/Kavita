@@ -1,4 +1,4 @@
-<ng-container *ngIf="format != MangaFormat.UNKNOWN">
+<ng-container *ngIf="format !== MangaFormat.UNKNOWN">
     <i class="fa {{format | mangaFormatIcon}}" aria-hidden="true" title="{{format | mangaFormat}}"></i>&nbsp;
     <ng-content></ng-content>
 </ng-container>

@@ -17,7 +17,12 @@
         Cannot Read
       </div>
       
-      <div class="not-read-badge" *ngIf="read === 0 && total > 0"></div>
+      <ng-container *ngIf="read === 0 && total > 0">
+        <div class="badge-container">
+          <div class="not-read-badge" ></div>
+        </div>
+      </ng-container>
+      
       <div class="bulk-mode {{bulkSelectionService.hasSelections() ? 'always-show' : ''}}" (click)="handleSelection($event)" *ngIf="allowSelection">
         <input type="checkbox" class="form-check-input" attr.aria-labelledby="{{title}}_{{entity.id}}" [ngModel]="selected" [ngModelOptions]="{standalone: true}">
       </div>
@@ -41,7 +46,7 @@
             <span class="visually-hidden">(promoted)</span>
           </span>
           <ng-container *ngIf="format | mangaFormat as formatString">
-            <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format != MangaFormat.UNKNOWN" title="{{formatString}}"></i>
+            <i class="fa {{format | mangaFormatIcon}} me-1" aria-hidden="true" *ngIf="format !== MangaFormat.UNKNOWN" title="{{formatString}}"></i>
             <span class="visually-hidden">{{formatString}}</span>
           </ng-container>
           {{title}}

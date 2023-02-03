@@ -1,6 +1,6 @@
 <app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
-        All Series
+        {{title}}
     </h2>
     <h6 subtitle *ngIf="pagination">{{pagination.totalItems}} Series</h6>
 </app-side-nav-companion-bar>

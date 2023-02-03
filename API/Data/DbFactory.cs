@@ -27,7 +27,7 @@ public static class DbFactory
             NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -46,7 +46,7 @@ public static class DbFactory
             NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -76,11 +76,6 @@ public static class DbFactory
         };
     }
 
-    public static SeriesMetadata SeriesMetadata(ComicInfo info)
-    {
-        return SeriesMetadata(Array.Empty<CollectionTag>());
-    }
-
     public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
     {
         return new SeriesMetadata()
@@ -95,10 +90,11 @@ public static class DbFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
             Title = title?.Trim(),
             Summary = summary?.Trim(),
-            Promoted = promoted
+            Promoted = promoted,
+            SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
 
@@ -106,7 +102,7 @@ public static class DbFactory
     {
         return new ReadingList()
         {
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()).ToUpper(),
+            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
             Title = title?.Trim(),
             Summary = summary?.Trim(),
             Promoted = promoted,
@@ -125,23 +121,21 @@ public static class DbFactory
         };
     }
 
-    public static Genre Genre(string name, bool external)
+    public static Genre Genre(string name)
     {
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            ExternalTag = external
         };
     }
 
-    public static Tag Tag(string name, bool external)
+    public static Tag Tag(string name)
     {
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            ExternalTag = external
         };
     }
 

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -45,14 +46,17 @@ public class ProcessSeries : IProcessSeries
     private readonly IFileService _fileService;
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
+    private readonly ICollectionTagService _collectionTagService;
 
-    private IList<Genre> _genres;
+    private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
-    private IList<Tag> _tags;
+    private Dictionary<string, Tag> _tags;
+    private Dictionary<string, CollectionTag> _collectionTags;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
-        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService)
+        IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
+        ICollectionTagService collectionTagService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -63,6 +67,7 @@ public class ProcessSeries : IProcessSeries
         _fileService = fileService;
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+        _collectionTagService = collectionTagService;
     }
 
     /// <summary>
@@ -70,9 +75,12 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        _genres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _people = await _unitOfWork.PersonRepository.GetAllPeople();
-        _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
+        _tags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToDictionary(t => t.NormalizedTitle);
+        _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
+                            .ToDictionary(t => t.NormalizedTitle);
+
     }
 
     public async Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false)
@@ -151,7 +159,7 @@ public class ProcessSeries : IProcessSeries
                 series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
             }
 
-            UpdateSeriesMetadata(series, library.Type);
+            UpdateSeriesMetadata(series, library);
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -223,10 +231,10 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    private static void UpdateSeriesMetadata(Series series, LibraryType libraryType)
+    private void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-        var isBook = libraryType == LibraryType.Book;
+        var isBook = library.Type == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
@@ -276,6 +284,23 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(firstChapter.Language) && !series.Metadata.LanguageLocked)
         {
             series.Metadata.Language = firstChapter.Language;
+        }
+
+        if (!string.IsNullOrEmpty(firstChapter.SeriesGroup) && library.ManageCollections)
+        {
+            _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
+
+            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            {
+                var normalizedName = Parser.Parser.Normalize(collection);
+                if (!_collectionTags.TryGetValue(normalizedName, out var tag))
+                {
+                    tag = _collectionTagService.CreateTag(collection);
+                    _collectionTags.Add(normalizedName, tag);
+                }
+
+                _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
+            }
         }
 
         // Handle People
@@ -508,6 +533,7 @@ public class ProcessSeries : IProcessSeries
             series.Volumes = nonDeletedVolumes;
         }
 
+        // DO I need this anymore?
         _logger.LogDebug("[ScannerService] Updated {SeriesName} volumes from count of {StartingVolumeCount} to {VolumeCount}",
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
@@ -629,6 +655,11 @@ public class ProcessSeries : IProcessSeries
             chapter.Language = comicInfo.LanguageISO;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.SeriesGroup))
+        {
+            chapter.SeriesGroup = comicInfo.SeriesGroup;
+        }
+
         if (comicInfo.Count > 0)
         {
             chapter.TotalCount = comicInfo.Count;
@@ -642,14 +673,14 @@ public class ProcessSeries : IProcessSeries
             PersonHelper.AddPersonIfNotExists(chapter.People, person);
         }
 
-        void AddGenre(Genre genre)
+        void AddGenre(Genre genre, bool newTag)
         {
-            GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
+            chapter.Genres.Add(genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
-            TagHelper.AddTagIfNotExists(chapter.Tags, tag);
+            chapter.Tags.Add(tag);
         }
 
 
@@ -714,14 +745,13 @@ public class ProcessSeries : IProcessSeries
             AddPerson);
 
         var genres = GetTagValues(comicInfo.Genre);
-        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
-        UpdateGenre(genres, false,
-            AddGenre);
+        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
+            genres.Select(DbFactory.Genre).ToList());
+        UpdateGenre(genres, AddGenre);
 
         var tags = GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
-        UpdateTag(tags, false,
-            AddTag);
+        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(DbFactory.Tag).ToList());
+        UpdateTag(tags, AddTag);
     }
 
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
@@ -729,7 +759,7 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).ToList();
+            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(s => s.Normalize()).ToList();
         }
         return ImmutableList<string>.Empty;
     }
@@ -770,27 +800,27 @@ public class ProcessSeries : IProcessSeries
     ///
     /// </summary>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
-    /// <param name="action"></param>
-    private void UpdateGenre(IEnumerable<string> names, bool isExternal, Action<Genre> action)
+    /// <param name="action">Executes for each tag</param>
+    private void UpdateGenre(IEnumerable<string> names, Action<Genre, bool> action)
     {
         foreach (var name in names)
         {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
             var normalizedName = Parser.Parser.Normalize(name);
-            var genre = _genres.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
-            if (genre == null)
+            if (string.IsNullOrEmpty(normalizedName)) continue;
+
+            _genres.TryGetValue(normalizedName, out var genre);
+            var newTag = genre == null;
+            if (newTag)
             {
-                genre = DbFactory.Genre(name, false);
+                genre = DbFactory.Genre(name);
                 lock (_genres)
                 {
-                    _genres.Add(genre);
+                    _genres.Add(normalizedName, genre);
+                    _unitOfWork.GenreRepository.Attach(genre);
                 }
             }
 
-            action(genre);
+            action(genre, newTag);
         }
     }
 
@@ -798,26 +828,23 @@ public class ProcessSeries : IProcessSeries
     ///
     /// </summary>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
-    private void UpdateTag(IEnumerable<string> names, bool isExternal, Action<Tag, bool> action)
+    private void UpdateTag(IEnumerable<string> names, Action<Tag, bool> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var added = false;
             var normalizedName = Parser.Parser.Normalize(name);
+            _tags.TryGetValue(normalizedName, out var tag);
 
-            var tag = _tags.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+            var added = tag == null;
             if (tag == null)
             {
-                added = true;
-                tag = DbFactory.Tag(name, false);
+                tag = DbFactory.Tag(name);
                 lock (_tags)
                 {
-                    _tags.Add(tag);
+                    _tags.Add(normalizedName, tag);
                 }
             }
 

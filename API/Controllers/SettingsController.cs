@@ -104,7 +104,7 @@ public class SettingsController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
-        _logger.LogInformation("{UserName}  is updating Server Settings", User.GetUsername());
+        _logger.LogInformation("{UserName} is updating Server Settings", User.GetUsername());
 
         // We do not allow CacheDirectory changes, so we will ignore.
         var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
@@ -187,6 +187,13 @@ public class SettingsController : BaseApiController
             if (setting.Key == ServerSettingKey.ConvertCoverToWebP && updateSettingsDto.ConvertCoverToWebP + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.ConvertCoverToWebP + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
+            {
+                setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();
+                if (setting.Value.EndsWith("/")) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

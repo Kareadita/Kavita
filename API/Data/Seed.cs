@@ -93,7 +93,7 @@ public static class Seed
                 Key = ServerSettingKey.IpAddresses, Value = "0.0.0.0,::"
             }, // Not used from DB, but DB is sync with appSettings.json
             new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
-            new() {Key = ServerSettingKey.EnableOpds, Value = "false"},
+            new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
             new() {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
             new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
             new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
@@ -105,6 +105,7 @@ public static class Seed
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             new() {Key = ServerSettingKey.ConvertCoverToWebP, Value = "false"},
+            new() {Key = ServerSettingKey.HostName, Value = string.Empty},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

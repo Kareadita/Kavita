@@ -179,6 +179,12 @@
                                             </div>
                                         </div>
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                            <div class="mb-3 mt-1">
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" id="swipe-to-paginate" role="switch" formControlName="swipeToPaginate" class="form-check-input" [value]="true">
+                                                    <label class="form-check-label me-1" for="swipe-to-paginate">Swipe to Paginate</label><i class="fa fa-info-circle" aria-hidden="true" placement="top" ngbTooltip="Should swiping on the screen cause the next or previous page to be triggered" role="button" tabindex="0"></i>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -247,7 +253,7 @@
                                 <div class="row g-0">
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                         <label for="settings-book-layout-mode" class="form-label">Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLayoutModeTooltip" role="button" tabindex="0"></i>
-                                        <ng-template #bookLayoutModeTooltip>How content should be laid out. Default is as the book packs it. 1 or 2 Column fits to the height of the device and fits 1 or 2 columns of text per page</ng-template>
+                                        <ng-template #bookLayoutModeTooltip>How content should be laid out. Scroll is as the book packs it. 1 or 2 Column fits to the height of the device and fits 1 or 2 columns of text per page</ng-template>
                                         <span class="visually-hidden" id="settings-book-layout-mode-help"><ng-container [ngTemplateOutlet]="bookLayoutModeTooltip"></ng-container></span>
                                         <select class="form-select" aria-describedby="settings-book-layout-mode-help" formControlName="bookReaderLayoutMode" id="settings-book-layout-mode">
                                             <option *ngFor="let opt of bookLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
