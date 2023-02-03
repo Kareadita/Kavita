@@ -48,7 +48,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly ICollectionTagService _collectionTagService;
 
-    private IList<Genre> _genres;
+    private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
     private IList<Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
@@ -75,7 +75,7 @@ public class ProcessSeries : IProcessSeries
     /// </summary>
     public async Task Prime()
     {
-        _genres = await _unitOfWork.GenreRepository.GetAllGenresAsync();
+        _genres = (await _unitOfWork.GenreRepository.GetAllGenresAsync()).ToDictionary(t => t.NormalizedTitle);
         _people = await _unitOfWork.PersonRepository.GetAllPeople();
         _tags = await _unitOfWork.TagRepository.GetAllTagsAsync();
         _collectionTags = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync(CollectionTagIncludes.SeriesMetadata))
@@ -673,9 +673,10 @@ public class ProcessSeries : IProcessSeries
             PersonHelper.AddPersonIfNotExists(chapter.People, person);
         }
 
-        void AddGenre(Genre genre)
+        void AddGenre(Genre genre, bool newTag)
         {
-            GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
+            //GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
+            chapter.Genres.Add(genre);
         }
 
         void AddTag(Tag tag, bool added)
@@ -745,9 +746,9 @@ public class ProcessSeries : IProcessSeries
             AddPerson);
 
         var genres = GetTagValues(comicInfo.Genre);
-        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres, genres.Select(g => DbFactory.Genre(g, false)).ToList());
-        UpdateGenre(genres, false,
-            AddGenre);
+        GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
+            genres.Select(g => DbFactory.Genre(g, false)).ToList());
+        UpdateGenre(genres, AddGenre);
 
         var tags = GetTagValues(comicInfo.Tags);
         TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
@@ -801,27 +802,28 @@ public class ProcessSeries : IProcessSeries
     ///
     /// </summary>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
+    /// <param name="isExternal">Not used</param>
     /// <param name="action"></param>
-    private void UpdateGenre(IEnumerable<string> names, bool isExternal, Action<Genre> action)
+    private void UpdateGenre(IEnumerable<string> names, Action<Genre, bool> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var normalizedName = Parser.Parser.Normalize(name);
-            var genre = _genres.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
-            if (genre == null)
+            _genres.TryGetValue(normalizedName, out var genre);
+            var newTag = genre == null;
+            if (newTag)
             {
                 genre = DbFactory.Genre(name, false);
                 lock (_genres)
                 {
-                    _genres.Add(genre);
+                    _genres.Add(normalizedName, genre);
+                    _unitOfWork.GenreRepository.Attach(genre);
                 }
             }
 
-            action(genre);
+            action(genre, newTag);
         }
     }
 
