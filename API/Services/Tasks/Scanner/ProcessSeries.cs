@@ -675,13 +675,11 @@ public class ProcessSeries : IProcessSeries
 
         void AddGenre(Genre genre, bool newTag)
         {
-            //GenreHelper.AddGenreIfNotExists(chapter.Genres, genre);
             chapter.Genres.Add(genre);
         }
 
         void AddTag(Tag tag, bool added)
         {
-            //TagHelper.AddTagIfNotExists(chapter.Tags, tag);
             chapter.Tags.Add(tag);
         }
 
@@ -748,11 +746,11 @@ public class ProcessSeries : IProcessSeries
 
         var genres = GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
-            genres.Select(g => DbFactory.Genre(g, false)).ToList());
+            genres.Select(DbFactory.Genre).ToList());
         UpdateGenre(genres, AddGenre);
 
         var tags = GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => DbFactory.Tag(t, false)).ToList());
+        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(DbFactory.Tag).ToList());
         UpdateTag(tags, AddTag);
     }
 
@@ -802,20 +800,19 @@ public class ProcessSeries : IProcessSeries
     ///
     /// </summary>
     /// <param name="names"></param>
-    /// <param name="isExternal">Not used</param>
-    /// <param name="action"></param>
+    /// <param name="action">Executes for each tag</param>
     private void UpdateGenre(IEnumerable<string> names, Action<Genre, bool> action)
     {
         foreach (var name in names)
         {
-            if (string.IsNullOrEmpty(name.Trim())) continue;
-
             var normalizedName = Parser.Parser.Normalize(name);
+            if (string.IsNullOrEmpty(normalizedName)) continue;
+
             _genres.TryGetValue(normalizedName, out var genre);
             var newTag = genre == null;
             if (newTag)
             {
-                genre = DbFactory.Genre(name, false);
+                genre = DbFactory.Genre(name);
                 lock (_genres)
                 {
                     _genres.Add(normalizedName, genre);
@@ -844,7 +841,7 @@ public class ProcessSeries : IProcessSeries
             var added = tag == null;
             if (tag == null)
             {
-                tag = DbFactory.Tag(name, false);
+                tag = DbFactory.Tag(name);
                 lock (_tags)
                 {
                     _tags.Add(normalizedName, tag);

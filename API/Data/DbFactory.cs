@@ -121,23 +121,21 @@ public static class DbFactory
         };
     }
 
-    public static Genre Genre(string name, bool external)
+    public static Genre Genre(string name)
     {
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            ExternalTag = external
         };
     }
 
-    public static Tag Tag(string name, bool external)
+    public static Tag Tag(string name)
     {
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            ExternalTag = external
         };
     }
 

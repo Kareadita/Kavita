@@ -10935,9 +10935,6 @@
             "type": "string",
             "nullable": true
           },
-          "externalTag": {
-            "type": "boolean"
-          },
           "seriesMetadatas": {
             "type": "array",
             "items": {
@@ -13561,9 +13558,6 @@
           "normalizedTitle": {
             "type": "string",
             "nullable": true
-          },
-          "externalTag": {
-            "type": "boolean"
           },
           "seriesMetadatas": {
             "type": "array",

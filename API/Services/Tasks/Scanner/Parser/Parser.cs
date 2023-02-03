@@ -945,7 +945,7 @@ public static class Parser
 
     public static string Normalize(string name)
     {
-        return NormalizeRegex.Replace(name, string.Empty).ToLower();
+        return NormalizeRegex.Replace(name, string.Empty).Trim().ToLower();
     }
 
     /// <summary>

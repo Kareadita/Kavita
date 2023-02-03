@@ -762,7 +762,7 @@ public class SeriesServiceTests : AbstractDbTest
             },
             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
         };
-        var g = DbFactory.Genre("Existing Genre", false);
+        var g = DbFactory.Genre("Existing Genre");
         s.Metadata.Genres = new List<Genre>() {g};
         _context.Series.Add(s);
 
@@ -918,7 +918,7 @@ public class SeriesServiceTests : AbstractDbTest
             },
             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
         };
-        var g = DbFactory.Genre("Existing Genre", false);
+        var g = DbFactory.Genre("Existing Genre");
         s.Metadata.Genres = new List<Genre>() {g};
         s.Metadata.GenresLocked = true;
         _context.Series.Add(s);
@@ -1554,6 +1554,12 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.Null(await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1));
     }
+
+    #endregion
+
+    #region UpdateRelatedList
+
+
 
     #endregion
 }
