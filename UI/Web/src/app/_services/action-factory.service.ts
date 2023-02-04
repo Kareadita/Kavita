@@ -261,14 +261,14 @@ export class ActionFactoryService {
         children: [
         	{
             action: Action.AddToWantToReadList,
-            title: 'Add to Want To Read',
+            title: 'Add to Want to Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
             children: [],
           },
           {
             action: Action.RemoveFromWantToReadList,
-            title: 'Remove from Want To Read',
+            title: 'Remove from Want to Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
             children: [],
@@ -564,7 +564,7 @@ export class ActionFactoryService {
 
     if (actions.length === 0) return actionFound;
 
-    for (let i = 0; i < actions.length; i++) 
+    for (let i = 0; i < actions.length; i++)
     {
       if (actions[i].action === action) return true;
       if (this.hasAction(actions[i].children, action)) return true;
@@ -573,5 +573,5 @@ export class ActionFactoryService {
 
     return actionFound;
   }
-  
+
 }
