@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.34"
+    "version": "0.6.1.35"
   },
   "servers": [
     {
@@ -13284,6 +13284,11 @@
             "type": "integer",
             "description": "Port the server listens on. Managed in appsettings.json.",
             "format": "int32"
+          },
+          "ipAddresses": {
+            "type": "string",
+            "description": "Comma separated list of ip addresses the server listens on. Managed in appsettings.json",
+            "nullable": true
           },
           "allowStatCollection": {
             "type": "boolean",
