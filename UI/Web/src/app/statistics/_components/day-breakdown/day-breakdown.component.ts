@@ -16,7 +16,7 @@ export class DayBreakdownComponent implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  view: [number, number] = [700, 400];
+  view: [number, number] = [0,0];
   gradient: boolean = true;
   showLegend: boolean = true;
   showLabels: boolean = true;

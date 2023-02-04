@@ -12,17 +12,18 @@ const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 const mangaFormatPipe = new MangaFormatPipe();
 
 @Component({
-  selector: 'app-read-by-day-and',
-  templateUrl: './read-by-day-and.component.html',
-  styleUrls: ['./read-by-day-and.component.scss'],
+  selector: 'app-reading-activity',
+  templateUrl: './reading-activity.component.html',
+  styleUrls: ['./reading-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReadByDayAndComponent implements OnInit, OnDestroy {
+export class ReadingActivityComponent implements OnInit, OnDestroy {
   /**
    * Only show for one user
    */
   @Input() userId: number = 0;
   @Input() isAdmin: boolean = true;
+  @Input() individualUserMode: boolean = false;
 
   view: [number, number] = [0, 400];
   formGroup: FormGroup = new FormGroup({
