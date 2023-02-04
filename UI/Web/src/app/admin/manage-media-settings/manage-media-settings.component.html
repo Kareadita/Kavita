@@ -7,7 +7,7 @@
             <div class="col-md-6 col-sm-12 mb-3">
                 <label for="bookmark-webp" class="form-label me-1" aria-describedby="settings-convertBookmarkToWebP-help">Save Bookmarks as WebP</label>
                 <i class="fa fa-info-circle" placement="right" [ngbTooltip]="convertBookmarkToWebPTooltip" role="button" tabindex="0"></i>
-                <ng-template #convertBookmarkToWebPTooltip>When saving bookmarks, covert them to WebP.</ng-template>
+                <ng-template #convertBookmarkToWebPTooltip>When saving bookmarks, convert them to WebP.</ng-template>
                 <span class="visually-hidden" id="settings-convertBookmarkToWebP-help"><ng-container [ngTemplateOutlet]="convertBookmarkToWebPTooltip"></ng-container></span>
                 <div class="form-check form-switch">
                     <input id="bookmark-webp" type="checkbox" class="form-check-input" formControlName="convertBookmarkToWebP" role="switch">
@@ -18,7 +18,7 @@
             <div class="col-md-6 col-sm-12 mb-3">
                 <label for="cover-webp" class="form-label me-1" aria-describedby="settings-convertCoverToWebP-help">Save Covers as WebP</label>
                 <i class="fa fa-info-circle" placement="right" [ngbTooltip]="convertCoverToWebPTooltip" role="button" tabindex="0"></i>
-                <ng-template #convertCoverToWebPTooltip>When generating covers, covert them to WebP.</ng-template>
+                <ng-template #convertCoverToWebPTooltip>When generating covers, convert them to WebP.</ng-template>
                 <span class="visually-hidden" id="settings-convertCoverToWebP-help"><ng-container [ngTemplateOutlet]="convertBookmarkToWebPTooltip"></ng-container></span>
                 <div class="form-check form-switch">
                     <input id="cover-webp" type="checkbox" class="form-check-input" formControlName="convertCoverToWebP" role="switch">
@@ -35,5 +35,5 @@
     </form>
 
     <!-- Accordion with Issues from Media anaysis -->
-    
+
 </div>

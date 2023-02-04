@@ -115,7 +115,7 @@ public class SeriesService : ISeriesService
             }
 
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
-            UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
+            UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
                 series.Metadata.CollectionTags.Add(tag);
             });
@@ -210,7 +210,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
+    public static void UpdateCollectionsList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
         // TODO: Move UpdateRelatedList to a helper so we can easily test
@@ -278,7 +278,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Genre(tagTitle, false));
+                handleAdd(DbFactory.Genre(tagTitle));
                 isModified = true;
             }
         }
@@ -320,7 +320,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Tag(tagTitle, false));
+                handleAdd(DbFactory.Tag(tagTitle));
                 isModified = true;
             }
         }

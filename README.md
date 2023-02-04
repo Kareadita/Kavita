@@ -97,6 +97,10 @@ We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png"
 We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 
 being paid to help secure Kavita, please give them a try.
 
+## PikaPods
+If you are looking to try your hand at self-hosting but lack the machine, [PikaPods](https://www.pikapods.com/pods?run=kavita) is a great service that 
+allows you to easily spin up a server. 20% of app revenues are contributed back to Kavita via OpenCollective.
+
 ### License
 
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
