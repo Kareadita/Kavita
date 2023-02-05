@@ -268,7 +268,8 @@ public class ReadingListService : IReadingListService
         var importSummary = new CblImportSummaryDto()
         {
             CblName = cblReading.Name,
-            Success = CblImportResult.Success
+            Success = CblImportResult.Success,
+            Results = new List<CblBookResult>()
         };
 
         if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
