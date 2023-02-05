@@ -1,16 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
+using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +87,7 @@ public class ReadingListServiceTests
     private async Task ResetDb()
     {
         _context.AppUser.RemoveRange(_context.AppUser);
+        _context.Library.RemoveRange(_context.Library);
         _context.Series.RemoveRange(_context.Series);
         _context.ReadingList.RemoveRange(_context.ReadingList);
         await _unitOfWork.CommitAsync();
@@ -621,6 +626,93 @@ public class ReadingListServiceTests
             ChapterTitleName = chapterTitleName
         };
     }
+
+    #endregion
+
+    #region CreateReadingListFromCBL
+
+    [Fact]
+    public async Task CreateReadingListFromCBL_ShouldCreateList()
+    {
+        await ResetDb();
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ReadingListService/");
+
+        var reader = new System.Xml.Serialization.XmlSerializer(typeof(CblReadingList));
+        using var file = new StreamReader(Path.Join(testDirectory, "Fables.cbl"));
+        var cblReadingList = (CblReadingList) reader.Deserialize(file);
+        file.Close();
+
+        // Mock up our series
+        var fablesSeries = DbFactory.Series("Fables");
+        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+
+        fablesSeries.Volumes.Add(new Volume()
+        {
+            Number = 1,
+            Name = "2002",
+            Chapters = new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("1", false),
+                EntityFactory.CreateChapter("2", false),
+                EntityFactory.CreateChapter("3", false),
+
+            }
+        });
+        fables2Series.Volumes.Add(new Volume()
+        {
+            Number = 1,
+            Name = "2003",
+            Chapters = new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("1", false),
+                EntityFactory.CreateChapter("2", false),
+                EntityFactory.CreateChapter("3", false),
+
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        fablesSeries,
+                        fables2Series
+                    },
+                },
+            },
+        });
+        await _unitOfWork.CommitAsync();
+
+        var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+
+        Assert.Equal(CblImportResult.Partial, importSummary.Success);
+        Assert.NotEmpty(importSummary.Results);
+
+        var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+
+        Assert.NotNull(createdList);
+        Assert.Equal("Fables", createdList.Title);
+
+        Assert.Equal(4, createdList.Items.Count);
+        Assert.Equal(1, createdList.Items.First(item => item.Order == 0).ChapterId);
+        Assert.Equal(2, createdList.Items.First(item => item.Order == 1).ChapterId);
+        Assert.Equal(3, createdList.Items.First(item => item.Order == 2).ChapterId);
+        Assert.Equal(4, createdList.Items.First(item => item.Order == 3).ChapterId);
+    }
+
+    public Task CreateReadingListFromCBL_ShouldCreateList_ButOnlyIncludeSeriesThatUserHasAccessTo()
+    {
+        return Task.CompletedTask;
+    }
+
 
     #endregion
 }

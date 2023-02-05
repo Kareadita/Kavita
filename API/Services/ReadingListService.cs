@@ -6,6 +6,7 @@ using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
+using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,8 @@ public interface IReadingListService
     Task CalculateReadingListAgeRating(ReadingList readingList);
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
         ReadingList readingList);
+
+    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading);
 }
 
 /// <summary>
@@ -258,8 +261,131 @@ public class ReadingListService : IReadingListService
         return index > lastOrder + 1;
     }
 
-    // public Task CreateReadingListFromComicInfoTags(int libraryId)
-    // {
-    //     _unitOfWork.
-    // }
+    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingLists);
+        _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user.UserName);
+        var importSummary = new CblImportSummaryDto()
+        {
+            CblName = cblReading.Name,
+            Success = CblImportResult.Success
+        };
+
+        if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
+        {
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = "CBL is empty"
+            });
+            importSummary.Success = CblImportResult.Fail;
+            return importSummary;
+        }
+
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        // TODO: Make this user id/restriction based
+        var allSeries =
+            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, SeriesIncludes.Chapters)).ToDictionary(s => s.NormalizedName);
+
+        if (allSeries.Count == 0)
+        {
+            // Report that no series exist in the reading list
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = "CBL contains no series that exist within Kavita or user doesn't have access to this Series"
+            });
+            importSummary.Success = CblImportResult.Fail;
+            return importSummary;
+        }
+
+        var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
+        var allReadingLists = (await _unitOfWork.ReadingListRepository.GetAllReadingListsAsync()).ToDictionary(s => s.NormalizedTitle);
+        if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
+        {
+            readingList = DbFactory.ReadingList(cblReading.Name, string.Empty, false);
+            user.ReadingLists.Add(readingList);
+        }
+        else
+        {
+            // Reading List exists, check if we own it
+            if (user.ReadingLists.All(l => l.NormalizedTitle != readingListNameNormalized))
+            {
+                importSummary.Results.Add(new CblBookResult()
+                {
+                    Reason = "CBL name conflicts with another Reading List within Kavita that user does not own"
+                });
+                importSummary.Success = CblImportResult.Fail;
+                return importSummary;
+            }
+        }
+
+        readingList.Items ??= new List<ReadingListItem>();
+        var successfulProcessedItem = 0;
+        foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
+        {
+            var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
+            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries))
+            {
+                importSummary.Results.Add(new CblBookResult()
+                {
+                    Series = book.Series,
+                    Volume = book.Volume,
+                    Number = book.Number,
+                    Reason = "Series could not be found"
+                });
+                continue; // Report failure
+            }
+            // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
+            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => book.Volume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
+            if (matchingVolume == null)
+            {
+                importSummary.Results.Add(new CblBookResult()
+                {
+                    Series = book.Series,
+                    Volume = book.Volume,
+                    Number = book.Number,
+                    Reason = "Volume Could not be found (or Volume not present and could not find individual chapter/issue"
+                });
+                continue;
+            }
+
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == book.Number);
+            if (chapter == null)
+            {
+                importSummary.Results.Add(new CblBookResult()
+                {
+                    Series = book.Series,
+                    Volume = book.Volume,
+                    Number = book.Number,
+                    Reason = "Chapter/Issue could not be found"
+                });
+                continue;
+            }
+
+
+            // See if a matching item already exists
+            var readingListItem =
+                readingList.Items.FirstOrDefault(item =>
+                    item.SeriesId == bookSeries.Id && item.ChapterId == chapter.Id);
+            if (readingListItem == null)
+            {
+                readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, bookSeries.Id,
+                    matchingVolume.Id, chapter.Id);
+                readingList.Items.Add(readingListItem);
+            }
+            successfulProcessedItem++;
+        }
+
+        if (successfulProcessedItem != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
+        {
+            importSummary.Success = CblImportResult.Partial;
+        }
+
+        await CalculateReadingListAgeRating(readingList);
+
+        if (!_unitOfWork.HasChanges()) return importSummary;
+        await _unitOfWork.CommitAsync();
+
+
+        return importSummary;
+    }
 }

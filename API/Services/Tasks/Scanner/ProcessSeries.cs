@@ -161,7 +161,7 @@ public class ProcessSeries : IProcessSeries
 
             UpdateSeriesMetadata(series, library);
 
-            CreateReadingListsFromSeries(series, library);
+            //CreateReadingListsFromSeries(series, library); This will be implemented later when I solution it
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -809,7 +809,7 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(s => s.Normalize()).ToList();
+            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();
         }
         return ImmutableList<string>.Empty;
     }

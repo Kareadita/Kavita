@@ -149,6 +149,13 @@ public static class QueryableExtensions
             query = query.Include(s => s.Volumes);
         }
 
+        if (includeFlags.HasFlag(SeriesIncludes.Chapters))
+        {
+            query = query
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters);
+        }
+
         if (includeFlags.HasFlag(SeriesIncludes.Related))
         {
             query = query.Include(s => s.Relations)
