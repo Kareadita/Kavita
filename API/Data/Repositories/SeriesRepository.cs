@@ -118,7 +118,7 @@ public interface ISeriesRepository
     Task<Series> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
 
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IEnumerable<string> normalizedNames,
-        SeriesIncludes includes = SeriesIncludes.None);
+        int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<Series> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true);
     Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId);
     Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId);
@@ -1205,10 +1205,17 @@ public class SeriesRepository : ISeriesRepository
     }
 
     public async Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IEnumerable<string> normalizedNames,
-        SeriesIncludes includes = SeriesIncludes.None)
+        int userId, SeriesIncludes includes = SeriesIncludes.None)
     {
+        var libraryIds = _context.Library.GetUserLibraries(userId);
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
-        return await _context.Series.Where(s => normalizedNames.Contains(s.NormalizedName)).Includes(includes).ToListAsync();
+        return await _context.Series
+            .Where(s => normalizedNames.Contains(s.NormalizedName))
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .Includes(includes)
+            .ToListAsync();
     }
 
     /// <summary>

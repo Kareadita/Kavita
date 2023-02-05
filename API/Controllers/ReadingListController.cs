@@ -11,6 +11,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -181,21 +182,16 @@ public class ReadingListController : BaseApiController
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingListsWithItems);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingLists);
 
-        // When creating, we need to make sure Title is unique
-        var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
-        if (hasExisting)
+        try
         {
-            return BadRequest("A list of this name already exists");
+            await _readingListService.CreateReadingListForUser(user, dto.Title);
         }
-
-        var readingList = DbFactory.ReadingList(dto.Title, string.Empty, false);
-        user.ReadingLists.Add(readingList);
-
-        if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
-
-        await _unitOfWork.CommitAsync();
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(user.Id, dto.Title));
     }
@@ -217,37 +213,16 @@ public class ReadingListController : BaseApiController
             return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
         }
 
-        dto.Title = dto.Title.Trim();
-
-        if (string.IsNullOrEmpty(dto.Title)) return BadRequest("Title must be set");
-        if (!dto.Title.Equals(readingList.Title) && await _unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
-            return BadRequest("Reading list already exists");
-
-
-        readingList.Summary = dto.Summary;
-        readingList.Title = dto.Title;
-        readingList.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
-        readingList.Promoted = dto.Promoted;
-        readingList.CoverImageLocked = dto.CoverImageLocked;
-
-        if (!dto.CoverImageLocked)
+        try
         {
-            readingList.CoverImageLocked = false;
-            readingList.CoverImage = string.Empty;
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
-            _unitOfWork.ReadingListRepository.Update(readingList);
+            await _readingListService.UpdateReadingList(readingList, dto);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
-        _unitOfWork.ReadingListRepository.Update(readingList);
-
-        if (!_unitOfWork.HasChanges()) return Ok("Updated");
-
-        if (await _unitOfWork.CommitAsync())
-        {
-            return Ok("Updated");
-        }
-        return BadRequest("Could not update reading list");
+        return Ok("Updated");
     }
 
     /// <summary>

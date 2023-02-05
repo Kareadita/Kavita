@@ -9,12 +9,16 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.SignalR;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
 public interface IReadingListService
 {
+    Task<ReadingList> CreateReadingListForUser(AppUser userWithReadingList, string title);
+    Task UpdateReadingList(ReadingList readingList, UpdateReadingListDto dto);
     Task<bool> RemoveFullyReadItems(int readingListId, AppUser user);
     Task<bool> UpdateReadingListItemPosition(UpdateReadingListPosition dto);
     Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto);
@@ -35,14 +39,16 @@ public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
-    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = new ChapterSortComparerZeroFirst();
+    private readonly IEventHub _eventHub;
+    private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger)
+    public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _eventHub = eventHub;
     }
 
     public static string FormatTitle(ReadingListItemDto item)
@@ -88,6 +94,60 @@ public class ReadingListService : IReadingListService
         return title;
     }
 
+
+    /// <summary>
+    /// Creates a new Reading List for a User
+    /// </summary>
+    /// <param name="userWithReadingList"></param>
+    /// <param name="title"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
+    public async Task<ReadingList> CreateReadingListForUser(AppUser userWithReadingList, string title)
+    {
+        // When creating, we need to make sure Title is unique
+        // TODO: Perform normalization
+        var hasExisting = userWithReadingList.ReadingLists.Any(l => l.Title.Equals(title));
+        if (hasExisting)
+        {
+            throw new KavitaException("A list of this name already exists");
+        }
+
+        var readingList = DbFactory.ReadingList(title, string.Empty, false);
+        userWithReadingList.ReadingLists.Add(readingList);
+
+        if (!_unitOfWork.HasChanges()) throw new KavitaException("There was a problem creating list");
+        await _unitOfWork.CommitAsync();
+        return readingList;
+    }
+
+    public async Task UpdateReadingList(ReadingList readingList, UpdateReadingListDto dto)
+    {
+        dto.Title = dto.Title.Trim();
+        if (string.IsNullOrEmpty(dto.Title)) throw new KavitaException("Title must be set");
+
+        if (!dto.Title.Equals(readingList.Title) && await _unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
+            throw new KavitaException("Reading list already exists");
+
+        readingList.Summary = dto.Summary;
+        readingList.Title = dto.Title.Trim();
+        readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.Promoted = dto.Promoted;
+        readingList.CoverImageLocked = dto.CoverImageLocked;
+
+        if (!dto.CoverImageLocked)
+        {
+            readingList.CoverImageLocked = false;
+            readingList.CoverImage = string.Empty;
+            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
+            _unitOfWork.ReadingListRepository.Update(readingList);
+        }
+
+        _unitOfWork.ReadingListRepository.Update(readingList);
+
+        if (!_unitOfWork.HasChanges()) return;
+        await _unitOfWork.CommitAsync();
+    }
 
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
@@ -203,12 +263,23 @@ public class ReadingListService : IReadingListService
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
             AppUserIncludes.ReadingListsWithItems);
-        if (user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) == null && !await _unitOfWork.UserRepository.IsUserAdminAsync(user))
+        if (await UserHasReadingListAccess(readingListId, user))
         {
             return null;
         }
 
         return user;
+    }
+
+    /// <summary>
+    /// User must have ReadingList on it
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <param name="user"></param>
+    /// <returns></returns>
+    private async Task<bool> UserHasReadingListAccess(int readingListId, AppUser user)
+    {
+        return user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) != null || await _unitOfWork.UserRepository.IsUserAdminAsync(user);
     }
 
     /// <summary>
@@ -263,7 +334,7 @@ public class ReadingListService : IReadingListService
 
     public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingLists);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
         _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user.UserName);
         var importSummary = new CblImportSummaryDto()
         {
@@ -283,10 +354,10 @@ public class ReadingListService : IReadingListService
         }
 
         var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
-        // TODO: Make this user id/restriction based
         var allSeries =
-            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, SeriesIncludes.Chapters)).ToDictionary(s => s.NormalizedName);
+            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToDictionary(s => s.NormalizedName);
 
+        // Check if all the series in the list are accessible to user
         if (allSeries.Count == 0)
         {
             // Report that no series exist in the reading list
@@ -297,6 +368,7 @@ public class ReadingListService : IReadingListService
             importSummary.Success = CblImportResult.Fail;
             return importSummary;
         }
+
 
         var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
         var allReadingLists = (await _unitOfWork.ReadingListRepository.GetAllReadingListsAsync()).ToDictionary(s => s.NormalizedTitle);
@@ -331,9 +403,9 @@ public class ReadingListService : IReadingListService
                     Series = book.Series,
                     Volume = book.Volume,
                     Number = book.Number,
-                    Reason = "Series could not be found"
+                    Reason = "Series could not be found or user does not have access"
                 });
-                continue; // Report failure
+                continue;
             }
             // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
             var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => book.Volume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
@@ -344,7 +416,7 @@ public class ReadingListService : IReadingListService
                     Series = book.Series,
                     Volume = book.Volume,
                     Number = book.Number,
-                    Reason = "Volume Could not be found (or Volume not present and could not find individual chapter/issue"
+                    Reason = "Volume could not be found (or Volume not present and could not find individual chapter/issue"
                 });
                 continue;
             }
