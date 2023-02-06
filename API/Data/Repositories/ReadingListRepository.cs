@@ -218,6 +218,7 @@ public class ReadingListRepository : IReadingListRepository
             if (progressItem == null) continue;
 
             progressItem.PagesRead = progress.PagesRead;
+            progressItem.ProgressLastModifiedUtc = progress.LastModifiedUtc;
         }
 
         return items;
@@ -241,8 +242,11 @@ public class ReadingListRepository : IReadingListRepository
 
         foreach (var item in items)
         {
-            var progress = userProgress.Where(p => p.ChapterId == item.ChapterId);
-            item.PagesRead = progress.Sum(p => p.PagesRead);
+            var progress = userProgress.SingleOrDefault(p => p.ChapterId == item.ChapterId);
+            if (progress == null) continue;
+
+            item.PagesRead = progress.PagesRead;
+            item.ProgressLastModifiedUtc = progress.LastModifiedUtc;
         }
 
         return items;

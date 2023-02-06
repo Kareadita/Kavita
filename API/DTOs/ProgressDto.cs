@@ -21,7 +21,7 @@ public class ProgressDto
     /// </summary>
     public string BookScrollId { get; set; }
     /// <summary>
-    /// Last time the progress was synced from UI or external app
+    /// Last time in Utc the progress was synced from UI or external app
     /// </summary>
-    public DateTime LastModified { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 }

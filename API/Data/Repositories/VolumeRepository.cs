@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -218,7 +219,11 @@ public class VolumeRepository : IVolumeRepository
         {
             foreach (var c in v.Chapters)
             {
-                c.PagesRead = userProgress.Where(p => p.ChapterId == c.Id).Sum(p => p.PagesRead);
+                var progress = userProgress.SingleOrDefault(p => p.ChapterId == c.Id);
+                if (progress == null) continue;
+
+                c.PagesRead = progress.PagesRead;
+                c.ProgressLastModifiedUtc = progress.LastModifiedUtc;
             }
 
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);

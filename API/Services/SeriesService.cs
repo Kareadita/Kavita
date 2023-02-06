@@ -437,6 +437,7 @@ public class SeriesService : ISeriesService
             foreach (var library in libraries)
             {
                 library.LastModified = DateTime.Now;
+                library.LastModifiedUtc = DateTime.UtcNow;
                 _unitOfWork.LibraryRepository.Update(library);
             }
 

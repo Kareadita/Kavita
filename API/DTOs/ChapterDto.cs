@@ -43,6 +43,10 @@ public class ChapterDto : IHasReadTimeEstimate
     /// </summary>
     public int PagesRead { get; set; }
     /// <summary>
+    /// Last time the progress was synced from UI or external app
+    /// </summary>
+    public DateTime ProgressLastModifiedUtc { get; set; }
+    /// <summary>
     /// If the Cover Image is locked for this entity
     /// </summary>
     public bool CoverImageLocked { get; set; }

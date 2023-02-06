@@ -121,7 +121,10 @@ public class SeriesController : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        await _unitOfWork.ChapterRepository.AddChapterProgress(userId, chapter);
+        return Ok(chapter);
     }
 
     [HttpGet("chapter-metadata")]

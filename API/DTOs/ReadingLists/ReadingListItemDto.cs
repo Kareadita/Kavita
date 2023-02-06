@@ -12,6 +12,7 @@ public class ReadingListItemDto
     public string SeriesName { get; set; }
     public MangaFormat SeriesFormat { get; set; }
     public int PagesRead { get; set; }
+    public DateTime ProgressLastModifiedUtc { get; set; }
     public int PagesTotal { get; set; }
     public string ChapterNumber { get; set; }
     public string ChapterTitleName { get; set; }

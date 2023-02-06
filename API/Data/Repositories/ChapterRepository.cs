@@ -37,6 +37,7 @@ public interface IChapterRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IList<Chapter>> GetAllChaptersWithNonWebPCovers();
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
+    Task AddChapterProgress(int userId, ChapterDto chapter);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -246,5 +247,14 @@ public class ChapterRepository : IChapterRepository
             .Where(c => chapterIds.Contains(c.ChapterId))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task AddChapterProgress(int userId, ChapterDto chapter)
+    {
+        var progress = await _context.AppUserProgresses.FirstOrDefaultAsync(x =>
+            x.AppUserId == userId && x.ChapterId == chapter.Id);
+        if (progress == null) return;
+        chapter.PagesRead = progress.PagesRead;
+        chapter.ProgressLastModifiedUtc = progress.LastModifiedUtc;
     }
 }

@@ -10068,6 +10068,11 @@
             "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
             "format": "int32"
           },
+          "progressLastModifiedUtc": {
+            "type": "string",
+            "description": "Last time the progress was synced from UI or external app",
+            "format": "date-time"
+          },
           "coverImageLocked": {
             "type": "boolean",
             "description": "If the Cover Image is locked for this entity"
@@ -11706,9 +11711,9 @@
             "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
           },
-          "lastModified": {
+          "lastModifiedUtc": {
             "type": "string",
-            "description": "Last time the progress was synced from UI or external app",
+            "description": "Last time in Utc the progress was synced from UI or external app",
             "format": "date-time"
           }
         },
@@ -11981,6 +11986,10 @@
           "pagesRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "progressLastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           },
           "pagesTotal": {
             "type": "integer",
