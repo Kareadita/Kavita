@@ -255,6 +255,7 @@ public class ChapterRepository : IChapterRepository
             x.AppUserId == userId && x.ChapterId == chapter.Id);
         if (progress == null) return;
         chapter.PagesRead = progress.PagesRead;
+        chapter.ProgressLastModified = progress.LastModified;
         chapter.ProgressLastModifiedUtc = progress.LastModifiedUtc;
     }
 }

@@ -14,140 +14,140 @@ namespace API.Data.Migrations
                 table: "Volume",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "Volume",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "SiteTheme",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "SiteTheme",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "Series",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "Series",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "ReadingList",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "ReadingList",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "MangaFile",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "MangaFile",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "Library",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "Library",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "Device",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "Device",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "Chapter",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "Chapter",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "AppUserProgresses",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "AppUserProgresses",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedUtc",
                 table: "AppUserBookmark",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "LastModifiedUtc",
                 table: "AppUserBookmark",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
@@ -218,6 +219,7 @@ public class ReadingListRepository : IReadingListRepository
             if (progressItem == null) continue;
 
             progressItem.PagesRead = progress.PagesRead;
+            progressItem.ProgressLastModified = progress.LastModified;
             progressItem.ProgressLastModifiedUtc = progress.LastModifiedUtc;
         }
 
@@ -243,10 +245,10 @@ public class ReadingListRepository : IReadingListRepository
         foreach (var item in items)
         {
             var progress = userProgress.SingleOrDefault(p => p.ChapterId == item.ChapterId);
-            if (progress == null) continue;
 
-            item.PagesRead = progress.PagesRead;
-            item.ProgressLastModifiedUtc = progress.LastModifiedUtc;
+            item.PagesRead = progress?.PagesRead ?? 0;
+            item.ProgressLastModified = progress?.LastModified ?? DateTime.Now;
+            item.ProgressLastModifiedUtc = progress?.LastModifiedUtc ?? DateTime.UtcNow;
         }
 
         return items;

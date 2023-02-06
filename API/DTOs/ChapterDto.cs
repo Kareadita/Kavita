@@ -43,7 +43,11 @@ public class ChapterDto : IHasReadTimeEstimate
     /// </summary>
     public int PagesRead { get; set; }
     /// <summary>
-    /// Last time the progress was synced from UI or external app
+    /// Last time Chapter was read.
+    /// </summary>
+    public DateTime ProgressLastModified { get; set; }
+    /// <summary>
+    /// Last time Chapter was read in Utc.
     /// </summary>
     public DateTime ProgressLastModifiedUtc { get; set; }
     /// <summary>

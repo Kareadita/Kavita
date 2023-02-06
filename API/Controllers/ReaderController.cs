@@ -467,6 +467,7 @@ public class ReaderController : BaseApiController
             progressBookmark.SeriesId = progress.SeriesId;
             progressBookmark.VolumeId = progress.VolumeId;
             progressBookmark.PageNum = progress.PagesRead;
+            progressBookmark.LastModified = progress.LastModified;
             progressBookmark.LastModifiedUtc = progress.LastModifiedUtc;
             progressBookmark.BookScrollId = progress.BookScrollId;
         }
