@@ -116,6 +116,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         {
             entity.Created = DateTime.Now;
             entity.LastModified = DateTime.Now;
+            entity.CreatedUtc = DateTime.UtcNow;
+            entity.LastModifiedUtc = DateTime.UtcNow;
         }
 
     }
@@ -123,7 +125,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     private static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
     {
         if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
+        {
             entity.LastModified = DateTime.Now;
+            entity.LastModifiedUtc = DateTime.UtcNow;
+        }
     }
 
     private void OnSaveChanges()

@@ -42,6 +42,15 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public DateTime LastModified { get; set; }
     /// <summary>
+    /// Time of creation in UTC
+    /// </summary>
+    public DateTime CreatedUtc { get; set; }
+    /// <summary>
+    /// Whenever a modification occurs in UTC. Ie) New volumes, removed volumes, title update, etc
+    /// </summary>
+    public DateTime LastModifiedUtc { get; set; }
+
+    /// <summary>
     /// Absolute path to the (managed) image file
     /// </summary>
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>

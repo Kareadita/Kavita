@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.34"
+    "version": "0.6.1.36"
   },
   "servers": [
     {
@@ -9470,6 +9470,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -9631,6 +9639,16 @@
           "lastModified": {
             "type": "string",
             "description": "Last date this was updated",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "description": "When this was first created in UTC",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "description": "Last date this was updated in UTC",
             "format": "date-time"
           },
           "appUser": {
@@ -9885,6 +9903,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -10540,6 +10566,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -11173,6 +11207,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastScanned": {
             "type": "string",
             "description": "Last time Library was scanned",
@@ -11329,6 +11371,15 @@
           "lastModified": {
             "type": "string",
             "description": "Last time underlying file was modified",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "description": "Last time underlying file was modified in UTC",
             "format": "date-time"
           },
           "lastFileAnalysis": {
@@ -11806,6 +11857,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -12416,6 +12475,16 @@
           "lastModified": {
             "type": "string",
             "description": "Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "description": "Time of creation in UTC",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "description": "Whenever a modification occurs in UTC. Ie) New volumes, removed volumes, title update, etc",
             "format": "date-time"
           },
           "coverImage": {
@@ -13473,6 +13542,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -14485,6 +14562,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },

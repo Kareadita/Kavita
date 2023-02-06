@@ -36,6 +36,14 @@ public class MangaFile : IEntityDate
     /// </summary>
     /// <remarks>This gets updated anytime the file is scanned</remarks>
     public DateTime LastModified { get; set; }
+
+    public DateTime CreatedUtc { get; set; }
+    /// <summary>
+    /// Last time underlying file was modified in UTC
+    /// </summary>
+    /// <remarks>This gets updated anytime the file is scanned</remarks>
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Last time file analysis ran on this file
     /// </summary>
@@ -53,5 +61,6 @@ public class MangaFile : IEntityDate
     public void UpdateLastModified()
     {
         LastModified = File.GetLastWriteTime(FilePath);
+        LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
     }
 }

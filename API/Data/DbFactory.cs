@@ -156,7 +156,8 @@ public static class DbFactory
             FilePath = filePath,
             Format = format,
             Pages = pages,
-            LastModified = File.GetLastWriteTime(filePath)
+            LastModified = File.GetLastWriteTime(filePath),
+            LastModifiedUtc = File.GetLastWriteTimeUtc(filePath)
         };
     }
 
