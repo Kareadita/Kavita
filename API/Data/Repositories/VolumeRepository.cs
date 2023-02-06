@@ -219,11 +219,19 @@ public class VolumeRepository : IVolumeRepository
         {
             foreach (var c in v.Chapters)
             {
-                var progress = userProgress.SingleOrDefault(p => p.ChapterId == c.Id);
-
-                c.PagesRead = progress?.PagesRead ?? 0;
-                c.ProgressLastModified = progress?.LastModified ?? DateTime.Now;
-                c.ProgressLastModifiedUtc = progress?.LastModifiedUtc ?? DateTime.UtcNow;
+                var progress = userProgress.Where(p => p.ChapterId == c.Id).ToList();
+                if (progress.Count > 0)
+                {
+                    c.PagesRead = progress.Sum(p => p.PagesRead);
+                    c.ProgressLastModified = progress.Max(p => p.LastModified);
+                    c.ProgressLastModifiedUtc = progress.Max(p => p.LastModifiedUtc);
+                }
+                else
+                {
+                    c.PagesRead = 0;
+                    c.ProgressLastModified = DateTime.MinValue;
+                    c.ProgressLastModifiedUtc = DateTime.MinValue;
+                }
             }
 
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);

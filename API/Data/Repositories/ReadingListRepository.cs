@@ -244,11 +244,19 @@ public class ReadingListRepository : IReadingListRepository
 
         foreach (var item in items)
         {
-            var progress = userProgress.SingleOrDefault(p => p.ChapterId == item.ChapterId);
-
-            item.PagesRead = progress?.PagesRead ?? 0;
-            item.ProgressLastModified = progress?.LastModified ?? DateTime.Now;
-            item.ProgressLastModifiedUtc = progress?.LastModifiedUtc ?? DateTime.UtcNow;
+            var progress = userProgress.Where(p => p.ChapterId == item.ChapterId).ToList();
+            if (progress.Count > 0)
+            {
+                item.PagesRead = progress.Sum(p => p.PagesRead);
+                item.ProgressLastModified = progress.Max(p => p.LastModified);
+                item.ProgressLastModifiedUtc = progress.Max(p => p.LastModifiedUtc);
+            }
+            else
+            {
+                item.PagesRead = 0;
+                item.ProgressLastModified = DateTime.MinValue;
+                item.ProgressLastModifiedUtc = DateTime.MinValue;
+            }
         }
 
         return items;

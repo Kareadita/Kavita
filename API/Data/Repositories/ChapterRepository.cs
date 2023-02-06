@@ -251,11 +251,21 @@ public class ChapterRepository : IChapterRepository
 
     public async Task AddChapterProgress(int userId, ChapterDto chapter)
     {
-        var progress = await _context.AppUserProgresses.FirstOrDefaultAsync(x =>
-            x.AppUserId == userId && x.ChapterId == chapter.Id);
-        if (progress == null) return;
-        chapter.PagesRead = progress.PagesRead;
-        chapter.ProgressLastModified = progress.LastModified;
-        chapter.ProgressLastModifiedUtc = progress.LastModifiedUtc;
+        var progress = await _context.AppUserProgresses.Where(x =>
+            x.AppUserId == userId && x.ChapterId == chapter.Id)
+            .AsNoTracking()
+            .ToListAsync();
+        if (progress.Count > 0)
+        {
+            chapter.PagesRead = progress.Sum(p => p.PagesRead);
+            chapter.ProgressLastModified = progress.Max(p => p.LastModified);
+            chapter.ProgressLastModifiedUtc = progress.Max(p => p.LastModifiedUtc);
+        }
+        else
+        {
+            chapter.PagesRead = 0;
+            chapter.ProgressLastModified = DateTime.MinValue;
+            chapter.ProgressLastModifiedUtc = DateTime.MinValue;
+        }
     }
 }
