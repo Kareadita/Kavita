@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
@@ -16,9 +17,11 @@ using API.Services;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Moq;
 using NSubstitute;
 using Xunit;
 
@@ -28,7 +31,6 @@ public class ReadingListServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReadingListService _readingListService;
-
     private readonly DataContext _context;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
@@ -722,7 +724,6 @@ public class ReadingListServiceTests
         await CreateReadingList_SetupBaseData();
 
 
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("admin", AppUserIncludes.ReadingLists);
         var list = await _readingListService.CreateReadingListForUser(user, "Test List");
         await _readingListService.UpdateReadingList(list,
@@ -740,10 +741,87 @@ public class ReadingListServiceTests
         {
             Assert.Equal("A list of this name already exists", ex.Message);
         }
+    }
+
+    #endregion
+
+    #region UpdateReadingList
+    #endregion
+
+    #region DeleteReadingList
+    [Fact]
+    public async Task DeleteReadingList_ShouldDelete()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+        try
+        {
+            await _readingListService.CreateReadingListForUser(user, "Test List");
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal("A list of this name already exists", ex.Message);
+        }
+        Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+
+        await _readingListService.DeleteReadingList(1, user);
         Assert.Empty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
             .ReadingLists);
     }
+    #endregion
 
+    #region UserHasReadingListAccess
+    public async Task UserHasReadingListAccess_ShouldWorkIfTheirList()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.NotNull(userWithList);
+        Assert.Single(userWithList.ReadingLists);
+    }
+
+
+    public async Task UserHasReadingListAccess_ShouldNotWork_IfNotTheirList()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.Null(userWithList);
+    }
+
+
+    public async Task UserHasReadingListAccess_ShouldWork_IfNotTheirList_ButUserIsAdmin()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        var admin = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        //_userManager.When(x => x.IsInRoleAsync(user, PolicyConstants.AdminRole)).Returns((info => true), null);
+
+        //_userManager.IsInRoleAsync(admin, PolicyConstants.AdminRole).ReturnsForAnyArgs(true);
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.NotNull(userWithList);
+        Assert.Single(userWithList.ReadingLists);
+    }
     #endregion
 
     #region CreateReadingListFromCBL

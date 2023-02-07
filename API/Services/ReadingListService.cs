@@ -120,6 +120,12 @@ public class ReadingListService : IReadingListService
         return readingList;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="readingList"></param>
+    /// <param name="dto"></param>
+    /// <exception cref="KavitaException"></exception>
     public async Task UpdateReadingList(ReadingList readingList, UpdateReadingListDto dto)
     {
         dto.Title = dto.Title.Trim();
@@ -262,7 +268,7 @@ public class ReadingListService : IReadingListService
     public async Task<AppUser?> UserHasReadingListAccess(int readingListId, string username)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
-            AppUserIncludes.ReadingListsWithItems);
+            AppUserIncludes.ReadingLists);
         if (await UserHasReadingListAccess(readingListId, user))
         {
             return null;

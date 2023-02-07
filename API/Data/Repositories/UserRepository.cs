@@ -119,6 +119,7 @@ public class UserRepository : IUserRepository
         var query = _context.Users
             .Where(x => x.UserName == username);
 
+        // TODO: Move to QueryExtensions
         query = AddIncludesToQuery(query, includeFlags);
 
         return await query.SingleOrDefaultAsync();
@@ -201,9 +202,7 @@ public class UserRepository : IUserRepository
             query = query.Include(u => u.Devices);
         }
 
-
-
-        return query;
+        return query.AsSplitQuery();
     }
 
 
