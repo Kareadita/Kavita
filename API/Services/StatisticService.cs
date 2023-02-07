@@ -411,7 +411,7 @@ public class StatisticService : IStatisticService
             }
         }
 
-        return results;
+        return results.OrderBy(r => r.Value);
     }
 
     public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown()
