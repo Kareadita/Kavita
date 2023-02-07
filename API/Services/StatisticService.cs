@@ -105,10 +105,20 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
 
+        // var averageReadingTimePerWeek = _context.AppUserProgresses
+        //     .Where(p => p.AppUserId == userId)
+        //     .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
+        //         (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
+        //     .Average() / 7.0;
+
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
-                (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
+                (p, c) => new
+                {
+                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
+                })
+            .Select(x => x.AverageReadingHours)
             .Average() / 7.0;
 
         return new UserReadStatistics()
