@@ -92,7 +92,6 @@ public class ReadingListRepository : IReadingListRepository
             .Include(r => r.Items.OrderBy(i => i.Order))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
-            .AsNoTracking()
             .ToListAsync();
     }
 

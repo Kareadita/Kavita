@@ -33,5 +33,6 @@ public class CblImportSummaryDto
     public string CblName { get; set; }
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
+    public ICollection<CblBookResult> SuccessfulInserts { get; set; }
 
 }

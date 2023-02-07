@@ -326,7 +326,7 @@ public class ReadingListService : IReadingListService
             .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
             .ToList();
 
-        var index = lastOrder + 1;
+        var index = lastOrder == 0 ? 0 : lastOrder + 1;
         foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
         {
             readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
@@ -346,7 +346,8 @@ public class ReadingListService : IReadingListService
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
-            Results = new List<CblBookResult>()
+            Results = new List<CblBookResult>(),
+            SuccessfulInserts = new List<CblBookResult>()
         };
 
         if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
@@ -361,7 +362,10 @@ public class ReadingListService : IReadingListService
 
         var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
         var allSeries =
-            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToDictionary(s => s.NormalizedName);
+            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters))
+            .ToDictionary(s => s.NormalizedName);
+
+        // How do I handle duplicate Series in different libraries?
 
         // Check if all the series in the list are accessible to user
         if (allSeries.Count == 0)
@@ -398,7 +402,6 @@ public class ReadingListService : IReadingListService
         }
 
         readingList.Items ??= new List<ReadingListItem>();
-        var successfulProcessedItem = 0;
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
             var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
@@ -451,10 +454,15 @@ public class ReadingListService : IReadingListService
                     matchingVolume.Id, chapter.Id);
                 readingList.Items.Add(readingListItem);
             }
-            successfulProcessedItem++;
+            importSummary.SuccessfulInserts.Add(new CblBookResult()
+            {
+                Series = book.Series,
+                Volume = book.Volume,
+                Number = book.Number,
+            });
         }
 
-        if (successfulProcessedItem != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
+        if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
         {
             importSummary.Success = CblImportResult.Partial;
         }
