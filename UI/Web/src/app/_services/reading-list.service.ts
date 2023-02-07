@@ -85,7 +85,7 @@ export class ReadingListService {
   }
 
   actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
-    if (readingList?.promoted && !isAdmin) return false;
+    //if (readingList?.promoted && !isAdmin) return false;
     return true;
   }
   
