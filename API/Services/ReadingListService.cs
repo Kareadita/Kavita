@@ -326,7 +326,7 @@ public class ReadingListService : IReadingListService
             .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
             .ToList();
 
-        var index = lastOrder == 0 ? 0 : lastOrder + 1;
+        var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
         foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
         {
             readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
@@ -354,7 +354,7 @@ public class ReadingListService : IReadingListService
         {
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = "CBL is empty"
+                Reason = CblImportReason.EmptyFile
             });
             importSummary.Success = CblImportResult.Fail;
             return importSummary;
@@ -365,7 +365,7 @@ public class ReadingListService : IReadingListService
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters))
             .ToDictionary(s => s.NormalizedName);
 
-        // How do I handle duplicate Series in different libraries?
+        // TODO: How do I handle series that have same name in different libraries?
 
         // Check if all the series in the list are accessible to user
         if (allSeries.Count == 0)
@@ -373,7 +373,7 @@ public class ReadingListService : IReadingListService
             // Report that no series exist in the reading list
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = "CBL contains no series that exist within Kavita or user doesn't have access to this Series"
+                Reason = CblImportReason.AllSeriesMissing
             });
             importSummary.Success = CblImportResult.Fail;
             return importSummary;
@@ -394,7 +394,7 @@ public class ReadingListService : IReadingListService
             {
                 importSummary.Results.Add(new CblBookResult()
                 {
-                    Reason = "CBL name conflicts with another Reading List within Kavita that user does not own"
+                    Reason = CblImportReason.NameConflict
                 });
                 importSummary.Success = CblImportResult.Fail;
                 return importSummary;
@@ -407,12 +407,9 @@ public class ReadingListService : IReadingListService
             var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
             if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries))
             {
-                importSummary.Results.Add(new CblBookResult()
+                importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Series = book.Series,
-                    Volume = book.Volume,
-                    Number = book.Number,
-                    Reason = "Series could not be found or user does not have access"
+                    Reason = CblImportReason.SeriesMissing
                 });
                 continue;
             }
@@ -420,12 +417,9 @@ public class ReadingListService : IReadingListService
             var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => book.Volume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
             if (matchingVolume == null)
             {
-                importSummary.Results.Add(new CblBookResult()
+                importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Series = book.Series,
-                    Volume = book.Volume,
-                    Number = book.Number,
-                    Reason = "Volume could not be found (or Volume not present and could not find individual chapter/issue"
+                    Reason = CblImportReason.VolumeMissing
                 });
                 continue;
             }
@@ -433,33 +427,16 @@ public class ReadingListService : IReadingListService
             var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == book.Number);
             if (chapter == null)
             {
-                importSummary.Results.Add(new CblBookResult()
+                importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Series = book.Series,
-                    Volume = book.Volume,
-                    Number = book.Number,
-                    Reason = "Chapter/Issue could not be found"
+                    Reason = CblImportReason.ChapterMissing
                 });
                 continue;
             }
 
-
             // See if a matching item already exists
-            var readingListItem =
-                readingList.Items.FirstOrDefault(item =>
-                    item.SeriesId == bookSeries.Id && item.ChapterId == chapter.Id);
-            if (readingListItem == null)
-            {
-                readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, bookSeries.Id,
-                    matchingVolume.Id, chapter.Id);
-                readingList.Items.Add(readingListItem);
-            }
-            importSummary.SuccessfulInserts.Add(new CblBookResult()
-            {
-                Series = book.Series,
-                Volume = book.Volume,
-                Number = book.Number,
-            });
+            ExistsOrAddReadingListItem(readingList, bookSeries.Id, matchingVolume.Id, chapter.Id);
+            importSummary.SuccessfulInserts.Add(new CblBookResult(book));
         }
 
         if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
@@ -474,5 +451,17 @@ public class ReadingListService : IReadingListService
 
 
         return importSummary;
+    }
+
+    private static void ExistsOrAddReadingListItem(ReadingList readingList, int seriesId, int volumeId, int chapterId)
+    {
+        var readingListItem =
+            readingList.Items.FirstOrDefault(item =>
+                item.SeriesId == seriesId && item.ChapterId == chapterId);
+        if (readingListItem != null) return;
+
+        readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, seriesId,
+            volumeId, chapterId);
+        readingList.Items.Add(readingListItem);
     }
 }

@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
@@ -17,11 +16,9 @@ using API.Services;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Moq;
 using NSubstitute;
 using Xunit;
 
@@ -243,7 +240,7 @@ public class ReadingListServiceTests
         await _readingListService.AddChaptersToReadingList(1, new List<int>() {2}, readingList);
         await _unitOfWork.CommitAsync();
 
-        Assert.Equal(1, readingList.Items.Count);
+        Assert.Equal(2, readingList.Items.Count);
         Assert.Equal(0, readingList.Items.First().Order);
         Assert.Equal(1, readingList.Items.ElementAt(1).Order);
     }
@@ -954,7 +951,7 @@ public class ReadingListServiceTests
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
         await _readingListService.CreateReadingListForUser(user, "Test List");
 
-        var admin = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        //var admin = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
         //_userManager.When(x => x.IsInRoleAsync(user, PolicyConstants.AdminRole)).Returns((info => true), null);
 
         //_userManager.IsInRoleAsync(admin, PolicyConstants.AdminRole).ReturnsForAnyArgs(true);
@@ -1130,7 +1127,7 @@ public class ReadingListServiceTests
         Assert.Equal(2, createdList.Items.First(item => item.Order == 1).ChapterId);
         Assert.Equal(3, createdList.Items.First(item => item.Order == 2).ChapterId);
         Assert.NotNull(importSummary.Results.SingleOrDefault(r => r.Series == "Fables: The Last Castle"
-                                                                  && r.Reason == "Series could not be found or user does not have access"));
+                                                                  && r.Reason == CblImportReason.SeriesMissing));
     }
 
     [Fact]
