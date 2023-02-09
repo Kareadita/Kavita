@@ -383,7 +383,22 @@ public class StatisticService : IStatisticService
             var minDay = results.Min(d => d.Value);
             for (var date = minDay; date < DateTime.Now; date = date.AddDays(1))
             {
-                if (results.Any(d => d.Value == date)) continue;
+                var resultsForDay = results.Where(d => d.Value == date).ToList();
+                if (resultsForDay.Count > 0)
+                {
+                    // Add in types that aren't there (there is a bug in UI library that will cause dates to get out of order)
+                    var existingFormats = resultsForDay.Select(r => r.Format).Distinct();
+                    foreach (var format in Enum.GetValues(typeof(MangaFormat)).Cast<MangaFormat>().Where(f => f != MangaFormat.Unknown && !existingFormats.Contains(f)))
+                    {
+                        results.Add(new PagesReadOnADayCount<DateTime>()
+                        {
+                            Format = format,
+                            Value = date,
+                            Count = 0
+                        });
+                    }
+                    continue;
+                }
                 results.Add(new PagesReadOnADayCount<DateTime>()
                 {
                     Format = MangaFormat.Archive,
