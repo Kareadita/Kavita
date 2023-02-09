@@ -267,8 +267,9 @@ public class ReadingListService : IReadingListService
     /// <returns></returns>
     public async Task<AppUser?> UserHasReadingListAccess(int readingListId, string username)
     {
+        // We need full reading list with items as this is used by many areas that manipulate items
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
-            AppUserIncludes.ReadingLists);
+            AppUserIncludes.ReadingListsWithItems);
         if (!await UserHasReadingListAccess(readingListId, user))
         {
             return null;
