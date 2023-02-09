@@ -8557,6 +8557,7 @@
           "Upload"
         ],
         "summary": "Replaces reading list cover image and locks it with a base64 encoded image",
+        "description": "This is the only API that can be called by non-admins, but the authenticated user must have a readinglist permission",
         "requestBody": {
           "description": "",
           "content": {

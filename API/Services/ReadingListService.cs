@@ -269,7 +269,7 @@ public class ReadingListService : IReadingListService
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
             AppUserIncludes.ReadingLists);
-        if (await UserHasReadingListAccess(readingListId, user))
+        if (!await UserHasReadingListAccess(readingListId, user))
         {
             return null;
         }
@@ -285,7 +285,7 @@ public class ReadingListService : IReadingListService
     /// <returns></returns>
     private async Task<bool> UserHasReadingListAccess(int readingListId, AppUser user)
     {
-        return user.ReadingLists.SingleOrDefault(rl => rl.Id == readingListId) != null || await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        return user.ReadingLists.Any(rl => rl.Id == readingListId) || await _unitOfWork.UserRepository.IsUserAdminAsync(user);
     }
 
     /// <summary>
