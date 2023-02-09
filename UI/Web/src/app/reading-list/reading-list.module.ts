@@ -13,6 +13,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
+import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { ReadingListsComponent } from './_components/reading-lists/reading-lists
     AddToListModalComponent,
     ReadingListsComponent,
     EditReadingListModalComponent,
-    ReadingListItemComponent
+    ReadingListItemComponent,
+    ImportCblModalComponent
   ],
   imports: [
     CommonModule,

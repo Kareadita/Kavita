@@ -84,6 +84,10 @@ export enum Action {
    * Send to a device
    */
   SendTo = 17,
+  /**
+   * Import some data into Kavita
+   */
+  Import = 18,
 }
 
 export interface ActionItem<T> {
