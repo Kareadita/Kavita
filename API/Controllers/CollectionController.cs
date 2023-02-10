@@ -61,8 +61,7 @@ public class CollectionController : BaseApiController
         queryString = queryString.Replace(@"%", string.Empty);
         if (queryString.Length == 0) return await GetAllTags();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id);
+        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId());
     }
 
     /// <summary>

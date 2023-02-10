@@ -244,8 +244,7 @@ public class ReaderController : BaseApiController
     [HttpGet("bookmark-info")]
     public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
+        var totalPages = await _cacheService.CacheBookmarkForSeries(User.GetUserId(), seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
         return Ok(new BookmarkInfoDto()
