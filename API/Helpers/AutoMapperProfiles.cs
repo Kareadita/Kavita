@@ -32,9 +32,13 @@ public class AutoMapperProfiles : Profile
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();
-        CreateMap<AppUserProgress, ProgressDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
 
+        CreateMap<AppUserProgress, ProgressDto>()
+            .ForMember(dest => dest.PageNum,
+                opt =>
+                    opt.MapFrom(
+                        src => src.PagesRead));
         CreateMap<SeriesMetadata, SeriesMetadataDto>()
             .ForMember(dest => dest.Writers,
                 opt =>
