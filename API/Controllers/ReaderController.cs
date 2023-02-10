@@ -493,7 +493,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("has-progress")]
-    public async Task<ActionResult<ChapterDto>> HasProgress(int seriesId)
+    public async Task<ActionResult<bool>> HasProgress(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId));

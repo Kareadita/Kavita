@@ -22,165 +22,128 @@ public static class MigrateToUtcDates
 
         #region Series
         logger.LogInformation("Updating Dates on Series...");
-        foreach (var series in await dataContext.Series.ToListAsync())
-        {
-            series.LastModifiedUtc = series.LastModified.ToUniversalTime();
-            series.CreatedUtc = series.Created.ToUniversalTime();
-            series.LastChapterAddedUtc = series.LastChapterAdded.ToUniversalTime();
-            series.LastFolderScannedUtc = series.LastFolderScanned.ToUniversalTime();
-            unitOfWork.SeriesRepository.Update(series);
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE Series SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc'),
+                       [LastChapterAddedUtc] = datetime([LastChapterAdded], 'utc'),
+                       [LastFolderScannedUtc] = datetime([LastFolderScanned], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on Series...Done");
         #endregion
 
         #region Library
         logger.LogInformation("Updating Dates on Libraries...");
-        foreach (var library in await dataContext.Library.ToListAsync())
-        {
-            library.CreatedUtc = library.Created.ToUniversalTime();
-            library.LastModifiedUtc = library.LastModified.ToUniversalTime();
-            unitOfWork.LibraryRepository.Update(library);
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE Library SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on Libraries...Done");
         #endregion
 
         #region Volume
-        logger.LogInformation("Updating Dates on Volumes...");
-        foreach (var volume in await dataContext.Volume.ToListAsync())
+        try
         {
-            volume.CreatedUtc = volume.Created.ToUniversalTime();
-            volume.LastModifiedUtc = volume.LastModified.ToUniversalTime();
-            unitOfWork.VolumeRepository.Update(volume);
+            logger.LogInformation("Updating Dates on Volumes...");
+            await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE Volume SET
+                      [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                      [CreatedUtc] = datetime([Created], 'utc');
+            ");
+            logger.LogInformation("Updating Dates on Volumes...Done");
         }
-
-        if (unitOfWork.HasChanges())
+        catch (Exception ex)
         {
-            await unitOfWork.CommitAsync();
+            logger.LogCritical(ex, "Updating Dates on Volumes...Failed");
         }
-        logger.LogInformation("Updating Dates on Volumes...Done");
         #endregion
 
         #region Chapter
-        logger.LogInformation("Updating Dates on Chapters...");
-        foreach (var chapter in await dataContext.Chapter.ToListAsync())
+        try
         {
-            chapter.CreatedUtc = chapter.Created.ToUniversalTime();
-            chapter.LastModifiedUtc = chapter.LastModified.ToUniversalTime();
-            unitOfWork.ChapterRepository.Update(chapter);
+            logger.LogInformation("Updating Dates on Chapters...");
+            await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE Chapter SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
+            logger.LogInformation("Updating Dates on Chapters...Done");
         }
-
-        if (unitOfWork.HasChanges())
+        catch (Exception ex)
         {
-            await unitOfWork.CommitAsync();
+            logger.LogCritical(ex, "Updating Dates on Chapters...Failed");
         }
-        logger.LogInformation("Updating Dates on Chapters...Done");
         #endregion
 
         #region AppUserBookmark
         logger.LogInformation("Updating Dates on Bookmarks...");
-        foreach (var bookmark in await dataContext.AppUserBookmark.ToListAsync())
-        {
-            bookmark.CreatedUtc = bookmark.Created.ToUniversalTime();
-            bookmark.LastModifiedUtc = bookmark.LastModified.ToUniversalTime();
-            dataContext.Entry(bookmark).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE AppUserBookmark SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on Bookmarks...Done");
         #endregion
 
         #region AppUserProgress
         logger.LogInformation("Updating Dates on Progress...");
-        foreach (var progress in await dataContext.AppUserProgresses.ToListAsync())
-        {
-            progress.CreatedUtc = progress.Created.ToUniversalTime();
-            progress.LastModifiedUtc = progress.LastModified.ToUniversalTime();
-            dataContext.Entry(progress).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE AppUserProgresses SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on Progress...Done");
         #endregion
 
         #region Device
         logger.LogInformation("Updating Dates on Device...");
-        foreach (var device in await dataContext.Device.ToListAsync())
-        {
-            device.CreatedUtc = device.Created.ToUniversalTime();
-            device.LastModifiedUtc = device.LastModified.ToUniversalTime();
-            device.LastUsedUtc = device.LastUsed.ToUniversalTime();
-            dataContext.Entry(device).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE Device SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc'),
+                       [LastUsedUtc] = datetime([LastUsed], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on Device...Done");
         #endregion
 
         #region MangaFile
         logger.LogInformation("Updating Dates on MangaFile...");
-        foreach (var file in await dataContext.MangaFile.ToListAsync())
-        {
-            file.CreatedUtc = file.Created.ToUniversalTime();
-            file.LastModifiedUtc = file.LastModified.ToUniversalTime();
-            file.LastFileAnalysisUtc = file.LastFileAnalysis.ToUniversalTime();
-            dataContext.Entry(file).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE MangaFile SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc'),
+                       [LastFileAnalysisUtc] = datetime([LastFileAnalysis], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on MangaFile...Done");
         #endregion
 
         #region ReadingList
         logger.LogInformation("Updating Dates on ReadingList...");
-        foreach (var readingList in await dataContext.ReadingList.ToListAsync())
-        {
-            readingList.CreatedUtc = readingList.Created.ToUniversalTime();
-            readingList.LastModifiedUtc = readingList.LastModified.ToUniversalTime();
-            dataContext.Entry(readingList).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE ReadingList SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on ReadingList...Done");
         #endregion
 
         #region SiteTheme
         logger.LogInformation("Updating Dates on SiteTheme...");
-        foreach (var theme in await dataContext.SiteTheme.ToListAsync())
-        {
-            theme.CreatedUtc = theme.Created.ToUniversalTime();
-            theme.LastModifiedUtc = theme.LastModified.ToUniversalTime();
-            dataContext.Entry(theme).State = EntityState.Modified;
-        }
-
-        if (unitOfWork.HasChanges())
-        {
-            await unitOfWork.CommitAsync();
-        }
+        await dataContext.Database.ExecuteSqlRawAsync(@"
+                UPDATE SiteTheme SET
+                       [LastModifiedUtc] = datetime([LastModified], 'utc'),
+                       [CreatedUtc] = datetime([Created], 'utc')
+                ;
+            ");
         logger.LogInformation("Updating Dates on SiteTheme...Done");
         #endregion
 

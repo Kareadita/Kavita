@@ -37,6 +37,7 @@ public interface IChapterRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IList<Chapter>> GetAllChaptersWithNonWebPCovers();
     Task<IEnumerable<string>> GetCoverImagesForLockedChaptersAsync();
+    Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter);
 }
 public class ChapterRepository : IChapterRepository
 {
@@ -121,7 +122,7 @@ public class ChapterRepository : IChapterRepository
         return _context.Chapter
             .Where(c => c.Id == chapterId)
             .Select(c => c.Pages)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
     public async Task<ChapterDto> GetChapterDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files)
     {
@@ -241,5 +242,25 @@ public class ChapterRepository : IChapterRepository
             .Where(c => chapterIds.Contains(c.ChapterId))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<ChapterDto> AddChapterModifiers(int userId, ChapterDto chapter)
+    {
+        var progress = await _context.AppUserProgresses.Where(x =>
+                x.AppUserId == userId && x.ChapterId == chapter.Id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        if (progress != null)
+        {
+            chapter.PagesRead = progress.PagesRead ;
+            chapter.ProgressLastModifiedUtc = progress.LastModifiedUtc;
+        }
+        else
+        {
+            chapter.PagesRead = 0;
+            chapter.ProgressLastModifiedUtc = DateTime.MinValue;
+        }
+
+        return chapter;
     }
 }
