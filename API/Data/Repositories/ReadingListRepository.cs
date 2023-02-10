@@ -243,7 +243,8 @@ public class ReadingListRepository : IReadingListRepository
         foreach (var item in items)
         {
             var progress = userProgress.Where(p => p.ChapterId == item.ChapterId).ToList();
-            item.PagesRead = progress.Sum(p => p.PagesRead);
+            if (progress.Count == 0) continue;
+                item.PagesRead = progress.Sum(p => p.PagesRead);
             item.LastReadingProgressUtc = progress.Max(p => p.LastModifiedUtc);
         }
 

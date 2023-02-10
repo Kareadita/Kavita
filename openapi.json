@@ -10081,7 +10081,7 @@
             "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
             "format": "int32"
           },
-          "progressLastModifiedUtc": {
+          "lastReadingProgressUtc": {
             "type": "string",
             "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
@@ -12211,7 +12211,7 @@
             "description": "Used internally only",
             "format": "int32"
           },
-          "progressLastModifiedUtc": {
+          "lastReadingProgressUtc": {
             "type": "string",
             "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
             "format": "date-time"
