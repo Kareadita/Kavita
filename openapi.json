@@ -4048,17 +4048,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               }
             }
@@ -6152,17 +6152,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               }
             }
@@ -10081,6 +10081,11 @@
             "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
             "format": "int32"
           },
+          "progressLastModifiedUtc": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
           "coverImageLocked": {
             "type": "boolean",
             "description": "If the Cover Image is locked for this entity"
@@ -10146,9 +10151,6 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
-          },
-          "readingProgress": {
-            "$ref": "#/components/schemas/ProgressDto"
           }
         },
         "additionalProperties": false,
@@ -10242,6 +10244,145 @@
         },
         "additionalProperties": false,
         "description": "Information about the Chapter for the Reader to render"
+      },
+      "ChapterMetadataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Series",
+            "nullable": true
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "releaseDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationStatus": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Summary for the Chapter/Issue",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the Chapter/Issue",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number in the TotalCount of issues",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of issues for the series",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Number of Words for this chapter. Only applies to Epub",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Exclusively metadata about a given chapter"
       },
       "CollectionTag": {
         "type": "object",
@@ -12069,6 +12210,11 @@
             "type": "integer",
             "description": "Used internally only",
             "format": "int32"
+          },
+          "progressLastModifiedUtc": {
+            "type": "string",
+            "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

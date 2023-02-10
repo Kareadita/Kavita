@@ -28,4 +28,8 @@ public class ReadingListItemDto
     /// Used internally only
     /// </summary>
     public int ReadingListId { get; set; }
+    /// <summary>
+    /// The last time a reading list item (underlying chapter) was read by current authenticated user
+    /// </summary>
+    public DateTime LastReadingProgressUtc { get; set; }
 }
