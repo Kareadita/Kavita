@@ -5,6 +5,8 @@ import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
+import { CblImportResult } from '../_models/reading-list/cbl/cbl-import-result.enum';
+import { CblImportSummary } from '../_models/reading-list/cbl/cbl-import-summary';
 import { TextResonse } from '../_types/text-response';
 import { ActionItem } from './action-factory.service';
 
@@ -91,5 +93,9 @@ export class ReadingListService {
   
   nameExists(name: string) {
     return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
+  }
+
+  importCbl(form: FormData) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'readinglist/import-cbl', form);
   }
 }

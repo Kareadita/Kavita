@@ -1,0 +1,8 @@
+export enum CblImportReason {
+    ChapterMissing = 0,
+    VolumeMissing = 1,
+    SeriesMissing = 2,
+    NameConflict = 3,
+    AllSeriesMissing = 4,
+    EmptyFile = 5,
+}

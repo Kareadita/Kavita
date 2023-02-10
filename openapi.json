@@ -5344,6 +5344,91 @@
         }
       }
     },
+    "/api/ReadingList/import-cbl": {
+      "post": {
+        "tags": [
+          "ReadingList"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ContentType": {
+                    "type": "string"
+                  },
+                  "ContentDisposition": {
+                    "type": "string"
+                  },
+                  "Headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "Length": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "Name": {
+                    "type": "string"
+                  },
+                  "FileName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "ContentType": {
+                  "style": "form"
+                },
+                "ContentDisposition": {
+                  "style": "form"
+                },
+                "Headers": {
+                  "style": "form"
+                },
+                "Length": {
+                  "style": "form"
+                },
+                "Name": {
+                  "style": "form"
+                },
+                "FileName": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [
@@ -9855,6 +9940,76 @@
           }
         },
         "additionalProperties": false
+      },
+      "CblBookResult": {
+        "type": "object",
+        "properties": {
+          "series": {
+            "type": "string",
+            "nullable": true
+          },
+          "volume": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/CblImportReason"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CblImportReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CblImportResult": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CblImportSummaryDto": {
+        "type": "object",
+        "properties": {
+          "cblName": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CblBookResult"
+            },
+            "nullable": true
+          },
+          "success": {
+            "$ref": "#/components/schemas/CblImportResult"
+          },
+          "successfulInserts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CblBookResult"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the summary from the Import of a given CBL"
       },
       "Chapter": {
         "type": "object",

@@ -8,12 +8,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
-import { NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
 import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
+import { NgxFileDropModule } from 'ngx-file-drop';
 
 
 @NgModule({
@@ -39,6 +40,8 @@ import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-m
     SharedSideNavCardsModule,
 
     ReadingListRoutingModule,
+    NgbAccordionModule, // Import CBL
+    NgxFileDropModule, // Import CBL
   ],
   exports: [
     AddToListModalComponent,

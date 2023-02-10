@@ -1,7 +1,8 @@
 <div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
     <form [formGroup]="form">
         <ngx-file-drop (onFileDrop)="dropped($event)" 
-        (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false" dropZoneClassName="file-upload" contentClassName="file-upload-zone" [directory]="false">
+        (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false"
+         dropZoneClassName="file-upload" contentClassName="file-upload-zone">
             <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
                 <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
                     <div class="mx-auto">

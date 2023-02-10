@@ -85,5 +85,9 @@ public class CblImportSummaryDto
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }
+    /// <summary>
+    /// A list of Series that are within the CBL but map to multiple libraries within Kavita
+    /// </summary>
+    public IList<SeriesDto> Conflicts { get; set; }
 
 }

@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
@@ -351,22 +354,35 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
+        if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
+
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        var userSeries =
+            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+        if (!userSeries.Any())
         {
+            // Report that no series exist in the reading list
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.EmptyFile
+                Reason = CblImportReason.AllSeriesMissing
             });
             importSummary.Success = CblImportResult.Fail;
             return importSummary;
         }
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
-        var allSeries =
-            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters))
-            .ToDictionary(s => s.NormalizedName);
+        var conflicts = FindCblImportConflicts(userSeries);
+        if (conflicts.Any())
+        {
+            importSummary.Success = CblImportResult.Fail;
+            // importSummary.Conflicts = conflicts.Select(s => new CblConflictQuestion()
+            // {
+            //     SeriesName = s.Name,
+            //     //LibraryName = s.LibraryId
+            // });
+            return importSummary;
+        }
+        var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
 
-        // TODO: How do I handle series that have same name in different libraries?
 
         // Check if all the series in the list are accessible to user
         if (allSeries.Count == 0)
@@ -382,7 +398,8 @@ public class ReadingListService : IReadingListService
 
 
         var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
-        var allReadingLists = (await _unitOfWork.ReadingListRepository.GetAllReadingListsAsync()).ToDictionary(s => s.NormalizedTitle);
+        // Get all the user's reading lists
+        var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
         {
             readingList = DbFactory.ReadingList(cblReading.Name, string.Empty, false);
@@ -454,6 +471,29 @@ public class ReadingListService : IReadingListService
         return importSummary;
     }
 
+    private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
+    {
+        var dict = new HashSet<string>();
+        return userSeries.Where(series => !dict.Add(Tasks.Scanner.Parser.Parser.Normalize(series.Name))).ToList();
+    }
+
+    private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,
+        out CblImportSummaryDto readingListFromCbl)
+    {
+        if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
+        {
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = CblImportReason.EmptyFile
+            });
+            importSummary.Success = CblImportResult.Fail;
+            readingListFromCbl = importSummary;
+            return true;
+        }
+
+        return false;
+    }
+
     private static void ExistsOrAddReadingListItem(ReadingList readingList, int seriesId, int volumeId, int chapterId)
     {
         var readingListItem =
@@ -464,5 +504,14 @@ public class ReadingListService : IReadingListService
         readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, seriesId,
             volumeId, chapterId);
         readingList.Items.Add(readingListItem);
+    }
+
+    public static CblReadingList LoadCblFromPath(string path)
+    {
+        var reader = new System.Xml.Serialization.XmlSerializer(typeof(CblReadingList));
+        using var file = new StreamReader(path);
+        var cblReadingList = (CblReadingList) reader.Deserialize(file);
+        file.Close();
+        return cblReadingList;
     }
 }
