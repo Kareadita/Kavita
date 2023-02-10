@@ -450,7 +450,7 @@ public class ReaderController : BaseApiController
     [HttpGet("get-progress")]
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
     {
-        var progress = await _unitOfWork.AppUserProgressRepository.GetProgressByUserAndChapter(User.GetUserId(), chapterId);
+        var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, User.GetUserId());
         if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,
