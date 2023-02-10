@@ -233,7 +233,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items)
     {
-        var chapterIds = items.Select(i => i.ChapterId).Distinct().ToList();
+        var chapterIds = items.Select(i => i.ChapterId).Distinct();
         var userProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && chapterIds.Contains(p.ChapterId))
             .AsNoTracking()

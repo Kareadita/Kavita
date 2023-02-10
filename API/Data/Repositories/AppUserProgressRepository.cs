@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -21,15 +24,18 @@ public interface IAppUserProgressRepository
     Task<AppUserProgress> GetAnyProgress();
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
+    Task<ProgressDto> GetProgressByUserAndChapter(int userId, int chapterId);
 }
 
 public class AppUserProgressRepository : IAppUserProgressRepository
 {
     private readonly DataContext _context;
+    private readonly IMapper _mapper;
 
-    public AppUserProgressRepository(DataContext context)
+    public AppUserProgressRepository(DataContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public void Update(AppUserProgress userProgress)
@@ -112,6 +118,14 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     public async Task<IEnumerable<AppUserProgress>> GetAllProgress()
     {
         return await _context.AppUserProgresses.ToListAsync();
+    }
+
+    public async Task<ProgressDto> GetProgressByUserAndChapter(int userId, int chapterId)
+    {
+        return await _context.AppUserProgresses
+            .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
+            .ProjectTo<ProgressDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)

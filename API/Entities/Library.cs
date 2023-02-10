@@ -33,6 +33,9 @@ public class Library : IEntityDate
     public bool ManageCollections { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Last time Library was scanned
     /// </summary>
@@ -42,4 +45,21 @@ public class Library : IEntityDate
     public ICollection<AppUser> AppUsers { get; set; }
     public ICollection<Series> Series { get; set; }
 
+    public void UpdateLastModified()
+    {
+        LastModified = DateTime.Now;
+        LastModifiedUtc = DateTime.UtcNow;
+    }
+
+    public void UpdateLastScanned(DateTime? time)
+    {
+        if (time == null)
+        {
+            LastScanned = DateTime.Now;
+        }
+        else
+        {
+            LastScanned = (DateTime) time;
+        }
+    }
 }

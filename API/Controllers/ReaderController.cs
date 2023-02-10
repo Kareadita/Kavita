@@ -451,25 +451,15 @@ public class ReaderController : BaseApiController
     [HttpGet("get-progress")]
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        var progressBookmark = new ProgressDto()
+        var progress = await _unitOfWork.AppUserProgressRepository.GetProgressByUserAndChapter(User.GetUserId(), chapterId);
+        if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = chapterId,
             VolumeId = 0,
             SeriesId = 0
-        };
-        if (user.Progresses == null) return Ok(progressBookmark);
-        var progress = user.Progresses.FirstOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
-
-        if (progress != null)
-        {
-            progressBookmark.SeriesId = progress.SeriesId;
-            progressBookmark.VolumeId = progress.VolumeId;
-            progressBookmark.PageNum = progress.PagesRead;
-            progressBookmark.BookScrollId = progress.BookScrollId;
-        }
-        return Ok(progressBookmark);
+        });
+        return Ok(progress);
     }
 
     /// <summary>
@@ -480,9 +470,7 @@ public class ReaderController : BaseApiController
     [HttpPost("progress")]
     public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
-        if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
+        if (await _readerService.SaveReadingProgress(progressDto, User.GetUserId())) return Ok(true);
 
         return BadRequest("Could not save progress");
     }

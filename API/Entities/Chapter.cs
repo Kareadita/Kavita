@@ -24,6 +24,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public ICollection<MangaFile> Files { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Relative path to the (managed) image file representing the cover image
     /// </summary>
@@ -101,6 +104,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
+    public ICollection<AppUserProgress> UserProgress { get; set; }
 
 
 

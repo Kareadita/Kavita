@@ -32,6 +32,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Genre, GenreTagDto>();
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();
+        CreateMap<AppUserProgress, ProgressDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
 
         CreateMap<SeriesMetadata, SeriesMetadataDto>()
