@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { FileUploadControl, FileUploadValidators } from '@iplab/ngx-file-upload';
+import { FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
@@ -25,8 +25,6 @@ export class ImportCblModalComponent {
     files: this.fileUploadControl
   });
 
-  
-  
   importSummaries: Array<CblImportSummary> = [];
 
   get Breakpoint() { return Breakpoint; }
@@ -45,7 +43,6 @@ export class ImportCblModalComponent {
 
     const formData = new FormData();
     formData.append('cbl', files[0]);
-    console.log('formData: ', formData);
     this.readingListService.importCbl(formData).subscribe(res => {
       console.log('Result: ', res);
       this.importSummaries.push(res);

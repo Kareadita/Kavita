@@ -500,7 +500,7 @@ public class ReadingListController : BaseApiController
         // We need to pass the temp file back
 
         var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
-        if (importSummary.Conflicts2.Any())
+        if (importSummary.Results.Any())
         {
             return Ok(importSummary);
         }

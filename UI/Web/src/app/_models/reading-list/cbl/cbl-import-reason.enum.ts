@@ -5,4 +5,5 @@ export enum CblImportReason {
     NameConflict = 3,
     AllSeriesMissing = 4,
     EmptyFile = 5,
+    SeriesCollision = 6
 }

@@ -379,22 +379,39 @@ public class ReadingListService : IReadingListService
         if (conflicts.Any())
         {
             importSummary.Success = CblImportResult.Fail;
-            foreach (var conflict in conflicts)
+            foreach (var con in conflicts)
             {
-                foreach (var quest in userSeries.Where(s => s.NormalizedName.Equals(conflict.NormalizedName)).Select(s =>
-                             new CblConflictQuestion()
-                             {
-                                 SeriesName = s.Name,
-                                 LibrariesIds = new[]
-                                 {
-                                     s.LibraryId,
-                                     conflict.LibraryId
-                                 }
-                             }))
+                importSummary.Results.Add(new CblBookResult()
                 {
-                    importSummary.Conflicts2.Add(quest);
-                }
+                    Reason = CblImportReason.SeriesCollision,
+                    Series = con.Name
+                });
             }
+            // foreach (var conflict in conflicts)
+            // {
+            //     var series = userSeries.First(s => s.NormalizedName.Equals(conflict.NormalizedName));
+            //     importSummary.Conflicts2.Add(new CblConflictQuestion()
+            //     {
+            //         SeriesName = series.Name,
+            //         LibrariesIds = new List<int>()
+            //         {
+            //             series.LibraryId
+            //         }
+            //     });
+            //     // foreach (var quest in userSeries.Where(s => s.NormalizedName.Equals(conflict.NormalizedName)).Select(s =>
+            //     //              new CblConflictQuestion()
+            //     //              {
+            //     //                  SeriesName = s.Name,
+            //     //                  LibrariesIds = new[]
+            //     //                  {
+            //     //                      s.LibraryId,
+            //     //                      conflict.LibraryId
+            //     //                  }
+            //     //              }))
+            //     // {
+            //     //     importSummary.Conflicts2.Add(quest);
+            //     // }
+            // }
         }
         return importSummary;
     }

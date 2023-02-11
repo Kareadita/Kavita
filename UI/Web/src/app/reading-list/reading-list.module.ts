@@ -15,7 +15,7 @@ import { ReadingListItemComponent } from './_components/reading-list-item/readin
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
 import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
-
+import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 
 
 @NgModule({
@@ -27,6 +27,7 @@ import { FileUploadModule } from '@iplab/ngx-file-upload';
     EditReadingListModalComponent,
     ReadingListItemComponent,
     ImportCblModalComponent,
+    CblConflictReasonPipe,
   ],
   imports: [
     CommonModule,

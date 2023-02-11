@@ -4,7 +4,31 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-    <p>Explanation</p>
+    
+    <!-- <app-step-tracker [steps]="steps"></app-step-tracker> -->
+    <!-- <div class="form-page-container">
+        <app-steps></app-steps>
+      <div class="step-page-container">
+        <div class="form-step">
+            <ng-container [ngSwitch]="currentStep?.stepIndex">
+                <ng-container *ngSwitchCase="'1'">
+                    <app-step-template [step]="currentStep">
+                        Test
+                    </app-step-template>
+                </ng-container>
+                <ng-container *ngSwitchCase="'2'">
+                  <app-step-template [step]="currentStep"></app-step-template>
+                </ng-container>
+                <ng-container *ngSwitchCase="'3'">
+                  <app-step-template [step]="currentStep"></app-step-template>
+                </ng-container>
+            </ng-container>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="onNextStep()" [disabled]="!currentStep?.isComplete">
+        Next
+      </button>
+    </div> -->
 
 
     <form [formGroup]="uploadForm" enctype="multipart/form-data">
@@ -13,22 +37,15 @@
     </form>
     
 
-
+    <h5>There were issues when trying to import this CBL!</h5>
     <ng-container *ngFor="let importSummary of importSummaries">
-        <ngb-accordion #acc="ngbAccordion">
-            <ng-template ngbPanelHeader let-opened>
-                <div class="accordion-button custom-header justify-content-between" [class.collapsed]="!opened">
-                    <p class="m-0">{{importSummary.success}} {{importSummary.cblName}}</p>
-                    <button ngbPanelToggle class="btn btn-link p-0">Toggle first</button>
-                </div>
-            </ng-template>
-            <ngb-panel [title]="importSummary.cblName">
-                <ng-template ngbPanelContent>
-                    
-                </ng-template>
-            </ngb-panel>
-        </ngb-accordion>
+        <ul>
+            <li class="list-item" *ngFor="let conflict of importSummary.results">
+                {{conflict.reason | cbl-conflict-reason: conflict.series:conflict.volume:conflict.chapter}}
+            </li>
+        </ul>
     </ng-container>
+
 
 
 </div>

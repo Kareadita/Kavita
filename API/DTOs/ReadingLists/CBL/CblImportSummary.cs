@@ -54,6 +54,11 @@ public enum CblImportReason
     /// </summary>
     [Description("Empty File")]
     EmptyFile = 5,
+    /// <summary>
+    /// Series Collides between Libraries
+    /// </summary>
+    [Description("Series Collision")]
+    SeriesCollision = 6,
 }
 
 public class CblBookResult
