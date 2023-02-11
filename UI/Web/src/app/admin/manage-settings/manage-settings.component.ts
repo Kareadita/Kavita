@@ -98,6 +98,16 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
+  resetIPAddresses() {
+    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+      this.serverSettings.ipAddresses = settings.ipAddresses;
+      this.settingsForm.get("ipAddresses")?.setValue(this.serverSettings.ipAddresses);
+      this.toastr.success('IP Addresses Reset');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
   openDirectoryChooser(existingDirectory: string, formControl: string) {
     const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
     modalRef.componentInstance.startingFolder = existingDirectory || '';

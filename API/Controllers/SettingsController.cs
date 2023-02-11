@@ -72,6 +72,27 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
+    /// Resets the IP Addresses
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-ip-addresses")]
+    public async Task<ActionResult<ServerSettingDto>> ResetIPAddressesSettings()
+    {
+        _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
+        var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
+        ipAddresses.Value = Configuration.DefaultIPAddresses;
+        _unitOfWork.SettingsRepository.Update(ipAddresses);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+    }
+
+    /// <summary>
     /// Resets the email service url
     /// </summary>
     /// <returns></returns>

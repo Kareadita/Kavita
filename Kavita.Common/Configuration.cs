@@ -8,6 +8,7 @@ namespace Kavita.Common;
 
 public static class Configuration
 {
+    public const string DefaultIPAddresses = "0.0.0.0,::";
     public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
@@ -174,10 +175,9 @@ public static class Configuration
 
     private static string GetIpAddresses(string filePath)
     {
-        const string defaultIpAddresses = "0.0.0.0,::";
         if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
         {
-            return defaultIpAddresses;
+            return DefaultIPAddresses;
         }
 
         try
@@ -196,7 +196,7 @@ public static class Configuration
             Console.WriteLine("Error writing app settings: " + ex.Message);
         }
 
-        return defaultIpAddresses;
+        return DefaultIPAddresses;
     }
     #endregion
 
