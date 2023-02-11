@@ -197,6 +197,7 @@ public class ReadingListRepository : IReadingListRepository
                 ReleaseDate = data.ReleaseDate,
                 LibraryType = data.LibraryType,
                 ChapterTitleName = data.ChapterTitleName,
+                LibraryName = data.LibraryName,
                 FileSize = data.FileSize
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
