@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -147,6 +148,14 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
+                // Validate IP addresses
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
+                {
+                    if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
+                        return BadRequest($"IP Address '{ipAddress}' is invalid");
+                    }
+                }
+
                 setting.Value = updateSettingsDto.IpAddresses;
                 // IpAddesses is managed in appSetting.json
                 Configuration.IpAddresses = updateSettingsDto.IpAddresses;

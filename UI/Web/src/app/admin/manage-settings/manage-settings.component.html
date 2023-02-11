@@ -35,10 +35,16 @@
 
         <div class="row g-0 mb-2">
             <div class="col-md-8 col-sm-12 pe-2">
-                <label for="settings-ipaddresses" class="form-label">Ip Addresses</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
-                <ng-template #ipAddressesTooltip>Comma separated list of Ip addresses the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
+                <label for="settings-ipaddresses" class="form-label">IP Addresses</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
+                <ng-template #ipAddressesTooltip>This does not apply to Docker</ng-template>
                 <span class="visually-hidden" id="settings-ipaddresses-help">Comma separated list of Ip addresses the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
-                <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text">
+                <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
+                [class.is-invalid]="settingsForm.get('ipAddresses')?.invalid && settingsForm.get('ipAddresses')?.touched">
+                <div id="ipaddresses-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+                    <div *ngIf="settingsForm.get('ipAddresses')?.errors?.pattern">
+                        IP addresses can only contain valid IPv4 or IPv6 addresses
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-4 col-sm-12 pe-2">
