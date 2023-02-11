@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.34"
+    "version": "0.6.1.37"
   },
   "servers": [
     {
@@ -4048,17 +4048,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               }
             }
@@ -6152,17 +6152,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               }
             }
@@ -9339,7 +9339,15 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActiveUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -9468,6 +9476,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           }
@@ -9631,6 +9647,14 @@
           "lastModified": {
             "type": "string",
             "description": "Last date this was updated",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "appUser": {
@@ -9888,6 +9912,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "coverImage": {
             "type": "string",
             "description": "Relative path to the (managed) image file representing the cover image",
@@ -9988,6 +10020,13 @@
             },
             "nullable": true
           },
+          "userProgress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserProgress"
+            },
+            "nullable": true
+          },
           "volume": {
             "$ref": "#/components/schemas/Volume"
           },
@@ -10042,6 +10081,11 @@
             "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
             "format": "int32"
           },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
           "coverImageLocked": {
             "type": "boolean",
             "description": "If the Cover Image is locked for this entity"
@@ -10054,6 +10098,18 @@
           "created": {
             "type": "string",
             "description": "When chapter was created",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "releaseDate": {
@@ -10188,6 +10244,145 @@
         },
         "additionalProperties": false,
         "description": "Information about the Chapter for the Reader to render"
+      },
+      "ChapterMetadataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Series",
+            "nullable": true
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "releaseDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationStatus": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Summary for the Chapter/Issue",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the Chapter/Issue",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number in the TotalCount of issues",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of issues for the series",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Number of Words for this chapter. Only applies to Epub",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Exclusively metadata about a given chapter"
       },
       "CollectionTag": {
         "type": "object",
@@ -10533,11 +10728,23 @@
             "description": "Last time this device was used to send a file",
             "format": "date-time"
           },
+          "lastUsedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           }
@@ -10568,6 +10775,11 @@
             "$ref": "#/components/schemas/DevicePlatform"
           },
           "lastUsed": {
+            "type": "string",
+            "description": "Last time this device was used to send a file",
+            "format": "date-time"
+          },
+          "lastUsedUtc": {
             "type": "string",
             "description": "Last time this device was used to send a file",
             "format": "date-time"
@@ -11075,6 +11287,18 @@
             "format": "date-time",
             "nullable": true
           },
+          "createdAtUtc": {
+            "type": "string",
+            "description": "When the job was created",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastExecutionUtc": {
+            "type": "string",
+            "description": "Last time the job was run",
+            "format": "date-time",
+            "nullable": true
+          },
           "cron": {
             "type": "string",
             "nullable": true
@@ -11170,6 +11394,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -11331,9 +11563,21 @@
             "description": "Last time underlying file was modified",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastFileAnalysis": {
             "type": "string",
             "description": "Last time file analysis ran on this file",
+            "format": "date-time"
+          },
+          "lastFileAnalysisUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "chapter": {
@@ -11652,13 +11896,8 @@
           },
           "bookScrollId": {
             "type": "string",
-            "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
+            "description": "For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "description": "Last time the progress was synced from UI or external app",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -11809,6 +12048,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -11950,6 +12197,10 @@
           "libraryType": {
             "$ref": "#/components/schemas/LibraryType"
           },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
           "title": {
             "type": "string",
             "nullable": true
@@ -11963,6 +12214,16 @@
             "type": "integer",
             "description": "Used internally only",
             "format": "int32"
+          },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
+            "format": "date-time"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "File size of underlying item",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -12418,6 +12679,14 @@
             "description": "Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "coverImage": {
             "type": "string",
             "description": "Absolute path to the (managed) image file",
@@ -12442,6 +12711,11 @@
             "description": "Last time the folder was scanned",
             "format": "date-time"
           },
+          "lastFolderScannedUtc": {
+            "type": "string",
+            "description": "Last time the folder was scanned in Utc",
+            "format": "date-time"
+          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
@@ -12457,6 +12731,10 @@
           "lastChapterAdded": {
             "type": "string",
             "description": "When a Chapter was last added onto the Series",
+            "format": "date-time"
+          },
+          "lastChapterAddedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "wordCount": {
@@ -13473,6 +13751,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -13507,6 +13793,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -14485,6 +14779,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },

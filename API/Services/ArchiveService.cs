@@ -278,7 +278,7 @@ public class ArchiveService : IArchiveService
     /// <exception cref="KavitaException"></exception>
     public string CreateZipForDownload(IEnumerable<string> files, string tempFolder)
     {
-        var dateString = DateTime.Now.ToShortDateString().Replace("/", "_");
+        var dateString = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
 
         var tempLocation = Path.Join(_directoryService.TempDirectory, $"{tempFolder}_{dateString}");
         var potentialExistingFile = _directoryService.FileSystem.FileInfo.FromFileName(Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip"));

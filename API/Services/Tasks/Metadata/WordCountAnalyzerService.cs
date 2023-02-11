@@ -233,7 +233,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
     private void UpdateFileAnalysis(MangaFile file)
     {
-        file.LastFileAnalysis = DateTime.Now;
+        file.UpdateLastFileAnalysis();
         _unitOfWork.MangaFileRepository.Update(file);
     }
 

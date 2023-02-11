@@ -41,6 +41,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc
     /// </summary>
     public DateTime LastModified { get; set; }
+
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Absolute path to the (managed) image file
     /// </summary>
@@ -64,6 +68,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public DateTime LastFolderScanned { get; set; }
     /// <summary>
+    /// Last time the folder was scanned in Utc
+    /// </summary>
+    public DateTime LastFolderScannedUtc { get; set; }
+    /// <summary>
     /// The type of all the files attached to this series
     /// </summary>
     public MangaFormat Format { get; set; } = MangaFormat.Unknown;
@@ -76,6 +84,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// When a Chapter was last added onto the Series
     /// </summary>
     public DateTime LastChapterAdded { get; set; }
+    public DateTime LastChapterAddedUtc { get; set; }
 
     /// <summary>
     /// Total Word count of all chapters in this chapter.
@@ -104,4 +113,16 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     public List<Volume> Volumes { get; set; }
     public Library Library { get; set; }
     public int LibraryId { get; set; }
+
+    public void UpdateLastFolderScanned()
+    {
+        LastFolderScanned = DateTime.Now;
+        LastFolderScannedUtc = DateTime.UtcNow;
+    }
+
+    public void UpdateLastChapterAdded()
+    {
+        LastChapterAdded = DateTime.Now;
+        LastChapterAddedUtc = DateTime.UtcNow;
+    }
 }

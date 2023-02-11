@@ -34,6 +34,11 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
 
+        CreateMap<AppUserProgress, ProgressDto>()
+            .ForMember(dest => dest.PageNum,
+                opt =>
+                    opt.MapFrom(
+                        src => src.PagesRead));
         CreateMap<SeriesMetadata, SeriesMetadataDto>()
             .ForMember(dest => dest.Writers,
                 opt =>
