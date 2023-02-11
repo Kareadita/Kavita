@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
