@@ -89,8 +89,7 @@ public class ReadingListController : BaseApiController
     [HttpGet("items")]
     public async Task<ActionResult<IEnumerable<ReadingListItemDto>>> GetListForUser(int readingListId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, User.GetUserId());
         return Ok(items);
     }
 

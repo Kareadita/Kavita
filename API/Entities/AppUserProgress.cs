@@ -47,6 +47,9 @@ public class AppUserProgress : IEntityDate
     /// </summary>
     public DateTime LastModified { get; set; }
 
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     // Relationships
     /// <summary>
     /// Navigational Property for EF. Links to a unique AppUser

@@ -133,6 +133,13 @@ public static class QueryableExtensions
             queryable = queryable.Include(v => v.Volume);
         }
 
+        if (includes.HasFlag(ChapterIncludes.Files))
+        {
+            queryable = queryable
+                .Include(c => c.Files);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 

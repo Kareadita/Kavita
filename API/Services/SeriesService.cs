@@ -436,7 +436,7 @@ public class SeriesService : ISeriesService
             var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
             foreach (var library in libraries)
             {
-                library.LastModified = DateTime.Now;
+                library.UpdateLastModified();
                 _unitOfWork.LibraryRepository.Update(library);
             }
 

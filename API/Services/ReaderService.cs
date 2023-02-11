@@ -231,6 +231,7 @@ public class ReaderService : IReaderService
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
+
             if (userProgress == null)
             {
                 // Create a user object

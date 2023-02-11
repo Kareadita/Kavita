@@ -244,8 +244,7 @@ public class ReaderController : BaseApiController
     [HttpGet("bookmark-info")]
     public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        var totalPages = await _cacheService.CacheBookmarkForSeries(user.Id, seriesId);
+        var totalPages = await _cacheService.CacheBookmarkForSeries(User.GetUserId(), seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
         return Ok(new BookmarkInfoDto()
@@ -451,25 +450,15 @@ public class ReaderController : BaseApiController
     [HttpGet("get-progress")]
     public async Task<ActionResult<ProgressDto>> GetProgress(int chapterId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        var progressBookmark = new ProgressDto()
+        var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, User.GetUserId());
+        if (progress == null) return Ok(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = chapterId,
             VolumeId = 0,
             SeriesId = 0
-        };
-        if (user.Progresses == null) return Ok(progressBookmark);
-        var progress = user.Progresses.FirstOrDefault(x => x.AppUserId == user.Id && x.ChapterId == chapterId);
-
-        if (progress != null)
-        {
-            progressBookmark.SeriesId = progress.SeriesId;
-            progressBookmark.VolumeId = progress.VolumeId;
-            progressBookmark.PageNum = progress.PagesRead;
-            progressBookmark.BookScrollId = progress.BookScrollId;
-        }
-        return Ok(progressBookmark);
+        });
+        return Ok(progress);
     }
 
     /// <summary>
@@ -480,9 +469,7 @@ public class ReaderController : BaseApiController
     [HttpPost("progress")]
     public async Task<ActionResult> BookmarkProgress(ProgressDto progressDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-
-        if (await _readerService.SaveReadingProgress(progressDto, user.Id)) return Ok(true);
+        if (await _readerService.SaveReadingProgress(progressDto, User.GetUserId())) return Ok(true);
 
         return BadRequest("Could not save progress");
     }
@@ -506,7 +493,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("has-progress")]
-    public async Task<ActionResult<ChapterDto>> HasProgress(int seriesId)
+    public async Task<ActionResult<bool>> HasProgress(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.AppUserProgressRepository.HasAnyProgressOnSeriesAsync(seriesId, userId));

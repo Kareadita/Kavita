@@ -3,6 +3,7 @@ using System;
 using API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230210153842_UtcTimes")]
+    partial class UtcTimes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
@@ -378,15 +380,6 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AlternateCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("AlternateNumber")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AlternateSeries")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("AvgHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -436,12 +429,6 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SeriesGroup")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StoryArc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("StoryArcNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")

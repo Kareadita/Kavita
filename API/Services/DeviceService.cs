@@ -114,7 +114,7 @@ public class DeviceService : IDeviceService
             throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported on Kindle");
 
 
-        device.LastUsed = DateTime.Now;
+        device.UpdateLastUsed();
         _unitOfWork.DeviceRepository.Update(device);
         await _unitOfWork.CommitAsync();
         var success = await _emailService.SendFilesToEmail(new SendToDto()

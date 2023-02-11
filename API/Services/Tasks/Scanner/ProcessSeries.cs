@@ -166,7 +166,7 @@ public class ProcessSeries : IProcessSeries
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
-            series.LastFolderScanned = DateTime.Now;
+            series.UpdateLastFolderScanned();
 
             if (_unitOfWork.HasChanges())
             {
@@ -585,7 +585,7 @@ public class ProcessSeries : IProcessSeries
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
                 chapter = DbFactory.Chapter(info);
                 volume.Chapters.Add(chapter);
-                series.LastChapterAdded = DateTime.Now;
+                series.UpdateLastChapterAdded();
             }
             else
             {
