@@ -180,23 +180,6 @@ public class ReadingListRepository : IReadingListRepository
                     LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
                     LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
-            // .Join(_context.Library, s => s.LibraryId, library => library.Id,
-            //     (data, l) => new
-            //     {
-            //         data.SeriesName,
-            //         data.SeriesFormat,
-            //         data.LibraryId,
-            //         LibraryName = l.Name,
-            //         data.ReadingListItem,
-            //         data.TotalPages,
-            //         data.ChapterNumber,
-            //         data.VolumeNumber,
-            //         data.VolumeId,
-            //         data.ReleaseDate,
-            //         data.ChapterTitleName,
-            //         data.FileSize,
-            //         LibraryType = l.Type
-            //     })
             .Select(data => new ReadingListItemDto()
             {
                 Id = data.ReadingListItem.Id,
