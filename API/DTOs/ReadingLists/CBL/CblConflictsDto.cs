@@ -13,8 +13,7 @@ public class CblConflictsDto
 public class CblConflictQuestion
 {
     public string SeriesName { get; set; }
-    public string Number { get; set; }
-    public string Volume { get; set; }
+    public IList<int> LibrariesIds { get; set; }
 }
 
 public class CblConflictAnswersDto

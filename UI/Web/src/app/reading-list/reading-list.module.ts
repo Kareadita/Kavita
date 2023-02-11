@@ -14,7 +14,8 @@ import { ReadingListDetailComponent } from './_components/reading-list-detail/re
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
 import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
-import { NgxFileDropModule } from 'ngx-file-drop';
+import { FileUploadModule } from '@iplab/ngx-file-upload';
+
 
 
 @NgModule({
@@ -25,7 +26,7 @@ import { NgxFileDropModule } from 'ngx-file-drop';
     ReadingListsComponent,
     EditReadingListModalComponent,
     ReadingListItemComponent,
-    ImportCblModalComponent
+    ImportCblModalComponent,
   ],
   imports: [
     CommonModule,
@@ -41,7 +42,7 @@ import { NgxFileDropModule } from 'ngx-file-drop';
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL
-    NgxFileDropModule, // Import CBL
+    FileUploadModule, // Import CBL
   ],
   exports: [
     AddToListModalComponent,

@@ -6,43 +6,10 @@
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
     <p>Explanation</p>
 
-    <!-- <form [formGroup]="form">
-        <ngx-file-drop (onFileDrop)="dropped($event)" 
-        (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false" 
-        dropZoneClassName="file-upload" contentClassName="file-upload-zone">
-            <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
-                    <div class="mx-auto">
-                        <div class="row g-0 mb-3">
-                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
-                        </div>
 
-                        <div class="d-flex justify-content-center">
-                            <div class="d-flex justify-content-evenly">
-                                <a style="padding-right:0px" href="javascript:void(0)" (click)="changeMode('url')"><span class="phone-hidden">Enter a </span>Url</a>
-                                <span class="ps-1 pe-1">•</span>
-                                <span style="padding-right:0px" href="javascript:void(0)">Drag and drop</span>
-                                <span class="ps-1 pe-1" style="padding-right:0px">•</span>
-                                <a style="padding-right:0px" href="javascript:void(0)" (click)="openFileSelector()">Upload<span class="phone-hidden"> an image</span></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </ng-template>
-        </ngx-file-drop>
-    </form> -->
-    <form enctype="multipart/form-data">
-        <input type="file" class="file-input"
-        (change)="onFileSelected($event)" #fileUpload>
-        <div class="file-upload">
- 
- 
-      
-          <button mat-mini-fab color="primary" class="upload-btn" type="button"
-            (click)="fileUpload.click()">
-              
-          </button>
-      </div>
+    <form [formGroup]="uploadForm" enctype="multipart/form-data">
+        <file-upload formControlName="files"></file-upload>
+        <button class="btn btn-primary" type="button" (click)="importFile()">Import</button>
     </form>
     
 

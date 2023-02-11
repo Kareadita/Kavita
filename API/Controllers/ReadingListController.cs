@@ -488,7 +488,7 @@ public class ReadingListController : BaseApiController
     [HttpPost("import-cbl")]
     public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var filename = Path.GetRandomFileName();
         var outputFile = Path.Join(_directoryService.TempDirectory, filename);
 
@@ -497,6 +497,13 @@ public class ReadingListController : BaseApiController
         stream.Close();
         var cbl = ReadingListService.LoadCblFromPath(outputFile);
 
+        // We need to pass the temp file back
+
+        var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
+        if (importSummary.Conflicts2.Any())
+        {
+            return Ok(importSummary);
+        }
         return Ok(_readingListService.CreateReadingListFromCbl(userId, cbl));
     }
 }

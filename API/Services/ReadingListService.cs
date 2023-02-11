@@ -31,7 +31,8 @@ public interface IReadingListService
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
         ReadingList readingList);
 
-    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading);
+    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
+    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
 }
 
 /// <summary>
@@ -342,7 +343,64 @@ public class ReadingListService : IReadingListService
         return index > lastOrder + 1;
     }
 
-    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading)
+    /// <summary>
+    /// Check for File issues like: No entries, Reading List Name collision, Duplicate Series across Libraries
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="cblReading"></param>
+    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading)
+    {
+        var importSummary = new CblImportSummaryDto()
+        {
+            CblName = cblReading.Name,
+            Success = CblImportResult.Success,
+            Results = new List<CblBookResult>(),
+            SuccessfulInserts = new List<CblBookResult>(),
+            Conflicts = new List<SeriesDto>(),
+            Conflicts2 = new List<CblConflictQuestion>()
+        };
+        if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
+
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        var userSeries =
+            (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+        if (!userSeries.Any())
+        {
+            // Report that no series exist in the reading list
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = CblImportReason.AllSeriesMissing
+            });
+            importSummary.Success = CblImportResult.Fail;
+            return importSummary;
+        }
+
+        var conflicts = FindCblImportConflicts(userSeries);
+        if (conflicts.Any())
+        {
+            importSummary.Success = CblImportResult.Fail;
+            foreach (var conflict in conflicts)
+            {
+                foreach (var quest in userSeries.Where(s => s.NormalizedName.Equals(conflict.NormalizedName)).Select(s =>
+                             new CblConflictQuestion()
+                             {
+                                 SeriesName = s.Name,
+                                 LibrariesIds = new[]
+                                 {
+                                     s.LibraryId,
+                                     conflict.LibraryId
+                                 }
+                             }))
+                {
+                    importSummary.Conflicts2.Add(quest);
+                }
+            }
+        }
+        return importSummary;
+    }
+
+
+    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
         _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user.UserName);
@@ -480,6 +538,7 @@ public class ReadingListService : IReadingListService
     private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,
         out CblImportSummaryDto readingListFromCbl)
     {
+        readingListFromCbl = new CblImportSummaryDto();
         if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
         {
             importSummary.Results.Add(new CblBookResult()

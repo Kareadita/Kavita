@@ -89,5 +89,6 @@ public class CblImportSummaryDto
     /// A list of Series that are within the CBL but map to multiple libraries within Kavita
     /// </summary>
     public IList<SeriesDto> Conflicts { get; set; }
+    public IList<CblConflictQuestion> Conflicts2 { get; set; }
 
 }

@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
+import { FileUploadControl, FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
@@ -14,7 +16,17 @@ export class ImportCblModalComponent {
 
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
 
-  acceptableExtensions: string = ['.cbl'].join(',');;
+  fileUploadControl = new FormControl(undefined, [
+    FileUploadValidators.filesLimit(1), 
+    FileUploadValidators.accept(['.cbl']),
+  ]);
+  
+  uploadForm = new FormGroup({
+    files: this.fileUploadControl
+  });
+
+  
+  
   importSummaries: Array<CblImportSummary> = [];
 
   get Breakpoint() { return Breakpoint; }
@@ -26,25 +38,40 @@ export class ImportCblModalComponent {
     this.ngModal.close();
   }
 
-  onFileSelected(event: any) {
-    console.log('event: ', event);
-    if (!(event.target as HTMLInputElement).files === null || (event.target as HTMLInputElement).files?.length === 0) return;
+  importFile() {
+    console.log('files: ', this.uploadForm.get('files')?.value);
+    const files = this.uploadForm.get('files')?.value;
+    if (!files) return;
 
-    const file = (event.target as HTMLInputElement).files![0];
+    const formData = new FormData();
+    formData.append('cbl', files[0]);
+    console.log('formData: ', formData);
+    this.readingListService.importCbl(formData).subscribe(res => {
+      console.log('Result: ', res);
+      this.importSummaries.push(res);
+      this.cdRef.markForCheck();
+    });
+  }
 
-    if (file) {
+  // onFileSelected(event: any) {
+  //   console.log('event: ', event);
+  //   if (!(event.target as HTMLInputElement).files === null || (event.target as HTMLInputElement).files?.length === 0) return;
 
-        //this.fileName = file.name;
+  //   const file = (event.target as HTMLInputElement).files![0];
 
-        const formData = new FormData();
+  //   if (file) {
 
-        formData.append("cbl", file);
+  //       //this.fileName = file.name;
 
-        this.readingListService.importCbl(formData).subscribe(res => {
-          this.importSummaries.push(res);
-          this.cdRef.markForCheck();
-        });
-        this.fileUpload.value = '';
-    }
-}
+  //       const formData = new FormData();
+
+  //       formData.append("cbl", file);
+
+  //       this.readingListService.importCbl(formData).subscribe(res => {
+  //         this.importSummaries.push(res);
+  //         this.cdRef.markForCheck();
+  //       });
+  //       this.fileUpload.value = '';
+  //   }
+  // }
 }
