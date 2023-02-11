@@ -448,8 +448,9 @@ public class CleanupServiceTests : AbstractDbTest
         // Delete the Chapter
         _context.Chapter.Remove(c);
         await _unitOfWork.CommitAsync();
-        Assert.Single(await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(1, 1));
+        Assert.Empty(await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(1, 1));
 
+        // NOTE: This may not be needed, the underlying DB structure seems fixed as of v0.7
         await cleanupService.CleanupDbEntries();
 
         Assert.Empty(await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(1, 1));

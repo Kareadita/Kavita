@@ -21,6 +21,7 @@
     .content-wrapper {
         padding: 0 5px 0;
         overflow: hidden;
+        height: calc(100vh - 56px);
 
         &.closed {
             overflow: auto;

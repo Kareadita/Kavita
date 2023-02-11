@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Hosting;

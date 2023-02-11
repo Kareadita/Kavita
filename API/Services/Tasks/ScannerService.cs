@@ -528,13 +528,13 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
-        var time = DateTime.Now;
+        var time = DateTime.UtcNow;
         foreach (var folderPath in library.Folders)
         {
-            folderPath.LastScanned = time;
+            folderPath.UpdateLastScanned(time);
         }
 
-        library.LastScanned = time;
+        library.UpdateLastScanned(time);
 
 
         _unitOfWork.LibraryRepository.Update(library);

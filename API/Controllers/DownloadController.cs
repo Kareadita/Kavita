@@ -201,19 +201,20 @@ public class DownloadController : BaseApiController
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest("Bookmarks cannot be empty");
 
         // We know that all bookmarks will be for one single seriesId
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
+        var username = User.GetUsername();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
         var filename = $"{series.Name} - Bookmarks.zip";
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 0F));
+            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());
         var filePath =  _archiveService.CreateZipForDownload(files,
-            $"download_{user.Id}_{seriesIds}_bookmarks");
+            $"download_{userId}_{seriesIds}_bookmarks");
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.DownloadProgressEvent(User.GetUsername(), Path.GetFileNameWithoutExtension(filename), 1F));
+            MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 1F));
 
 
         return PhysicalFile(filePath, DefaultContentType, filename, true);

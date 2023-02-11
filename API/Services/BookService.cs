@@ -731,7 +731,7 @@ public class BookService : IBookService
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
-        var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        var correctedKey = book.Content.Html.Keys.FirstOrDefault(s => s.EndsWith(key));
         if (!string.IsNullOrEmpty(correctedKey))
         {
             key = correctedKey;

@@ -41,6 +41,15 @@ public class Device : IEntityDate
     /// Last time this device was used to send a file
     /// </summary>
     public DateTime LastUsed { get; set; }
+    public DateTime LastUsedUtc { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
+    public void UpdateLastUsed()
+    {
+        LastUsed = DateTime.Now;
+        LastUsedUtc = DateTime.UtcNow;
+    }
 }
