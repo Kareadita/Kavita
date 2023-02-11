@@ -149,6 +149,7 @@ public class ReadingListRepository : IReadingListRepository
                 chapter.ReleaseDate,
                 ReadingListItem = data,
                 ChapterTitleName = chapter.TitleName,
+                FileSize = chapter.Files.Sum(f => f.Bytes)
 
             })
             .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
@@ -158,6 +159,7 @@ public class ReadingListRepository : IReadingListRepository
                 data.ChapterNumber,
                 data.ReleaseDate,
                 data.ChapterTitleName,
+                data.FileSize,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
@@ -174,8 +176,27 @@ public class ReadingListRepository : IReadingListRepository
                     data.VolumeId,
                     data.ReleaseDate,
                     data.ChapterTitleName,
+                    data.FileSize,
+                    LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
                     LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
+            // .Join(_context.Library, s => s.LibraryId, library => library.Id,
+            //     (data, l) => new
+            //     {
+            //         data.SeriesName,
+            //         data.SeriesFormat,
+            //         data.LibraryId,
+            //         LibraryName = l.Name,
+            //         data.ReadingListItem,
+            //         data.TotalPages,
+            //         data.ChapterNumber,
+            //         data.VolumeNumber,
+            //         data.VolumeId,
+            //         data.ReleaseDate,
+            //         data.ChapterTitleName,
+            //         data.FileSize,
+            //         LibraryType = l.Type
+            //     })
             .Select(data => new ReadingListItemDto()
             {
                 Id = data.ReadingListItem.Id,
@@ -192,7 +213,8 @@ public class ReadingListRepository : IReadingListRepository
                 ReadingListId = data.ReadingListItem.ReadingListId,
                 ReleaseDate = data.ReleaseDate,
                 LibraryType = data.LibraryType,
-                ChapterTitleName = data.ChapterTitleName
+                ChapterTitleName = data.ChapterTitleName,
+                FileSize = data.FileSize
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)

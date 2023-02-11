@@ -12197,6 +12197,10 @@
           "libraryType": {
             "$ref": "#/components/schemas/LibraryType"
           },
+          "libraryName": {
+            "type": "string",
+            "nullable": true
+          },
           "title": {
             "type": "string",
             "nullable": true
@@ -12215,6 +12219,11 @@
             "type": "string",
             "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
             "format": "date-time"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "File size of underlying item",
+            "format": "int64"
           }
         },
         "additionalProperties": false
