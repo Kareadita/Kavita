@@ -5,45 +5,27 @@
 </div>
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
     
-    <!-- <app-step-tracker [steps]="steps"></app-step-tracker> -->
-    <!-- <div class="form-page-container">
-        <app-steps></app-steps>
-      <div class="step-page-container">
-        <div class="form-step">
-            <ng-container [ngSwitch]="currentStep?.stepIndex">
-                <ng-container *ngSwitchCase="'1'">
-                    <app-step-template [step]="currentStep">
-                        Test
-                    </app-step-template>
-                </ng-container>
-                <ng-container *ngSwitchCase="'2'">
-                  <app-step-template [step]="currentStep"></app-step-template>
-                </ng-container>
-                <ng-container *ngSwitchCase="'3'">
-                  <app-step-template [step]="currentStep"></app-step-template>
-                </ng-container>
-            </ng-container>
-        </div>
-      </div>
-      <button class="btn btn-primary" (click)="onNextStep()" [disabled]="!currentStep?.isComplete">
-        Next
-      </button>
-    </div> -->
-
-
-    <form [formGroup]="uploadForm" enctype="multipart/form-data">
-        <file-upload formControlName="files"></file-upload>
-        <button class="btn btn-primary" type="button" (click)="importFile()">Import</button>
-    </form>
+    <div class="row g-0" *ngIf="currentStep.index === 0">
+        <form [formGroup]="uploadForm" enctype="multipart/form-data">
+            <file-upload formControlName="files"></file-upload>
+        </form>
+    </div>
     
+    <ng-container *ngIf="currentStep.index === 1">
+        <div class="row g-0">
+            <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
+                <ol class="list-group list-group-flush" *ngIf="validateSummary">
+                    <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results">
+                        {{result | cblConflictReason}}
+                    </li>
+                </ol>
+        </div>
+    </ng-container>
 
-    <h5>There were issues when trying to import this CBL!</h5>
-    <ng-container *ngFor="let importSummary of importSummaries">
-        <ul>
-            <li class="list-item" *ngFor="let conflict of importSummary.results">
-                {{conflict.reason | cbl-conflict-reason: conflict.series:conflict.volume:conflict.chapter}}
-            </li>
-        </ul>
+    <ng-container *ngIf="currentStep.index === 2 && validateSummary && validateSummary.results.length=== 0">
+        <div class="row g-0">
+                Dry Run
+        </div>
     </ng-container>
 
 
@@ -52,6 +34,7 @@
 <div class="modal-footer">
     <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+    <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">Next</button>
 </div>
 
 
