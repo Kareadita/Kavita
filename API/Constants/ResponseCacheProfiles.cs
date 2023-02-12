@@ -14,4 +14,5 @@ public static class ResponseCacheProfiles
     /// Instant is a very quick cache, because we can't bust based on the query params, but rather body
     /// </summary>
     public const string Instant = "Instant";
+    public const string Month = "Month";
 }
