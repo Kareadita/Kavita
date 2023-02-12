@@ -110,5 +110,9 @@ public enum ServerSettingKey
     /// </summary>
     [Description("HostName")]
     HostName = 20,
-
+    /// <summary>
+    /// Ip addresses the server listens on. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("IpAddresses")]
+    IpAddresses = 21,
 }
