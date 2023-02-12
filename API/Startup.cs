@@ -60,10 +60,22 @@ public class Startup
 
         services.AddControllers(options =>
         {
-            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
+            options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
                 new CacheProfile()
                 {
-                    Duration = 60,
+                    Duration = 30,
+                    Location = ResponseCacheLocation.None,
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
+                new CacheProfile()
+                {
+                    Duration = 60 * 5,
+                    Location = ResponseCacheLocation.None,
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
+                new CacheProfile()
+                {
+                    Duration = 60 * 10,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
@@ -74,30 +86,25 @@ public class Startup
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
-            options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
-                new CacheProfile()
-                {
-                    Duration = 60 * 10,
-                    Location = ResponseCacheLocation.None,
-                    NoStore = false
-                });
-            options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
-                new CacheProfile()
-                {
-                    Duration = 60 * 5,
-                    Location = ResponseCacheLocation.None,
-                });
             options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
                 new CacheProfile()
                 {
                     Duration = 60 * 60 * 6,
                     Location = ResponseCacheLocation.None,
                 });
-            options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
+            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
                 new CacheProfile()
                 {
-                    Duration = 30,
+                    Duration = 60,
                     Location = ResponseCacheLocation.None,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.Month,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Location = ResponseCacheLocation.Client,
+                    NoStore = false
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>

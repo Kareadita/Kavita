@@ -370,7 +370,7 @@ public class SeriesController : BaseApiController
     /// <param name="ageRating"></param>
     /// <returns></returns>
     /// <remarks>This is cached for an hour</remarks>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"ageRating"})]
+    [ResponseCache(CacheProfileName = "Month", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {

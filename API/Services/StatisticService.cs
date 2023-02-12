@@ -105,12 +105,6 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
 
-        // var averageReadingTimePerWeek = _context.AppUserProgresses
-        //     .Where(p => p.AppUserId == userId)
-        //     .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
-        //         (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
-        //     .Average() / 7.0;
-
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
@@ -168,8 +162,6 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-
-
     public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
     {
         return await _context.SeriesMetadata
@@ -195,7 +187,6 @@ public class StatisticService : IStatisticService
             })
             .ToListAsync();
     }
-
 
     public async Task<ServerStatisticsDto> GetServerStatistics()
     {
