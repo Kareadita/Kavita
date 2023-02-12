@@ -1,11 +1,12 @@
 
 <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Import CBL Reading List</h4>
+    <h4 class="modal-title" id="modal-basic-title">CBL Import: {{currentStep.title}}</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
     
     <div class="row g-0" *ngIf="currentStep.index === 0">
+        <p>Import a .cbl file as a reading list</p>
         <form [formGroup]="uploadForm" enctype="multipart/form-data">
             <file-upload formControlName="files"></file-upload>
         </form>
@@ -13,18 +14,32 @@
     
     <ng-container *ngIf="currentStep.index === 1">
         <div class="row g-0">
-            <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
-                <ol class="list-group list-group-flush" *ngIf="validateSummary">
+            <ng-container *ngIf="validateSummary; else noValidateIssues">
+                <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
+                <ol class="list-group list-group-flush" >
                     <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results">
                         {{result | cblConflictReason}}
                     </li>
                 </ol>
+            </ng-container>
+            <ng-template #noValidateIssues>No issues found with CBL, press next.</ng-template>
         </div>
     </ng-container>
 
-    <ng-container *ngIf="currentStep.index === 2 && validateSummary && validateSummary.results.length=== 0">
+    <ng-container *ngIf="currentStep.index === 2 && dryRunSummary">
         <div class="row g-0">
-                Dry Run
+            <h5>This is a dry run and shows what will happen if you press Next</h5>
+            <h6>The import was a {{dryRunSummary.success}}</h6>
+                <ul class="list-group list-group-flush" *ngIf="dryRunSummary">
+                    <li class="list-group-item no-hover" *ngFor="let result of dryRunSummary.results">
+                        {{result | cblConflictReason}}
+                    </li>
+                </ul>
+                <ul class="list-group list-group-flush" *ngIf="dryRunSummary">
+                    <li class="list-group-item no-hover" *ngFor="let result of dryRunSummary.successfulInserts">
+                        {{result | cblConflictReason}}
+                    </li>
+                </ul>
         </div>
     </ng-container>
 

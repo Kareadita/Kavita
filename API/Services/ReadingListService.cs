@@ -376,47 +376,39 @@ public class ReadingListService : IReadingListService
         }
 
         var conflicts = FindCblImportConflicts(userSeries);
-        if (conflicts.Any())
+        if (!conflicts.Any()) return importSummary;
+
+        importSummary.Success = CblImportResult.Fail;
+        if (conflicts.Count == cblReading.Books.Book.Count)
         {
-            importSummary.Success = CblImportResult.Fail;
-            foreach (var con in conflicts)
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = CblImportReason.AllChapterMissing,
+            });
+        }
+        else
+        {
+            foreach (var conflict in conflicts)
             {
                 importSummary.Results.Add(new CblBookResult()
                 {
                     Reason = CblImportReason.SeriesCollision,
-                    Series = con.Name
+                    Series = conflict.Name
                 });
             }
-            // foreach (var conflict in conflicts)
-            // {
-            //     var series = userSeries.First(s => s.NormalizedName.Equals(conflict.NormalizedName));
-            //     importSummary.Conflicts2.Add(new CblConflictQuestion()
-            //     {
-            //         SeriesName = series.Name,
-            //         LibrariesIds = new List<int>()
-            //         {
-            //             series.LibraryId
-            //         }
-            //     });
-            //     // foreach (var quest in userSeries.Where(s => s.NormalizedName.Equals(conflict.NormalizedName)).Select(s =>
-            //     //              new CblConflictQuestion()
-            //     //              {
-            //     //                  SeriesName = s.Name,
-            //     //                  LibrariesIds = new[]
-            //     //                  {
-            //     //                      s.LibraryId,
-            //     //                      conflict.LibraryId
-            //     //                  }
-            //     //              }))
-            //     // {
-            //     //     importSummary.Conflicts2.Add(quest);
-            //     // }
-            // }
         }
+
         return importSummary;
     }
 
 
+    /// <summary>
+    /// Imports (or pretends to) a cbl into a reading list. Call <see cref="ValidateCblFile"/> first!
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="cblReading"></param>
+    /// <param name="dryRun"></param>
+    /// <returns></returns>
     public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
@@ -429,48 +421,10 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
-
         var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-        if (!userSeries.Any())
-        {
-            // Report that no series exist in the reading list
-            importSummary.Results.Add(new CblBookResult()
-            {
-                Reason = CblImportReason.AllSeriesMissing
-            });
-            importSummary.Success = CblImportResult.Fail;
-            return importSummary;
-        }
-
-        var conflicts = FindCblImportConflicts(userSeries);
-        if (conflicts.Any())
-        {
-            importSummary.Success = CblImportResult.Fail;
-            // importSummary.Conflicts = conflicts.Select(s => new CblConflictQuestion()
-            // {
-            //     SeriesName = s.Name,
-            //     //LibraryName = s.LibraryId
-            // });
-            return importSummary;
-        }
         var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
-
-
-        // Check if all the series in the list are accessible to user
-        if (allSeries.Count == 0)
-        {
-            // Report that no series exist in the reading list
-            importSummary.Results.Add(new CblBookResult()
-            {
-                Reason = CblImportReason.AllSeriesMissing
-            });
-            importSummary.Success = CblImportResult.Fail;
-            return importSummary;
-        }
-
 
         var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
@@ -538,6 +492,8 @@ public class ReadingListService : IReadingListService
         }
 
         await CalculateReadingListAgeRating(readingList);
+
+        if (!dryRun) return importSummary;
 
         if (!_unitOfWork.HasChanges()) return importSummary;
         await _unitOfWork.CommitAsync();

@@ -59,6 +59,11 @@ public enum CblImportReason
     /// </summary>
     [Description("Series Collision")]
     SeriesCollision = 6,
+    /// <summary>
+    /// Every book chapter is missing or can't be matched
+    /// </summary>
+    [Description("All Chapters Missing")]
+    AllChapterMissing = 7,
 }
 
 public class CblBookResult

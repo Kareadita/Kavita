@@ -5379,6 +5379,10 @@
                   },
                   "FileName": {
                     "type": "string"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "default": false
                   }
                 }
               },
@@ -5399,6 +5403,9 @@
                   "style": "form"
                 },
                 "FileName": {
+                  "style": "form"
+                },
+                "dryRun": {
                   "style": "form"
                 }
               }

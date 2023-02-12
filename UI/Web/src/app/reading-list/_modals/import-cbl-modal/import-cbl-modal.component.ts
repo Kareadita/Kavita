@@ -34,6 +34,7 @@ export class ImportCblModalComponent {
 
   importSummaries: Array<CblImportSummary> = [];
   validateSummary: CblImportSummary | undefined;
+  dryRunSummary: CblImportSummary | undefined;
 
   steps = [
     {title: 'Import CBL', index: Step.Import},
@@ -99,9 +100,15 @@ export class ImportCblModalComponent {
 
     const formData = new FormData();
     formData.append('cbl', files[0]);
+    formData.append('dryRun', (this.currentStep.index !== Step.Finalize) + '');
     this.readingListService.importCbl(formData).subscribe(res => {
       console.log('Result: ', res);
-      this.validateSummary = res;
+      if (this.currentStep.index === Step.Import) {
+        this.validateSummary = res;
+      }
+      if (this.currentStep.index === Step.DryRun) {
+        this.dryRunSummary = res;
+      }
       this.importSummaries.push(res);
       this.currentStep.index++;
       this.cdRef.markForCheck();
