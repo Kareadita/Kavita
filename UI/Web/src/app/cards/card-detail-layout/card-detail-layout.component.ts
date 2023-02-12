@@ -14,6 +14,7 @@ import { Pagination } from 'src/app/_models/pagination';
 import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -74,7 +75,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private filterUtilitySerivce: FilterUtilitiesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
-    private jumpbarService: JumpbarService, private router: Router) {
+    private jumpbarService: JumpbarService, private router: Router, private scrollService: ScrollService) {
     this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
 
@@ -117,7 +118,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.resizeJumpBar();
     
     // Don't resume jump key when there is a custom sort order, as it won't work
-    if (this.hasCustomSort()) {
+    if (!this.hasCustomSort()) {
       if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
         const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
         if (resumeKey === '') return;
@@ -127,6 +128,13 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
         this.hasResumedJumpKey = true;
         setTimeout(() => this.scrollTo(keys[0]), 100);
       }
+    } else {
+      // I will come back and refactor this to work
+      // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
+      // console.log('scroll position: ', scrollPosition);
+      // if (scrollPosition > 0) {
+      //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
+      // }
     }
   }
 
@@ -164,6 +172,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
+    // TODO: This doesn't work, we need the offset from virtual scroller
+    this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
     this.changeDetectionRef.markForCheck();
   }
 

@@ -9,6 +9,8 @@ const keySize = 25; // Height of the JumpBar button
 export class JumpbarService {
 
   resumeKeys: {[key: string]: string} = {};
+  // Used for custom filtered urls
+  resumeScroll: {[key: string]: number} = {};
 
   constructor() { }
 
@@ -18,8 +20,17 @@ export class JumpbarService {
     return '';
   }
 
+  getResumePosition(key: string) {
+    if (this.resumeScroll.hasOwnProperty(key)) return this.resumeScroll[key];
+    return 0;
+  }
+
   saveResumeKey(key: string, value: string) {
     this.resumeKeys[key] = value;
+  }
+
+  saveScrollOffset(key: string, value: number) {
+    this.resumeScroll[key] = value;
   }
 
   generateJumpBar(jumpBarKeys: Array<JumpKey>, currentSize: number) {
