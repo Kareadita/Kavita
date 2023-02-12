@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
@@ -11,6 +12,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
+import { ImportCblModalComponent } from '../../_modals/import-cbl-modal/import-cbl-modal.component';
 
 @Component({
   selector: 'app-reading-lists',
@@ -26,10 +28,11 @@ export class ReadingListsComponent implements OnInit {
   isAdmin: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
+  globalActions: Array<ActionItem<any>> = []; //[{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}]
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
-    private jumpbarService: JumpbarService, private readonly cdRef: ChangeDetectorRef) { }
+    private jumpbarService: JumpbarService, private readonly cdRef: ChangeDetectorRef, private ngbModal: NgbModal) { }
 
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -49,6 +52,17 @@ export class ReadingListsComponent implements OnInit {
     if (typeof action.callback === 'function') {
       action.callback(action, readingList);
     }
+  }
+
+  performGlobalAction(action: ActionItem<any>) {
+    if (typeof action.callback === 'function') {
+      action.callback(action, undefined);
+    }
+  }
+
+  importCbl() {
+    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+    ref.closed.subscribe(result => this.loadPage());
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {

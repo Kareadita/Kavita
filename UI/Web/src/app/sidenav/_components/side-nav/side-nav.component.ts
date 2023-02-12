@@ -12,7 +12,6 @@ import { Action, ActionFactoryService, ActionItem } from '../../../_services/act
 import { ActionService } from '../../../_services/action.service';
 import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
-import { LibrarySettingsModalComponent } from '../../_modals/library-settings-modal/library-settings-modal.component';
 
 @Component({
   selector: 'app-side-nav',
@@ -91,18 +90,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
         this.actionService.analyzeFiles(library);
         break;
       case (Action.Edit):
-        const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
-        modalRef.componentInstance.library = library;
-        modalRef.closed.subscribe((closeResult: {success: boolean, library: Library, coverImageUpdate: boolean}) => {
-          window.scrollTo(0, 0);
-          if (closeResult.success) {
-            
-          }
-
-          if (closeResult.coverImageUpdate) {
-            
-          }
-        });
+        this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
         break;
       default:
         break;

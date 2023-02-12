@@ -137,7 +137,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions !== null || this.filterSettings.presets?.sortOptions !== null;
+    return this.filter.sortOptions !== null || this.filterSettings?.presets?.sortOptions !== null;
   }
 
   performAction(action: ActionItem<any>) {

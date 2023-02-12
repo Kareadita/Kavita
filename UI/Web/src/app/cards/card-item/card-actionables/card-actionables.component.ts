@@ -33,8 +33,7 @@ export class CardActionablesComponent implements OnInit {
       this.canDownload = this.accountService.hasDownloadRole(user);
 
       // We want to avoid an empty menu when user doesn't have access to anything
-      const validActions = this.actions.filter(a => a.children.length > 0 || a.dynamicList);
-      if (!this.isAdmin && validActions.filter(a => !a.requiresAdmin).length === 0) {
+      if (!this.isAdmin && this.actions.filter(a => !a.requiresAdmin).length === 0) {
         this.actions = [];
       }
       this.cdRef.markForCheck();

@@ -105,10 +105,20 @@ public class StatisticService : IStatisticService
             .ToListAsync();
 
 
+        // var averageReadingTimePerWeek = _context.AppUserProgresses
+        //     .Where(p => p.AppUserId == userId)
+        //     .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
+        //         (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
+        //     .Average() / 7.0;
+
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
-                (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
+                (p, c) => new
+                {
+                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
+                })
+            .Select(x => x.AverageReadingHours)
             .Average() / 7.0;
 
         return new UserReadStatistics()
@@ -373,7 +383,22 @@ public class StatisticService : IStatisticService
             var minDay = results.Min(d => d.Value);
             for (var date = minDay; date < DateTime.Now; date = date.AddDays(1))
             {
-                if (results.Any(d => d.Value == date)) continue;
+                var resultsForDay = results.Where(d => d.Value == date).ToList();
+                if (resultsForDay.Count > 0)
+                {
+                    // Add in types that aren't there (there is a bug in UI library that will cause dates to get out of order)
+                    var existingFormats = resultsForDay.Select(r => r.Format).Distinct();
+                    foreach (var format in Enum.GetValues(typeof(MangaFormat)).Cast<MangaFormat>().Where(f => f != MangaFormat.Unknown && !existingFormats.Contains(f)))
+                    {
+                        results.Add(new PagesReadOnADayCount<DateTime>()
+                        {
+                            Format = format,
+                            Value = date,
+                            Count = 0
+                        });
+                    }
+                    continue;
+                }
                 results.Add(new PagesReadOnADayCount<DateTime>()
                 {
                     Format = MangaFormat.Archive,
@@ -401,7 +426,7 @@ public class StatisticService : IStatisticService
             }
         }
 
-        return results;
+        return results.OrderBy(r => r.Value);
     }
 
     public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown()

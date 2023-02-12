@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
@@ -31,6 +32,7 @@ public interface IReadingListRepository
     Task<string> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
+    Task<List<ReadingList>> GetAllReadingListsAsync();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -82,6 +84,15 @@ public class ReadingListRepository : IReadingListRepository
         var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
         return await _context.ReadingList
             .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
+    }
+
+    public async Task<List<ReadingList>> GetAllReadingListsAsync()
+    {
+        return await _context.ReadingList
+            .Include(r => r.Items.OrderBy(i => i.Order))
+            .AsSplitQuery()
+            .OrderBy(l => l.Title)
+            .ToListAsync();
     }
 
     public void Remove(ReadingListItem item)

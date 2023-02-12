@@ -80,6 +80,15 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// SeriesGroup tag in ComicInfo
     /// </summary>
     public string SeriesGroup { get; set; }
+    public string StoryArc { get; set; } = string.Empty;
+    public string StoryArcNumber { get; set; } = string.Empty;
+    public string AlternateNumber { get; set; } = string.Empty;
+    public string AlternateSeries { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Not currently used in Kavita
+    /// </summary>
+    public int AlternateCount { get; set; } = 0;
 
     /// <summary>
     /// Total Word count of all chapters in this chapter.

@@ -161,6 +161,8 @@ public class ProcessSeries : IProcessSeries
 
             UpdateSeriesMetadata(series, library);
 
+            //CreateReadingListsFromSeries(series, library); This will be implemented later when I solution it
+
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
@@ -201,6 +203,27 @@ public class ProcessSeries : IProcessSeries
 
         await _metadataService.GenerateCoversForSeries(series, false);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
+    }
+
+    private void CreateReadingListsFromSeries(Series series, Library library)
+    {
+        //if (!library.ManageReadingLists) return;
+        _logger.LogInformation("Generating Reading Lists for {SeriesName}", series.Name);
+
+        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            if (!string.IsNullOrEmpty(chapter.StoryArc))
+            {
+                var readingLists = chapter.StoryArc.Split(',');
+                var readingListOrders = chapter.StoryArcNumber.Split(',');
+                if (readingListOrders.Length == 0)
+                {
+                    _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
+
+                }
+            }
+        }
     }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
@@ -660,6 +683,33 @@ public class ProcessSeries : IProcessSeries
             chapter.SeriesGroup = comicInfo.SeriesGroup;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.StoryArc))
+        {
+            chapter.StoryArc = comicInfo.StoryArc;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.AlternateSeries))
+        {
+            chapter.AlternateSeries = comicInfo.AlternateSeries;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.AlternateNumber))
+        {
+            chapter.AlternateNumber = comicInfo.AlternateNumber;
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.StoryArcNumber))
+        {
+            chapter.StoryArcNumber = comicInfo.StoryArcNumber;
+        }
+
+
+        if (comicInfo.AlternateCount > 0)
+        {
+            chapter.AlternateCount = comicInfo.AlternateCount;
+        }
+
+
         if (comicInfo.Count > 0)
         {
             chapter.TotalCount = comicInfo.Count;
@@ -759,7 +809,7 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(s => s.Normalize()).ToList();
+            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();
         }
         return ImmutableList<string>.Empty;
     }

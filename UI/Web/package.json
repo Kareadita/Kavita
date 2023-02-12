@@ -27,6 +27,7 @@
     "@angular/router": "^15.1.2",
     "@fortawesome/fontawesome-free": "^6.2.0",
     "@iharbeck/ngx-virtual-scroller": "^15.0.0",
+    "@iplab/ngx-file-upload": "^15.0.0",
     "@microsoft/signalr": "^7.0.2",
     "@ng-bootstrap/ng-bootstrap": "^14.0.1",
     "@popperjs/core": "^2.11.6",
