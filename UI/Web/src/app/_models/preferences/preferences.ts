@@ -7,6 +7,7 @@ import { ReaderMode } from './reader-mode';
 import { ReadingDirection } from './reading-direction';
 import { ScalingOption } from './scaling-option';
 import { SiteTheme } from './site-theme';
+import {ReadingMode} from "./reading-mode";
 
 export interface Preferences {
     // Manga Reader
@@ -28,6 +29,7 @@ export interface Preferences {
     bookReaderFontFamily: string;
     bookReaderTapToPaginate: boolean;
     bookReaderReadingDirection: ReadingDirection;
+    bookReaderReadingMode: ReadingMode;
     bookReaderThemeName: string;
     bookReaderLayoutMode: BookPageLayoutMode;
     bookReaderImmersiveMode: boolean;
@@ -41,6 +43,7 @@ export interface Preferences {
 }
 
 export const readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];
+export const bookReadingModes = [{text: 'Horizontally', value: ReadingMode.Horizontally}, {text: 'Vertically', value: ReadingMode.Vertically}];
 export const scalingOptions = [{text: 'Automatic', value: ScalingOption.Automatic}, {text: 'Fit to Height', value: ScalingOption.FitToHeight}, {text: 'Fit to Width', value: ScalingOption.FitToWidth}, {text: 'Original', value: ScalingOption.Original}];
 export const pageSplitOptions = [{text: 'Fit to Screen', value: PageSplitOption.FitSplit}, {text: 'Right to Left', value: PageSplitOption.SplitRightToLeft}, {text: 'Left to Right', value: PageSplitOption.SplitLeftToRight}, {text: 'No Split', value: PageSplitOption.NoSplit}];
 export const readingModes = [{text: 'Left to Right', value: ReaderMode.LeftRight}, {text: 'Up to Down', value: ReaderMode.UpDown}, {text: 'Webtoon', value: ReaderMode.Webtoon}];

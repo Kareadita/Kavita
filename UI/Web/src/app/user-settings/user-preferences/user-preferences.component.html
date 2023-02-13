@@ -47,7 +47,7 @@
                                                 <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
                                                 <label class="form-check-label" for="auto-close">Blur Unread Summaries</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
                                             </div>
-                                            
+
                                             <ng-template #blurUnreadSummariesTooltip>Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</ng-template>
                                             <span class="visually-hidden" id="settings-global-blurUnreadSummaries-help">Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</span>
                                         </div>
@@ -59,7 +59,7 @@
                                                 <input type="checkbox" id="prompt-download" role="switch" formControlName="promptForDownloadSize" class="form-check-input" aria-describedby="settings-global-promptForDownloadSize-help" [value]="true" aria-labelledby="auto-close-label">
                                                 <label class="form-check-label" for="prompt-download">Prompt on Download</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="promptForDownloadSizeTooltip" role="button" tabindex="0"></i>
                                             </div>
-                                            
+
                                             <ng-template #promptForDownloadSizeTooltip>Prompt when a download exceedes 100MB in size</ng-template>
                                             <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">Prompt when a download exceedes 100MB in size</span>
                                         </div>
@@ -142,11 +142,12 @@
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <label for="settings-backgroundcolor-option" class="form-label">Background Color</label>
                                             <input [value]="user.preferences.backgroundColor"
-                                                class="form-control"
-                                                (colorPickerChange)="handleBackgroundColorChange()"
-                                                [style.background]="user.preferences.backgroundColor"
-                                                [cpAlphaChannel]="'disabled'"
-                                                [(colorPicker)]="user.preferences.backgroundColor"/>
+                                                   class="form-control"
+                                                   id="settings-backgroundcolor-option"
+                                                   (colorPickerChange)="handleBackgroundColorChange()"
+                                                   [style.background]="user.preferences.backgroundColor"
+                                                   [cpAlphaChannel]="'disabled'"
+                                                   [(colorPicker)]="user.preferences.backgroundColor"/>
                                         </div>
                                     </div>
 
@@ -252,6 +253,15 @@
 
                                 <div class="row g-0">
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
+                                        <label for="settings-book-reading-mode" class="form-label">Reading Mode</label>&nbsp; <i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingModeTooltip" role="button" tabindex="0"></i>
+                                        <ng-template #bookReadingModeTooltip>How the book should be read.  Vertical will read the book vertically. Horizontal will read the book horizontally.</ng-template>
+                                        <span class="visually-hidden" id="settings-book-reading-mode-help">How the book should be read.  Vertical will read the book vertically. Horizontal will read the book horizontally.</span>
+                                        <select class="form-select" aria-describedby="settings-book-reading-mode-help" formControlName="bookReaderReadingMode" id="settings-book-reading-mode" >
+                                            <option *ngFor="let opt of bookReadingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                         <label for="settings-book-layout-mode" class="form-label">Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookLayoutModeTooltip" role="button" tabindex="0"></i>
                                         <ng-template #bookLayoutModeTooltip>How content should be laid out. Scroll is as the book packs it. 1 or 2 Column fits to the height of the device and fits 1 or 2 columns of text per page</ng-template>
                                         <span class="visually-hidden" id="settings-book-layout-mode-help"><ng-container [ngTemplateOutlet]="bookLayoutModeTooltip"></ng-container></span>
@@ -259,26 +269,28 @@
                                             <option *ngFor="let opt of bookLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                         </select>
                                     </div>
+                                </div>
 
+                                <div class="row g-0">
 
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                        <label for="settings-color-theme-option" class="form-label">Color Theme</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookColorThemeTooltip" role="button" tabindex="0"></i>
-                                        <ng-template #bookColorThemeTooltip>What color theme to apply to the book reader content and menuing</ng-template>
-                                        <span class="visually-hidden" id="settings-color-theme-option-help"><ng-container [ngTemplateOutlet]="bookColorThemeTooltip"></ng-container></span>
-                                        <select class="form-select" aria-describedby="settings-color-theme-option-help" formControlName="bookReaderThemeName" id="settings-color-theme-option">
-                                            <option *ngFor="let opt of bookColorThemes" [value]="opt.name">{{opt.name | titlecase}}</option>
-                                        </select>
-                                    </div>
+                                            <label for="settings-color-theme-option" class="form-label">Color Theme</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookColorThemeTooltip" role="button" tabindex="0"></i>
+                                            <ng-template #bookColorThemeTooltip>What color theme to apply to the book reader content and menuing</ng-template>
+                                            <span class="visually-hidden" id="settings-color-theme-option-help"><ng-container [ngTemplateOutlet]="bookColorThemeTooltip"></ng-container></span>
+                                            <select class="form-select" aria-describedby="settings-color-theme-option-help" formControlName="bookReaderThemeName" id="settings-color-theme-option">
+                                                <option *ngFor="let opt of bookColorThemes" [value]="opt.name">{{opt.name | titlecase}}</option>
+                                            </select>
+                                        </div>
                                 </div>
 
                                 <div class="row g-0">
                                     <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                         <label for="fontsize" class="form-label range-label">Font Size</label>
-                                        <input type="range" class="form-range" id="fontsize" 
+                                        <input type="range" class="form-range" id="fontsize"
                                                 min="50" max="300" step="10" formControlName="bookReaderFontSize">
                                         <span class="range-text">{{settingsForm.get('bookReaderFontSize')?.value + '%'}}</span>
                                     </div>
-                                    
+
 
                                     <div class="col-md-4 col-sm-12 pe-2 mb-3">
                                         <div class="range-label">
@@ -286,7 +298,7 @@
                                             <ng-template #bookLineHeightOptionTooltip>How much spacing between the lines of the book</ng-template>
                                             <span class="visually-hidden" id="settings-booklineheight-option-help">How much spacing between the lines of the book</span>
                                         </div>
-                                        <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10" 
+                                        <input type="range" class="form-range" id="linespacing" min="100" max="200" step="10"
                                             formControlName="bookReaderLineSpacing" aria-describedby="settings-booklineheight-option-help">
                                         <span class="range-text">{{settingsForm.get('bookReaderLineSpacing')?.value + '%'}}</span>
                                     </div>
