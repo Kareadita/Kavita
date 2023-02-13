@@ -1173,6 +1173,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) { 
       this.toastr.info('No Next Chapter');
+      this.isLoading = false;
+      this.cdRef.markForCheck();
       return;
      }
 
@@ -1189,6 +1191,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadPrevChapter() {
     if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) { 
       this.toastr.info('No Previous Chapter');
+      this.isLoading = false;
+      this.cdRef.markForCheck();
       return; 
     }
     this.continuousChaptersStack.pop();
