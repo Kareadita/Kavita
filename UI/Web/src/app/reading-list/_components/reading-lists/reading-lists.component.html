@@ -1,6 +1,7 @@
-<app-side-nav-companion-bar>
+<app-side-nav-companion-bar >
     <h2 title>
-        Reading Lists
+        <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
+        <span>Reading Lists</span>
     </h2>
     <h6 subtitle *ngIf="pagination">{{pagination.totalItems}} Items</h6>
 </app-side-nav-companion-bar>

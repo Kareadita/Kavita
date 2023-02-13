@@ -231,6 +231,7 @@ public class ReaderService : IReaderService
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
+
             if (userProgress == null)
             {
                 // Create a user object
@@ -481,18 +482,17 @@ public class ReaderService : IReaderService
         var volumeChapters = volumes
             .Where(v => v.Number != 0)
             .SelectMany(v => v.Chapters)
-            //.OrderBy(c => float.Parse(c.Number))
             .ToList();
 
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
             .OrderBy(c => double.Parse(c.Range), _chapterSortComparer)
-            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, new SortComparerZeroLast()).SelectMany(v => v.Chapters).ToList());
+        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).SelectMany(v => v.Chapters).ToList());
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
@@ -510,7 +510,14 @@ public class ReaderService : IReaderService
         var lastChapter = chaptersWithProgress.ElementAt(last);
         if (lastChapter.PagesRead < lastChapter.Pages)
         {
-            return chaptersWithProgress.ElementAt(last);
+            return lastChapter;
+        }
+
+        // If the last chapter didn't fit, then we need the next chapter without any progress
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead == 0);
+        if (firstChapterWithoutProgress != null)
+        {
+            return firstChapterWithoutProgress;
         }
 
         // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress

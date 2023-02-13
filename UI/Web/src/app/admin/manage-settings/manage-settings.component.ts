@@ -8,6 +8,7 @@ import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
 
+const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
   selector: 'app-manage-settings',
@@ -25,7 +26,7 @@ export class ManageSettingsComponent implements OnInit {
     return TagBadgeCursor;
   }
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
+  constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private modalService: NgbModal) { }
 
   ngOnInit(): void {
@@ -41,6 +42,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
       this.settingsForm.addControl('port', new FormControl(this.serverSettings.port, [Validators.required]));
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
@@ -60,6 +62,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('bookmarksDirectory')?.setValue(this.serverSettings.bookmarksDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
+    this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
     this.settingsForm.get('port')?.setValue(this.serverSettings.port);
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel);
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection);
@@ -91,6 +94,16 @@ export class ManageSettingsComponent implements OnInit {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
+  resetIPAddresses() {
+    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+      this.serverSettings.ipAddresses = settings.ipAddresses;
+      this.settingsForm.get("ipAddresses")?.setValue(this.serverSettings.ipAddresses);
+      this.toastr.success('IP Addresses Reset');
     }, (err: any) => {
       console.error('error: ', err);
     });

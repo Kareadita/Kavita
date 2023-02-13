@@ -133,6 +133,13 @@ public static class QueryableExtensions
             queryable = queryable.Include(v => v.Volume);
         }
 
+        if (includes.HasFlag(ChapterIncludes.Files))
+        {
+            queryable = queryable
+                .Include(c => c.Files);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 
@@ -147,6 +154,13 @@ public static class QueryableExtensions
         if (includeFlags.HasFlag(SeriesIncludes.Volumes))
         {
             query = query.Include(s => s.Volumes);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Chapters))
+        {
+            query = query
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))

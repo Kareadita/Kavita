@@ -16,12 +16,8 @@ public class ProgressDto
     [Required]
     public int LibraryId { get; set; }
     /// <summary>
-    /// For Book reader, this can be an optional string of the id of a part marker, to help resume reading position
+    /// For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position
     /// on pages that combine multiple "chapters".
     /// </summary>
     public string BookScrollId { get; set; }
-    /// <summary>
-    /// Last time the progress was synced from UI or external app
-    /// </summary>
-    public DateTime LastModified { get; set; }
 }

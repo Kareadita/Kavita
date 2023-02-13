@@ -207,7 +207,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
-      this.actionService.refreshMetadata(lib);
+        this.actionService.refreshMetadata(lib);
+        break;
+      case(Action.Edit):
+        this.actionService.editLibrary(lib);
         break;
       default:
         break;

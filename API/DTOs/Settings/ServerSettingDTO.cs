@@ -18,6 +18,10 @@ public class ServerSettingDto
     /// </summary>
     public int Port { get; set; }
     /// <summary>
+    /// Comma separated list of ip addresses the server listens on. Managed in appsettings.json
+    /// </summary>
+    public string IpAddresses { get; set; }
+    /// <summary>
     /// Allows anonymous information to be collected and sent to KavitaStats
     /// </summary>
     public bool AllowStatCollection { get; set; }

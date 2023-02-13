@@ -8,11 +8,14 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
-import { NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
+import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
+import { FileUploadModule } from '@iplab/ngx-file-upload';
+import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 
 
 @NgModule({
@@ -22,7 +25,9 @@ import { ReadingListsComponent } from './_components/reading-lists/reading-lists
     AddToListModalComponent,
     ReadingListsComponent,
     EditReadingListModalComponent,
-    ReadingListItemComponent
+    ReadingListItemComponent,
+    ImportCblModalComponent,
+    CblConflictReasonPipe,
   ],
   imports: [
     CommonModule,
@@ -37,6 +42,8 @@ import { ReadingListsComponent } from './_components/reading-lists/reading-lists
     SharedSideNavCardsModule,
 
     ReadingListRoutingModule,
+    NgbAccordionModule, // Import CBL
+    FileUploadModule, // Import CBL
   ],
   exports: [
     AddToListModalComponent,

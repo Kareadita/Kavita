@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -68,6 +69,27 @@ public class SettingsController : BaseApiController
         _logger.LogInformation("{UserName} is resetting Server Settings", User.GetUsername());
 
         return await UpdateSettings(_mapper.Map<ServerSettingDto>(Seed.DefaultSettings));
+    }
+
+    /// <summary>
+    /// Resets the IP Addresses
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-ip-addresses")]
+    public async Task<ActionResult<ServerSettingDto>> ResetIPAddressesSettings()
+    {
+        _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
+        var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
+        ipAddresses.Value = Configuration.DefaultIPAddresses;
+        _unitOfWork.SettingsRepository.Update(ipAddresses);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
     }
 
     /// <summary>
@@ -142,6 +164,22 @@ public class SettingsController : BaseApiController
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
+            {
+                // Validate IP addresses
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
+                {
+                    if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
+                        return BadRequest($"IP Address '{ipAddress}' is invalid");
+                    }
+                }
+
+                setting.Value = updateSettingsDto.IpAddresses;
+                // IpAddesses is managed in appSetting.json
+                Configuration.IpAddresses = updateSettingsDto.IpAddresses;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

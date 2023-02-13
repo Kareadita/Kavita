@@ -8,12 +8,19 @@ namespace Kavita.Common;
 
 public static class Configuration
 {
+    public const string DefaultIPAddresses = "0.0.0.0,::";
     public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
     {
         get => GetPort(GetAppSettingFilename());
         set => SetPort(GetAppSettingFilename(), value);
+    }
+
+    public static string IpAddresses
+    {
+        get => GetIpAddresses(GetAppSettingFilename());
+        set => SetIpAddresses(GetAppSettingFilename(), value);
     }
 
     public static string JwtToken
@@ -63,9 +70,10 @@ public static class Configuration
     {
         try
         {
-            var currentToken = GetJwtToken(filePath);
-            var json = File.ReadAllText(filePath)
-                .Replace("\"TokenKey\": \"" + currentToken, "\"TokenKey\": \"" + token);
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.TokenKey = token;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
         catch (Exception)
@@ -101,8 +109,10 @@ public static class Configuration
 
         try
         {
-            var currentPort = GetPort(filePath);
-            var json = File.ReadAllText(filePath).Replace("\"Port\": " + currentPort, "\"Port\": " + port);
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.Port = port;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }
         catch (Exception)
@@ -139,4 +149,61 @@ public static class Configuration
     }
 
     #endregion
+
+    #region Ip Addresses
+
+    private static void SetIpAddresses(string filePath, string ipAddresses)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.IpAddresses = ipAddresses;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow Exception */
+        }
+    }
+
+    private static string GetIpAddresses(string filePath)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return DefaultIPAddresses;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "IpAddresses";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                return tokenElement.GetString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error writing app settings: " + ex.Message);
+        }
+
+        return DefaultIPAddresses;
+    }
+    #endregion
+
+    private class AppSettings
+    {
+        public string TokenKey { get; set; }
+        public int Port { get; set; }
+        public string IpAddresses { get; set; }
+    }
 }

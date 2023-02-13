@@ -150,13 +150,7 @@ public class CollectionTagService : ICollectionTagService
     /// <returns></returns>
     public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
     {
-        var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId);
-        if (tag == null)
-        {
-            tag = CreateTag(title);
-        }
-
-        return tag;
+        return await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId) ?? CreateTag(title);
     }
 
     /// <summary>

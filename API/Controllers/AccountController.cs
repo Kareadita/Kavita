@@ -41,7 +41,6 @@ public class AccountController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
-    private readonly IHostEnvironment _environment;
     private readonly IEventHub _eventHub;
 
     /// <inheritdoc />
@@ -50,8 +49,7 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IHostEnvironment environment,
-        IEventHub eventHub)
+        IEmailService emailService, IEventHub eventHub)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -61,7 +59,6 @@ public class AccountController : BaseApiController
         _mapper = mapper;
         _accountService = accountService;
         _emailService = emailService;
-        _environment = environment;
         _eventHub = eventHub;
     }
 
@@ -202,7 +199,7 @@ public class AccountController : BaseApiController
         }
 
         // Update LastActive on account
-        user.LastActive = DateTime.Now;
+        user.UpdateLastActive();
         user.UserPreferences ??= new AppUserPreferences
         {
             Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
