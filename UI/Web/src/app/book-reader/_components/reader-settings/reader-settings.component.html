@@ -70,6 +70,14 @@
                         <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
                     </button>
                 </div>
+                <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
+                    <label id="readingmode" class="form-label">Reading Mode</label>
+                    <button (click)="toggleReadingMode()" class="btn btn-icon" aria-labelledby="readingmode" title="{{readingModeModel === ReadingMode.Horizontally ? 'Horizontally' : 'Vertically'}}">
+                        <i class="fa {{readingModeModel === ReadingMode.Horizontally ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
+                        <span class="phone-hidden"> {{readingModeModel === ReadingMode.Horizontally ? 'Horizontally' : 'Vertically' }}</span>
+                    </button>
+
+                </div>
                 <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
                     <label for="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
                     <ng-template #tapPaginationTooltip>Click the edges of the screen to paginate</ng-template>
@@ -116,10 +124,10 @@
                     <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
                         <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Default" class="btn-check" id="layout-mode-default" autocomplete="off">
                         <label class="btn btn-outline-primary" for="layout-mode-default">Scroll</label>
-                      
+
                         <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column1" class="btn-check" id="layout-mode-col1" autocomplete="off">
                         <label class="btn btn-outline-primary" for="layout-mode-col1">1 Column</label>
-                        
+
                         <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
                         <label class="btn btn-outline-primary" for="layout-mode-col2">2 Column</label>
                     </div>

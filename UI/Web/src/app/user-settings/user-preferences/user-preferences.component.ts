@@ -3,7 +3,17 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeUntil } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
-import { readingDirections, scalingOptions, pageSplitOptions, readingModes, Preferences, bookLayoutModes, layoutModes, pageLayoutModes } from 'src/app/_models/preferences/preferences';
+import {
+  readingDirections,
+  scalingOptions,
+  pageSplitOptions,
+  readingModes,
+  Preferences,
+  bookLayoutModes,
+  layoutModes,
+  pageLayoutModes,
+  bookReadingModes
+} from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,6 +55,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   bookLayoutModes = bookLayoutModes;
   bookColorThemes = bookColorThemes;
   pageLayoutModes = pageLayoutModes;
+  bookReadingModes = bookReadingModes;
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -134,6 +145,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
       this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
       this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
+      this.settingsForm.addControl('bookReaderReadingMode', new FormControl(this.user.preferences.bookReaderReadingMode, []))
       this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
       this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
       this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
@@ -179,6 +191,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
+    this.settingsForm.get('bookReaderReadingMode')?.setValue(this.user.preferences.bookReaderReadingMode);
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
@@ -211,6 +224,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
+      bookReaderReadingMode: parseInt(modelSettings.bookReaderReadingMode, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
       bookReaderThemeName: modelSettings.bookReaderThemeName,
       theme: modelSettings.theme,

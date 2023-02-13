@@ -102,6 +102,7 @@ public class UsersController : BaseApiController
         existingPreferences.BookReaderFontSize = preferencesDto.BookReaderFontSize;
         existingPreferences.BookReaderTapToPaginate = preferencesDto.BookReaderTapToPaginate;
         existingPreferences.BookReaderReadingDirection = preferencesDto.BookReaderReadingDirection;
+        existingPreferences.BookReaderReadingMode = preferencesDto.BookReaderReadingMode;
         existingPreferences.BookThemeName = preferencesDto.BookReaderThemeName;
         existingPreferences.BookReaderLayoutMode = preferencesDto.BookReaderLayoutMode;
         existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
