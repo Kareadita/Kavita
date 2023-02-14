@@ -885,14 +885,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else if (scrollTop !== undefined && scrollTop !== 0) {
       this.scrollService.scrollTo(scrollTop, this.reader.nativeElement);
     } else if ((this.readingMode === ReadingMode.Vertically) && (this.layoutMode === BookPageLayoutMode.Default)) {
-       console.log("Scrolling to end of page");
        setTimeout(()=> this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.clientWidth, this.reader.nativeElement));
     } else {
 
       if (this.layoutMode === BookPageLayoutMode.Default) {
         this.scrollService.scrollTo(0, this.reader.nativeElement);
       } else if (this.readingMode === ReadingMode.Vertically) {
-        this.reader.nativeElement.children
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
             setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement));
         } else {
@@ -985,7 +983,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         } else {
           this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement);
         }
-        //this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement);
         this.handleScrollEvent();
         return;
       }
@@ -1017,7 +1014,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentVirtualPage < totalVirtualPages) {
         // +0 apparently goes forward 1 virtual page...
         if (this.readingMode === ReadingMode.Vertically) {
-          this.scrollService.scrollTo( (currentVirtualPage) * pageWidth, this.bookContentElemRef.nativeElement, "auto");
+          this.scrollService.scrollTo( (currentVirtualPage) * pageWidth, this.bookContentElemRef.nativeElement, 'auto');
         } else {
           this.scrollService.scrollToX((currentVirtualPage) * pageWidth, this.bookContentElemRef.nativeElement);
         }
@@ -1070,9 +1067,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const [scroll, total] = this.getScrollAndTotal();
     const pageSize = this.getPageSize();
     const totalVirtualPages = Math.max(1, Math.round(total / pageSize));
-    const currentVirtualPage = Math.min(Math.max(1, Math.round((scroll + pageSize) / pageSize)), totalVirtualPages);
+    const delta = scroll - total;
+    let currentVirtualPage = 1;
+
+    //If first virtual page, i.e. totalScroll and delta are the same value
+    if (total === delta) {
+      currentVirtualPage = 1;
+        // If second virtual page
+    } else if (total - delta === pageSize) {
+      currentVirtualPage = 2;
+      // Otherwise do math to get correct page. i.e. scroll + pageHeight/pageWidth (this accounts for first page offset)
+    } else {
+      currentVirtualPage = Math.min(Math.max(1, Math.round((scroll + pageSize) / pageSize)), totalVirtualPages);
+    }
 
     return [currentVirtualPage, totalVirtualPages, pageSize];
+
   }
 
   private getScrollAndTotal() {

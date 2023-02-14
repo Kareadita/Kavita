@@ -173,7 +173,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
         if (this.user.preferences.bookReaderReadingMode === undefined) {
-          console.log('Reading mode is undefined  - setting to horizontal');
           this.user.preferences.bookReaderReadingMode = ReadingMode.Horizontally;
         }
         this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;

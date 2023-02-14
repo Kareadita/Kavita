@@ -188,6 +188,11 @@ $action-bar-height: 38px;
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
+    &.reading-mode-vertical {
+        // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
+        overflow: auto;
+    }
+
 }
 
 .book-content {
