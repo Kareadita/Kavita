@@ -869,17 +869,25 @@ public class AccountController : BaseApiController
         _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
         if (await _accountService.CheckIfAccessible(Request))
         {
-            await _emailService.SendMigrationEmail(new EmailMigrationDto()
+            try
             {
-                EmailAddress = user.Email,
-                Username = user.UserName,
-                ServerConfirmationLink = emailLink,
-                InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-            });
+                await _emailService.SendMigrationEmail(new EmailMigrationDto()
+                {
+                    EmailAddress = user.Email,
+                    Username = user.UserName,
+                    ServerConfirmationLink = emailLink,
+                    InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue resending invite email");
+                return BadRequest("There was an issue resending invite email");
+            }
             return Ok(emailLink);
         }
 
-        return Ok("The server is not accessible externally. Please ");
+        return Ok("The server is not accessible externally");
     }
 
     /// <summary>
