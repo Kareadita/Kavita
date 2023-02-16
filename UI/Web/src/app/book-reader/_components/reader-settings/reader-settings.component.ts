@@ -245,7 +245,14 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     }
     
     this.settingsForm.get('bookReaderFontFamily')?.setValue(this.user.preferences.bookReaderFontFamily);
-    this.cdRef.markForCheck();
+    this.settingsForm.get('bookReaderFontSize')?.setValue(this.user.preferences.bookReaderFontSize);
+    this.settingsForm.get('bookReaderLineSpacing')?.setValue(this.user.preferences.bookReaderLineSpacing);
+    this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
+    this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
+    this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
+    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
+    this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
+    this.cdRef.detectChanges();
     this.styleUpdate.emit(this.pageStyles);
   }
 

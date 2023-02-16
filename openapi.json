@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.38"
+    "version": "0.6.1.41"
   },
   "servers": [
     {
@@ -7443,6 +7443,36 @@
         }
       }
     },
+    "/api/Settings/reset-ip-addresses": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the IP Addresses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/reset-email-url": {
       "post": {
         "tags": [
@@ -13581,6 +13611,11 @@
             "type": "integer",
             "description": "Port the server listens on. Managed in appsettings.json.",
             "format": "int32"
+          },
+          "ipAddresses": {
+            "type": "string",
+            "description": "Comma separated list of ip addresses the server listens on. Managed in appsettings.json",
+            "nullable": true
           },
           "allowStatCollection": {
             "type": "boolean",
