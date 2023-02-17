@@ -371,7 +371,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
-      console.log('Image height: ', this.mangaReaderService.getPageDimensions(this.pageNum)?.height)
       return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
     }
     return this.readingArea?.nativeElement?.clientHeight + 'px';
@@ -386,7 +385,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get RightPaginationOffset() {
-    if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
+    if (this.readerMode === ReaderMode.LeftRight && this.FittingOption !== FITTING_OPTION.WIDTH) {
       return (this.readingArea?.nativeElement?.scrollLeft || 0) * -1;
     }
     return 0;
