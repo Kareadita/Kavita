@@ -623,7 +623,7 @@ public class BookService : IBookService
                             series = metadataItem.Content;
                             break;
                         case "collection-type":
-                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html
+                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                             break;
                     }
                 }
