@@ -370,8 +370,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get ImageHeight() {
-    if (this.FittingOption !== FITTING_OPTION.HEIGHT) return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
+    if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
+      console.log('Image height: ', this.mangaReaderService.getPageDimensions(this.pageNum)?.height)
+      return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
+    }
     return this.readingArea?.nativeElement?.clientHeight + 'px';
+  }
+
+  // This is for the pagination area
+  get MaxHeight() {
+    if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
+      return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
+    }
+    return 'calc(var(--vh) * 100)';
   }
 
   get RightPaginationOffset() {
