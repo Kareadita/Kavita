@@ -250,7 +250,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
-    this.settingsForm.get('layoutMode')?.setValue(this.user.preferences.layoutMode);
+    this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('bookReaderImmersiveMode')?.setValue(this.user.preferences.bookReaderImmersiveMode);
     this.cdRef.detectChanges();
     this.styleUpdate.emit(this.pageStyles);
