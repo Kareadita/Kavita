@@ -92,7 +92,7 @@ public class BackupService : IBackupService
         await SendProgress(0F, "Started backup");
         await SendProgress(0.1F, "Copying core files");
 
-        var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
+        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace("/", "_").Replace(":", "_");
         var zipPath = _directoryService.FileSystem.Path.Join(backupDirectory, $"kavita_backup_{dateString}.zip");
 
         if (File.Exists(zipPath))
@@ -162,6 +162,14 @@ public class BackupService : IBackupService
             var chapterImages = await _unitOfWork.ChapterRepository.GetCoverImagesForLockedChaptersAsync();
             _directoryService.CopyFilesToDirectory(
                 chapterImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
+
+            var libraryImages = await _unitOfWork.LibraryRepository.GetAllCoverImagesAsync();
+            _directoryService.CopyFilesToDirectory(
+                libraryImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
+
+            var readingListImages = await _unitOfWork.ReadingListRepository.GetAllCoverImagesAsync();
+            _directoryService.CopyFilesToDirectory(
+                readingListImages.Select(s => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, s)), outputTempDir);
         }
         catch (IOException)
         {

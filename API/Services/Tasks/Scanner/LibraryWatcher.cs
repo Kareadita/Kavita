@@ -74,14 +74,24 @@ public class LibraryWatcher : ILibraryWatcher
 
     public async Task StartWatching()
     {
-        _logger.LogInformation("[LibraryWatcher] Starting file watchers");
+        FileWatchers.Clear();
+        WatcherDictionary.Clear();
+
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableFolderWatching)
+        {
+            _logger.LogInformation("Folder watching is disabled at the server level, thus ignoring any requests to create folder watching");
+            return;
+        }
 
         var libraryFolders = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync())
+            .Where(l => l.FolderWatching)
             .SelectMany(l => l.Folders)
             .Distinct()
             .Select(Parser.Parser.NormalizePath)
             .Where(_directoryService.Exists)
             .ToList();
+
+        _logger.LogInformation("[LibraryWatcher] Starting file watchers for {Count} library folders", libraryFolders.Count);
 
         foreach (var libraryFolder in libraryFolders)
         {
@@ -106,7 +116,7 @@ public class LibraryWatcher : ILibraryWatcher
 
             WatcherDictionary[libraryFolder].Add(watcher);
         }
-        _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", FileWatchers.Count);
+        _logger.LogInformation("[LibraryWatcher] Watching {Count} folders", libraryFolders.Count);
     }
 
     public void StopWatching()
@@ -235,17 +245,17 @@ public class LibraryWatcher : ILibraryWatcher
     private string GetFolder(string filePath, IEnumerable<string> libraryFolders)
     {
         var parentDirectory = _directoryService.GetParentDirectoryName(filePath);
-        _logger.LogDebug("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
+        _logger.LogTrace("[LibraryWatcher] Parent Directory: {ParentDirectory}", parentDirectory);
         if (string.IsNullOrEmpty(parentDirectory)) return string.Empty;
 
         // We need to find the library this creation belongs to
         // Multiple libraries can point to the same base folder. In this case, we need use FirstOrDefault
         var libraryFolder = libraryFolders.FirstOrDefault(f => parentDirectory.Contains(f));
-        _logger.LogDebug("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
+        _logger.LogTrace("[LibraryWatcher] Library Folder: {LibraryFolder}", libraryFolder);
         if (string.IsNullOrEmpty(libraryFolder)) return string.Empty;
 
         var rootFolder = _directoryService.GetFoldersTillRoot(libraryFolder, filePath).ToList();
-        _logger.LogDebug("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
+        _logger.LogTrace("[LibraryWatcher] Root Folders: {RootFolders}", rootFolder);
         if (!rootFolder.Any()) return string.Empty;
 
         // Select the first folder and join with library folder, this should give us the folder to scan.

@@ -1,0 +1,17 @@
+<ng-container *ngIf="data$ | async as data">
+    <div class="card" style="width: 18rem;">
+        <div class="card-header text-center">
+          {{title}}
+          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0" *ngIf="description && description.length > 0"></i>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item" [ngClass]="{'underline': handleClick !== undefined}" *ngFor="let item of data" (click)="doClick(item)">
+            <ng-container *ngIf="image && image(item) as url">
+              <app-image *ngIf="url && url.length > 0" width="32px" maxHeight="32px" class="img-top me-1" [imageUrl]="url"></app-image>
+            </ng-container>
+            {{item.name}} <span class="float-end" *ngIf="item.value >= 0">{{item.value | compactNumber}} {{label}}</span>
+          </li>
+        </ul>
+    </div>
+</ng-container>
+<ng-template #tooltip></ng-template>

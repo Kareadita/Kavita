@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ToastrService } from 'ngx-toastr';
@@ -134,14 +134,12 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         }
         await this.confirmService.alert(
           'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
-
       });
     });
   }
 
   setup(member: Member) {
     this.accountService.getInviteUrl(member.id, false).subscribe(url => {
-      console.log('Invite Url: ', url);
       if (url) {
         this.router.navigateByUrl(url);
       }

@@ -19,6 +19,9 @@ public class Volume : IEntityDate, IHasReadTimeEstimate
     public IList<Chapter> Chapters { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Absolute path to the (managed) image file
     /// </summary>

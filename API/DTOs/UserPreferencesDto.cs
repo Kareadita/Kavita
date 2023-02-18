@@ -37,10 +37,20 @@ public class UserPreferencesDto
     [Required]
     public LayoutMode LayoutMode { get; set; }
     /// <summary>
+    /// Manga Reader Option: Emulate a book by applying a shadow effect on the pages
+    /// </summary>
+    [Required]
+    public bool EmulateBook { get; set; }
+    /// <summary>
     /// Manga Reader Option: Background color of the reader
     /// </summary>
     [Required]
     public string BackgroundColor { get; set; } = "#000000";
+    [Required]
+    /// <summary>
+    /// Manga Reader Option: Should swiping trigger pagination
+    /// </summary>
+    public bool SwipeToPaginate { get; set; }
     /// <summary>
     /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
     /// </summary>

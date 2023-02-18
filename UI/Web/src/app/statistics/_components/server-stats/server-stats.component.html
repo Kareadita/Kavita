@@ -1,0 +1,123 @@
+<div class="container-fluid">
+    <div class="row g-0 mt-4 mb-3 d-flex justify-content-around" *ngIf="stats$ | async as stats">
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Series" [clickable]="false" fontClasses="fa-solid fa-book-open" title="Total Series: {{stats.seriesCount | number}}">
+                    {{stats.seriesCount | compactNumber}} Series
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+    
+        <ng-container >
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Volumes" [clickable]="false" fontClasses="fas fa-book" title="Total Volumes: {{stats.volumeCount | number}}">
+                    {{stats.volumeCount | compactNumber}} Volumes
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Files" [clickable]="false" fontClasses="fa-regular fa-file" title="Total Files: {{stats.totalFiles | number}}">
+                    {{stats.totalFiles | compactNumber}} Files
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+    
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Size" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" title="Total Size">
+                    {{stats.totalSize | bytes}}
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Genres" [clickable]="true" fontClasses="fa-solid fa-tags" title="Total Genres: {{stats.totalGenres | number}}" (click)="openGenreList();$event.stopPropagation();">
+                    {{stats.totalGenres | compactNumber}} Genres
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Tags" [clickable]="true" fontClasses="fa-solid fa-tags" title="Total Tags: {{stats.totalTags | number}}" (click)="openTagList();$event.stopPropagation();">
+                    {{stats.totalTags | compactNumber}} Tags
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total People" [clickable]="true" fontClasses="fa-solid fa-user-tag" title="Total People: {{stats.totalPeople | number}}" (click)="openPeopleList();$event.stopPropagation();">
+                    {{stats.totalPeople | compactNumber}} People
+                </app-icon-and-title>
+            </div>
+            <div class="vr d-none d-lg-block m-2"></div>
+        </ng-container>
+
+        <ng-container>
+            <div class="col-auto mb-2">
+                <app-icon-and-title label="Total Read Time" [clickable]="false" fontClasses="fas fa-eye" title="Total Read Time: {{stats.totalReadingTime | number}}">
+                    {{stats.totalReadingTime | compactNumber}} Hours
+                </app-icon-and-title>
+            </div>
+        </ng-container>
+    </div>
+
+    <div class="grid row g-0 pt-2 pb-2 d-flex justify-content-around">
+        <div class="col-auto">
+            <app-stat-list [data$]="releaseYears$" title="Release Years" label="series"></app-stat-list>
+        </div>
+        <div class="col-auto">
+            <app-stat-list [data$]="mostActiveUsers$" title="Most Active Users" label="reads"></app-stat-list>
+        </div>
+        <div class="col-auto">
+            <app-stat-list [data$]="mostActiveLibrary$" title="Popular Libraries" label="reads"></app-stat-list>
+        </div>
+        <div class="col-auto">
+            <app-stat-list [data$]="mostActiveSeries$" title="Popular Series" [image]="seriesImage" [handleClick]="openSeries">
+            </app-stat-list>
+        </div>
+        <div class="col-auto">
+            <app-stat-list [data$]="recentlyRead$" title="Recently Read" [image]="seriesImage" [handleClick]="openSeries"></app-stat-list>
+        </div>
+    </div>
+
+    <ng-container *ngIf="breakpoint$ | async as bp">
+        <div class="row g-0 pt-2 pb-2">
+            <app-top-readers></app-top-readers>
+        </div>
+    
+        <div class="row g-0 pt-4 pb-2">
+            <div class="col-lg-6 col-md-12 mb-md-5">
+                <app-file-breakdown-stats></app-file-breakdown-stats>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <app-publication-status-stats></app-publication-status-stats>
+            </div>
+        </div>
+
+        <div class="row g-0 pt-4 pb-2">
+            <div class="col-md-12 col-sm-12 mt-4 pt-2">
+                <app-reading-activity [isAdmin]="true"></app-reading-activity>
+            </div>
+        </div>
+        
+        <div class="row g-0 pt-4 pb-2">
+            <div class="col-md-12 col-sm-12 mt-4 pt-2">
+                <app-day-breakdown></app-day-breakdown>
+            </div>
+        </div>
+    </ng-container>
+
+    
+    
+</div>

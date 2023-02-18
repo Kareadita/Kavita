@@ -9,9 +9,9 @@
 	<ng-template #submenu let-list="list">
 		<ng-container *ngFor="let action of list">
       <!-- Non Submenu items -->
-      <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 || action.dynamicList != undefined ; else submenuDropdown">
+      <ng-container *ngIf="action.children === undefined || action?.children?.length === 0 || action.dynamicList !== undefined ; else submenuDropdown">
 
-        <ng-container *ngIf="action.dynamicList != undefined && (action.dynamicList | async | dynamicList) as dList; else justItem">
+        <ng-container *ngIf="action.dynamicList !== undefined && (action.dynamicList | async | dynamicList) as dList; else justItem">
           <ng-container *ngFor="let dynamicItem of dList">
             <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
           </ng-container>

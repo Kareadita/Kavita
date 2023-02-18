@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Search;
 using API.Extensions;
@@ -50,17 +51,16 @@ public class SearchController : BaseApiController
     [HttpGet("search")]
     public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString)
     {
-        queryString = Uri.UnescapeDataString(queryString).Trim().Replace(@"%", string.Empty).Replace(":", string.Empty);
+        queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        // Get libraries user has access to
-        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(user.Id)).ToList();
+        var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
+        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin, libraries.Select(l => l.Id).ToArray(), queryString);
+        var series = await _unitOfWork.SeriesRepository.SearchSeries(user.Id, isAdmin,
+            libraries, queryString);
 
         return Ok(series);
     }

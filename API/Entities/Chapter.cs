@@ -24,6 +24,9 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public ICollection<MangaFile> Files { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Relative path to the (managed) image file representing the cover image
     /// </summary>
@@ -73,6 +76,19 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Number of the Total Count (progress the Series is complete)
     /// </summary>
     public int Count { get; set; } = 0;
+    /// <summary>
+    /// SeriesGroup tag in ComicInfo
+    /// </summary>
+    public string SeriesGroup { get; set; }
+    public string StoryArc { get; set; } = string.Empty;
+    public string StoryArcNumber { get; set; } = string.Empty;
+    public string AlternateNumber { get; set; } = string.Empty;
+    public string AlternateSeries { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Not currently used in Kavita
+    /// </summary>
+    public int AlternateCount { get; set; } = 0;
 
     /// <summary>
     /// Total Word count of all chapters in this chapter.
@@ -97,6 +113,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
+    public ICollection<AppUserProgress> UserProgress { get; set; }
 
 
 

@@ -42,6 +42,7 @@ public interface IScannerService
     Task ScanSeries(int seriesId, bool bypassFolderOptimizationChecks = true);
 
     Task ScanFolder(string folder);
+    Task AnalyzeFiles();
 
 }
 
@@ -95,6 +96,35 @@ public class ScannerService : IScannerService
         _readingItemService = readingItemService;
         _processSeries = processSeries;
         _wordCountAnalyzerService = wordCountAnalyzerService;
+    }
+
+    /// <summary>
+    /// This is only used for v0.7 to get files analyzed
+    /// </summary>
+    public async Task AnalyzeFiles()
+    {
+        _logger.LogInformation("Starting Analyze Files task");
+        var missingExtensions = await _unitOfWork.MangaFileRepository.GetAllWithMissingExtension();
+        if (missingExtensions.Count == 0)
+        {
+            _logger.LogInformation("Nothing to do");
+            return;
+        }
+
+        var sw = Stopwatch.StartNew();
+
+        foreach (var file in missingExtensions)
+        {
+            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(file.FilePath);
+            if (!fileInfo.Exists)continue;
+            file.Extension = fileInfo.Extension.ToLowerInvariant();
+            file.Bytes = fileInfo.Length;
+            _unitOfWork.MangaFileRepository.Update(file);
+        }
+
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Completed Analyze Files task in {ElapsedTime}", sw.Elapsed);
     }
 
     /// <summary>
@@ -483,7 +513,7 @@ public class ScannerService : IScannerService
 
 
             seenSeries.Add(foundParsedSeries);
-            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library));
+            processTasks.Add(async () => await _processSeries.ProcessSeriesAsync(parsedFiles, library, forceUpdate));
             return Task.CompletedTask;
         }
 
@@ -498,13 +528,13 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
-        var time = DateTime.Now;
+        var time = DateTime.UtcNow;
         foreach (var folderPath in library.Folders)
         {
-            folderPath.LastScanned = time;
+            folderPath.UpdateLastScanned(time);
         }
 
-        library.LastScanned = time;
+        library.UpdateLastScanned(time);
 
 
         _unitOfWork.LibraryRepository.Update(library);

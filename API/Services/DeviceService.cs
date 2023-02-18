@@ -7,6 +7,7 @@ using API.DTOs.Device;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Enums.Device;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -105,13 +106,15 @@ public class DeviceService : IDeviceService
 
     public async Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId)
     {
-        var files = await _unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds);
-        if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)))
-            throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported");
-
         var device = await _unitOfWork.DeviceRepository.GetDeviceById(deviceId);
         if (device == null) throw new KavitaException("Device doesn't exist");
-        device.LastUsed = DateTime.Now;
+
+        var files = await _unitOfWork.ChapterRepository.GetFilesForChaptersAsync(chapterIds);
+        if (files.Any(f => f.Format is not (MangaFormat.Epub or MangaFormat.Pdf)) && device.Platform == DevicePlatform.Kindle)
+            throw new KavitaException("Cannot Send non Epub or Pdf to devices as not supported on Kindle");
+
+
+        device.UpdateLastUsed();
         _unitOfWork.DeviceRepository.Update(device);
         await _unitOfWork.CommitAsync();
         var success = await _emailService.SendFilesToEmail(new SendToDto()

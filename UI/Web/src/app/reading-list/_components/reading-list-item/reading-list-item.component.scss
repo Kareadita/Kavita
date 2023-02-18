@@ -1,0 +1,25 @@
+.progress-banner {
+    height: 5px;
+
+    .progress {
+        color: var(--card-progress-bar-color);
+        background-color: transparent;
+    }
+}
+
+.list-item-container {
+    background: var(--card-list-item-bg-color);
+    border-radius: 5px;
+    position: relative;
+}
+
+.not-read-badge {
+    position: absolute;
+    top: 8px;
+    left: 108px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
+    border-color: transparent var(--primary-color) transparent transparent;
+}

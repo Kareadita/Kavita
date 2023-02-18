@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using API.Services;
 
 namespace API.DTOs.Settings;
@@ -16,6 +17,10 @@ public class ServerSettingDto
     /// Port the server listens on. Managed in appsettings.json.
     /// </summary>
     public int Port { get; set; }
+    /// <summary>
+    /// Comma separated list of ip addresses the server listens on. Managed in appsettings.json
+    /// </summary>
+    public string IpAddresses { get; set; }
     /// <summary>
     /// Allows anonymous information to be collected and sent to KavitaStats
     /// </summary>
@@ -48,10 +53,6 @@ public class ServerSettingDto
     /// </summary>
     public bool ConvertBookmarkToWebP { get; set; }
     /// <summary>
-    /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
-    /// </summary>
-    public bool EnableSwaggerUi { get; set; }
-    /// <summary>
     /// The amount of Backups before cleanup
     /// </summary>
     /// <remarks>Value should be between 1 and 30</remarks>
@@ -65,4 +66,12 @@ public class ServerSettingDto
     /// </summary>
     /// <remarks>Value should be between 1 and 30</remarks>
     public int TotalLogs { get; set; }
+    /// <summary>
+    /// If the server should save covers as WebP encoding
+    /// </summary>
+    public bool ConvertCoverToWebP { get; set; }
+    /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server
+    /// </summary>
+    public string HostName { get; set; }
 }

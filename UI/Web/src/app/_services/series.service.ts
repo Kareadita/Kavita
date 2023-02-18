@@ -6,17 +6,18 @@ import { environment } from 'src/environments/environment';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
-import { ChapterMetadata } from '../_models/chapter-metadata';
+import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
 import { CollectionTag } from '../_models/collection-tag';
 import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { SeriesDetail } from '../_models/series-detail/series-detail';
-import { SeriesFilter } from '../_models/series-filter';
+import { SeriesFilter } from '../_models/metadata/series-filter';
 import { SeriesGroup } from '../_models/series-group';
-import { SeriesMetadata } from '../_models/series-metadata';
+import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
+import { TextResonse } from '../_types/text-response';
 
 @Injectable({
   providedIn: 'root'
@@ -130,6 +131,13 @@ export class SeriesService {
     }));
   }
 
+  isWantToRead(seriesId: number) {
+    return this.httpClient.get<string>(this.baseUrl + 'want-to-read?seriesId=' + seriesId, TextResonse)
+    .pipe(map(val => {
+      return val === 'true';
+    }));
+  }
+
   getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
@@ -167,7 +175,7 @@ export class SeriesService {
       seriesMetadata,
       collectionTags,
     };
-    return this.httpClient.post(this.baseUrl + 'series/metadata', data, {responseType: 'text' as 'json'});
+    return this.httpClient.post(this.baseUrl + 'series/metadata', data, TextResonse);
   }
 
   getSeriesForTag(collectionTagId: number, pageNum?: number, itemsPerPage?: number) {

@@ -7,12 +7,12 @@ import { Download } from 'src/app/shared/_models/download';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
-import { ChapterMetadata } from 'src/app/_models/chapter-metadata';
+import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
 import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { PersonRole } from 'src/app/_models/person';
+import { PersonRole } from 'src/app/_models/metadata/person';
 import { Volume } from 'src/app/_models/volume';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
@@ -194,7 +194,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       return;
     }
     
-    this.actionService.markChapterAsRead(this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
+    this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 
   markChapterAsUnread(chapter: Chapter) {
@@ -202,7 +202,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.actionService.markChapterAsUnread(this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
+    this.actionService.markChapterAsUnread(this.libraryId, this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 
   handleChapterActionCallback(action: ActionItem<Chapter>, chapter: Chapter) {

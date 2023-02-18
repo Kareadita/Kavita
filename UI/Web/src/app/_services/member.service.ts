@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { Member } from '../_models/member';
+import { Member } from '../_models/auth/member';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +46,10 @@ export class MemberService {
 
   removeSeriesToWantToRead(seriesIds: Array<number>) {
     return this.httpClient.post<Array<Member>>(this.baseUrl + 'want-to-read/remove-series', {seriesIds});
+  }
+
+  getMember() {
+    return this.httpClient.get<Member>(this.baseUrl + 'users/myself');
   }
   
 }

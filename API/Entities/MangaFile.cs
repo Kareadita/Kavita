@@ -21,18 +21,30 @@ public class MangaFile : IEntityDate
     /// </summary>
     public int Pages { get; set; }
     public MangaFormat Format { get; set; }
+    /// <summary>
+    /// How many bytes make up this file
+    /// </summary>
+    public long Bytes { get; set; }
+    /// <summary>
+    /// File extension
+    /// </summary>
+    public string Extension { get; set; }
     /// <inheritdoc cref="IEntityDate.Created"/>
     public DateTime Created { get; set; }
-
     /// <summary>
     /// Last time underlying file was modified
     /// </summary>
     /// <remarks>This gets updated anytime the file is scanned</remarks>
     public DateTime LastModified { get; set; }
+
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Last time file analysis ran on this file
     /// </summary>
     public DateTime LastFileAnalysis { get; set; }
+    public DateTime LastFileAnalysisUtc { get; set; }
 
 
     // Relationship Mapping
@@ -46,5 +58,12 @@ public class MangaFile : IEntityDate
     public void UpdateLastModified()
     {
         LastModified = File.GetLastWriteTime(FilePath);
+        LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
+    }
+
+    public void UpdateLastFileAnalysis()
+    {
+        LastFileAnalysis = DateTime.Now;
+        LastFileAnalysisUtc = DateTime.UtcNow;
     }
 }

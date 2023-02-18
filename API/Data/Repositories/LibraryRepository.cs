@@ -9,6 +9,7 @@ using API.DTOs.JumpBar;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.Common.Extensions;
@@ -38,7 +39,7 @@ public interface ILibraryRepository
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
-    Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId);
+    IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None);
     Task<int> GetTotalFiles();
@@ -48,7 +49,9 @@ public interface ILibraryRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
-    Library GetLibraryByFolder(string folder);
+    Task<string> GetLibraryCoverImageAsync(int libraryId);
+    Task<IList<string>> GetAllCoverImagesAsync();
+    Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -126,12 +129,13 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<int>> GetLibraryIdsForUserIdAsync(int userId)
+    public IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None)
     {
-        return await _context.Library
+        return _context.Library
+            .IsRestricted(queryContext)
             .Where(l => l.AppUsers.Select(ap => ap.Id).Contains(userId))
             .Select(l => l.Id)
-            .ToListAsync();
+            .AsEnumerable();
     }
 
     public async Task<LibraryType> GetLibraryTypeAsync(int libraryId)
@@ -280,7 +284,7 @@ public class LibraryRepository : ILibraryRepository
     {
         return await _context.Library
             .AsNoTracking()
-            .AnyAsync(x => x.Name == libraryName);
+            .AnyAsync(x => x.Name.Equals(libraryName));
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user)
@@ -377,12 +381,43 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 
-    public Library? GetLibraryByFolder(string folder)
+    public Task<string> GetLibraryCoverImageAsync(int libraryId)
     {
-        var normalized = Services.Tasks.Scanner.Parser.Parser.NormalizePath(folder);
         return _context.Library
-            .Include(l => l.Folders)
-            .AsSplitQuery()
-            .SingleOrDefault(l => l.Folders.Select(f => f.Path).Contains(normalized));
+            .Where(l => l.Id == libraryId)
+            .Select(l => l.CoverImage)
+            .SingleOrDefaultAsync();
+
+    }
+
+    public async Task<IList<string>> GetAllCoverImagesAsync()
+    {
+        return await _context.ReadingList
+            .Select(t => t.CoverImage)
+            .Where(t => !string.IsNullOrEmpty(t))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds)
+    {
+        var types = await _context.Library
+            .Where(l => libraryIds.Contains(l.Id))
+            .AsNoTracking()
+            .Select(l => new
+            {
+                LibraryId = l.Id,
+                LibraryType = l.Type
+            })
+            .ToListAsync();
+
+        var dict = new Dictionary<int, LibraryType>();
+
+        foreach (var type in types)
+        {
+            dict.TryAdd(type.LibraryId, type.LibraryType);
+        }
+
+        return dict;
     }
 }

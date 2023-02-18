@@ -1,7 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
+/// <summary>
+/// 15 is blocked as it was EnableSwaggerUi, which is no longer used
+/// </summary>
 public enum ServerSettingKey
 {
     /// <summary>
@@ -82,11 +86,6 @@ public enum ServerSettingKey
     [Description("ConvertBookmarkToWebP")]
     ConvertBookmarkToWebP = 14,
     /// <summary>
-    /// If the Swagger UI Should be exposed. Does not require authentication, but does require a JWT.
-    /// </summary>
-    [Description("EnableSwaggerUi")]
-    EnableSwaggerUi = 15,
-    /// <summary>
     /// Total Number of Backups to maintain before cleaning. Default 30, min 1.
     /// </summary>
     [Description("TotalBackups")]
@@ -101,4 +100,19 @@ public enum ServerSettingKey
     /// </summary>
     [Description("TotalLogs")]
     TotalLogs = 18,
+    /// <summary>
+    /// If Kavita should save covers as WebP images
+    /// </summary>
+    [Description("ConvertCoverToWebP")]
+    ConvertCoverToWebP = 19,
+    /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server. Used for email link generation
+    /// </summary>
+    [Description("HostName")]
+    HostName = 20,
+    /// <summary>
+    /// Ip addresses the server listens on. Not managed in DB. Managed in appsettings.json and synced to DB.
+    /// </summary>
+    [Description("IpAddresses")]
+    IpAddresses = 21,
 }

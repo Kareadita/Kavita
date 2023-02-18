@@ -7,6 +7,7 @@ import { BulkAddToCollectionComponent } from '../cards/_modals/bulk-add-to-colle
 import { AddToListModalComponent, ADD_FLOW } from '../reading-list/_modals/add-to-list-modal/add-to-list-modal.component';
 import { EditReadingListModalComponent } from '../reading-list/_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { ConfirmService } from '../shared/confirm.service';
+import { LibrarySettingsModalComponent } from '../sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { Chapter } from '../_models/chapter';
 import { Device } from '../_models/device/device';
 import { Library } from '../_models/library';
@@ -97,6 +98,14 @@ export class ActionService implements OnDestroy {
         callback(library);
       }
     });
+  }
+
+  editLibrary(library: Partial<Library>, callback?: LibraryActionCallback) {
+    const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
+      modalRef.componentInstance.library = library;
+      modalRef.closed.subscribe((closeResult: {success: boolean, library: Library, coverImageUpdate: boolean}) => {
+        if (callback) callback(library)
+      });
   }
 
   /**
@@ -245,8 +254,8 @@ export class ActionService implements OnDestroy {
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
    */
-  markChapterAsRead(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
+  markChapterAsRead(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
       this.toastr.success('Marked as Read');
       if (callback) {
@@ -261,8 +270,8 @@ export class ActionService implements OnDestroy {
    * @param chapter Chapter, should have id, pages, volumeId populated
    * @param callback Optional callback to perform actions after API completes
    */
-  markChapterAsUnread(seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
-    this.readerService.saveProgress(seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
+  markChapterAsUnread(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
+    this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
       this.toastr.success('Marked as Unread');
       if (callback) {

@@ -1,7 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({
@@ -9,7 +9,7 @@ import { AccountService } from 'src/app/_services/account.service';
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss']
 })
-export class ResetPasswordModalComponent implements OnInit {
+export class ResetPasswordModalComponent {
 
   @Input() member!: Member;
   errorMessage = '';
@@ -18,9 +18,6 @@ export class ResetPasswordModalComponent implements OnInit {
   });
 
   constructor(public modal: NgbActiveModal, private accountService: AccountService) { }
-
-  ngOnInit(): void {
-  }
 
   save() {
     this.accountService.resetPassword(this.member.username, this.resetPasswordForm.value.password,'').subscribe(() => {

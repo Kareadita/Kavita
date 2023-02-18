@@ -1,0 +1,11 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 280px);
+    grid-gap: 0.5rem;
+    justify-content: space-evenly;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: start;
+}
+

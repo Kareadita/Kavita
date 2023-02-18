@@ -3,8 +3,8 @@
         <h4>Recurring Tasks</h4>
         <div class="mb-3">
             <label for="settings-tasks-scan" class="form-label">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
-            <ng-template #taskScanTooltip>How often Kavita will scan and refresh metadata around manga files.</ng-template>
-            <span class="visually-hidden" id="settings-tasks-scan-help">How often Kavita will scan and refresh metatdata around manga files.</span>
+            <ng-template #taskScanTooltip>How often Kavita will scan and refresh metadata around library files.</ng-template>
+            <span class="visually-hidden" id="settings-tasks-scan-help">How often Kavita will scan and refresh metadata around library files.</span>
             <select class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
                 <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
             </select>

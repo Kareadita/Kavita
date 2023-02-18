@@ -1,6 +1,5 @@
 
 
-$triangle-size: 30px;
 $image-height: 230px;
 $image-width: 160px;
 
@@ -68,15 +67,28 @@ $image-width: 160px;
     right: 30%;
 }
 
+.badge-container {
+    border-radius: 4px;
+    display: block;
+    height: $image-height;
+    left: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    width: 158px;
+    
+}
+
 .not-read-badge {
     position: absolute;
-    top: 0px;
-    right: 0px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 $triangle-size $triangle-size 0;
-    border-color: transparent var(--primary-color) transparent transparent;
+    top: calc(-1 * (var(--card-progress-triangle-size) / 2));
+    right: -14px;
+    z-index: 1000;
+    height: var(--card-progress-triangle-size);
+    width: var(--card-progress-triangle-size);
+    background-color: var(--primary-color);
+    transform: rotate(45deg);
 }
 
 
@@ -110,8 +122,8 @@ $image-width: 160px;
 
 .overlay {
     height: $image-height;
-
-    
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     
     &:hover {
         visibility: visible;
@@ -170,4 +182,6 @@ $image-width: 160px;
     height: $image-height;
     z-index: 10;
     transition: all 0.2s;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }

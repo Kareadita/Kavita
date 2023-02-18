@@ -57,7 +57,7 @@ public class PresenceTracker : IPresenceTracker
         }
 
         // Update the last active for the user
-        user.LastActive = DateTime.Now;
+        user.UpdateLastActive();
         await _unitOfWork.CommitAsync();
     }
 

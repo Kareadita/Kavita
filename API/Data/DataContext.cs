@@ -45,6 +45,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<SeriesRelation> SeriesRelation { get; set; }
     public DbSet<FolderPath> FolderPath { get; set; }
     public DbSet<Device> Device { get; set; }
+    public DbSet<ServerStatistics> ServerStatistics { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -68,13 +69,15 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasOne(pt => pt.Series)
             .WithMany(p => p.Relations)
             .HasForeignKey(pt => pt.SeriesId)
-            .OnDelete(DeleteBehavior.ClientCascade);
+            .OnDelete(DeleteBehavior.Cascade);
+
 
         builder.Entity<SeriesRelation>()
             .HasOne(pt => pt.TargetSeries)
             .WithMany(t => t.RelationOf)
             .HasForeignKey(pt => pt.TargetSeriesId)
-            .OnDelete(DeleteBehavior.ClientCascade);
+            .OnDelete(DeleteBehavior.Cascade);
+
 
 
         builder.Entity<AppUserPreferences>()
@@ -87,23 +90,41 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.GlobalPageLayoutMode)
             .HasDefaultValue(PageLayoutMode.Cards);
+
+
+        builder.Entity<Library>()
+            .Property(b => b.FolderWatching)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInDashboard)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInRecommended)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.IncludeInSearch)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageCollections)
+            .HasDefaultValue(true);
     }
 
 
     private static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
     {
-        if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
-        {
-            entity.Created = DateTime.Now;
-            entity.LastModified = DateTime.Now;
-        }
+        if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
+        entity.Created = DateTime.Now;
+        entity.LastModified = DateTime.Now;
+        entity.CreatedUtc = DateTime.UtcNow;
+        entity.LastModifiedUtc = DateTime.UtcNow;
     }
 
     private static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
     {
-        if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
-            entity.LastModified = DateTime.Now;
+        if (e.NewState != EntityState.Modified || e.Entry.Entity is not IEntityDate entity) return;
+        entity.LastModified = DateTime.Now;
+        entity.LastModifiedUtc = DateTime.UtcNow;
     }
 
     private void OnSaveChanges()

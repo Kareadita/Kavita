@@ -34,6 +34,10 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/backup-db', {});
   }
 
+  analyzeFiles() {
+    return this.httpClient.post(this.baseUrl + 'server/analyze-files', {});
+  }
+
   checkForUpdate() {
     return this.httpClient.get<UpdateVersionEvent>(this.baseUrl + 'server/check-update', {});
   }
@@ -52,5 +56,9 @@ export class ServerService {
 
   convertBookmarks() {
     return this.httpClient.post(this.baseUrl + 'server/convert-bookmarks', {});
+  }
+
+  convertCovers() {
+    return this.httpClient.post(this.baseUrl + 'server/convert-covers', {});
   }
 }

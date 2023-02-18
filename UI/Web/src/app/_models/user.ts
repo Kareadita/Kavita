@@ -1,4 +1,4 @@
-import { AgeRestriction } from './age-restriction';
+import { AgeRestriction } from './metadata/age-restriction';
 import { Preferences } from './preferences/preferences';
 
 // This interface is only used for login and storing/retreiving JWT from local storage

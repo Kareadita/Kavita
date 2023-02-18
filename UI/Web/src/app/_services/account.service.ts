@@ -8,11 +8,12 @@ import { User } from '../_models/user';
 import { Router } from '@angular/router';
 import { EVENTS, MessageHubService } from './message-hub.service';
 import { ThemeService } from './theme.service';
-import { InviteUserResponse } from '../_models/invite-user-response';
+import { InviteUserResponse } from '../_models/auth/invite-user-response';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { UpdateEmailResponse } from '../_models/email/update-email-response';
+import { UpdateEmailResponse } from '../_models/auth/update-email-response';
 import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRestriction } from '../_models/age-restriction';
+import { AgeRestriction } from '../_models/metadata/age-restriction';
+import { TextResonse } from '../_types/text-response';
 
 export enum Role {
   Admin = 'Admin',
@@ -151,7 +152,7 @@ export class AccountService implements OnDestroy {
   }
 
   migrateUser(model: {email: string, username: string, password: string, sendEmail: boolean}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, {responseType: 'text' as 'json'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/migrate-email', model, TextResonse);
   }
 
   confirmMigrationEmail(model: {email: string, token: string}) {
@@ -159,7 +160,7 @@ export class AccountService implements OnDestroy {
   }
 
   resendConfirmationEmail(userId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, {responseType: 'text' as 'json'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/resend-confirmation-email?userId=' + userId, {}, TextResonse);
   }
 
   inviteUser(model: {email: string, roles: Array<string>, libraries: Array<number>, ageRestriction: AgeRestriction}) {
@@ -180,7 +181,7 @@ export class AccountService implements OnDestroy {
    * @returns 
    */
   getInviteUrl(userId: number, withBaseUrl: boolean = true) {
-    return this.httpClient.get<string>(this.baseUrl + 'account/invite-url?userId=' + userId + '&withBaseUrl=' + withBaseUrl, {responseType: 'text' as 'json'});
+    return this.httpClient.get<string>(this.baseUrl + 'account/invite-url?userId=' + userId + '&withBaseUrl=' + withBaseUrl, TextResonse);
   }
 
   getDecodedToken(token: string) {
@@ -188,23 +189,23 @@ export class AccountService implements OnDestroy {
   }
 
   requestResetPasswordEmail(email: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/forgot-password?email=' + encodeURIComponent(email), {}, {responseType: 'text' as 'json'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/forgot-password?email=' + encodeURIComponent(email), {}, TextResonse);
   }
 
   confirmResetPasswordEmail(model: {email: string, token: string, password: string}) {
-    return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, {responseType: 'text' as 'json'});
+    return this.httpClient.post<string>(this.baseUrl + 'account/confirm-password-reset', model, TextResonse);
   }
 
   resetPassword(username: string, password: string, oldPassword: string) {
-    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, {responseType: 'json' as 'text'});
+    return this.httpClient.post(this.baseUrl + 'account/reset-password', {username, password, oldPassword}, TextResonse);
   }
 
   update(model: {email: string, roles: Array<string>, libraries: Array<number>, userId: number, ageRestriction: AgeRestriction}) {
     return this.httpClient.post(this.baseUrl + 'account/update', model);
   }
 
-  updateEmail(email: string) {
-    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email});
+  updateEmail(email: string, password: string) {
+    return this.httpClient.post<UpdateEmailResponse>(this.baseUrl + 'account/update/email', {email, password});
   }
 
   updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {
@@ -247,7 +248,7 @@ export class AccountService implements OnDestroy {
   }
 
   resetApiKey() {
-    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, {responseType: 'text' as 'json'}).pipe(map(key => {
+    return this.httpClient.post<string>(this.baseUrl + 'account/reset-api-key', {}, TextResonse).pipe(map(key => {
       const user = this.getUserFromLocalStorage();
       if (user) {
         user.apiKey = key;
@@ -264,7 +265,8 @@ export class AccountService implements OnDestroy {
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     
-    return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token', {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
+    return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
+     {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
         this.currentUser.token = user.token;
         this.currentUser.refreshToken = user.refreshToken;

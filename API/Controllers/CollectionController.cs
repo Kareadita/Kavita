@@ -6,10 +6,12 @@ using API.Data;
 using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Services;
+using API.Services.Tasks.Metadata;
 using API.SignalR;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers;
 
@@ -19,13 +21,13 @@ namespace API.Controllers;
 public class CollectionController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEventHub _eventHub;
+    private readonly ICollectionTagService _collectionService;
 
     /// <inheritdoc />
-    public CollectionController(IUnitOfWork unitOfWork, IEventHub eventHub)
+    public CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService)
     {
         _unitOfWork = unitOfWork;
-        _eventHub = eventHub;
+        _collectionService = collectionService;
     }
 
     /// <summary>
@@ -55,12 +57,23 @@ public class CollectionController : BaseApiController
     [HttpGet("search")]
     public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
     {
-        queryString ??= "";
+        queryString ??= string.Empty;
         queryString = queryString.Replace(@"%", string.Empty);
         if (queryString.Length == 0) return await GetAllTags();
 
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, user.Id);
+        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId());
+    }
+
+    /// <summary>
+    /// Checks if a collection exists with the name
+    /// </summary>
+    /// <param name="name">If empty or null, will return true as that is invalid</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("name-exists")]
+    public async Task<ActionResult<bool>> DoesNameExists(string name)
+    {
+        return Ok(await _collectionService.TagExistsByName(name));
     }
 
     /// <summary>
@@ -71,26 +84,15 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateTagPromotion(CollectionTagDto updatedTag)
+    public async Task<ActionResult> UpdateTag(CollectionTagDto updatedTag)
     {
-        var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updatedTag.Id);
-        if (existingTag == null) return BadRequest("This tag does not exist");
-
-        existingTag.Promoted = updatedTag.Promoted;
-        existingTag.Title = updatedTag.Title.Trim();
-        existingTag.NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(updatedTag.Title).ToUpper();
-        existingTag.Summary = updatedTag.Summary.Trim();
-
-        if (_unitOfWork.HasChanges())
+        try
         {
-            if (await _unitOfWork.CommitAsync())
-            {
-                return Ok("Tag updated successfully");
-            }
+            if (await _collectionService.UpdateTag(updatedTag)) return Ok("Tag updated successfully");
         }
-        else
+        catch (KavitaException ex)
         {
-            return Ok("Tag updated successfully");
+            return BadRequest(ex.Message);
         }
 
         return BadRequest("Something went wrong, please try again");
@@ -105,29 +107,11 @@ public class CollectionController : BaseApiController
     [HttpPost("update-for-series")]
     public async Task<ActionResult> AddToMultipleSeries(CollectionTagBulkAddDto dto)
     {
-        var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(dto.CollectionTagId);
-        if (tag == null)
-        {
-            tag = DbFactory.CollectionTag(0, dto.CollectionTagTitle, String.Empty, false);
-            _unitOfWork.CollectionTagRepository.Add(tag);
-        }
+        // Create a new tag and save
+        var tag = await _collectionService.GetTagOrCreate(dto.CollectionTagId, dto.CollectionTagTitle);
 
+        if (await _collectionService.AddTagToSeries(tag, dto.SeriesIds)) return Ok();
 
-        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(dto.SeriesIds);
-        foreach (var metadata in seriesMetadatas)
-        {
-            if (!metadata.CollectionTags.Any(t => t.Title.Equals(tag.Title, StringComparison.InvariantCulture)))
-            {
-                metadata.CollectionTags.Add(tag);
-                _unitOfWork.SeriesMetadataRepository.Update(metadata);
-            }
-        }
-
-        if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync())
-        {
-            return Ok();
-        }
         return BadRequest("There was an issue updating series with collection tag");
     }
 
@@ -138,7 +122,7 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update-series")]
-    public async Task<ActionResult> UpdateSeriesForTag(UpdateSeriesForTagDto updateSeriesForTagDto)
+    public async Task<ActionResult> RemoveTagFromMultipleSeries(UpdateSeriesForTagDto updateSeriesForTagDto)
     {
         try
         {
@@ -146,41 +130,8 @@ public class CollectionController : BaseApiController
             if (tag == null) return BadRequest("Not a valid Tag");
             tag.SeriesMetadatas ??= new List<SeriesMetadata>();
 
-            // Check if Tag has updated (Summary)
-            if (tag.Summary == null || !tag.Summary.Equals(updateSeriesForTagDto.Tag.Summary))
-            {
-                tag.Summary = updateSeriesForTagDto.Tag.Summary;
-                _unitOfWork.CollectionTagRepository.Update(tag);
-            }
-
-            tag.CoverImageLocked = updateSeriesForTagDto.Tag.CoverImageLocked;
-
-            if (!updateSeriesForTagDto.Tag.CoverImageLocked)
-            {
-                tag.CoverImageLocked = false;
-                tag.CoverImage = string.Empty;
-                await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(tag.Id, MessageFactoryEntityTypes.CollectionTag), false);
-                _unitOfWork.CollectionTagRepository.Update(tag);
-            }
-
-            foreach (var seriesIdToRemove in updateSeriesForTagDto.SeriesIdsToRemove)
-            {
-                tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
-            }
-
-
-            if (tag.SeriesMetadatas.Count == 0)
-            {
-                _unitOfWork.CollectionTagRepository.Remove(tag);
-            }
-
-            if (!_unitOfWork.HasChanges()) return Ok("No updates");
-
-            if (await _unitOfWork.CommitAsync())
-            {
+            if (await _collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
                 return Ok("Tag updated");
-            }
         }
         catch (Exception)
         {

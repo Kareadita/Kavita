@@ -52,7 +52,7 @@
         <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Last Read" [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
-                    {{series.latestReadDate | date:'shortDate'}}
+                    {{series.latestReadDate | timeAgo}}
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
@@ -61,7 +61,7 @@
         <ng-container *ngIf="series.format === MangaFormat.EPUB; else showPages">
             <ng-container *ngIf="series.wordCount > 0">
                 <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                    <app-icon-and-title label="Word Count" [clickable]="false" fontClasses="fa-solid fa-book-open">
+                    <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-solid fa-book-open">
                         {{series.wordCount | compactNumber}} Words
                     </app-icon-and-title>
                 </div>
@@ -71,8 +71,8 @@
         </ng-container>
         <ng-template #showPages>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Print Length" [clickable]="false" fontClasses="fa-regular fa-file-lines">
-                    {{series.pages | number:''}} Pages
+                <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-regular fa-file-lines">
+                    {{series.pages | compactNumber}} Pages
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>
@@ -81,7 +81,7 @@
         <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                    <ng-container *ngIf="readingTime.maxHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
+                    <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
                     <ng-template #normalReadTime>
                         {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
                     </ng-template>
@@ -93,7 +93,7 @@
             <div class="vr d-none d-lg-block m-2"></div>
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Time Left" [clickable]="false" fontClasses="fa-solid fa-clock">
-                    ~{{readingTimeLeft.avgHours}} Hour{{readingTimeLeft.avgHours > 1 ? 's' : ''}} Left
+                    ~{{readingTimeLeft.avgHours}} Hour{{readingTimeLeft.avgHours > 1 ? 's' : ''}}
                 </app-icon-and-title>
             </div>
         </ng-container>

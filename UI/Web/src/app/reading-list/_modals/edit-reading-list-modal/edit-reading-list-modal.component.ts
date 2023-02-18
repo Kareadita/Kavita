@@ -1,21 +1,27 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReadingList } from 'src/app/_models/reading-list';
+import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { UploadService } from 'src/app/_services/upload.service';
 
+enum TabID {
+  General = 'General',
+  CoverImage = 'Cover Image'
+}
 
 @Component({
   selector: 'app-edit-reading-list-modal',
   templateUrl: './edit-reading-list-modal.component.html',
-  styleUrls: ['./edit-reading-list-modal.component.scss']
+  styleUrls: ['./edit-reading-list-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditReadingListModalComponent implements OnInit {
+export class EditReadingListModalComponent implements OnInit, OnDestroy {
 
   @Input() readingList!: ReadingList;
   reviewGroup!: FormGroup;
@@ -26,27 +32,47 @@ export class EditReadingListModalComponent implements OnInit {
   */
   selectedCover: string = '';
   coverImageLocked: boolean = false;
-
   imageUrls: Array<string> = [];
+  active = TabID.General;
 
-  tabs = [{title: 'General', disabled: false}, {title: 'Cover', disabled: false}];
-  active = this.tabs[0];
+  private readonly onDestroy = new Subject<void>();
 
-  get Breakpoint() {
-    return Breakpoint;
-  }
+  get Breakpoint() { return Breakpoint; }
+  get TabID() { return TabID; }
 
   constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
     public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService, 
-    private imageService: ImageService) { }
+    private imageService: ImageService, private readonly cdRef: ChangeDetectorRef, public accountService: AccountService) { }
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
-      title: new FormControl(this.readingList.title, [Validators.required]),
-      summary: new FormControl(this.readingList.summary, [])
+      title: new FormControl(this.readingList.title, { nonNullable: true, validators: [Validators.required] }),
+      summary: new FormControl(this.readingList.summary, { nonNullable: true, validators: [] }),
+      promoted: new FormControl(this.readingList.promoted, { nonNullable: true, validators: [] }),
     });
 
+    this.reviewGroup.get('title')?.valueChanges.pipe(
+      debounceTime(100), 
+      distinctUntilChanged(),
+      switchMap(name => this.readingListService.nameExists(name)),
+      tap(exists => {
+        const isExistingName = this.reviewGroup.get('title')?.value === this.readingList.title;
+        if (!exists || isExistingName) {
+          this.reviewGroup.get('title')?.setErrors(null);
+        } else {
+          this.reviewGroup.get('title')?.setErrors({duplicateName: true})  
+        }
+        this.cdRef.markForCheck();
+      }),
+      takeUntil(this.onDestroy)
+      ).subscribe();
+
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
   }
 
   close() {
@@ -56,7 +82,7 @@ export class EditReadingListModalComponent implements OnInit {
   save() {
     if (this.reviewGroup.value.title.trim() === '') return;
 
-    const model = {...this.reviewGroup.value, readingListId: this.readingList.id, promoted: this.readingList.promoted, coverImageLocked: this.coverImageLocked};
+    const model = {...this.reviewGroup.value, readingListId: this.readingList.id, coverImageLocked: this.coverImageLocked};
     const apis = [this.readingListService.update(model)];
     
     if (this.selectedCover !== '') {
@@ -67,19 +93,9 @@ export class EditReadingListModalComponent implements OnInit {
       this.readingList.title = model.title;
       this.readingList.summary = model.summary;
       this.readingList.coverImageLocked = this.coverImageLocked;
+      this.readingList.promoted = model.promoted;
       this.ngModal.close(this.readingList);
       this.toastr.success('Reading List updated');
-    });
-  }
-
-  togglePromotion() {
-    const originalPromotion = this.readingList.promoted;
-    this.readingList.promoted = !this.readingList.promoted;
-    const model = {...this.reviewGroup.value, readingListId: this.readingList.id, promoted: this.readingList.promoted, coverImageLocked: this.coverImageLocked};
-    this.readingListService.update(model).subscribe(res => {
-      /* No Operation */
-    }, err => {
-      this.readingList.promoted = originalPromotion;
     });
   }
 

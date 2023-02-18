@@ -15,6 +15,8 @@ import { MangaFormatIconPipe } from './manga-format-icon.pipe';
 import { LibraryTypePipe } from './library-type.pipe';
 import { SafeStylePipe } from './safe-style.pipe';
 import { DefaultDatePipe } from './default-date.pipe';
+import { BytesPipe } from './bytes.pipe';
+import { TimeAgoPipe } from './time-ago.pipe';
 
 
 
@@ -35,6 +37,8 @@ import { DefaultDatePipe } from './default-date.pipe';
     LibraryTypePipe,
     SafeStylePipe,
     DefaultDatePipe,
+    BytesPipe,
+    TimeAgoPipe,
   ],
   imports: [
     CommonModule,
@@ -55,6 +59,8 @@ import { DefaultDatePipe } from './default-date.pipe';
     LibraryTypePipe,
     SafeStylePipe,
     DefaultDatePipe,
+    BytesPipe,
+    TimeAgoPipe
   ]
 })
 export class PipeModule { }

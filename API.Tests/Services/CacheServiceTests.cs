@@ -41,7 +41,7 @@ internal class MockReadingItemServiceForCacheService : IReadingItemService
         return 1;
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format)
+    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, bool saveAsWebP)
     {
         return string.Empty;
     }
@@ -325,7 +325,7 @@ public class CacheServiceTests
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");
 
-        var path = cs.GetCachedPagePath(c, 11);
+        var path = cs.GetCachedPagePath(c.Id, 11);
         Assert.Equal(string.Empty, path);
     }
 
@@ -377,7 +377,7 @@ public class CacheServiceTests
         // Flatten to prepare for how GetFullPath expects
         ds.Flatten($"{CacheDirectory}1/");
 
-        Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/000_001.jpg"), ds.FileSystem.Path.GetFullPath(cs.GetCachedPagePath(c, 0)));
+        Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/000_001.jpg"), ds.FileSystem.Path.GetFullPath(cs.GetCachedPagePath(c.Id, 0)));
 
     }
 
@@ -425,7 +425,7 @@ public class CacheServiceTests
         ds.Flatten($"{CacheDirectory}1/");
 
         // Remember that we start at 0, so this is the 10th file
-        var path = cs.GetCachedPagePath(c, c.Pages);
+        var path = cs.GetCachedPagePath(c.Id, c.Pages);
         Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/000_0{c.Pages}.jpg"), ds.FileSystem.Path.GetFullPath(path));
     }
 
@@ -478,7 +478,7 @@ public class CacheServiceTests
         ds.Flatten($"{CacheDirectory}1/");
 
         // Remember that we start at 0, so this is the page + 1 file
-        var path = cs.GetCachedPagePath(c, 10);
+        var path = cs.GetCachedPagePath(c.Id, 10);
         Assert.Equal(ds.FileSystem.Path.GetFullPath($"{CacheDirectory}/1/001_001.jpg"), ds.FileSystem.Path.GetFullPath(path));
     }
 

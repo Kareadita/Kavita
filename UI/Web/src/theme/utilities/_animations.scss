@@ -11,3 +11,12 @@
     transform: translateY(-10px);
   }
 }
+
+@keyframes bookmark {
+  0%, 100% {
+      border: 0px;
+  }
+  50% {
+      border: 5px solid var(--primary-color);
+  }
+}

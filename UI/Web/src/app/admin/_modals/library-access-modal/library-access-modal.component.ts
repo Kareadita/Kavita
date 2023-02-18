@@ -1,11 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { SelectionModel } from 'src/app/typeahead/typeahead.component';
 import { Library } from 'src/app/_models/library';
-import { Member } from 'src/app/_models/member';
+import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
+import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 
+// TODO: Change to OnPush
 @Component({
   selector: 'app-library-access-modal',
   templateUrl: './library-access-modal.component.html',
@@ -18,13 +18,12 @@ export class LibraryAccessModalComponent implements OnInit {
   selectedLibraries: Array<{selected: boolean, data: Library}> = [];
   selections!: SelectionModel<Library>;
   selectAll: boolean = false;
-  isLoading: boolean = false;
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
   }
 
-  constructor(public modal: NgbActiveModal, private libraryService: LibraryService, private fb: FormBuilder) { }
+  constructor(public modal: NgbActiveModal, private libraryService: LibraryService) { }
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libs => {
@@ -50,7 +49,6 @@ export class LibraryAccessModalComponent implements OnInit {
 
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.allLibraries);
-    this.isLoading = false;
       
     // If a member is passed in, then auto-select their libraries
     if (this.member !== undefined) {

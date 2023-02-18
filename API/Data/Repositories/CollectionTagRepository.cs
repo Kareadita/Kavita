@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.Misc;
@@ -12,6 +12,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
+[Flags]
+public enum CollectionTagIncludes
+{
+    None = 1,
+    SeriesMetadata = 2,
+}
+
 public interface ICollectionTagRepository
 {
     void Add(CollectionTag tag);
@@ -21,11 +28,12 @@ public interface ICollectionTagRepository
     Task<string> GetCoverImageAsync(int collectionTagId);
     Task<IEnumerable<CollectionTagDto>> GetAllPromotedTagDtosAsync(int userId);
     Task<CollectionTag> GetTagAsync(int tagId);
-    Task<CollectionTag> GetFullTagAsync(int tagId);
+    Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata);
     void Update(CollectionTag tag);
     Task<int> RemoveTagsWithoutSeries();
-    Task<IEnumerable<CollectionTag>> GetAllTagsAsync();
+    Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
+    Task<bool> TagExists(string title);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -58,7 +66,6 @@ public class CollectionTagRepository : ICollectionTagRepository
     /// </summary>
     public async Task<int> RemoveTagsWithoutSeries()
     {
-        // TODO: Write a Unit test to validate this works
         var tagsToDelete = await _context.CollectionTag
             .Include(c => c.SeriesMetadatas)
             .Where(c => c.SeriesMetadatas.Count == 0)
@@ -69,11 +76,21 @@ public class CollectionTagRepository : ICollectionTagRepository
         return await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync()
+    public async Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None)
     {
         return await _context.CollectionTag
             .OrderBy(c => c.NormalizedTitle)
+            .Includes(includes)
             .ToListAsync();
+    }
+
+    public async Task<string> GetCoverImageAsync(int collectionTagId)
+    {
+        return await _context.CollectionTag
+            .Where(c => c.Id == collectionTagId)
+            .Select(c => c.CoverImage)
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
@@ -83,6 +100,13 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(t => !string.IsNullOrEmpty(t))
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<bool> TagExists(string title)
+    {
+        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(title);
+        return await _context.CollectionTag
+            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()
@@ -114,11 +138,11 @@ public class CollectionTagRepository : ICollectionTagRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<CollectionTag> GetFullTagAsync(int tagId)
+    public async Task<CollectionTag> GetFullTagAsync(int tagId, CollectionTagIncludes includes = CollectionTagIncludes.SeriesMetadata)
     {
         return await _context.CollectionTag
             .Where(c => c.Id == tagId)
-            .Include(c => c.SeriesMetadatas)
+            .Includes(includes)
             .AsSplitQuery()
             .SingleOrDefaultAsync();
     }
@@ -143,19 +167,9 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Where(s => EF.Functions.Like(s.Title, $"%{searchQuery}%")
                         || EF.Functions.Like(s.NormalizedTitle, $"%{searchQuery}%"))
             .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(s => s.Title)
+            .OrderBy(s => s.NormalizedTitle)
             .AsNoTracking()
-            .OrderBy(c => c.NormalizedTitle)
             .ProjectTo<CollectionTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
-    }
-
-    public async Task<string> GetCoverImageAsync(int collectionTagId)
-    {
-        return await _context.CollectionTag
-            .Where(c => c.Id == collectionTagId)
-            .Select(c => c.CoverImage)
-            .AsNoTracking()
-            .SingleOrDefaultAsync();
     }
 }

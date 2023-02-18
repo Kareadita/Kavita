@@ -56,7 +56,7 @@ public class GenreRepository : IGenreRepository
         var genresWithNoConnections = await _context.Genre
             .Include(p => p.SeriesMetadatas)
             .Include(p => p.Chapters)
-            .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0 && p.ExternalTag == removeExternal)
+            .Where(p => p.SeriesMetadatas.Count == 0 && p.Chapters.Count == 0)
             .AsSplitQuery()
             .ToListAsync();
 
@@ -80,7 +80,7 @@ public class GenreRepository : IGenreRepository
             .SelectMany(s => s.Metadata.Genres)
             .AsSplitQuery()
             .Distinct()
-            .OrderBy(p => p.Title)
+            .OrderBy(p => p.NormalizedTitle)
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
@@ -101,6 +101,7 @@ public class GenreRepository : IGenreRepository
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Genre
             .RestrictAgainstAgeRestriction(ageRating)
+            .OrderBy(g => g.NormalizedTitle)
             .AsNoTracking()
             .ProjectTo<GenreTagDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

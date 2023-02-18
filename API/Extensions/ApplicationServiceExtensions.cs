@@ -48,12 +48,14 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProcessSeries, ProcessSeries>();
         services.AddScoped<IReadingListService, ReadingListService>();
         services.AddScoped<IDeviceService, DeviceService>();
+        services.AddScoped<IStatisticService, StatisticService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
         services.AddScoped<IWordCountAnalyzerService, WordCountAnalyzerService>();
         services.AddScoped<ILibraryWatcher, LibraryWatcher>();
         services.AddScoped<ITachiyomiService, TachiyomiService>();
+        services.AddScoped<ICollectionTagService, CollectionTagService>();
 
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IEventHub, EventHub>();

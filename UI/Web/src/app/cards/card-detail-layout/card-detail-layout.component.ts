@@ -11,9 +11,10 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/series-filter';
+import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
+import { ScrollService } from 'src/app/_services/scroll.service';
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -74,7 +75,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
   constructor(private filterUtilitySerivce: FilterUtilitiesService, public utilityService: UtilityService,
     @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
-    private jumpbarService: JumpbarService, private router: Router) {
+    private jumpbarService: JumpbarService, private router: Router, private scrollService: ScrollService) {
     this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.changeDetectionRef.markForCheck();
 
@@ -116,14 +117,24 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
     
-    if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
-      const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
-      if (resumeKey === '') return;
-      const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
-      if (keys.length < 1) return;
-
-      this.hasResumedJumpKey = true;
-      setTimeout(() => this.scrollTo(keys[0]), 100);
+    // Don't resume jump key when there is a custom sort order, as it won't work
+    if (!this.hasCustomSort()) {
+      if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
+        const resumeKey = this.jumpbarService.getResumeKey(this.router.url);
+        if (resumeKey === '') return;
+        const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
+        if (keys.length < 1) return;
+  
+        this.hasResumedJumpKey = true;
+        setTimeout(() => this.scrollTo(keys[0]), 100);
+      }
+    } else {
+      // I will come back and refactor this to work
+      // const scrollPosition = this.jumpbarService.getResumePosition(this.router.url);
+      // console.log('scroll position: ', scrollPosition);
+      // if (scrollPosition > 0) {
+      //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
+      // }
     }
   }
 
@@ -131,6 +142,10 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   ngOnDestroy() {
     this.onDestory.next();
     this.onDestory.complete();
+  }
+
+  hasCustomSort() {
+    return this.filter.sortOptions !== null || this.filterSettings?.presets?.sortOptions !== null;
   }
 
   performAction(action: ActionItem<any>) {
@@ -147,6 +162,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
 
   scrollTo(jumpKey: JumpKey) {
+    if (this.hasCustomSort()) return;
+
     let targetIndex = 0;
     for(var i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
@@ -155,6 +172,8 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
 
     this.virtualScroller.scrollToIndex(targetIndex, true, 0, 1000);
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
+    // TODO: This doesn't work, we need the offset from virtual scroller
+    this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
     this.changeDetectionRef.markForCheck();
   }
 

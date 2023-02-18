@@ -5,7 +5,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
-import { LibraryEditorModalComponent } from './_modals/library-editor-modal/library-editor-modal.component';
 import { SharedModule } from '../shared/shared.module';
 import { LibraryAccessModalComponent } from './_modals/library-access-modal/library-access-modal.component';
 import { DirectoryPickerComponent } from './_modals/directory-picker/directory-picker.component';
@@ -25,6 +24,7 @@ import { ManageEmailSettingsComponent } from './manage-email-settings/manage-ema
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
 import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { StatisticsModule } from '../statistics/statistics.module';
 
 
 
@@ -34,7 +34,6 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     ManageUsersComponent,
     DashboardComponent,
     ManageLibraryComponent,
-    LibraryEditorModalComponent,
     LibraryAccessModalComponent,
     DirectoryPickerComponent,
     ResetPasswordModalComponent,
@@ -62,7 +61,9 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     PipeModule,
     SidenavModule,
     UserSettingsModule, // API-key componet
-    VirtualScrollerModule
+    VirtualScrollerModule,
+
+    StatisticsModule
   ],
   providers: []
 })

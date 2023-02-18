@@ -10,7 +10,7 @@ public interface IReadingItemService
 {
     ComicInfo GetComicInfo(string filePath);
     int GetNumberOfPages(string filePath, MangaFormat format);
-    string GetCoverImage(string filePath, string fileName, MangaFormat format);
+    string GetCoverImage(string filePath, string fileName, MangaFormat format, bool saveAsWebP);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
     ParserInfo Parse(string path, string rootPath, LibraryType type);
     ParserInfo ParseFile(string path, string rootPath, LibraryType type);
@@ -162,19 +162,20 @@ public class ReadingItemService : IReadingItemService
         }
     }
 
-    public string GetCoverImage(string filePath, string fileName, MangaFormat format)
+    public string GetCoverImage(string filePath, string fileName, MangaFormat format, bool saveAsWebP)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(fileName))
         {
             return string.Empty;
         }
 
+
         return format switch
         {
-            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
-            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
-            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
-            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory),
+            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
+            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
+            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
+            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
             _ => string.Empty
         };
     }
@@ -198,6 +199,8 @@ public class ReadingItemService : IReadingItemService
                 _imageService.ExtractImages(fileFilePath, targetDirectory, imageCount);
                 break;
             case MangaFormat.Pdf:
+                _bookService.ExtractPdfImages(fileFilePath, targetDirectory);
+                break;
             case MangaFormat.Unknown:
             case MangaFormat.Epub:
                 break;

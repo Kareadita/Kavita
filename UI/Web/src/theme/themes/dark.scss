@@ -1,5 +1,6 @@
-:root, :root .bg-dark {
-    --color-scheme: dark;
+//
+:root, :root .default {
+    /* Base colors */
     --primary-color: #4ac694;
     --primary-color-dark-shade: #3B9E76;
     --primary-color-darker-shade: #338A67;
@@ -9,6 +10,11 @@
     --body-text-color: #efefef;
     --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
     --primary-color-scrollbar: rgba(74,198,148,0.75);
+
+    /* Meta and Globals */
+    --theme-color: #000000;
+    --color-scheme: dark;
+    --tile-color: var(--primary-color);
     
 
     /* Navbar */
@@ -114,7 +120,7 @@
 
 
     /* List items */
-    --list-group-item-text-color: var(--body-text-color); /*rgba(74, 198, 148, 0.9)*/
+    --list-group-item-text-color: var(--body-text-color);
     --list-group-item-bg-color: #343a40;
     --list-group-item-border-color: rgba(239, 239, 239, 0.125);
     --list-group-hover-text-color: white;
@@ -174,6 +180,7 @@
     --ratingstar-star-filled: var(--primary-color);
 
     /* Global */
+    //--hr-color: transparent;
     --hr-color: rgba(239, 239, 239, 0.125);
     --accent-bg-color: rgba(1, 4, 9, 0.5);
     --accent-text-color: lightgrey;
@@ -194,6 +201,7 @@
     --card-progress-bar-color: var(--primary-color);
     --card-overlay-bg-color: rgba(0, 0, 0, 0);
     --card-overlay-hover-bg-color: rgba(0, 0, 0, 0.2);
+    --card-progress-triangle-size: 28px;
 
     /* Slider */
     --slider-text-color: white;
@@ -204,7 +212,6 @@
     --manga-reader-overlay-filter: blur(10px);
     --manga-reader-overlay-bg-color: rgba(0,0,0,0.5);
     --manga-reader-overlay-text-color: white;
-    --manga-reader-bg-color: black; // TODO: Remove this
     --manga-reader-next-highlight-bg-color: rgba(65, 225, 100, 0.5);
     --manga-reader-prev-highlight-bg-color: rgba(65, 105, 225, 0.5);
 
@@ -239,7 +246,4 @@
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
-
-
-
   }

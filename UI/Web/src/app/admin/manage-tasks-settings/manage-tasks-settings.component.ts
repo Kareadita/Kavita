@@ -13,8 +13,8 @@ import { DownloadService } from 'src/app/shared/_services/download.service';
 
 interface AdhocTask {
   name: string;
-  description: string; 
-  api: Observable<any>; 
+  description: string;
+  api: Observable<any>;
   successMessage: string;
   successFunction?: (data: any) => void;
 }
@@ -34,39 +34,51 @@ export class ManageTasksSettingsComponent implements OnInit {
   recurringTasks$: Observable<Array<Job>> = of([]);
   adhocTasks: Array<AdhocTask> = [
     {
-      name: 'Convert Bookmarks to WebP', 
+      name: 'Convert Bookmarks to WebP',
       description: 'Runs a long-running task which will convert all bookmarks to WebP. This is slow (especially on ARM devices).',
-      api: this.serverService.convertBookmarks(), 
+      api: this.serverService.convertBookmarks(),
       successMessage: 'Conversion of Bookmarks has been queued'
     },
     {
-      name: 'Clear Cache', 
-      description: 'Clears cached files for reading. Usefull when you\'ve just updated a file that you were previously reading within last 24 hours.',
-      api: this.serverService.clearCache(), 
+      name: 'Convert Covers to WebP',
+      description: 'Runs a long-running task which will convert all existing covers to WebP. This is slow (especially on ARM devices).',
+      api: this.serverService.convertCovers(),
+      successMessage: 'Conversion of Covers has been queued'
+    },
+    {
+      name: 'Clear Cache',
+      description: 'Clears cached files for reading. Useful when you\'ve just updated a file that you were previously reading within the last 24 hours.',
+      api: this.serverService.clearCache(),
       successMessage: 'Cache has been cleared'
     },
     {
-      name: 'Clean up Want to Read', 
-      description: 'Removes any series that users have fully read that are within want to read and have a publication status of Completed. Runs every 24 hours.',
-      api: this.serverService.cleanupWantToRead(), 
+      name: 'Clean up Want to Read',
+      description: 'Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.',
+      api: this.serverService.cleanupWantToRead(),
       successMessage: 'Want to Read has been cleaned up'
     },
     {
-      name: 'Backup Database', 
-      description: 'Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files',
-      api: this.serverService.backupDatabase(), 
+      name: 'Backup Database',
+      description: 'Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.',
+      api: this.serverService.backupDatabase(),
       successMessage: 'A job to backup the database has been queued'
     },
     {
-      name: 'Download Logs', 
+      name: 'Download Logs',
       description: 'Compiles all log files into a zip and downloads it',
-      api: defer(() => of(this.downloadService.download('logs', undefined))), 
+      api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
     {
-      name: 'Check for Updates', 
-      description: 'See if there are any Stable releases ahead of your version',
-      api: this.serverService.checkForUpdate(), 
+      name: 'Analyze Files',
+      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release.',
+      api: this.serverService.analyzeFiles(),
+      successMessage: 'File analysis has been queued'
+    },
+    {
+      name: 'Check for Updates',
+      description: 'See if there are any Stable releases ahead of your version.',
+      api: this.serverService.checkForUpdate(),
       successMessage: '',
       successFunction: (update) => {
         if (update === null) {
@@ -79,7 +91,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     },
   ];
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
+  constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService, private modalService: NgbModal,
     private downloadService: DownloadService) { }
 
@@ -89,7 +101,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       levels: this.settingsService.getLoggingLevels(),
       settings: this.settingsService.getServerSettings()
     }
-      
+
     ).subscribe(result => {
       this.taskFrequencies = result.frequencies;
       this.logLevels = result.levels;

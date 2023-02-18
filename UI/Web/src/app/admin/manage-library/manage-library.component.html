@@ -3,7 +3,7 @@
         <div class="col-8"><h3>Libraries</h3></div>
         <div class="col-4"><button class="btn btn-primary float-end" (click)="addLibrary()" title="Add Library"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Add Library</span></button></div>
     </div>
-    <ul class="list-group" *ngIf="!createLibraryToggle; else createLibrary">
+    <ul class="list-group">
         <li *ngFor="let library of libraries; let idx = index; trackBy: libraryTrackBy" class="list-group-item no-hover">
             <div>
                 <h4>
@@ -19,14 +19,14 @@
             <div>Shared Folders: {{library.folders.length + ' folders'}}</div>
             <div>
                 Last Scanned: 
-                <span *ngIf="library.lastScanned == '0001-01-01T00:00:00'; else activeDate">Never</span>
+                <span *ngIf="library.lastScanned === '0001-01-01T00:00:00'; else activeDate">Never</span>
                 <ng-template #activeDate>
-                    {{library.lastScanned | date: 'short'}}
+                    {{library.lastScanned | timeAgo}}
                 </ng-template>
             </div>
         </li>
         <li *ngIf="loading" class="list-group-item">
-            <div class="spinner-border text-secondary" role="status">
+            <div class="spinner-border text-primary" role="status">
                 <span class="invisible">Loading...</span>
             </div>
         </li>
@@ -34,7 +34,4 @@
             There are no libraries. Try creating one.
         </li>
     </ul>
-    <ng-template #createLibrary>
-        <app-library-editor-modal></app-library-editor-modal>
-    </ng-template>
 </div>

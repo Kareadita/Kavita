@@ -143,7 +143,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     }
 
 
-    public async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
+    private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
         var existingWordCount = series.WordCount;
@@ -196,8 +196,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                             return;
                         }
 
-                        file.LastFileAnalysis = DateTime.Now;
-                        _unitOfWork.MangaFileRepository.Update(file);
+                        UpdateFileAnalysis(file);
                     }
 
                     chapter.WordCount = sum;
@@ -211,8 +210,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 chapter.AvgHoursToRead = est.AvgHours;
                 foreach (var file in chapter.Files)
                 {
-                    file.LastFileAnalysis = DateTime.Now;
-                    _unitOfWork.MangaFileRepository.Update(file);
+                    UpdateFileAnalysis(file);
                 }
                 _unitOfWork.ChapterRepository.Update(chapter);
             }
@@ -225,12 +223,18 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         }
 
-        if (series.WordCount == 0 && series.WordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
+        if (series.WordCount == 0 && existingWordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
         var seriesEstimate = _readerService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
         series.MinHoursToRead = seriesEstimate.MinHours;
         series.MaxHoursToRead = seriesEstimate.MaxHours;
         series.AvgHoursToRead = seriesEstimate.AvgHours;
         _unitOfWork.SeriesRepository.Update(series);
+    }
+
+    private void UpdateFileAnalysis(MangaFile file)
+    {
+        file.UpdateLastFileAnalysis();
+        _unitOfWork.MangaFileRepository.Update(file);
     }
 
 
@@ -241,14 +245,9 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
         if (textNodes == null) return 0;
-
         return textNodes
             .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Where(s => char.IsLetter(s[0])))
-            .Select(words => words.Count())
-            .Where(wordCount => wordCount > 0)
-            .Sum();
+            .Sum(words => words.Count());
     }
-
-
 }

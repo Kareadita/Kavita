@@ -1,0 +1,11 @@
+::ng-deep .pie-label {
+    color: var(--body-text-color) !important;
+}
+
+.dashboard-card-content {
+    width: 100%;
+    height: 242px;
+    display: flex;
+    flex-flow: column;
+    box-sizing: border-box;
+}

@@ -1,0 +1,11 @@
+::ng-deep .dark .ngx-charts text {
+    fill: #a0aabe;
+}
+
+.dashboard-card-content {
+    width: 100%;
+    height: 242px;
+    display: flex;
+    flex-flow: column;
+    box-sizing: border-box;
+}

@@ -1,0 +1,31 @@
+<ng-container>
+    <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden': (navService.sideNavVisibility$ | async) === false}"  *ngIf="accountService.currentUser$ | async as user">
+        <!-- <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
+            <ng-container actions>
+                Todo: This will be customize dashboard/side nav controls
+                <a href="/preferences/" title="User Settings"><span class="visually-hidden">User Settings</span></a>
+            </ng-container>
+        </app-side-nav-item> -->
+
+        <app-side-nav-item icon="fa-home" title="Home" link="/libraries/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-star" title="Want To Read" link="/want-to-read/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-list" title="Collections" link="/collections/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-list-ol" title="Reading Lists" link="/lists/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-bookmark" title="Bookmarks" link="/bookmarks/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-regular fa-rectangle-list" title="All Series" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>
+        <div class="mb-2 mt-3 ms-2 me-2" *ngIf="libraries.length > 10 && (navService?.sideNavCollapsed$ | async) === false">
+            <label for="filter" class="form-label visually-hidden">Filter</label>
+            <div class="form-group">
+                <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
+                <button type="button" aria-label="Clear" class="btn-close" id="reset-input" (click)="filterQuery = '';"></button>
+            </div>
+        </div>
+        <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id + '/'"
+        [icon]="getLibraryTypeIcon(library.type)" [imageUrl]="getLibraryImage(library)" [title]="library.name" [comparisonMethod]="'startsWith'">
+            <ng-container actions>
+                <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>
+            </ng-container>
+        </app-side-nav-item>
+    </div>
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
+</ng-container>

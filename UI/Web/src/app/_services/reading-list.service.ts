@@ -5,6 +5,9 @@ import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
+import { CblImportResult } from '../_models/reading-list/cbl/cbl-import-result.enum';
+import { CblImportSummary } from '../_models/reading-list/cbl/cbl-import-summary';
+import { TextResonse } from '../_types/text-response';
 import { ActionItem } from './action-factory.service';
 
 @Injectable({
@@ -44,47 +47,55 @@ export class ReadingListService {
   }
 
   update(model: {readingListId: number, title?: string, summary?: string, promoted: boolean}) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, TextResonse);
   }
 
   updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple', {readingListId, seriesId, volumeIds, chapterIds}, TextResonse);
   }
 
   updateByMultipleSeries(readingListId: number, seriesIds: Array<number>) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-multiple-series', {readingListId, seriesIds}, TextResonse);
   }
 
   updateBySeries(readingListId: number, seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-series', {readingListId, seriesId}, TextResonse);
   }
 
   updateByVolume(readingListId: number, seriesId: number, volumeId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-volume', {readingListId, seriesId, volumeId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-volume', {readingListId, seriesId, volumeId}, TextResonse);
   }
 
   updateByChapter(readingListId: number, seriesId: number, chapterId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-chapter', {readingListId, seriesId, chapterId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-by-chapter', {readingListId, seriesId, chapterId}, TextResonse);
   }
 
   delete(readingListId: number) {
-    return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, { responseType: 'text' as 'json' });
+    return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, TextResonse);
   }
 
   updatePosition(readingListId: number, readingListItemId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, TextResonse);
   }
 
   deleteItem(readingListId: number, readingListItemId: number) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/delete-item', {readingListId, readingListItemId}, { responseType: 'text' as 'json' });
+    return this.httpClient.post(this.baseUrl + 'readinglist/delete-item', {readingListId, readingListItemId}, TextResonse);
   }
 
   removeRead(readingListId: number) {
-    return this.httpClient.post<string>(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, {}, { responseType: 'text' as 'json' });
+    return this.httpClient.post<string>(this.baseUrl + 'readinglist/remove-read?readingListId=' + readingListId, {}, TextResonse);
   }
 
   actionListFilter(action: ActionItem<ReadingList>, readingList: ReadingList, isAdmin: boolean) {
     if (readingList?.promoted && !isAdmin) return false;
     return true;
+  }
+  
+  nameExists(name: string) {
+    return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
+  }
+
+  importCbl(form: FormData) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'readinglist/import-cbl', form);
   }
 }

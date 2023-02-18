@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { ConfirmEmailChangeComponent } from './confirm-email-change/confirm-email-change.component';
-import { ConfirmEmailComponent } from './confirm-email/confirm-email.component';
-import { ConfirmMigrationEmailComponent } from './confirm-migration-email/confirm-migration-email.component';
-import { ConfirmResetPasswordComponent } from './confirm-reset-password/confirm-reset-password.component';
-import { RegisterComponent } from './register/register.component';
-import { ResetPasswordComponent } from './reset-password/reset-password.component';
 import { UserLoginComponent } from './user-login/user-login.component';
+import { ConfirmEmailChangeComponent } from './_components/confirm-email-change/confirm-email-change.component';
+import { ConfirmEmailComponent } from './_components/confirm-email/confirm-email.component';
+import { ConfirmMigrationEmailComponent } from './_components/confirm-migration-email/confirm-migration-email.component';
+import { ConfirmResetPasswordComponent } from './_components/confirm-reset-password/confirm-reset-password.component';
+import { RegisterComponent } from './_components/register/register.component';
+import { ResetPasswordComponent } from './_components/reset-password/reset-password.component';
 
 const routes: Routes = [
   {

@@ -1,0 +1,73 @@
+<app-side-nav-companion-bar>
+  <h2 title>
+    <span *ngIf="actions.length > 0">
+      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title"></app-card-actionables>
+    </span>
+    {{readingList?.title}}
+    <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
+  </h2>
+  <h6 subtitle class="subtitle-with-actionables">{{items.length}} Items</h6>
+</app-side-nav-companion-bar>
+<div class="container-fluid mt-2" *ngIf="readingList">
+
+  <div class="row mb-3">
+    <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="readingList.coverImage !== '' && readingList.coverImage !== undefined && readingList.coverImage !== null">
+        <app-image maxWidth="300px" maxHeight="400px" [imageUrl]="readingListImage"></app-image>
+    </div>
+    <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
+      <div class="row g-0 mb-3">
+        <div class="col-auto me-2">
+          <!-- Action row-->
+          <button class="btn btn-primary" title="Read from beginning" (click)="read()">
+              <span>
+                  <i class="fa fa-book" aria-hidden="true"></i>
+                  <span class="read-btn--text">&nbsp;Read</span>
+              </span>
+          </button>
+          <button class="btn btn-primary ms-2" title="Continue from last reading position" (click)="continue()">
+            <span>
+                <i class="fa fa-book-open" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;Continue</span>
+            </span>
+        </button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList.promoted && !this.isAdmin">
+                <span>
+                    <i class="fa fa-check"></i>
+                </span>
+                <span class="read-btn--text">&nbsp;Remove Read</span>
+            </button>
+        </div>
+        <!-- TODO: Move this in companion bar's page actions -->
+        <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
+            <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
+          </div>
+        </div>
+      </div>
+      <!-- Summary row-->
+      <div class="row g-0 mt-2">
+        <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mb-3" cdkScrollable>
+    <div class="mx-auto" style="width: 200px;">
+      <ng-container *ngIf="items.length === 0 && !isLoading">
+        Nothing added
+      </ng-container>
+      <app-loading [loading]="isLoading"></app-loading>
+    </div>
+
+    <!-- TODO: This needs virtualization -->
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode" [showRemoveButton]="false">
+        <ng-template #draggableItem let-item let-position="idx">
+          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+            [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
+        </ng-template>
+    </app-draggable-ordered-list>
+  </div>
+</div>

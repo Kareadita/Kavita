@@ -1,0 +1,17 @@
+<div class="dashboard-card-content">
+  <div class="row g-0 mb-2">
+      <h4>Day Breakdown</h4>
+  </div>
+
+  <ngx-charts-bar-vertical
+    class="dark"
+    [results]="dayBreakdown$ | async"
+    [xAxis]="true"
+    [yAxis]="true"
+    [legend]="showLegend"
+    [showXAxisLabel]="true"
+    [showYAxisLabel]="true"
+    xAxisLabel="Day of Week"
+    yAxisLabel="Reading Events">
+  </ngx-charts-bar-vertical>
+</div>

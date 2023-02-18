@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { filter, map, merge, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
-import { Genre } from 'src/app/_models/genre';
+import { Genre } from 'src/app/_models/metadata/genre';
 import { Series } from 'src/app/_models/series';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { RecommendationService } from 'src/app/_services/recommendation.service';

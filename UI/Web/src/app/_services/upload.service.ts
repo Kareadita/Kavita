@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
+import { TextResonse } from '../_types/text-response';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class UploadService {
 
 
   uploadByUrl(url: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url}, {responseType: 'text' as 'json'});
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url}, TextResonse);
   }
 
   /**
@@ -36,6 +37,10 @@ export class UploadService {
 
   updateChapterCoverImage(chapterId: number, url: string) {
     return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, url: this._cleanBase64Url(url)});
+  }
+
+  updateLibraryCoverImage(libraryId: number, url: string) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/library', {id: libraryId, url: this._cleanBase64Url(url)});
   }
 
   resetChapterCoverLock(chapterId: number, ) {

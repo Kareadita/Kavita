@@ -1,0 +1,55 @@
+.user-review {
+  font-style: italic;
+}
+
+.to-read-counter {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+}
+
+.under-image {
+  background-color: var(--breadcrumb-bg-color);
+  color: white;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
+}
+
+.rating-star {
+  margin-top: 2px;
+  font-size: 1.5rem;
+}
+
+.card-container{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 158px);
+  grid-gap: 0.5rem;
+  justify-content: space-around;
+}
+
+.virtual-scroller, virtual-scroller {
+  width: 100%;
+  height: calc(100vh - 85px);
+  max-height: calc(var(--vh)*100 - 170px);
+}
+
+// This is responsible for ensuring we scroll down and only tabs and companion bar is visible
+.main-container {
+  // Height set dynamically by get ScrollingBlockHeight()
+  overflow-y: auto;
+  position: relative;
+  overscroll-behavior-y: none;
+}
+
+.title, .subtitle-with-actionable {
+  margin-bottom: 0;
+}
+
+.image-container {
+  max-height: 400px;
+}
+
+.info-container {
+  align-items: flex-start;
+}

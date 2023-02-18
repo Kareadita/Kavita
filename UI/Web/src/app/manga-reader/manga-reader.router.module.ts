@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { MangaReaderComponent } from './manga-reader.component';
+import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 
 const routes: Routes = [
   {

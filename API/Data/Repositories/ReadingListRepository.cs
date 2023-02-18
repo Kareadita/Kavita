@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +22,6 @@ public interface IReadingListRepository
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
     Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
-
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
     void Remove(ReadingListItem item);
@@ -29,6 +31,8 @@ public interface IReadingListRepository
     Task<int> Count();
     Task<string> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
+    Task<bool> ReadingListExists(string name);
+    Task<List<ReadingList>> GetAllReadingListsAsync();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -72,6 +76,22 @@ public class ReadingListRepository : IReadingListRepository
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<bool> ReadingListExists(string name)
+    {
+        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+        return await _context.ReadingList
+            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
+    }
+
+    public async Task<List<ReadingList>> GetAllReadingListsAsync()
+    {
+        return await _context.ReadingList
+            .Include(r => r.Items.OrderBy(i => i.Order))
+            .AsSplitQuery()
+            .OrderBy(l => l.Title)
             .ToListAsync();
     }
 
@@ -137,34 +157,46 @@ public class ReadingListRepository : IReadingListRepository
             {
                 TotalPages = chapter.Pages,
                 ChapterNumber = chapter.Range,
-                readingListItem = data
+                chapter.ReleaseDate,
+                ReadingListItem = data,
+                ChapterTitleName = chapter.TitleName,
+                FileSize = chapter.Files.Sum(f => f.Bytes)
+
             })
-            .Join(_context.Volume, s => s.readingListItem.VolumeId, volume => volume.Id, (data, volume) => new
+            .Join(_context.Volume, s => s.ReadingListItem.VolumeId, volume => volume.Id, (data, volume) => new
             {
-                data.readingListItem,
+                data.ReadingListItem,
                 data.TotalPages,
                 data.ChapterNumber,
+                data.ReleaseDate,
+                data.ChapterTitleName,
+                data.FileSize,
                 VolumeId = volume.Id,
                 VolumeNumber = volume.Name,
             })
-            .Join(_context.Series, s => s.readingListItem.SeriesId, series => series.Id,
+            .Join(_context.Series, s => s.ReadingListItem.SeriesId, series => series.Id,
                 (data, s) => new
                 {
                     SeriesName = s.Name,
                     SeriesFormat = s.Format,
                     s.LibraryId,
-                    data.readingListItem,
+                    data.ReadingListItem,
                     data.TotalPages,
                     data.ChapterNumber,
                     data.VolumeNumber,
-                    data.VolumeId
+                    data.VolumeId,
+                    data.ReleaseDate,
+                    data.ChapterTitleName,
+                    data.FileSize,
+                    LibraryName = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Name).Single(),
+                    LibraryType = _context.Library.Where(l => l.Id == s.LibraryId).Select(l => l.Type).Single()
                 })
             .Select(data => new ReadingListItemDto()
             {
-                Id = data.readingListItem.Id,
-                ChapterId = data.readingListItem.ChapterId,
-                Order = data.readingListItem.Order,
-                SeriesId = data.readingListItem.SeriesId,
+                Id = data.ReadingListItem.Id,
+                ChapterId = data.ReadingListItem.ChapterId,
+                Order = data.ReadingListItem.Order,
+                SeriesId = data.ReadingListItem.SeriesId,
                 SeriesName = data.SeriesName,
                 SeriesFormat = data.SeriesFormat,
                 PagesTotal = data.TotalPages,
@@ -172,13 +204,23 @@ public class ReadingListRepository : IReadingListRepository
                 VolumeNumber = data.VolumeNumber,
                 LibraryId = data.LibraryId,
                 VolumeId = data.VolumeId,
-                ReadingListId = data.readingListItem.ReadingListId
+                ReadingListId = data.ReadingListItem.ReadingListId,
+                ReleaseDate = data.ReleaseDate,
+                LibraryType = data.LibraryType,
+                ChapterTitleName = data.ChapterTitleName,
+                LibraryName = data.LibraryName,
+                FileSize = data.FileSize
             })
             .Where(o => userLibraries.Contains(o.LibraryId))
             .OrderBy(rli => rli.Order)
             .AsSplitQuery()
             .AsNoTracking()
             .ToListAsync();
+
+        foreach (var item in items)
+        {
+            item.Title = ReadingListService.FormatTitle(item);
+        }
 
         // Attach progress information
         var fetchedChapterIds = items.Select(i => i.ChapterId);
@@ -193,6 +235,7 @@ public class ReadingListRepository : IReadingListRepository
             if (progressItem == null) continue;
 
             progressItem.PagesRead = progress.PagesRead;
+            progressItem.LastReadingProgressUtc = progress.LastModifiedUtc;
         }
 
         return items;
@@ -208,7 +251,7 @@ public class ReadingListRepository : IReadingListRepository
 
     public async Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items)
     {
-        var chapterIds = items.Select(i => i.ChapterId).Distinct().ToList();
+        var chapterIds = items.Select(i => i.ChapterId).Distinct();
         var userProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && chapterIds.Contains(p.ChapterId))
             .AsNoTracking()
@@ -216,8 +259,10 @@ public class ReadingListRepository : IReadingListRepository
 
         foreach (var item in items)
         {
-            var progress = userProgress.Where(p => p.ChapterId == item.ChapterId);
-            item.PagesRead = progress.Sum(p => p.PagesRead);
+            var progress = userProgress.Where(p => p.ChapterId == item.ChapterId).ToList();
+            if (progress.Count == 0) continue;
+                item.PagesRead = progress.Sum(p => p.PagesRead);
+            item.LastReadingProgressUtc = progress.Max(p => p.LastModifiedUtc);
         }
 
         return items;

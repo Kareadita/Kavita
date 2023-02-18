@@ -115,7 +115,7 @@ public class SeriesService : ISeriesService
             }
 
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
-            UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
+            UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
                 series.Metadata.CollectionTags.Add(tag);
             });
@@ -210,7 +210,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
+    public static void UpdateCollectionsList(ICollection<CollectionTagDto> tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
         // TODO: Move UpdateRelatedList to a helper so we can easily test
@@ -278,7 +278,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Genre(tagTitle, false));
+                handleAdd(DbFactory.Genre(tagTitle));
                 isModified = true;
             }
         }
@@ -320,7 +320,7 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Tag(tagTitle, false));
+                handleAdd(DbFactory.Tag(tagTitle));
                 isModified = true;
             }
         }
@@ -436,7 +436,7 @@ public class SeriesService : ISeriesService
             var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
             foreach (var library in libraries)
             {
-                library.LastModified = DateTime.Now;
+                library.UpdateLastModified();
                 _unitOfWork.LibraryRepository.Update(library);
             }
 
@@ -473,7 +473,7 @@ public class SeriesService : ISeriesService
     public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var libraryIds = (await _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId));
+        var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
             throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
 
@@ -553,7 +553,9 @@ public class SeriesService : ISeriesService
             Specials = specials,
             Chapters = retChapters,
             Volumes = processedVolumes,
-            StorylineChapters = storylineChapters
+            StorylineChapters = storylineChapters,
+            TotalCount = chapters.Count,
+            UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages)
         };
     }
 

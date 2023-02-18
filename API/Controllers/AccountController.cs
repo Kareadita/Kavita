@@ -41,7 +41,6 @@ public class AccountController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
-    private readonly IHostEnvironment _environment;
     private readonly IEventHub _eventHub;
 
     /// <inheritdoc />
@@ -50,8 +49,7 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IHostEnvironment environment,
-        IEventHub eventHub)
+        IEmailService emailService, IEventHub eventHub)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -61,7 +59,6 @@ public class AccountController : BaseApiController
         _mapper = mapper;
         _accountService = accountService;
         _emailService = emailService;
-        _environment = environment;
         _eventHub = eventHub;
     }
 
@@ -202,7 +199,7 @@ public class AccountController : BaseApiController
         }
 
         // Update LastActive on account
-        user.LastActive = DateTime.Now;
+        user.UpdateLastActive();
         user.UserPreferences ??= new AppUserPreferences
         {
             Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
@@ -247,7 +244,6 @@ public class AccountController : BaseApiController
     [HttpGet("roles")]
     public ActionResult<IList<string>> GetRoles()
     {
-        // TODO: This should be moved to ServerController
         return typeof(PolicyConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
@@ -290,7 +286,15 @@ public class AccountController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
 
-        if (dto == null || string.IsNullOrEmpty(dto.Email)) return BadRequest("Invalid payload");
+        if (dto == null || string.IsNullOrEmpty(dto.Email) || string.IsNullOrEmpty(dto.Password)) return BadRequest("Invalid payload");
+
+
+        // Validate this user's password
+        if (! await _userManager.CheckPasswordAsync(user, dto.Password))
+        {
+            _logger.LogCritical("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
+            return BadRequest("You do not have permission");
+        }
 
         // Validate no other users exist with this email
         if (user.Email.Equals(dto.Email)) return Ok("Nothing to do");
@@ -317,10 +321,11 @@ public class AccountController : BaseApiController
         // Send a confirmation email
         try
         {
-            var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email-update", dto.Email);
+            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
             _logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var accessible = await _emailService.CheckIfAccessible(host);
+
+
+            var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
                 try
@@ -488,7 +493,7 @@ public class AccountController : BaseApiController
         if (string.IsNullOrEmpty(user.ConfirmationToken))
             return BadRequest("Manual setup is unable to be completed. Please cancel and recreate the invite.");
 
-        return GenerateEmailLink(user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
+        return await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
     }
 
 
@@ -596,11 +601,10 @@ public class AccountController : BaseApiController
 
         try
         {
-            var emailLink = GenerateEmailLink(user.ConfirmationToken, "confirm-email", dto.Email);
+            var emailLink = await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
             _logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
             _logger.LogCritical("[Invite User]: Token {UserName}: {Token}", user.UserName, user.ConfirmationToken);
-            var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-            var accessible = await _emailService.CheckIfAccessible(host);
+            var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
                 try
@@ -788,10 +792,9 @@ public class AccountController : BaseApiController
             return BadRequest("You do not have an email on account or it has not been confirmed");
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-        var emailLink = GenerateEmailLink(token, "confirm-reset-password", user.Email);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
         _logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
-        var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-        if (await _emailService.CheckIfAccessible(host))
+        if (await _accountService.CheckIfAccessible(Request))
         {
             await _emailService.SendPasswordResetEmail(new PasswordResetEmailDto()
             {
@@ -844,6 +847,11 @@ public class AccountController : BaseApiController
         };
     }
 
+    /// <summary>
+    /// Resend an invite to a user already invited
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
     public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
@@ -856,26 +864,30 @@ public class AccountController : BaseApiController
         if (user.EmailConfirmed) return BadRequest("User already confirmed");
 
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var emailLink = GenerateEmailLink(token, "confirm-email", user.Email);
+        var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-email", user.Email);
         _logger.LogCritical("[Email Migration]: Email Link: {Link}", emailLink);
         _logger.LogCritical("[Email Migration]: Token {UserName}: {Token}", user.UserName, token);
-        await _emailService.SendMigrationEmail(new EmailMigrationDto()
+        if (await _accountService.CheckIfAccessible(Request))
         {
-            EmailAddress = user.Email,
-            Username = user.UserName,
-            ServerConfirmationLink = emailLink,
-            InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
-        });
+            try
+            {
+                await _emailService.SendMigrationEmail(new EmailMigrationDto()
+                {
+                    EmailAddress = user.Email,
+                    Username = user.UserName,
+                    ServerConfirmationLink = emailLink,
+                    InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue resending invite email");
+                return BadRequest("There was an issue resending invite email");
+            }
+            return Ok(emailLink);
+        }
 
-
-        return Ok(emailLink);
-    }
-
-    private string GenerateEmailLink(string token, string routePart, string email, bool withHost = true)
-    {
-        var host = _environment.IsDevelopment() ? "localhost:4200" : Request.Host.ToString();
-        if (withHost) return $"{Request.Scheme}://{host}{Request.PathBase}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
-        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return Ok("The server is not accessible externally");
     }
 
     /// <summary>

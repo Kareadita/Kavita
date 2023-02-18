@@ -1,0 +1,210 @@
+$center-width: 50%;
+$side-width: 25%;
+
+$dash-width: 3px;
+$pointer-offset: 5px;
+
+@use '../../.././../manga-reader-common';
+
+
+
+
+.reading-area {
+  position: relative;
+  overflow: auto;
+  text-align: center;
+  //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
+}
+
+
+.reader {
+    background-color: var(--manga-reader-bg-color);
+    overflow: auto;
+
+    img {
+        align-items: center;
+    }
+}
+
+.title, .subtitle {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.bottom-menu {
+    padding: 20px 20px;
+}
+
+
+
+
+.overlay {
+  background-color: var(--manga-reader-overlay-bg-color);
+  backdrop-filter: var(--manga-reader-overlay-filter); // BUG: This doesn't work on Firefox
+  color: var(--manga-reader-overlay-text-color);
+}
+
+@media(min-width: 600px) {
+  .overlay .left .i {
+      left: 20px;
+  }
+  .overlay .right .i {
+      right: 20px;
+  }
+} 
+
+// Splitting Icon
+.split {
+    height: 20px;
+    width: 40px;
+    z-index: 1;
+    top: 0;
+    overflow: hidden;
+    border: 2px solid #ccc;
+    vertical-align: sub;
+    display: inline-block;
+
+    &::before {
+        margin-left: 30%;
+    }
+
+    /* Control the left side */
+    .left-side {
+        height: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+    
+    /* Control the right side */
+    .right-side {
+        height: 20px;
+        margin-left: 20px;
+        width: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        margin-top: -16px;
+    }
+
+    .none {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    // For layout only
+
+  }
+
+  .split-double {
+    height: 20px;
+    display: inline-block;
+    font-size: .7em;
+
+    .right {
+      left: -7px;
+    }
+  }
+
+  ::ng-deep {
+    .custom-slider .ngx-slider .ngx-slider-bar {
+      background: #e9ffe2;
+      height: 2px;
+    }
+    .custom-slider .ngx-slider .ngx-slider-selection {
+      background: var(--primary-color);
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer {
+      width: 8px;
+      height: 16px;
+      top: auto; /* to remove the default positioning */
+      bottom: 0;
+      background-color: var(--primary-color); // #333;
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-pointer:after {
+      display: none;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-bubble {
+      bottom: 14px;
+      font-weight: bold;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-limit {
+      font-weight: bold;
+      color: white !important;
+
+    }
+
+  
+    .custom-slider .ngx-slider .ngx-slider-tick {
+      width: 1px;
+      height: 10px;
+      margin-left: 4px;
+      border-radius: 0;
+      background: #ffe4d1;
+      top: -1px;
+    }
+  
+    .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
+      background: var(--primary-color);
+    }
+  }
+
+  .webtoon-images {
+      text-align: center;
+      width: 100%;
+  }
+
+
+  .pagination-area {
+    $pagination-bg: rgba(0, 0, 0, 0);
+    //$pagination-bg: rgba(0, 0, 255, 0.4); // DEBUG CODE
+    cursor: pointer;
+    z-index: 100;
+
+    i {
+        color: white;
+        font-size: 42px;
+    }
+
+    .right {
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      width: $side-width;
+      background: $pagination-bg;
+      max-height: calc(var(--vh)*100);
+      z-index: 100;
+    }
+    
+    .top {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 100%;
+        background: $pagination-bg;
+        z-index: 100;
+    }
+    
+    .left {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: $side-width;
+        background: $pagination-bg;
+        max-height: calc(var(--vh)*100);
+        z-index: 100;
+    }
+    
+    .bottom {
+        position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
+        left: 0px;
+        bottom: 0px;
+        width: 100%;
+        background: $pagination-bg;
+        z-index: 100;
+    }
+  }

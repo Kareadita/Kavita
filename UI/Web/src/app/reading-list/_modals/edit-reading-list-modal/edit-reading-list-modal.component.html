@@ -3,44 +3,59 @@
     <h4 class="modal-title" id="modal-basic-title">Edit {{readingList.title}} Reading List</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
-<div class="modal-body {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">     
-        <li [ngbNavItem]="tabs[0]">
-            <a ngbNavLink>{{tabs[0].title}}</a>
+<div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
+     orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">     
+        <li [ngbNavItem]="TabID.General">
+            <a ngbNavLink>{{TabID.General}}</a>
             <ng-template ngbNavContent>
-                <p>
-                    This list is currently {{readingList.promoted ? 'promoted' : 'not promoted'}} (<i class="fa fa-angle-double-up" aria-hidden="true"></i>). 
-                    Promotion means that the list can be seen server-wide, not just for admin users. All series that are within this list will still have user-access restrictions placed on them.
-                </p>
                 <form [formGroup]="reviewGroup">
-                    <div class="mb-3">
-                        <label for="title" class="form-label">Name</label>
-                        <input id="title" class="form-control" formControlName="title" type="text">
+                    <div class="row g-0 mb-3">
+                        <div class="col-md-8 col-sm-12">
+                            <label for="library-name" class="form-label">Name</label>
+                            <input id="library-name" class="form-control" formControlName="title" type="text" [class.is-invalid]="reviewGroup.get('title')?.invalid && reviewGroup.get('title')?.touched">
+                            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                <div *ngIf="reviewGroup.get('title')?.errors?.required">
+                                    This field is required
+                                </div>
+                                <div *ngIf="reviewGroup.get('title')?.errors?.duplicateName">
+                                    Name must be unique
+                                </div>
+                            </div>
+                        </div>
+                        <ng-container *ngIf="(accountService.currentUser$ | async) as user">
+                            <div class="col-md-3 col-sm-12 ms-2" *ngIf="accountService.hasAdminRole(user)">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input"
+                                        aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                                    <label class="form-check-label me-1" for="tag-promoted">Promote</label>
+                                    <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                                    <ng-template #promotedTooltip>Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.</ng-template>
+                                    <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
+                                </div>
+                            </div>
+                        </ng-container>
                     </div>
-            
-                    <div class="mb-3">
+    
+                    <div class="row g-0 mb-3">
                         <label for="summary" class="form-label">Summary</label>
                         <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
                     </div>
                 </form>
             </ng-template>
         </li>
-        <li [ngbNavItem]="tabs[1]">
-            <a ngbNavLink>{{tabs[1].title}}</a>
+        <li [ngbNavItem]="TabID.CoverImage">
+            <a ngbNavLink>{{TabID.CoverImage}}</a>
             <ng-template ngbNavContent>
-                <p class="alert alert-primary" role="alert">
-                    Upload and choose a new cover image. Press Save to upload and override the cover.
-                </p>
                 <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
             </ng-template>
         </li>
     </ul>
-    <div [ngbNavOutlet]="nav" class="ms-2 mt-3"></div>
+    <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-    <button type="button" class="btn btn-secondary alt" (click)="togglePromotion()">{{readingList.promoted ? 'Demote' : 'Promote'}}</button>
-    <button type="submit" class="btn btn-primary" [disabled]="reviewGroup.get('title')?.value.trim().length === 0" (click)="save()">Save</button>
+    <button type="submit" class="btn btn-primary" [disabled]="!reviewGroup.valid" (click)="save()">Save</button>
 </div>
 
 

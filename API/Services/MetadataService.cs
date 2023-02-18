@@ -39,7 +39,7 @@ public interface IMetadataService
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
 
     Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
-    Task GenerateCoversForSeries(Series series, bool forceUpdate = false);
+    Task GenerateCoversForSeries(Series series, bool convertToWebP, bool forceUpdate = false);
     Task RemoveAbandonedMetadataKeys();
 }
 
@@ -70,7 +70,8 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
-    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate)
+    /// <param name="convertToWebPOnWrite">Convert image to WebP when extracting the cover</param>
+    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate, bool convertToWebPOnWrite)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
 
@@ -80,7 +81,9 @@ public class MetadataService : IMetadataService
         if (firstFile == null) return Task.FromResult(false);
 
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
-        chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath, ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format);
+
+        chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath,
+            ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, convertToWebPOnWrite);
         _unitOfWork.ChapterRepository.Update(chapter);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
@@ -143,7 +146,8 @@ public class MetadataService : IMetadataService
     /// </summary>
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
-    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate)
+    /// <param name="convertToWebP"></param>
+    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, bool convertToWebP)
     {
         _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
@@ -156,7 +160,7 @@ public class MetadataService : IMetadataService
                 var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate);
+                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, convertToWebP);
                     // If cover was update, either the file has changed or first scan and we should force a metadata update
                     UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
@@ -194,7 +198,7 @@ public class MetadataService : IMetadataService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task GenerateCoversForLibrary(int libraryId, bool forceUpdate = false)
     {
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
         _logger.LogInformation("[MetadataService] Beginning cover generation refresh of {LibraryName}", library.Name);
 
         _updateEvents.Clear();
@@ -206,6 +210,8 @@ public class MetadataService : IMetadataService
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
+
+        var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
@@ -235,7 +241,7 @@ public class MetadataService : IMetadataService
 
                 try
                 {
-                    await ProcessSeriesCoverGen(series, forceUpdate);
+                    await ProcessSeriesCoverGen(series, forceUpdate, convertToWebP);
                 }
                 catch (Exception ex)
                 {
@@ -285,21 +291,23 @@ public class MetadataService : IMetadataService
             return;
         }
 
-        await GenerateCoversForSeries(series, forceUpdate);
+        var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+        await GenerateCoversForSeries(series, convertToWebP, forceUpdate);
     }
 
     /// <summary>
     /// Generate Cover for a Series. This is used by Scan Loop and should not be invoked directly via User Interaction.
     /// </summary>
     /// <param name="series">A full Series, with metadata, chapters, etc</param>
+    /// <param name="convertToWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <param name="forceUpdate"></param>
-    public async Task GenerateCoversForSeries(Series series, bool forceUpdate = false)
+    public async Task GenerateCoversForSeries(Series series, bool convertToWebP, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
-        await ProcessSeriesCoverGen(series, forceUpdate);
+        await ProcessSeriesCoverGen(series, forceUpdate, convertToWebP);
 
 
         if (_unitOfWork.HasChanges())

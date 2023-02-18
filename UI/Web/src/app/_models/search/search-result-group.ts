@@ -1,7 +1,7 @@
 import { Chapter } from "../chapter";
 import { Library } from "../library";
 import { MangaFile } from "../manga-file";
-import { SearchResult } from "../search-result";
+import { SearchResult } from "./search-result";
 import { Tag } from "../tag";
 
 export class SearchResultGroup {

@@ -1,0 +1,117 @@
+<form [formGroup]="typeaheadForm" class="grouped-typeahead">
+      <div class="typeahead-input" [ngClass]="{'focused': hasFocus}" (click)="onInputFocus($event)">
+        <div class="search">
+          <input #input [id]="id" type="text" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder"
+          aria-haspopup="listbox" aria-owns="dropdown" aria-expanded="hasFocus && (grouppedData.persons.length || grouppedData.collections.length || grouppedData.series.length || grouppedData.persons.length || grouppedData.tags.length || grouppedData.genres.length)"
+          aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="search" 
+          >
+          <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <button type="button" class="btn-close" aria-label="Close" (click)="resetField()" *ngIf="typeaheadForm.get('typeahead')?.value.length > 0"></button>
+        </div>
+      </div>
+      <div class="dropdown" *ngIf="hasFocus">
+        <ul class="list-group" role="listbox" id="dropdown">
+            <ng-container *ngIf="seriesTemplate !== undefined && grouppedData.series.length > 0">
+                <li class="list-group-item section-header"><h5 id="series-group">Series</h5></li>
+                <ul class="list-group results" role="group" aria-describedby="series-group">
+                    <li *ngFor="let option of grouppedData.series; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" aria-labelledby="series-group" role="option">
+                        <ng-container [ngTemplateOutlet]="seriesTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="collectionTemplate !== undefined && grouppedData.collections.length > 0">
+                <li class="list-group-item section-header"><h5>Collections</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.collections; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="collectionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="readingListTemplate !== undefined && grouppedData.readingLists.length > 0">
+                <li class="list-group-item section-header"><h5>Reading Lists</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.readingLists; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="readingListTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="libraryTemplate !== undefined && grouppedData.libraries.length > 0">
+                <li class="list-group-item section-header"><h5 id="libraries-group">Libraries</h5></li>
+                <ul class="list-group results" role="group" aria-describedby="libraries-group">
+                    <li *ngFor="let option of grouppedData.libraries; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" aria-labelledby="libraries-group" role="option">
+                        <ng-container [ngTemplateOutlet]="libraryTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="genreTemplate !== undefined && grouppedData.genres.length > 0">
+              <li class="list-group-item section-header"><h5>Genres</h5></li>
+              <ul class="list-group results">
+                  <li *ngFor="let option of grouppedData.genres; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                      class="list-group-item" role="option">
+                      <ng-container [ngTemplateOutlet]="genreTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                  </li>
+              </ul>
+          </ng-container>
+
+            <ng-container *ngIf="tagTemplate !== undefined && grouppedData.tags.length > 0">
+                <li class="list-group-item section-header"><h5>Tags</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.tags; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="tagTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="personTemplate !== undefined && grouppedData.persons.length > 0">
+                <li class="list-group-item section-header"><h5>People</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.persons; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="personTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="chapterTemplate !== undefined && grouppedData.chapters.length > 0">
+                <li class="list-group-item section-header"><h5>Chapters</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.chapters; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="chapterTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="fileTemplate !== undefined && grouppedData.files.length > 0">
+                <li class="list-group-item section-header"><h5>Files</h5></li>
+                <ul class="list-group results">
+                    <li *ngFor="let option of grouppedData.files; let index = index;" (click)="handleResultlick(option)" tabindex="0"
+                        class="list-group-item" role="option">
+                        <ng-container [ngTemplateOutlet]="fileTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>
+                    </li>
+                </ul>
+            </ng-container>
+
+            <ng-container *ngIf="!hasData && searchTerm.length > 0">
+              <ul class="list-group results">
+                <li class="list-group-item">
+                  <ng-container [ngTemplateOutlet]="noResultsTemplate"></ng-container>
+                </li>
+              </ul>
+
+            </ng-container>
+        </ul>
+    </div>
+
+  </form>

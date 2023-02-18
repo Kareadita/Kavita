@@ -11,7 +11,7 @@ public static class Parser
 {
     public const string DefaultChapter = "0";
     public const string DefaultVolume = "0";
-    private static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
+    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
     public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -408,7 +408,7 @@ public static class Parser
     {
         // Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
         new Regex(
-            @"^(?<Series>.*)(?: |_)(t|v)(?<Volume>\d+)",
+            @"^(?<Series>.+?)(?: |_)(t|v)(?<Volume>" + NumberRange + @")",
             MatchOptions, RegexTimeout),
         // Batgirl Vol.2000 #57 (December, 2004)
         new Regex(
@@ -911,7 +911,7 @@ public static class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
                 return (float) 0.0;
             }
@@ -929,7 +929,7 @@ public static class Parser
     {
         try
         {
-            if (!Regex.IsMatch(range, @"^[\d\-.]+$"))
+            if (!Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout))
             {
                 return (float) 0.0;
             }
@@ -945,7 +945,7 @@ public static class Parser
 
     public static string Normalize(string name)
     {
-        return NormalizeRegex.Replace(name, string.Empty).ToLower();
+        return NormalizeRegex.Replace(name, string.Empty).Trim().ToLower();
     }
 
     /// <summary>
@@ -1009,6 +1009,17 @@ public static class Parser
     public static string CleanAuthor(string author)
     {
         return string.IsNullOrEmpty(author) ? string.Empty : author.Trim();
+    }
+
+    /// <summary>
+    /// Cleans user query string input
+    /// </summary>
+    /// <param name="query"></param>
+    /// <returns></returns>
+    public static string CleanQuery(string query)
+    {
+        return Uri.UnescapeDataString(query).Trim().Replace(@"%", string.Empty)
+            .Replace(":", string.Empty);
     }
 
     /// <summary>

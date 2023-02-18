@@ -30,6 +30,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.Port:
                     destination.Port = int.Parse(row.Value);
                     break;
+                case ServerSettingKey.IpAddresses:
+                    destination.IpAddresses = row.Value;
+                    break;
                 case ServerSettingKey.AllowStatCollection:
                     destination.AllowStatCollection = bool.Parse(row.Value);
                     break;
@@ -51,8 +54,8 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.ConvertBookmarkToWebP:
                     destination.ConvertBookmarkToWebP = bool.Parse(row.Value);
                     break;
-                case ServerSettingKey.EnableSwaggerUi:
-                    destination.EnableSwaggerUi = bool.Parse(row.Value);
+                case ServerSettingKey.ConvertCoverToWebP:
+                    destination.ConvertCoverToWebP = bool.Parse(row.Value);
                     break;
                 case ServerSettingKey.TotalBackups:
                     destination.TotalBackups = int.Parse(row.Value);
@@ -65,6 +68,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     break;
                 case ServerSettingKey.TotalLogs:
                     destination.TotalLogs = int.Parse(row.Value);
+                    break;
+                case ServerSettingKey.HostName:
+                    destination.HostName = row.Value;
                     break;
             }
         }

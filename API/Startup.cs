@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
@@ -57,39 +60,51 @@ public class Startup
 
         services.AddControllers(options =>
         {
-            options.CacheProfiles.Add("Images",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Instant,
                 new CacheProfile()
                 {
-                    Duration = 60,
+                    Duration = 30,
                     Location = ResponseCacheLocation.None,
-                    NoStore = false
                 });
-            options.CacheProfiles.Add("Hour",
+            options.CacheProfiles.Add(ResponseCacheProfiles.FiveMinute,
                 new CacheProfile()
                 {
-                    Duration = 60 * 60,
+                    Duration = 60 * 5,
                     Location = ResponseCacheLocation.None,
-                    NoStore = false
                 });
-            options.CacheProfiles.Add("10Minute",
+            options.CacheProfiles.Add(ResponseCacheProfiles.TenMinute,
                 new CacheProfile()
                 {
                     Duration = 60 * 10,
                     Location = ResponseCacheLocation.None,
                     NoStore = false
                 });
-            options.CacheProfiles.Add("5Minute",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Hour,
                 new CacheProfile()
                 {
-                    Duration = 60 * 5,
+                    Duration = 60 * 60,
+                    Location = ResponseCacheLocation.None,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.Statistics,
+                new CacheProfile()
+                {
+                    Duration = 60 * 60 * 6,
                     Location = ResponseCacheLocation.None,
                 });
-            // Instant is a very quick cache, because we can't bust based on the query params, but rather body
-            options.CacheProfiles.Add("Instant",
+            options.CacheProfiles.Add(ResponseCacheProfiles.Images,
                 new CacheProfile()
                 {
-                    Duration = 30,
+                    Duration = 60,
                     Location = ResponseCacheLocation.None,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.Month,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Location = ResponseCacheLocation.Client,
+                    NoStore = false
                 });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
@@ -103,15 +118,20 @@ public class Startup
         services.AddIdentityServices(_config);
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo()
+            c.SwaggerDoc("v1", new OpenApiInfo
             {
+                Version = BuildInfo.Version.ToString(),
+                Title = "Kavita",
                 Description = "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage.",
-                Title = "Kavita API",
-                Version = "v1",
+                License = new OpenApiLicense
+                {
+                    Name = "GPL-3.0",
+                    Url = new Uri("https://github.com/Kareadita/Kavita/blob/develop/LICENSE")
+                }
             });
 
-
-            var filePath = Path.Combine(AppContext.BaseDirectory, "API.xml");
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var filePath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             c.IncludeXmlComments(filePath, true);
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme {
                 In = ParameterLocation.Header,
@@ -119,6 +139,7 @@ public class Startup
                 Name = "Authorization",
                 Type = SecuritySchemeType.ApiKey
             });
+
             c.AddSecurityRequirement(new OpenApiSecurityRequirement {
                 {
                     new OpenApiSecurityScheme
@@ -133,30 +154,15 @@ public class Startup
                 }
             });
 
-            c.AddServer(new OpenApiServer()
+            c.AddServer(new OpenApiServer
             {
-                Description = "Custom Url",
-                Url = "/"
+                Url = "{protocol}://{hostpath}",
+                Variables = new Dictionary<string, OpenApiServerVariable>
+                {
+                    { "protocol", new OpenApiServerVariable { Default = "http", Enum = new List<string> { "http", "https" } } },
+                    { "hostpath", new OpenApiServerVariable { Default = "localhost:5000" } }
+                }
             });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Description = "Local Server",
-                Url = "http://localhost:5000/",
-            });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Url = "https://demo.kavitareader.com/",
-                Description = "Kavita Demo"
-            });
-
-            c.AddServer(new OpenApiServer()
-            {
-                Url = "http://" + GetLocalIpAddress() + ":5000/",
-                Description = "Local IP"
-            });
-
         });
         services.AddResponseCompression(options =>
         {
@@ -209,6 +215,7 @@ public class Startup
                     var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
+                    logger.LogInformation("Running Migrations");
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
@@ -220,12 +227,20 @@ public class Startup
                     await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
                     await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
 
+                    // v0.6.2 or v0.7
+                    await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
+
+                    // v0.6.8 or v0.7
+                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
+                    await MigrateToUtcDates.Migrate(unitOfWork, dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
 
                     await unitOfWork.CommitAsync();
+                    logger.LogInformation("Running Migrations - done");
                 }).GetAwaiter()
                 .GetResult();
         }
@@ -239,20 +254,14 @@ public class Startup
 
         app.UseMiddleware<ExceptionMiddleware>();
 
-        Task.Run(async () =>
+        if (env.IsDevelopment())
         {
-            var allowSwaggerUi = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync())
-                .EnableSwaggerUi;
-
-            if (env.IsDevelopment() || allowSwaggerUi)
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
-                });
-            }
-        });
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Kavita API " + BuildInfo.Version);
+            });
+        }
 
         if (env.IsDevelopment())
         {
@@ -272,7 +281,7 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200")
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
 

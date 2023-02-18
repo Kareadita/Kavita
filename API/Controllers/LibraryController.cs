@@ -247,11 +247,9 @@ public class LibraryController : BaseApiController
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
-                // TODO: Figure out how to cancel a job
-
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
-                    "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
+                    "You cannot delete a library while a scan is in progress. Please wait for scan to complete or restart Kavita then try to delete");
             }
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
@@ -296,33 +294,63 @@ public class LibraryController : BaseApiController
     }
 
     /// <summary>
+    /// Checks if the library name exists or not
+    /// </summary>
+    /// <param name="name">If empty or null, will return true as that is invalid</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("name-exists")]
+    public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
+    {
+        var trimmed = name.Trim();
+        if (string.IsNullOrEmpty(trimmed)) return Ok(true);
+        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(trimmed));
+    }
+
+    /// <summary>
     /// Updates an existing Library with new name, folders, and/or type.
     /// </summary>
     /// <remarks>Any folder or type change will invoke a scan.</remarks>
-    /// <param name="libraryForUserDto"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("update")]
-    public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto libraryForUserDto)
+    public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryForUserDto.Id, LibraryIncludes.Folders);
+        var newName = dto.Name.Trim();
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
+            return BadRequest("Library name already exists");
 
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
-        library.Name = libraryForUserDto.Name;
-        library.Folders = libraryForUserDto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
+        library.Name = newName;
+        library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
 
-        var typeUpdate = library.Type != libraryForUserDto.Type;
-        library.Type = libraryForUserDto.Type;
+        var typeUpdate = library.Type != dto.Type;
+        var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
+        library.Type = dto.Type;
+        library.FolderWatching = dto.FolderWatching;
+        library.IncludeInDashboard = dto.IncludeInDashboard;
+        library.IncludeInRecommended = dto.IncludeInRecommended;
+        library.IncludeInSearch = dto.IncludeInSearch;
+        library.ManageCollections = dto.CreateCollections;
 
         _unitOfWork.LibraryRepository.Update(library);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
-        if (originalFolders.Count != libraryForUserDto.Folders.Count() || typeUpdate)
+        if (originalFolders.Count != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();
             _taskScheduler.ScanLibrary(library.Id);
         }
+
+        if (folderWatchingUpdate)
+        {
+            await _libraryWatcher.RestartWatching();
+        }
+        await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
+            MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
 
         return Ok();
 

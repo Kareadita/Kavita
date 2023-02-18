@@ -3,17 +3,17 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { UtilityService } from '../shared/_services/utility.service';
-import { TypeaheadSettings } from '../typeahead/typeahead-settings';
+import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
+import { TypeaheadSettings } from '../typeahead/_models/typeahead-settings';
 import { CollectionTag } from '../_models/collection-tag';
-import { Genre } from '../_models/genre';
+import { Genre } from '../_models/metadata/genre';
 import { Library } from '../_models/library';
 import { MangaFormat } from '../_models/manga-format';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 import { Language } from '../_models/metadata/language';
 import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person, PersonRole } from '../_models/person';
-import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from '../_models/series-filter';
+import { Person, PersonRole } from '../_models/metadata/person';
+import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from '../_models/metadata/series-filter';
 import { Tag } from '../_models/tag';
 import { CollectionTagService } from '../_services/collection-tag.service';
 import { LibraryService } from '../_services/library.service';
@@ -629,6 +629,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   apply() {
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
+
+    if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
+      this.toggleSelected();
+    }
+
     this.updateApplied++;
     this.cdRef.markForCheck();
   }

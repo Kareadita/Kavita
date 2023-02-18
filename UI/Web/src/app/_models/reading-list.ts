@@ -1,3 +1,4 @@
+import { LibraryType } from "./library";
 import { MangaFormat } from "./manga-format";
 
 export interface ReadingListItem {
@@ -12,6 +13,10 @@ export interface ReadingListItem {
     volumeNumber: string;
     libraryId: number;
     id: number;
+    releaseDate: string;
+    title: string;
+    libraryType: LibraryType;
+    libraryName: string;
 }
 
 export interface ReadingList {

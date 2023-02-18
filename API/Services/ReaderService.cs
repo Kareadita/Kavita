@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,7 +33,7 @@ public interface IReaderService
     Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
-    string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false);
+    IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
 }
 
 public class ReaderService : IReaderService
@@ -103,6 +104,7 @@ public class ReaderService : IReaderService
     public async Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters)
     {
         var seenVolume = new Dictionary<int, bool>();
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -114,7 +116,8 @@ public class ReaderService : IReaderService
                     PagesRead = chapter.Pages,
                     VolumeId = chapter.VolumeId,
                     SeriesId = seriesId,
-                    ChapterId = chapter.Id
+                    ChapterId = chapter.Id,
+                    LibraryId = series.LibraryId
                 });
             }
             else
@@ -224,8 +227,10 @@ public class ReaderService : IReaderService
 
         try
         {
+            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
+
 
             if (userProgress == null)
             {
@@ -239,8 +244,8 @@ public class ReaderService : IReaderService
                     VolumeId = progressDto.VolumeId,
                     SeriesId = progressDto.SeriesId,
                     ChapterId = progressDto.ChapterId,
-                    BookScrollId = progressDto.BookScrollId,
-                    LastModified = DateTime.Now
+                    LibraryId = progressDto.LibraryId,
+                    BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
             }
@@ -249,8 +254,8 @@ public class ReaderService : IReaderService
                 userProgress.PagesRead = progressDto.PageNum;
                 userProgress.SeriesId = progressDto.SeriesId;
                 userProgress.VolumeId = progressDto.VolumeId;
+                userProgress.LibraryId = progressDto.LibraryId;
                 userProgress.BookScrollId = progressDto.BookScrollId;
-                userProgress.LastModified = DateTime.Now;
                 _unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
@@ -264,6 +269,10 @@ public class ReaderService : IReaderService
         }
         catch (Exception exception)
         {
+            // This can happen when the reader sends 2 events at same time, so 2 threads are inserting and one fails.
+            if (exception.Message.StartsWith(
+                    "The database operation was expected to affect 1 row(s), but actually affected 0 row(s)"))
+                return true;
             _logger.LogError(exception, "Could not save progress");
             await _unitOfWork.RollbackAsync();
         }
@@ -279,15 +288,15 @@ public class ReaderService : IReaderService
     /// <returns></returns>
     public async Task<int> CapPageToChapter(int chapterId, int page)
     {
+        if (page < 0)
+        {
+            page = 0;
+        }
+
         var totalPages = await _unitOfWork.ChapterRepository.GetChapterTotalPagesAsync(chapterId);
         if (page > totalPages)
         {
             page = totalPages;
-        }
-
-        if (page < 0)
-        {
-            page = 0;
         }
 
         return page;
@@ -473,15 +482,17 @@ public class ReaderService : IReaderService
         var volumeChapters = volumes
             .Where(v => v.Number != 0)
             .SelectMany(v => v.Chapters)
-            .OrderBy(c => float.Parse(c.Number))
             .ToList();
 
+        // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
-        var currentlyReadingChapter = volumeChapters.FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages);
+        var currentlyReadingChapter = volumeChapters
+            .OrderBy(c => double.Parse(c.Range), _chapterSortComparer)
+            .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, new SortComparerZeroLast()).SelectMany(v => v.Chapters).ToList());
+        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).SelectMany(v => v.Chapters).ToList());
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
@@ -499,7 +510,14 @@ public class ReaderService : IReaderService
         var lastChapter = chaptersWithProgress.ElementAt(last);
         if (lastChapter.PagesRead < lastChapter.Pages)
         {
-            return chaptersWithProgress.ElementAt(last);
+            return lastChapter;
+        }
+
+        // If the last chapter didn't fit, then we need the next chapter without any progress
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead == 0);
+        if (firstChapterWithoutProgress != null)
+        {
+            return firstChapterWithoutProgress;
         }
 
         // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
@@ -564,41 +582,65 @@ public class ReaderService : IReaderService
         {
             var minHours = Math.Max((int) Math.Round((wordCount / MinWordsPerHour)), 0);
             var maxHours = Math.Max((int) Math.Round((wordCount / MaxWordsPerHour)), 0);
-            if (maxHours < minHours)
-            {
-                return new HourEstimateRangeDto
-                {
-                    MinHours = maxHours,
-                    MaxHours = minHours,
-                    AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
-                };
-            }
             return new HourEstimateRangeDto
             {
-                MinHours = minHours,
-                MaxHours = maxHours,
+                MinHours = Math.Min(minHours, maxHours),
+                MaxHours = Math.Max(minHours, maxHours),
                 AvgHours = (int) Math.Round((wordCount / AvgWordsPerHour))
             };
         }
 
         var minHoursPages = Math.Max((int) Math.Round((pageCount / MinPagesPerMinute / 60F)), 0);
         var maxHoursPages = Math.Max((int) Math.Round((pageCount / MaxPagesPerMinute / 60F)), 0);
-        if (maxHoursPages < minHoursPages)
-        {
-            return new HourEstimateRangeDto
-            {
-                MinHours = maxHoursPages,
-                MaxHours = minHoursPages,
-                AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
-            };
-        }
-
         return new HourEstimateRangeDto
         {
-            MinHours = minHoursPages,
-            MaxHours = maxHoursPages,
+            MinHours = Math.Min(minHoursPages, maxHoursPages),
+            MaxHours = Math.Max(minHoursPages, maxHoursPages),
             AvgHours = (int) Math.Round((pageCount / AvgPagesPerMinute / 60F))
         };
+    }
+
+    /// <summary>
+    /// This is used exclusively for double page renderer. The goal is to break up all files into pairs respecting the reader.
+    /// wide images should count as 2 pages.
+    /// </summary>
+    /// <param name="dimensions"></param>
+    /// <returns></returns>
+    public IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions)
+    {
+        var pairs = new Dictionary<int, int>();
+        var files = dimensions.ToList();
+        if (files.Count == 0) return pairs;
+
+        var pairStart = true;
+        var previousPage = files[0];
+        pairs.Add(previousPage.PageNumber, previousPage.PageNumber);
+
+        foreach(var dimension in files.Skip(1))
+        {
+            if (dimension.IsWide)
+            {
+                pairs.Add(dimension.PageNumber, dimension.PageNumber);
+                pairStart = true;
+            }
+            else
+            {
+                if (previousPage.IsWide || previousPage.PageNumber == 0)
+                {
+                    pairs.Add(dimension.PageNumber, dimension.PageNumber);
+                    pairStart = true;
+                }
+                else
+                {
+                    pairs.Add(dimension.PageNumber, pairStart ? dimension.PageNumber - 1 : dimension.PageNumber);
+                    pairStart = !pairStart;
+                }
+            }
+
+            previousPage = dimension;
+        }
+
+        return pairs;
     }
 
     /// <summary>
@@ -608,7 +650,7 @@ public class ReaderService : IReaderService
     /// <param name="includeHash">For comics only, includes a # which is used for numbering on cards</param>
     /// <param name="includeSpace">Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.</param>
     /// <returns></returns>
-    public string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
+    public static string FormatChapterName(LibraryType libraryType, bool includeHash = false, bool includeSpace = false)
     {
         switch(libraryType)
         {

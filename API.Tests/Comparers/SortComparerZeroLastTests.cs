@@ -12,6 +12,6 @@ public class SortComparerZeroLastTests
     [InlineData(new[] {0, 0, 1}, new[] {1, 0, 0})]
     public void SortComparerZeroLastTest(int[] input, int[] expected)
     {
-        Assert.Equal(expected, input.OrderBy(f => f, new SortComparerZeroLast()).ToArray());
+        Assert.Equal(expected, input.OrderBy(f => f, SortComparerZeroLast.Default).ToArray());
     }
 }

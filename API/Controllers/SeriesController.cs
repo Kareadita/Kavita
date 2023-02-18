@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -120,11 +122,12 @@ public class SeriesController : BaseApiController
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
-        return Ok(await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId));
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter));
     }
 
     [HttpGet("chapter-metadata")]
-    public async Task<ActionResult<ChapterDto>> GetChapterMetadata(int chapterId)
+    public async Task<ActionResult<ChapterMetadataDto>> GetChapterMetadata(int chapterId)
     {
         return Ok(await _unitOfWork.ChapterRepository.GetChapterMetadataDtoAsync(chapterId));
     }
@@ -367,7 +370,7 @@ public class SeriesController : BaseApiController
     /// <param name="ageRating"></param>
     /// <returns></returns>
     /// <remarks>This is cached for an hour</remarks>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] {"ageRating"})]
+    [ResponseCache(CacheProfileName = "Month", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
     public ActionResult<string> GetAgeRating(int ageRating)
     {
@@ -383,7 +386,7 @@ public class SeriesController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     /// <remarks>Do not rely on this API externally. May change without hesitation. </remarks>
-    [ResponseCache(CacheProfileName = "5Minute", VaryByQueryKeys = new [] {"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new [] {"seriesId"})]
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
