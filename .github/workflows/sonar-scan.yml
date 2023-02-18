@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main, develop ]
     types: [synchronize]
-  workflow_dispatch:
 
 jobs:
   build:
