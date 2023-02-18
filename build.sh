@@ -63,7 +63,7 @@ BuildUI()
     rm -rf API/wwwroot/*
     cd UI/Web/ || exit
     echo 'Installing web dependencies'
-    npm install
+    npm ci --legacy-peer-deps
     echo 'Building UI'
     npm run prod
     echo 'Copying back to Kavita wwwroot'
