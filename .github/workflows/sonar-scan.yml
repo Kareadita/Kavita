@@ -150,7 +150,7 @@ jobs:
       - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm ci
+          npm ci --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
@@ -265,7 +265,7 @@ jobs:
 
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm install
+          npm ci --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
