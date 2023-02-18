@@ -10,7 +10,7 @@
 
     <ng-container>
         <div class="col-auto mb-2">
-            <app-icon-and-title label="Total Words Read" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Total Words Read: {{totalWordsRead | number}}" (click)="openWordByYearList();$event.stopPropagation();">
+            <app-icon-and-title label="Total Words Read" [clickable]="true" fontClasses="fa-regular fa-file-lines" title="Total Words Read: {{totalWordsRead | number}}" (click)="openWordByYearList();$event.stopPropagation();">
                 {{totalWordsRead | compactNumber}}
             </app-icon-and-title>
         </div>
