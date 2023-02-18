@@ -2,7 +2,7 @@ name: .NET Build Test and Sonar Scan
 
 on:
   push:
-    branches: '**'
+    branches: '*'
   pull_request:
     branches: [ main, develop ]
     types: [synchronize]
