@@ -55,6 +55,7 @@ public class LibraryWatcher : ILibraryWatcher
     /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
     /// </summary>
     private int _bufferFullCounter;
+    private DateTime _lastErrorTime = DateTime.MinValue;
     /// <summary>
     /// Used to lock buffer Full Counter
     /// </summary>
@@ -180,7 +181,9 @@ public class LibraryWatcher : ILibraryWatcher
         lock (Lock)
         {
             _bufferFullCounter += 1;
-            condition = _bufferFullCounter >= 3;
+            _lastErrorTime = DateTime.Now;
+            //condition = _bufferFullCounter >= 3;
+            condition = _bufferFullCounter >= 3 && (DateTime.Now - _lastErrorTime).TotalMinutes <= 10;
         }
 
         if (condition)
@@ -191,7 +194,7 @@ public class LibraryWatcher : ILibraryWatcher
             return;
         }
         Task.Run(RestartWatching);
-        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+        //BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
     }
 
 
