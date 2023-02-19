@@ -19,7 +19,7 @@ public static class MigrateBrokenGMT1Dates
         {
             return;
         }
-        logger.LogCritical("Running MigrateToUtcDates migration. Please be patient, this may take some time depending on the size of your library. Do not abort, this can break your Database");
+        logger.LogCritical("Running MigrateBrokenGMT1Dates migration. Please be patient, this may take some time depending on the size of your library. Do not abort, this can break your Database");
 
         #region Series
         logger.LogInformation("Updating Dates on Series...");
@@ -129,7 +129,7 @@ public static class MigrateBrokenGMT1Dates
         logger.LogInformation("Updating Dates on SiteTheme...Done");
         #endregion
 
-        logger.LogInformation("MigrateToUtcDates migration finished");
+        logger.LogInformation("MigrateBrokenGMT1Dates migration finished");
 
     }
 }
