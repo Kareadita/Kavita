@@ -39,7 +39,7 @@
         <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
             <div>
                 <h4>
-                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
+                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.id)"></i>
                     <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
                     <span *ngIf="member.username === loggedInUsername">
                         <i class="fas fa-star" aria-hidden="true"></i>
