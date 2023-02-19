@@ -174,7 +174,7 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (ipAddresses == null || ipAddresses.Length == 0)
+                    if (string.IsNullOrEmpty(ipAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }

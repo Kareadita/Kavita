@@ -96,7 +96,7 @@ export class MessageHubService {
   private hubConnection!: HubConnection;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
-  private onlineUsersSource = new BehaviorSubject<string[]>([]);
+  private onlineUsersSource = new BehaviorSubject<number[]>([]); // UserIds
 
   /**
    * Any events that come from the backend
