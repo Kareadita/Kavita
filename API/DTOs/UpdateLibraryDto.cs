@@ -23,6 +23,6 @@ public class UpdateLibraryDto
     [Required]
     public bool IncludeInSearch { get; init; }
     [Required]
-    public bool CreateCollections { get; init; }
+    public bool ManageCollections { get; init; }
 
 }
