@@ -46,7 +46,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     includeInDashboard: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
-    manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    createCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
   });
 
   selectedFolders: string[] = [];
