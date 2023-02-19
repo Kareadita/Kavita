@@ -90,9 +90,11 @@ public class DirectoryService : IDirectoryService
 
     private static readonly Regex ExcludeDirectories = new Regex(
         @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        Tasks.Scanner.Parser.Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -203,7 +205,8 @@ public class DirectoryService : IDirectoryService
 
         if (fileNameRegex != string.Empty)
         {
-            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase);
+            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase,
+                Tasks.Scanner.Parser.Parser.RegexTimeout);
             return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
                 {

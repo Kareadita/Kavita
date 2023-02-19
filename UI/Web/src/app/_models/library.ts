@@ -15,5 +15,5 @@ export interface Library {
     includeInDashboard: boolean;
     includeInRecommended: boolean;
     includeInSearch: boolean;
-    createCollections: boolean;
+    manageCollections: boolean;
 }

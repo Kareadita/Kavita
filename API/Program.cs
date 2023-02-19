@@ -44,12 +44,11 @@ public class Program
             .CreateBootstrapLogger();
 
         var directoryService = new DirectoryService(null, new FileSystem());
-
         // Before anything, check if JWT has been generated properly or if user still has default
         if (!Configuration.CheckIfJwtTokenSet() &&
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
         {
-            Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
+            Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
             var rBytes = new byte[128];
             RandomNumberGenerator.Create().GetBytes(rBytes);
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
@@ -174,7 +173,7 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (ipAddresses == null || ipAddresses.Length == 0)
+                    if (string.IsNullOrEmpty(ipAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }

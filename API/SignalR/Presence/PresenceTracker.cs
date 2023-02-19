@@ -8,15 +8,16 @@ namespace API.SignalR.Presence;
 
 public interface IPresenceTracker
 {
-    Task UserConnected(string username, string connectionId);
-    Task UserDisconnected(string username, string connectionId);
-    Task<string[]> GetOnlineAdmins();
-    Task<List<string>> GetConnectionsForUser(string username);
+    Task UserConnected(int userId, string connectionId);
+    Task UserDisconnected(int userId, string connectionId);
+    Task<int[]> GetOnlineAdminIds();
+    Task<List<string>> GetConnectionsForUser(int userId);
 
 }
 
 internal class ConnectionDetail
 {
+    public string UserName { get; set; }
     public List<string> ConnectionIds { get; set; }
     public bool IsAdmin { get; set; }
 }
@@ -28,28 +29,29 @@ internal class ConnectionDetail
 public class PresenceTracker : IPresenceTracker
 {
     private readonly IUnitOfWork _unitOfWork;
-    private static readonly Dictionary<string, ConnectionDetail> OnlineUsers = new Dictionary<string, ConnectionDetail>();
+    private static readonly Dictionary<int, ConnectionDetail> OnlineUsers = new Dictionary<int, ConnectionDetail>();
 
     public PresenceTracker(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
 
-    public async Task UserConnected(string username, string connectionId)
+    public async Task UserConnected(int userId, string connectionId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return;
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         lock (OnlineUsers)
         {
-            if (OnlineUsers.ContainsKey(username))
+            if (OnlineUsers.ContainsKey(userId))
             {
-                OnlineUsers[username].ConnectionIds.Add(connectionId);
+                OnlineUsers[userId].ConnectionIds.Add(connectionId);
             }
             else
             {
-                OnlineUsers.Add(username, new ConnectionDetail()
+                OnlineUsers.Add(userId, new ConnectionDetail()
                 {
+                    UserName = user.UserName,
                     ConnectionIds = new List<string>() {connectionId},
                     IsAdmin = isAdmin
                 });
@@ -61,17 +63,17 @@ public class PresenceTracker : IPresenceTracker
         await _unitOfWork.CommitAsync();
     }
 
-    public Task UserDisconnected(string username, string connectionId)
+    public Task UserDisconnected(int userId, string connectionId)
     {
         lock (OnlineUsers)
         {
-            if (!OnlineUsers.ContainsKey(username)) return Task.CompletedTask;
+            if (!OnlineUsers.ContainsKey(userId)) return Task.CompletedTask;
 
-            OnlineUsers[username].ConnectionIds.Remove(connectionId);
+            OnlineUsers[userId].ConnectionIds.Remove(connectionId);
 
-            if (OnlineUsers[username].ConnectionIds.Count == 0)
+            if (OnlineUsers[userId].ConnectionIds.Count == 0)
             {
-                OnlineUsers.Remove(username);
+                OnlineUsers.Remove(userId);
             }
         }
         return Task.CompletedTask;
@@ -82,15 +84,15 @@ public class PresenceTracker : IPresenceTracker
         string[] onlineUsers;
         lock (OnlineUsers)
         {
-            onlineUsers = OnlineUsers.OrderBy(k => k.Key).Select(k => k.Key).ToArray();
+            onlineUsers = OnlineUsers.OrderBy(k => k.Value.UserName).Select(k => k.Value.UserName).ToArray();
         }
 
         return Task.FromResult(onlineUsers);
     }
 
-    public Task<string[]> GetOnlineAdmins()
+    public Task<int[]> GetOnlineAdminIds()
     {
-        string[] onlineUsers;
+        int[] onlineUsers;
         lock (OnlineUsers)
         {
             onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin).OrderBy(k => k.Key).Select(k => k.Key).ToArray();
@@ -100,12 +102,12 @@ public class PresenceTracker : IPresenceTracker
         return Task.FromResult(onlineUsers);
     }
 
-    public Task<List<string>> GetConnectionsForUser(string username)
+    public Task<List<string>> GetConnectionsForUser(int userId)
     {
         List<string> connectionIds;
         lock (OnlineUsers)
         {
-            connectionIds = OnlineUsers.GetValueOrDefault(username)?.ConnectionIds;
+            connectionIds = OnlineUsers.GetValueOrDefault(userId)?.ConnectionIds;
         }
 
         return Task.FromResult(connectionIds ?? new List<string>());

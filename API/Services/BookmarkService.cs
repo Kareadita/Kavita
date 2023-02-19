@@ -216,7 +216,7 @@ public class BookmarkService : IBookmarkService
         foreach (var chapter in chapters)
         {
             var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
-            chapter.CoverImage = newFile;
+            chapter.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -272,7 +272,6 @@ public class BookmarkService : IBookmarkService
         {
             // Convert target file to webp then delete original target file and update bookmark
 
-            var originalFile = filename;
             try
             {
                 var targetFile = await _imageService.ConvertToWebP(fullSourcePath, fullTargetDirectory);
@@ -283,7 +282,7 @@ public class BookmarkService : IBookmarkService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Could not convert image {FilePath}", filename);
-                newFilename = originalFile;
+                newFilename = filename;
             }
         }
         catch (Exception ex)
