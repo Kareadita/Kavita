@@ -234,6 +234,9 @@ public class Startup
                     await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
                     await MigrateToUtcDates.Migrate(unitOfWork, dataContext, logger);
 
+                    // v0.7
+                    await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
