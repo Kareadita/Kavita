@@ -14070,13 +14070,13 @@
       },
       "UpdateLibraryDto": {
         "required": [
-          "createCollections",
           "folders",
           "folderWatching",
           "id",
           "includeInDashboard",
           "includeInRecommended",
           "includeInSearch",
+          "manageCollections",
           "name",
           "type"
         ],
@@ -14111,7 +14111,7 @@
           "includeInSearch": {
             "type": "boolean"
           },
-          "createCollections": {
+          "manageCollections": {
             "type": "boolean"
           }
         },

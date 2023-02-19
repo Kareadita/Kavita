@@ -334,7 +334,7 @@ public class LibraryController : BaseApiController
         library.IncludeInDashboard = dto.IncludeInDashboard;
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
-        library.ManageCollections = dto.CreateCollections;
+        library.ManageCollections = dto.ManageCollections;
 
         _unitOfWork.LibraryRepository.Update(library);
 
