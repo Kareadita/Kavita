@@ -142,7 +142,7 @@ export class MessageHubService {
     .start()
     .catch(err => console.error(err));
 
-    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
+    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: number[]) => {
       this.onlineUsersSource.next(usernames);
     });
 
