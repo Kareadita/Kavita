@@ -741,11 +741,14 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
-    //CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, IQueryable<Series> sQuery)
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, QueryContext queryContext)
     {
+        // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var onlyParentSeries = await _context.Library.AsNoTracking()
+            .Where(l => filter.Libraries.Contains(l.Id))
+            .AllAsync(l => l.CollapseSeriesRelationships);
 
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,
@@ -770,14 +773,16 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                                || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
                                                || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
-            .Where(s => userLibraries.Contains(s.LibraryId)
-                        && formats.Contains(s.Format));
+
+            .WhereIf(onlyParentSeries,
+                s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
+            .Where(s => userLibraries.Contains(s.LibraryId))
+            .Where(s => formats.Contains(s.Format));
+
         if (userRating.AgeRating != AgeRating.NotApplicable)
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
         }
-        // We only want to return series where they have the prequel relationshipOf or don't have any relationshipOfs
-        //query = query.WhereIf(true, s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
 
 
         // If no sort options, default to using SortName

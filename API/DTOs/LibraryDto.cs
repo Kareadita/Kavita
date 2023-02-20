@@ -37,5 +37,9 @@ public class LibraryDto
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
+    /// <summary>
+    /// When showing series, only parent series or series with no relationships will be returned
+    /// </summary>
+    public bool CollapseSeriesRelationships { get; set; } = false;
     public ICollection<string> Folders { get; init; }
 }
