@@ -47,6 +47,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
   });
 
   selectedFolders: string[] = [];
@@ -119,6 +120,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
       this.libraryForm.get('includeInRecommended')?.setValue(this.library.includeInRecommended);
       this.libraryForm.get('includeInSearch')?.setValue(this.library.includeInSearch);
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
+      this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       this.cdRef.markForCheck();

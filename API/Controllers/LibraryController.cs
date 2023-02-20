@@ -335,6 +335,7 @@ public class LibraryController : BaseApiController
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
+        library.CollapseSeriesRelationships = dto.CollapseSeriesRelationships;
 
         _unitOfWork.LibraryRepository.Update(library);
 

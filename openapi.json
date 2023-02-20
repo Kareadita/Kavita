@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.0.2"
+    "version": "0.7.1.1"
   },
   "servers": [
     {
@@ -11441,6 +11441,10 @@
             "type": "boolean",
             "description": "Should this library create and manage collections from Metadata"
           },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -11529,6 +11533,10 @@
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           },
           "folders": {
             "type": "array",
@@ -14070,6 +14078,7 @@
       },
       "UpdateLibraryDto": {
         "required": [
+          "collapseSeriesRelationships",
           "folders",
           "folderWatching",
           "id",
@@ -14112,6 +14121,9 @@
             "type": "boolean"
           },
           "manageCollections": {
+            "type": "boolean"
+          },
+          "collapseSeriesRelationships": {
             "type": "boolean"
           }
         },

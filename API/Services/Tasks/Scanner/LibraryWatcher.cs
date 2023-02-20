@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities.Enums;
 using Hangfire;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -55,6 +56,8 @@ public class LibraryWatcher : ILibraryWatcher
     /// Counts within a time frame how many times the buffer became full. Is used to reschedule LibraryWatcher to start monitoring much later rather than instantly
     /// </summary>
     private int _bufferFullCounter;
+    private int _restartCounter;
+    private DateTime _lastErrorTime = DateTime.MinValue;
     /// <summary>
     /// Used to lock buffer Full Counter
     /// </summary>
@@ -180,18 +183,37 @@ public class LibraryWatcher : ILibraryWatcher
         lock (Lock)
         {
             _bufferFullCounter += 1;
-            condition = _bufferFullCounter >= 3;
+            _lastErrorTime = DateTime.Now;
+            condition = _bufferFullCounter >= 3 && (DateTime.Now - _lastErrorTime).TotalMinutes <= 10;
+        }
+
+        if (_restartCounter >= 3)
+        {
+            _logger.LogInformation("[LibraryWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
+            Task.Run(TurnOffWatching);
+            return;
         }
 
         if (condition)
         {
-            _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour");
+            _logger.LogInformation("[LibraryWatcher] Internal buffer has been overflown multiple times in past 10 minutes. Suspending file watching for an hour. Restart count: {RestartCount}", _restartCounter);
+            _restartCounter++;
             StopWatching();
             BackgroundJob.Schedule(() => RestartWatching(), TimeSpan.FromHours(1));
             return;
         }
         Task.Run(RestartWatching);
         BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+    }
+
+    private async Task TurnOffWatching()
+    {
+        var setting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EnableFolderWatching);
+        setting.Value = "false";
+        _unitOfWork.SettingsRepository.Update(setting);
+        await _unitOfWork.CommitAsync();
+        StopWatching();
+        _logger.LogInformation("[LibraryWatcher] Folder watching has been disabled");
     }
 
 
