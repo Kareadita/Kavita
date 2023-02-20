@@ -75,7 +75,7 @@ public class DirectoryServiceTests
     [Fact]
     public void TraverseTreeParallelForEach_DontCountExcludedDirectories_ShouldBe28()
     {
-        var testDirectory = "/manga/";
+        const string testDirectory = "/manga/";
         var fileSystem = new MockFileSystem();
         for (var i = 0; i < 28; i++)
         {
@@ -85,6 +85,7 @@ public class DirectoryServiceTests
         fileSystem.AddFile($"{Path.Join(testDirectory, "@eaDir")}file_{29}.jpg", new MockFileData(""));
         fileSystem.AddFile($"{Path.Join(testDirectory, ".DS_Store")}file_{30}.jpg", new MockFileData(""));
         fileSystem.AddFile($"{Path.Join(testDirectory, ".qpkg")}file_{30}.jpg", new MockFileData(""));
+        fileSystem.AddFile($"{Path.Join(testDirectory, ".@_thumb")}file_{30}.jpg", new MockFileData(""));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = new List<string>();
