@@ -741,6 +741,7 @@ public class SeriesRepository : ISeriesRepository
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
+    //CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, IQueryable<Series> sQuery)
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, QueryContext queryContext)
     {
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
@@ -753,24 +754,23 @@ public class SeriesRepository : ISeriesRepository
             out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
         var query = _context.Series
+            .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
+            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+            .WhereIf(hasCollectionTagFilter,
+                s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
+            .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
+            .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
+            .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
+            .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
+            .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
+            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
+            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+            .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
+            .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
-                        && formats.Contains(s.Format)
-                        && (!hasGenresFilter || s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-                        && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
-                        && (!hasCollectionTagFilter ||
-                            s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
-                        && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
-                        && (!hasProgressFilter || seriesIds.Contains(s.Id))
-                        && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
-                        && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
-                        && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
-                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
-            .Where(s => !hasSeriesNameFilter ||
-                        EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"));
+                        && formats.Contains(s.Format));
         if (userRating.AgeRating != AgeRating.NotApplicable)
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
@@ -825,24 +825,23 @@ public class SeriesRepository : ISeriesRepository
             out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
         var query = sQuery
+            .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
+            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
+            .WhereIf(hasCollectionTagFilter,
+                s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
+            .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
+            .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
+            .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
+            .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
+            .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
+            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
+            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+            .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
+            .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
-                        && formats.Contains(s.Format)
-                        && (!hasGenresFilter || s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-                        && (!hasPeopleFilter || s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
-                        && (!hasCollectionTagFilter ||
-                            s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
-                        && (!hasRatingFilter || s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
-                        && (!hasProgressFilter || seriesIds.Contains(s.Id))
-                        && (!hasAgeRating || filter.AgeRating.Contains(s.Metadata.AgeRating))
-                        && (!hasTagsFilter || s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
-                        && (!hasLanguageFilter || filter.Languages.Contains(s.Metadata.Language))
-                        && (!hasReleaseYearMinFilter || s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-                        && (!hasReleaseYearMaxFilter || s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
-                        && (!hasPublicationFilter || filter.PublicationStatus.Contains(s.Metadata.PublicationStatus)))
-            .Where(s => !hasSeriesNameFilter ||
-                        EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                             || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+                        && formats.Contains(s.Format))
             .AsNoTracking();
 
         // If no sort options, default to using SortName

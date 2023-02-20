@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
@@ -234,4 +235,10 @@ public static class QueryableExtensions
 
     public static IEnumerable<DateTime> Range(this DateTime startDate, int numberOfDays) =>
         Enumerable.Range(0, numberOfDays).Select(e => startDate.AddDays(e));
+
+    public static IQueryable<T> WhereIf<T>(this IQueryable<T> queryable, bool condition,
+        Expression<Func<T, bool>> predicate)
+    {
+        return condition ? queryable.Where(predicate) : queryable;
+    }
 }
