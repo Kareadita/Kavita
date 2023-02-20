@@ -184,14 +184,12 @@ public class LibraryWatcher : ILibraryWatcher
         {
             _bufferFullCounter += 1;
             _lastErrorTime = DateTime.Now;
-            //condition = _bufferFullCounter >= 3;
             condition = _bufferFullCounter >= 3 && (DateTime.Now - _lastErrorTime).TotalMinutes <= 10;
         }
 
         if (_restartCounter >= 3)
         {
             _logger.LogInformation("[LibraryWatcher] Too many restarts occured, you either have limited inotify or an OS constraint. Kavita will turn off folder watching to prevent high utilization of resources");
-            StopWatching();
             Task.Run(TurnOffWatching);
             return;
         }
@@ -205,7 +203,7 @@ public class LibraryWatcher : ILibraryWatcher
             return;
         }
         Task.Run(RestartWatching);
-        //BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
+        BackgroundJob.Schedule(() => UpdateLastBufferOverflow(), TimeSpan.FromMinutes(10));
     }
 
     private async Task TurnOffWatching()
@@ -214,6 +212,7 @@ public class LibraryWatcher : ILibraryWatcher
         setting.Value = "false";
         _unitOfWork.SettingsRepository.Update(setting);
         await _unitOfWork.CommitAsync();
+        StopWatching();
         _logger.LogInformation("[LibraryWatcher] Folder watching has been disabled");
     }
 
