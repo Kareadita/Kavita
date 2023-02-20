@@ -26,13 +26,13 @@ public class LogHub : Hub<ILogHub>
 
     public override async Task OnConnectedAsync()
     {
-        await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
+        await _tracker.UserConnected(Context.User.GetUserId(), Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
+        await _tracker.UserDisconnected(Context.User.GetUserId(), Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
 

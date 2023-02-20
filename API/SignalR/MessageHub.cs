@@ -22,7 +22,7 @@ public class MessageHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        await _tracker.UserConnected(Context.User.GetUsername(), Context.ConnectionId);
+        await _tracker.UserConnected(Context.User.GetUserId(), Context.ConnectionId);
 
         var currentUsers = await PresenceTracker.GetOnlineUsers();
         await Clients.All.SendAsync(MessageFactory.OnlineUsers, currentUsers);
@@ -33,7 +33,7 @@ public class MessageHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {
-        await _tracker.UserDisconnected(Context.User.GetUsername(), Context.ConnectionId);
+        await _tracker.UserDisconnected(Context.User.GetUserId(), Context.ConnectionId);
 
         var currentUsers = await PresenceTracker.GetOnlineUsers();
         await Clients.All.SendAsync(MessageFactory.OnlineUsers, currentUsers);
