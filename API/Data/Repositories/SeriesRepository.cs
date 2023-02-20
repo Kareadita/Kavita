@@ -754,6 +754,7 @@ public class SeriesRepository : ISeriesRepository
             out var hasPublicationFilter, out var hasSeriesNameFilter, out var hasReleaseYearMinFilter, out var hasReleaseYearMaxFilter);
 
         var query = _context.Series
+            .AsNoTracking()
             .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
             .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
             .WhereIf(hasCollectionTagFilter,
@@ -775,8 +776,9 @@ public class SeriesRepository : ISeriesRepository
         {
             query = query.RestrictAgainstAgeRestriction(userRating);
         }
+        // We only want to return series where they have the prequel relationshipOf or don't have any relationshipOfs
+        //query = query.WhereIf(true, s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
 
-        query = query.AsNoTracking();
 
         // If no sort options, default to using SortName
         filter.SortOptions ??= new SortOptions()
