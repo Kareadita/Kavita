@@ -49,11 +49,13 @@
 @font-face {
   font-family: "EBGarmond";
   src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
+  font-display: swap;
 }
 
 @font-face {
   font-family: "Spartan";
   src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
+  font-display: swap;
 }
 
 label, select, .clickable {

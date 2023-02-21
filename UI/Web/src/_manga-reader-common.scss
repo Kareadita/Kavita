@@ -55,14 +55,6 @@ img {
     animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-// TODO: Move this into a dedicated component
-.loading {
-  position: absolute;
-  left: 48%;
-  top: 20%;
-  z-index: 1;
-}
-
 
 .highlight {
   background-color: var(--manga-reader-next-highlight-bg-color) !important;
