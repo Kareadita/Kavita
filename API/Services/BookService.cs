@@ -421,6 +421,7 @@ public class BookService : IBookService
             // Parse tags not exposed via Library
             foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
             {
+                // EPUB 2 and 3
                 switch (metadataItem.Name)
                 {
                     case "calibre:rating":
@@ -435,6 +436,21 @@ public class BookService : IBookService
                         break;
                     case "calibre:series_index":
                         info.Volume = metadataItem.Content;
+                        break;
+                }
+
+                // EPUB 3.2+ only
+                switch (metadataItem.Property)
+                {
+                    case "group-position":
+                        info.Volume = metadataItem.Content;
+                        break;
+                    case "belongs-to-collection":
+                        info.Series = metadataItem.Content;
+                        info.SeriesSort = metadataItem.Content;
+                        break;
+                    case "collection-type":
+                        // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                         break;
                 }
             }
