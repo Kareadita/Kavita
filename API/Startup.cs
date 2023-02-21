@@ -19,6 +19,7 @@ using API.Services.HostedServices;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -273,6 +274,17 @@ public class Startup
 
         app.UseForwardedHeaders();
 
+        var basePath = !Configuration.BaseUrl.StartsWith("/")
+            ? $"/{Configuration.BaseUrl}"
+            : Configuration.BaseUrl;
+
+        basePath = !basePath.EndsWith("/")
+                    ? $"{basePath}/"
+                    : basePath;
+
+        app.UsePathBase(basePath);
+        UpdateBaseUrlInIndex(basePath);
+
         app.UseRouting();
 
         // Ordering is important. Cors, authentication, authorization
@@ -333,6 +345,8 @@ public class Startup
             endpoints.MapFallbackToController("Index", "Fallback");
         });
 
+        Console.WriteLine("Starting with base url as " + basePath);
+
         applicationLifetime.ApplicationStopping.Register(OnShutdown);
         applicationLifetime.ApplicationStarted.Register(() =>
         {
@@ -347,6 +361,26 @@ public class Startup
             }
             Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
+    }
+
+    private static void UpdateBaseUrlInIndex(string baseUrl)
+    {
+        var htmlDoc = new HtmlDocument();
+        string indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+        htmlDoc.Load(indexHtmlPath);
+
+        var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
+        if (baseNode != null)
+        {
+            baseNode.SetAttributeValue("href", baseUrl);
+        }
+        else
+        {
+            var newBaseNode = htmlDoc.CreateElement("base");
+            newBaseNode.SetAttributeValue("href", baseUrl);
+            htmlDoc.DocumentNode.SelectSingleNode("/html/head").AppendChild(newBaseNode);
+        }
+        htmlDoc.Save(indexHtmlPath);
     }
 
     private static void OnShutdown()

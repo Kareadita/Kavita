@@ -191,6 +191,7 @@ public class SettingsController : BaseApiController
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
+                Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
