@@ -16,6 +16,7 @@ import { ReadingListsComponent } from './_components/reading-lists/reading-lists
 import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
+import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
 
 
 @NgModule({
@@ -28,6 +29,7 @@ import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
     ReadingListItemComponent,
     ImportCblModalComponent,
     CblConflictReasonPipe,
+    StepTrackerComponent,
   ],
   imports: [
     CommonModule,

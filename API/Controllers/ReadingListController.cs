@@ -485,21 +485,21 @@ public class ReadingListController : BaseApiController
         return Ok(await _unitOfWork.ReadingListRepository.ReadingListExists(name));
     }
 
-    // [HttpPost("import-cbl")]
-    // public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
-    // {
-    //     var userId = User.GetUserId();
-    //     var filename = Path.GetRandomFileName();
-    //     var outputFile = Path.Join(_directoryService.TempDirectory, filename);
-    //
-    //     await using var stream = System.IO.File.Create(outputFile);
-    //     await file.CopyToAsync(stream);
-    //     stream.Close();
-    //     var cbl = ReadingListService.LoadCblFromPath(outputFile);
-    //
-    //     // We need to pass the temp file back
-    //
-    //     var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
-    //     return importSummary.Results.Any() ? Ok(importSummary) : Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
-    // }
+    [HttpPost("import-cbl")]
+    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
+    {
+        var userId = User.GetUserId();
+        var filename = Path.GetRandomFileName();
+        var outputFile = Path.Join(_directoryService.TempDirectory, filename);
+
+        await using var stream = System.IO.File.Create(outputFile);
+        await file.CopyToAsync(stream);
+        stream.Close();
+        var cbl = ReadingListService.LoadCblFromPath(outputFile);
+
+        // We need to pass the temp file back
+
+        var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
+        return importSummary.Results.Any() ? Ok(importSummary) : Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
+    }
 }

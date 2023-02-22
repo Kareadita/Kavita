@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
+import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
 
 enum Step {
   Import = 0,
@@ -36,11 +37,11 @@ export class ImportCblModalComponent {
   validateSummary: CblImportSummary | undefined;
   dryRunSummary: CblImportSummary | undefined;
 
-  steps = [
-    {title: 'Import CBL', index: Step.Import},
-    {title: 'Validate File', index: Step.Validate},
-    {title: 'Dry Run', index: Step.DryRun},
-    {title: 'Final Import', index: Step.Finalize},
+  steps: Array<TimelineStep> = [
+    {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
+    {title: 'Validate File', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
+    {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-regular fa-floppy-disk'},
+    {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStep = this.steps[0];
 
@@ -75,16 +76,32 @@ export class ImportCblModalComponent {
     }
   }
 
+  prevStep() {
+    if (this.currentStep.index === Step.Import) return;
+    this.currentStep.index--;
+  }
+
   canMoveToNextStep() {
     switch (this.currentStep.index) {
       case Step.Import:
         return this.isFileSelected();
       case Step.Validate:
-        return this.validateSummary && this.validateSummary.results.length > 0;
+        return this.validateSummary && this.validateSummary.results.length === 0;
       case Step.DryRun:
         return true; 
       case Step.Finalize:
         return true; 
+      default:
+        return false;
+    }
+  }
+
+  canMoveToPrevStep() {
+    switch (this.currentStep.index) {
+      case Step.Import:
+        return false;
+      default:
+        return true;
     }
   }
 
