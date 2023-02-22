@@ -16,14 +16,11 @@ export interface TimelineStep {
   styleUrls: ['./step-tracker.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StepTrackerComponent implements OnInit {
+export class StepTrackerComponent {
   @Input() steps: Array<TimelineStep> = [];
-  @Input() currentStep!: TimelineStep;
+  @Input() currentStep: number = 0;
   
 
   constructor(private readonly cdRef: ChangeDetectorRef) {}
 
-  ngOnInit() {
-
-  }
 }

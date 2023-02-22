@@ -43,7 +43,7 @@ export class ImportCblModalComponent {
     {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-regular fa-floppy-disk'},
     {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
-  currentStep = this.steps[0];
+  currentStepIndex = this.steps[0].index;
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
@@ -57,32 +57,35 @@ export class ImportCblModalComponent {
 
   nextStep() {
 
-    if (this.currentStep.index >= Step.Finalize) return;
-    if (this.currentStep.index === Step.Import && !this.isFileSelected()) return;
-    if (this.currentStep.index === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
+    if (this.currentStepIndex >= Step.Finalize) return;
+    if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
+    if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
-    switch (this.currentStep.index) {
+    switch (this.currentStepIndex) {
       case Step.Import:
         this.importFile();
         break;
       case Step.Validate:
+        this.import();
         break;
       case Step.DryRun:
+        this.import();
         break;
       case Step.Finalize:
         // Clear the models and allow user to do another import
+        this.uploadForm.get('files')?.setValue(null);
         break;
 
     }
   }
 
   prevStep() {
-    if (this.currentStep.index === Step.Import) return;
-    this.currentStep.index--;
+    if (this.currentStepIndex === Step.Import) return;
+    this.currentStepIndex--;
   }
 
   canMoveToNextStep() {
-    switch (this.currentStep.index) {
+    switch (this.currentStepIndex) {
       case Step.Import:
         return this.isFileSelected();
       case Step.Validate:
@@ -97,7 +100,7 @@ export class ImportCblModalComponent {
   }
 
   canMoveToPrevStep() {
-    switch (this.currentStep.index) {
+    switch (this.currentStepIndex) {
       case Step.Import:
         return false;
       default:
@@ -117,17 +120,37 @@ export class ImportCblModalComponent {
 
     const formData = new FormData();
     formData.append('cbl', files[0]);
-    formData.append('dryRun', (this.currentStep.index !== Step.Finalize) + '');
-    this.readingListService.importCbl(formData).subscribe(res => {
+    this.readingListService.validateCbl(formData).subscribe(res => {
       console.log('Result: ', res);
-      if (this.currentStep.index === Step.Import) {
+      if (this.currentStepIndex === Step.Import) {
         this.validateSummary = res;
       }
-      if (this.currentStep.index === Step.DryRun) {
+      if (this.currentStepIndex === Step.DryRun) {
         this.dryRunSummary = res;
       }
       this.importSummaries.push(res);
-      this.currentStep.index++;
+      this.currentStepIndex++;
+      this.cdRef.markForCheck();
+    });
+  }
+
+  import() {
+    const files = this.uploadForm.get('files')?.value;
+    if (!files) return;
+
+    const formData = new FormData();
+    formData.append('cbl', files[0]);
+    formData.append('dryRun', (this.currentStepIndex !== Step.Finalize) + '');
+    this.readingListService.importCbl(formData).subscribe(res => {
+      console.log('Step: ', this.currentStepIndex)
+      console.log('Result: ', res);
+
+      // Our step when calling is always one behind
+      if (this.currentStepIndex === Step.Validate) {
+        this.dryRunSummary = res;
+      }
+      this.importSummaries.push(res);
+      this.currentStepIndex++;
       this.cdRef.markForCheck();
     });
   }

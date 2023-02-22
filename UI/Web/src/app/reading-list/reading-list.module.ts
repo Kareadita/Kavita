@@ -17,6 +17,7 @@ import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-m
 import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
+import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 
 
 @NgModule({
@@ -30,6 +31,7 @@ import { StepTrackerComponent } from './_components/step-tracker/step-tracker.co
     ImportCblModalComponent,
     CblConflictReasonPipe,
     StepTrackerComponent,
+    CblImportResultPipe,
   ],
   imports: [
     CommonModule,

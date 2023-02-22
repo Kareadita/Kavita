@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using API.DTOs.ReadingLists.CBL;
 
-namespace API.DTOs.ReadingLists;
+namespace API.DTOs.ReadingLists.CBL;
 
 public enum CblImportResult {
     /// <summary>

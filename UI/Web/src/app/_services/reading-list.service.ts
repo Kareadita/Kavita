@@ -95,7 +95,11 @@ export class ReadingListService {
     return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
   }
 
+  validateCbl(form: FormData) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/validate', form);
+  }
+
   importCbl(form: FormData) {
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'readinglist/import-cbl', form);
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/import', form);
   }
 }
