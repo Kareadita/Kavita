@@ -3,6 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
+import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
@@ -36,6 +37,7 @@ export class ImportCblModalComponent {
   importSummaries: Array<CblImportSummary> = [];
   validateSummary: CblImportSummary | undefined;
   dryRunSummary: CblImportSummary | undefined;
+  dryRunResults: Array<CblBookResult> = [];
 
   steps: Array<TimelineStep> = [
     {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
@@ -125,9 +127,6 @@ export class ImportCblModalComponent {
       if (this.currentStepIndex === Step.Import) {
         this.validateSummary = res;
       }
-      if (this.currentStepIndex === Step.DryRun) {
-        this.dryRunSummary = res;
-      }
       this.importSummaries.push(res);
       this.currentStepIndex++;
       this.cdRef.markForCheck();
@@ -142,38 +141,15 @@ export class ImportCblModalComponent {
     formData.append('cbl', files[0]);
     formData.append('dryRun', (this.currentStepIndex !== Step.Finalize) + '');
     this.readingListService.importCbl(formData).subscribe(res => {
-      console.log('Step: ', this.currentStepIndex)
-      console.log('Result: ', res);
-
       // Our step when calling is always one behind
       if (this.currentStepIndex === Step.Validate) {
         this.dryRunSummary = res;
+        this.dryRunResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
       }
+
       this.importSummaries.push(res);
       this.currentStepIndex++;
       this.cdRef.markForCheck();
     });
   }
-
-  // onFileSelected(event: any) {
-  //   console.log('event: ', event);
-  //   if (!(event.target as HTMLInputElement).files === null || (event.target as HTMLInputElement).files?.length === 0) return;
-
-  //   const file = (event.target as HTMLInputElement).files![0];
-
-  //   if (file) {
-
-  //       //this.fileName = file.name;
-
-  //       const formData = new FormData();
-
-  //       formData.append("cbl", file);
-
-  //       this.readingListService.importCbl(formData).subscribe(res => {
-  //         this.importSummaries.push(res);
-  //         this.cdRef.markForCheck();
-  //       });
-  //       this.fileUpload.value = '';
-  //   }
-  // }
 }

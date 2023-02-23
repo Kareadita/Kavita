@@ -37,14 +37,9 @@
             <div class="row g-0">
                 <h5>This is a dry run and shows what will happen if you press Next</h5>
                 <h6>The import was a {{dryRunSummary.success | cblImportResult }}</h6>
-                    <ul class="list-group list-group-flush" *ngIf="dryRunSummary">
-                        <li class="list-group-item no-hover" *ngFor="let result of dryRunSummary.results">
-                            {{result | cblConflictReason}}
-                        </li>
-                    </ul>
-                    <ul class="list-group list-group-flush" *ngIf="dryRunSummary">
-                        <li class="list-group-item no-hover" *ngFor="let result of dryRunSummary.successfulInserts">
-                            {{result | cblConflictReason}}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item no-hover" *ngFor="let result of dryRunResults">
+                            {{result.order}}. {{result | cblConflictReason}}
                         </li>
                     </ul>
             </div>

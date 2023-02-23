@@ -10115,24 +10115,6 @@
         },
         "additionalProperties": false
       },
-      "CblConflictQuestion": {
-        "type": "object",
-        "properties": {
-          "seriesName": {
-            "type": "string",
-            "nullable": true
-          },
-          "librariesIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "CblImportReason": {
         "enum": [
           0,
@@ -10178,21 +10160,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/CblBookResult"
-            },
-            "nullable": true
-          },
-          "conflicts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SeriesDto"
-            },
-            "description": "A list of Series that are within the CBL but map to multiple libraries within Kavita",
-            "nullable": true
-          },
-          "conflicts2": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CblConflictQuestion"
             },
             "nullable": true
           }

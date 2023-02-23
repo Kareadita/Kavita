@@ -355,9 +355,7 @@ public class ReadingListService : IReadingListService
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
             Results = new List<CblBookResult>(),
-            SuccessfulInserts = new List<CblBookResult>(),
-            Conflicts = new List<SeriesDto>(),
-            Conflicts2 = new List<CblConflictQuestion>()
+            SuccessfulInserts = new List<CblBookResult>()
         };
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
