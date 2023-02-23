@@ -38,6 +38,10 @@ export class ImportCblModalComponent {
   validateSummary: CblImportSummary | undefined;
   dryRunSummary: CblImportSummary | undefined;
   dryRunResults: Array<CblBookResult> = [];
+  finalizeSummary: CblImportSummary | undefined;
+  finalizeResults: Array<CblBookResult> = [];
+
+  isLoading: boolean = false;
 
   steps: Array<TimelineStep> = [
     {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
@@ -66,12 +70,14 @@ export class ImportCblModalComponent {
     switch (this.currentStepIndex) {
       case Step.Import:
         this.importFile();
+        
+        //this.cdRef.markForCheck();
         break;
       case Step.Validate:
-        this.import();
+        this.import(true);
         break;
       case Step.DryRun:
-        this.import();
+        this.import(false);
         break;
       case Step.Finalize:
         // Clear the models and allow user to do another import
@@ -120,34 +126,39 @@ export class ImportCblModalComponent {
     const files = this.uploadForm.get('files')?.value;
     if (!files) return;
 
+    this.isLoading = true;
+    this.cdRef.markForCheck();
+
     const formData = new FormData();
     formData.append('cbl', files[0]);
     this.readingListService.validateCbl(formData).subscribe(res => {
-      console.log('Result: ', res);
       if (this.currentStepIndex === Step.Import) {
         this.validateSummary = res;
       }
       this.importSummaries.push(res);
       this.currentStepIndex++;
+      this.isLoading = false;
       this.cdRef.markForCheck();
     });
   }
 
-  import() {
+  import(dryRun: boolean = false) {
     const files = this.uploadForm.get('files')?.value;
     if (!files) return;
 
     const formData = new FormData();
     formData.append('cbl', files[0]);
-    formData.append('dryRun', (this.currentStepIndex !== Step.Finalize) + '');
+    formData.append('dryRun', dryRun + '');
     this.readingListService.importCbl(formData).subscribe(res => {
       // Our step when calling is always one behind
-      if (this.currentStepIndex === Step.Validate) {
+      if (dryRun) {
         this.dryRunSummary = res;
         this.dryRunResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
+      } else {
+        this.finalizeSummary = res;
+        this.finalizeResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
       }
 
-      this.importSummaries.push(res);
       this.currentStepIndex++;
       this.cdRef.markForCheck();
     });

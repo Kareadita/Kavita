@@ -10,14 +10,14 @@
     
     <!-- This is going to need to have a fixed height with a scrollbar-->
     <div style="height: 300px; overflow-y: auto">
-        <div class="row g-0" *ngIf="currentStepIndex === 0">
+        <div class="row g-0" *ngIf="currentStepIndex === Step.Import">
             <p>To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.</p>
             <form [formGroup]="uploadForm" enctype="multipart/form-data">
                 <file-upload formControlName="files"></file-upload>
             </form>
         </div>
         
-        <ng-container *ngIf="currentStepIndex === 1">
+        <ng-container *ngIf="currentStepIndex === Step.Validate">
             <div class="row g-0">
                 <ng-container *ngIf="validateSummary">
                     <ng-container *ngIf="validateSummary.results.length > 0; else noValidateIssues">
@@ -33,7 +33,7 @@
             </div>
         </ng-container>
     
-        <ng-container *ngIf="currentStepIndex === 2 && dryRunSummary">
+        <ng-container *ngIf="currentStepIndex === Step.DryRun && dryRunSummary">
             <div class="row g-0">
                 <h5>This is a dry run and shows what will happen if you press Next</h5>
                 <h6>The import was a {{dryRunSummary.success | cblImportResult }}</h6>
@@ -42,6 +42,17 @@
                             {{result.order}}. {{result | cblConflictReason}}
                         </li>
                     </ul>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="currentStepIndex === Step.Finalize && finalizeSummary && dryRunSummary">
+            <div class="row g-0">
+                <h5>{{finalizeSummary.success | cblImportResult }} on {{dryRunSummary.cblName}} Import</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item no-hover" *ngFor="let result of finalizeResults">
+                        {{result.order}}. {{result | cblConflictReason}}
+                    </li>
+                </ul>
             </div>
         </ng-container>
     </div>
@@ -53,7 +64,7 @@
     <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
     <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">Prev</button>
-    <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">Next</button>
+    <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="!canMoveToNextStep()">{{currentStepIndex === Step.Finalize ? 'Restart' : 'Next'}}</button>
 </div>
 
 
