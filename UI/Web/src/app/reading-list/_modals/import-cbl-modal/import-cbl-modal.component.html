@@ -39,7 +39,7 @@
                 <h6>The import was a {{dryRunSummary.success | cblImportResult }}</h6>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item no-hover" *ngFor="let result of dryRunResults">
-                            {{result.order}}. {{result | cblConflictReason}}
+                            {{result.order + 1}}. {{result | cblConflictReason}}
                         </li>
                     </ul>
             </div>
@@ -50,7 +50,7 @@
                 <h5>{{finalizeSummary.success | cblImportResult }} on {{dryRunSummary.cblName}} Import</h5>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item no-hover" *ngFor="let result of finalizeResults">
-                        {{result.order}}. {{result | cblConflictReason}}
+                        {{result.order + 1}}. {{result | cblConflictReason}}
                     </li>
                 </ul>
             </div>
