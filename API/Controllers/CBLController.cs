@@ -34,7 +34,7 @@ public class CblController : BaseApiController
     public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl([FromForm(Name = "cbl")] IFormFile file)
     {
         var userId = User.GetUserId();
-        var cbl = await SaveAndLoadCblFile(userId, file);
+        var cbl = SaveAndLoadCblFile(userId, file);
 
         var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
         return Ok(importSummary);
@@ -51,19 +51,15 @@ public class CblController : BaseApiController
     public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
     {
         var userId = User.GetUserId();
-        var cbl = await SaveAndLoadCblFile(userId, file);
+        var cbl = SaveAndLoadCblFile(userId, file);
 
         return Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
     }
 
-    private async Task<CblReadingList> SaveAndLoadCblFile(int userId, IFormFile file)
+    private CblReadingList SaveAndLoadCblFile(int userId, IFormFile file)
     {
         var filename = Path.GetRandomFileName();
         var outputFile = Path.Join(_directoryService.TempDirectory, filename);
-
-        await using var stream = System.IO.File.Create(outputFile);
-        await file.CopyToAsync(stream);
-        stream.Close();
         return ReadingListService.LoadCblFromPath(outputFile);
     }
 }

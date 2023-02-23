@@ -425,6 +425,7 @@ public class ReadingListService : IReadingListService
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
+        var allSeriesLocalized = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.LocalizedName));
 
         var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
@@ -452,38 +453,52 @@ public class ReadingListService : IReadingListService
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
             var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
-            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries))
+            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.SeriesMissing
+                    Reason = CblImportReason.SeriesMissing,
+                    Order = i
                 });
                 continue;
             }
             // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
-            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => book.Volume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
+            var bookVolume = string.IsNullOrEmpty(book.Volume)
+                ? Tasks.Scanner.Parser.Parser.DefaultVolume
+                : book.Volume;
+            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => bookVolume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.VolumeMissing
+                    Reason = CblImportReason.VolumeMissing,
+                    Order = i
                 });
                 continue;
             }
 
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == book.Number);
+            // We need to handle chapter 0 or empty string when it's just a volume
+            var bookNumber = string.IsNullOrEmpty(book.Number)
+                ? Tasks.Scanner.Parser.Parser.DefaultChapter
+                : book.Number;
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == bookNumber);
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.ChapterMissing
+                    Reason = CblImportReason.ChapterMissing,
+                    Order = i
                 });
                 continue;
             }
 
             // See if a matching item already exists
             ExistsOrAddReadingListItem(readingList, bookSeries.Id, matchingVolume.Id, chapter.Id);
-            importSummary.SuccessfulInserts.Add(new CblBookResult(book));
+            importSummary.SuccessfulInserts.Add(new CblBookResult(book)
+            {
+                Reason = CblImportReason.Success,
+                Order = i
+            });
         }
 
         if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
@@ -493,7 +508,7 @@ public class ReadingListService : IReadingListService
 
         await CalculateReadingListAgeRating(readingList);
 
-        if (!dryRun) return importSummary;
+        if (dryRun) return importSummary;
 
         if (!_unitOfWork.HasChanges()) return importSummary;
         await _unitOfWork.CommitAsync();

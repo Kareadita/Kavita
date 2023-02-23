@@ -63,10 +63,19 @@ public enum CblImportReason
     /// </summary>
     [Description("All Chapters Missing")]
     AllChapterMissing = 7,
+    /// <summary>
+    /// The Chapter was imported
+    /// </summary>
+    [Description("Success")]
+    Success = 8,
 }
 
 public class CblBookResult
 {
+    /// <summary>
+    /// Order in the CBL
+    /// </summary>
+    public int Order { get; set; }
     public string Series { get; set; }
     public string Volume { get; set; }
     public string Number { get; set; }

@@ -10092,6 +10092,11 @@
       "CblBookResult": {
         "type": "object",
         "properties": {
+          "order": {
+            "type": "integer",
+            "description": "Order in the CBL",
+            "format": "int32"
+          },
           "series": {
             "type": "string",
             "nullable": true
@@ -10137,7 +10142,8 @@
           4,
           5,
           6,
-          7
+          7,
+          8
         ],
         "type": "integer",
         "format": "int32"

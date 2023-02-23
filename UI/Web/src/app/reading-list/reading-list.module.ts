@@ -19,7 +19,6 @@ import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
 import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 
-
 @NgModule({
   declarations: [
     DraggableOrderedListComponent,
