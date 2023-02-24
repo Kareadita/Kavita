@@ -7,7 +7,7 @@
     <div class="row g-0" style="min-width: 135px;">
         <app-step-tracker [steps]="steps" [currentStep]="currentStepIndex"></app-step-tracker>
     </div>
-    
+
     <!-- This is going to need to have a fixed height with a scrollbar-->
     <div style="height: 300px; overflow-y: auto">
         <div class="row g-0" *ngIf="currentStepIndex === Step.Import">

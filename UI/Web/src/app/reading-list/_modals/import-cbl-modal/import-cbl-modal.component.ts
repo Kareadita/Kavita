@@ -79,6 +79,7 @@ export class ImportCblModalComponent {
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
     if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
+    this.isLoading = true;
     switch (this.currentStepIndex) {
       case Step.Import:
         this.importFile();
@@ -98,6 +99,7 @@ export class ImportCblModalComponent {
         this.dryRunResults = [];
         this.finalizeSummary = undefined;
         this.finalizeResults = [];
+        this.isLoading = false;
         this.cdRef.markForCheck();
         break;
 
@@ -144,7 +146,6 @@ export class ImportCblModalComponent {
     const files = this.uploadForm.get('files')?.value;
     if (!files) return;
 
-    this.isLoading = true;
     this.cdRef.markForCheck();
 
     const formData = new FormData();
@@ -178,6 +179,7 @@ export class ImportCblModalComponent {
         this.toastr.success('Reading List imported');
       }
 
+      this.isLoading = false;
       this.currentStepIndex++;
       this.cdRef.markForCheck();
     });
