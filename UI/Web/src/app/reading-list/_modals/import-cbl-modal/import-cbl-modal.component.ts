@@ -2,8 +2,10 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, View
 import { FormControl, FormGroup } from '@angular/forms';
 import { FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
+import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
@@ -54,8 +56,20 @@ export class ImportCblModalComponent {
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
 
+  get NextButtonLabel() {
+    switch(this.currentStepIndex) {
+      case Step.DryRun:
+        return 'Import';
+      case Step.Finalize:
+        return 'Restart'
+      default:
+        return 'Next';
+    }
+  }
+
   constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
-    public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) {}
+    public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef,
+    private toastr: ToastrService) {}
 
   close() {
     this.ngModal.close();
@@ -70,8 +84,6 @@ export class ImportCblModalComponent {
     switch (this.currentStepIndex) {
       case Step.Import:
         this.importFile();
-        
-        //this.cdRef.markForCheck();
         break;
       case Step.Validate:
         this.import(true);
@@ -81,7 +93,14 @@ export class ImportCblModalComponent {
         break;
       case Step.Finalize:
         // Clear the models and allow user to do another import
-        this.uploadForm.get('files')?.setValue(null);
+        this.uploadForm.get('files')?.setValue(undefined);
+        this.currentStepIndex = 0;
+        this.validateSummary = undefined;
+        this.dryRunSummary = undefined;
+        this.dryRunResults = [];
+        this.finalizeSummary = undefined;
+        this.finalizeResults = [];
+        this.cdRef.markForCheck();
         break;
 
     }
@@ -99,7 +118,7 @@ export class ImportCblModalComponent {
       case Step.Validate:
         return this.validateSummary && this.validateSummary.results.length === 0;
       case Step.DryRun:
-        return true; 
+        return this.dryRunSummary?.success != CblImportResult.Fail; 
       case Step.Finalize:
         return true; 
       default:
@@ -115,6 +134,7 @@ export class ImportCblModalComponent {
         return true;
     }
   }
+
 
   isFileSelected() {
     const files = this.uploadForm.get('files')?.value;
@@ -157,6 +177,7 @@ export class ImportCblModalComponent {
       } else {
         this.finalizeSummary = res;
         this.finalizeResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
+        this.toastr.success('Reading List imported');
       }
 
       this.currentStepIndex++;

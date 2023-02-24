@@ -359,7 +359,8 @@ public class ReadingListService : IReadingListService
         };
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        // TODO: This needs to check against Localized as well
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         if (!userSeries.Any())
@@ -419,7 +420,7 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
@@ -502,6 +503,11 @@ public class ReadingListService : IReadingListService
         if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
         {
             importSummary.Success = CblImportResult.Partial;
+        }
+
+        if (importSummary.SuccessfulInserts.Count == 0 && importSummary.Results.Count == cblReading.Books.Book.Count)
+        {
+            importSummary.Success = CblImportResult.Fail;
         }
 
         await CalculateReadingListAgeRating(readingList);
