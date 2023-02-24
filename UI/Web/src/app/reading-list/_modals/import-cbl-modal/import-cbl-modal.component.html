@@ -23,12 +23,14 @@
                     <ng-container *ngIf="validateSummary.results.length > 0; else noValidateIssues">
                         <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
                         <ol class="list-group list-group-numbered list-group-flush" >
-                            <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results">
-                                {{result | cblConflictReason}}
+                            <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results" 
+                            [innerHTML]="result | cblConflictReason | safeHtml">
                             </li>
                         </ol>
                     </ng-container>
-                    <ng-template #noValidateIssues>No issues found with CBL, press next.</ng-template>
+                    <ng-template #noValidateIssues>
+                        No issues found with CBL, press next.
+                    </ng-template>
                 </ng-container>
             </div>
         </ng-container>
@@ -36,11 +38,10 @@
         <ng-container *ngIf="currentStepIndex === Step.DryRun && dryRunSummary">
             <div class="row g-0">
                 <h5>This is a dry run and shows what will happen if you press Next</h5>
-                <h6>The import was a {{dryRunSummary.success | cblImportResult }}</h6>
+                <h6>The import was a {{dryRunSummary.success | cblImportResult}}</h6>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item no-hover" *ngFor="let result of dryRunResults">
-                            {{result.order + 1}}. {{result | cblConflictReason}}
-                        </li>
+                        <li class="list-group-item no-hover" *ngFor="let result of dryRunResults" 
+                            innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
                     </ul>
             </div>
         </ng-container>
@@ -49,8 +50,8 @@
             <div class="row g-0">
                 <h5>{{finalizeSummary.success | cblImportResult }} on {{dryRunSummary.cblName}} Import</h5>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item no-hover" *ngFor="let result of finalizeResults">
-                        {{result.order + 1}}. {{result | cblConflictReason}}
+                    <li class="list-group-item no-hover" *ngFor="let result of finalizeResults"
+                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}">
                     </li>
                 </ul>
             </div>

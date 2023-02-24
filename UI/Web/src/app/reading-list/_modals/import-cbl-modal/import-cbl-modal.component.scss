@@ -1,3 +1,11 @@
 .file-input {
   display: none;
 }
+
+::ng-deep .reading-list-success--item {
+  color: var(--primary-color);
+}
+
+::ng-deep .reading-list-fail--item {
+  color: var(--error-color);
+}
