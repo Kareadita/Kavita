@@ -17,9 +17,9 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.ChapterMissing:
         return failIcon + result.series + ': ' + 'Chapter ' + result.number + ' is missing from Kavita. This item will be skipped.';
       case CblImportReason.EmptyFile:
-        return failIcon + 'The Cbl file is empty, nothing to be done.';
+        return failIcon + 'The cbl file is empty, nothing to be done.';
       case CblImportReason.NameConflict:
-        return failIcon + 'A reading list already exists on your account that matches the Cbl file.';
+        return failIcon + 'A reading list already exists on your account that matches the cbl file.';
       case CblImportReason.SeriesCollision:
         return failIcon + 'The series, ' + result.series + ', collides with another series of the same name in another library.';
       case CblImportReason.SeriesMissing:
