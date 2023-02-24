@@ -63,6 +63,7 @@ export class ReadingListsComponent implements OnInit {
   importCbl() {
     const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
     ref.closed.subscribe(result => this.loadPage());
+    ref.dismissed.subscribe(_ => this.loadPage());
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {

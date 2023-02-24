@@ -359,7 +359,15 @@ public class ReadingListService : IReadingListService
         };
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        // TODO: This needs to check against Localized as well
+        // Is there another reading list with the same name?
+        if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
+        {
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = CblImportReason.NameConflict
+            });
+        }
+
         var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();

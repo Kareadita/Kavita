@@ -76,8 +76,6 @@ export class ImportCblModalComponent {
   }
 
   nextStep() {
-
-    if (this.currentStepIndex >= Step.Finalize) return;
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
     if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
@@ -94,7 +92,7 @@ export class ImportCblModalComponent {
       case Step.Finalize:
         // Clear the models and allow user to do another import
         this.uploadForm.get('files')?.setValue(undefined);
-        this.currentStepIndex = 0;
+        this.currentStepIndex = Step.Import;
         this.validateSummary = undefined;
         this.dryRunSummary = undefined;
         this.dryRunResults = [];
