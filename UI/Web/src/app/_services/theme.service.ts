@@ -64,15 +64,23 @@ export class ThemeService implements OnDestroy {
   getColorScheme() {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
-
-  /**
-   * --theme-color from theme. Updates the meta tag
-   * @returns 
-   */
-  getThemeColor() {
-    return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
-  }
-
+  
+    /**
+     * --theme-color from theme. Updates the meta tag
+     * @returns 
+     */
+    getThemeColor() {
+      return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
+    }
+  
+    /**
+     * --msapplication-TileColor from theme. Updates the meta tag
+     * @returns 
+     */
+    getTileColor() {
+      return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
+    }
+  
   getCssVariable(variable: string) {
     return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
   }
@@ -155,6 +163,12 @@ export class ThemeService implements OnDestroy {
           const themeColor = this.getThemeColor();
           if (themeColor) {
             this.document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+            this.document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')?.setAttribute('content', themeColor);
+          }
+
+          const tileColor = this.getTileColor();
+          if (themeColor) {
+            this.document.querySelector('meta[name="msapplication-TileColor"]')?.setAttribute('content', themeColor);
           }
 
           const colorScheme = this.getColorScheme();

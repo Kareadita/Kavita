@@ -1,17 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
+using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using API.Tests.Helpers;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +29,6 @@ public class ReadingListServiceTests
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReadingListService _readingListService;
-
     private readonly DataContext _context;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
@@ -44,7 +47,7 @@ public class ReadingListServiceTests
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null!);
 
-        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>());
+        _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>(), Substitute.For<IEventHub>());
     }
 
     #region Setup
@@ -84,6 +87,7 @@ public class ReadingListServiceTests
     private async Task ResetDb()
     {
         _context.AppUser.RemoveRange(_context.AppUser);
+        _context.Library.RemoveRange(_context.Library);
         _context.Series.RemoveRange(_context.Series);
         _context.ReadingList.RemoveRange(_context.ReadingList);
         await _unitOfWork.CommitAsync();
@@ -104,7 +108,147 @@ public class ReadingListServiceTests
 
     #endregion
 
+    #region AddChaptersToReadingList
+    [Fact]
+    public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone,
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "3",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
+        await _unitOfWork.CommitAsync();
+
+        Assert.Equal(1, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.First().Order);
+    }
+
+    [Fact]
+    public async Task AddChaptersToReadingList_ShouldNewItems_AfterLastOrder()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone,
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "3",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
+        await _unitOfWork.CommitAsync();
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {2}, readingList);
+        await _unitOfWork.CommitAsync();
+
+        Assert.Equal(2, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.First().Order);
+        Assert.Equal(1, readingList.Items.ElementAt(1).Order);
+    }
+    #endregion
+
     #region UpdateReadingListItemPosition
+
 
     [Fact]
     public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift()
@@ -124,7 +268,6 @@ public class ReadingListServiceTests
                     {
                         new Series()
                         {
-                            Name = "Test",
                             NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
@@ -185,6 +328,96 @@ public class ReadingListServiceTests
         Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
         Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
         Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
+    }
+
+    [Fact]
+    public async Task UpdateReadingListItemPosition_MoveLastToFirst_TwoItemsShouldShift_ThenDeleteSecond_OrderShouldBeCorrect()
+    {
+        await ResetDb();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        new Series()
+                        {
+                            Name = "Test",
+                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+                            Volumes = new List<Volume>()
+                            {
+                                new Volume()
+                                {
+                                    Name = "0",
+                                    Chapters = new List<Chapter>()
+                                    {
+                                        new Chapter()
+                                        {
+                                            Number = "1",
+                                            AgeRating = AgeRating.Everyone,
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "2",
+                                            AgeRating = AgeRating.X18Plus
+                                        },
+                                        new Chapter()
+                                        {
+                                            Number = "3",
+                                            AgeRating = AgeRating.X18Plus
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = new ReadingList();
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        // Existing (order, chapterId): (0, 1), (1, 2), (2, 3)
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2, 3}, readingList);
+        await _unitOfWork.CommitAsync();
+        Assert.Equal(3, readingList.Items.Count);
+
+        // From 3 to 1
+        // New (order, chapterId): (0, 3), (1, 2), (2, 1)
+        await _readingListService.UpdateReadingListItemPosition(new UpdateReadingListPosition()
+        {
+            FromPosition = 2, ToPosition = 0, ReadingListId = 1, ReadingListItemId = 3
+        });
+
+
+
+        Assert.Equal(3, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
+        Assert.Equal(2, readingList.Items.Single(i => i.ChapterId == 2).Order);
+
+        // New (order, chapterId): (0, 3), (2, 1): Delete 2nd item
+        await _readingListService.DeleteReadingListItem(new UpdateReadingListPosition()
+        {
+            ReadingListId = 1, ReadingListItemId = readingList.Items.Single(i => i.ChapterId == 2).Id
+        });
+
+        Assert.Equal(2, readingList.Items.Count);
+        Assert.Equal(0, readingList.Items.Single(i => i.ChapterId == 3).Order);
+        Assert.Equal(1, readingList.Items.Single(i => i.ChapterId == 1).Order);
     }
 
 
@@ -357,7 +590,6 @@ public class ReadingListServiceTests
 
     #endregion
 
-
     #region CalculateAgeRating
 
     [Fact]
@@ -431,6 +663,33 @@ public class ReadingListServiceTests
     public async Task CalculateAgeRating_ShouldUpdateToMax()
     {
         await ResetDb();
+        var s = new Series()
+        {
+            Name = "Test",
+            NormalizedName = "Test".ToNormalized(),
+            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
+            Volumes = new List<Volume>()
+            {
+                new Volume()
+                {
+                    Name = "0",
+                    Number = 0,
+                    Chapters = new List<Chapter>()
+                    {
+                        new Chapter()
+                        {
+                            Number = "1",
+                            Range = "1",
+                        },
+                        new Chapter()
+                        {
+                            Number = "2",
+                            Range = "2",
+                        }
+                    }
+                }
+            }
+        };
         _context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -443,37 +702,13 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
-                            {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        s
                     }
                 },
             }
         });
+
+        s.Metadata.AgeRating = AgeRating.G;
 
         await _context.SaveChangesAsync();
 
@@ -491,8 +726,579 @@ public class ReadingListServiceTests
         await _unitOfWork.CommitAsync();
 
         await _readingListService.CalculateReadingListAgeRating(readingList);
-        Assert.Equal(AgeRating.Unknown, readingList.AgeRating);
+        Assert.Equal(AgeRating.G, readingList.AgeRating);
     }
 
     #endregion
+
+    #region FormatTitle
+
+    [Fact]
+    public void FormatTitle_ShouldFormatCorrectly()
+    {
+        // Manga Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1")));
+        Assert.Equal("Chapter 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1", "1")));
+        Assert.Equal("Chapter 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Manga, chapterTitleName: "The Title")));
+
+        // Comic Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1")));
+        Assert.Equal("Issue #1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1", "1")));
+        Assert.Equal("Issue #1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Comic, chapterTitleName: "The Title")));
+
+        // Book Library & Archive
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1")));
+        Assert.Equal("Book 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1", "1")));
+        Assert.Equal("Book 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1", "1", "The Title")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Archive, LibraryType.Book, chapterTitleName: "The Title")));
+
+        // Manga Library & EPUB
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1", "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1", "1", "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Manga, chapterTitleName: "The Title")));
+
+        // Book Library & EPUB
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1", "1")));
+        Assert.Equal("Volume 1", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1", "1", "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, "1",  chapterTitleName: "The Title")));
+        Assert.Equal("The Title", ReadingListService.FormatTitle(CreateListItemDto(MangaFormat.Epub, LibraryType.Book, chapterTitleName: "The Title")));
+
+    }
+
+    private static ReadingListItemDto CreateListItemDto(MangaFormat seriesFormat, LibraryType libraryType,
+        string volumeNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume,
+        string chapterNumber = API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter,
+        string chapterTitleName = "")
+    {
+        return new ReadingListItemDto()
+        {
+            SeriesFormat = seriesFormat,
+            LibraryType = libraryType,
+            VolumeNumber = volumeNumber,
+            ChapterNumber = chapterNumber,
+            ChapterTitleName = chapterTitleName
+        };
+    }
+
+    #endregion
+
+    #region CreateReadingList
+
+    private async Task CreateReadingList_SetupBaseData()
+    {
+        var fablesSeries = DbFactory.Series("Fables");
+        fablesSeries.Volumes.Add(new Volume()
+        {
+            Number = 1,
+            Name = "2002",
+            Chapters = new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("1", false),
+            }
+        });
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test Lib",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        fablesSeries,
+                    },
+                },
+            },
+        });
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "admin",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test Lib 2",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        fablesSeries,
+                    },
+                },
+            }
+        });
+        await _unitOfWork.CommitAsync();
+    }
+
+    [Fact]
+    public async Task CreateReadingList_ShouldCreate_WhenNoOtherListsOnUser()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+    }
+
+    [Fact]
+    public async Task CreateReadingList_ShouldNotCreate_WhenExistingList()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+        try
+        {
+            await _readingListService.CreateReadingListForUser(user, "Test List");
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal("A list of this name already exists", ex.Message);
+        }
+        Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+    }
+
+    [Fact]
+    public async Task CreateReadingList_ShouldNotCreate_WhenPromotedListExists()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("admin", AppUserIncludes.ReadingLists);
+        var list = await _readingListService.CreateReadingListForUser(user, "Test List");
+        await _readingListService.UpdateReadingList(list,
+            new UpdateReadingListDto()
+            {
+                ReadingListId = list.Id, Promoted = true, Title = list.Title, Summary = list.Summary,
+                CoverImageLocked = false
+            });
+
+        try
+        {
+            await _readingListService.CreateReadingListForUser(user, "Test List");
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal("A list of this name already exists", ex.Message);
+        }
+    }
+
+    #endregion
+
+    #region UpdateReadingList
+    #endregion
+
+    #region DeleteReadingList
+    [Fact]
+    public async Task DeleteReadingList_ShouldDelete()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+        Assert.NotEmpty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+        try
+        {
+            await _readingListService.CreateReadingListForUser(user, "Test List");
+        }
+        catch (Exception ex)
+        {
+            Assert.Equal("A list of this name already exists", ex.Message);
+        }
+        Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+
+        await _readingListService.DeleteReadingList(1, user);
+        Assert.Empty((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
+            .ReadingLists);
+    }
+    #endregion
+
+    #region UserHasReadingListAccess
+    // TODO: UserHasReadingListAccess tests are unavailable because I can't mock UserManager<AppUser>
+    public async Task UserHasReadingListAccess_ShouldWorkIfTheirList()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.NotNull(userWithList);
+        Assert.Single(userWithList.ReadingLists);
+    }
+
+
+    public async Task UserHasReadingListAccess_ShouldNotWork_IfNotTheirList()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.Null(userWithList);
+    }
+
+
+    public async Task UserHasReadingListAccess_ShouldWork_IfNotTheirList_ButUserIsAdmin()
+    {
+        await ResetDb();
+        await CreateReadingList_SetupBaseData();
+
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+        await _readingListService.CreateReadingListForUser(user, "Test List");
+
+        //var admin = await _unitOfWork.UserRepository.GetUserByIdAsync(2, AppUserIncludes.ReadingLists);
+        //_userManager.When(x => x.IsInRoleAsync(user, PolicyConstants.AdminRole)).Returns((info => true), null);
+
+        //_userManager.IsInRoleAsync(admin, PolicyConstants.AdminRole).ReturnsForAnyArgs(true);
+
+        var userWithList = await _readingListService.UserHasReadingListAccess(1, "majora2007");
+        Assert.NotNull(userWithList);
+        Assert.Single(userWithList.ReadingLists);
+    }
+    #endregion
+    //
+    // #region CreateReadingListFromCBL
+    //
+    // private static CblReadingList LoadCblFromPath(string path)
+    // {
+    //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ReadingListService/");
+    //
+    //     var reader = new System.Xml.Serialization.XmlSerializer(typeof(CblReadingList));
+    //     using var file = new StreamReader(Path.Join(testDirectory, path));
+    //     var cblReadingList = (CblReadingList) reader.Deserialize(file);
+    //     file.Close();
+    //     return cblReadingList;
+    // }
+    //
+    // [Fact]
+    // public async Task CreateReadingListFromCBL_ShouldCreateList()
+    // {
+    //     await ResetDb();
+    //     var cblReadingList = LoadCblFromPath("Fables.cbl");
+    //
+    //     // Mock up our series
+    //     var fablesSeries = DbFactory.Series("Fables");
+    //     var fables2Series = DbFactory.Series("Fables: The Last Castle");
+    //
+    //     fablesSeries.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2002",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //     fables2Series.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2003",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //
+    //     _context.AppUser.Add(new AppUser()
+    //     {
+    //         UserName = "majora2007",
+    //         ReadingLists = new List<ReadingList>(),
+    //         Libraries = new List<Library>()
+    //         {
+    //             new Library()
+    //             {
+    //                 Name = "Test LIb",
+    //                 Type = LibraryType.Book,
+    //                 Series = new List<Series>()
+    //                 {
+    //                     fablesSeries,
+    //                     fables2Series
+    //                 },
+    //             },
+    //         },
+    //     });
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+    //
+    //     Assert.Equal(CblImportResult.Partial, importSummary.Success);
+    //     Assert.NotEmpty(importSummary.Results);
+    //
+    //     var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+    //
+    //     Assert.NotNull(createdList);
+    //     Assert.Equal("Fables", createdList.Title);
+    //
+    //     Assert.Equal(4, createdList.Items.Count);
+    //     Assert.Equal(1, createdList.Items.First(item => item.Order == 0).ChapterId);
+    //     Assert.Equal(2, createdList.Items.First(item => item.Order == 1).ChapterId);
+    //     Assert.Equal(3, createdList.Items.First(item => item.Order == 2).ChapterId);
+    //     Assert.Equal(4, createdList.Items.First(item => item.Order == 3).ChapterId);
+    // }
+    //
+    // [Fact]
+    // public async Task CreateReadingListFromCBL_ShouldCreateList_ButOnlyIncludeSeriesThatUserHasAccessTo()
+    // {
+    //     await ResetDb();
+    //     var cblReadingList = LoadCblFromPath("Fables.cbl");
+    //
+    //     // Mock up our series
+    //     var fablesSeries = DbFactory.Series("Fables");
+    //     var fables2Series = DbFactory.Series("Fables: The Last Castle");
+    //
+    //     fablesSeries.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2002",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //     fables2Series.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2003",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //
+    //     _context.AppUser.Add(new AppUser()
+    //     {
+    //         UserName = "majora2007",
+    //         ReadingLists = new List<ReadingList>(),
+    //         Libraries = new List<Library>()
+    //         {
+    //             new Library()
+    //             {
+    //                 Name = "Test LIb",
+    //                 Type = LibraryType.Book,
+    //                 Series = new List<Series>()
+    //                 {
+    //                     fablesSeries,
+    //                 },
+    //             },
+    //         },
+    //     });
+    //
+    //     _context.Library.Add(new Library()
+    //     {
+    //         Name = "Test Lib 2",
+    //         Type = LibraryType.Book,
+    //         Series = new List<Series>()
+    //         {
+    //             fables2Series,
+    //         },
+    //     });
+    //
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+    //
+    //     Assert.Equal(CblImportResult.Partial, importSummary.Success);
+    //     Assert.NotEmpty(importSummary.Results);
+    //
+    //     var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+    //
+    //     Assert.NotNull(createdList);
+    //     Assert.Equal("Fables", createdList.Title);
+    //
+    //     Assert.Equal(3, createdList.Items.Count);
+    //     Assert.Equal(1, createdList.Items.First(item => item.Order == 0).ChapterId);
+    //     Assert.Equal(2, createdList.Items.First(item => item.Order == 1).ChapterId);
+    //     Assert.Equal(3, createdList.Items.First(item => item.Order == 2).ChapterId);
+    //     Assert.NotNull(importSummary.Results.SingleOrDefault(r => r.Series == "Fables: The Last Castle"
+    //                                                               && r.Reason == CblImportReason.SeriesMissing));
+    // }
+    //
+    // [Fact]
+    // public async Task CreateReadingListFromCBL_ShouldFail_UserHasAccessToNoSeries()
+    // {
+    //     await ResetDb();
+    //     var cblReadingList = LoadCblFromPath("Fables.cbl");
+    //
+    //     // Mock up our series
+    //     var fablesSeries = DbFactory.Series("Fables");
+    //     var fables2Series = DbFactory.Series("Fables: The Last Castle");
+    //
+    //     fablesSeries.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2002",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //     fables2Series.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2003",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //
+    //     _context.AppUser.Add(new AppUser()
+    //     {
+    //         UserName = "majora2007",
+    //         ReadingLists = new List<ReadingList>(),
+    //         Libraries = new List<Library>(),
+    //     });
+    //
+    //     _context.Library.Add(new Library()
+    //     {
+    //         Name = "Test Lib 2",
+    //         Type = LibraryType.Book,
+    //         Series = new List<Series>()
+    //         {
+    //             fablesSeries,
+    //             fables2Series,
+    //         },
+    //     });
+    //
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+    //
+    //     Assert.Equal(CblImportResult.Fail, importSummary.Success);
+    //     Assert.NotEmpty(importSummary.Results);
+    //
+    //     var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+    //
+    //     Assert.Null(createdList);
+    // }
+    //
+    //
+    // [Fact]
+    // public async Task CreateReadingListFromCBL_ShouldUpdateAnExistingList()
+    // {
+    //     await ResetDb();
+    //     var cblReadingList = LoadCblFromPath("Fables.cbl");
+    //
+    //     // Mock up our series
+    //     var fablesSeries = DbFactory.Series("Fables");
+    //     var fables2Series = DbFactory.Series("Fables: The Last Castle");
+    //
+    //     fablesSeries.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2002",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //     fables2Series.Volumes.Add(new Volume()
+    //     {
+    //         Number = 1,
+    //         Name = "2003",
+    //         Chapters = new List<Chapter>()
+    //         {
+    //             EntityFactory.CreateChapter("1", false),
+    //             EntityFactory.CreateChapter("2", false),
+    //             EntityFactory.CreateChapter("3", false),
+    //
+    //         }
+    //     });
+    //
+    //     _context.AppUser.Add(new AppUser()
+    //     {
+    //         UserName = "majora2007",
+    //         ReadingLists = new List<ReadingList>(),
+    //         Libraries = new List<Library>()
+    //         {
+    //             new Library()
+    //             {
+    //                 Name = "Test LIb",
+    //                 Type = LibraryType.Book,
+    //                 Series = new List<Series>()
+    //                 {
+    //                     fablesSeries,
+    //                     fables2Series
+    //                 },
+    //             },
+    //         },
+    //     });
+    //
+    //     await _unitOfWork.CommitAsync();
+    //
+    //     // Create a reading list named Fables and add 2 chapters to it
+    //     var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists);
+    //     var readingList = await _readingListService.CreateReadingListForUser(user, "Fables");
+    //     Assert.True(await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 3}, readingList));
+    //     Assert.Equal(2, readingList.Items.Count);
+    //
+    //     // Attempt to import a Cbl with same reading list name
+    //     var importSummary = await _readingListService.CreateReadingListFromCbl(1, cblReadingList);
+    //
+    //     Assert.Equal(CblImportResult.Partial, importSummary.Success);
+    //     Assert.NotEmpty(importSummary.Results);
+    //
+    //     var createdList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(1);
+    //
+    //     Assert.NotNull(createdList);
+    //     Assert.Equal("Fables", createdList.Title);
+    //
+    //     Assert.Equal(4, createdList.Items.Count);
+    //     Assert.Equal(4, importSummary.SuccessfulInserts.Count);
+    //
+    //     Assert.Equal(1, createdList.Items.First(item => item.Order == 0).ChapterId);
+    //     Assert.Equal(3, createdList.Items.First(item => item.Order == 1).ChapterId); // we inserted 3 first
+    //     Assert.Equal(2, createdList.Items.First(item => item.Order == 2).ChapterId);
+    //     Assert.Equal(4, createdList.Items.First(item => item.Order == 3).ChapterId);
+    // }
+    // #endregion
+    //
 }

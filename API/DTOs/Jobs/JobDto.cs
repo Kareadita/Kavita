@@ -20,5 +20,13 @@ public class JobDto
     /// Last time the job was run
     /// </summary>
     public DateTime? LastExecution { get; set; }
+    /// <summary>
+    /// When the job was created
+    /// </summary>
+    public DateTime? CreatedAtUtc { get; set; }
+    /// <summary>
+    /// Last time the job was run
+    /// </summary>
+    public DateTime? LastExecutionUtc { get; set; }
     public string Cron { get; set; } = default!;
 }

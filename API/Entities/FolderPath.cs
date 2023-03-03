@@ -16,4 +16,16 @@ public class FolderPath
     // Relationship
     public Library Library { get; set; } = null!;
     public int LibraryId { get; set; }
+
+    public void UpdateLastScanned(DateTime? time)
+    {
+        if (time == null)
+        {
+            LastScanned = DateTime.Now;
+        }
+        else
+        {
+            LastScanned = (DateTime) time;
+        }
+    }
 }

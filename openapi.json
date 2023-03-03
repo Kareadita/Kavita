@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.6.1.26"
+    "version": "0.7.1.2"
   },
   "servers": [
     {
@@ -729,10 +729,12 @@
         "tags": [
           "Account"
         ],
+        "summary": "Resend an invite to a user already invited",
         "parameters": [
           {
             "name": "userId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4046,17 +4048,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "type": "boolean"
                 }
               }
             }
@@ -6150,17 +6152,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/ChapterMetadataDto"
                 }
               }
             }
@@ -7245,6 +7247,7 @@
           "Server"
         ],
         "summary": "Is this server accessible to the outside net",
+        "description": "If the instance has the HostName set, this will return true whether or not it is accessible externally",
         "responses": {
           "200": {
             "description": "Success",
@@ -7416,6 +7419,36 @@
         "tags": [
           "Settings"
         ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/reset-ip-addresses": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the IP Addresses",
         "responses": {
           "200": {
             "description": "Success",
@@ -8554,6 +8587,7 @@
           "Upload"
         ],
         "summary": "Replaces reading list cover image and locks it with a base64 encoded image",
+        "description": "This is the only API that can be called by non-admins, but the authenticated user must have a readinglist permission",
         "requestBody": {
           "description": "",
           "content": {
@@ -9336,7 +9370,15 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastActive": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastActiveUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -9467,6 +9509,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -9510,6 +9560,10 @@
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader",
             "nullable": true
+          },
+          "swipeToPaginate": {
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
           },
           "bookReaderMargin": {
             "type": "integer",
@@ -9624,6 +9678,14 @@
           "lastModified": {
             "type": "string",
             "description": "Last date this was updated",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "appUser": {
@@ -9881,6 +9943,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "coverImage": {
             "type": "string",
             "description": "Relative path to the (managed) image file representing the cover image",
@@ -9936,6 +10006,32 @@
             "description": "Number of the Total Count (progress the Series is complete)",
             "format": "int32"
           },
+          "seriesGroup": {
+            "type": "string",
+            "description": "SeriesGroup tag in ComicInfo",
+            "nullable": true
+          },
+          "storyArc": {
+            "type": "string",
+            "nullable": true
+          },
+          "storyArcNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "alternateNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "alternateSeries": {
+            "type": "string",
+            "nullable": true
+          },
+          "alternateCount": {
+            "type": "integer",
+            "description": "Not currently used in Kavita",
+            "format": "int32"
+          },
           "wordCount": {
             "type": "integer",
             "description": "Total Word count of all chapters in this chapter.",
@@ -9973,6 +10069,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Tag"
+            },
+            "nullable": true
+          },
+          "userProgress": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserProgress"
             },
             "nullable": true
           },
@@ -10030,6 +10133,11 @@
             "description": "Calculated at API time. Number of pages read for this Chapter for logged in user.",
             "format": "int32"
           },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
           "coverImageLocked": {
             "type": "boolean",
             "description": "If the Cover Image is locked for this entity"
@@ -10042,6 +10150,18 @@
           "created": {
             "type": "string",
             "description": "When chapter was created",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "releaseDate": {
@@ -10176,6 +10296,145 @@
         },
         "additionalProperties": false,
         "description": "Information about the Chapter for the Reader to render"
+      },
+      "ChapterMetadataDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "description": "Collection of all Tags from underlying chapters for a Series",
+            "nullable": true
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "releaseDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "publicationStatus": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Summary for the Chapter/Issue",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "description": "Language for the Chapter/Issue",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number in the TotalCount of issues",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "description": "Total number of issues for the series",
+            "format": "int32"
+          },
+          "wordCount": {
+            "type": "integer",
+            "description": "Number of Words for this chapter. Only applies to Epub",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Exclusively metadata about a given chapter"
       },
       "CollectionTag": {
         "type": "object",
@@ -10521,11 +10780,23 @@
             "description": "Last time this device was used to send a file",
             "format": "date-time"
           },
+          "lastUsedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           }
@@ -10556,6 +10827,11 @@
             "$ref": "#/components/schemas/DevicePlatform"
           },
           "lastUsed": {
+            "type": "string",
+            "description": "Last time this device was used to send a file",
+            "format": "date-time"
+          },
+          "lastUsedUtc": {
             "type": "string",
             "description": "Last time this device was used to send a file",
             "format": "date-time"
@@ -10923,9 +11199,6 @@
             "type": "string",
             "nullable": true
           },
-          "externalTag": {
-            "type": "boolean"
-          },
           "seriesMetadatas": {
             "type": "array",
             "items": {
@@ -11066,6 +11339,18 @@
             "format": "date-time",
             "nullable": true
           },
+          "createdAtUtc": {
+            "type": "string",
+            "description": "When the job was created",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastExecutionUtc": {
+            "type": "string",
+            "description": "Last time the job was run",
+            "format": "date-time",
+            "nullable": true
+          },
           "cron": {
             "type": "string",
             "nullable": true
@@ -11152,11 +11437,27 @@
             "type": "boolean",
             "description": "Include library series in Search"
           },
+          "manageCollections": {
+            "type": "boolean",
+            "description": "Should this library create and manage collections from Metadata"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -11225,9 +11526,17 @@
             "type": "boolean",
             "description": "Include Library series on Recommended Streams"
           },
+          "manageCollections": {
+            "type": "boolean",
+            "description": "Should this library create and manage collections from Metadata"
+          },
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           },
           "folders": {
             "type": "array",
@@ -11314,9 +11623,21 @@
             "description": "Last time underlying file was modified",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "lastFileAnalysis": {
             "type": "string",
             "description": "Last time file analysis ran on this file",
+            "format": "date-time"
+          },
+          "lastFileAnalysisUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "chapter": {
@@ -11509,6 +11830,9 @@
           "password": {
             "type": "string",
             "nullable": true
+          },
+          "sendEmail": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -11632,13 +11956,8 @@
           },
           "bookScrollId": {
             "type": "string",
-            "description": "For Book reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
+            "description": "For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "description": "Last time the progress was synced from UI or external app",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -11789,6 +12108,14 @@
             "type": "string",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -11911,11 +12238,11 @@
             "type": "string",
             "nullable": true
           },
-          "volumeNumber": {
+          "chapterTitleName": {
             "type": "string",
             "nullable": true
           },
-          "chapterTitleName": {
+          "volumeNumber": {
             "type": "string",
             "nullable": true
           },
@@ -11927,12 +12254,16 @@
             "type": "integer",
             "format": "int32"
           },
-          "title": {
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
+          },
+          "libraryName": {
             "type": "string",
             "nullable": true
           },
-          "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
+          "title": {
+            "type": "string",
+            "nullable": true
           },
           "releaseDate": {
             "type": "string",
@@ -11943,6 +12274,16 @@
             "type": "integer",
             "description": "Used internally only",
             "format": "int32"
+          },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
+            "format": "date-time"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "File size of underlying item",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -12398,6 +12739,14 @@
             "description": "Whenever a modification occurs. Ie) New volumes, removed volumes, title update, etc",
             "format": "date-time"
           },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "coverImage": {
             "type": "string",
             "description": "Absolute path to the (managed) image file",
@@ -12422,6 +12771,11 @@
             "description": "Last time the folder was scanned",
             "format": "date-time"
           },
+          "lastFolderScannedUtc": {
+            "type": "string",
+            "description": "Last time the folder was scanned in Utc",
+            "format": "date-time"
+          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
@@ -12437,6 +12791,10 @@
           "lastChapterAdded": {
             "type": "string",
             "description": "When a Chapter was last added onto the Series",
+            "format": "date-time"
+          },
+          "lastChapterAddedUtc": {
+            "type": "string",
             "format": "date-time"
           },
           "wordCount": {
@@ -13198,6 +13556,40 @@
           "usingRestrictedProfiles": {
             "type": "boolean",
             "description": "If there is at least one user that is using an age restricted profile on the instance"
+          },
+          "usersWithEmulateComicBook": {
+            "type": "integer",
+            "description": "Number of users using the Emulate Comic Book setting",
+            "format": "int32"
+          },
+          "percentOfLibrariesWithFolderWatchingEnabled": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries with folder watching enabled",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInSearch": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Search",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInRecommended": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Recommended",
+            "format": "float"
+          },
+          "percentOfLibrariesIncludedInDashboard": {
+            "type": "number",
+            "description": "Percent (0.0-1.0) of libraries included in Dashboard",
+            "format": "float"
+          },
+          "totalReadingHours": {
+            "type": "integer",
+            "description": "Total reading hours of all users",
+            "format": "int64"
+          },
+          "storeCoversAsWebP": {
+            "type": "boolean",
+            "description": "Is the Server saving covers as WebP"
           }
         },
         "additionalProperties": false,
@@ -13227,6 +13619,11 @@
             "type": "integer",
             "description": "Port the server listens on. Managed in appsettings.json.",
             "format": "int32"
+          },
+          "ipAddresses": {
+            "type": "string",
+            "description": "Comma separated list of ip addresses the server listens on. Managed in appsettings.json",
+            "nullable": true
           },
           "allowStatCollection": {
             "type": "boolean",
@@ -13281,6 +13678,11 @@
           "convertCoverToWebP": {
             "type": "boolean",
             "description": "If the server should save covers as WebP encoding"
+          },
+          "hostName": {
+            "type": "string",
+            "description": "The Host name (ie Reverse proxy domain name) for the server",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13317,6 +13719,10 @@
             "format": "int64"
           },
           "totalPeople": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalReadingTime": {
             "type": "integer",
             "format": "int64"
           },
@@ -13410,6 +13816,14 @@
           "lastModified": {
             "type": "string",
             "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -13444,6 +13858,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -13495,9 +13917,6 @@
           "normalizedTitle": {
             "type": "string",
             "nullable": true
-          },
-          "externalTag": {
-            "type": "boolean"
           },
           "seriesMetadatas": {
             "type": "array",
@@ -13649,11 +14068,27 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
       },
       "UpdateLibraryDto": {
+        "required": [
+          "collapseSeriesRelationships",
+          "folders",
+          "folderWatching",
+          "id",
+          "includeInDashboard",
+          "includeInRecommended",
+          "includeInSearch",
+          "manageCollections",
+          "name",
+          "type"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -13661,8 +14096,8 @@
             "format": "int32"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "minLength": 1,
+            "type": "string"
           },
           "type": {
             "$ref": "#/components/schemas/LibraryType"
@@ -13671,8 +14106,7 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "nullable": true
+            }
           },
           "folderWatching": {
             "type": "boolean"
@@ -13684,6 +14118,12 @@
             "type": "boolean"
           },
           "includeInSearch": {
+            "type": "boolean"
+          },
+          "manageCollections": {
+            "type": "boolean"
+          },
+          "collapseSeriesRelationships": {
             "type": "boolean"
           }
         },
@@ -14162,15 +14602,12 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
-        "required": [
-          "url"
-        ],
         "type": "object",
         "properties": {
           "url": {
-            "minLength": 1,
             "type": "string",
-            "description": "External url"
+            "description": "External url",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14244,7 +14681,7 @@
           "readingDirection",
           "scalingOption",
           "showScreenHints",
-          "theme"
+          "swipeToPaginate"
         ],
         "type": "object",
         "properties": {
@@ -14271,6 +14708,9 @@
             "minLength": 1,
             "type": "string",
             "description": "Manga Reader Option: Background color of the reader"
+          },
+          "swipeToPaginate": {
+            "type": "boolean"
           },
           "autoCloseMenu": {
             "type": "boolean",
@@ -14408,6 +14848,14 @@
             "format": "date-time"
           },
           "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },

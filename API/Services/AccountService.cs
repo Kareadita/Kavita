@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Errors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -21,6 +24,8 @@ public interface IAccountService
     Task<bool> HasBookmarkPermission(AppUser? user);
     Task<bool> HasDownloadPermission(AppUser? user);
     Task<bool> HasChangeRestrictionRole(AppUser? user);
+    Task<bool> CheckIfAccessible(HttpRequest request);
+    Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true);
 }
 
 public class AccountService : IAccountService
@@ -28,13 +33,44 @@ public class AccountService : IAccountService
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<AccountService> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IHostEnvironment _environment;
+    private readonly IEmailService _emailService;
     public const string DefaultPassword = "[k.2@RZ!mxCQkJzE";
+    private const string LocalHost = "localhost:4200";
 
-    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork)
+    public AccountService(UserManager<AppUser> userManager, ILogger<AccountService> logger, IUnitOfWork unitOfWork,
+        IHostEnvironment environment, IEmailService emailService)
     {
         _userManager = userManager;
         _logger = logger;
         _unitOfWork = unitOfWork;
+        _environment = environment;
+        _emailService = emailService;
+    }
+
+    /// <summary>
+    /// Checks if the instance is accessible. If the host name is filled out, then it will assume it is accessible as email generation will use host name.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
+    public async Task<bool> CheckIfAccessible(HttpRequest request)
+    {
+        var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        return !string.IsNullOrEmpty((await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).HostName) || await _emailService.CheckIfAccessible(host);
+    }
+
+    public async Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true)
+    {
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var host = _environment.IsDevelopment() ? LocalHost : request.Host.ToString();
+        var basePart = $"{request.Scheme}://{host}{request.PathBase}/";
+        if (!string.IsNullOrEmpty(serverSettings.HostName))
+        {
+            basePart = serverSettings.HostName;
+        }
+
+        if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
+        return $"registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";
     }
 
     public async Task<IEnumerable<ApiException>> ChangeUserPassword(AppUser user, string newPassword)

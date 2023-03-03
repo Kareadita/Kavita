@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace API.DTOs;
 
@@ -9,7 +10,7 @@ namespace API.DTOs;
 /// A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying
 /// file (abstracted from type).
 /// </summary>
-public class ChapterDto : IHasReadTimeEstimate
+public class ChapterDto : IHasReadTimeEstimate, IEntityDate
 {
     public int Id { get; init; }
     /// <summary>
@@ -41,6 +42,10 @@ public class ChapterDto : IHasReadTimeEstimate
     /// </summary>
     public int PagesRead { get; set; }
     /// <summary>
+    /// The last time a chapter was read by current authenticated user
+    /// </summary>
+    public DateTime LastReadingProgressUtc { get; set; }
+    /// <summary>
     /// If the Cover Image is locked for this entity
     /// </summary>
     public bool CoverImageLocked { get; set; }
@@ -51,7 +56,10 @@ public class ChapterDto : IHasReadTimeEstimate
     /// <summary>
     /// When chapter was created
     /// </summary>
-    public DateTime Created { get; init; }
+    public DateTime Created { get; set; }
+    public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
     /// <summary>
     /// When the chapter was released.
     /// </summary>
@@ -75,7 +83,6 @@ public class ChapterDto : IHasReadTimeEstimate
     /// Total words in a Chapter (books only)
     /// </summary>
     public long WordCount { get; set; } = 0L;
-
     /// <summary>
     /// Formatted Volume title ie) Volume 2.
     /// </summary>

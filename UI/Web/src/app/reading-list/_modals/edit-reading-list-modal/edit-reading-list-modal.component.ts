@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReadingList } from 'src/app/_models/reading-list';
+import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { UploadService } from 'src/app/_services/upload.service';
@@ -41,7 +42,7 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
 
   constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
     public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService, 
-    private imageService: ImageService, private readonly cdRef: ChangeDetectorRef) { }
+    private imageService: ImageService, private readonly cdRef: ChangeDetectorRef, public accountService: AccountService) { }
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({

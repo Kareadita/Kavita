@@ -10,6 +10,7 @@ using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using static System.Security.Claims.ClaimTypes;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 
@@ -21,6 +22,7 @@ public interface ITokenService
     Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
 }
+
 
 public class TokenService : ITokenService
 {
@@ -38,19 +40,20 @@ public class TokenService : ITokenService
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.NameId, user.UserName!)
+            new Claim(JwtRegisteredClaimNames.Name, user.UserName!),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
         };
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
         var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.Now.AddDays(14),
+            Expires = DateTime.UtcNow.AddDays(14),
             SigningCredentials = creds
         };
 

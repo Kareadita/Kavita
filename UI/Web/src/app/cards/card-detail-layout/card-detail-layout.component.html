@@ -7,7 +7,7 @@
             </span>
             <span *ngIf="header !== undefined && header.length > 0">
                 {{header}}&nbsp;
-                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination != undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
             </span>
         </h2>
     </div>
@@ -52,7 +52,7 @@
 <ng-template #jumpBar>
     <div class="jump-bar">
         <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
-            <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)">
+            <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="jumpKey.size + ' Series'" placement="left">
                 {{jumpKey.title}}
             </button>
         </ng-container>

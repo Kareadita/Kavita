@@ -37,6 +37,8 @@ public class ReadingList : IEntityDate
     public ICollection<ReadingListItem> Items { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 
     // Relationships
     public int AppUserId { get; set; }

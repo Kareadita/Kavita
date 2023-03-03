@@ -14,7 +14,6 @@ namespace API.Controllers;
 /// <summary>
 ///
 /// </summary>
-[Authorize(Policy = "RequireAdminRole")]
 public class UploadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -23,10 +22,11 @@ public class UploadController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IDirectoryService _directoryService;
     private readonly IEventHub _eventHub;
+    private readonly IReadingListService _readingListService;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
-        ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub)
+        ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _imageService = imageService;
@@ -34,6 +34,7 @@ public class UploadController : BaseApiController
         _taskScheduler = taskScheduler;
         _directoryService = directoryService;
         _eventHub = eventHub;
+        _readingListService = readingListService;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ public class UploadController : BaseApiController
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
-        var dateString = $"{DateTime.Now.ToShortDateString()}_{DateTime.Now.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
+        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
         var format = _directoryService.FileSystem.Path.GetExtension(dto.Url.Split('?')[0]).Replace(".", string.Empty);
         try
         {
@@ -171,9 +172,9 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces reading list cover image and locks it with a base64 encoded image
     /// </summary>
+    /// <remarks>This is the only API that can be called by non-admins, but the authenticated user must have a readinglist permission</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [Authorize(Policy = "RequireAdminRole")]
     [RequestSizeLimit(8_000_000)]
     [HttpPost("reading-list")]
     public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadFileDto uploadFileDto)
@@ -184,6 +185,9 @@ public class UploadController : BaseApiController
         {
             return BadRequest("You must pass a url to use");
         }
+
+        if (_readingListService.UserHasReadingListAccess(uploadFileDto.Id, User.GetUsername()) == null)
+            return Unauthorized("You do not have access");
 
         try
         {

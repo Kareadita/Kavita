@@ -58,7 +58,7 @@ public static class DbFactory
             NormalizedLocalizedName = localizedName.ToNormalized(),
             SortName = name,
             Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(Array.Empty<CollectionTag>())
+            Metadata = SeriesMetadata(new List<CollectionTag>())
         };
     }
 
@@ -88,11 +88,6 @@ public static class DbFactory
         };
     }
 
-    public static SeriesMetadata SeriesMetadata(ComicInfo info)
-    {
-        return SeriesMetadata(Array.Empty<CollectionTag>());
-    }
-
     public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
     {
         return new SeriesMetadata()
@@ -108,10 +103,11 @@ public static class DbFactory
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = title.ToNormalized().ToUpper(),
+            NormalizedTitle = title.ToNormalized(),
             Title = title,
             Summary = summary?.Trim(),
-            Promoted = promoted
+            Promoted = promoted,
+            SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
 
@@ -120,7 +116,7 @@ public static class DbFactory
         title = title.Trim();
         return new ReadingList()
         {
-            NormalizedTitle = title.ToNormalized().ToUpper(),
+            NormalizedTitle = title.ToNormalized(),
             Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
@@ -136,27 +132,25 @@ public static class DbFactory
             Order = index,
             ChapterId = chapterId,
             SeriesId = seriesId,
-            VolumeId = volumeId,
+            VolumeId = volumeId
         };
     }
 
-    public static Genre Genre(string name, bool external)
+    public static Genre Genre(string name)
     {
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.ToNormalized(),
-            ExternalTag = external
+            NormalizedTitle = name.ToNormalized()
         };
     }
 
-    public static Tag Tag(string name, bool external)
+    public static Tag Tag(string name)
     {
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.ToNormalized(),
-            ExternalTag = external
+            NormalizedTitle = name.ToNormalized()
         };
     }
 
@@ -177,7 +171,8 @@ public static class DbFactory
             FilePath = filePath,
             Format = format,
             Pages = pages,
-            LastModified = File.GetLastWriteTime(filePath)
+            LastModified = File.GetLastWriteTime(filePath),
+            LastModifiedUtc = File.GetLastWriteTimeUtc(filePath),
         };
     }
 

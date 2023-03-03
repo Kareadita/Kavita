@@ -16,7 +16,6 @@ public class MangaFile : IEntityDate
     /// Absolute path to the archive file
     /// </summary>
     public required string FilePath { get; set; }
-
     /// <summary>
     /// Number of pages for the given file
     /// </summary>
@@ -37,10 +36,15 @@ public class MangaFile : IEntityDate
     /// </summary>
     /// <remarks>This gets updated anytime the file is scanned</remarks>
     public DateTime LastModified { get; set; }
+
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
+
     /// <summary>
     /// Last time file analysis ran on this file
     /// </summary>
     public DateTime LastFileAnalysis { get; set; }
+    public DateTime LastFileAnalysisUtc { get; set; }
 
 
     // Relationship Mapping
@@ -53,6 +57,14 @@ public class MangaFile : IEntityDate
     /// </summary>
     public void UpdateLastModified()
     {
-        if (FilePath != null) LastModified = File.GetLastWriteTime(FilePath);
+        if (FilePath == null) return; 
+        LastModified = File.GetLastWriteTime(FilePath);
+        LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
+    }
+
+    public void UpdateLastFileAnalysis()
+    {
+        LastFileAnalysis = DateTime.Now;
+        LastFileAnalysisUtc = DateTime.UtcNow;
     }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-loading',
@@ -6,14 +6,14 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } 
   styleUrls: ['./loading.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LoadingComponent implements OnInit {
+export class LoadingComponent {
 
   @Input() loading: boolean = false;
   @Input() message: string = '';
+  /**
+   * Uses absolute positioning to ensure it loads over content
+   */
+  @Input() absolute: boolean = false;
   
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
-
-  ngOnInit(): void {
-  }
-
+  constructor() { }
 }

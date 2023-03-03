@@ -90,6 +90,9 @@ public static class Seed
             {
                 Key = ServerSettingKey.Port, Value = "5000"
             }, // Not used from DB, but DB is sync with appSettings.json
+            new() {
+                Key = ServerSettingKey.IpAddresses, Value = "0.0.0.0,::"
+            }, // Not used from DB, but DB is sync with appSettings.json
             new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
             new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
             new() {Key = ServerSettingKey.EnableAuthentication, Value = "true"},
@@ -103,6 +106,7 @@ public static class Seed
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             new() {Key = ServerSettingKey.ConvertCoverToWebP, Value = "false"},
+            new() {Key = ServerSettingKey.HostName, Value = string.Empty},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)
@@ -116,9 +120,11 @@ public static class Seed
 
         await context.SaveChangesAsync();
 
-        // Port and LoggingLevel are managed in appSettings.json. Update the DB values to match
+        // Port, IpAddresses and LoggingLevel are managed in appSettings.json. Update the DB values to match
         context.ServerSetting.First(s => s.Key == ServerSettingKey.Port).Value =
             Configuration.Port + string.Empty;
+        context.ServerSetting.First(s => s.Key == ServerSettingKey.IpAddresses).Value =
+            Configuration.IpAddresses;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheDirectory).Value =
             directoryService.CacheDirectory + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =

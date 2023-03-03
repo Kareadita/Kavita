@@ -33,6 +33,10 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset', {});
   }
 
+  resetIPAddressesSettings() {
+    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-ip-addresses', {});
+  }
+
   resetEmailServerSettings() {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
   }

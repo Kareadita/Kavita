@@ -1,9 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
-import { Subject, combineLatest, map, takeUntil, Observable } from 'rxjs';
+import { Subject, map, takeUntil, Observable } from 'rxjs';
 import { DayOfWeek, StatisticsService } from 'src/app/_services/statistics.service';
-import { compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { StatCount } from '../../_models/stat-count';
 import { DayOfWeekPipe } from '../../_pipes/day-of-week.pipe';
@@ -13,11 +12,11 @@ import { DayOfWeekPipe } from '../../_pipes/day-of-week.pipe';
   templateUrl: './day-breakdown.component.html',
   styleUrls: ['./day-breakdown.component.scss']
 })
-export class DayBreakdownComponent implements OnInit {
+export class DayBreakdownComponent implements OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  view: [number, number] = [700, 400];
+  view: [number, number] = [0,0];
   gradient: boolean = true;
   showLegend: boolean = true;
   showLabels: boolean = true;
@@ -40,11 +39,6 @@ export class DayBreakdownComponent implements OnInit {
       }),
       takeUntil(this.onDestroy)
     );
-  }
-
-  ngOnInit(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnDestroy(): void {

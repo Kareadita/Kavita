@@ -25,18 +25,23 @@ public interface IStatsService
     Task<ServerInfoDto> GetServerInfo();
     Task SendCancellation();
 }
+/// <summary>
+/// This is for reporting to the stat server
+/// </summary>
 public class StatsService : IStatsService
 {
     private readonly ILogger<StatsService> _logger;
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
+    private readonly IStatisticService _statisticService;
     private const string ApiUrl = "https://stats.kavitareader.com";
 
-    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context)
+    public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context, IStatisticService statisticService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _context = context;
+        _statisticService = statisticService;
 
         FlurlHttp.ConfigureClient(ApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -116,6 +121,14 @@ public class StatsService : IStatsService
             DotnetVersion = Environment.Version.ToString(),
             IsDocker = new OsInfo().IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
+            UsersWithEmulateComicBook = await _context.AppUserPreferences.CountAsync(p => p.EmulateBook),
+            TotalReadingHours = await _statisticService.TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty),
+
+            PercentOfLibrariesWithFolderWatchingEnabled = await GetPercentageOfLibrariesWithFolderWatchingEnabled(),
+            PercentOfLibrariesIncludedInRecommended = await GetPercentageOfLibrariesIncludedInRecommended(),
+            PercentOfLibrariesIncludedInDashboard = await GetPercentageOfLibrariesIncludedInDashboard(),
+            PercentOfLibrariesIncludedInSearch = await GetPercentageOfLibrariesIncludedInSearch(),
+
             HasBookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync()).Any(),
             NumberOfLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).Count(),
             NumberOfCollections = (await _unitOfWork.CollectionTagRepository.GetAllTagsAsync()).Count(),
@@ -127,6 +140,7 @@ public class StatsService : IStatsService
             TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
             UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
             StoreBookmarksAsWebP = serverSettings.ConvertBookmarkToWebP,
+            StoreCoversAsWebP = serverSettings.ConvertCoverToWebP,
             MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
             MaxVolumesInASeries = await MaxVolumesInASeries(),
             MaxChaptersInASeries = await MaxChaptersInASeries(),
@@ -190,6 +204,34 @@ public class StatsService : IStatsService
         }
     }
 
+    private async Task<float> GetPercentageOfLibrariesWithFolderWatchingEnabled()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
+        return libraries.Count(l => l.FolderWatching) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInRecommended()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
+        return libraries.Count(l => l.IncludeInRecommended) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInDashboard()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
+        return libraries.Count(l => l.IncludeInDashboard) / (1.0f * libraries.Count);
+    }
+
+    private async Task<float> GetPercentageOfLibrariesIncludedInSearch()
+    {
+        var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
+        if (libraries.Count == 0) return 0.0f;
+        return libraries.Count(l => l.IncludeInSearch) / (1.0f * libraries.Count);
+    }
+
     private Task<bool> GetIfUsingSeriesRelationship()
     {
         return _context.SeriesRelation.AnyAsync();
@@ -241,6 +283,7 @@ public class StatsService : IStatsService
     {
         return await _context.AppUserPreferences.Select(p => p.PageSplitOption).Distinct().ToListAsync();
     }
+
 
     private async Task<IEnumerable<LayoutMode>> AllMangaReaderLayoutModes()
     {

@@ -11,13 +11,14 @@ namespace API.Entities;
 public class AppUser : IdentityUser<int>, IHasConcurrencyToken
 {
     public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime CreatedUtc { get; set; } = DateTime.UtcNow;
     public DateTime LastActive { get; set; }
+    public DateTime LastActiveUtc { get; set; }
     public ICollection<Library> Libraries { get; set; } = null!;
     public ICollection<AppUserRole> UserRoles { get; set; } = null!;
     public ICollection<AppUserProgress> Progresses { get; set; } = null!;
     public ICollection<AppUserRating> Ratings { get; set; } = null!;
     public AppUserPreferences UserPreferences { get; set; } = null!;
-
     /// <summary>
     /// Bookmarks associated with this User
     /// </summary>
@@ -59,6 +60,12 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     public void OnSavingChanges()
     {
         RowVersion++;
+    }
+
+    public void UpdateLastActive()
+    {
+        LastActive = DateTime.Now;
+        LastActiveUtc = DateTime.UtcNow;
     }
 
 }

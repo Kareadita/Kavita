@@ -30,4 +30,8 @@ public class DeviceDto
     /// Last time this device was used to send a file
     /// </summary>
     public DateTime LastUsed { get; set; }
+    /// <summary>
+    /// Last time this device was used to send a file
+    /// </summary>
+    public DateTime LastUsedUtc { get; set; }
 }

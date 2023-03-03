@@ -16,9 +16,8 @@ public static class TagHelper
     /// </summary>
     /// <param name="allTags"></param>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
     /// <param name="action">Callback for every item. Will give said item back and a bool if item was added</param>
-    public static void UpdateTag(ICollection<Tag> allTags, IEnumerable<string> names, bool isExternal, Action<Tag, bool> action)
+    public static void UpdateTag(ICollection<Tag> allTags, IEnumerable<string> names, Action<Tag, bool> action)
     {
         foreach (var name in names)
         {
@@ -28,11 +27,11 @@ public static class TagHelper
             var normalizedName = name.ToNormalized();
 
             var genre = allTags.FirstOrDefault(p =>
-                p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+                p.NormalizedTitle.Equals(normalizedName));
             if (genre == null)
             {
                 added = true;
-                genre = DbFactory.Tag(name, false);
+                genre = DbFactory.Tag(name);
                 allTags.Add(genre);
             }
 
@@ -45,7 +44,7 @@ public static class TagHelper
         var existing = existingTags.ToList();
         foreach (var genre in existing)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
+            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle.Equals(g.NormalizedTitle));
             if (existingPerson != null) continue;
             existingTags.Remove(genre);
             action?.Invoke(genre);
@@ -86,12 +85,12 @@ public static class TagHelper
     /// <param name="tags">Tags from metadata</param>
     /// <param name="isExternal">Remove external tags?</param>
     /// <param name="action">Callback which will be executed for each tag removed</param>
-    public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, bool isExternal, Action<Tag>? action = null)
+    public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, Action<Tag>? action = null)
     {
         var normalizedTags = tags.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         foreach (var person in normalizedTags)
         {
-            var existingTag = existingTags.FirstOrDefault(p => p.ExternalTag == isExternal && person.Equals(p.NormalizedTitle));
+            var existingTag = existingTags.FirstOrDefault(p => person.Equals(p.NormalizedTitle));
             if (existingTag == null) continue;
 
             existingTags.Remove(existingTag);

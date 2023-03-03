@@ -72,6 +72,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
@@ -80,6 +83,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastActive")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastActiveUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
@@ -146,10 +152,16 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Page")
@@ -249,6 +261,9 @@ namespace API.Data.Migrations
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("SwipeToPaginate")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("ThemeId")
                         .HasColumnType("INTEGER");
 
@@ -280,7 +295,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("LibraryId")
@@ -298,6 +319,8 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
+
+                    b.HasIndex("ChapterId");
 
                     b.HasIndex("SeriesId");
 
@@ -355,6 +378,15 @@ namespace API.Data.Migrations
                     b.Property<int>("AgeRating")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AlternateCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AlternateNumber")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlternateSeries")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("AvgHoursToRead")
                         .HasColumnType("INTEGER");
 
@@ -370,6 +402,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsSpecial")
                         .HasColumnType("INTEGER");
 
@@ -377,6 +412,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxHoursToRead")
@@ -395,6 +433,15 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SeriesGroup")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoryArc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("StoryArcNumber")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Summary")
@@ -469,6 +516,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("EmailAddress")
                         .HasColumnType("TEXT");
 
@@ -478,7 +528,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastUsed")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUsedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -522,9 +578,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ExternalTag")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
@@ -533,7 +586,7 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedTitle", "ExternalTag")
+                    b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
                     b.ToTable("Genre");
@@ -545,10 +598,16 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("CollapseSeriesRelationships")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("FolderWatching")
@@ -574,8 +633,16 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastScanned")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ManageCollections")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -603,6 +670,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Extension")
                         .HasColumnType("TEXT");
 
@@ -615,7 +685,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastFileAnalysis")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastFileAnalysisUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Pages")
@@ -789,7 +865,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedTitle")
@@ -866,6 +948,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FolderPath")
                         .HasColumnType("TEXT");
 
@@ -875,10 +960,19 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastChapterAdded")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastChapterAddedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastFolderScanned")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("LastFolderScannedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("LibraryId")
@@ -996,6 +1090,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
@@ -1003,6 +1100,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -1025,9 +1125,6 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("ExternalTag")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("NormalizedTitle")
                         .HasColumnType("TEXT");
 
@@ -1036,7 +1133,7 @@ namespace API.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedTitle", "ExternalTag")
+                    b.HasIndex("NormalizedTitle")
                         .IsUnique();
 
                     b.ToTable("Tag");
@@ -1057,7 +1154,13 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxHoursToRead")
@@ -1325,6 +1428,12 @@ namespace API.Data.Migrations
                     b.HasOne("API.Entities.AppUser", "AppUser")
                         .WithMany("Progresses")
                         .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Chapter", null)
+                        .WithMany("UserProgress")
+                        .HasForeignKey("ChapterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1702,6 +1811,8 @@ namespace API.Data.Migrations
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
                     b.Navigation("Files");
+
+                    b.Navigation("UserProgress");
                 });
 
             modelBuilder.Entity("API.Entities.Library", b =>

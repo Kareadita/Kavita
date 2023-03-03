@@ -28,80 +28,18 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class SeriesServiceTests
+public class SeriesServiceTests : AbstractDbTest
 {
-    private readonly IUnitOfWork _unitOfWork;
-
-    private readonly DbConnection _connection;
-    private readonly DataContext _context;
-
     private readonly ISeriesService _seriesService;
 
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string DataDirectory = "C:/data/";
-
-    public SeriesServiceTests()
+    public SeriesServiceTests() : base()
     {
-        var contextOptions = new DbContextOptionsBuilder().UseSqlite(CreateInMemoryDatabase()).Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
-
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
     }
     #region Setup
 
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context,
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        // var lib = new Library()
-        // {
-        //     Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        // };
-        //
-        // _context.AppUser.Add(new AppUser()
-        // {
-        //     UserName = "majora2007",
-        //     Libraries = new List<Library>()
-        //     {
-        //         lib
-        //     }
-        // });
-
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    private async Task ResetDb()
+    protected override async Task ResetDb()
     {
         _context.Series.RemoveRange(_context.Series.ToList());
         _context.AppUserRating.RemoveRange(_context.AppUserRating.ToList());
@@ -111,19 +49,6 @@ public class SeriesServiceTests
         _context.Library.RemoveRange(_context.Library.ToList());
 
         await _context.SaveChangesAsync();
-    }
-
-    private static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(DataDirectory);
-
-        return fileSystem;
     }
 
     private static UpdateRelatedSeriesDto CreateRelationsDto(Series series)
@@ -851,7 +776,7 @@ public class SeriesServiceTests
             },
             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
         };
-        var g = DbFactory.Genre("Existing Genre", false);
+        var g = DbFactory.Genre("Existing Genre");
         s.Metadata.Genres = new List<Genre>() {g};
         _context.Series.Add(s);
 
@@ -1011,7 +936,7 @@ public class SeriesServiceTests
             },
             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>())
         };
-        var g = DbFactory.Genre("Existing Genre", false);
+        var g = DbFactory.Genre("Existing Genre");
         s.Metadata.Genres = new List<Genre>() {g};
         s.Metadata.GenresLocked = true;
         _context.Series.Add(s);
@@ -1432,7 +1357,7 @@ public class SeriesServiceTests
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary()
     {
         await ResetDb();
-        _context.Library.Add(new Library()
+        var lib = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1445,11 +1370,24 @@ public class SeriesServiceTests
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series"),
-                DbFactory.Series("Test Series Prequels"),
-                DbFactory.Series("Test Series Sequels")
+                new Series()
+                {
+                    Name = "Test Series",
+                    Volumes = new List<Volume>() { }
+                },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>() { }
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>() { }
+                }
             }
-        });
+        };
+        _context.Library.Add(lib);
 
         await _context.SaveChangesAsync();
 
@@ -1460,7 +1398,7 @@ public class SeriesServiceTests
         addRelationDto.Sequels.Add(3);
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib.Id);
         _unitOfWork.LibraryRepository.Delete(library);
 
         try
@@ -1479,7 +1417,7 @@ public class SeriesServiceTests
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary_WhenSeriesCrossLibraries()
     {
         await ResetDb();
-        _context.Library.Add(new Library()
+        var lib1 = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1521,12 +1459,22 @@ public class SeriesServiceTests
                         }
                     }
                 },
+                new Series()
+                {
+                    Name = "Test Series Prequels",
+                    Volumes = new List<Volume>() { }
+                },
+                new Series()
+                {
+                    Name = "Test Series Sequels",
+                    Volumes = new List<Volume>() { }
+                }
                 DbFactory.Series("Test Series Prequels"),
                 DbFactory.Series("Test Series Sequels"),
             }
-        });
-
-        _context.Library.Add(new Library()
+        };
+        _context.Library.Add(lib1);
+        var lib2 = new Library()
         {
             AppUsers = new List<AppUser>()
             {
@@ -1543,7 +1491,8 @@ public class SeriesServiceTests
                 DbFactory.Series("Test Series Prequels 2"),
                 DbFactory.Series("Test Series Prequels 2"),
             }
-        });
+        };
+        _context.Library.Add(lib2);
 
         await _context.SaveChangesAsync();
 
@@ -1553,7 +1502,7 @@ public class SeriesServiceTests
         addRelationDto.Adaptations.Add(4); // cross library link
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(lib1.Id, LibraryIncludes.Series);
         _unitOfWork.LibraryRepository.Delete(library);
 
         try
@@ -1571,7 +1520,6 @@ public class SeriesServiceTests
     #endregion
 
     #region UpdateRelatedList
-
 
 
 

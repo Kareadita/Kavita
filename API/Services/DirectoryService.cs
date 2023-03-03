@@ -65,7 +65,7 @@ public interface IDirectoryService
     DateTime GetLastWriteTime(string folderPath);
     GlobMatcher? CreateMatcherFromFile(string filePath);
 }
-public partial class DirectoryService : IDirectoryService
+public class DirectoryService : IDirectoryService
 {
     public const string KavitaIgnoreFile = ".kavitaignore";
     public IFileSystem FileSystem { get; }
@@ -80,14 +80,21 @@ public partial class DirectoryService : IDirectoryService
     private const int RegexTimeoutMs = 5000000;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
-    [GeneratedRegex(@"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
-        MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
-    private static partial Regex ExcludeDirectoriesRegex();
+    // [GeneratedRegex(@"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
+    //     MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    // private static partial Regex ExcludeDirectoriesRegex();
+    //
+    // [GeneratedRegex(@"\(\d+\)",
+    //     MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
+    // private static partial Regex FileCopyAppendRegex();
 
-    [GeneratedRegex(@"\(\d+\)",
-        MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
-    private static partial Regex FileCopyAppendRegex();
-
+    private static readonly Regex ExcludeDirectories = new Regex(
+        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        Tasks.Scanner.Parser.Parser.RegexTimeout);
+    private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        Tasks.Scanner.Parser.Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
     public DirectoryService(ILogger<DirectoryService> logger, IFileSystem fileSystem)
@@ -165,7 +172,6 @@ public partial class DirectoryService : IDirectoryService
 
         while (FileSystem.Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
         {
-
             var folder = FileSystem.DirectoryInfo.New(path).Name;
             paths.Add(folder);
             path = path.Substring(0, path.LastIndexOf(separator));
@@ -199,7 +205,8 @@ public partial class DirectoryService : IDirectoryService
 
         if (fileNameRegex != string.Empty)
         {
-            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
+            var reSearchPattern = new Regex(fileNameRegex, RegexOptions.IgnoreCase,
+                Tasks.Scanner.Parser.Parser.RegexTimeout);
             return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
                 .Where(file =>
                 {
@@ -483,9 +490,11 @@ public partial class DirectoryService : IDirectoryService
             }
 
             var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-            if (FileCopyAppendRegex().IsMatch(noExtension))
+            //if (FileCopyAppendRegex().IsMatch(noExtension))
+            if (FileCopyAppend.IsMatch(noExtension))
             {
-                var match = FileCopyAppendRegex().Match(noExtension).Value;
+                //var match = FileCopyAppendRegex().Match(noExtension).Value;
+                var match = FileCopyAppend.Match(noExtension).Value;
                 var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
                 noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
             }
@@ -579,7 +588,7 @@ public partial class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(folderPath)) return ImmutableArray<string>.Empty;
         return FileSystem.Directory.GetDirectories(folderPath)
-            .Where(path => ExcludeDirectoriesRegex().Matches(path).Count == 0);
+            .Where(path => ExcludeDirectories.Matches(path).Count == 0);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -47,7 +47,7 @@ public class Program
         if (!Configuration.CheckIfJwtTokenSet() &&
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
         {
-            Console.WriteLine("Generating JWT TokenKey for encrypting user sessions...");
+            Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
             var rBytes = new byte[128];
             RandomNumberGenerator.Create().GetBytes(rBytes);
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
@@ -171,7 +171,25 @@ public class Program
             {
                 webBuilder.UseKestrel((opts) =>
                 {
-                    opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
+                    var ipAddresses = Configuration.IpAddresses;
+                    if (string.IsNullOrEmpty(ipAddresses))
+                    {
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
+                    }
+                    else
+                    {
+                        foreach(var ipAddress in ipAddresses.Split(','))
+                        {
+                            try {
+                                var address = System.Net.IPAddress.Parse(ipAddress.Trim());
+                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
+                            }
+                            catch(Exception ex)
+                            {
+                                Log.Fatal(ex, "Could not parse ip addess '{0}'", ipAddress);
+                            }
+                        }
+                    }
                 });
 
                 webBuilder.UseStartup<Startup>();

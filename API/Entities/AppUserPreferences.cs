@@ -1,4 +1,5 @@
 ﻿using API.Data;
+using System;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 
@@ -27,7 +28,6 @@ public class AppUserPreferences
     /// </example>
     /// </summary>
     public ReaderMode ReaderMode { get; set; }
-
     /// <summary>
     /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
     /// </summary>
@@ -48,6 +48,10 @@ public class AppUserPreferences
     /// Manga Reader Option: Background color of the reader
     /// </summary>
     public string BackgroundColor { get; set; } = "#000000";
+    /// <summary>
+    /// Manga Reader Option: Should swiping trigger pagination
+    /// </summary>
+    public bool SwipeToPaginate { get; set; }
     /// <summary>
     /// Book Reader Option: Override extra Margin
     /// </summary>

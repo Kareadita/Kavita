@@ -104,23 +104,27 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.IncludeInSearch)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageCollections)
+            .HasDefaultValue(true);
     }
 
 
     private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
-        if (!e.FromQuery && e.Entry.State == EntityState.Added && e.Entry.Entity is IEntityDate entity)
-        {
-            entity.Created = DateTime.Now;
-            entity.LastModified = DateTime.Now;
-        }
+        if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
+        entity.Created = DateTime.Now;
+        entity.LastModified = DateTime.Now;
+        entity.CreatedUtc = DateTime.UtcNow;
+        entity.LastModifiedUtc = DateTime.UtcNow;
     }
 
     private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
     {
-        if (e.NewState == EntityState.Modified && e.Entry.Entity is IEntityDate entity)
-            entity.LastModified = DateTime.Now;
+        if (e.NewState != EntityState.Modified || e.Entry.Entity is not IEntityDate entity) return;
+        entity.LastModified = DateTime.Now;
+        entity.LastModifiedUtc = DateTime.UtcNow;
     }
 
     private void OnSaveChanges()

@@ -247,7 +247,7 @@ public class LibraryController : BaseApiController
             {
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
-                    "You cannot delete a library while a scan is in progress. Please wait for scan to continue then try to delete");
+                    "You cannot delete a library while a scan is in progress. Please wait for scan to complete or restart Kavita then try to delete");
             }
 
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
@@ -337,6 +337,8 @@ public class LibraryController : BaseApiController
         library.IncludeInDashboard = dto.IncludeInDashboard;
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
+        library.ManageCollections = dto.ManageCollections;
+        library.CollapseSeriesRelationships = dto.CollapseSeriesRelationships;
 
         _unitOfWork.LibraryRepository.Update(library);
 

@@ -27,4 +27,6 @@ public class AppUserBookmark : IEntityDate
     public int AppUserId { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 }

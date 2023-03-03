@@ -176,10 +176,7 @@ export class BulkSelectionService {
     if (action.children === null || action.children?.length === 0) return ret;
 
     action.children = action.children.filter((childAction) => this.applyFilter(childAction, allowedActions));
-
-    // action.children?.forEach((childAction) => {
-    //   this.applyFilter(childAction, allowedActions);
-    // });
+    
     return ret;
   }
 

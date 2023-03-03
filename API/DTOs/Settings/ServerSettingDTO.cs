@@ -17,6 +17,10 @@ public class ServerSettingDto
     /// </summary>
     public int Port { get; set; }
     /// <summary>
+    /// Comma separated list of ip addresses the server listens on. Managed in appsettings.json
+    /// </summary>
+    public string IpAddresses { get; set; }
+    /// <summary>
     /// Allows anonymous information to be collected and sent to KavitaStats
     /// </summary>
     public bool AllowStatCollection { get; set; }
@@ -65,4 +69,8 @@ public class ServerSettingDto
     /// If the server should save covers as WebP encoding
     /// </summary>
     public bool ConvertCoverToWebP { get; set; }
+    /// <summary>
+    /// The Host name (ie Reverse proxy domain name) for the server
+    /// </summary>
+    public string HostName { get; set; }
 }

@@ -1,14 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
+using API.DTOs.ReadingLists.CBL;
+using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -19,12 +25,14 @@ public class ReadingListController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
+    private readonly IDirectoryService _directoryService;
 
-    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService)
+    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService, IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _readingListService = readingListService;
+        _directoryService = directoryService;
     }
 
     /// <summary>
@@ -79,8 +87,7 @@ public class ReadingListController : BaseApiController
     [HttpGet("items")]
     public async Task<ActionResult<IEnumerable<ReadingListItemDto>>> GetListForUser(int readingListId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId);
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, User.GetUserId());
         return Ok(items);
     }
 
@@ -177,22 +184,17 @@ public class ReadingListController : BaseApiController
     [HttpPost("create")]
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingListsWithItems);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingLists);
         if (user == null) return Unauthorized();
 
-        // When creating, we need to make sure Title is unique
-        var hasExisting = user.ReadingLists.Any(l => l.Title.Equals(dto.Title));
-        if (hasExisting)
+        try
         {
-            return BadRequest("A list of this name already exists");
+            await _readingListService.CreateReadingListForUser(user, dto.Title);
         }
-
-        var readingList = DbFactory.ReadingList(dto.Title, string.Empty, false);
-        user.ReadingLists.Add(readingList);
-
-        if (!_unitOfWork.HasChanges()) return BadRequest("There was a problem creating list");
-
-        await _unitOfWork.CommitAsync();
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByTitleAsync(user.Id, dto.Title));
     }
@@ -214,37 +216,16 @@ public class ReadingListController : BaseApiController
             return BadRequest("You do not have permissions on this reading list or the list doesn't exist");
         }
 
-        dto.Title = dto.Title.Trim();
-
-        if (string.IsNullOrEmpty(dto.Title)) return BadRequest("Title must be set");
-        if (!dto.Title.Equals(readingList.Title) && await _unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
-            return BadRequest("Reading list already exists");
-
-
-        readingList.Summary = dto.Summary;
-        readingList.Title = dto.Title;
-        readingList.NormalizedTitle = readingList.Title.ToNormalized();
-        readingList.Promoted = dto.Promoted;
-        readingList.CoverImageLocked = dto.CoverImageLocked;
-
-        if (!dto.CoverImageLocked)
+        try
         {
-            readingList.CoverImageLocked = false;
-            readingList.CoverImage = string.Empty;
-            await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                MessageFactory.CoverUpdateEvent(readingList.Id, MessageFactoryEntityTypes.ReadingList), false);
-            _unitOfWork.ReadingListRepository.Update(readingList);
+            await _readingListService.UpdateReadingList(readingList, dto);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
         }
 
-        _unitOfWork.ReadingListRepository.Update(readingList);
-
-        if (!_unitOfWork.HasChanges()) return Ok("Updated");
-
-        if (await _unitOfWork.CommitAsync())
-        {
-            return Ok("Updated");
-        }
-        return BadRequest("Could not update reading list");
+        return Ok("Updated");
     }
 
     /// <summary>
@@ -501,4 +482,22 @@ public class ReadingListController : BaseApiController
         if (string.IsNullOrEmpty(name)) return true;
         return Ok(await _unitOfWork.ReadingListRepository.ReadingListExists(name));
     }
+
+    // [HttpPost("import-cbl")]
+    // public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
+    // {
+    //     var userId = User.GetUserId();
+    //     var filename = Path.GetRandomFileName();
+    //     var outputFile = Path.Join(_directoryService.TempDirectory, filename);
+    //
+    //     await using var stream = System.IO.File.Create(outputFile);
+    //     await file.CopyToAsync(stream);
+    //     stream.Close();
+    //     var cbl = ReadingListService.LoadCblFromPath(outputFile);
+    //
+    //     // We need to pass the temp file back
+    //
+    //     var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
+    //     return importSummary.Results.Any() ? Ok(importSummary) : Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
+    // }
 }

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { map, Observable, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Series } from 'src/app/_models/series';
 import { ImageService } from 'src/app/_services/image.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -17,7 +18,7 @@ import { GenericListModalComponent } from '../_modals/generic-list-modal/generic
   styleUrls: ['./server-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServerStatsComponent implements OnInit, OnDestroy {
+export class ServerStatsComponent implements OnDestroy {
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;
@@ -32,12 +33,26 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
     this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
 
+  breakpointSubject = new BehaviorSubject<Breakpoint>(1);
+  breakpoint$: Observable<Breakpoint> = this.breakpointSubject.asObservable();
+
+  @HostListener('window:resize', ['$event'])
+  @HostListener('window:orientationchange', ['$event'])
+  onResize() {  
+    this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
+  }
+
+
+  get Breakpoint() { return Breakpoint; }
+
   constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService, 
-    private metadataService: MetadataService, private modalService: NgbModal) {
+    private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService) {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';      
     }
+
+    this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
 
     this.stats$ = this.statService.getServerStatistics().pipe(takeUntil(this.onDestroy), shareReplay());
     this.releaseYears$ = this.statService.getTopYears().pipe(takeUntil(this.onDestroy));
@@ -72,9 +87,6 @@ export class ServerStatsComponent implements OnInit, OnDestroy {
       })),
       takeUntil(this.onDestroy)
     );
-  }
-
-  ngOnInit(): void {
   }
 
   ngOnDestroy(): void {

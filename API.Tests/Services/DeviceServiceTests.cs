@@ -11,20 +11,20 @@ using Xunit;
 
 namespace API.Tests.Services;
 
-public class DeviceServiceTests : BasicTest
+public class DeviceServiceDbTests : AbstractDbTest
 {
     private readonly ILogger<DeviceService> _logger = Substitute.For<ILogger<DeviceService>>();
     private readonly IDeviceService _deviceService;
 
-    public DeviceServiceTests() : base()
+    public DeviceServiceDbTests() : base()
     {
         _deviceService = new DeviceService(_unitOfWork, _logger, Substitute.For<IEmailService>());
     }
 
-    protected new Task ResetDb()
+    protected override async Task ResetDb()
     {
         _context.Users.RemoveRange(_context.Users.ToList());
-        return Task.CompletedTask;
+        await _unitOfWork.CommitAsync();
     }
 
 
@@ -50,7 +50,6 @@ public class DeviceServiceTests : BasicTest
         }, user);
 
         Assert.NotNull(device);
-
     }
 
     [Fact]

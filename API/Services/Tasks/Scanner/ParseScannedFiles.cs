@@ -290,6 +290,8 @@ public class ParseScannedFiles
                 if (processSeriesInfos != null)
                     await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
                 _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, libraryName, ProgressEventType.Updated));
                 return;
             }
 

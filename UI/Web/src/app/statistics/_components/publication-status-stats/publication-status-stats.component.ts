@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, QueryList, ViewChildren } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, map, takeUntil, combineLatest, BehaviorSubject } from 'rxjs';
@@ -12,7 +12,7 @@ import { PieDataItem } from '../../_models/pie-data-item';
   styleUrls: ['./publication-status-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PublicationStatusStatsComponent implements OnInit {
+export class PublicationStatusStatsComponent implements OnDestroy {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
@@ -46,11 +46,6 @@ export class PublicationStatusStatsComponent implements OnInit {
       }),
       takeUntil(this.onDestroy)
     );
-  }
-
-  ngOnInit(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnDestroy(): void {

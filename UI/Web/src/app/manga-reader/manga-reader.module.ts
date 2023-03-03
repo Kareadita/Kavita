@@ -4,7 +4,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { MangaReaderRoutingModule } from './manga-reader.router.module';
 import { SharedModule } from '../shared/shared.module';
-import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { NgxSliderModule } from 'ngx-slider-v2';
 import { InfiniteScrollerComponent } from './_components/infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
 import { PipeModule } from '../pipe/pipe.module';

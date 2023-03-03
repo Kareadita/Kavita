@@ -4,6 +4,7 @@ export interface ServerSettings {
     taskBackup: string;
     loggingLevel: string;
     port: number;
+    ipAddresses: string;
     allowStatCollection: boolean;
     enableOpds: boolean;
     baseUrl: string;
@@ -14,4 +15,5 @@ export interface ServerSettings {
     totalBackups: number;
     totalLogs: number;
     enableFolderWatching: boolean;
+    hostName: string;
 }

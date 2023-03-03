@@ -108,6 +108,7 @@ public class UsersController : BaseApiController
         existingPreferences.Theme = preferencesDto.Theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
+        existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

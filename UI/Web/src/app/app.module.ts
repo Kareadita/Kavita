@@ -12,7 +12,6 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
-import { DevicesComponent } from './_components/devices/devices.component';
 
 
 
@@ -24,7 +23,6 @@ if (disableAnimations) console.error("Web Animations have been disabled as your 
 @NgModule({
     declarations: [
         AppComponent,
-        DevicesComponent,
     ],
     imports: [
         HttpClientModule,

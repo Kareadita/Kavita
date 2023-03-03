@@ -144,7 +144,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     }
 
 
-    public async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
+    private async Task ProcessSeries(Series series, bool forceUpdate = false, bool useFileName = true)
     {
         var isEpub = series.Format == MangaFormat.Epub;
         var existingWordCount = series.WordCount;
@@ -224,7 +224,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
         }
 
-        if (series.WordCount == 0 && series.WordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
+        if (series.WordCount == 0 && existingWordCount != 0) series.WordCount = existingWordCount; // Restore original word count if the file hasn't changed
         var seriesEstimate = _readerService.GetTimeEstimate(series.WordCount, series.Pages, isEpub);
         series.MinHoursToRead = seriesEstimate.MinHours;
         series.MaxHoursToRead = seriesEstimate.MaxHours;
@@ -234,7 +234,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
 
     private void UpdateFileAnalysis(MangaFile file)
     {
-        file.LastFileAnalysis = DateTime.Now;
+        file.UpdateLastFileAnalysis();
         _unitOfWork.MangaFileRepository.Update(file);
     }
 

@@ -4,7 +4,6 @@ import { Chapter } from '../_models/chapter';
 import { CollectionTag } from '../_models/collection-tag';
 import { Device } from '../_models/device/device';
 import { Library } from '../_models/library';
-import { MangaFormat } from '../_models/manga-format';
 import { ReadingList } from '../_models/reading-list';
 import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
@@ -85,6 +84,10 @@ export enum Action {
    * Send to a device
    */
   SendTo = 17,
+  /**
+   * Import some data into Kavita
+   */
+  Import = 18,
 }
 
 export interface ActionItem<T> {
@@ -261,14 +264,14 @@ export class ActionFactoryService {
         children: [
         	{
             action: Action.AddToWantToReadList,
-            title: 'Add to Want To Read',
+            title: 'Add to Want to Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
             children: [],
           },
           {
             action: Action.RemoveFromWantToReadList,
-            title: 'Remove from Want To Read',
+            title: 'Remove from Want to Read',
             callback: this.dummyCallback,
             requiresAdmin: false,
             children: [],
@@ -564,7 +567,7 @@ export class ActionFactoryService {
 
     if (actions.length === 0) return actionFound;
 
-    for (let i = 0; i < actions.length; i++) 
+    for (let i = 0; i < actions.length; i++)
     {
       if (actions[i].action === action) return true;
       if (this.hasAction(actions[i].children, action)) return true;
@@ -573,5 +576,5 @@ export class ActionFactoryService {
 
     return actionFound;
   }
-  
+
 }

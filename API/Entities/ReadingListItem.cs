@@ -19,5 +19,4 @@ public class ReadingListItem
     public Series Series { get; set; } = null!;
     public Volume Volume { get; set; } = null!;
     public Chapter Chapter { get; set; } = null!;
-
 }

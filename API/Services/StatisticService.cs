@@ -32,6 +32,7 @@ public interface IStatisticService
     IEnumerable<StatCount<int>> GetPagesReadCountByYear(int userId = 0);
     IEnumerable<StatCount<int>> GetWordsReadCountByYear(int userId = 0);
     Task UpdateServerStatistics();
+    Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds);
 }
 
 /// <summary>
@@ -62,18 +63,7 @@ public class StatisticService : IStatisticService
             .Where(p => libraryIds.Contains(p.LibraryId))
             .SumAsync(p => p.PagesRead);
 
-        var ids = await _context.AppUserProgresses
-            .Where(p => p.AppUserId == userId)
-            .Where(p => libraryIds.Contains(p.LibraryId))
-            .Where(p => p.PagesRead > 0)
-            .Select(p => new {p.ChapterId, p.SeriesId})
-            .ToListAsync();
-
-        var chapterIds = ids.Select(id => id.ChapterId);
-
-        var timeSpentReading = await _context.Chapter
-            .Where(c => chapterIds.Contains(c.Id))
-            .SumAsync(c => c.AvgHoursToRead);
+        var timeSpentReading = await TimeSpentReadingForUsersAsync(new List<int>() {userId}, libraryIds);
 
         var totalWordsRead =  (long) Math.Round(await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
@@ -118,7 +108,11 @@ public class StatisticService : IStatisticService
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
-                (p, c) => (p.PagesRead / (float) c.Pages) * c.AvgHoursToRead)
+                (p, c) => new
+                {
+                    AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
+                })
+            .Select(x => x.AverageReadingHours)
             .Average() / 7.0;
 
         return new UserReadStatistics()
@@ -168,8 +162,6 @@ public class StatisticService : IStatisticService
             .ToListAsync();
     }
 
-
-
     public async Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount()
     {
         return await _context.SeriesMetadata
@@ -195,7 +187,6 @@ public class StatisticService : IStatisticService
             })
             .ToListAsync();
     }
-
 
     public async Task<ServerStatisticsDto> GetServerStatistics()
     {
@@ -275,6 +266,8 @@ public class StatisticService : IStatisticService
             .Distinct()
             .Count();
 
+
+
         return new ServerStatisticsDto()
         {
             ChapterCount = await _context.Chapter.CountAsync(),
@@ -289,7 +282,8 @@ public class StatisticService : IStatisticService
             MostActiveLibraries = mostActiveLibrary,
             MostPopularSeries = mostPopularSeries,
             MostReadSeries = mostReadSeries,
-            RecentlyRead = recentlyRead
+            RecentlyRead = recentlyRead,
+            TotalReadingTime = await TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty)
         };
     }
 
@@ -358,12 +352,12 @@ public class StatisticService : IStatisticService
         if (days > 0)
         {
             var date = DateTime.Now.AddDays(days * -1);
-            query = query.Where(x => x.appUserProgresses.LastModified >= date && x.appUserProgresses.Created >= date);
+            query = query.Where(x => x.appUserProgresses.LastModified >= date);
         }
 
         var results = await query.GroupBy(x => new
             {
-                Day = x.appUserProgresses.Created.Date,
+                Day = x.appUserProgresses.LastModified.Date,
                 x.series.Format
             })
             .Select(g => new PagesReadOnADayCount<DateTime>
@@ -380,17 +374,50 @@ public class StatisticService : IStatisticService
             var minDay = results.Min(d => d.Value);
             for (var date = minDay; date < DateTime.Now; date = date.AddDays(1))
             {
-                if (results.Any(d => d.Value == date)) continue;
+                var resultsForDay = results.Where(d => d.Value == date).ToList();
+                if (resultsForDay.Count > 0)
+                {
+                    // Add in types that aren't there (there is a bug in UI library that will cause dates to get out of order)
+                    var existingFormats = resultsForDay.Select(r => r.Format).Distinct();
+                    foreach (var format in Enum.GetValues(typeof(MangaFormat)).Cast<MangaFormat>().Where(f => f != MangaFormat.Unknown && !existingFormats.Contains(f)))
+                    {
+                        results.Add(new PagesReadOnADayCount<DateTime>()
+                        {
+                            Format = format,
+                            Value = date,
+                            Count = 0
+                        });
+                    }
+                    continue;
+                }
                 results.Add(new PagesReadOnADayCount<DateTime>()
                 {
-                    Format = MangaFormat.Unknown,
+                    Format = MangaFormat.Archive,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Epub,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Pdf,
+                    Value = date,
+                    Count = 0
+                });
+                results.Add(new PagesReadOnADayCount<DateTime>()
+                {
+                    Format = MangaFormat.Image,
                     Value = date,
                     Count = 0
                 });
             }
         }
 
-        return results;
+        return results.OrderBy(r => r.Value);
     }
 
     public IEnumerable<StatCount<DayOfWeek>> GetDayBreakdown()
@@ -481,6 +508,30 @@ public class StatisticService : IStatisticService
             _context.Entry(existingRecord).State = EntityState.Modified;
         }
         await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds)
+    {
+        var query = _context.AppUserProgresses
+            .AsSplitQuery();
+
+        if (userIds.Any())
+        {
+            query = query.Where(p => userIds.Contains(p.AppUserId));
+        }
+        if (libraryIds.Any())
+        {
+            query = query.Where(p => libraryIds.Contains(p.LibraryId));
+        }
+
+        return (long) Math.Round(await query
+            .Join(_context.Chapter,
+                p => p.ChapterId,
+                c => c.Id,
+                (progress, chapter) => new {chapter, progress})
+            .Where(p => p.chapter.AvgHoursToRead > 0)
+            .SumAsync(p =>
+                p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))));
     }
 
     public async Task<IEnumerable<TopReadDto>> GetTopUsers(int days)

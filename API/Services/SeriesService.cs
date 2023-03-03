@@ -114,7 +114,7 @@ public class SeriesService : ISeriesService
             }
 
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
-            UpdateRelatedList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
+            UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
                 series.Metadata.CollectionTags.Add(tag);
             });
@@ -209,10 +209,10 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static void UpdateRelatedList(ICollection<CollectionTagDto>? tags, Series series,
-        IReadOnlyCollection<CollectionTag> allTags,
+    public static void UpdateCollectionsList(ICollection<CollectionTagDto>? tags, Series series, IReadOnlyCollection<CollectionTag> allTags,
         Action<CollectionTag> handleAdd)
     {
+        // TODO: Move UpdateCollectionsList to a helper so we can easily test
         if (tags == null) return;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.CollectionTags.ToList();
@@ -306,7 +306,7 @@ public class SeriesService : ISeriesService
             var libraries = await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(libraryIds);
             foreach (var library in libraries)
             {
-                library.LastModified = DateTime.Now;
+                library.UpdateLastModified();
                 _unitOfWork.LibraryRepository.Update(library);
             }
 

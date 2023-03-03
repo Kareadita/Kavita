@@ -217,7 +217,10 @@ public class VolumeRepository : IVolumeRepository
         {
             foreach (var c in v.Chapters)
             {
-                c.PagesRead = userProgress.Where(p => p.ChapterId == c.Id).Sum(p => p.PagesRead);
+                var progresses = userProgress.Where(p => p.ChapterId == c.Id).ToList();
+                if (progresses.Count == 0) continue;
+                c.PagesRead = progresses.Sum(p => p.PagesRead);
+                c.LastReadingProgressUtc = progresses.Max(p => p.LastModifiedUtc);
             }
 
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
@@ -70,6 +71,27 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
+    /// Resets the IP Addresses
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-ip-addresses")]
+    public async Task<ActionResult<ServerSettingDto>> ResetIPAddressesSettings()
+    {
+        _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
+        var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
+        ipAddresses.Value = Configuration.DefaultIPAddresses;
+        _unitOfWork.SettingsRepository.Update(ipAddresses);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+    }
+
+    /// <summary>
     /// Resets the email service url
     /// </summary>
     /// <returns></returns>
@@ -103,7 +125,7 @@ public class SettingsController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<ServerSettingDto>> UpdateSettings(ServerSettingDto updateSettingsDto)
     {
-        _logger.LogInformation("{UserName}  is updating Server Settings", User.GetUsername());
+        _logger.LogInformation("{UserName} is updating Server Settings", User.GetUsername());
 
         // We do not allow CacheDirectory changes, so we will ignore.
         var currentSettings = await _unitOfWork.SettingsRepository.GetSettingsAsync();
@@ -144,6 +166,22 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
+            {
+                // Validate IP addresses
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
+                {
+                    if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
+                        return BadRequest($"IP Address '{ipAddress}' is invalid");
+                    }
+                }
+
+                setting.Value = updateSettingsDto.IpAddresses;
+                // IpAddesses is managed in appSetting.json
+                Configuration.IpAddresses = updateSettingsDto.IpAddresses;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.BaseUrl + string.Empty != setting.Value)
             {
                 var path = !updateSettingsDto.BaseUrl.StartsWith("/")
@@ -178,6 +216,13 @@ public class SettingsController : BaseApiController
             if (setting.Key == ServerSettingKey.ConvertCoverToWebP && updateSettingsDto.ConvertCoverToWebP + string.Empty != setting.Value)
             {
                 setting.Value = updateSettingsDto.ConvertCoverToWebP + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
+            {
+                setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();
+                if (setting.Value.EndsWith("/")) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

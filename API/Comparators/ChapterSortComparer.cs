@@ -62,4 +62,5 @@ public class SortComparerZeroLast : IComparer<double>
 
         return x.CompareTo(y);
     }
+    public static readonly SortComparerZeroLast Default = new SortComparerZeroLast();
 }

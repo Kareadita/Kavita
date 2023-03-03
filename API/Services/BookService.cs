@@ -56,7 +56,7 @@ public interface IBookService
     Task<Dictionary<string, int>> CreateKeyToPageMappingAsync(EpubBookRef book);
 }
 
-public partial class BookService : IBookService
+public class BookService : IBookService
 {
     private readonly ILogger<BookService> _logger;
     private readonly IDirectoryService _directoryService;
@@ -73,24 +73,25 @@ public partial class BookService : IBookService
         }
     };
 
-    [GeneratedRegex(@"/\*[\d\D]*?\*/", RegexOptions.Compiled)]
-    private static partial Regex CssComment();
-
-    [GeneratedRegex(@"[a-zA-Z]+#", RegexOptions.Compiled)]
-    private static partial Regex WhiteSpace1();
-    [GeneratedRegex(@"[\n\r]+\s*", RegexOptions.Compiled)]
-    private static partial Regex WhiteSpace2();
-    [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
-    private static partial Regex WhiteSpace3();
-    [GeneratedRegex(@"\s?([:,;{}])\s?", RegexOptions.Compiled)]
-    private static partial Regex WhiteSpace4();
-    [GeneratedRegex(@"([\s:]0)(px|pt|%|em)", RegexOptions.Compiled)]
-    private static partial Regex UnitPadding();
-
-    [GeneratedRegex(@"<script(.*)(/>)", RegexOptions.Compiled)]
-    private static partial Regex StartingScriptTag();
-    [GeneratedRegex(@"<title(.*)(/>)", RegexOptions.Compiled)]
-    private static partial Regex StartingTitleTag();
+    // Use when Rosyln fixed
+    // [GeneratedRegex(@"/\*[\d\D]*?\*/", RegexOptions.Compiled)]
+    // private static partial Regex CssComment();
+    //
+    // [GeneratedRegex(@"[a-zA-Z]+#", RegexOptions.Compiled)]
+    // private static partial Regex WhiteSpace1();
+    // [GeneratedRegex(@"[\n\r]+\s*", RegexOptions.Compiled)]
+    // private static partial Regex WhiteSpace2();
+    // [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
+    // private static partial Regex WhiteSpace3();
+    // [GeneratedRegex(@"\s?([:,;{}])\s?", RegexOptions.Compiled)]
+    // private static partial Regex WhiteSpace4();
+    // [GeneratedRegex(@"([\s:]0)(px|pt|%|em)", RegexOptions.Compiled)]
+    // private static partial Regex UnitPadding();
+    //
+    // [GeneratedRegex(@"<script(.*)(/>)", RegexOptions.Compiled)]
+    // private static partial Regex StartingScriptTag();
+    // [GeneratedRegex(@"<title(.*)(/>)", RegexOptions.Compiled)]
+    // private static partial Regex StartingTitleTag();
 
 
     public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
@@ -192,7 +193,8 @@ public partial class BookService : IBookService
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
         var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
         var importBuilder = new StringBuilder();
-        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
+        //foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
 
@@ -243,7 +245,8 @@ public partial class BookService : IBookService
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
+        //foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -253,7 +256,8 @@ public partial class BookService : IBookService
 
     private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex().Matches(stylesheetHtml))
+        //foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex().Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -263,7 +267,8 @@ public partial class BookService : IBookService
 
     private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
     {
-        var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex().Matches(stylesheetHtml);
+        //var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex().Matches(stylesheetHtml);
+        var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
         foreach (Match match in matches)
         {
             if (!match.Success) continue;
@@ -431,21 +436,7 @@ public partial class BookService : IBookService
             {
                 publicationDate = epubBook.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
             }
-            var dateParsed = DateTime.TryParse(publicationDate, out var date);
-            var year = 0;
-            var month = 0;
-            var day = 0;
-            switch (dateParsed)
-            {
-                case true:
-                    year = date.Year;
-                    month = date.Month;
-                    day = date.Day;
-                    break;
-                case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
-                    int.TryParse(publicationDate, out year);
-                    break;
-            }
+            var (year, month, day) = GetPublicationDate(publicationDate);
 
             var info =  new ComicInfo()
             {
@@ -464,6 +455,7 @@ public partial class BookService : IBookService
             // Parse tags not exposed via Library
             foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
             {
+                // EPUB 2 and 3
                 switch (metadataItem.Name)
                 {
                     case "calibre:rating":
@@ -478,6 +470,21 @@ public partial class BookService : IBookService
                         break;
                     case "calibre:series_index":
                         info.Volume = metadataItem.Content;
+                        break;
+                }
+
+                // EPUB 3.2+ only
+                switch (metadataItem.Property)
+                {
+                    case "group-position":
+                        info.Volume = metadataItem.Content;
+                        break;
+                    case "belongs-to-collection":
+                        info.Series = metadataItem.Content;
+                        info.SeriesSort = metadataItem.Content;
+                        break;
+                    case "collection-type":
+                        // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                         break;
                 }
             }
@@ -500,6 +507,27 @@ public partial class BookService : IBookService
         }
 
         return null;
+    }
+    
+    private static (int year, int month, int day) GetPublicationDate(string publicationDate)
+    {
+        var dateParsed = DateTime.TryParse(publicationDate, out var date);
+        var year = 0;
+        var month = 0;
+        var day = 0;
+        switch (dateParsed)
+        {
+            case true:
+                year = date.Year;
+                month = date.Month;
+                day = date.Day;
+                break;
+            case false when !string.IsNullOrEmpty(publicationDate) && publicationDate.Length == 4:
+                int.TryParse(publicationDate, out year);
+                break;
+        }
+
+        return (year, month, day);
     }
 
     private static string ValidateLanguage(string? language)
@@ -555,8 +583,10 @@ public partial class BookService : IBookService
 
     private static string EscapeTags(string content)
     {
-        content = StartingScriptTag().Replace(content, "<script$1></script>");
-        content = StartingTitleTag().Replace(content, "<title$1></title>");
+        // content = StartingScriptTag().Replace(content, "<script$1></script>");
+        // content = StartingTitleTag().Replace(content, "<title$1></title>");
+        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         return content;
     }
 
@@ -641,7 +671,7 @@ public partial class BookService : IBookService
                             series = metadataItem.Content;
                             break;
                         case "collection-type":
-                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html
+                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                             break;
                     }
                 }
@@ -749,7 +779,7 @@ public partial class BookService : IBookService
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
-        var correctedKey = book.Content.Html.Keys.SingleOrDefault(s => s.EndsWith(key));
+        var correctedKey = book.Content.Html.Keys.FirstOrDefault(s => s.EndsWith(key));
         if (!string.IsNullOrEmpty(correctedKey))
         {
             key = correctedKey;
@@ -1039,12 +1069,18 @@ public partial class BookService : IBookService
         }
 
         // Remove comments from CSS
-        body = CssComment().Replace(body, string.Empty);
+        // body = CssComment().Replace(body, string.Empty);
+        //
+        // body = WhiteSpace1().Replace(body, "#");
+        // body = WhiteSpace2().Replace(body, string.Empty);
+        // body = WhiteSpace3().Replace(body, " ");
+        // body = WhiteSpace4().Replace(body, "$1");
+        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-        body = WhiteSpace1().Replace(body, "#");
-        body = WhiteSpace2().Replace(body, string.Empty);
-        body = WhiteSpace3().Replace(body, " ");
-        body = WhiteSpace4().Replace(body, "$1");
+        body = Regex.Replace(body, @"[a-zA-Z]+#", "#", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         try
         {
             body = body.Replace(";}", "}");
@@ -1054,7 +1090,9 @@ public partial class BookService : IBookService
             //Swallow exception. Some css don't have style rules ending in ';'
         }
 
-        body = UnitPadding().Replace(body, "$1");
+        //body = UnitPadding().Replace(body, "$1");
+        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+
 
         return body;
     }

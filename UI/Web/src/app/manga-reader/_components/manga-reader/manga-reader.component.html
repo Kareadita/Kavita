@@ -26,7 +26,7 @@
             </div>
         </div>
     </div>
-    <app-loading [loading]="isLoading"></app-loading>
+    <app-loading [loading]="isLoading" [absolute]="true"></app-loading>
     <div class="reading-area" 
             ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
@@ -44,7 +44,7 @@
             <!-- Pagination controls and screen hints-->
             <div class="pagination-area">
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)" 
-                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%')}">
+                    [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 'max-height': MaxHeight}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
                          title="Previous Page" aria-hidden="true"></i>
@@ -53,7 +53,8 @@
                 <div class="{{readerMode === ReaderMode.LeftRight ? 'right' : 'bottom'}} {{clickOverlayClass('right')}}" (click)="handlePageChange($event, KeyDirection.Right)"
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'),
                                 'left': 'inherit',
-                                'right': RightPaginationOffset + 'px'}">
+                                'right': RightPaginationOffset + 'px',
+                                'max-height': MaxHeight}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.LeftToRight ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'right' : 'down'}}"
                          title="Next Page" aria-hidden="true"></i>
@@ -117,7 +118,7 @@
 
     <div class="fixed-bottom overlay" *ngIf="menuOpen" [@slideFromBottom]="menuOpen">
 
-        <div class="mb-3" *ngIf="pageOptions != undefined && pageOptions.ceil != undefined">
+        <div class="mb-3" *ngIf="pageOptions !== undefined && pageOptions.ceil !== undefined">
             <span class="visually-hidden" id="slider-info"></span>
             <div class="row g-0">
                 <button class="btn btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter();resetMenuCloseTimer();" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
@@ -233,6 +234,15 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input type="checkbox" id="swipe-to-paginate" formControlName="swipeToPaginate" class="form-check-input" >
+                                    <label class="form-check-label" for="swipe-to-paginate">Swipe Enabled</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-3 col-sm-12">
                         <div class="mb-3">
@@ -251,8 +261,10 @@
                         <input type="range" class="form-range" id="darkness" 
                                 min="10" max="100" step="1" formControlName="darkness">
                     </div>
+
+
                     <div class="col-md-6 col-sm-12">
-                        <button class="btn btn-primary" (click)="savePref()">Save to Preferences</button>
+                        <button class="btn btn-primary" (click)="savePref()">Save Globally</button>
                     </div>
                 </div>
             </form>

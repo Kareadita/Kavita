@@ -35,4 +35,6 @@ public class SiteTheme : IEntityDate, ITheme
     public ThemeProvider Provider { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 }

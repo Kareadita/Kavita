@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
@@ -133,6 +134,13 @@ public static class QueryableExtensions
             queryable = queryable.Include(v => v.Volume);
         }
 
+        if (includes.HasFlag(ChapterIncludes.Files))
+        {
+            queryable = queryable
+                .Include(c => c.Files);
+        }
+
+
         return queryable.AsSplitQuery();
     }
 
@@ -147,6 +155,13 @@ public static class QueryableExtensions
         if (includeFlags.HasFlag(SeriesIncludes.Volumes))
         {
             query = query.Include(s => s.Volumes);
+        }
+
+        if (includeFlags.HasFlag(SeriesIncludes.Chapters))
+        {
+            query = query
+                .Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters);
         }
 
         if (includeFlags.HasFlag(SeriesIncludes.Related))
@@ -266,4 +281,10 @@ public static class QueryableExtensions
 
     public static IEnumerable<DateTime> Range(this DateTime startDate, int numberOfDays) =>
         Enumerable.Range(0, numberOfDays).Select(e => startDate.AddDays(e));
+
+    public static IQueryable<T> WhereIf<T>(this IQueryable<T> queryable, bool condition,
+        Expression<Func<T, bool>> predicate)
+    {
+        return condition ? queryable.Where(predicate) : queryable;
+    }
 }

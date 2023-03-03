@@ -15,20 +15,18 @@ public static class GenreHelper
     /// </summary>
     /// <param name="allGenres"></param>
     /// <param name="names"></param>
-    /// <param name="isExternal"></param>
     /// <param name="action"></param>
-    public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, bool isExternal, Action<Genre> action)
+    public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, Action<Genre> action)
     {
         foreach (var name in names)
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
             var normalizedName = name.ToNormalized();
-            var genre = allGenres.FirstOrDefault(p =>
-                p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName) && p.ExternalTag == isExternal);
+            var genre = allGenres.FirstOrDefault(p => p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName));
             if (genre == null)
             {
-                genre = DbFactory.Genre(name, false);
+                genre = DbFactory.Genre(name);
                 allGenres.Add(genre);
             }
 
@@ -42,7 +40,7 @@ public static class GenreHelper
         var existing = existingGenres.ToList();
         foreach (var genre in existing)
         {
-            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle != null && g.ExternalTag == genre.ExternalTag && genre.NormalizedTitle.Equals(g.NormalizedTitle));
+            var existingPerson = removeAllExcept.FirstOrDefault(g => genre.NormalizedTitle != null && genre.NormalizedTitle.Equals(g.NormalizedTitle));
             if (existingPerson != null) continue;
             existingGenres.Remove(genre);
             action?.Invoke(genre);

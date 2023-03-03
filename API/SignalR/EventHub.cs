@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Linq;
+using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.SignalR.Presence;
@@ -37,8 +38,8 @@ public class EventHub : IEventHub
         var users = _messageHub.Clients.All;
         if (onlyAdmins)
         {
-            var admins = await _presenceTracker.GetOnlineAdmins();
-            users = _messageHub.Clients.Users(admins);
+            var admins = await _presenceTracker.GetOnlineAdminIds();
+            users = _messageHub.Clients.Users(admins.Select(i => i.ToString()).ToArray());
         }
 
 

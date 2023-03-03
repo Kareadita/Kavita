@@ -2,10 +2,13 @@
 
 namespace API.Extensions;
 
-public static partial class StringExtensions
+public static class StringExtensions
 {
-    [GeneratedRegex(@"(^[a-z])|\.\s+(.)", RegexOptions.ExplicitCapture | RegexOptions.Compiled)]
-    private static partial Regex SentenceCaseRegex();
+    // Wait for Rosyln bugfix
+    // [GeneratedRegex(@"(^[a-z])|\.\s+(.)", RegexOptions.ExplicitCapture | RegexOptions.Compiled)]
+    // private static partial Regex SentenceCaseRegex();
+    private static readonly Regex SentenceCaseRegex = new Regex(@"(^[a-z])|\.\s+(.)",
+        RegexOptions.ExplicitCapture | RegexOptions.Compiled, Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
     public static string SentenceCase(this string value)
     {

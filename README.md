@@ -3,8 +3,7 @@
 
 ![new_github_preview_stills](https://user-images.githubusercontent.com/735851/169657008-37812c18-5490-4e2a-9dcb-4806f8c87c69.gif)
 
-Kavita is a fast, feature rich, cross platform reading server. Built with a focus for manga,
-and the goal of being a full solution for all your reading needs. Setup your own server and share
+Kavita is a fast, feature rich, cross platform reading server. Built with a focus for being a full solution for all your reading needs. Setup your own server and share
 your reading collection with your friends and family!
 
 [![Release](https://img.shields.io/github/release/Kareadita/Kavita.svg?style=flat&maxAge=3600)](https://github.com/Kareadita/Kavita/releases)
@@ -18,11 +17,12 @@ your reading collection with your friends and family!
 </div>
 
 ## Goals
-- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar, 7zip, raw images) and Books (epub, pdf)
+- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Dark mode and customizable theming support
 - [ ] Provide a plugin system to allow external metadata integration and scrobbling for read status, ratings, and reviews
-- [x] Metadata should allow for collections, want to read integration from 3rd party services, genres.
+- [x] Rich Metadata support with filtering and searching
+- [x] Ways to group reading material: Collections, Reading Lists, Want to Read
 - [x] Ability to manage users, access, and ratings
 - [x] Fully Accessible with active accessibility audits
 - [x] Dedicated webtoon reading mode
@@ -57,17 +57,18 @@ Kavita is being actively developed and should be considered beta software until 
 Kavita may be subject to changes in how the platform functions as it is being built out toward the
 vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
 
+## Donate
+If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
+expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
+
+
 ## Contributors
 
-This project exists thanks to all the people who contribute. [Contribute](CONTRIBUTING.md).
+This project exists thanks to all the people who contribute and downstream library maintainers. [Contribute](CONTRIBUTING.md).
 <a href="https://github.com/Kareadita/Kavita/graphs/contributors">
 <img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false&avatarHeight=42" />
 </a>
 
-
-## Donate
-If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
-expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
 
 ## Backers
 
@@ -96,6 +97,10 @@ We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png"
 ## Huntr
 We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 
 being paid to help secure Kavita, please give them a try.
+
+## PikaPods
+If you are looking to try your hand at self-hosting but lack the machine, [PikaPods](https://www.pikapods.com/pods?run=kavita) is a great service that 
+allows you to easily spin up a server. 20% of app revenues are contributed back to Kavita via OpenCollective.
 
 ### License
 

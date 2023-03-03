@@ -1483,6 +1483,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_NoProgress()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1534,6 +1535,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1_WithProgress()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1580,6 +1582,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1653,6 +1656,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial2()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1732,6 +1736,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1802,6 +1807,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenNonRead_LooseLeafChaptersAndVolumes()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1845,6 +1851,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1912,6 +1919,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -1976,6 +1984,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstChapter_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2022,6 +2031,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstSpecial_WhenAllReadAndAllChapters()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2084,6 +2094,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstVolumeChapter_WhenPreExistingProgress()
     {
+        await ResetDb();
         var series = new Series()
         {
             Name = "Test",
@@ -2133,8 +2144,82 @@ public class ReaderServiceTests
         _context.Series.Attach(series);
         await _context.SaveChangesAsync();
 
+        // This tests that if you add a series later to a volume and a loose leaf chapter, we continue from that volume, rather than loose leaf
         var nextChapter = await readerService.GetContinuePoint(1, 1);
         Assert.Equal("14.9", nextChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnUnreadSingleVolume_WhenThereAreSomeSingleVolumesBeforeLooseLeafChapters()
+    {
+        await ResetDb();
+        var readChapter1 = EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1);
+        var readChapter2 = EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1);
+
+        var volume = EntityFactory.CreateVolume("3", new List<Chapter>()
+            {
+                EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+            });
+
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("51", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("52", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("53", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("1", new List<Chapter>()
+                {
+                    readChapter1
+                }),
+                EntityFactory.CreateVolume("2", new List<Chapter>()
+                {
+                    readChapter2
+                }),
+                volume,
+                // 3, 4, and all loose leafs are unread should be unread
+                EntityFactory.CreateVolume("3", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 1),
+                }),
+                EntityFactory.CreateVolume("4", new List<Chapter>()
+                {
+                    EntityFactory.CreateChapter("40", false, new List<MangaFile>(), 1),
+                    EntityFactory.CreateChapter("41", false, new List<MangaFile>(), 1),
+                }),
+            }
+        });
+
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
+        // Save progress on first volume chapters and 1st of second volume
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
+        await readerService.MarkChaptersAsRead(user, 1,
+            new List<Chapter>()
+            {
+                readChapter1, readChapter2
+            });
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal(4, nextChapter.VolumeId);
     }
 
     #endregion
@@ -2144,6 +2229,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAllChaptersAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2187,6 +2273,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkUptTillChapterNumberAsRead()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
@@ -2232,6 +2319,7 @@ public class ReaderServiceTests
     [Fact]
     public async Task MarkChaptersUntilAsRead_ShouldMarkAsRead_OnlyVolumesWithChapter0()
     {
+        await ResetDb();
         _context.Series.Add(new Series()
         {
             Name = "Test",
