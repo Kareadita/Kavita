@@ -77,7 +77,6 @@ public static class Parser
         MatchOptions, RegexTimeout);
 
 
-    private const string XmlRegexExtensions = @"\.xml";
     private static readonly Regex ImageRegex = new Regex(ImageFileExtensions,
         MatchOptions, RegexTimeout);
     private static readonly Regex ArchiveFileRegex = new Regex(ArchiveFileExtensions,
@@ -600,17 +599,11 @@ public static class Parser
         MatchOptions, RegexTimeout
     );
 
-    // Matches [Complete], release tags like [kmts] but not [ Complete ] or [kmts ]
-    private const string TagsInBrackets = $@"\[(?!\s){BalancedBrack}(?<!\s)\]";
-
     // Matches anything between balanced parenthesis, tags between brackets, {} and {Complete}
     private static readonly Regex CleanupRegex = new Regex(
         $@"(?:\({BalancedParen}\)|{TagsInBrackets}|\{{\}}|\{{Complete\}})",
         MatchOptions, RegexTimeout
     );
-
-    // Common regex patterns present in both Comics and Mangas
-    private const string CommonSpecial = @"Specials?|One[- ]?Shot|Extra(?:\sChapter)?(?=\s)|Art Collection|Side Stories|Bonus";
 
     private static readonly Regex MangaSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
@@ -621,6 +614,12 @@ public static class Parser
     private static readonly Regex ComicSpecialRegex = new Regex(
     // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
         $@"\b(?:{CommonSpecial}|\d.+?(\W|-|^)Annual|Annual(\W|-|$)|Book \d.+?|Compendium(\W|-|$|\s.+?)|Omnibus(\W|-|$|\s.+?)|FCBD \d.+?|Absolute(\W|-|$|\s.+?)|Preview(\W|-|$|\s.+?)|Hors[ -]S[ée]rie|TPB|HS|THS)\b",
+        MatchOptions, RegexTimeout
+    );
+
+    private static readonly Regex EuropeanComicRegex = new Regex(
+    // All Keywords, does not account for checking if contains volume/chapter identification. Parser.Parse() will handle.
+        @"\b(?:Bd[-\s]Fr)\b",
         MatchOptions, RegexTimeout
     );
 

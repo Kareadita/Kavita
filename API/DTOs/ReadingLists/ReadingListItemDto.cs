@@ -20,8 +20,7 @@ public class ReadingListItemDto
     public int LibraryId { get; set; }
     public string? Title { get; set; }
     public LibraryType LibraryType { get; set; }
-    public string LibraryName { get; set; }
-    public string Title { get; set; }
+    public string? LibraryName { get; set; }
     /// <summary>
     /// Release Date from Chapter
     /// </summary>

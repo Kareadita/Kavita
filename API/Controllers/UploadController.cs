@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Uploads;
+using API.Extensions;
 using API.Services;
 using API.SignalR;
 using Flurl.Http;

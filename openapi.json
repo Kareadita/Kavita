@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.2"
+    "version": "0.7.1.4"
   },
   "servers": [
     {
@@ -11534,16 +11534,16 @@
             "type": "boolean",
             "description": "Include library series in Search"
           },
-          "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
-          },
           "folders": {
             "type": "array",
             "items": {
               "type": "string"
             },
             "nullable": true
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           }
         },
         "additionalProperties": false
@@ -11830,9 +11830,6 @@
           "password": {
             "type": "string",
             "nullable": true
-          },
-          "sendEmail": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -12238,11 +12235,11 @@
             "type": "string",
             "nullable": true
           },
-          "chapterTitleName": {
+          "volumeNumber": {
             "type": "string",
             "nullable": true
           },
-          "volumeNumber": {
+          "chapterTitleName": {
             "type": "string",
             "nullable": true
           },
@@ -12254,14 +12251,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
           "libraryType": {
             "$ref": "#/components/schemas/LibraryType"
           },
           "libraryName": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
             "type": "string",
             "nullable": true
           },
@@ -14602,12 +14599,15 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
+        "required": [
+          "url"
+        ],
         "type": "object",
         "properties": {
           "url": {
+            "minLength": 1,
             "type": "string",
-            "description": "External url",
-            "nullable": true
+            "description": "External url"
           }
         },
         "additionalProperties": false
@@ -14681,7 +14681,8 @@
           "readingDirection",
           "scalingOption",
           "showScreenHints",
-          "swipeToPaginate"
+          "swipeToPaginate",
+          "theme"
         ],
         "type": "object",
         "properties": {

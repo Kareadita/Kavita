@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Metadata;
@@ -150,7 +151,7 @@ public class CollectionTagService : ICollectionTagService
     /// <returns></returns>
     public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
     {
-        return await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId) ?? CreateTag(title);
+        return await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata) ?? CreateTag(title);
     }
 
     /// <summary>

@@ -33,7 +33,7 @@ public class CollectionTag
     /// <summary>
     /// A normalized string used to check if the tag already exists in the DB
     /// </summary>
-    public string? NormalizedTitle { get; set; }
+    public required string NormalizedTitle { get; set; }
     /// <summary>
     /// A promoted collection tag will allow all linked seriesMetadata's Series to show for all users.
     /// </summary>

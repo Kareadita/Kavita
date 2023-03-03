@@ -130,7 +130,7 @@ public static class TagHelper
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Tag(tagTitle, false));
+                handleAdd(DbFactory.Tag(tagTitle));
                 isModified = true;
             }
         }

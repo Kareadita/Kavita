@@ -99,7 +99,7 @@ public static class GenreHelper
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Genre(tagTitle, false));
+                handleAdd(DbFactory.Genre(tagTitle));
                 isModified = true;
             }
         }

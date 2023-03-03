@@ -68,9 +68,10 @@ public class ProcessSeries : IProcessSeries
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
 
-        _genres = new List<Genre>();
-        _tags = new List<Tag>();
+        _genres = new Dictionary<string, Genre>();
         _people = new List<Person>();
+        _tags = new Dictionary<string, Tag>();
+        _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
     /// <summary>

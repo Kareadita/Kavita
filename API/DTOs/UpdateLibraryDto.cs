@@ -15,8 +15,6 @@ public class UpdateLibraryDto
     [Required]
     public required IEnumerable<string> Folders { get; init; }
     [Required]
-    public IEnumerable<string> Folders { get; init; }
-    [Required]
     public bool FolderWatching { get; init; }
     [Required]
     public bool IncludeInDashboard { get; init; }
