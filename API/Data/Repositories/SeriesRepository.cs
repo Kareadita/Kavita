@@ -132,14 +132,15 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
 }
 
-public partial class SeriesRepository : ISeriesRepository
+public class SeriesRepository : ISeriesRepository
 {
     private readonly DataContext _context;
     private readonly IMapper _mapper;
 
 
-    [GeneratedRegex(@"\d{4}", RegexOptions.Compiled, 50000)]
-    private static partial Regex YearRegex();
+    // [GeneratedRegex(@"\d{4}", RegexOptions.Compiled, 50000)]
+    // private static partial Regex YearRegex();
+    private readonly Regex _yearRegex = new Regex(@"\d{4}", RegexOptions.Compiled, Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
     public SeriesRepository(DataContext context, IMapper mapper)
     {
@@ -329,10 +330,9 @@ public partial class SeriesRepository : ISeriesRepository
             .Select(s => s.Id)
             .ToList();
 
-        // TODO: Apply WHereIf
         result.Libraries = await _context.Library
             .Where(l => libraryIds.Contains(l.Id))
-            .Where(l => l.Name != null && EF.Functions.Like(l.Name, $"%{searchQuery}%"))
+            .Where(l => EF.Functions.Like(l.Name, $"%{searchQuery}%"))
             .IsRestricted(QueryContext.Search)
             .OrderBy(l => l.Name.ToLower())
             .AsSplitQuery()
@@ -340,7 +340,7 @@ public partial class SeriesRepository : ISeriesRepository
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
-        var justYear = YearRegex().Match(searchQuery).Value;
+        var justYear = _yearRegex.Match(searchQuery).Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
         var yearComparison = hasYearInQuery ? int.Parse(justYear) : 0;
 
@@ -353,7 +353,7 @@ public partial class SeriesRepository : ISeriesRepository
                          || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison)))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
-            .OrderBy(s => s.SortName.ToLower())
+            .OrderBy(s => s.SortName!.ToLower())
             .AsNoTracking()
             .AsSplitQuery()
             .Take(maxRecords)
@@ -370,8 +370,8 @@ public partial class SeriesRepository : ISeriesRepository
             .ToListAsync();
 
         result.Collections =  await _context.CollectionTag
-            .Where(c => (c.Title != null && EF.Functions.Like(c.Title, $"%{searchQuery}%"))
-                                    || (c.NormalizedTitle != null && EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%")))
+            .Where(c => (EF.Functions.Like(c.Title, $"%{searchQuery}%"))
+                                    || (EF.Functions.Like(c.NormalizedTitle, $"%{searchQueryNormalized}%")))
             .Where(c => c.Promoted || isAdmin)
             .RestrictAgainstAgeRestriction(userRating)
             .OrderBy(s => s.NormalizedTitle)
@@ -393,7 +393,7 @@ public partial class SeriesRepository : ISeriesRepository
 
         result.Genres = await _context.SeriesMetadata
             .Where(sm => seriesIds.Contains(sm.SeriesId))
-            .SelectMany(sm => sm.Genres.Where(t => t.Title != null && EF.Functions.Like(t.Title, $"%{searchQuery}%")))
+            .SelectMany(sm => sm.Genres.Where(t => EF.Functions.Like(t.Title, $"%{searchQuery}%")))
             .AsSplitQuery()
             .OrderBy(t => t.NormalizedTitle)
             .Distinct()
@@ -774,12 +774,12 @@ public partial class SeriesRepository : ISeriesRepository
             .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
             .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
-            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
+            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
             .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+                                               || EF.Functions.Like(s.OriginalName!, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
@@ -848,12 +848,12 @@ public partial class SeriesRepository : ISeriesRepository
             .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
             .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
-            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange.Min)
-            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange.Max)
+            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
+            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
             .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.OriginalName, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+                                               || EF.Functions.Like(s.OriginalName!, $"%{filter.SeriesNameQuery}%")
+                                               || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
                         && formats.Contains(s.Format))
             .AsNoTracking();
@@ -869,7 +869,7 @@ public partial class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderBy(s => s.SortName.ToLower()),
+                SortField.SortName => query.OrderBy(s => s.SortName!.ToLower()),
                 SortField.CreatedDate => query.OrderBy(s => s.Created),
                 SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
@@ -881,7 +881,7 @@ public partial class SeriesRepository : ISeriesRepository
         {
             query = filter.SortOptions.SortField switch
             {
-                SortField.SortName => query.OrderByDescending(s => s.SortName.ToLower()),
+                SortField.SortName => query.OrderByDescending(s => s.SortName!.ToLower()),
                 SortField.CreatedDate => query.OrderByDescending(s => s.Created),
                 SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
@@ -1590,7 +1590,7 @@ public partial class SeriesRepository : ISeriesRepository
                 SeriesName = s.Name,
                 FolderPath = s.FolderPath,
                 Format = s.Format,
-                LibraryRoots = s.Library.Folders.Select(f => f.Path)!
+                LibraryRoots = s.Library.Folders.Select(f => f.Path)
             }).ToListAsync();
 
         var map = new Dictionary<string, IList<SeriesModified>>();

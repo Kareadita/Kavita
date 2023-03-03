@@ -203,6 +203,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something",
+            NormalizedTitle = "Something".ToNormalized(),
             CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
         });
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
@@ -214,6 +215,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something 2",
+            NormalizedTitle = "Something 2".ToNormalized(),
             CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
         });
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
@@ -467,7 +469,8 @@ public class CleanupServiceTests : AbstractDbTest
     {
         var c = new CollectionTag()
         {
-            Title = "Test Tag"
+            Title = "Test Tag",
+            NormalizedTitle = "Test Tag".ToNormalized(),
         };
         var s = new Series()
         {
@@ -521,6 +524,7 @@ public class CleanupServiceTests : AbstractDbTest
         var s = new Series()
         {
             Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            NormalizedName = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries".ToNormalized(),
             Library = new Library()
             {
                 Name = "Test LIb",

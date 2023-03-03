@@ -26,123 +26,23 @@ using Xunit.Abstractions;
 namespace API.Tests.Services;
 
 
-public abstract class SiteThemeServiceTest
+public abstract class SiteThemeServiceTest : AbstractDbTest
 {
-    protected readonly ITestOutputHelper _testOutputHelper;
-    protected readonly IEventHub _messageHub = Substitute.For<IEventHub>();
+    private readonly ITestOutputHelper _testOutputHelper;
+    private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
 
-    protected readonly DbConnection _connection;
-    protected readonly DataContext _context;
-    protected readonly IUnitOfWork _unitOfWork;
 
-    private const string CacheDirectory = "C:/kavita/config/cache/";
-    private const string CoverImageDirectory = "C:/kavita/config/covers/";
-    private const string BackupDirectory = "C:/kavita/config/backups/";
-    private const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
-
-    protected SiteThemeServiceTest(ITestOutputHelper testOutputHelper)
+    protected SiteThemeServiceTest(ITestOutputHelper testOutputHelper) : base()
     {
         _testOutputHelper = testOutputHelper;
-        var contextOptions = new DbContextOptionsBuilder()
-            .UseSqlite(CreateInMemoryDatabase())
-            .Options;
-        _connection = RelationalOptionsExtension.Extract(contextOptions).Connection;
-
-        _context = new DataContext(contextOptions);
-        Task.Run(SeedDb).GetAwaiter().GetResult();
-
-        var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
-        var mapper = config.CreateMapper();
-        _unitOfWork = new UnitOfWork(_context, mapper, null);
     }
 
-    #region Setup
-
-    private static DbConnection CreateInMemoryDatabase()
-    {
-        var connection = new SqliteConnection("Filename=:memory:");
-
-        connection.Open();
-
-        return connection;
-    }
-
-    private async Task<bool> SeedDb()
-    {
-        await _context.Database.MigrateAsync();
-        var filesystem = CreateFileSystem();
-
-        await Seed.SeedSettings(_context, new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem));
-        await Seed.SeedThemes(_context);
-
-        var setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-        setting.Value = CacheDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-        setting.Value = BackupDirectory;
-
-        setting = await _context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
-        setting.Value = BookmarkDirectory;
-
-        _context.ServerSetting.Update(setting);
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "Joe",
-            UserPreferences = new AppUserPreferences
-            {
-                Theme = Seed.DefaultThemes[0]
-            }
-        });
-
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    protected static MockFileSystem CreateFileSystem()
-    {
-        var fileSystem = new MockFileSystem();
-        fileSystem.Directory.SetCurrentDirectory("C:/kavita/");
-        fileSystem.AddDirectory("C:/kavita/config/");
-        fileSystem.AddDirectory(CacheDirectory);
-        fileSystem.AddDirectory(CoverImageDirectory);
-        fileSystem.AddDirectory(BackupDirectory);
-        fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(SiteThemeDirectory);
-        fileSystem.AddDirectory("C:/data/");
-
-        return fileSystem;
-    }
-
-    protected async Task ResetDb()
+    protected override async Task ResetDb()
     {
         _context.SiteTheme.RemoveRange(_context.SiteTheme);
         await _context.SaveChangesAsync();
         // Recreate defaults
         await Seed.SeedThemes(_context);
-    }
-
-    #endregion
-}
-
-
-
-[Collection("UpdateDefault_ShouldThrowOnInvalidId")]
-public class SiteThemeServiceTest1 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest1(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
     }
 
     [Fact]
@@ -170,15 +70,6 @@ public class SiteThemeServiceTest1 : SiteThemeServiceTest
 
     }
 
-}
-
-[Collection("Scan_ShouldFindCustomFile")]
-public class SiteThemeServiceTest2 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest2(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
-    }
-
     [Fact]
     public async Task Scan_ShouldFindCustomFile()
     {
@@ -191,14 +82,6 @@ public class SiteThemeServiceTest2 : SiteThemeServiceTest
         await siteThemeService.Scan();
 
         Assert.NotNull(await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("custom"));
-    }
-}
-
-[Collection("Scan_ShouldOnlyInsertOnceOnSecondScan")]
-public class SiteThemeServiceTest3 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest3(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
     }
 
     [Fact]
@@ -222,14 +105,6 @@ public class SiteThemeServiceTest3 : SiteThemeServiceTest
 
         Assert.Single(customThemes);
     }
-}
-
-[Collection("Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan")]
-public class SiteThemeServiceTest4 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest4(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
-    }
 
     [Fact]
     public async Task Scan_ShouldDeleteWhenFileDoesntExistOnSecondScan()
@@ -251,14 +126,6 @@ public class SiteThemeServiceTest4 : SiteThemeServiceTest
 
         Assert.Equal(0, themes.Count(t =>
             t.Name.ToNormalized().Equals("custom".ToNormalized())));
-    }
-}
-
-[Collection("GetContent_ShouldReturnContent")]
-public class SiteThemeServiceTest5 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest5(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
     }
 
     [Fact]
@@ -286,14 +153,6 @@ public class SiteThemeServiceTest5 : SiteThemeServiceTest
         Assert.NotEmpty(content);
         Assert.Equal("123", content);
     }
-}
-
-[Collection("UpdateDefault_ShouldHaveOneDefault")]
-public class SiteThemeServiceTest6 : SiteThemeServiceTest
-{
-    public SiteThemeServiceTest6(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
-    {
-    }
 
     [Fact]
     public async Task UpdateDefault_ShouldHaveOneDefault()
@@ -317,13 +176,13 @@ public class SiteThemeServiceTest6 : SiteThemeServiceTest
 
         var customTheme = (await _unitOfWork.SiteThemeRepository.GetThemeDtoByName("Custom"));
 
+        Assert.NotNull(customTheme);
         await siteThemeService.UpdateDefault(customTheme.Id);
 
 
 
         Assert.Equal(customTheme.Id, (await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Id);
     }
+
 }
-
-
 

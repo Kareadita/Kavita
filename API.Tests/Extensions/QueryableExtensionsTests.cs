@@ -67,6 +67,7 @@ public class QueryableExtensionsTests
             new CollectionTag()
             {
                 Title = "Test",
+                NormalizedTitle = "Test".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -78,6 +79,7 @@ public class QueryableExtensionsTests
             new CollectionTag()
             {
                 Title = "Test",
+                NormalizedTitle = "Test".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -93,6 +95,7 @@ public class QueryableExtensionsTests
             new CollectionTag()
             {
                 Title = "Test",
+                NormalizedTitle = "Test".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -120,6 +123,8 @@ public class QueryableExtensionsTests
         {
             new Genre()
             {
+                Title = "A",
+                NormalizedTitle = "A".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -130,6 +135,8 @@ public class QueryableExtensionsTests
             },
             new Genre()
             {
+                Title = "B",
+                NormalizedTitle = "B".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()
@@ -144,6 +151,8 @@ public class QueryableExtensionsTests
             },
             new Genre()
             {
+                Title = "C",
+                NormalizedTitle = "C".ToNormalized(),
                 SeriesMetadatas = new List<SeriesMetadata>()
                 {
                     new SeriesMetadata()

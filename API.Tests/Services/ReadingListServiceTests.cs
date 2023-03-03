@@ -128,27 +128,32 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone,
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus
                                         },
                                         new Chapter()
                                         {
                                             Number = "3",
+                                            Range = "3",
                                             AgeRating = AgeRating.X18Plus
                                         }
                                     }
@@ -163,8 +168,8 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = new ReadingList();
-        user.ReadingLists = new List<ReadingList>()
+        var readingList = DbFactory.ReadingList("test");
+        user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
@@ -195,27 +200,32 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone,
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus
                                         },
                                         new Chapter()
                                         {
                                             Number = "3",
+                                            Range = "3",
                                             AgeRating = AgeRating.X18Plus
                                         }
                                     }
@@ -230,8 +240,8 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = new ReadingList();
-        user.ReadingLists = new List<ReadingList>()
+        var readingList = DbFactory.ReadingList("test");
+        user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
@@ -268,6 +278,7 @@ public class ReadingListServiceTests
                     {
                         new Series()
                         {
+                            Name = "Test",
                             NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
@@ -349,27 +360,32 @@ public class ReadingListServiceTests
                         new Series()
                         {
                             Name = "Test",
+                            NormalizedName = "Test".ToNormalized(),
                             Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
                             Volumes = new List<Volume>()
                             {
                                 new Volume()
                                 {
                                     Name = "0",
+                                    Number = 0,
                                     Chapters = new List<Chapter>()
                                     {
                                         new Chapter()
                                         {
                                             Number = "1",
+                                            Range = "1",
                                             AgeRating = AgeRating.Everyone,
                                         },
                                         new Chapter()
                                         {
                                             Number = "2",
+                                            Range = "2",
                                             AgeRating = AgeRating.X18Plus
                                         },
                                         new Chapter()
                                         {
                                             Number = "3",
+                                            Range = "3",
                                             AgeRating = AgeRating.X18Plus
                                         }
                                     }
@@ -384,8 +400,8 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = new ReadingList();
-        user.ReadingLists = new List<ReadingList>()
+        var readingList = DbFactory.ReadingList("test");
+        user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };

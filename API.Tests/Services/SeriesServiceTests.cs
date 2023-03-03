@@ -1370,21 +1370,9 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                new Series()
-                {
-                    Name = "Test Series",
-                    Volumes = new List<Volume>() { }
-                },
-                new Series()
-                {
-                    Name = "Test Series Prequels",
-                    Volumes = new List<Volume>() { }
-                },
-                new Series()
-                {
-                    Name = "Test Series Sequels",
-                    Volumes = new List<Volume>() { }
-                }
+                DbFactory.Series("Test Series"),
+                DbFactory.Series("Test Series Prequels"),
+                DbFactory.Series("Test Series Sequels"),
             }
         };
         _context.Library.Add(lib);
@@ -1459,16 +1447,6 @@ public class SeriesServiceTests : AbstractDbTest
                         }
                     }
                 },
-                new Series()
-                {
-                    Name = "Test Series Prequels",
-                    Volumes = new List<Volume>() { }
-                },
-                new Series()
-                {
-                    Name = "Test Series Sequels",
-                    Volumes = new List<Volume>() { }
-                }
                 DbFactory.Series("Test Series Prequels"),
                 DbFactory.Series("Test Series Sequels"),
             }
