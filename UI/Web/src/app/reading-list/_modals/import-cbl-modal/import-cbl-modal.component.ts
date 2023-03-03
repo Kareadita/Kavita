@@ -48,7 +48,7 @@ export class ImportCblModalComponent {
   steps: Array<TimelineStep> = [
     {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
     {title: 'Validate File', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
-    {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-regular fa-floppy-disk'},
+    {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
     {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
