@@ -1,6 +1,5 @@
 
 .bs4-order-tracking {
-    margin-bottom: 30px;
     overflow: hidden;
     color: #878788;
     padding-left: 0px;
@@ -9,7 +8,7 @@
   
   .bs4-order-tracking li {
     list-style-type: none;
-    font-size: 13px;
+    font-size: 17px;
     width: 25%;
     float: left;
     position: relative;
@@ -32,11 +31,11 @@
   
   .bs4-order-tracking li>div {
     color: #fff;
-    width: 29px;
+    width: 50px;
     text-align: center;
-    line-height: 29px;
+    line-height: 50px;
     display: block;
-    font-size: 12px;
+    font-size: 20px;
     background: #878788;
     border-radius: 50%;
     margin: auto
@@ -50,7 +49,7 @@
     position: absolute;
     left: 0%;
     right: 0%;
-    top: 15px;
+    top: 25px;
     z-index: -1
   }
   
