@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
-using API.DTOs.ReadingLists.CBL;
 
-namespace API.DTOs.ReadingLists;
+namespace API.DTOs.ReadingLists.CBL;
 
 public enum CblImportResult {
     /// <summary>
@@ -64,10 +63,19 @@ public enum CblImportReason
     /// </summary>
     [Description("All Chapters Missing")]
     AllChapterMissing = 7,
+    /// <summary>
+    /// The Chapter was imported
+    /// </summary>
+    [Description("Success")]
+    Success = 8,
 }
 
 public class CblBookResult
 {
+    /// <summary>
+    /// Order in the CBL
+    /// </summary>
+    public int Order { get; set; }
     public string Series { get; set; }
     public string Volume { get; set; }
     public string Number { get; set; }
@@ -95,10 +103,5 @@ public class CblImportSummaryDto
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }
-    /// <summary>
-    /// A list of Series that are within the CBL but map to multiple libraries within Kavita
-    /// </summary>
-    public IList<SeriesDto> Conflicts { get; set; }
-    public IList<CblConflictQuestion> Conflicts2 { get; set; }
 
 }
