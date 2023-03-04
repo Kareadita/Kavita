@@ -5,7 +5,7 @@ import { Subject, take, takeUntil } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
-import { ReadingMode } from 'src/app/_models/preferences/reading-mode';
+import { WritingStyle } from 'src/app/_models/preferences/writing-style';
 import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -92,7 +92,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   /**
    * Outputs when reading mode is changed
    */
-  @Output() bookReaderReadingMode: EventEmitter<ReadingMode> = new EventEmitter();
+  @Output() bookReaderWritingStyle: EventEmitter<WritingStyle> = new EventEmitter();
   /**
    * Outputs when immersive mode is changed
    */
@@ -111,7 +111,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   readingDirectionModel: ReadingDirection = ReadingDirection.LeftToRight;
 
-  readingModeModel: ReadingMode = ReadingMode.Horizontally;
+  writingStyleModel: WritingStyle = WritingStyle.Horizontal;
 
 
   activeTheme: BookTheme | undefined;
@@ -137,8 +137,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     return ReadingDirection;
   }
 
-  get ReadingMode() {
-    return ReadingMode;
+  get WritingStyle() {
+    return WritingStyle;
   }
 
 
@@ -172,11 +172,11 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         if (this.user.preferences.bookReaderReadingDirection === undefined) {
           this.user.preferences.bookReaderReadingDirection = ReadingDirection.LeftToRight;
         }
-        if (this.user.preferences.bookReaderReadingMode === undefined) {
-          this.user.preferences.bookReaderReadingMode = ReadingMode.Horizontally;
+        if (this.user.preferences.bookReaderWritingStyle === undefined) {
+          this.user.preferences.bookReaderWritingStyle = WritingStyle.Horizontal;
         }
         this.readingDirectionModel = this.user.preferences.bookReaderReadingDirection;
-        this.readingModeModel = this.user.preferences.bookReaderReadingMode;
+        this.writingStyleModel = this.user.preferences.bookReaderWritingStyle;
 
 
 
@@ -235,7 +235,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
         // Emit first time so book reader gets the setting
         this.readingDirection.emit(this.readingDirectionModel);
-        this.bookReaderReadingMode.emit(this.readingModeModel);
+        this.bookReaderWritingStyle.emit(this.writingStyleModel);
         this.clickToPaginateChanged.emit(this.user.preferences.bookReaderTapToPaginate);
         this.layoutModeUpdate.emit(this.user.preferences.bookReaderLayoutMode);
         this.immersiveMode.emit(this.user.preferences.bookReaderImmersiveMode);
@@ -314,15 +314,15 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
     this.readingDirection.emit(this.readingDirectionModel);
   }
 
-  toggleReadingMode() {
-    if (this.readingModeModel === ReadingMode.Horizontally) {
-      this.readingModeModel = ReadingMode.Vertically
+  toggleWritingStyle() {
+    if (this.writingStyleModel === WritingStyle.Horizontal) {
+      this.writingStyleModel = WritingStyle.Vertical
     } else {
-      this.readingModeModel = ReadingMode.Horizontally
+      this.writingStyleModel = WritingStyle.Horizontal
     }
 
     this.cdRef.markForCheck();
-    this.bookReaderReadingMode.emit(this.readingModeModel);
+    this.bookReaderWritingStyle.emit(this.writingStyleModel);
   }
 
   toggleFullscreen() {

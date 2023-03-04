@@ -144,7 +144,7 @@ $action-bar-height: 38px;
         height: calc(var(--vh) * 100);
     }
 
-    &.reading-mode-vertical {
+    &.writing-style-vertical {
         direction: rtl;
     }
 }
@@ -174,7 +174,7 @@ $action-bar-height: 38px;
         //padding-bottom: 0px;
     }
 
-    &.reading-mode-vertical {
+    &.writing-style-vertical {
         writing-mode: vertical-rl;
         height: 100%;
     }
@@ -195,7 +195,7 @@ $action-bar-height: 38px;
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
 
-    &.reading-mode-vertical {
+    &.writing-style-vertical {
         // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
         overflow: auto;
     }
@@ -211,7 +211,7 @@ $action-bar-height: 38px;
     &.column-layout-1 {
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-        &.reading-mode-vertical {
+        &.writing-style-vertical {
             height: auto;
             padding: 0;
             margin: 20px 0;
@@ -221,7 +221,7 @@ $action-bar-height: 38px;
     &.column-layout-2 {
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-        &.reading-mode-vertical {
+        &.writing-style-vertical {
             height: auto;
             padding: 0;
             margin: 20px 0;

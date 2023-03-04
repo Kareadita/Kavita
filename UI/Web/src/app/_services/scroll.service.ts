@@ -46,7 +46,6 @@ export class ScrollService {
   }
 
   scrollToX(left: number, el: Element | Window = window, behavior: 'auto' | 'smooth' = 'auto') {
-    console.log('scrollToX', left);
     el.scroll({
       left: left,
       behavior: behavior
