@@ -20,19 +20,19 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Used internally for localized name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
-    public string? NormalizedLocalizedName { get; set; }
+    public required string NormalizedLocalizedName { get; set; }
     /// <summary>
     /// The name used to sort the Series. By default, will be the same as Name.
     /// </summary>
-    public string? SortName { get; set; }
+    public required string SortName { get; set; }
     /// <summary>
     /// Name in original language (Japanese for Manga). By default, will be same as Name.
     /// </summary>
-    public string? LocalizedName { get; set; }
+    public required string LocalizedName { get; set; }
     /// <summary>
     /// Original Name on disk. Not exposed to UI.
     /// </summary>
-    public string? OriginalName { get; set; }
+    public required string OriginalName { get; set; }
     /// <summary>
     /// Time of creation
     /// </summary>

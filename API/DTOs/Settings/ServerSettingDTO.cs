@@ -1,5 +1,4 @@
-﻿using System;
-using API.Services;
+﻿using API.Services;
 
 namespace API.DTOs.Settings;
 

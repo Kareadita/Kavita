@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.System;
-using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;

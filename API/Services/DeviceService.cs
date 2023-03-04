@@ -8,7 +8,6 @@ using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Device;
-using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 

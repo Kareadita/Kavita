@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace API.DTOs.Statistics;
+﻿namespace API.DTOs.Statistics;
 
 public class TopReadDto
 {

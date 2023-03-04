@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -7,15 +6,12 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using API.SignalR;
 using Kavita.Common;
-using API.Entities.Enums;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;

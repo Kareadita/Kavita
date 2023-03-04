@@ -7,10 +7,8 @@ using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
-using API.Services.Tasks.Metadata;
 using API.SignalR;
 using API.Tests.Helpers;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 

@@ -9,7 +9,6 @@ using API.Entities;
 using API.Entities.Metadata;
 using API.SignalR;
 using Kavita.Common;
-using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 

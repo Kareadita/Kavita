@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.4"
+    "version": "0.7.1.5"
   },
   "servers": [
     {
@@ -12947,6 +12947,10 @@
         "additionalProperties": false
       },
       "Series": {
+        "required": [
+          "name",
+          "normalizedName"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -12954,14 +12958,14 @@
             "format": "int32"
           },
           "name": {
+            "minLength": 1,
             "type": "string",
-            "description": "The UI visible Name of the Series. This may or may not be the same as the OriginalName",
-            "nullable": true
+            "description": "The UI visible Name of the Series. This may or may not be the same as the OriginalName"
           },
           "normalizedName": {
+            "minLength": 1,
             "type": "string",
-            "description": "Used internally for name matching. M:API.Services.Tasks.Scanner.Parser.Parser.Normalize(System.String)",
-            "nullable": true
+            "description": "Used internally for name matching. M:API.Services.Tasks.Scanner.Parser.Parser.Normalize(System.String)"
           },
           "normalizedLocalizedName": {
             "type": "string",

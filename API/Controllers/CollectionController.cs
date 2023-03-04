@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -8,8 +7,6 @@ using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks.Metadata;
-using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

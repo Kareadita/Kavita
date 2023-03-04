@@ -1229,7 +1229,8 @@ public class SeriesRepository : ISeriesRepository
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Series
-            .Where(s => normalizedNames.Contains(s.NormalizedName) || normalizedNames.Contains(s.NormalizedLocalizedName))
+            .Where(s => normalizedNames.Contains(s.NormalizedName) ||
+                        (s.NormalizedLocalizedName != null && normalizedNames.Contains(s.NormalizedLocalizedName)))
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Includes(includes)
