@@ -3,6 +3,8 @@ import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
 import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
+import { ReadingList } from 'src/app/_models/reading-list';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
@@ -23,6 +25,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
 
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
+  readingListActions = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
 
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
@@ -36,7 +39,7 @@ export class SideNavComponent implements OnInit, OnDestroy {
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService, 
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private modalService: NgbModal, private imageService: ImageService) {
+    private ngbModal: NgbModal, private imageService: ImageService) {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd), 
@@ -97,6 +100,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  importCbl() {
+    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+  }
 
   performAction(action: ActionItem<Library>, library: Library) {
     if (typeof action.callback === 'function') {

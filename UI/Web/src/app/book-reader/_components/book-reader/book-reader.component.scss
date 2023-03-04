@@ -198,10 +198,10 @@ $action-bar-height: 38px;
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
     }
 
-    &.immersive {
-        // Note: I removed this for bug: https://github.com/Kareadita/Kavita/issues/1726
-        //height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
-    }
+    // &.immersive {
+    //     // Note: I removed this for bug: https://github.com/Kareadita/Kavita/issues/1726
+    //     //height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
+    // }
 
     a, :link {
         color: var(--brtheme-link-text-color);

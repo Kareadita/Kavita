@@ -12,7 +12,4 @@ export interface CblImportSummary {
     results: Array<CblBookResult>;
     success: CblImportResult;
     successfulInserts: Array<CblBookResult>;
-    conflicts: Array<Series>;
-    conflicts2: Array<CblConflictQuestion>;
-    
 }

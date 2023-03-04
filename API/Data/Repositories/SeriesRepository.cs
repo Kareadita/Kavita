@@ -115,7 +115,7 @@ public interface ISeriesRepository
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
-    Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IEnumerable<string> normalizedNames,
+    Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
     Task<IEnumerable<SeriesDto>> GetAllSeriesDtosByNameAsync(IEnumerable<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None);
@@ -1222,14 +1222,14 @@ public class SeriesRepository : ISeriesRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IEnumerable<string> normalizedNames,
+    public async Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
         int userId, SeriesIncludes includes = SeriesIncludes.None)
     {
         var libraryIds = _context.Library.GetUserLibraries(userId);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
 
         return await _context.Series
-            .Where(s => normalizedNames.Contains(s.NormalizedName))
+            .Where(s => normalizedNames.Contains(s.NormalizedName) || normalizedNames.Contains(s.NormalizedLocalizedName))
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Includes(includes)
