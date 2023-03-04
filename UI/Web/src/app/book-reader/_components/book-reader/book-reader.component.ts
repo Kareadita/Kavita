@@ -651,7 +651,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('wheel', ['$event'])
   onWheel(event: WheelEvent) {
     // This allows the user to scroll the page horizontally without holding shift
     if (this.layoutMode !== BookPageLayoutMode.Default || this.writingStyle !== WritingStyle.Vertical) {
@@ -1317,15 +1316,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateWritingStyle(writingStyle: WritingStyle) {
     this.writingStyle = writingStyle;
-    this.updateWidthAndHeightCalcs();
-    this.updateLayoutMode(this.layoutMode)
+    setTimeout(() => this.updateLayoutMode(this.layoutMode));
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => {
         this.scrollTo(lastSelector);
       });
-    } else {
-      const resumeElement = this.getFirstVisibleElementXPath();
+    } else if (this.bookContentElemRef !== undefined) {
+      const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
       if (resumeElement !== null && resumeElement !== undefined) {
         setTimeout(() => {
           this.scrollTo(resumeElement);
@@ -1341,9 +1339,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
     // Remove any max-heights from column layout
     this.updateImagesWithHeight();
-    if (this.writingStyle === WritingStyle.Vertical) {
-        this.updateWidthAndHeightCalcs();
-    }
 
     // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
     if (this.bookContentElemRef == null) {
