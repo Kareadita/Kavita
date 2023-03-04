@@ -12,7 +12,7 @@ import {
   bookLayoutModes,
   layoutModes,
   pageLayoutModes,
-  bookReadingModes
+  bookWritingStyles
 } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
@@ -55,7 +55,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   bookLayoutModes = bookLayoutModes;
   bookColorThemes = bookColorThemes;
   pageLayoutModes = pageLayoutModes;
-  bookReadingModes = bookReadingModes;
+  bookWritingStyles = bookWritingStyles;
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -145,7 +145,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
       this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
       this.settingsForm.addControl('bookReaderReadingDirection', new FormControl(this.user.preferences.bookReaderReadingDirection, []));
-      this.settingsForm.addControl('bookReaderReadingMode', new FormControl(this.user.preferences.bookReaderReadingMode, []))
+      this.settingsForm.addControl('bookReaderWritingStyle', new FormControl(this.user.preferences.bookReaderWritingStyle, []))
       this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(!!this.user.preferences.bookReaderTapToPaginate, []));
       this.settingsForm.addControl('bookReaderLayoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
       this.settingsForm.addControl('bookReaderThemeName', new FormControl(this.user?.preferences.bookReaderThemeName || bookColorThemes[0].name, []));
@@ -191,7 +191,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('bookReaderMargin')?.setValue(this.user.preferences.bookReaderMargin);
     this.settingsForm.get('bookReaderTapToPaginate')?.setValue(this.user.preferences.bookReaderTapToPaginate);
     this.settingsForm.get('bookReaderReadingDirection')?.setValue(this.user.preferences.bookReaderReadingDirection);
-    this.settingsForm.get('bookReaderReadingMode')?.setValue(this.user.preferences.bookReaderReadingMode);
+    this.settingsForm.get('bookReaderWritingStyle')?.setValue(this.user.preferences.bookReaderWritingStyle);
     this.settingsForm.get('bookReaderLayoutMode')?.setValue(this.user.preferences.bookReaderLayoutMode);
     this.settingsForm.get('bookReaderThemeName')?.setValue(this.user.preferences.bookReaderThemeName);
     this.settingsForm.get('theme')?.setValue(this.user.preferences.theme);
@@ -224,7 +224,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       bookReaderMargin: modelSettings.bookReaderMargin,
       bookReaderTapToPaginate: modelSettings.bookReaderTapToPaginate,
       bookReaderReadingDirection: parseInt(modelSettings.bookReaderReadingDirection, 10),
-      bookReaderReadingMode: parseInt(modelSettings.bookReaderReadingMode, 10),
+      bookReaderWritingStyle: parseInt(modelSettings.bookReaderWritingStyle, 10),
       bookReaderLayoutMode: parseInt(modelSettings.bookReaderLayoutMode, 10),
       bookReaderThemeName: modelSettings.bookReaderThemeName,
       theme: modelSettings.theme,
