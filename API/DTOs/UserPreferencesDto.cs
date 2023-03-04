@@ -96,7 +96,7 @@ public class UserPreferencesDto
     /// Book Reader Option: What direction should the next/prev page buttons go
     /// </summary>
     [Required]
-    public ReadingMode BookReaderReadingMode { get; set; }
+    public WritingStyle BookReaderWritingStyle { get; set; }
 
     /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.

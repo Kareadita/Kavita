@@ -221,7 +221,7 @@ namespace API.Data.Migrations
                     b.Property<int>("BookReaderReadingDirection")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BookReaderReadingMode")
+                    b.Property<int>("BookReaderWritingStyle")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("BookReaderTapToPaginate")

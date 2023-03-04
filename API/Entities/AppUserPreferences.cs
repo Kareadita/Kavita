@@ -76,9 +76,9 @@ public class AppUserPreferences
     /// </summary>
     public ReadingDirection BookReaderReadingDirection { get; set; } = ReadingDirection.LeftToRight;
     /// <summary>
-    /// Book Reader Option: Defines the reading mode vertically/horizontally
+    /// Book Reader Option: Defines the writing styles vertical/horizontal
     /// </summary>
-    public ReadingMode BookReaderReadingMode { get; set; } = ReadingMode.Horizontally;
+    public WritingStyle BookReaderWritingStyle { get; set; } = WritingStyle.Horizontal;
     /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.
     /// </summary>
