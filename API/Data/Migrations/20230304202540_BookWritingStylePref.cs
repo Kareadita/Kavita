@@ -4,12 +4,12 @@
 
 namespace API.Data.Migrations
 {
-    public partial class BookReadingModePref : Migration
+    public partial class BookWritingStylePref : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "BookReaderReadingMode",
+                name: "BookReaderWritingStyle",
                 table: "AppUserPreferences",
                 type: "INTEGER",
                 nullable: false,
@@ -19,7 +19,7 @@ namespace API.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "BookReaderReadingMode",
+                name: "BookReaderWritingStyle",
                 table: "AppUserPreferences");
         }
     }
