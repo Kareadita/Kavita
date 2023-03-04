@@ -1316,11 +1316,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateWritingStyle(writingStyle: WritingStyle) {
     this.writingStyle = writingStyle;
-    setTimeout(() => this.updateLayoutMode(this.layoutMode));
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => {
         this.scrollTo(lastSelector);
+        this.updateLayoutMode(this.layoutMode);
       });
     } else if (this.bookContentElemRef !== undefined) {
       const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
