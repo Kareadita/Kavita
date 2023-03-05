@@ -216,6 +216,8 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
           this.styleUpdate.emit(this.pageStyles);
         });
 
+
+
         this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
         this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
           this.layoutModeUpdate.emit(layoutMode);
@@ -257,7 +259,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
   resetSettings() {
     if (this.user) {
-      this.setPageStyles(this.user.preferences.bookReaderFontFamily, this.user.preferences.bookReaderFontSize + '%', this.user.preferences.bookReaderMargin + '%', this.user.preferences.bookReaderLineSpacing + '%');
+      this.setPageStyles(this.user.preferences.bookReaderFontFamily, this.user.preferences.bookReaderFontSize + '%', this.user.preferences.bookReaderMargin + 'vw', this.user.preferences.bookReaderLineSpacing + '%');
     } else {
       this.setPageStyles();
     }
