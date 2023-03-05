@@ -21,6 +21,8 @@ public static class EntityFactory
             SortName = name,
             LocalizedName = name,
             NormalizedName = name.ToNormalized(),
+            OriginalName = name,
+            NormalizedLocalizedName = name.ToNormalized(),
             Volumes = new List<Volume>(),
             Metadata = new SeriesMetadata()
         };
@@ -67,3 +69,6 @@ public static class EntityFactory
         return DbFactory.CollectionTag(id, title, summary, promoted);
     }
 }
+
+
+

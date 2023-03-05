@@ -16,6 +16,7 @@ using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
+using API.Tests.Helpers.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -409,23 +410,25 @@ public class CleanupServiceTests : AbstractDbTest
     [Fact]
     public async Task CleanupDbEntries_CleanupAbandonedChapters()
     {
-        var c = EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1);
-        _context.Series.Add(new Series()
+        var c = new ChapterBuilder("0")
+            .WithPages(1)
+            .Build();
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithMetadata(new SeriesMetadata())
+            .WithVolume(new VolumeBuilder("0")
+                .WithNumber(1)
+                .WithChapter(c)
+                .Build())
+            .Build();
+        series.Library = new Library()
         {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    c,
-                }),
-            }
-        });
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+        };
+
+        _context.Series.Add(series);
+
 
         _context.AppUser.Add(new AppUser()
         {
@@ -466,24 +469,16 @@ public class CleanupServiceTests : AbstractDbTest
             Title = "Test Tag",
             NormalizedTitle = "Test Tag".ToNormalized(),
         };
-        var s = new Series()
+        var s = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
+            .Build();
+        s.Library = new Library()
         {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Library = new Library()
-            {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>(),
-            Metadata = new SeriesMetadata()
-            {
-                CollectionTags = new List<CollectionTag>()
-                {
-                    c
-                }
-            }
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
         };
+
         _context.Series.Add(s);
 
         _context.AppUser.Add(new AppUser()
@@ -515,20 +510,14 @@ public class CleanupServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        var s = new Series()
+        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldRemoveFullyReadSeries")
+            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+            .Build();
+
+        s.Library = new Library()
         {
-            Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
-            NormalizedName = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries".ToNormalized(),
-            Library = new Library()
-            {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>(),
-            Metadata = new SeriesMetadata()
-            {
-                PublicationStatus = PublicationStatus.Completed
-            }
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
         };
         _context.Series.Add(s);
 

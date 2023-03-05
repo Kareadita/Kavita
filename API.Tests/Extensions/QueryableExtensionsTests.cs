@@ -6,6 +6,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Tests.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Extensions;
@@ -19,34 +20,24 @@ public class QueryableExtensionsTests
     {
         var items = new List<Series>()
         {
-
-            new Series()
-            {
-                Name = "Test 1",
-                NormalizedName = "Test 1".ToNormalized(),
-                Metadata = new SeriesMetadata()
+            new SeriesBuilder("Test 1")
+                .WithMetadata( new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Teen,
-                }
-            },
-            new Series()
-            {
-                Name = "Test 2",
-                NormalizedName = "Test 2".ToNormalized(),
-                Metadata = new SeriesMetadata()
+                })
+                .Build(),
+            new SeriesBuilder("Test 2")
+                .WithMetadata( new SeriesMetadata()
                 {
                     AgeRating = AgeRating.Unknown,
-                }
-            },
-            new Series()
-            {
-                Name = "Test 3",
-                NormalizedName = "Test 3".ToNormalized(),
-                Metadata = new SeriesMetadata()
+                })
+                .Build(),
+            new SeriesBuilder("Test 3")
+                .WithMetadata( new SeriesMetadata()
                 {
                     AgeRating = AgeRating.X18Plus,
-                }
-            },
+                })
+                .Build()
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()

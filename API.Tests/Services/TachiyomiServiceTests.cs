@@ -1,4 +1,5 @@
 ﻿using API.Extensions;
+using API.Tests.Helpers.Builders;
 
 namespace API.Tests.Services;
 using System.Collections.Generic;
@@ -113,34 +114,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("4").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -172,34 +164,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("4").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -237,34 +220,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("22").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -301,34 +275,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("22").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -366,27 +331,19 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 199),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 192),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("0", false, new List<MangaFile>(), 255),
-                }),
-            },
-            Pages = 646
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithPages(199).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("0").WithPages(192).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("0").WithPages(255).Build())
+                .Build())
+            .WithPages(646)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -425,32 +382,23 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1997", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2002", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("2", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2005", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1997")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2002")
+                .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2005")
+                .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -493,34 +441,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("4").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -551,34 +490,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("3", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("4", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("4").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -616,34 +546,25 @@ public class TachiyomiServiceTests
     {
         await ResetDb();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("23").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
+
         var library = new Library()
         {
             Name = "Test LIb",
@@ -679,35 +600,25 @@ public class TachiyomiServiceTests
     public async Task MarkChaptersUntilAsRead_ShouldReturnEncodedVolume_Progress()
     {
         await ResetDb();
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("95").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("96").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("23").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
+                .Build())
+            .WithPages(7)
+            .Build();
 
-        var series = new Series
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("95", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("96", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("1", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("1", true, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("2", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("21", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("23", false, new List<MangaFile>(), 1),
-                }),
-                EntityFactory.CreateVolume("3", new List<Chapter>()
-                {
-                    EntityFactory.CreateChapter("31", false, new List<MangaFile>(), 1),
-                    EntityFactory.CreateChapter("32", false, new List<MangaFile>(), 1),
-                }),
-            },
-            Pages = 7
-        };
         var library = new Library()
         {
             Name = "Test LIb",

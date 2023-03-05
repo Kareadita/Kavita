@@ -16,6 +16,7 @@ using API.Helpers;
 using API.Services;
 using API.SignalR;
 using API.Tests.Helpers;
+using API.Tests.Helpers.Builders;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -125,41 +126,26 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone,
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "3",
-                                            Range = "3",
-                                            AgeRating = AgeRating.X18Plus
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("3")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build(),
                     }
                 },
             }
@@ -197,41 +183,26 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone,
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "3",
-                                            Range = "3",
-                                            AgeRating = AgeRating.X18Plus
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("3")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build()
                     }
                 },
             }
@@ -276,41 +247,26 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone,
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "3",
-                                            Range = "3",
-                                            AgeRating = AgeRating.X18Plus
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("3")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build()
                     }
                 },
             }
@@ -357,41 +313,26 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone,
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "3",
-                                            Range = "3",
-                                            AgeRating = AgeRating.X18Plus
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("3")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build()
                     }
                 },
             }
@@ -457,35 +398,22 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build(),
                     }
                 },
             }
@@ -533,44 +461,26 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                            AgeRating = AgeRating.Everyone,
-                                            Pages = 1
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                            AgeRating = AgeRating.X18Plus,
-                                            Pages = 1
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "3",
-                                            Range = "3",
-                                            AgeRating = AgeRating.X18Plus,
-                                            Pages = 1
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .WithAgeRating(AgeRating.Everyone)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("3")
+                                        .WithAgeRating(AgeRating.X18Plus)
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build()
                     }
                 },
             }
@@ -624,33 +534,20 @@ public class ReadingListServiceTests
                     Type = LibraryType.Book,
                     Series = new List<Series>()
                     {
-                        new Series()
-                        {
-                            Name = "Test",
-                            NormalizedName = "Test".ToNormalized(),
-                            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-                            Volumes = new List<Volume>()
+                        new SeriesBuilder("Test")
+                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithVolumes(new List<Volume>()
                             {
-                                new Volume()
-                                {
-                                    Name = "0",
-                                    Number = 0,
-                                    Chapters = new List<Chapter>()
-                                    {
-                                        new Chapter()
-                                        {
-                                            Number = "1",
-                                            Range = "1",
-                                        },
-                                        new Chapter()
-                                        {
-                                            Number = "2",
-                                            Range = "2",
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                                new VolumeBuilder("0")
+                                    .WithChapter(new ChapterBuilder("1")
+                                        .Build()
+                                    )
+                                    .WithChapter(new ChapterBuilder("2")
+                                        .Build()
+                                    )
+                                    .Build()
+                            })
+                            .Build()
                     }
                 },
             }
@@ -660,7 +557,7 @@ public class ReadingListServiceTests
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
         var readingList = DbFactory.ReadingList("Test");
-        user.ReadingLists = new List<ReadingList>()
+        user!.ReadingLists = new List<ReadingList>()
         {
             readingList
         };
@@ -679,33 +576,20 @@ public class ReadingListServiceTests
     public async Task CalculateAgeRating_ShouldUpdateToMax()
     {
         await ResetDb();
-        var s = new Series()
-        {
-            Name = "Test",
-            NormalizedName = "Test".ToNormalized(),
-            Metadata = DbFactory.SeriesMetadata(new List<CollectionTag>()),
-            Volumes = new List<Volume>()
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithVolumes(new List<Volume>()
             {
-                new Volume()
-                {
-                    Name = "0",
-                    Number = 0,
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
-                            Number = "1",
-                            Range = "1",
-                        },
-                        new Chapter()
-                        {
-                            Number = "2",
-                            Range = "2",
-                        }
-                    }
-                }
-            }
-        };
+                new VolumeBuilder("0")
+                    .WithChapter(new ChapterBuilder("1")
+                        .Build()
+                    )
+                    .WithChapter(new ChapterBuilder("2")
+                        .Build()
+                    )
+                    .Build()
+            })
+            .Build();
         _context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
@@ -1146,33 +1030,53 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        // var fablesSeries = DbFactory.Series("Fables");
+        // var fables2Series = DbFactory.Series("Fables: The Last Castle");
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
+        var fablesSeries = new SeriesBuilder("Fables")
+            .WithVolume(new VolumeBuilder("2002")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .WithChapter(new ChapterBuilder("3").Build())
+                .Build())
+            .Build();
 
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle")
+            .WithVolume(new VolumeBuilder("2003")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .WithChapter(new ChapterBuilder("3").Build())
+                .Build())
+            .Build();
 
-            }
-        });
+
+
+        // fablesSeries.Volumes.Add(new Volume()
+        // {
+        //     Number = 1,
+        //     Name = "2002",
+        //     Chapters = new List<Chapter>()
+        //     {
+        //         EntityFactory.CreateChapter("1", false),
+        //         EntityFactory.CreateChapter("2", false),
+        //         EntityFactory.CreateChapter("3", false),
+        //
+        //     }
+        // });
+        // fables2Series.Volumes.Add(new Volume()
+        // {
+        //     Number = 1,
+        //     Name = "2003",
+        //     Chapters = new List<Chapter>()
+        //     {
+        //         EntityFactory.CreateChapter("1", false),
+        //         EntityFactory.CreateChapter("2", false),
+        //         EntityFactory.CreateChapter("3", false),
+        //
+        //     }
+        // });
 
         _context.AppUser.Add(new AppUser()
         {

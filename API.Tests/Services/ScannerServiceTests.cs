@@ -8,6 +8,7 @@ using API.Parser;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
 using API.Tests.Helpers;
+using API.Tests.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Services;
@@ -24,23 +25,14 @@ public class ScannerServiceTests
 
         var existingSeries = new List<Series>
         {
-            new Series()
-            {
-                Name = "Darker Than Black",
-                LocalizedName = "Darker Than Black",
-                OriginalName = "Darker Than Black",
-                Volumes = new List<Volume>()
-                {
-                    new Volume()
-                    {
-                        Number = 1,
-                        Name = "1"
-                    }
-                },
-                NormalizedName = "Darker Than Black".ToNormalized(),
-                Metadata = new SeriesMetadata(),
-                Format = MangaFormat.Epub
-            }
+            new SeriesBuilder("Darker Than Black")
+                .WithFormat(MangaFormat.Epub)
+                .WithMetadata(new SeriesMetadata())
+                .WithVolume(new VolumeBuilder("1")
+                .WithName("1")
+                .Build())
+                .WithLocalizedName("Darker Than Black")
+                .Build()
         };
 
         Assert.Equal(1, ScannerService.FindSeriesNotOnDisk(existingSeries, infos).Count());
@@ -57,24 +49,40 @@ public class ScannerServiceTests
 
         var existingSeries = new List<Series>
         {
-            new Series()
-            {
-                Name = "Cage of Eden",
-                LocalizedName = "Cage of Eden",
-                OriginalName = "Cage of Eden",
-                NormalizedName = "Darker Than Black".ToNormalized(),
-                Metadata = new SeriesMetadata(),
-                Format = MangaFormat.Archive
-            },
-            new Series()
-            {
-                Name = "Darker Than Black",
-                LocalizedName = "Darker Than Black",
-                OriginalName = "Darker Than Black",
-                NormalizedName = "Darker Than Black".ToNormalized(),
-                Metadata = new SeriesMetadata(),
-                Format = MangaFormat.Archive
-            }
+            new SeriesBuilder("Cage of Eden")
+                .WithFormat(MangaFormat.Archive)
+                .WithMetadata(new SeriesMetadata())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithName("1")
+                    .Build())
+                .WithLocalizedName("Darker Than Black")
+                .Build(),
+            new SeriesBuilder("Darker Than Black")
+                .WithFormat(MangaFormat.Archive)
+                .WithMetadata(new SeriesMetadata())
+                .WithVolume(new VolumeBuilder("1")
+                    .WithName("1")
+                    .Build())
+                .WithLocalizedName("Darker Than Black")
+                .Build(),
+            // new Series()
+            // {
+            //     Name = "Cage of Eden",
+            //     LocalizedName = "Cage of Eden",
+            //     OriginalName = "Cage of Eden",
+            //     NormalizedName = "Darker Than Black".ToNormalized(),
+            //     Metadata = new SeriesMetadata(),
+            //     Format = MangaFormat.Archive
+            // },
+            // new Series()
+            // {
+            //     Name = "Darker Than Black",
+            //     LocalizedName = "Darker Than Black",
+            //     OriginalName = "Darker Than Black",
+            //     NormalizedName = "Darker Than Black".ToNormalized(),
+            //     Metadata = new SeriesMetadata(),
+            //     Format = MangaFormat.Archive
+            // }
         };
 
         Assert.Empty(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));

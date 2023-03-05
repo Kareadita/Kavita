@@ -12947,10 +12947,6 @@
         "additionalProperties": false
       },
       "Series": {
-        "required": [
-          "name",
-          "normalizedName"
-        ],
         "type": "object",
         "properties": {
           "id": {
@@ -12958,14 +12954,14 @@
             "format": "int32"
           },
           "name": {
-            "minLength": 1,
             "type": "string",
-            "description": "The UI visible Name of the Series. This may or may not be the same as the OriginalName"
+            "description": "The UI visible Name of the Series. This may or may not be the same as the OriginalName",
+            "nullable": true
           },
           "normalizedName": {
-            "minLength": 1,
             "type": "string",
-            "description": "Used internally for name matching. M:API.Services.Tasks.Scanner.Parser.Parser.Normalize(System.String)"
+            "description": "Used internally for name matching. M:API.Services.Tasks.Scanner.Parser.Parser.Normalize(System.String)",
+            "nullable": true
           },
           "normalizedLocalizedName": {
             "type": "string",

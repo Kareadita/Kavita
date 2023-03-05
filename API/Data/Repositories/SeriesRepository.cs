@@ -1230,7 +1230,7 @@ public class SeriesRepository : ISeriesRepository
 
         return await _context.Series
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
-                        (s.NormalizedLocalizedName != null && normalizedNames.Contains(s.NormalizedLocalizedName)))
+                        normalizedNames.Contains(s.NormalizedLocalizedName))
             .Where(s => libraryIds.Contains(s.LibraryId))
             .RestrictAgainstAgeRestriction(userRating)
             .Includes(includes)
