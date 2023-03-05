@@ -93,7 +93,7 @@ public class UserPreferencesDto
     public ReadingDirection BookReaderReadingDirection { get; set; }
 
     /// <summary>
-    /// Book Reader Option: What direction should the next/prev page buttons go
+    /// Book Reader Option: What writing style should be used, horizontal or vertical.
     /// </summary>
     [Required]
     public WritingStyle BookReaderWritingStyle { get; set; }
