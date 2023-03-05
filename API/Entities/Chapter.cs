@@ -78,7 +78,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// SeriesGroup tag in ComicInfo
     /// </summary>
-    public string SeriesGroup { get; set; }
+    public string SeriesGroup { get; set; } = string.Empty;
     public string StoryArc { get; set; } = string.Empty;
     public string StoryArcNumber { get; set; } = string.Empty;
     public string AlternateNumber { get; set; } = string.Empty;

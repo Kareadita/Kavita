@@ -8,7 +8,7 @@
     <TieredPGO>true</TieredPGO>
     <TieredCompilation>true</TieredCompilation>
     <ApplicationIcon>../favicon.ico</ApplicationIcon>
-    <Nullable>enable</Nullable>
+    <Nullable>warnings</Nullable>
     <LangVersion>latestmajor</LangVersion>
   </PropertyGroup>
 
