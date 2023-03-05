@@ -375,9 +375,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get VerticalBookContentWidth() {
     if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Horizontal ) {
-      const margin = (window.innerWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
-      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
-      const width = windowWidth - margin
+      const width = this.getVerticalPageWidth()
       this.document.documentElement.style.setProperty('--book-reader-content-max-width', `${width}px`);
       return width + 'px';
     }
@@ -855,27 +853,30 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateImagesWithHeight() {
     const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
     let maxHeight: number | undefined;
+    let columnGap = 20
 
     if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Vertical) {
       maxHeight = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2));
     } else if (this.layoutMode !== BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight();
+      maxHeight = this.getPageHeight() - columnGap;
     } else if (this.layoutMode === BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() / 2;
+      maxHeight = this.getPageHeight() / 2 - columnGap;
     } else {
       maxHeight = undefined;
     }
-
     Array.from(images).forEach(img => {
-      if (maxHeight !== undefined) {
+      if (maxHeight === undefined) {
+        this.renderer.removeStyle(img, 'max-height');
+      } else if (this.writingStyle === WritingStyle.Horizontal) {
+        this.renderer.setStyle(img, 'max-height', `${maxHeight}px`);
+      } else {
         const aspectRatio = img.width / img.height;
-        const pageWidth = this.getPageWidth();
+        const pageWidth = this.getVerticalPageWidth()
         const maxImgHeight = Math.min(maxHeight, pageWidth / aspectRatio);
         this.renderer.setStyle(img, 'max-height', `${maxImgHeight}px`);
-      } else {
-        this.renderer.removeStyle(img, 'max-height');
       }
     });
+
   }
 
 
@@ -1064,8 +1065,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getPageHeight() {
     if (this.readingSectionElemRef == null) return 0;
     const height = (parseInt(this.ColumnHeight.replace('px', ''), 10));
+
     const columnGap = 20;
     return height - columnGap;
+  }
+
+  getVerticalPageWidth() {
+    const margin = (window.innerWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
+    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+    return windowWidth - margin;
   }
 
   /**
