@@ -402,6 +402,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  get PageWidthForPagination() {
+    if (this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical && this.horizontalScrollbarNeeded) {
+      return 'unset';
+    }
+    return '100%'
+  }
+
   get PageHeightForPagination() {
     if (this.layoutMode === BookPageLayoutMode.Default) {
       // if the book content is less than the height of the container, override and return height of container for pagination area
@@ -1220,6 +1227,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // Recalculate if bottom action bar is needed
     this.scrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientHeight > this.reader?.nativeElement?.clientHeight;
+    this.horizontalScrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientWidth > this.reader?.nativeElement?.clientWidth;
     this.cdRef.markForCheck();
   }
 
@@ -1355,6 +1363,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     setTimeout(() => {
       this.scrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientHeight > this.reader?.nativeElement?.clientHeight;
+      this.horizontalScrollbarNeeded = this.bookContentElemRef?.nativeElement?.clientWidth > this.reader?.nativeElement?.clientWidth;
       this.cdRef.markForCheck();
     });
 
