@@ -202,6 +202,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
    * Will hide if all content in book is absolute positioned
    */
+
+  horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
   readingDirection: ReadingDirection = ReadingDirection.LeftToRight;
   clickToPaginate = false;
