@@ -177,6 +177,7 @@ $action-bar-height: 38px;
     &.writing-style-vertical {
         writing-mode: vertical-rl;
         height: 100%;
+        width: unset;
     }
 }
 
@@ -325,7 +326,7 @@ $action-bar-height: 38px;
     position: absolute;
     right: 0px;
     top: $action-bar-height;
-    width: 20%;
+    width: 20vw;
     z-index: 3;
     cursor: pointer;
     background: transparent;
@@ -362,7 +363,7 @@ $action-bar-height: 38px;
     position: absolute;
     left: 0px;
     top: $action-bar-height;
-    width: 20%;
+    width: 20vw;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -374,6 +375,7 @@ $action-bar-height: 38px;
     &.immersive {
         top: 0px;
     }
+
 }
 
 
