@@ -174,7 +174,7 @@ public class Program
                     var ipAddresses = Configuration.IpAddresses;
                     if (string.IsNullOrEmpty(ipAddresses))
                     {
-                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }
                     else
                     {
@@ -182,7 +182,7 @@ public class Program
                         {
                             try {
                                 var address = System.Net.IPAddress.Parse(ipAddress.Trim());
-                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
+                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                             }
                             catch(Exception ex)
                             {
