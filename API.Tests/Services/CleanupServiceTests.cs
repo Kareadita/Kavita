@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
@@ -8,21 +7,16 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
-using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers;
-using API.Helpers.Converters;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
-using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using API.Tests.Helpers.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -149,6 +143,8 @@ public class CleanupServiceTests : AbstractDbTest
         var v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
+            Number = "0",
+            Range = "0",
             CoverImage = "v01_c01.jpg"
         });
         v.CoverImage = "v01_c01.jpg";
@@ -161,6 +157,8 @@ public class CleanupServiceTests : AbstractDbTest
         v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
+            Number = "0",
+            Range = "0",
             CoverImage = "v01_c03.jpg"
         });
         v.CoverImage = "v01_c03jpg";
@@ -200,6 +198,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something",
+            NormalizedTitle = "Something".ToNormalized(),
             CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
         });
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
@@ -211,6 +210,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
             Title = "Something 2",
+            NormalizedTitle = "Something 2".ToNormalized(),
             CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
         });
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
@@ -250,14 +250,16 @@ public class CleanupServiceTests : AbstractDbTest
                 new ReadingList()
                 {
                     Title = "Something",
-                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something"),
-                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg"
+                    NormalizedTitle = "Something".ToNormalized(),
+                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg",
+                    AgeRating = AgeRating.Unknown
                 },
                 new ReadingList()
                 {
                     Title = "Something 2",
-                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something 2"),
-                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg"
+                    NormalizedTitle = "Something 2".ToNormalized(),
+                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
+                    AgeRating = AgeRating.Unknown
                 }
             }
         });
@@ -408,22 +410,25 @@ public class CleanupServiceTests : AbstractDbTest
     [Fact]
     public async Task CleanupDbEntries_CleanupAbandonedChapters()
     {
-        var c = EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1);
-        _context.Series.Add(new Series()
+        var c = new ChapterBuilder("0")
+            .WithPages(1)
+            .Build();
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithMetadata(new SeriesMetadata())
+            .WithVolume(new VolumeBuilder("0")
+                .WithNumber(1)
+                .WithChapter(c)
+                .Build())
+            .Build();
+        series.Library = new Library()
         {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                EntityFactory.CreateVolume("0", new List<Chapter>()
-                {
-                    c,
-                }),
-            }
-        });
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
+        };
+
+        _context.Series.Add(series);
+
 
         _context.AppUser.Add(new AppUser()
         {
@@ -461,25 +466,19 @@ public class CleanupServiceTests : AbstractDbTest
     {
         var c = new CollectionTag()
         {
-            Title = "Test Tag"
+            Title = "Test Tag",
+            NormalizedTitle = "Test Tag".ToNormalized(),
         };
-        var s = new Series()
+        var s = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
+            .Build();
+        s.Library = new Library()
         {
-            Name = "Test",
-            Library = new Library()
-            {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>(),
-            Metadata = new SeriesMetadata()
-            {
-                CollectionTags = new List<CollectionTag>()
-                {
-                    c
-                }
-            }
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
         };
+
         _context.Series.Add(s);
 
         _context.AppUser.Add(new AppUser()
@@ -511,19 +510,14 @@ public class CleanupServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        var s = new Series()
+        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldRemoveFullyReadSeries")
+            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+            .Build();
+
+        s.Library = new Library()
         {
-            Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
-            Library = new Library()
-            {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>(),
-            Metadata = new SeriesMetadata()
-            {
-                PublicationStatus = PublicationStatus.Completed
-            }
+            Name = "Test LIb",
+            Type = LibraryType.Manga,
         };
         _context.Series.Add(s);
 

@@ -43,7 +43,8 @@ public class TachiyomiController : BaseApiController
     [HttpPost("mark-chapter-until-as-read")]
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        var user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
+            AppUserIncludes.Progress))!;
         return Ok(await _tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber));
     }
 }

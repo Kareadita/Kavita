@@ -11,11 +11,11 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// The Chapter Number
     /// </summary>
-    public string ChapterNumber { get; set; }
+    public string ChapterNumber { get; set; } = default! ;
     /// <summary>
     /// The Volume Number
     /// </summary>
-    public string VolumeNumber { get; set; }
+    public string VolumeNumber { get; set; } = default! ;
     /// <summary>
     /// Volume entity Id
     /// </summary>
@@ -23,7 +23,7 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// Series Name
     /// </summary>
-    public string SeriesName { get; set; }
+    public string SeriesName { get; set; } = null!;
     /// <summary>
     /// Series Format
     /// </summary>
@@ -51,7 +51,7 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// File name of the chapter
     /// </summary>
-    public string FileName { get; set; }
+    public string? FileName { get; set; }
     /// <summary>
     /// If this is marked as a special in Kavita
     /// </summary>
@@ -59,21 +59,22 @@ public class ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// The subtitle to render on the reader
     /// </summary>
-    public string Subtitle { get; set; }
+    public string? Subtitle { get; set; }
     /// <summary>
     /// Series Title
     /// </summary>
     /// <remarks>Usually just series name, but can include chapter title</remarks>
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
+
     /// <summary>
     /// List of all files with their inner archive structure maintained in filename and dimensions
     /// </summary>
     /// <remarks>This is optionally returned by includeDimensions</remarks>
-    public IEnumerable<FileDimensionDto> PageDimensions { get; set; }
+    public IEnumerable<FileDimensionDto>? PageDimensions { get; set; }
     /// <summary>
     /// For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page
     /// </summary>
     /// <remarks>This is optionally returned by includeDimensions</remarks>
-    public IDictionary<int, int> DoublePairs { get; set; }
+    public IDictionary<int, int>? DoublePairs { get; set; }
 
 }

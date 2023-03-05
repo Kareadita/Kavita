@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
-using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
@@ -50,7 +49,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     public async Task ScanLibrary(int libraryId, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty));

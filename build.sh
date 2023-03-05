@@ -75,17 +75,16 @@ BuildUI()
 
 Package()
 {
-    local framework="$1"
-    local runtime="$2"
+    local runtime="$1"
     local lOutputFolder=../_output/"$runtime"/Kavita
 
-    ProgressStart "Creating $runtime Package for $framework"
+    ProgressStart "Creating $runtime Package"
 
     # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
     cd API
-    echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    echo dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder"
+    dotnet publish -c Release --self-contained --runtime $runtime -o "$lOutputFolder"
 
     echo "Recopying wwwroot due to bug"
     cp -R ./wwwroot/* $lOutputFolder/wwwroot
@@ -114,7 +113,7 @@ Package()
     tar -czvf ../kavita-$runtime.tar.gz Kavita
 
 
-    ProgressEnd "Creating $runtime Package for $framework"
+    ProgressEnd "Creating $runtime Package"
 
 
 }
@@ -130,21 +129,21 @@ dir=$PWD
 
 if [[ -z "$RID" ]];
 then
-    Package "net6.0" "win-x64"
+    Package "win-x64"
     cd "$dir"
-    Package "net6.0" "win-x86"
+    Package "win-x86"
     cd "$dir"
-    Package "net6.0" "linux-x64"
+    Package "linux-x64"
     cd "$dir"
-    Package "net6.0" "linux-arm"
+    Package "linux-arm"
     cd "$dir"
-    Package "net6.0" "linux-arm64"
+    Package "linux-arm64"
     cd "$dir"
-    Package "net6.0" "linux-musl-x64"
+    Package "linux-musl-x64"
     cd "$dir"
-    Package "net6.0" "osx-x64"
+    Package "osx-x64"
     cd "$dir"
 else
-    Package "net6.0" "$RID"
+    Package "$RID"
     cd "$dir"
 fi

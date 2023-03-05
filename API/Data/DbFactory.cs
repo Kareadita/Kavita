@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Parser;
 using API.Services.Tasks;
+using Kavita.Common;
 
 namespace API.Data;
 
@@ -16,6 +15,17 @@ namespace API.Data;
 /// </summary>
 public static class DbFactory
 {
+    public static Library Library(string name, LibraryType type)
+    {
+        return new Library()
+        {
+            Name = name,
+            Type = type,
+            Series = new List<Series>(),
+            Folders = new List<FolderPath>(),
+            AppUsers = new List<AppUser>()
+        };
+    }
     public static Series Series(string name)
     {
         return new Series
@@ -23,8 +33,8 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = name,
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedName = name.ToNormalized(),
+            NormalizedLocalizedName = name.ToNormalized(),
             SortName = name,
             Volumes = new List<Volume>(),
             Metadata = SeriesMetadata(new List<CollectionTag>())
@@ -42,8 +52,8 @@ public static class DbFactory
             Name = name,
             OriginalName = name,
             LocalizedName = localizedName,
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
-            NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(localizedName),
+            NormalizedName = name.ToNormalized(),
+            NormalizedLocalizedName = localizedName.ToNormalized(),
             SortName = name,
             Volumes = new List<Volume>(),
             Metadata = SeriesMetadata(new List<CollectionTag>())
@@ -85,28 +95,31 @@ public static class DbFactory
         };
     }
 
-    public static CollectionTag CollectionTag(int id, string title, string summary, bool promoted)
+    public static CollectionTag CollectionTag(int id, string title, string? summary = null, bool promoted = false)
     {
+        title = title.Trim();
         return new CollectionTag()
         {
             Id = id,
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
-            Title = title?.Trim(),
+            NormalizedTitle = title.ToNormalized(),
+            Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
             SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
 
-    public static ReadingList ReadingList(string title, string summary, bool promoted)
+    public static ReadingList ReadingList(string title, string? summary = null, bool promoted = false, AgeRating rating = AgeRating.Unknown)
     {
+        title = title.Trim();
         return new ReadingList()
         {
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(title?.Trim()),
-            Title = title?.Trim(),
+            NormalizedTitle = title.ToNormalized(),
+            Title = title,
             Summary = summary?.Trim(),
             Promoted = promoted,
-            Items = new List<ReadingListItem>()
+            Items = new List<ReadingListItem>(),
+            AgeRating = rating
         };
     }
 
@@ -126,7 +139,7 @@ public static class DbFactory
         return new Genre()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedTitle = name.ToNormalized()
         };
     }
 
@@ -135,7 +148,7 @@ public static class DbFactory
         return new Tag()
         {
             Title = name.Trim().SentenceCase(),
-            NormalizedTitle = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedTitle = name.ToNormalized()
         };
     }
 
@@ -144,7 +157,7 @@ public static class DbFactory
         return new Person()
         {
             Name = name.Trim(),
-            NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name),
+            NormalizedName = name.ToNormalized(),
             Role = role
         };
     }
@@ -169,4 +182,17 @@ public static class DbFactory
         };
     }
 
+    public static AppUser AppUser(string username, string email, SiteTheme defaultTheme)
+    {
+        return new AppUser()
+        {
+            UserName = username,
+            Email = email,
+            ApiKey = HashUtil.ApiKey(),
+            UserPreferences = new AppUserPreferences
+            {
+                Theme = defaultTheme
+            }
+        };
+    }
 }

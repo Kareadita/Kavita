@@ -1,4 +1,5 @@
 ﻿using API.Data;
+using API.Extensions;
 using Xunit;
 
 namespace API.Tests.Entities;
@@ -12,7 +13,7 @@ public class SeriesTest
     [InlineData("Darker than Black")]
     public void CreateSeries(string name)
     {
-        var key = API.Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+        var key = name.ToNormalized();
         var series = DbFactory.Series(name);
         Assert.Equal(0, series.Id);
         Assert.Equal(0, series.Pages);

@@ -27,7 +27,7 @@ public class ParserInfoListExtensions
     [InlineData(new[] {"1", "1", "3-5", "5", "8", "0", "0"}, new[] {"1", "3-5", "5", "8", "0"})]
     public void DistinctVolumesTest(string[] volumeNumbers, string[] expectedNumbers)
     {
-        var infos = volumeNumbers.Select(n => new ParserInfo() {Volumes = n}).ToList();
+        var infos = volumeNumbers.Select(n => new ParserInfo() {Series = "", Volumes = n}).ToList();
         Assert.Equal(expectedNumbers, infos.DistinctVolumes());
     }
 

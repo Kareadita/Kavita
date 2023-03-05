@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -68,6 +67,11 @@ public class ProcessSeries : IProcessSeries
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
+
+        _genres = new Dictionary<string, Genre>();
+        _people = new List<Person>();
+        _tags = new Dictionary<string, Tag>();
+        _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
     /// <summary>
@@ -96,7 +100,7 @@ public class ProcessSeries : IProcessSeries
 
         // Check if there is a Series
         var firstInfo = parsedInfos.First();
-        Series series;
+        Series? series;
         try
         {
             series =
@@ -131,7 +135,7 @@ public class ProcessSeries : IProcessSeries
             UpdateVolumes(series, parsedInfos, forceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
-            series.NormalizedName = Parser.Parser.Normalize(series.Name);
+            series.NormalizedName = series.Name.ToNormalized();
             series.OriginalName ??= firstParsedInfo.Series;
             if (series.Format == MangaFormat.Unknown)
             {
@@ -156,7 +160,7 @@ public class ProcessSeries : IProcessSeries
             if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
             {
                 series.LocalizedName = localizedSeries;
-                series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
+                series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
             UpdateSeriesMetadata(series, library);
@@ -299,17 +303,17 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Summary) && !series.Metadata.SummaryLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
         {
             series.Metadata.Summary = firstChapter.Summary;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Language) && !series.Metadata.LanguageLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Language) && !series.Metadata.LanguageLocked)
         {
             series.Metadata.Language = firstChapter.Language;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.SeriesGroup) && library.ManageCollections)
+        if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
 
@@ -487,7 +491,7 @@ public class ProcessSeries : IProcessSeries
         foreach (var volumeNumber in distinctVolumes)
         {
             _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
-            Volume volume;
+            Volume? volume;
             try
             {
                 volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
@@ -568,7 +572,7 @@ public class ProcessSeries : IProcessSeries
         {
             // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
             // also are treated like specials for UI grouping.
-            Chapter chapter;
+            Chapter? chapter;
             try
             {
                 chapter = volume.Chapters.GetChapterByRange(info);
@@ -625,7 +629,7 @@ public class ProcessSeries : IProcessSeries
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-        var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(info.FullFilePath);
+        var fileInfo = _directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
             existingFile.Format = info.Format;
@@ -645,7 +649,6 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    #nullable enable
     private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
@@ -813,7 +816,6 @@ public class ProcessSeries : IProcessSeries
         }
         return ImmutableList<string>.Empty;
     }
-    #nullable disable
 
     /// <summary>
     /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and
@@ -830,9 +832,9 @@ public class ProcessSeries : IProcessSeries
 
         foreach (var name in names)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName));
+                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
                 person = DbFactory.Person(name, role);
@@ -855,7 +857,7 @@ public class ProcessSeries : IProcessSeries
     {
         foreach (var name in names)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             if (string.IsNullOrEmpty(normalizedName)) continue;
 
             _genres.TryGetValue(normalizedName, out var genre);
@@ -885,7 +887,7 @@ public class ProcessSeries : IProcessSeries
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             _tags.TryGetValue(normalizedName, out var tag);
 
             var added = tag == null;

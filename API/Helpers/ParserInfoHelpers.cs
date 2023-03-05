@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Parser;
 using API.Services.Tasks.Scanner;
 
@@ -22,14 +23,13 @@ public static class ParserInfoHelpers
         foreach (var pSeries in parsedSeries.Keys)
         {
             var name = pSeries.Name;
-            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
 
-            //if (series.NameInParserInfo(pSeries.))
             if (normalizedName == series.NormalizedName ||
-                normalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name) ||
+                normalizedName == series.Name.ToNormalized() ||
                 name == series.Name || name == series.LocalizedName ||
                 name == series.OriginalName ||
-                normalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(series.OriginalName))
+                normalizedName == series.OriginalName?.ToNormalized())
             {
                 format = pSeries.Format;
                 if (format == series.Format)

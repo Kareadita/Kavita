@@ -30,17 +30,16 @@ Build()
 
 Package()
 {
-    local framework="$1"
-    local runtime="$2"
+    local runtime="$1"
     local lOutputFolder=../_output/"$runtime"/Kavita
 
-    ProgressStart "Creating $runtime Package for $framework"
+    ProgressStart "Creating $runtime Package"
 
     # TODO: Use no-restore? Because Build should have already done it for us
     echo "Building"
     cd API
-    echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
-    dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder" --framework $framework
+    echo dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
+    dotnet publish -c Release --no-restore --self-contained --runtime $runtime -o "$lOutputFolder"
 
     echo "Renaming API -> Kavita"
     mv "$lOutputFolder"/API "$lOutputFolder"/Kavita
@@ -64,7 +63,7 @@ Package()
     cd ../$outputFolder/"$runtime"/
     tar -czvf ../kavita-$runtime.tar.gz Kavita
 
-    ProgressEnd "Creating $runtime Package for $framework"
+    ProgressEnd "Creating $runtime Package"
 
 }
 
@@ -77,15 +76,15 @@ fi
 
 #Build for x64
 Build "linux-x64"
-Package "net6.0" "linux-x64"
+Package "linux-x64"
 cd "$dir"
 
 #Build for arm
 Build "linux-arm"
-Package "net6.0" "linux-arm"
+Package "linux-arm"
 cd "$dir"
 
 #Build for arm64
 Build "linux-arm64"
-Package "net6.0" "linux-arm64"
+Package "linux-arm64"
 cd "$dir"

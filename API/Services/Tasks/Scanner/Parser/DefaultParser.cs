@@ -7,7 +7,7 @@ namespace API.Services.Tasks.Scanner.Parser;
 
 public interface IDefaultParser
 {
-    ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga);
+    ParserInfo? Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga);
     void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret);
 }
 
@@ -31,7 +31,7 @@ public class DefaultParser : IDefaultParser
     /// <param name="rootPath">Root folder</param>
     /// <param name="type">Defaults to Manga. Allows different Regex to be used for parsing.</param>
     /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
-    public ParserInfo Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
+    public ParserInfo? Parse(string filePath, string rootPath, LibraryType type = LibraryType.Manga)
     {
         var fileName = _directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         // TODO: Potential Bug: This will return null, but on Image libraries, if all images, we would want to include this.
@@ -134,7 +134,7 @@ public class DefaultParser : IDefaultParser
 
         if (fallbackFolders.Count == 0)
         {
-            var rootFolderName = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(rootPath).Name;
+            var rootFolderName = _directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
             var series = Parser.ParseSeries(rootFolderName);
 
             if (string.IsNullOrEmpty(series))

@@ -16,14 +16,14 @@ public interface IVolumeRepository
     void Update(Volume volume);
     void Remove(Volume volume);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
-    Task<string> GetVolumeCoverImageAsync(int volumeId);
+    Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
     Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
-    Task<Volume> GetVolumeAsync(int volumeId);
+    Task<Volume?> GetVolumeAsync(int volumeId);
     Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
-    Task<Volume> GetVolumeByIdAsync(int volumeId);
+    Task<Volume?> GetVolumeByIdAsync(int volumeId);
 }
 public class VolumeRepository : IVolumeRepository
 {
@@ -72,12 +72,11 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<string> GetVolumeCoverImageAsync(int volumeId)
+    public async Task<string?> GetVolumeCoverImageAsync(int volumeId)
     {
         return await _context.Volume
             .Where(v => v.Id == volumeId)
             .Select(v => v.CoverImage)
-            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
@@ -155,7 +154,7 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<Volume> GetVolumeAsync(int volumeId)
+    public async Task<Volume?> GetVolumeAsync(int volumeId)
     {
         return await _context.Volume
             .Include(vol => vol.Chapters)
@@ -191,7 +190,7 @@ public class VolumeRepository : IVolumeRepository
         return volumes;
     }
 
-    public async Task<Volume> GetVolumeByIdAsync(int volumeId)
+    public async Task<Volume?> GetVolumeByIdAsync(int volumeId)
     {
         return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
     }

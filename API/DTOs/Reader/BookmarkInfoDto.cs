@@ -4,7 +4,7 @@ namespace API.DTOs.Reader;
 
 public class BookmarkInfoDto
 {
-    public string SeriesName { get; set; }
+    public string SeriesName { get; set; } = default!;
     public MangaFormat SeriesFormat { get; set; }
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }

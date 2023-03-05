@@ -1,9 +1,12 @@
-﻿namespace API.DTOs.Uploads;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace API.DTOs.Uploads;
 
 public class UploadUrlDto
 {
     /// <summary>
     /// External url
     /// </summary>
-    public string Url { get; set; }
+    [Required]
+    public required string Url { get; set; }
 }

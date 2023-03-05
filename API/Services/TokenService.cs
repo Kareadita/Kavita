@@ -19,7 +19,7 @@ namespace API.Services;
 public interface ITokenService
 {
     Task<string> CreateToken(AppUser user);
-    Task<TokenRequestDto> ValidateRefreshToken(TokenRequestDto request);
+    Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
 }
 
@@ -33,14 +33,14 @@ public class TokenService : ITokenService
     {
 
         _userManager = userManager;
-        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+        _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty));
     }
 
     public async Task<string> CreateToken(AppUser user)
     {
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Name, user.UserName!),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
         };
 
@@ -71,11 +71,12 @@ public class TokenService : ITokenService
         return refreshToken;
     }
 
-    public async Task<TokenRequestDto> ValidateRefreshToken(TokenRequestDto request)
+    public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var tokenContent = tokenHandler.ReadJwtToken(request.Token);
         var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
+        if (string.IsNullOrEmpty(username)) return null;
         var user = await _userManager.FindByNameAsync(username);
         if (user == null) return null; // This forces a logout
         await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", request.RefreshToken);

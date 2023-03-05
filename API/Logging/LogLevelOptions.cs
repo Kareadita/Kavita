@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using API.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Serilog;
+﻿using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting.Display;

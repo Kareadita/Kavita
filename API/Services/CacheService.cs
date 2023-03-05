@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
@@ -25,7 +24,7 @@ public interface ICacheService
     /// <param name="chapterId"></param>
     /// <param name="extractPdfToImages">Extracts a PDF into images for a different reading experience</param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false);
+    Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
@@ -132,14 +131,21 @@ public class CacheService : ICacheService
     {
         var extractPath = GetCachePath(chapter.Id);
         var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(chapter.Files.First().FilePath));
-        if (!(_directoryService.FileSystem.FileInfo.FromFileName(path).Exists))
+        if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
         {
             path = chapter.Files.First().FilePath;
         }
         return path;
     }
 
-    public async Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false)
+
+    /// <summary>
+    /// Caches the files for the given chapter to CacheDirectory
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="extractPdfToImages">Defaults to false. Extract pdf file into images rather than copying just the pdf file</param>
+    /// <returns>This will always return the Chapter for the chapterId</returns>
+    public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -160,12 +166,13 @@ public class CacheService : ICacheService
     /// <param name="files"></param>
     /// <param name="extractPdfImages">Defaults to false, if true, will extract the images from the PDF renderer and not move the pdf file</param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false)
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
     {
+        if (files == null) return;
         var removeNonImages = true;
         var fileCount = files.Count;
         var extraPath = string.Empty;
-        var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
+        var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
         {

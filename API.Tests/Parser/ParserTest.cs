@@ -249,7 +249,7 @@ public class ParserTests
     [InlineData("The ()quick brown fox jumps over the lazy dog")]
     [InlineData("The (quick (brown)) fox jumps over the lazy dog")]
     [InlineData("The (quick (brown) fox jumps over the lazy dog)")]
-    public void BalancedParenTestMatches(string input)
+    public void BalancedParenTest_Matches(string input)
     {
         Assert.Matches($@"^{BalancedParen}$", input);
     }
@@ -261,7 +261,7 @@ public class ParserTests
     [InlineData("The quick (brown)) fox jumps over the lazy dog")]
     [InlineData("The quick (brown) fox jumps over the lazy dog)")]
     [InlineData("(The ))(quick (brown) fox jumps over the lazy dog")]
-    public void BalancedParenTestDoesNotMatch(string input)
+    public void BalancedParenTest_DoesNotMatch(string input)
     {
         Assert.DoesNotMatch($@"^{BalancedParen}$", input);
     }
@@ -273,9 +273,9 @@ public class ParserTests
     [InlineData("The []quick brown fox jumps over the lazy dog")]
     [InlineData("The [quick [brown]] fox jumps over the lazy dog")]
     [InlineData("The [quick [brown] fox jumps over the lazy dog]")]
-    public void BalancedBrackTestMatches(string input)
+    public void BalancedBracketTest_Matches(string input)
     {
-        Assert.Matches($@"^{BalancedBrack}$", input);
+        Assert.Matches($@"^{BalancedBracket}$", input);
     }
 
     [Theory]
@@ -285,8 +285,8 @@ public class ParserTests
     [InlineData("The quick [brown]] fox jumps over the lazy dog")]
     [InlineData("The quick [brown] fox jumps over the lazy dog]")]
     [InlineData("[The ]][quick [brown] fox jumps over the lazy dog")]
-    public void BalancedBrackTestDoesNotMatch(string input)
+    public void BalancedBracketTest_DoesNotMatch(string input)
     {
-        Assert.DoesNotMatch($@"^{BalancedBrack}$", input);
+        Assert.DoesNotMatch($@"^{BalancedBracket}$", input);
     }
 }

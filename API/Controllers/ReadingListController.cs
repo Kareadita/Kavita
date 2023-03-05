@@ -1,22 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.ReadingLists;
-using API.DTOs.ReadingLists.CBL;
-using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -186,8 +179,8 @@ public class ReadingListController : BaseApiController
     [HttpPost("create")]
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingLists);
+        if (user == null) return Unauthorized();
 
         try
         {

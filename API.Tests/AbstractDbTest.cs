@@ -29,6 +29,7 @@ public abstract class AbstractDbTest
     protected const string BackupDirectory = "C:/kavita/config/backups/";
     protected const string LogDirectory = "C:/kavita/config/logs/";
     protected const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
+    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
     protected const string TempDirectory = "C:/kavita/config/temp/";
     protected const string DataDirectory = "C:/data/";
 
@@ -103,6 +104,7 @@ public abstract class AbstractDbTest
         fileSystem.AddDirectory(CoverImageDirectory);
         fileSystem.AddDirectory(BackupDirectory);
         fileSystem.AddDirectory(BookmarkDirectory);
+        fileSystem.AddDirectory(SiteThemeDirectory);
         fileSystem.AddDirectory(LogDirectory);
         fileSystem.AddDirectory(TempDirectory);
         fileSystem.AddDirectory(DataDirectory);

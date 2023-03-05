@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks.Metadata;
-using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,16 +33,17 @@ public class CollectionController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<IEnumerable<CollectionTagDto>> GetAllTags()
+    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> GetAllTags()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (isAdmin)
         {
-            return await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync();
+            return Ok(await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync());
         }
 
-        return await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id);
+        return Ok(await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(user.Id));
     }
 
     /// <summary>
@@ -55,13 +54,13 @@ public class CollectionController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("search")]
-    public async Task<IEnumerable<CollectionTagDto>> SearchTags(string queryString)
+    public async Task<ActionResult<IEnumerable<CollectionTagDto>>> SearchTags(string queryString)
     {
         queryString ??= string.Empty;
         queryString = queryString.Replace(@"%", string.Empty);
         if (queryString.Length == 0) return await GetAllTags();
 
-        return await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId());
+        return Ok(await _unitOfWork.CollectionTagRepository.SearchTagDtosAsync(queryString, User.GetUserId()));
     }
 
     /// <summary>
@@ -126,7 +125,7 @@ public class CollectionController : BaseApiController
     {
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetFullTagAsync(updateSeriesForTagDto.Tag.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updateSeriesForTagDto.Tag.Id, CollectionTagIncludes.SeriesMetadata);
             if (tag == null) return BadRequest("Not a valid Tag");
             tag.SeriesMetadatas ??= new List<SeriesMetadata>();
 

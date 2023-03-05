@@ -31,13 +31,12 @@ public interface ILibraryRepository
 {
     void Add(Library library);
     void Update(Library library);
-    void Delete(Library library);
+    void Delete(Library? library);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
-    Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
+    Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
     Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
-    Task<bool> DeleteLibrary(int libraryId);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
     Task<LibraryType> GetLibraryTypeAsync(int libraryId);
@@ -49,7 +48,7 @@ public interface ILibraryRepository
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
-    Task<string> GetLibraryCoverImageAsync(int libraryId);
+    Task<string?> GetLibraryCoverImageAsync(int libraryId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
 }
@@ -75,8 +74,9 @@ public class LibraryRepository : ILibraryRepository
         _context.Entry(library).State = EntityState.Modified;
     }
 
-    public void Delete(Library library)
+    public void Delete(Library? library)
     {
+        if (library == null) return;
         _context.Library.Remove(library);
     }
 
@@ -105,14 +105,6 @@ public class LibraryRepository : ILibraryRepository
 
         query = AddIncludesToQuery(query, includes);
         return await query.ToListAsync();
-    }
-
-    public async Task<bool> DeleteLibrary(int libraryId)
-    {
-        var library = await GetLibraryForIdAsync(libraryId, LibraryIncludes.Folders | LibraryIncludes.Series);
-        _context.Library.Remove(library);
-
-        return await _context.SaveChangesAsync() > 0;
     }
 
     /// <summary>
@@ -164,7 +156,7 @@ public class LibraryRepository : ILibraryRepository
     public IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId)
     {
         var seriesSortCharacters = _context.Series.Where(s => s.LibraryId == libraryId)
-            .Select(s => s.SortName.ToUpper())
+            .Select(s => s.SortName!.ToUpper())
             .OrderBy(s => s)
             .AsEnumerable()
             .Select(s => s[0]);
@@ -207,7 +199,7 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<Library> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None)
+    public async Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None)
     {
 
         var query = _context.Library
@@ -237,54 +229,11 @@ public class LibraryRepository : ILibraryRepository
         return query.AsSplitQuery();
     }
 
-
-    /// <summary>
-    /// This returns a Library with all it's Series -> Volumes -> Chapters. This is expensive. Should only be called when needed.
-    /// </summary>
-    /// <param name="libraryId"></param>
-    /// <returns></returns>
-    public async Task<Library> GetFullLibraryForIdAsync(int libraryId)
-    {
-        return await _context.Library
-            .Where(x => x.Id == libraryId)
-            .Include(f => f.Folders)
-            .Include(l => l.Series)
-            .ThenInclude(s => s.Metadata)
-            .Include(l => l.Series)
-            .ThenInclude(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Files)
-            .AsSplitQuery()
-            .SingleAsync();
-    }
-
-    /// <summary>
-    /// This is a heavy call, pulls all entities for a Library, except this version only grabs for one series id
-    /// </summary>
-    /// <param name="libraryId"></param>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    public async Task<Library> GetFullLibraryForIdAsync(int libraryId, int seriesId)
-    {
-
-        return await _context.Library
-            .Where(x => x.Id == libraryId)
-            .Include(f => f.Folders)
-            .Include(l => l.Series.Where(s => s.Id == seriesId))
-            .ThenInclude(s => s.Metadata)
-            .Include(l => l.Series.Where(s => s.Id == seriesId))
-            .ThenInclude(s => s.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Files)
-            .AsSplitQuery()
-            .SingleAsync();
-    }
-
     public async Task<bool> LibraryExists(string libraryName)
     {
         return await _context.Library
             .AsNoTracking()
-            .AnyAsync(x => x.Name.Equals(libraryName));
+            .AnyAsync(x => x.Name != null && x.Name.Equals(libraryName));
     }
 
     public async Task<IEnumerable<LibraryDto>> GetLibrariesForUserAsync(AppUser user)
@@ -381,7 +330,7 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Series.AnyAsync(s => normalized.Contains(s.FolderPath));
     }
 
-    public Task<string> GetLibraryCoverImageAsync(int libraryId)
+    public Task<string?> GetLibraryCoverImageAsync(int libraryId)
     {
         return _context.Library
             .Where(l => l.Id == libraryId)
@@ -392,11 +341,10 @@ public class LibraryRepository : ILibraryRepository
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return await _context.ReadingList
+        return (await _context.ReadingList
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .AsNoTracking()
-            .ToListAsync();
+            .ToListAsync())!;
     }
 
     public async Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds)

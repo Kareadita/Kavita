@@ -38,10 +38,10 @@ public class PluginController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0) return Unauthorized();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user.UserName, userId);
+        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user!.UserName, userId);
         return new UserDto
         {
-            Username = user.UserName,
+            Username = user.UserName!,
             Token = await _tokenService.CreateToken(user),
             ApiKey = user.ApiKey,
         };

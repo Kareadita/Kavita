@@ -7,7 +7,7 @@ namespace API.DTOs;
 /// </summary>
 public class GroupedSeriesDto
 {
-    public string SeriesName { get; set; }
+    public string SeriesName { get; set; } = default!;
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
     public LibraryType LibraryType { get; set; }

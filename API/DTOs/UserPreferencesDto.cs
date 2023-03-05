@@ -80,7 +80,8 @@ public class UserPreferencesDto
     /// Book Reader Option: Maps to the default Kavita font-family (inherit) or an override
     /// </summary>
     [Required]
-    public string BookReaderFontFamily { get; set; }
+    public string BookReaderFontFamily { get; set; } = null!;
+
     /// <summary>
     /// Book Reader Option: Allows tapping on side of screens to paginate
     /// </summary>
@@ -96,9 +97,10 @@ public class UserPreferencesDto
     /// UI Site Global Setting: The UI theme the user should use.
     /// </summary>
     /// <remarks>Should default to Dark</remarks>
-    public SiteTheme Theme { get; set; }
     [Required]
-    public string BookReaderThemeName { get; set; }
+    public SiteTheme? Theme { get; set; }
+
+    [Required] public string BookReaderThemeName { get; set; } = null!;
     [Required]
     public BookPageLayoutMode BookReaderLayoutMode { get; set; }
     /// <summary>

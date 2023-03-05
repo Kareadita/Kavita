@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -12,7 +11,6 @@ using API.Extensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -593,13 +591,14 @@ public class StatisticService : IStatisticService
             user[userChapter.User.Id] = libraryTimes;
         }
 
+
         return user.Keys.Select(userId => new TopReadDto()
             {
                 UserId = userId,
                 Username = users.First(u => u.Id == userId).UserName,
-                BooksTime = user[userId].ContainsKey(LibraryType.Book) ? user[userId][LibraryType.Book] : 0,
-                ComicsTime = user[userId].ContainsKey(LibraryType.Comic) ? user[userId][LibraryType.Comic] : 0,
-                MangaTime = user[userId].ContainsKey(LibraryType.Manga) ? user[userId][LibraryType.Manga] : 0,
+                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0,
+                ComicsTime = user[userId].TryGetValue(LibraryType.Comic, out var comicTime) ? comicTime : 0,
+                MangaTime = user[userId].TryGetValue(LibraryType.Manga, out var mangaTime) ? mangaTime : 0,
             })
             .ToList();
     }

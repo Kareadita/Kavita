@@ -12,7 +12,7 @@ public static class ChapterListExtensions
     /// </summary>
     /// <param name="chapters"></param>
     /// <returns></returns>
-    public static Chapter GetFirstChapterWithFiles(this IList<Chapter> chapters)
+    public static Chapter? GetFirstChapterWithFiles(this IEnumerable<Chapter> chapters)
     {
         return chapters.FirstOrDefault(c => c.Files.Any());
     }
@@ -24,7 +24,7 @@ public static class ChapterListExtensions
     /// <param name="chapters"></param>
     /// <param name="info"></param>
     /// <returns></returns>
-    public static Chapter GetChapterByRange(this IList<Chapter> chapters, ParserInfo info)
+    public static Chapter? GetChapterByRange(this IEnumerable<Chapter> chapters, ParserInfo info)
     {
         var specialTreatment = info.IsSpecialInfo();
         return specialTreatment

@@ -3,6 +3,7 @@ using System.Linq;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services.Tasks.Scanner;
 using Xunit;
@@ -22,21 +23,35 @@ public class SeriesHelperTests
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
+        }));
+    }
+
+    [Fact]
+    public void FindSeries_ShouldFind_NullName()
+    {
+        var series = DbFactory.Series("Darker than Black");
+        series.OriginalName = null;
+        series.Format = MangaFormat.Archive;
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "Darker than Black",
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
     }
 
@@ -50,21 +65,21 @@ public class SeriesHelperTests
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
     }
 
@@ -78,28 +93,28 @@ public class SeriesHelperTests
         {
             Format = MangaFormat.Image,
             Name = "Something Random",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "SomethingRandom".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("SomethingRandom")
+            NormalizedName = "SomethingRandom".ToNormalized()
         }));
     }
 
@@ -113,28 +128,28 @@ public class SeriesHelperTests
         {
             Format = MangaFormat.Image,
             Name = "Something Random",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "SomethingRandom".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("SomethingRandom")
+            NormalizedName = "SomethingRandom".ToNormalized()
         }));
     }
 
@@ -148,14 +163,14 @@ public class SeriesHelperTests
         {
             Format = MangaFormat.Archive,
             Name = "My Dress-Up Darling",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("My Dress-Up Darling")
+            NormalizedName = "My Dress-Up Darling".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Sono Bisque Doll wa Koi wo Suru".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Sono Bisque Doll wa Koi wo Suru")
+            NormalizedName = "Sono Bisque Doll wa Koi wo Suru".ToNormalized()
         }));
     }
     #endregion

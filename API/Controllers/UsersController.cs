@@ -4,10 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
-using API.DTOs.Filtering;
-using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -68,6 +65,7 @@ public class UsersController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+        if (library == null) return BadRequest("Library does not exist");
         return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
     }
 
@@ -83,9 +81,8 @@ public class UsersController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.UserPreferences);
-        var existingPreferences = user.UserPreferences;
-
-        preferencesDto.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
+        if (user == null) return Unauthorized();
+        var existingPreferences = user!.UserPreferences;
 
         existingPreferences.ReadingDirection = preferencesDto.ReadingDirection;
         existingPreferences.ScalingOption = preferencesDto.ScalingOption;
@@ -107,8 +104,8 @@ public class UsersController : BaseApiController
         existingPreferences.BookReaderImmersiveMode = preferencesDto.BookReaderImmersiveMode;
         existingPreferences.GlobalPageLayoutMode = preferencesDto.GlobalPageLayoutMode;
         existingPreferences.BlurUnreadSummaries = preferencesDto.BlurUnreadSummaries;
-        existingPreferences.Theme = await _unitOfWork.SiteThemeRepository.GetThemeById(preferencesDto.Theme.Id);
         existingPreferences.LayoutMode = preferencesDto.LayoutMode;
+        existingPreferences.Theme = preferencesDto.Theme ?? await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
@@ -117,7 +114,7 @@ public class UsersController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
             return Ok(preferencesDto);
         }
 

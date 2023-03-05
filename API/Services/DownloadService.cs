@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using API.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace API.Services;
@@ -53,7 +51,7 @@ public class DownloadService : IDownloadService
             };
         }
 
-        return contentType;
+        return contentType!;
     }
 
 

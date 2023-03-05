@@ -171,6 +171,7 @@ public class CacheServiceTests
         var c = new Chapter()
         {
             Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
             {
                 new MangaFile()
@@ -272,6 +273,8 @@ public class CacheServiceTests
 
         var c = new Chapter()
         {
+            Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
             {
                 new MangaFile()
@@ -303,6 +306,8 @@ public class CacheServiceTests
         var c = new Chapter()
         {
             Id = 1,
+            Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
         };
 
@@ -340,6 +345,8 @@ public class CacheServiceTests
         var c = new Chapter()
         {
             Id = 1,
+            Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
             {
                 new MangaFile()
@@ -392,6 +399,8 @@ public class CacheServiceTests
         var c = new Chapter()
         {
             Id = 1,
+            Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
             {
                 new MangaFile()
@@ -440,6 +449,8 @@ public class CacheServiceTests
         var c = new Chapter()
         {
             Id = 1,
+            Number = "1",
+            Range = "1",
             Files = new List<MangaFile>()
             {
                 new MangaFile()

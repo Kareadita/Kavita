@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -11,7 +10,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -175,7 +173,7 @@ public class CleanupService : ICleanupService
 
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
-        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 
@@ -198,7 +196,7 @@ public class CleanupService : ICleanupService
         var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allLogs = _directoryService.GetFiles(_directoryService.LogDirectory).ToList();
-        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 

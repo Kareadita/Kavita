@@ -3,8 +3,8 @@
 public class ReadingListDto
 {
     public int Id { get; init; }
-    public string Title { get; set; }
-    public string Summary { get; set; }
+    public string Title { get; set; } = default!;
+    public string Summary { get; set; } = default!;
     /// <summary>
     /// Reading lists that are promoted are only done by admins
     /// </summary>

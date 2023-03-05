@@ -19,8 +19,6 @@ using API.Services.HostedServices;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
-using Hangfire.MemoryStorage;
-using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -111,7 +109,7 @@ public class Startup
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             foreach(var proxy in _config.GetSection("KnownProxies").AsEnumerable().Where(c => c.Value != null)) {
-                options.KnownProxies.Add(IPAddress.Parse(proxy.Value));
+                options.KnownProxies.Add(IPAddress.Parse(proxy.Value!));
             }
         });
         services.AddCors();

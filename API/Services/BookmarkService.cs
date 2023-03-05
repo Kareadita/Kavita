@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
@@ -50,21 +49,23 @@ public class BookmarkService : IBookmarkService
     /// Deletes the files associated with the list of Bookmarks passed. Will clean up empty folders.
     /// </summary>
     /// <param name="bookmarks"></param>
-    public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark> bookmarks)
+    public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark?> bookmarks)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
 
-        var bookmarkFilesToDelete = bookmarks.Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(
-            _directoryService.FileSystem.Path.Join(bookmarkDirectory,
-                b.FileName))).ToList();
+        var bookmarkFilesToDelete = bookmarks
+            .Where(b => b != null)
+            .Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(
+                _directoryService.FileSystem.Path.Join(bookmarkDirectory, b!.FileName)))
+            .ToList();
 
         if (bookmarkFilesToDelete.Count == 0) return;
 
         _directoryService.DeleteFiles(bookmarkFilesToDelete);
 
         // Delete any leftover folders
-        foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, "", SearchOption.AllDirectories))
+        foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, string.Empty, SearchOption.AllDirectories))
         {
             if (_directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
                 _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
@@ -92,7 +93,7 @@ public class BookmarkService : IBookmarkService
                 return true;
             }
 
-            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(imageToBookmark);
+            var fileInfo = _directoryService.FileSystem.FileInfo.New(imageToBookmark);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
             var targetFilepath = Path.Join(settings.BookmarksDirectory, targetFolderStem);
@@ -136,7 +137,6 @@ public class BookmarkService : IBookmarkService
     /// <returns></returns>
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto)
     {
-        if (userWithBookmarks.Bookmarks == null) return true;
         var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
             x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page);
         try
@@ -215,6 +215,8 @@ public class BookmarkService : IBookmarkService
         var count = 1F;
         foreach (var chapter in chapters)
         {
+            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
+
             var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
             chapter.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.ChapterRepository.Update(chapter);

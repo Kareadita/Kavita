@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -56,6 +55,7 @@ public class WantToReadController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
+        if (user == null) return Unauthorized();
 
         var existingIds = user.WantToRead.Select(s => s.Id).ToList();
         existingIds.AddRange(dto.SeriesIds);
@@ -84,6 +84,7 @@ public class WantToReadController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
+        if (user == null) return Unauthorized();
 
         user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
 

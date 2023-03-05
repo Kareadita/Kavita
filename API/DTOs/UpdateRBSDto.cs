@@ -4,6 +4,6 @@ namespace API.DTOs;
 
 public class UpdateRbsDto
 {
-    public string Username { get; init; }
-    public IList<string> Roles { get; init; }
+    public required string Username { get; init; }
+    public IList<string>? Roles { get; init; }
 }

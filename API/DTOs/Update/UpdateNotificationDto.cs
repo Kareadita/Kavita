@@ -8,24 +8,24 @@ public class UpdateNotificationDto
     /// <summary>
     /// Current installed Version
     /// </summary>
-    public string CurrentVersion { get; init; }
+    public required string CurrentVersion { get; init; }
     /// <summary>
     /// Semver of the release version
     /// <example>0.4.3</example>
     /// </summary>
-    public string UpdateVersion { get; init; }
+    public required string UpdateVersion { get; init; }
     /// <summary>
     /// Release body in HTML
     /// </summary>
-    public string UpdateBody { get; init; }
+    public required string UpdateBody { get; init; }
     /// <summary>
     /// Title of the release
     /// </summary>
-    public string UpdateTitle { get; init; }
+    public required string UpdateTitle { get; init; }
     /// <summary>
     /// Github Url
     /// </summary>
-    public string UpdateUrl { get; init; }
+    public required string UpdateUrl { get; init; }
     /// <summary>
     /// If this install is within Docker
     /// </summary>
@@ -37,5 +37,5 @@ public class UpdateNotificationDto
     /// <summary>
     /// Date of the publish
     /// </summary>
-    public string PublishDate { get; init; }
+    public required string PublishDate { get; init; }
 }

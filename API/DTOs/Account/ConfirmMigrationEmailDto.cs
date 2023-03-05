@@ -2,6 +2,6 @@
 
 public class ConfirmMigrationEmailDto
 {
-    public string Email { get; set; }
-    public string Token { get; set; }
+    public string Email { get; set; } = default!;
+    public string Token { get; set; } = default!;
 }

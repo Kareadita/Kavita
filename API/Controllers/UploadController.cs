@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Uploads;
@@ -10,7 +9,6 @@ using Flurl.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using NetVips;
 
 namespace API.Controllers;
 
@@ -93,8 +91,10 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, ImageService.GetSeriesFormat(uploadFileDto.Id));
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
+            if (series == null) return BadRequest("Invalid Series");
+            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, ImageService.GetSeriesFormat(uploadFileDto.Id), convertToWebP);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -140,8 +140,10 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
             var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
+            if (tag == null) return BadRequest("Invalid Tag id");
+            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}", convertToWebP);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -190,8 +192,10 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
+            if (readingList == null) return BadRequest("Reading list is not valid");
+            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}", convertToWebP);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -238,7 +242,9 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
+            if (chapter == null) return BadRequest("Invalid Chapter");
+            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}", convertToWebP);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -246,8 +252,11 @@ public class UploadController : BaseApiController
                 chapter.CoverImageLocked = true;
                 _unitOfWork.ChapterRepository.Update(chapter);
                 var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
-                volume.CoverImage = chapter.CoverImage;
-                _unitOfWork.VolumeRepository.Update(volume);
+                if (volume != null)
+                {
+                    volume.CoverImage = chapter.CoverImage;
+                    _unitOfWork.VolumeRepository.Update(volume);
+                }
             }
 
             if (_unitOfWork.HasChanges())
@@ -301,8 +310,9 @@ public class UploadController : BaseApiController
 
         try
         {
+            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
             var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
+                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", convertToWebP, ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -340,19 +350,20 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+            if (chapter == null) return BadRequest("Chapter no longer exists");
             var originalFile = chapter.CoverImage;
             chapter.CoverImage = string.Empty;
             chapter.CoverImageLocked = false;
             _unitOfWork.ChapterRepository.Update(chapter);
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId);
+            var volume = (await _unitOfWork.VolumeRepository.GetVolumeAsync(chapter.VolumeId))!;
             volume.CoverImage = chapter.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+            var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
 
             if (_unitOfWork.HasChanges())
             {
                 await _unitOfWork.CommitAsync();
-                System.IO.File.Delete(originalFile);
+                if (originalFile != null) System.IO.File.Delete(originalFile);
                 _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 return Ok();
             }

@@ -13,7 +13,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
-using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -164,7 +163,7 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
-        if (chapterId <= 0) return null;
+        if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
         return Ok(_cacheService.GetCachedFileDimensions(chapterId));
@@ -179,9 +178,9 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("chapter-info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf", "includeDimensions"})]
-    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
+    public async Task<ActionResult<ChapterInfoDto?>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
-        if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
+        if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
 
@@ -249,7 +248,7 @@ public class ReaderController : BaseApiController
 
         return Ok(new BookmarkInfoDto()
         {
-            SeriesName = series.Name,
+            SeriesName = series!.Name,
             SeriesFormat = series.Format,
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
@@ -267,6 +266,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -284,6 +284,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -300,6 +301,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
@@ -323,9 +325,10 @@ public class ReaderController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
+        if (user == null) return Unauthorized();
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markVolumeReadDto.SeriesId,
+            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         if (await _unitOfWork.CommitAsync())
@@ -346,6 +349,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -374,6 +378,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsUnread(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -401,6 +406,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsRead(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -426,6 +432,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsUnread(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -509,6 +516,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         // Tachiyomi sends chapter 0.0f when there's no chapters read.
@@ -546,6 +554,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
     }
@@ -559,6 +568,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterDto filterDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id, filterDto));
@@ -573,6 +583,7 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
+        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok("Nothing to remove");
 
         try
@@ -612,7 +623,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> BulkRemoveBookmarks(BulkRemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok("Nothing to remove");
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok("Nothing to remove");
 
         try
         {
@@ -648,7 +660,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
     }
 
@@ -661,7 +674,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user == null) return Unauthorized();
+        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
     }

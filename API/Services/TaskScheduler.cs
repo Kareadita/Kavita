@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
@@ -322,6 +321,7 @@ public class TaskScheduler : ITaskScheduler
     public async Task CheckForUpdate()
     {
         var update = await _versionUpdaterService.CheckForUpdate();
+        if (update == null) return;
         await _versionUpdaterService.PushUpdate(update);
     }
 

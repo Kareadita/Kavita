@@ -21,8 +21,9 @@ public interface IAccountService
     Task<IEnumerable<ApiException>> ValidatePassword(AppUser user, string password);
     Task<IEnumerable<ApiException>> ValidateUsername(string username);
     Task<IEnumerable<ApiException>> ValidateEmail(string email);
-    Task<bool> HasBookmarkPermission(AppUser user);
-    Task<bool> HasDownloadPermission(AppUser user);
+    Task<bool> HasBookmarkPermission(AppUser? user);
+    Task<bool> HasDownloadPermission(AppUser? user);
+    Task<bool> HasChangeRestrictionRole(AppUser? user);
     Task<bool> CheckIfAccessible(HttpRequest request);
     Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email, bool withHost = true);
 }
@@ -137,8 +138,9 @@ public class AccountService : IAccountService
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
-    public async Task<bool> HasBookmarkPermission(AppUser user)
+    public async Task<bool> HasBookmarkPermission(AppUser? user)
     {
+        if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
         return roles.Contains(PolicyConstants.BookmarkRole) || roles.Contains(PolicyConstants.AdminRole);
     }
@@ -148,8 +150,9 @@ public class AccountService : IAccountService
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
-    public async Task<bool> HasDownloadPermission(AppUser user)
+    public async Task<bool> HasDownloadPermission(AppUser? user)
     {
+        if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
         return roles.Contains(PolicyConstants.DownloadRole) || roles.Contains(PolicyConstants.AdminRole);
     }
@@ -159,8 +162,9 @@ public class AccountService : IAccountService
     /// </summary>
     /// <param name="user"></param>
     /// <returns></returns>
-    public async Task<bool> HasChangeRestrictionRole(AppUser user)
+    public async Task<bool> HasChangeRestrictionRole(AppUser? user)
     {
+        if (user == null) return false;
         var roles = await _userManager.GetRolesAsync(user);
         return roles.Contains(PolicyConstants.ChangePasswordRole) || roles.Contains(PolicyConstants.AdminRole);
     }

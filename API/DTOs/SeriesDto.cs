@@ -7,11 +7,11 @@ namespace API.DTOs;
 public class SeriesDto : IHasReadTimeEstimate
 {
     public int Id { get; init; }
-    public string Name { get; init; }
-    public string OriginalName { get; init; }
-    public string LocalizedName { get; init; }
-    public string SortName { get; init; }
-    public string Summary { get; init; }
+    public string? Name { get; init; }
+    public string? OriginalName { get; init; }
+    public string? LocalizedName { get; init; }
+    public string? SortName { get; init; }
+    public string? Summary { get; init; }
     public int Pages { get; init; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
@@ -33,7 +33,7 @@ public class SeriesDto : IHasReadTimeEstimate
     /// <summary>
     /// Review from logged in user. Calculated at API-time.
     /// </summary>
-    public string UserReview { get; set; }
+    public string? UserReview { get; set; }
     public MangaFormat Format { get; set; }
 
     public DateTime Created { get; set; }
@@ -47,7 +47,7 @@ public class SeriesDto : IHasReadTimeEstimate
     public long WordCount { get; set; }
 
     public int LibraryId { get; set; }
-    public string LibraryName { get; set; }
+    public string LibraryName { get; set; } = default!;
     /// <inheritdoc cref="IHasReadTimeEstimate.MinHoursToRead"/>
     public int MinHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.MaxHoursToRead"/>
@@ -57,7 +57,7 @@ public class SeriesDto : IHasReadTimeEstimate
     /// <summary>
     /// The highest level folder for this Series
     /// </summary>
-    public string FolderPath { get; set; }
+    public string FolderPath { get; set; } = default!;
     /// <summary>
     /// The last time the folder for this series was scanned
     /// </summary>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -18,7 +17,7 @@ public interface IPresenceTracker
 internal class ConnectionDetail
 {
     public string UserName { get; set; }
-    public List<string> ConnectionIds { get; set; }
+    public List<string> ConnectionIds { get; set; } = new List<string>();
     public bool IsAdmin { get; set; }
 }
 
@@ -43,9 +42,9 @@ public class PresenceTracker : IPresenceTracker
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         lock (OnlineUsers)
         {
-            if (OnlineUsers.ContainsKey(userId))
+            if (OnlineUsers.TryGetValue(userId, out var detail))
             {
-                OnlineUsers[userId].ConnectionIds.Add(connectionId);
+                detail.ConnectionIds.Add(connectionId);
             }
             else
             {
@@ -104,7 +103,7 @@ public class PresenceTracker : IPresenceTracker
 
     public Task<List<string>> GetConnectionsForUser(int userId)
     {
-        List<string> connectionIds;
+        List<string>? connectionIds;
         lock (OnlineUsers)
         {
             connectionIds = OnlineUsers.GetValueOrDefault(userId)?.ConnectionIds;

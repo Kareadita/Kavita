@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -105,6 +104,7 @@ public class ReaderService : IReaderService
     {
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) throw new KavitaException("Series suddenly doesn't exist, cannot mark as read");
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -128,14 +128,14 @@ public class ReaderService : IReaderService
             }
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
 
             // Send out volume events for each distinct volume
             if (!seenVolume.ContainsKey(chapter.VolumeId))
             {
                 seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
 
@@ -164,14 +164,14 @@ public class ReaderService : IReaderService
             userProgress.VolumeId = chapter.VolumeId;
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
 
             // Send out volume events for each distinct volume
             if (!seenVolume.ContainsKey(chapter.VolumeId))
             {
                 seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, 0));
             }
         }
@@ -184,9 +184,9 @@ public class ReaderService : IReaderService
     /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private static AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
-        AppUserProgress userProgress = null;
+        AppUserProgress? userProgress = null;
 
         if (user.Progresses == null)
         {
@@ -227,7 +227,7 @@ public class ReaderService : IReaderService
 
         try
         {
-            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
+            // TODO: Rewrite this code to just pull user object with progress for that particular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -237,6 +237,7 @@ public class ReaderService : IReaderService
                 // Create a user object
                 var userWithProgress =
                     await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                if (userWithProgress == null) return false;
                 userWithProgress.Progresses ??= new List<AppUserProgress>();
                 userWithProgress.Progresses.Add(new AppUserProgress
                 {
@@ -263,7 +264,7 @@ public class ReaderService : IReaderService
             {
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(userId, user.UserName, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
                 return true;
             }
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -54,6 +53,7 @@ public class SearchController : BaseApiController
         queryString = Services.Tasks.Scanner.Parser.Parser.CleanQuery(queryString);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
         var libraries = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(user.Id, QueryContext.Search).ToList();
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 

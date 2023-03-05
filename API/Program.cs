@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,7 +10,6 @@ using API.Logging;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
-using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -43,7 +41,8 @@ public class Program
             .Information()
             .CreateBootstrapLogger();
 
-        var directoryService = new DirectoryService(null, new FileSystem());
+        var directoryService = new DirectoryService(null!, new FileSystem());
+
         // Before anything, check if JWT has been generated properly or if user still has default
         if (!Configuration.CheckIfJwtTokenSet() &&
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
@@ -126,7 +125,7 @@ public class Program
 
     private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
     {
-        string currentVersion = null;
+        string? currentVersion = null;
         try
         {
             if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
@@ -175,7 +174,7 @@ public class Program
                     var ipAddresses = Configuration.IpAddresses;
                     if (string.IsNullOrEmpty(ipAddresses))
                     {
-                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
                     }
                     else
                     {
@@ -183,7 +182,7 @@ public class Program
                         {
                             try {
                                 var address = System.Net.IPAddress.Parse(ipAddress.Trim());
-                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2AndHttp3; });
                             }
                             catch(Exception ex)
                             {

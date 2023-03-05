@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -81,7 +80,7 @@ public class FilterDto
     /// <summary>
     /// Sorting Options for a query. Defaults to null, which uses the queries natural sorting order
     /// </summary>
-    public SortOptions SortOptions { get; set; } = null;
+    public SortOptions? SortOptions { get; set; } = null;
     /// <summary>
     /// Age Ratings. Empty list will return everything back
     /// </summary>
@@ -99,10 +98,8 @@ public class FilterDto
     /// An optional name string to filter by. Empty string will ignore.
     /// </summary>
     public string SeriesNameQuery { get; init; } = string.Empty;
-    #nullable enable
     /// <summary>
     /// An optional release year to filter by. Null will ignore. You can pass 0 for an individual field to ignore it.
     /// </summary>
     public Range<int>? ReleaseYearRange { get; init; } = null;
-    #nullable disable
 }

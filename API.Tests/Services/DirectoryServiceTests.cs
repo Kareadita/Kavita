@@ -152,7 +152,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory, API.Services.Tasks.Scanner.Parser.Parser.ArchiveFileExtensions).ToList();
 
-        Assert.Equal(10, files.Count());
+        Assert.Equal(10, files.Count);
         Assert.All(files, s => fileSystem.Path.GetExtension(s).Equals(".zip"));
     }
 
@@ -171,7 +171,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory).ToList();
 
-        Assert.Equal(11, files.Count());
+        Assert.Equal(11, files.Count);
     }
 
     [Fact]
@@ -189,7 +189,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory).ToList();
 
-        Assert.Equal(11, files.Count());
+        Assert.Equal(11, files.Count);
     }
 
     [Fact]
@@ -207,7 +207,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory).ToList();
 
-        Assert.Equal(10, files.Count());
+        Assert.Equal(10, files.Count);
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory).ToList();
 
-        Assert.Equal(10, files.Count());
+        Assert.Equal(10, files.Count);
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var files = ds.GetFiles(testDirectory).ToList();
 
-        Assert.Equal(10, files.Count());
+        Assert.Equal(10, files.Count);
     }
 
     [Fact]
@@ -325,7 +325,7 @@ public class DirectoryServiceTests
         ds.CopyFileToDirectory($"{testDirectory}file/data-0.txt", "/manga/output/");
         Assert.True(fileSystem.FileExists("/manga/output/data-0.txt"));
         Assert.True(fileSystem.FileExists("/manga/file/data-0.txt"));
-        Assert.True(fileSystem.FileInfo.FromFileName("/manga/file/data-0.txt").Length == fileSystem.FileInfo.FromFileName("/manga/output/data-0.txt").Length);
+        Assert.True(fileSystem.FileInfo.New("/manga/file/data-0.txt").Length == fileSystem.FileInfo.New("/manga/output/data-0.txt").Length);
     }
     #endregion
 
@@ -353,7 +353,7 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         ds.CopyDirectoryToDirectory($"{testDirectory}empty/", "/manga/output/");
-        Assert.Empty(fileSystem.DirectoryInfo.FromDirectoryName("/manga/output/").GetFiles());
+        Assert.Empty(fileSystem.DirectoryInfo.New("/manga/output/").GetFiles());
     }
 
     [Fact]
@@ -427,7 +427,7 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         ds.ExistOrCreate("c:/manga/output/");
 
-        Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("c:/manga/output/").Exists);
+        Assert.True(ds.FileSystem.DirectoryInfo.New("c:/manga/output/").Exists);
     }
     #endregion
 
@@ -448,9 +448,9 @@ public class DirectoryServiceTests
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         ds.ClearAndDeleteDirectory($"{testDirectory}");
         Assert.Empty(ds.GetFiles("/manga/", searchOption: SearchOption.AllDirectories));
-        Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").GetDirectories());
-        Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").Exists);
-        Assert.False(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/base").Exists);
+        Assert.Empty(ds.FileSystem.DirectoryInfo.New("/manga/").GetDirectories());
+        Assert.True(ds.FileSystem.DirectoryInfo.New("/manga/").Exists);
+        Assert.False(ds.FileSystem.DirectoryInfo.New("/manga/base").Exists);
     }
     #endregion
 
@@ -470,9 +470,9 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         ds.ClearDirectory($"{testDirectory}file/");
-        Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").GetDirectories());
-        Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName("/manga/").Exists);
-        Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").Exists);
+        Assert.Empty(ds.FileSystem.DirectoryInfo.New($"{testDirectory}file/").GetDirectories());
+        Assert.True(ds.FileSystem.DirectoryInfo.New("/manga/").Exists);
+        Assert.True(ds.FileSystem.DirectoryInfo.New($"{testDirectory}file/").Exists);
     }
 
     [Fact]
@@ -487,9 +487,9 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         ds.ClearDirectory($"{testDirectory}");
-        Assert.Empty(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}").GetDirectories());
-        Assert.True(ds.FileSystem.DirectoryInfo.FromDirectoryName(testDirectory).Exists);
-        Assert.False(ds.FileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}file/").Exists);
+        Assert.Empty(ds.FileSystem.DirectoryInfo.New($"{testDirectory}").GetDirectories());
+        Assert.True(ds.FileSystem.DirectoryInfo.New(testDirectory).Exists);
+        Assert.False(ds.FileSystem.DirectoryInfo.New($"{testDirectory}file/").Exists);
     }
     #endregion
 
@@ -587,7 +587,7 @@ public class DirectoryServiceTests
         ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
         ds.CopyFilesToDirectory(new []{MockUnixSupport.Path($"{testDirectory}file.zip")}, "/manga/output/");
         var outputFiles = ds.GetFiles("/manga/output/").Select(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath).ToList();
-        Assert.Equal(4, outputFiles.Count()); // we have 2 already there and 2 copies
+        Assert.Equal(4, outputFiles.Count); // we have 2 already there and 2 copies
         // For some reason, this has C:/ on directory even though everything is emulated (System.IO.Abstractions issue, not changing)
         // https://github.com/TestableIO/System.IO.Abstractions/issues/831
         Assert.True(outputFiles.Contains(API.Services.Tasks.Scanner.Parser.Parser.NormalizePath("/manga/output/file (3).zip"))
@@ -645,10 +645,10 @@ public class DirectoryServiceTests
         const string testDirectory = "/manga/";
         var fileSystem = new MockFileSystem();
         fileSystem.AddDirectory($"{testDirectory}dir1");
-        var di = fileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}dir1");
+        var di = fileSystem.DirectoryInfo.New($"{testDirectory}dir1");
         di.Attributes |= FileAttributes.System;
         fileSystem.AddDirectory($"{testDirectory}dir2");
-        di = fileSystem.DirectoryInfo.FromDirectoryName($"{testDirectory}dir2");
+        di = fileSystem.DirectoryInfo.New($"{testDirectory}dir2");
         di.Attributes |= FileAttributes.Hidden;
         fileSystem.AddDirectory($"{testDirectory}dir3");
         fileSystem.AddFile($"{testDirectory}file_0.zip", new MockFileData(""));

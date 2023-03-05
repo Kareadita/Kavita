@@ -194,6 +194,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
@@ -230,6 +231,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable <CollectionTagDto> tags;
@@ -310,7 +312,8 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName, AppUserIncludes.ReadingListsWithItems);
+        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
+        if (userWithLists == null) return Unauthorized();
         var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
         if (readingList == null)
         {
@@ -432,7 +435,6 @@ public class OpdsController : BaseApiController
         query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
-
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -569,7 +571,7 @@ public class OpdsController : BaseApiController
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
         foreach (var chapter in chapters)
         {
@@ -597,11 +599,12 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        if (chapter == null) return BadRequest("Chapter doesn't exist");
+        var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
@@ -768,7 +771,7 @@ public class OpdsController : BaseApiController
             DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
                 {mangaFile.FilePath}));
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
-        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
+        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath));
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
@@ -890,7 +893,7 @@ public class OpdsController : BaseApiController
         return link;
     }
 
-    private static FeedLink CreateLink(string rel, string type, string href, string title = null)
+    private static FeedLink CreateLink(string rel, string type, string href, string? title = null)
     {
         return new FeedLink()
         {
