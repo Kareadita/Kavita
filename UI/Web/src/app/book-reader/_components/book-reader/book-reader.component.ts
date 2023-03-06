@@ -48,6 +48,7 @@ interface HistoryPoint {
 
 const TOP_OFFSET = -50 * 1.5; // px the sticky header takes up // TODO: Do I need this or can I change it with new fixed top height
 
+const COLUMN_GAP = 20; // px
 /**
  * Styles that should be applied on the top level book-content tag
  */
@@ -202,7 +203,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
    * Will hide if all content in book is absolute positioned
    */
-  columnGap: number = 20;
 
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
@@ -867,9 +867,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Vertical) {
       maxHeight = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2));
     } else if (this.layoutMode !== BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() - this.columnGap;
+      maxHeight = this.getPageHeight() - COLUMN_GAP;
     } else if (this.layoutMode === BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() / 2 - this.columnGap;
+      maxHeight = this.getPageHeight() / 2 - COLUMN_GAP;
     } else {
       maxHeight = undefined;
     }
@@ -1067,14 +1067,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.readingSectionElemRef == null) return 0;
     const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
 
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + this.columnGap;
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
   }
 
   getPageHeight() {
     if (this.readingSectionElemRef == null) return 0;
     const height = (parseInt(this.ColumnHeight.replace('px', ''), 10));
 
-    return height - this.columnGap;
+    return height - COLUMN_GAP;
   }
 
   getVerticalPageWidth() {
