@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.Extensions;
 using API.Helpers;
@@ -419,6 +421,18 @@ public class ReadingListController : BaseApiController
         }
 
         return Ok("Nothing to do");
+    }
+
+    /// <summary>
+    /// Returns a list of characters associated with the reading list
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [HttpGet("characters")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
+    public ActionResult<IEnumerable<PersonDto>> GetCharactersForList(int readingListId)
+    {
+        return Ok(_unitOfWork.ReadingListRepository.GetReadingListCharactersAsync(readingListId));
     }
 
 

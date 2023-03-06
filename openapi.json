@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.7"
+    "version": "0.7.1.12"
   },
   "servers": [
     {
@@ -5327,6 +5327,56 @@
         }
       }
     },
+    "/api/ReadingList/characters": {
+      "get": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns a list of characters associated with the reading list",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ReadingList/next-chapter": {
       "get": {
         "tags": [
@@ -9720,6 +9770,9 @@
           },
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
+          },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
           },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
@@ -14894,6 +14947,7 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "bookReaderWritingStyle",
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
@@ -14970,6 +15024,9 @@
           },
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
+          },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
           },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
@@ -15176,6 +15233,15 @@
           }
         },
         "additionalProperties": false
+      },
+      "WritingStyle": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Represents the writing styles for the book-reader",
+        "format": "int32"
       }
     },
     "securitySchemes": {

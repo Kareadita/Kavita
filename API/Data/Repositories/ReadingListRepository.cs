@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -32,6 +35,7 @@ public interface IReadingListRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
     Task<List<ReadingList>> GetAllReadingListsAsync();
+    IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -90,6 +94,16 @@ public class ReadingListRepository : IReadingListRepository
             .AsSplitQuery()
             .OrderBy(l => l.Title)
             .ToListAsync();
+    }
+
+    public IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId)
+    {
+        return _context.ReadingListItem
+            .Where(item => item.ReadingListId == readingListId)
+            .SelectMany(item => item.Chapter.People.Where(p => p.Role == PersonRole.Character))
+            .OrderBy(p => p.NormalizedName)
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .AsEnumerable();
     }
 
     public void Remove(ReadingListItem item)
