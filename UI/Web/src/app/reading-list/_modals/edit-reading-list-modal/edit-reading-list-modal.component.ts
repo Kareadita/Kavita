@@ -68,6 +68,13 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));
+    if (!this.readingList.items || this.readingList.items.length === 0) {
+      this.readingListService.getListItems(this.readingList.id).subscribe(items => {
+        this.imageUrls.push(...(items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
+      });
+    } else {
+      this.imageUrls.push(...(this.readingList.items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
+    }
   }
 
   ngOnDestroy() {
