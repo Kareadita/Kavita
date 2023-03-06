@@ -29,15 +29,16 @@
                         </ol>
                     </ng-container>
                     <ng-template #noValidateIssues>
-                        <div class="mx-auto">
+                        <div class="justify-content-center col">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
                                   <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    No issues found with CBL, press next.
+                                    Looks good
                                 </div>
                             </div>
+                            No issues found with CBL, press next.
                         </div>
                     </ng-template>
                 </ng-container>
@@ -72,7 +73,7 @@
 </div>
 <div class="modal-footer">
     <div class="float-left" *ngIf="currentStepIndex !== Step.Import">
-        {{currentFileIndex}} / {{FileCount}}
+        {{currentFileIndex + 1}} / {{FileCount}}
     </div>
     <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>

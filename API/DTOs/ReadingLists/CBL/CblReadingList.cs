@@ -21,6 +21,44 @@ public class CblReadingList
     [XmlElement(ElementName="Name")]
     public string Name { get; set; }
 
+    /// <summary>
+    /// Summary of the Reading List
+    /// </summary>
+    /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
+    [XmlElement(ElementName="Summary")]
+    public string Summary { get; set; }
+
+    /// <summary>
+    /// Start Year of the Reading List. Overrides calculation
+    /// </summary>
+    /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
+    [XmlElement(ElementName="StartYear")]
+    public int StartYear { get; set; }
+
+    /// <summary>
+    /// Start Year of the Reading List. Overrides calculation
+    /// </summary>
+    /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
+    [XmlElement(ElementName="StartMonth")]
+    public int StartMonth { get; set; }
+
+    /// <summary>
+    /// End Year of the Reading List. Overrides calculation
+    /// </summary>
+    /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
+    [XmlElement(ElementName="EndYear")]
+    public int EndYear { get; set; }
+
+    /// <summary>
+    /// End Year of the Reading List. Overrides calculation
+    /// </summary>
+    /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
+    [XmlElement(ElementName="EndMonth")]
+    public int EndMonth { get; set; }
+
+    /// <summary>
+    /// Issues of the Reading List
+    /// </summary>
     [XmlElement(ElementName="Books")]
     public CblBooks Books { get; set; }
 }

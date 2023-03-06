@@ -10,6 +10,13 @@ import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-su
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
 
+interface FileStep {
+  filename: string;
+  validateSummary: CblImportSummary | undefined;
+  dryRunSummary: CblImportSummary | undefined;
+  finalizeSummary: CblImportSummary | undefined;
+}
+
 enum Step {
   Import = 0,
   Validate = 1,
@@ -28,7 +35,6 @@ export class ImportCblModalComponent {
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
-    FileUploadValidators.filesLimit(1), 
     FileUploadValidators.accept(['.cbl']),
   ]);
   
@@ -46,13 +52,15 @@ export class ImportCblModalComponent {
   isLoading: boolean = false;
 
   steps: Array<TimelineStep> = [
-    {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
-    {title: 'Validate File', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
+    {title: 'Import CBLs', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
+    {title: 'Validate CBL', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
     {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
     {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
   currentFileIndex: number = 0;
+
+  files: Array<FileStep> = [];
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
@@ -156,7 +164,7 @@ export class ImportCblModalComponent {
     this.cdRef.markForCheck();
 
     const formData = new FormData();
-    formData.append('cbl', files[0]);
+    formData.append('cbl', files[this.currentFileIndex]);
     this.readingListService.validateCbl(formData).subscribe(res => {
       if (this.currentStepIndex === Step.Import) {
         this.validateSummary = res;
@@ -174,7 +182,7 @@ export class ImportCblModalComponent {
     if (!files) return;
 
     const formData = new FormData();
-    formData.append('cbl', files[0]);
+    formData.append('cbl', files[this.currentFileIndex]);
     formData.append('dryRun', dryRun + '');
     this.readingListService.importCbl(formData).subscribe(res => {
       // Our step when calling is always one behind

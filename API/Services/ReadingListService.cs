@@ -518,9 +518,13 @@ public class ReadingListService : IReadingListService
             importSummary.Success = CblImportResult.Fail;
         }
 
-        await CalculateReadingListAgeRating(readingList);
-
         if (dryRun) return importSummary;
+
+        await CalculateReadingListAgeRating(readingList);
+        if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
+        {
+            readingList.Summary = readingList.Summary?.Trim();
+        }
 
         if (!_unitOfWork.HasChanges()) return importSummary;
         await _unitOfWork.CommitAsync();
