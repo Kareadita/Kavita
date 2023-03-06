@@ -87,6 +87,7 @@ $action-bar-height: 38px;
 
 .fixed-top {
     z-index: 1022;
+    direction: ltr;
 }
 
 .dark-mode .overlay {
@@ -95,7 +96,7 @@ $action-bar-height: 38px;
 
 
 .action-bar {
-    background-color: var(--br-actionbar-bg-color); 
+    background-color: var(--br-actionbar-bg-color);
     overflow: hidden;
     box-shadow: 0 0 6px 0 rgb(0 0 0 / 70%);
     max-height: $action-bar-height;
@@ -109,13 +110,13 @@ $action-bar-height: 38px;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
-    
+
     @media(max-width: 875px) {
         .book-title {
             display: none;
         }
-    } 
-    
+    }
+
     .book-title {
         margin-top: 10px;
         text-align: center;
@@ -142,6 +143,10 @@ $action-bar-height: 38px;
     &.column-layout-2 {
         height: calc(var(--vh) * 100);
     }
+
+    &.writing-style-vertical {
+        direction: rtl;
+    }
 }
 
 .reading-section {
@@ -151,6 +156,7 @@ $action-bar-height: 38px;
     padding-top: $action-bar-height;
     padding-bottom: $action-bar-height;
     position: relative;
+    direction: ltr;
 
     //background-color: green !important;
 
@@ -167,11 +173,17 @@ $action-bar-height: 38px;
         //padding-top: 0px;
         //padding-bottom: 0px;
     }
+
+    &.writing-style-vertical {
+        writing-mode: vertical-rl;
+        height: 100%;
+    }
 }
 
 .book-container {
     position: relative;
     height: 100%;
+
 
     //background-color: purple !important;
 
@@ -182,6 +194,12 @@ $action-bar-height: 38px;
     &.column-layout-2 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
     }
+
+    &.writing-style-vertical {
+        // Fixes an issue where chrome will cut of margins, doesn't seem to affect other browsers
+        overflow: auto;
+    }
+
 }
 
 .book-content {
@@ -192,10 +210,22 @@ $action-bar-height: 38px;
 
     &.column-layout-1 {
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+
+        &.writing-style-vertical {
+            height: auto;
+            padding: 0 10px 0 0;
+            margin: 20px 0;
+        }
     }
 
     &.column-layout-2 {
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+
+        &.writing-style-vertical {
+            height: auto;
+            padding: 0 10px 0 0;
+            margin: 20px 0;
+        }
     }
 
     // &.immersive {
@@ -228,6 +258,8 @@ $action-bar-height: 38px;
     position: fixed;
     width: 100%;
     bottom: 0px;
+    left: 0px;
+    writing-mode: horizontal-tb;
 }
 
 
@@ -242,7 +274,7 @@ $action-bar-height: 38px;
         overflow-wrap: break-word;
     }
 
-    
+
 }
 
 .column-layout-2 {
@@ -254,7 +286,7 @@ $action-bar-height: 38px;
         overflow-wrap: break-word;
     }
 
-    
+
 
 }
 
@@ -293,7 +325,7 @@ $action-bar-height: 38px;
     position: absolute;
     right: 0px;
     top: $action-bar-height;
-    width: 20%;
+    width: 20vw;
     z-index: 3;
     cursor: pointer;
     background: transparent;
@@ -330,7 +362,7 @@ $action-bar-height: 38px;
     position: absolute;
     left: 0px;
     top: $action-bar-height;
-    width: 20%;
+    width: 20vw;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -342,6 +374,7 @@ $action-bar-height: 38px;
     &.immersive {
         top: 0px;
     }
+
 }
 
 
@@ -360,7 +393,7 @@ $action-bar-height: 38px;
 
 .btn {
     &.btn-secondary {
-        color: var(--br-actionbar-button-text-color); 
+        color: var(--br-actionbar-button-text-color);
         border-color: transparent;
         background-color: unset;
 
@@ -368,7 +401,7 @@ $action-bar-height: 38px;
             border-color: var(--br-actionbar-button-hover-border-color);
         }
     }
-    
+
     &.btn-outline-secondary {
         border-color: transparent;
         background-color: unset;
@@ -380,7 +413,7 @@ $action-bar-height: 38px;
 
     span {
         background-color: unset;
-        color: var(--br-actionbar-button-text-color); 
+        color: var(--br-actionbar-button-text-color);
     }
 
     i {

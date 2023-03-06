@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -10,6 +10,7 @@ using API.Logging;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -172,19 +173,20 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (string.IsNullOrEmpty(ipAddresses))
+                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }
                     else
                     {
-                        foreach(var ipAddress in ipAddresses.Split(','))
+                        foreach (var ipAddress in ipAddresses.Split(','))
                         {
-                            try {
+                            try
+                            {
                                 var address = System.Net.IPAddress.Parse(ipAddress.Trim());
                                 opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 Log.Fatal(ex, "Could not parse ip address {IPAddress}", ipAddress);
                             }
@@ -192,9 +194,8 @@ public class Program
                     }
                 });
 
-                webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>();
             });
-
 
 
 
