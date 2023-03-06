@@ -391,23 +391,15 @@ public class ReadingListService : IReadingListService
         if (!conflicts.Any()) return importSummary;
 
         importSummary.Success = CblImportResult.Fail;
-        if (conflicts.Count == cblReading.Books.Book.Count)
+        foreach (var conflict in conflicts)
         {
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.AllChapterMissing,
+                Reason = CblImportReason.SeriesCollision,
+                Series = conflict.Name,
+                LibraryId = conflict.LibraryId,
+                SeriesId = conflict.Id,
             });
-        }
-        else
-        {
-            foreach (var conflict in conflicts)
-            {
-                importSummary.Results.Add(new CblBookResult()
-                {
-                    Reason = CblImportReason.SeriesCollision,
-                    Series = conflict.Name
-                });
-            }
         }
 
         return importSummary;
@@ -484,6 +476,7 @@ public class ReadingListService : IReadingListService
                 importSummary.Results.Add(new CblBookResult(book)
                 {
                     Reason = CblImportReason.VolumeMissing,
+                    LibraryId = bookSeries.LibraryId,
                     Order = i
                 });
                 continue;
@@ -499,6 +492,7 @@ public class ReadingListService : IReadingListService
                 importSummary.Results.Add(new CblBookResult(book)
                 {
                     Reason = CblImportReason.ChapterMissing,
+                    LibraryId = bookSeries.LibraryId,
                     Order = i
                 });
                 continue;

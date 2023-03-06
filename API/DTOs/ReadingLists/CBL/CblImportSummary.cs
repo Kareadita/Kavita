@@ -84,6 +84,14 @@ public class CblBookResult
     public string Series { get; set; }
     public string Volume { get; set; }
     public string Number { get; set; }
+    /// <summary>
+    /// Used on Series conflict
+    /// </summary>
+    public int LibraryId { get; set; }
+    /// <summary>
+    /// Used on Series conflict
+    /// </summary>
+    public int SeriesId { get; set; }
     public CblImportReason Reason { get; set; }
 
     public CblBookResult(CblBook book)

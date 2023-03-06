@@ -4245,56 +4245,6 @@
         }
       }
     },
-    "/api/Reader/mark-chapter-until-as-read": {
-      "post": {
-        "tags": [
-          "Reader"
-        ],
-        "summary": "Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.",
-        "description": "This is built for Tachiyomi and is not expected to be called by any other place",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "chapterNumber",
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "format": "float"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/Reader/chapter-bookmarks": {
       "get": {
         "tags": [
@@ -10108,6 +10058,16 @@
           "number": {
             "type": "string",
             "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
           },
           "reason": {
             "$ref": "#/components/schemas/CblImportReason"

@@ -80,7 +80,7 @@ public class SettingsController : BaseApiController
     {
         _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
         var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
-        ipAddresses.Value = Configuration.DefaultIPAddresses;
+        ipAddresses.Value = Configuration.DefaultIpAddresses;
         _unitOfWork.SettingsRepository.Update(ipAddresses);
 
         if (!await _unitOfWork.CommitAsync())
