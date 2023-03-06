@@ -24,22 +24,31 @@ export class ScrollService {
   }
 
   get scrollPosition() {
-    return (window.pageYOffset 
-      || document.documentElement.scrollTop 
+    return (window.pageYOffset
+      || document.documentElement.scrollTop
       || document.body.scrollTop || 0);
   }
 
-  scrollTo(top: number, el: Element | Window = window) {
+  /*
+   * When in the scroll vertical position the scroll in the horizontal position is needed
+   */
+  get scrollPositionX() {
+    return (window.pageXOffset
+      || document.documentElement.scrollLeft
+      || document.body.scrollLeft || 0);
+  }
+
+  scrollTo(top: number, el: Element | Window = window, behavior: 'auto' | 'smooth' = 'smooth') {
     el.scroll({
       top: top,
-      behavior: 'smooth' 
+      behavior: behavior
     });
   }
-  
-  scrollToX(left: number, el: Element | Window = window) {
+
+  scrollToX(left: number, el: Element | Window = window, behavior: 'auto' | 'smooth' = 'auto') {
     el.scroll({
       left: left,
-      behavior: 'auto'
+      behavior: behavior
     });
   }
 

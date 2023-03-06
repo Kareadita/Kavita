@@ -94,6 +94,12 @@ public class UserPreferencesDto
     public ReadingDirection BookReaderReadingDirection { get; set; }
 
     /// <summary>
+    /// Book Reader Option: What writing style should be used, horizontal or vertical.
+    /// </summary>
+    [Required]
+    public WritingStyle BookReaderWritingStyle { get; set; }
+
+    /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.
     /// </summary>
     /// <remarks>Should default to Dark</remarks>
