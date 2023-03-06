@@ -186,7 +186,7 @@ public class Program
                             }
                             catch(Exception ex)
                             {
-                                Log.Fatal(ex, "Could not parse ip addess '{0}'", ipAddress);
+                                Log.Fatal(ex, "Could not parse ip address {IPAddress}", ipAddress);
                             }
                         }
                     }
