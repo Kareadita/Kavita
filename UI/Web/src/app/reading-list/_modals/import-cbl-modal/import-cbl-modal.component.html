@@ -1,6 +1,6 @@
 
 <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">CBL Import</h4>
+    <h4 class="modal-title" id="modal-basic-title">CBL Import<span class="ms-1" *ngIf="validateSummary">: {{validateSummary.cblName}}</span></h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body scrollable-modal">
@@ -29,7 +29,16 @@
                         </ol>
                     </ng-container>
                     <ng-template #noValidateIssues>
-                        No issues found with CBL, press next.
+                        <div class="mx-auto">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                  <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    No issues found with CBL, press next.
+                                </div>
+                            </div>
+                        </div>
                     </ng-template>
                 </ng-container>
             </div>
@@ -62,6 +71,9 @@
 
 </div>
 <div class="modal-footer">
+    <div class="float-left" *ngIf="currentStepIndex !== Step.Import">
+        {{currentFileIndex}} / {{FileCount}}
+    </div>
     <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
     <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">Prev</button>

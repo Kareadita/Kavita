@@ -13,5 +13,6 @@ export interface CblBookResult {
      * For SeriesCollision
      */
     seriesId: number;
+    readingListName: string;
     reason: CblImportReason;
 }

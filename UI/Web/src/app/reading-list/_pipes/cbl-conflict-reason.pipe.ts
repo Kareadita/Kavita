@@ -1,7 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportReason } from 'src/app/_models/reading-list/cbl/cbl-import-reason.enum';
-import { LibraryService } from 'src/app/_services/library.service';
 
 const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid fa-circle-xmark me-1"></i>';
 const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';
@@ -10,8 +9,6 @@ const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-
   name: 'cblConflictReason'
 })
 export class CblConflictReasonPipe implements PipeTransform {
-
-  constructor(private libraryService: LibraryService) {}
 
   transform(result: CblBookResult): string {
     switch (result.reason) {
@@ -22,7 +19,7 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.EmptyFile:
         return failIcon + 'The cbl file is empty, nothing to be done.';
       case CblImportReason.NameConflict:
-        return failIcon + 'A reading list already exists on your account that matches the cbl file.';
+        return failIcon + 'A reading list (' + result.readingListName + ') already exists on your account that matches the cbl file.';
       case CblImportReason.SeriesCollision:
         return failIcon + 'The series, ' + `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>` + ', collides with another series of the same name in another library.';
       case CblImportReason.SeriesMissing:

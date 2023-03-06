@@ -369,7 +369,8 @@ public class ReadingListService : IReadingListService
         {
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.NameConflict
+                Reason = CblImportReason.NameConflict,
+                ReadingListName = cblReading.Name
             });
         }
 

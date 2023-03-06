@@ -92,6 +92,10 @@ public class CblBookResult
     /// Used on Series conflict
     /// </summary>
     public int SeriesId { get; set; }
+    /// <summary>
+    /// The name of the reading list
+    /// </summary>
+    public string ReadingListName { get; set; }
     public CblImportReason Reason { get; set; }
 
     public CblBookResult(CblBook book)

@@ -52,9 +52,16 @@ export class ImportCblModalComponent {
     {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
+  currentFileIndex: number = 0;
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
+
+  get FileCount() { 
+    const files = this.uploadForm.get('files')?.value;
+    if (!files) return 0;
+    return files.length;
+  }
 
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
@@ -156,6 +163,7 @@ export class ImportCblModalComponent {
       }
       this.importSummaries.push(res);
       this.currentStepIndex++;
+      this.currentFileIndex++;
       this.isLoading = false;
       this.cdRef.markForCheck();
     });

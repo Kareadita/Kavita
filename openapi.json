@@ -10069,6 +10069,11 @@
             "description": "Used on Series conflict",
             "format": "int32"
           },
+          "readingListName": {
+            "type": "string",
+            "description": "The name of the reading list",
+            "nullable": true
+          },
           "reason": {
             "$ref": "#/components/schemas/CblImportReason"
           }
