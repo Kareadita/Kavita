@@ -253,10 +253,10 @@
 
                                 <div class="row g-0">
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
-                                        <label for="settings-book-reading-style" class="form-label">Writing Style</label>&nbsp; <i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookWritingStyleToolTip" role="button" tabindex="0"></i>
+                                        <label for="settings-book-writing-style" class="form-label me-1">Writing Style</label><i class="fa fa-info-circle" aria-hidden="true" aria-describedby="settings-book-writing-style-help" placement="right" [ngbTooltip]="bookWritingStyleToolTip" role="button" tabindex="0"></i>
                                         <ng-template #bookWritingStyleToolTip>Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.</ng-template>
-                                        <span class="visually-hidden" id="settings-book-writing-style-help">Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.</span>
-                                        <select class="form-select" aria-describedby="settings-book-writing-style-help" formControlName="bookReaderWritingStyle" id="settings-book-reading-style" >
+                                        <span class="visually-hidden" id="settings-book-writing-style-help"><ng-container [ngTemplateOutlet]="bookWritingStyleToolTip"></ng-container></span>
+                                        <select class="form-select" aria-describedby="settings-book-writing-style-help" formControlName="bookReaderWritingStyle" id="settings-book-writing-style" >
                                             <option *ngFor="let opt of bookWritingStyles" [value]="opt.value">{{opt.text | titlecase}}</option>
                                         </select>
                                     </div>

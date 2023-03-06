@@ -71,9 +71,10 @@
                     </button>
                 </div>
                 <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
-                    <label id="writingstyle" class="form-label">Writing Style <i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
+                    <label for="writing-style" class="form-label">Writing Style <i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
                     <ng-template #writingStyleTooltip>Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.</ng-template>
-                    <button (click)="toggleWritingStyle()" class="btn btn-icon" aria-labelledby="writingstyle" title="{{writingStyleModel === WritingStyle.Horizontal ? 'Horizontal' : 'Vertical'}}">
+                    <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip"></ng-container></span>
+                    <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel === WritingStyle.Horizontal ? 'Horizontal' : 'Vertical'}}">
                         <i class="fa {{writingStyleModel === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
                         <span class="phone-hidden"> {{writingStyleModel === WritingStyle.Horizontal ? 'Horizontal' : 'Vertical' }}</span>
                     </button>

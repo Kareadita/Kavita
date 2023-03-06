@@ -202,6 +202,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Used for showing/hiding bottom action bar. Calculates if there is enough scroll to show it.
    * Will hide if all content in book is absolute positioned
    */
+  columnGap: number = 20;
 
   horizontalScrollbarNeeded = false;
   scrollbarNeeded = false;
@@ -862,14 +863,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   updateImagesWithHeight() {
     const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
     let maxHeight: number | undefined;
-    let columnGap = 20
 
     if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Vertical) {
       maxHeight = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2));
     } else if (this.layoutMode !== BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() - columnGap;
+      maxHeight = this.getPageHeight() - this.columnGap;
     } else if (this.layoutMode === BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() / 2 - columnGap;
+      maxHeight = this.getPageHeight() / 2 - this.columnGap;
     } else {
       maxHeight = undefined;
     }
@@ -1065,18 +1065,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
-
     const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
-    const columnGap = 20;
-    return this.readingSectionElemRef.nativeElement.clientWidth - margin + columnGap;
+
+    return this.readingSectionElemRef.nativeElement.clientWidth - margin + this.columnGap;
   }
 
   getPageHeight() {
     if (this.readingSectionElemRef == null) return 0;
     const height = (parseInt(this.ColumnHeight.replace('px', ''), 10));
 
-    const columnGap = 20;
-    return height - columnGap;
+    return height - this.columnGap;
   }
 
   getVerticalPageWidth() {
@@ -1092,36 +1090,36 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   getVirtualPage() {
     if (!this.bookContentElemRef || !this.readingSectionElemRef) return [1, 1, 0];
 
-    const [scroll, total] = this.getScrollAndTotal();
+    const [scrollOffset, totalScroll] = this.getScrollOffsetAndTotalScroll();
     const pageSize = this.getPageSize();
-    const totalVirtualPages = Math.max(1, Math.round(total / pageSize));
-    const delta = scroll - total;
+    const totalVirtualPages = Math.max(1, Math.round(totalScroll / pageSize));
+    const delta = scrollOffset - totalScroll;
     let currentVirtualPage = 1;
 
     //If first virtual page, i.e. totalScroll and delta are the same value
-    if (total === delta) {
+    if (totalScroll === delta) {
       currentVirtualPage = 1;
         // If second virtual page
-    } else if (total - delta === pageSize) {
+    } else if (totalScroll - delta === pageSize) {
       currentVirtualPage = 2;
       // Otherwise do math to get correct page. i.e. scroll + pageHeight/pageWidth (this accounts for first page offset)
     } else {
-      currentVirtualPage = Math.min(Math.max(1, Math.round((scroll + pageSize) / pageSize)), totalVirtualPages);
+      currentVirtualPage = Math.min(Math.max(1, Math.round((scrollOffset + pageSize) / pageSize)), totalVirtualPages);
     }
 
     return [currentVirtualPage, totalVirtualPages, pageSize];
 
   }
 
-  private getScrollAndTotal() {
+  private getScrollOffsetAndTotalScroll() {
     const { nativeElement: bookContent } = this.bookContentElemRef;
-    const scroll = this.writingStyle === WritingStyle.Vertical
+    const scrollOffset = this.writingStyle === WritingStyle.Vertical
         ? bookContent.scrollTop
         : bookContent.scrollLeft;
-    const total = this.writingStyle === WritingStyle.Vertical
+    const totalScroll = this.writingStyle === WritingStyle.Vertical
         ? bookContent.scrollHeight
         : bookContent.scrollWidth;
-    return [scroll, total];
+    return [scrollOffset, totalScroll];
   }
 
   private getPageSize() {
@@ -1260,7 +1258,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if(this.layoutMode === BookPageLayoutMode.Default && this.writingStyle === WritingStyle.Vertical ) {
       const windowWidth = window.innerWidth || document.documentElement.clientWidth;
       const scrollLeft = element.getBoundingClientRect().left + window.pageXOffset - (windowWidth - element.getBoundingClientRect().width);
-      setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, "smooth"), 10);
+      setTimeout(() => this.scrollService.scrollToX(scrollLeft, this.reader.nativeElement, 'smooth'), 10);
     }
     else if ((this.layoutMode === BookPageLayoutMode.Default) && (this.writingStyle === WritingStyle.Horizontal)) {
       const fromTopOffset = element.getBoundingClientRect().top + window.pageYOffset + TOP_OFFSET;
@@ -1341,8 +1339,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.updateLayoutMode(this.layoutMode);
       });
     } else if (this.bookContentElemRef !== undefined) {
-      const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
-      if (resumeElement !== null && resumeElement !== undefined) {
+      const resumeElement = this.getFirstVisibleElementXPath();
+      if (resumeElement) {
         setTimeout(() => {
           this.scrollTo(resumeElement);
         });
