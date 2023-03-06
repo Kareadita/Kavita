@@ -177,7 +177,7 @@ public static class Configuration
     {
         if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
         {
-            return DefaultIpAddresses;
+            return string.Empty;
         }
 
         try
@@ -196,7 +196,7 @@ public static class Configuration
             Console.WriteLine("Error writing app settings: " + ex.Message);
         }
 
-        return DefaultIpAddresses;
+        return string.Empty;
     }
     #endregion
 
