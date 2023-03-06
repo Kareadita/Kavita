@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using API.DTOs.ReadingLists.CBL;
 using API.Extensions;
@@ -32,10 +34,40 @@ public class CblController : BaseApiController
     public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl([FromForm(Name = "cbl")] IFormFile file)
     {
         var userId = User.GetUserId();
-        var cbl = await SaveAndLoadCblFile(userId, file);
-
-        var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
-        return Ok(importSummary);
+        try
+        {
+            var cbl = await SaveAndLoadCblFile(userId, file);
+            var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
+            return Ok(importSummary);
+        }
+        catch (ArgumentNullException)
+        {
+            return Ok(new CblImportSummaryDto()
+            {
+                Success = CblImportResult.Fail,
+                Results = new List<CblBookResult>()
+                {
+                    new CblBookResult()
+                    {
+                        Reason = CblImportReason.InvalidFile
+                    }
+                }
+            });
+        }
+        catch (InvalidOperationException)
+        {
+            return Ok(new CblImportSummaryDto()
+            {
+                Success = CblImportResult.Fail,
+                Results = new List<CblBookResult>()
+                {
+                    new CblBookResult()
+                    {
+                        Reason = CblImportReason.InvalidFile
+                    }
+                }
+            });
+        }
     }
 
 

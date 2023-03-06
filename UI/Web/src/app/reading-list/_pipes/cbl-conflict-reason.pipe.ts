@@ -29,7 +29,9 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.AllChapterMissing:
         return failIcon + 'All chapters cannot be matched to Chapters in Kavita.';
       case CblImportReason.Success:
-        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully';
+        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully.';
+      case CblImportReason.InvalidFile:
+        return failIcon + 'The file is corrupted or not matching the expected tags/spec.';
     }
   }
 

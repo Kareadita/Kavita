@@ -7,5 +7,6 @@ export enum CblImportReason {
     EmptyFile = 5,
     SeriesCollision = 6,
     AllChapterMissing = 7,
-    Success = 8
+    Success = 8,
+    InvalidFile = 9
 }

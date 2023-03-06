@@ -68,6 +68,11 @@ public enum CblImportReason
     /// </summary>
     [Description("Success")]
     Success = 8,
+    /// <summary>
+    /// The file does not match the XML spec
+    /// </summary>
+    [Description("Invalid File")]
+    InvalidFile = 9,
 }
 
 public class CblBookResult
