@@ -114,6 +114,8 @@ export class ImportCblModalComponent {
             });
           });
 
+          this.filesToProcess = this.filesToProcess.sort((a, b) => b.validateSummary!.success - a.validateSummary!.success);
+
           this.currentStepIndex++;
           this.isLoading = false;
           this.cdRef.markForCheck();
@@ -154,7 +156,7 @@ export class ImportCblModalComponent {
       case Step.Validate:
         return this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail).length > 0;
       case Step.DryRun:
-        return this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail).length > 0; 
+        return this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail).length > 0; 
       case Step.Finalize:
         return true; 
       default:
@@ -193,10 +195,11 @@ export class ImportCblModalComponent {
         pages.push(this.readingListService.importCbl(formData));
     }
     forkJoin(pages).subscribe(results => {
-      results.forEach(cblImport => {
-      const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);
-      this.filesToProcess[index].dryRunSummary = cblImport;
+        results.forEach(cblImport => {
+        const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);
+        this.filesToProcess[index].dryRunSummary = cblImport;
       });
+      this.filesToProcess = this.filesToProcess.sort((a, b) => b.dryRunSummary!.success - a.dryRunSummary!.success);
 
       this.isLoading = false;
       this.currentStepIndex++;

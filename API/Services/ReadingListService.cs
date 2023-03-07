@@ -367,6 +367,7 @@ public class ReadingListService : IReadingListService
         // Is there another reading list with the same name?
         if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
         {
+            importSummary.Success = CblImportResult.Fail;
             importSummary.Results.Add(new CblBookResult()
             {
                 Reason = CblImportReason.NameConflict,
