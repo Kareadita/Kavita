@@ -64,25 +64,61 @@
             </div>
         </ng-container>
     
-        <ng-container *ngIf="currentStepIndex === Step.DryRun && dryRunSummary">
+        <ng-container *ngIf="currentStepIndex === Step.DryRun">
             <div class="row g-0">
-                <h5>This is a dry run and shows what will happen if you press Next</h5>
-                <h6>The import was a {{dryRunSummary.success | cblImportResult}}</h6>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item no-hover" *ngFor="let result of dryRunResults" 
-                            innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
-                    </ul>
+                <h5>This is a dry run and shows what will happen if you press Next and perform the import. You can mark any files you do not wish to continue with.</h5>
+
+                <ngb-accordion #a="ngbAccordion">
+                    <ngb-panel *ngFor="let fileToProcess of filesToProcess">
+                        <ng-container *ngIf="fileToProcess.dryRunSummary as summary">
+                            <ng-template ngbPanelTitle>
+                                <span>{{fileToProcess.fileName}}: ({{summary.cblName}})</span>
+                                <ng-container *ngIf="summary.success | cblImportResult as success">
+                                    <ng-container [ngSwitch]="success">
+                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
+                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
+                                        <span *ngSwitchCase="'Partial Success'" class="badge bg-warning">{{success}}</span>    
+                                    </ng-container>
+                                </ng-container>
+                            </ng-template>
+
+                            <ng-template ngbPanelContent>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item no-hover" *ngFor="let result of fileToProcess.dryRunSummary.results"  
+                                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
+                                </ul>
+                            </ng-template>
+                        </ng-container>
+                    </ngb-panel>
+                </ngb-accordion>
             </div>
         </ng-container>
 
-        <ng-container *ngIf="currentStepIndex === Step.Finalize && finalizeSummary && dryRunSummary">
+        <ng-container *ngIf="currentStepIndex === Step.Finalize">
             <div class="row g-0">
-                <h5>{{finalizeSummary.success | cblImportResult }} on {{dryRunSummary.cblName}} Import</h5>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item no-hover" *ngFor="let result of finalizeResults"
-                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}">
-                    </li>
-                </ul>
+                <ngb-accordion #a="ngbAccordion">
+                    <ngb-panel *ngFor="let fileToProcess of filesToProcess">
+                        <ng-container *ngIf="fileToProcess.finalizeSummary as summary">
+                            <ng-template ngbPanelTitle>
+                                <span>{{fileToProcess.fileName}}: ({{summary.cblName}})</span>
+                                <ng-container *ngIf="summary.success | cblImportResult as success">
+                                    <ng-container [ngSwitch]="success">
+                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
+                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
+                                        <span *ngSwitchCase="'Partial Success'" class="badge bg-warning">{{success}}</span>    
+                                    </ng-container>
+                                </ng-container>
+                            </ng-template>
+
+                            <ng-template ngbPanelContent>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item no-hover" *ngFor="let result of fileToProcess.finalizeSummary.results"  
+                                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
+                                </ul>
+                            </ng-template>
+                        </ng-container>
+                    </ngb-panel>
+                </ngb-accordion>
             </div>
         </ng-container>
     </div>
@@ -91,9 +127,6 @@
 
 </div>
 <div class="modal-footer">
-    <div class="float-left" *ngIf="currentStepIndex !== Step.Import">
-        {{currentFileIndex + 1}} / {{FileCount}}
-    </div>
     <a class="btn btn-icon" href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/reading-lists#creating-a-reading-list-via-cbl" target="_blank" rel="noopener noreferrer">Help</a>
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
     <button type="button" class="btn btn-primary" (click)="prevStep()" [disabled]="!canMoveToPrevStep()">Prev</button>

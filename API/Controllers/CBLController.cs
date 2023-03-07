@@ -83,10 +83,44 @@ public class CblController : BaseApiController
     [HttpPost("import")]
     public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
     {
-        var userId = User.GetUserId();
-        var cbl = await SaveAndLoadCblFile(file);
+        try
+        {
+            var userId = User.GetUserId();
+            var cbl = await SaveAndLoadCblFile(file);
+            var importSummary = await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun);
+            importSummary.FileName = file.FileName;
+            return Ok(importSummary);
+        } catch (ArgumentNullException)
+        {
+            return Ok(new CblImportSummaryDto()
+            {
+                FileName = file.FileName,
+                Success = CblImportResult.Fail,
+                Results = new List<CblBookResult>()
+                {
+                    new CblBookResult()
+                    {
+                        Reason = CblImportReason.InvalidFile
+                    }
+                }
+            });
+        }
+        catch (InvalidOperationException)
+        {
+            return Ok(new CblImportSummaryDto()
+            {
+                FileName = file.FileName,
+                Success = CblImportResult.Fail,
+                Results = new List<CblBookResult>()
+                {
+                    new CblBookResult()
+                    {
+                        Reason = CblImportReason.InvalidFile
+                    }
+                }
+            });
+        }
 
-        return Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
     }
 
     private async Task<CblReadingList> SaveAndLoadCblFile(IFormFile file)
