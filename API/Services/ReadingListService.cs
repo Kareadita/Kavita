@@ -526,7 +526,8 @@ public class ReadingListService : IReadingListService
             readingList.Summary = readingList.Summary?.Trim();
         }
 
-        if (!_unitOfWork.HasChanges()) return importSummary;
+        // If there are no items, don't create a blank list
+        if (!_unitOfWork.HasChanges() || !readingList.Items.Any()) return importSummary;
         await _unitOfWork.CommitAsync();
 
 

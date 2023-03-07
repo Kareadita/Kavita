@@ -25,14 +25,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.validateSummary as summary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
-                                <ng-container *ngIf="summary.success | cblImportResult as success">
-                                    <ng-container [ngSwitch]="success">
-                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
-                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
-                                        <span *ngSwitchCase="'Partial'" class="badge bg-warning">{{success}}</span>    
-                                    </ng-container>
-                                </ng-container>
+                                <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
                             </ng-template>
 
                             <ng-template ngbPanelContent>
@@ -72,14 +65,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.dryRunSummary as summary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
-                                <ng-container *ngIf="summary.success | cblImportResult as success">
-                                    <ng-container [ngSwitch]="success">
-                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
-                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
-                                        <span *ngSwitchCase="'Partial Success'" class="badge bg-warning">{{success}}</span>    
-                                    </ng-container>
-                                </ng-container>
+                                <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
                             </ng-template>
 
                             <ng-template ngbPanelContent>
@@ -100,14 +86,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.finalizeSummary as summary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
-                                <ng-container *ngIf="summary.success | cblImportResult as success">
-                                    <ng-container [ngSwitch]="success">
-                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
-                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
-                                        <span *ngSwitchCase="'Partial Success'" class="badge bg-warning">{{success}}</span>    
-                                    </ng-container>
-                                </ng-container>
+                                <ng-container [ngTemplateOutlet]="heading" [ngTemplateOutletContext]="{ summary: summary, filename: fileToProcess.fileName }"></ng-container>
                             </ng-template>
 
                             <ng-template ngbPanelContent>
@@ -123,6 +102,16 @@
         </ng-container>
     </div>
 
+    <ng-template #heading let-filename="filename" let-summary="summary">
+            <ng-container *ngIf="summary.success | cblImportResult as success">
+                <ng-container [ngSwitch]="success">
+                    <span *ngSwitchCase="'Success'" class="badge bg-primary me-1">{{success}}</span>    
+                    <span *ngSwitchCase="'Failure'" class="badge bg-danger me-1">{{success}}</span>    
+                    <span *ngSwitchCase="'Partial'" class="badge bg-warning me-1">{{success}}</span>    
+                </ng-container>
+            </ng-container>
+            <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
+    </ng-template>
 
 
 </div>
