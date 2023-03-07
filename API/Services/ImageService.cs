@@ -149,7 +149,7 @@ public class ImageService : IImageService
         try
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
-            fileName = fileName + (saveAsWebP ? ".webp" : ".png");
+            fileName += (saveAsWebP ? ".webp" : ".png");
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName));
             return fileName;
         }

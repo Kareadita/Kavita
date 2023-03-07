@@ -14,4 +14,5 @@ public class ReadingListDto
     /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
     /// </summary>
     public string CoverImage { get; set; } = string.Empty;
+
 }

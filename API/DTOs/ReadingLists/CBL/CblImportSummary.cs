@@ -117,6 +117,10 @@ public class CblBookResult
 public class CblImportSummaryDto
 {
     public string CblName { get; set; }
+    /// <summary>
+    /// Used only for Kavita's UI, the filename of the cbl
+    /// </summary>
+    public string FileName { get; set; }
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }

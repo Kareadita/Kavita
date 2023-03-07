@@ -1,6 +1,6 @@
 
 <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">CBL Import<span class="ms-1" *ngIf="validateSummary">: {{validateSummary.cblName}}</span></h4>
+    <h4 class="modal-title" id="modal-basic-title">CBL Import</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body scrollable-modal">
@@ -18,30 +18,49 @@
         </div>
         
         <ng-container *ngIf="currentStepIndex === Step.Validate">
+            <p>All files have been validated to see if there are any operations to do on the list. Any lists have have failed will not move to the next step. Fix the CBL files and retry.</p>
             <div class="row g-0">
-                <ng-container *ngIf="validateSummary">
-                    <ng-container *ngIf="validateSummary.results.length > 0; else noValidateIssues">
-                        <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
-                        <ol class="list-group list-group-numbered list-group-flush" >
-                            <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results" 
-                            [innerHTML]="result | cblConflictReason | safeHtml">
-                            </li>
-                        </ol>
-                    </ng-container>
-                    <ng-template #noValidateIssues>
-                        <div class="justify-content-center col">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                  <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    Looks good
-                                </div>
-                            </div>
-                            No issues found with CBL, press next.
-                        </div>
-                    </ng-template>
-                </ng-container>
+
+                <ngb-accordion #a="ngbAccordion">
+                    <ngb-panel *ngFor="let fileToProcess of filesToProcess">
+                        <ng-container *ngIf="fileToProcess.validateSummary as validateSummary">
+                            <ng-template ngbPanelTitle>
+                                <span>{{fileToProcess.fileName}}: ({{validateSummary.cblName}})</span>
+                                <ng-container *ngIf="validateSummary.success | cblImportResult as success">
+                                    <ng-container [ngSwitch]="success">
+                                        <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
+                                        <span *ngSwitchCase="'Failure'" class="badge bg-danger">{{success}}</span>    
+                                        <span *ngSwitchCase="'Partial'" class="badge bg-warning">{{success}}</span>    
+                                    </ng-container>
+                                </ng-container>
+                            </ng-template>
+
+                            <ng-template ngbPanelContent>
+                                <ng-container *ngIf="validateSummary.results.length > 0; else noValidateIssues">
+                                    <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
+                                    <ol class="list-group list-group-numbered list-group-flush" >
+                                        <li class="list-group-item no-hover" *ngFor="let result of validateSummary.results" 
+                                        [innerHTML]="result | cblConflictReason | safeHtml">
+                                        </li>
+                                    </ol>
+                                </ng-container>
+                                <ng-template #noValidateIssues>
+                                    <div class="justify-content-center col">
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                              <i class="fa-solid fa-circle-check" style="font-size: 24px" aria-hidden="true"></i>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                Looks good
+                                            </div>
+                                        </div>
+                                        No issues found with CBL, press next.
+                                    </div>
+                                </ng-template>
+                            </ng-template>
+                        </ng-container>
+                    </ngb-panel>
+                </ngb-accordion>
             </div>
         </ng-container>
     

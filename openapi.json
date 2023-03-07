@@ -10165,6 +10165,11 @@
             "type": "string",
             "nullable": true
           },
+          "fileName": {
+            "type": "string",
+            "description": "Used only for Kavita's UI, the filename of the cbl",
+            "nullable": true
+          },
           "results": {
             "type": "array",
             "items": {

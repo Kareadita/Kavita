@@ -3,6 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { forkJoin } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
@@ -11,7 +12,7 @@ import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
 
 interface FileStep {
-  filename: string;
+  fileName: string;
   validateSummary: CblImportSummary | undefined;
   dryRunSummary: CblImportSummary | undefined;
   finalizeSummary: CblImportSummary | undefined;
@@ -43,7 +44,7 @@ export class ImportCblModalComponent {
   });
 
   importSummaries: Array<CblImportSummary> = [];
-  validateSummary: CblImportSummary | undefined;
+  //validateSummary: CblImportSummary | undefined;
   dryRunSummary: CblImportSummary | undefined;
   dryRunResults: Array<CblBookResult> = [];
   finalizeSummary: CblImportSummary | undefined;
@@ -60,7 +61,7 @@ export class ImportCblModalComponent {
   currentStepIndex = this.steps[0].index;
   currentFileIndex: number = 0;
 
-  files: Array<FileStep> = [];
+  filesToProcess: Array<FileStep> = [];
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
@@ -92,12 +93,40 @@ export class ImportCblModalComponent {
 
   nextStep() {
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
-    if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
+    //if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
     this.isLoading = true;
     switch (this.currentStepIndex) {
       case Step.Import:
-        this.importFile();
+        const files = this.uploadForm.get('files')?.value;
+        if (!files) {
+          this.toastr.error('You need to select files to move forward');
+          return;
+        }
+        // Load each file into filesToProcess and group their data
+        let pages = [];
+        for (let i = 0; i < files.length; i++) {
+          const formData = new FormData();
+            formData.append('cbl', files[i]);
+            formData.append('dryRun', true + '');
+            pages.push(this.readingListService.validateCbl(formData));
+        }
+        forkJoin(pages).subscribe(results => {
+          this.filesToProcess = [];
+          results.forEach(cblImport => {
+            this.filesToProcess.push({
+              fileName: cblImport.fileName,
+              validateSummary: cblImport,
+              dryRunSummary: undefined,
+              finalizeSummary: undefined
+            });
+          });
+
+          this.currentStepIndex++;
+          this.currentFileIndex++;
+          this.isLoading = false;
+          this.cdRef.markForCheck();
+        });
         break;
       case Step.Validate:
         this.import(true);
@@ -109,12 +138,13 @@ export class ImportCblModalComponent {
         // Clear the models and allow user to do another import
         this.uploadForm.get('files')?.setValue(undefined);
         this.currentStepIndex = Step.Import;
-        this.validateSummary = undefined;
+        //this.validateSummary = undefined;
         this.dryRunSummary = undefined;
         this.dryRunResults = [];
         this.finalizeSummary = undefined;
         this.finalizeResults = [];
         this.isLoading = false;
+        this.filesToProcess = [];
         this.cdRef.markForCheck();
         break;
 
@@ -131,7 +161,8 @@ export class ImportCblModalComponent {
       case Step.Import:
         return this.isFileSelected();
       case Step.Validate:
-        return this.validateSummary && this.validateSummary.results.length === 0;
+        return this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail).length > 0;
+        //return this.validateSummary && this.validateSummary.results.length === 0;
       case Step.DryRun:
         return this.dryRunSummary?.success != CblImportResult.Fail; 
       case Step.Finalize:
@@ -157,25 +188,25 @@ export class ImportCblModalComponent {
     return false;
   }
 
-  importFile() {
-    const files = this.uploadForm.get('files')?.value;
-    if (!files) return;
+  // importFile() {
+  //   const files = this.uploadForm.get('files')?.value;
+  //   if (!files) return;
 
-    this.cdRef.markForCheck();
+  //   this.cdRef.markForCheck();
 
-    const formData = new FormData();
-    formData.append('cbl', files[this.currentFileIndex]);
-    this.readingListService.validateCbl(formData).subscribe(res => {
-      if (this.currentStepIndex === Step.Import) {
-        this.validateSummary = res;
-      }
-      this.importSummaries.push(res);
-      this.currentStepIndex++;
-      this.currentFileIndex++;
-      this.isLoading = false;
-      this.cdRef.markForCheck();
-    });
-  }
+  //   const formData = new FormData();
+  //   formData.append('cbl', files[this.currentFileIndex]);
+  //   this.readingListService.validateCbl(formData).subscribe(res => {
+  //     if (this.currentStepIndex === Step.Import) {
+  //       this.validateSummary = res;
+  //     }
+  //     this.importSummaries.push(res);
+  //     this.currentStepIndex++;
+  //     this.currentFileIndex++;
+  //     this.isLoading = false;
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
 
   import(dryRun: boolean = false) {
     const files = this.uploadForm.get('files')?.value;
