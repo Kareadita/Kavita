@@ -15,7 +15,7 @@ public class ReadingList : IEntityDate
     /// <summary>
     /// A normalized string used to check if the reading list already exists in the DB
     /// </summary>
-    public string? NormalizedTitle { get; set; }
+    public required string NormalizedTitle { get; set; }
     public string? Summary { get; set; }
     /// <summary>
     /// Reading lists that are promoted are only done by admins
@@ -39,6 +39,14 @@ public class ReadingList : IEntityDate
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+    // /// <summary>
+    // /// Minimum Year and Month the Reading List starts
+    // /// </summary>
+    // public DateOnly StartingYear { get; set; }
+    // /// <summary>
+    // ///  Maximum Year and Month the Reading List starts
+    // /// </summary>
+    // public DateOnly EndingYear { get; set; }
 
     // Relationships
     public int AppUserId { get; set; }

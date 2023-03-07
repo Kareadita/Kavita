@@ -3,12 +3,19 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FileUploadValidators } from '@iplab/ngx-file-upload';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import { forkJoin } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
+
+interface FileStep {
+  fileName: string;
+  validateSummary: CblImportSummary | undefined;
+  dryRunSummary: CblImportSummary | undefined;
+  finalizeSummary: CblImportSummary | undefined;
+}
 
 enum Step {
   Import = 0,
@@ -28,7 +35,6 @@ export class ImportCblModalComponent {
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
-    FileUploadValidators.filesLimit(1), 
     FileUploadValidators.accept(['.cbl']),
   ]);
   
@@ -36,25 +42,28 @@ export class ImportCblModalComponent {
     files: this.fileUploadControl
   });
 
-  importSummaries: Array<CblImportSummary> = [];
-  validateSummary: CblImportSummary | undefined;
-  dryRunSummary: CblImportSummary | undefined;
-  dryRunResults: Array<CblBookResult> = [];
-  finalizeSummary: CblImportSummary | undefined;
-  finalizeResults: Array<CblBookResult> = [];
-
   isLoading: boolean = false;
 
   steps: Array<TimelineStep> = [
-    {title: 'Import CBL', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
-    {title: 'Validate File', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
+    {title: 'Import CBLs', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
+    {title: 'Validate CBL', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
     {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
     {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
 
+  filesToProcess: Array<FileStep> = [];
+  failedFiles: Array<FileStep> = [];
+
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
+  get CblImportResult() { return CblImportResult; }
+
+  get FileCount() { 
+    const files = this.uploadForm.get('files')?.value;
+    if (!files) return 0;
+    return files.length;
+  }
 
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
@@ -77,29 +86,59 @@ export class ImportCblModalComponent {
 
   nextStep() {
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
-    if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
+    //if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
     this.isLoading = true;
     switch (this.currentStepIndex) {
       case Step.Import:
-        this.importFile();
+        const files = this.uploadForm.get('files')?.value;
+        if (!files) {
+          this.toastr.error('You need to select files to move forward');
+          return;
+        }
+        // Load each file into filesToProcess and group their data
+        let pages = [];
+        for (let i = 0; i < files.length; i++) {
+          const formData = new FormData();
+            formData.append('cbl', files[i]);
+            formData.append('dryRun', true + '');
+            pages.push(this.readingListService.validateCbl(formData));
+        }
+        forkJoin(pages).subscribe(results => {
+          this.filesToProcess = [];
+          results.forEach(cblImport => {
+            this.filesToProcess.push({
+              fileName: cblImport.fileName,
+              validateSummary: cblImport,
+              dryRunSummary: undefined,
+              finalizeSummary: undefined
+            });
+          });
+
+          this.filesToProcess = this.filesToProcess.sort((a, b) => b.validateSummary!.success - a.validateSummary!.success);
+
+          this.currentStepIndex++;
+          this.isLoading = false;
+          this.cdRef.markForCheck();
+        });
         break;
       case Step.Validate:
-        this.import(true);
+        this.failedFiles = this.filesToProcess.filter(item => item.validateSummary?.success === CblImportResult.Fail);
+        this.filesToProcess = this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail);
+        this.dryRun();
         break;
       case Step.DryRun:
-        this.import(false);
+        this.failedFiles.push(...this.filesToProcess.filter(item => item.dryRunSummary?.success === CblImportResult.Fail));
+        this.filesToProcess = this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail);
+        this.import();
         break;
       case Step.Finalize:
         // Clear the models and allow user to do another import
         this.uploadForm.get('files')?.setValue(undefined);
         this.currentStepIndex = Step.Import;
-        this.validateSummary = undefined;
-        this.dryRunSummary = undefined;
-        this.dryRunResults = [];
-        this.finalizeSummary = undefined;
-        this.finalizeResults = [];
         this.isLoading = false;
+        this.filesToProcess = [];
+        this.failedFiles = [];
         this.cdRef.markForCheck();
         break;
 
@@ -116,9 +155,9 @@ export class ImportCblModalComponent {
       case Step.Import:
         return this.isFileSelected();
       case Step.Validate:
-        return this.validateSummary && this.validateSummary.results.length === 0;
+        return this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail).length > 0;
       case Step.DryRun:
-        return this.dryRunSummary?.success != CblImportResult.Fail; 
+        return this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail).length > 0; 
       case Step.Finalize:
         return true; 
       default:
@@ -129,6 +168,7 @@ export class ImportCblModalComponent {
   canMoveToPrevStep() {
     switch (this.currentStepIndex) {
       case Step.Import:
+      case Step.Finalize:
         return false;
       default:
         return true;
@@ -142,45 +182,52 @@ export class ImportCblModalComponent {
     return false;
   }
 
-  importFile() {
-    const files = this.uploadForm.get('files')?.value;
-    if (!files) return;
 
-    this.cdRef.markForCheck();
+  dryRun() {
 
-    const formData = new FormData();
-    formData.append('cbl', files[0]);
-    this.readingListService.validateCbl(formData).subscribe(res => {
-      if (this.currentStepIndex === Step.Import) {
-        this.validateSummary = res;
-      }
-      this.importSummaries.push(res);
-      this.currentStepIndex++;
+    const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
+    const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
+
+    let pages = [];
+    for (let i = 0; i < files.length; i++) {
+      const formData = new FormData();
+        formData.append('cbl', files[i]);
+        formData.append('dryRun', 'true');
+        pages.push(this.readingListService.importCbl(formData));
+    }
+    forkJoin(pages).subscribe(results => {
+        results.forEach(cblImport => {
+        const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);
+        this.filesToProcess[index].dryRunSummary = cblImport;
+      });
+      this.filesToProcess = this.filesToProcess.sort((a, b) => b.dryRunSummary!.success - a.dryRunSummary!.success);
+
       this.isLoading = false;
+      this.currentStepIndex++;
       this.cdRef.markForCheck();
     });
   }
 
-  import(dryRun: boolean = false) {
-    const files = this.uploadForm.get('files')?.value;
-    if (!files) return;
+  import() {
+    const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
+    const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
 
-    const formData = new FormData();
-    formData.append('cbl', files[0]);
-    formData.append('dryRun', dryRun + '');
-    this.readingListService.importCbl(formData).subscribe(res => {
-      // Our step when calling is always one behind
-      if (dryRun) {
-        this.dryRunSummary = res;
-        this.dryRunResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
-      } else {
-        this.finalizeSummary = res;
-        this.finalizeResults = [...res.successfulInserts, ...res.results].sort((a, b) => a.order - b.order);
-        this.toastr.success('Reading List imported');
-      }
+    let pages = [];
+    for (let i = 0; i < files.length; i++) {
+      const formData = new FormData();
+      formData.append('cbl', files[i]);
+      formData.append('dryRun', 'false');
+      pages.push(this.readingListService.importCbl(formData));
+    }
+    forkJoin(pages).subscribe(results => {
+      results.forEach(cblImport => {
+        const index = this.filesToProcess.findIndex(p => p.fileName === cblImport.fileName);
+        this.filesToProcess[index].finalizeSummary = cblImport;
+      });
 
       this.isLoading = false;
       this.currentStepIndex++;
+      this.toastr.success('Reading List imported');
       this.cdRef.markForCheck();
     });
   }

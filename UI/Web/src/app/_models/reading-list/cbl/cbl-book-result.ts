@@ -5,5 +5,14 @@ export interface CblBookResult {
     series: string;
     volume: string;
     number: string;
+    /**
+     * For SeriesCollision
+     */
+    libraryId: number;
+    /**
+     * For SeriesCollision
+     */
+    seriesId: number;
+    readingListName: string;
     reason: CblImportReason;
 }

@@ -173,7 +173,7 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses))
+                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }

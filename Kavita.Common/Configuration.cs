@@ -8,8 +8,8 @@ namespace Kavita.Common;
 
 public static class Configuration
 {
-    public const string DefaultIPAddresses = "0.0.0.0,::";
-    public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
+    public const string DefaultIpAddresses = "0.0.0.0,::";
+    private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
     {

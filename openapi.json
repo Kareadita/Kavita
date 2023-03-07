@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.6"
+    "version": "0.7.1.12"
   },
   "servers": [
     {
@@ -4245,56 +4245,6 @@
         }
       }
     },
-    "/api/Reader/mark-chapter-until-as-read": {
-      "post": {
-        "tags": [
-          "Reader"
-        ],
-        "summary": "Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.",
-        "description": "This is built for Tachiyomi and is not expected to be called by any other place",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "chapterNumber",
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "format": "float"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
     "/api/Reader/chapter-bookmarks": {
       "get": {
         "tags": [
@@ -5373,6 +5323,56 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/ReadingList/characters": {
+      "get": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns a list of characters associated with the reading list",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -9771,6 +9771,9 @@
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
           },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
+          },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
           },
@@ -10109,6 +10112,21 @@
             "type": "string",
             "nullable": true
           },
+          "libraryId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
+          },
+          "readingListName": {
+            "type": "string",
+            "description": "The name of the reading list",
+            "nullable": true
+          },
           "reason": {
             "$ref": "#/components/schemas/CblImportReason"
           }
@@ -10125,7 +10143,8 @@
           5,
           6,
           7,
-          8
+          8,
+          9
         ],
         "type": "integer",
         "format": "int32"
@@ -10144,6 +10163,11 @@
         "properties": {
           "cblName": {
             "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Used only for Kavita's UI, the filename of the cbl",
             "nullable": true
           },
           "results": {
@@ -14928,6 +14952,7 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "bookReaderWritingStyle",
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
@@ -15004,6 +15029,9 @@
           },
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
+          },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
           },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
@@ -15210,6 +15238,15 @@
           }
         },
         "additionalProperties": false
+      },
+      "WritingStyle": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Represents the writing styles for the book-reader",
+        "format": "int32"
       }
     },
     "securitySchemes": {

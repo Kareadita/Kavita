@@ -19,9 +19,9 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.EmptyFile:
         return failIcon + 'The cbl file is empty, nothing to be done.';
       case CblImportReason.NameConflict:
-        return failIcon + 'A reading list already exists on your account that matches the cbl file.';
+        return failIcon + 'A reading list (' + result.readingListName + ') already exists on your account that matches the cbl file.';
       case CblImportReason.SeriesCollision:
-        return failIcon + 'The series, ' + result.series + ', collides with another series of the same name in another library.';
+        return failIcon + 'The series, ' + `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>` + ', collides with another series of the same name in another library.';
       case CblImportReason.SeriesMissing:
         return failIcon + 'The series, ' + result.series + ', is missing from Kavita or your account does not have permission. All items with this series will be skipped from import.';
       case CblImportReason.VolumeMissing:
@@ -29,7 +29,9 @@ export class CblConflictReasonPipe implements PipeTransform {
       case CblImportReason.AllChapterMissing:
         return failIcon + 'All chapters cannot be matched to Chapters in Kavita.';
       case CblImportReason.Success:
-        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully';
+        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully.';
+      case CblImportReason.InvalidFile:
+        return failIcon + 'The file is corrupted or not matching the expected tags/spec.';
     }
   }
 

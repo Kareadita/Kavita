@@ -367,9 +367,11 @@ public class ReadingListService : IReadingListService
         // Is there another reading list with the same name?
         if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
         {
+            importSummary.Success = CblImportResult.Fail;
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.NameConflict
+                Reason = CblImportReason.NameConflict,
+                ReadingListName = cblReading.Name
             });
         }
 
@@ -391,23 +393,15 @@ public class ReadingListService : IReadingListService
         if (!conflicts.Any()) return importSummary;
 
         importSummary.Success = CblImportResult.Fail;
-        if (conflicts.Count == cblReading.Books.Book.Count)
+        foreach (var conflict in conflicts)
         {
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.AllChapterMissing,
+                Reason = CblImportReason.SeriesCollision,
+                Series = conflict.Name,
+                LibraryId = conflict.LibraryId,
+                SeriesId = conflict.Id,
             });
-        }
-        else
-        {
-            foreach (var conflict in conflicts)
-            {
-                importSummary.Results.Add(new CblBookResult()
-                {
-                    Reason = CblImportReason.SeriesCollision,
-                    Series = conflict.Name
-                });
-            }
         }
 
         return importSummary;
@@ -484,6 +478,7 @@ public class ReadingListService : IReadingListService
                 importSummary.Results.Add(new CblBookResult(book)
                 {
                     Reason = CblImportReason.VolumeMissing,
+                    LibraryId = bookSeries.LibraryId,
                     Order = i
                 });
                 continue;
@@ -499,6 +494,7 @@ public class ReadingListService : IReadingListService
                 importSummary.Results.Add(new CblBookResult(book)
                 {
                     Reason = CblImportReason.ChapterMissing,
+                    LibraryId = bookSeries.LibraryId,
                     Order = i
                 });
                 continue;
@@ -523,11 +519,16 @@ public class ReadingListService : IReadingListService
             importSummary.Success = CblImportResult.Fail;
         }
 
-        await CalculateReadingListAgeRating(readingList);
-
         if (dryRun) return importSummary;
 
-        if (!_unitOfWork.HasChanges()) return importSummary;
+        await CalculateReadingListAgeRating(readingList);
+        if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
+        {
+            readingList.Summary = readingList.Summary?.Trim();
+        }
+
+        // If there are no items, don't create a blank list
+        if (!_unitOfWork.HasChanges() || !readingList.Items.Any()) return importSummary;
         await _unitOfWork.CommitAsync();
 
 
