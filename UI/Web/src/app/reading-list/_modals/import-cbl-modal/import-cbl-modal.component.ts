@@ -165,6 +165,7 @@ export class ImportCblModalComponent {
   canMoveToPrevStep() {
     switch (this.currentStepIndex) {
       case Step.Import:
+      case Step.Finalize:
         return false;
       default:
         return true;
