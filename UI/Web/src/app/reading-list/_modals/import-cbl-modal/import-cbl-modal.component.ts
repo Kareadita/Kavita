@@ -57,6 +57,7 @@ export class ImportCblModalComponent {
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
+  get CblImportResult() { return CblImportResult; }
 
   get FileCount() { 
     const files = this.uploadForm.get('files')?.value;

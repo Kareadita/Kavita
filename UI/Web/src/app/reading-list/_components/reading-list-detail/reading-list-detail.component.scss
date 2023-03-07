@@ -1,3 +1,10 @@
 .content-container {
     width: 100%;
 }
+
+.dropdown-toggle-split {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+    border-top-left-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+}

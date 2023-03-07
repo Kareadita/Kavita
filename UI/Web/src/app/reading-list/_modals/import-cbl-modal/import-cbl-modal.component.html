@@ -105,10 +105,10 @@
 
     <ng-template #heading let-filename="filename" let-summary="summary">
             <ng-container *ngIf="summary.success | cblImportResult as success">
-                <ng-container [ngSwitch]="success">
-                    <span *ngSwitchCase="'Success'" class="badge bg-primary me-1">{{success}}</span>    
-                    <span *ngSwitchCase="'Failure'" class="badge bg-danger me-1">{{success}}</span>    
-                    <span *ngSwitchCase="'Partial'" class="badge bg-warning me-1">{{success}}</span>    
+                <ng-container [ngSwitch]="summary.success">
+                    <span *ngSwitchCase="CblImportResult.Success" class="badge bg-primary me-1">{{success}}</span>    
+                    <span *ngSwitchCase="CblImportResult.Fail" class="badge bg-danger me-1">{{success}}</span>    
+                    <span *ngSwitchCase="CblImportResult.Partial" class="badge bg-warning me-1">{{success}}</span>    
                 </ng-container>
             </ng-container>
             <span>{{filename}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>

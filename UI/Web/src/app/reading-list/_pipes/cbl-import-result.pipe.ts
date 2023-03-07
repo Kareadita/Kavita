@@ -11,7 +11,7 @@ export class CblImportResultPipe implements PipeTransform {
       case CblImportResult.Success:
         return 'Success';
       case CblImportResult.Partial:
-        return 'Partial Success';
+        return 'Partial';
       case CblImportResult.Fail:
         return 'Failure';
     }
