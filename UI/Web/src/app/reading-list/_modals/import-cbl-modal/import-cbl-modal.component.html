@@ -25,7 +25,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.validateSummary as validateSummary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}: ({{validateSummary.cblName}})</span>
+                                <span>{{fileToProcess.fileName}}<span *ngIf="validateSummary.cblName">: ({{validateSummary.cblName}})</span></span>
                                 <ng-container *ngIf="validateSummary.success | cblImportResult as success">
                                     <ng-container [ngSwitch]="success">
                                         <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
@@ -72,7 +72,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.dryRunSummary as summary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}: ({{summary.cblName}})</span>
+                                <span>{{fileToProcess.fileName}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
                                 <ng-container *ngIf="summary.success | cblImportResult as success">
                                     <ng-container [ngSwitch]="success">
                                         <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
@@ -100,7 +100,7 @@
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
                         <ng-container *ngIf="fileToProcess.finalizeSummary as summary">
                             <ng-template ngbPanelTitle>
-                                <span>{{fileToProcess.fileName}}: ({{summary.cblName}})</span>
+                                <span>{{fileToProcess.fileName}}<span *ngIf="summary.cblName">: ({{summary.cblName}})</span></span>
                                 <ng-container *ngIf="summary.success | cblImportResult as success">
                                     <ng-container [ngSwitch]="success">
                                         <span *ngSwitchCase="'Success'" class="badge bg-primary">{{success}}</span>    
