@@ -125,8 +125,8 @@ export class ImportCblModalComponent {
         this.dryRun();
         break;
       case Step.DryRun:
-        this.failedFiles.push(...this.filesToProcess.filter(item => item.validateSummary?.success === CblImportResult.Fail));
-        this.filesToProcess = this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail);
+        this.failedFiles.push(...this.filesToProcess.filter(item => item.dryRunSummary?.success === CblImportResult.Fail));
+        this.filesToProcess = this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail);
         this.import();
         break;
       case Step.Finalize:

@@ -33,7 +33,7 @@
                                     <h5>There are issues with the CBL that will prevent an import. Correct these issues then try again.</h5>
                                     <ol class="list-group list-group-numbered list-group-flush" >
                                         <li class="list-group-item no-hover" *ngFor="let result of summary.results" 
-                                        [innerHTML]="result | cblConflictReason | safeHtml">
+                                            [innerHTML]="result | cblConflictReason | safeHtml">
                                         </li>
                                     </ol>
                                 </ng-container>
@@ -59,7 +59,7 @@
     
         <ng-container *ngIf="currentStepIndex === Step.DryRun">
             <div class="row g-0">
-                <h5>This is a dry run and shows what will happen if you press Next and perform the import. You can mark any files you do not wish to continue with.</h5>
+                <p>This is a dry run and shows what will happen if you press Next and perform the import. All Failures will not be imported.</p>
 
                 <ngb-accordion #a="ngbAccordion">
                     <ngb-panel *ngFor="let fileToProcess of filesToProcess">
@@ -69,10 +69,7 @@
                             </ng-template>
 
                             <ng-template ngbPanelContent>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item no-hover" *ngFor="let result of fileToProcess.dryRunSummary.results"  
-                                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
-                                </ul>
+                                <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
                             </ng-template>
                         </ng-container>
                     </ngb-panel>
@@ -90,10 +87,7 @@
                             </ng-template>
 
                             <ng-template ngbPanelContent>
-                                <ul class="list-group list-group-flush">
-                                    <li class="list-group-item no-hover" *ngFor="let result of fileToProcess.finalizeSummary.results"  
-                                        innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
-                                </ul>
+                                <ng-container [ngTemplateOutlet]="resultsList" [ngTemplateOutletContext]="{ summary: summary }"></ng-container>
                             </ng-template>
                         </ng-container>
                     </ngb-panel>
@@ -101,6 +95,13 @@
             </div>
         </ng-container>
     </div>
+
+    <ng-template #resultsList let-summary="summary">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item no-hover" *ngFor="let result of summary.results"  
+                innerHTML="{{result.order + 1}}. {{result | cblConflictReason | safeHtml}}"></li>
+        </ul>
+    </ng-template>
 
     <ng-template #heading let-filename="filename" let-summary="summary">
             <ng-container *ngIf="summary.success | cblImportResult as success">
