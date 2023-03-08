@@ -1275,16 +1275,10 @@ public class SeriesRepository : ISeriesRepository
                 || s.NormalizedName.Equals(normalizedLocalized)
 
                 || s.NormalizedLocalizedName.Equals(normalizedSeries)
-                || (string.IsNullOrEmpty(normalizedLocalized) || s.NormalizedLocalizedName.Equals(normalizedLocalized))
+                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
 
                 || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
             );
-            // .WhereIf(!string.IsNullOrEmpty(normalizedLocalized), s =>
-            //     s.NormalizedName.Equals(normalizedLocalized)
-            //     || s.NormalizedLocalizedName.Equals(normalizedLocalized));
-
-        // BUG: This isn't pulling back the Series if there is a Localized Series
-
         if (!withFullIncludes)
         {
             return query.SingleOrDefaultAsync();
