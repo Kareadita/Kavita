@@ -1262,24 +1262,28 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="format"></param>
     /// <param name="withFullIncludes">Defaults to true. This will query against all foreign keys (deep). If false, just the series will come back</param>
     /// <returns></returns>
-    public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
+    public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId,
+        MangaFormat format, bool withFullIncludes = true)
     {
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
-            .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                               || (s.NormalizedLocalizedName == normalizedSeries)
-                               || (s.OriginalName == seriesName));
+            .Where(s =>
+                s.NormalizedName.Equals(normalizedSeries)
+                || s.NormalizedName.Equals(normalizedLocalized)
 
-        if (!string.IsNullOrEmpty(normalizedLocalized))
-        {
-            // TODO: Apply WhereIf
-            query = query.Where(s =>
-                s.NormalizedName.Equals(normalizedLocalized)
-                || (s.NormalizedLocalizedName != null && s.NormalizedLocalizedName.Equals(normalizedLocalized)));
-        }
+                || s.NormalizedLocalizedName.Equals(normalizedSeries)
+                || (string.IsNullOrEmpty(normalizedLocalized) || s.NormalizedLocalizedName.Equals(normalizedLocalized))
+
+                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
+            );
+            // .WhereIf(!string.IsNullOrEmpty(normalizedLocalized), s =>
+            //     s.NormalizedName.Equals(normalizedLocalized)
+            //     || s.NormalizedLocalizedName.Equals(normalizedLocalized));
+
+        // BUG: This isn't pulling back the Series if there is a Localized Series
 
         if (!withFullIncludes)
         {
@@ -1287,13 +1291,17 @@ public class SeriesRepository : ISeriesRepository
         }
 
         #nullable disable
-        return query.Include(s => s.Metadata)
+        query = query.Include(s => s.Library)
+
+            .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
 
-            .Include(s => s.Library)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
@@ -1306,15 +1314,12 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Genres)
 
-
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Tags)
-
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
+
+            .AsSplitQuery();
+        return query.SingleOrDefaultAsync();
     #nullable enable
     }
 
