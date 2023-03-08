@@ -93,8 +93,7 @@ public class UploadController : BaseApiController
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
             if (series == null) return BadRequest("Invalid Series");
-            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, ImageService.GetSeriesFormat(uploadFileDto.Id), convertToWebP);
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetSeriesFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -142,8 +141,7 @@ public class UploadController : BaseApiController
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
             if (tag == null) return BadRequest("Invalid Tag id");
-            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}", convertToWebP);
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -194,8 +192,7 @@ public class UploadController : BaseApiController
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
             if (readingList == null) return BadRequest("Reading list is not valid");
-            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}", convertToWebP);
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -222,6 +219,19 @@ public class UploadController : BaseApiController
         return BadRequest("Unable to save cover image to Reading List");
     }
 
+    private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename, int thumbnailSize = 0)
+    {
+        var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+        if (thumbnailSize > 0)
+        {
+            return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
+                filename, convertToWebP, thumbnailSize);
+        }
+
+        return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
+            filename, convertToWebP); ;
+    }
+
     /// <summary>
     /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
     /// </summary>
@@ -243,8 +253,7 @@ public class UploadController : BaseApiController
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
             if (chapter == null) return BadRequest("Invalid Chapter");
-            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}", convertToWebP);
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -311,8 +320,7 @@ public class UploadController : BaseApiController
         try
         {
             var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
-            var filePath = _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", convertToWebP, ImageService.LibraryThumbnailWidth);
+            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))
             {
