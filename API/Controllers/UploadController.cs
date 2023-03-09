@@ -319,7 +319,6 @@ public class UploadController : BaseApiController
 
         try
         {
-            var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))

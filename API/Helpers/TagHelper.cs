@@ -83,7 +83,6 @@ public static class TagHelper
     /// <remarks>Used to remove before we update/add new tags</remarks>
     /// <param name="existingTags">Existing tags on Entity</param>
     /// <param name="tags">Tags from metadata</param>
-    /// <param name="isExternal">Remove external tags?</param>
     /// <param name="action">Callback which will be executed for each tag removed</param>
     public static void RemoveTags(ICollection<Tag> existingTags, IEnumerable<string> tags, Action<Tag>? action = null)
     {

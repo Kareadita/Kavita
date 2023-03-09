@@ -30,14 +30,13 @@ public class ServerController : BaseApiController
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
-    private readonly IEmailService _emailService;
     private readonly IBookmarkService _bookmarkService;
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
 
     public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService)
+        ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
@@ -46,7 +45,6 @@ public class ServerController : BaseApiController
         _versionUpdaterService = versionUpdaterService;
         _statsService = statsService;
         _cleanupService = cleanupService;
-        _emailService = emailService;
         _bookmarkService = bookmarkService;
         _scannerService = scannerService;
         _accountService = accountService;

@@ -22,14 +22,12 @@ public class ReadingListController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
-    private readonly IDirectoryService _directoryService;
 
-    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService, IDirectoryService directoryService)
+    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _readingListService = readingListService;
-        _directoryService = directoryService;
     }
 
     /// <summary>

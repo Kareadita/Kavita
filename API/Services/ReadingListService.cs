@@ -418,7 +418,7 @@ public class ReadingListService : IReadingListService
     public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
-        _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user.UserName);
+        _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
         var importSummary = new CblImportSummaryDto()
         {
             CblName = cblReading.Name,
