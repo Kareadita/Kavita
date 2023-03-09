@@ -12,6 +12,7 @@
   export interface SiteTheme {
     id: number;
     name: string;
+    normalizedName: string;
     filePath: string;
     isDefault: boolean;
     provider: ThemeProvider;

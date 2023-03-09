@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using API.Entities.Enums.Theme;
 using API.Entities.Interfaces;
 using API.Services;

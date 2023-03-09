@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
