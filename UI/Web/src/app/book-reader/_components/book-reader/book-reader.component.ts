@@ -122,7 +122,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * TODO: See if continuousChaptersStack can be moved into reader service so we can reduce code duplication between readers (and also use ChapterInfo with it instead)
    */
   continuousChaptersStack: Stack<number> = new Stack();
-
+  /*
+   * The current page only contains an image. This is used to determine if we should show the image in the center of the screen.
+   */
+  isSingleImagePage = false;
   /**
    * Belongs to the drawer component
    */
@@ -372,17 +375,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.layoutMode !== BookPageLayoutMode.Default || this.writingStyle === WritingStyle.Vertical) {
       // Take the height after page loads, subtract the top/bottom bar
       const height = this.windowHeight  - (this.topOffset * 2);
-      this.document.documentElement.style.setProperty('--book-reader-content-max-height', `${height}px`);
       return height + 'px';
     }
-
     return 'unset';
   }
 
   get VerticalBookContentWidth() {
-    if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Horizontal ) {
+    if (this.layoutMode !== BookPageLayoutMode.Default) {
       const width = this.getVerticalPageWidth()
-      this.document.documentElement.style.setProperty('--book-reader-content-max-width', `${width}px`);
       return width + 'px';
     }
     return '';
@@ -592,7 +592,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.libraryType = type;
         });
 
-        this.updateImagesWithHeight();
+        this.updateImageSizes();
 
 
         if (this.pageNum >= this.maxPages) {
@@ -637,6 +637,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   onResize(){
     // Update the window Height
     this.updateWidthAndHeightCalcs();
+    this.updateImageSizes();
     const resumeElement = this.getFirstVisibleElementXPath();
     if (this.layoutMode !== BookPageLayoutMode.Default && resumeElement !== null && resumeElement !== undefined) {
       this.scrollTo(resumeElement); // This works pretty well, but not perfect
@@ -836,7 +837,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
-      this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
+      const safeHtml = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
+      this.isSingleImagePage = this.checkSingleImagePage(safeHtml) // This needs be performed before we set this.page to avoid image jumping
+      this.updateSingleImagePageStyles()
+      this.page = safeHtml;
+
       this.cdRef.markForCheck();
 
       setTimeout(() => {
@@ -854,41 +859,78 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           .map(img => new Promise(resolve => { img.onload = img.onerror = resolve; })))
           .then(() => {
             this.setupPage(part, scrollTop);
-            this.updateImagesWithHeight();
+            this.updateImageSizes();
           });
       }, 10);
     });
   }
 
   /**
-   * Applies a max-height inline css property on each image in the page if the layout mode is column-based, else it removes the property
+   * Updates the image properties to fit the current layout mode and screen size
    */
-  updateImagesWithHeight() {
-    const images = this.readingSectionElemRef?.nativeElement.querySelectorAll('img') || [];
-    let maxHeight: number | undefined;
+  updateImageSizes() {
+    const isVerticalWritingStyle = this.writingStyle === WritingStyle.Vertical
+    const height = this.windowHeight - (this.topOffset * 2)
+    let maxHeight = 'unset'
+    let maxWidth = ''
+    switch (this.layoutMode) {
+      case BookPageLayoutMode.Default:
+        if (isVerticalWritingStyle) {
+          maxHeight = `${height}px`
+        } else {
+          maxWidth = `${this.getVerticalPageWidth()}px`
+        }
+        break
 
-    if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Vertical) {
-      maxHeight = (parseInt(this.ColumnHeight.replace('px', ''), 10) - (this.topOffset * 2));
-    } else if (this.layoutMode !== BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() - COLUMN_GAP;
-    } else if (this.layoutMode === BookPageLayoutMode.Column2 && this.writingStyle === WritingStyle.Vertical) {
-      maxHeight = this.getPageHeight() / 2 - COLUMN_GAP;
-    } else {
-      maxHeight = undefined;
+      case BookPageLayoutMode.Column1:
+        maxHeight = `${height}px`
+        maxWidth = `${this.getVerticalPageWidth()}px`
+        break
+
+      case BookPageLayoutMode.Column2:
+        maxWidth = `${this.getVerticalPageWidth()}px`
+        if (isVerticalWritingStyle && !this.isSingleImagePage)  {
+          maxHeight = `${height / 2}px`
+        } else {
+          maxHeight = `${height}px`
+        }
+        break
     }
-    Array.from(images).forEach(img => {
-      if (maxHeight === undefined) {
-        this.renderer.removeStyle(img, 'max-height');
-      } else if (this.writingStyle === WritingStyle.Horizontal) {
-        this.renderer.setStyle(img, 'max-height', `${maxHeight}px`);
-      } else {
-        const aspectRatio = img.width / img.height;
-        const pageWidth = this.getVerticalPageWidth()
-        const maxImgHeight = Math.min(maxHeight, pageWidth / aspectRatio);
-        this.renderer.setStyle(img, 'max-height', `${maxImgHeight}px`);
-      }
-    });
+    this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight)
+    this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth)
 
+  }
+
+  updateSingleImagePageStyles() {
+    if (this.isSingleImagePage && this.layoutMode !== BookPageLayoutMode.Default) {
+      this.document.documentElement.style.setProperty('--book-reader-content-position', 'absolute');
+      this.document.documentElement.style.setProperty('--book-reader-content-top', '50%');
+      this.document.documentElement.style.setProperty('--book-reader-content-left', '50%');
+      this.document.documentElement.style.setProperty('--book-reader-content-transform', 'translate(-50%, -50%)');
+    } else {
+        this.document.documentElement.style.setProperty('--book-reader-content-position', '');
+        this.document.documentElement.style.setProperty('--book-reader-content-top', '');
+        this.document.documentElement.style.setProperty('--book-reader-content-left', '');
+        this.document.documentElement.style.setProperty('--book-reader-content-transform', '');
+    }
+  }
+
+  checkSingleImagePage(safeHtml: SafeHtml) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(safeHtml.toString(), "text/html");
+    const images = doc.querySelectorAll("img");
+    const text = doc.querySelectorAll("p");
+
+
+    if (images.length > 1 || text.length > 1) {
+      return false
+    }
+    // A p tag could hold the image, and needs to be checked
+    if (text.length) {
+      return text[0].textContent === "";
+    } else {
+      return true;
+    }
   }
 
 
@@ -1166,9 +1208,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const resumeElement: string | null | undefined = this.getFirstVisibleElementXPath();
 
     // Needs to update the image size when reading mode is vertically
-    if (this.writingStyle === WritingStyle.Vertical) {
-      this.updateImagesWithHeight();
-    }
+    this.updateImageSizes();
+
     // Line Height must be placed on each element in the page
 
     // Apply page level overrides
@@ -1335,11 +1376,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateWritingStyle(writingStyle: WritingStyle) {
     this.writingStyle = writingStyle;
+    this.updateImageSizes()
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => {
         this.scrollTo(lastSelector);
-        this.updateLayoutMode(this.layoutMode);
       });
     } else if (this.bookContentElemRef !== undefined) {
       const resumeElement = this.getFirstVisibleElementXPath();
@@ -1357,7 +1398,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.layoutMode = mode;
     this.cdRef.markForCheck();
     // Remove any max-heights from column layout
-    this.updateImagesWithHeight();
+    this.updateImageSizes();
+    this.updateSingleImagePageStyles()
 
     // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
     if (this.bookContentElemRef == null) {
