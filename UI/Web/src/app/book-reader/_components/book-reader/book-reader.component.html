@@ -1,4 +1,4 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyle}}" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -73,7 +73,7 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading ? true : false">
+    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyle}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading ? true : false">
 
         <ng-container *ngIf="clickToPaginate">
             <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
@@ -84,16 +84,15 @@
                 (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
                  tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
         </ng-container>
-        <div #bookContainer class="book-container {{WritingStyleClass}}" [ngClass]="{'immersive' : immersiveMode}">
+        <div #bookContainer class="book-container {{WritingStyle}}" [ngClass]="{'immersive' : immersiveMode}">
 
-            <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
+            <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyle}}" [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
                  [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                  [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 
 
-            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
-                 (click)="$event.stopPropagation();"
-                 [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
+            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default)" (click)="$event.stopPropagation();"
+                [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
                 <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
             </div>
         </div>
