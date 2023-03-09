@@ -381,7 +381,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get VerticalBookContentWidth() {
-    if (this.layoutMode !== BookPageLayoutMode.Default) {
+    if (this.layoutMode !== BookPageLayoutMode.Default && this.writingStyle !== WritingStyle.Horizontal ) {
       const width = this.getVerticalPageWidth()
       return width + 'px';
     }
