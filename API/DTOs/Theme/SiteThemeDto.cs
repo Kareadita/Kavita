@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using API.Entities.Enums.Theme;
 using API.Entities.Interfaces;
 using API.Services;
@@ -15,6 +15,10 @@ public class SiteThemeDto : IEntityDate
     /// Name of the Theme
     /// </summary>
     public required string Name { get; set; }
+    /// <summary>
+    /// Normalized name for lookups
+    /// </summary>
+    public required string NormalizedName { get; set; }
     /// <summary>
     /// File path to the content. Stored under <see cref="DirectoryService.SiteThemeDirectory"/>.
     /// Must be a .css file
