@@ -806,7 +806,7 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
-                CreatePageStreamLink(series.LibraryId,seriesId, volumeId, chapterId, mangaFile, apiKey)
+                await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
             {
@@ -818,6 +818,16 @@ public class OpdsController : BaseApiController
         return entry;
     }
 
+    /// <summary>
+    /// This returns a streamed image following OPDS-PS v1.2
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <param name="libraryId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="volumeId"></param>
+    /// <param name="chapterId"></param>
+    /// <param name="pageNumber"></param>
+    /// <returns></returns>
     [HttpGet("{apiKey}/image")]
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
     {
@@ -886,10 +896,15 @@ public class OpdsController : BaseApiController
         throw new KavitaException("User does not exist");
     }
 
-    private static FeedLink CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
+    private async Task<FeedLink> CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
     {
+        var userId = await GetUser(apiKey);
+        var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
+
         var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
+        link.LastRead = progress.PageNum;
+        link.LastReadDate = progress.LastModifiedUtc;
         return link;
     }
 
