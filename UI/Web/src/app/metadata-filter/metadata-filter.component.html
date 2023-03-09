@@ -318,7 +318,7 @@
             <div class="col-md-2 me-3">
                 <form [formGroup]="seriesNameGroup">
                     <div class="mb-3">
-                        <label for="series-name" class="form-label">Series Name</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="seriesNameFilterTooltip" role="button" tabindex="0"></i>
+                        <label for="series-name" class="form-label me-1">Series Name</label><i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="seriesNameFilterTooltip" role="button" tabindex="0"></i>
                         <span class="visually-hidden" id="filter-series-name-help"><ng-container [ngTemplateOutlet]="seriesNameFilterTooltip"></ng-container></span>
                         <ng-template #seriesNameFilterTooltip>Series name will filter against Name, Sort Name, or Localized Name</ng-template>
                         <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help">

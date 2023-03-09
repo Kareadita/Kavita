@@ -622,6 +622,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.readProgressGroup.get('inProgress')?.setValue(true);
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
+    this.seriesNameGroup.get('seriesNameQuery')?.setValue('');
     this.cdRef.markForCheck();
     // Apply any presets which will trigger the apply
     this.loadFromPresetsAndSetup();
