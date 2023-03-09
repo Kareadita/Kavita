@@ -125,6 +125,11 @@ public class ImageService : IImageService
         return Task.FromResult(outputFile);
     }
 
+    /// <summary>
+    /// Performs I/O to determine if the file is a valid Image
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
     public async Task<bool> IsImage(string filePath)
     {
         try
