@@ -24,6 +24,7 @@ public interface IVolumeRepository
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
+    Task<IList<Volume>> GetAllWithNonWebPCovers();
 }
 public class VolumeRepository : IVolumeRepository
 {
@@ -193,6 +194,13 @@ public class VolumeRepository : IVolumeRepository
     public async Task<Volume?> GetVolumeByIdAsync(int volumeId)
     {
         return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
+    }
+
+    public async Task<IList<Volume>> GetAllWithNonWebPCovers()
+    {
+        return await _context.Volume
+                    .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+                    .ToListAsync();
     }
 
 

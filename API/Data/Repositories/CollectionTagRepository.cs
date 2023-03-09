@@ -33,6 +33,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title);
+    Task<IList<CollectionTag>> GetAllWithNonWebPCovers();
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -104,6 +105,13 @@ public class CollectionTagRepository : ICollectionTagRepository
         var normalized = title.ToNormalized();
         return await _context.CollectionTag
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
+    }
+
+    public async Task<IList<CollectionTag>> GetAllWithNonWebPCovers()
+    {
+        return await _context.CollectionTag
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<CollectionTagDto>> GetAllTagDtosAsync()

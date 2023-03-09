@@ -36,6 +36,7 @@ public interface IReadingListRepository
     Task<bool> ReadingListExists(string name);
     Task<List<ReadingList>> GetAllReadingListsAsync();
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
+    Task<IList<ReadingList>> GetAllWithNonWebPCovers();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -104,6 +105,13 @@ public class ReadingListRepository : IReadingListRepository
             .OrderBy(p => p.NormalizedName)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
+    }
+
+    public async Task<IList<ReadingList>> GetAllWithNonWebPCovers()
+    {
+        return await _context.ReadingList
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .ToListAsync();
     }
 
     public void Remove(ReadingListItem item)

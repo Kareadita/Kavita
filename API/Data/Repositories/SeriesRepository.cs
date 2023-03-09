@@ -130,6 +130,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
+    Task<IList<Series>> GetAllWithNonWebPCovers();
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -556,6 +557,13 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IList<Series>> GetAllWithNonWebPCovers()
+    {
+        return await _context.Series
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
             .ToListAsync();
     }
 

@@ -206,14 +206,25 @@ public class BookmarkService : IBookmarkService
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllCoverToWebP()
     {
+        _logger.LogInformation("[BookmarkService] Starting conversion of all covers to webp");
         var coverDirectory = _directoryService.CoverImageDirectory;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
-        var chapters = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
+        var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
+        var volumeCovers = await _unitOfWork.VolumeRepository.GetAllWithNonWebPCovers();
+        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithNonWebPCovers();
+
+        var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithNonWebPCovers();
+        var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithNonWebPCovers();
+        var collectionCovers = await _unitOfWork.CollectionTagRepository.GetAllWithNonWebPCovers();
+
+        var totalCount = chapterCovers.Count + volumeCovers.Count + seriesCovers.Count + readingListCovers.Count +
+                         libraryCovers.Count + collectionCovers.Count;
 
         var count = 1F;
-        foreach (var chapter in chapters)
+        _logger.LogInformation("[BookmarkService] Starting conversion of chapters");
+        foreach (var chapter in chapterCovers)
         {
             if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
 
@@ -222,7 +233,77 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / chapters.Count, ProgressEventType.Started));
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+            count++;
+        }
+
+        _logger.LogInformation("[BookmarkService] Starting conversion of volumes");
+        foreach (var volume in volumeCovers)
+        {
+            if (string.IsNullOrEmpty(volume.CoverImage)) continue;
+
+            var newFile = await SaveAsWebP(coverDirectory, volume.CoverImage, coverDirectory);
+            volume.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.VolumeRepository.Update(volume);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+            count++;
+        }
+
+        _logger.LogInformation("[BookmarkService] Starting conversion of series");
+        foreach (var series in seriesCovers)
+        {
+            if (string.IsNullOrEmpty(series.CoverImage)) continue;
+
+            var newFile = await SaveAsWebP(coverDirectory, series.CoverImage, coverDirectory);
+            series.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.SeriesRepository.Update(series);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+            count++;
+        }
+
+        _logger.LogInformation("[BookmarkService] Starting conversion of libraries");
+        foreach (var library in libraryCovers)
+        {
+            if (string.IsNullOrEmpty(library.CoverImage)) continue;
+
+            var newFile = await SaveAsWebP(coverDirectory, library.CoverImage, coverDirectory);
+            library.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.LibraryRepository.Update(library);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+            count++;
+        }
+
+        _logger.LogInformation("[BookmarkService] Starting conversion of reading lists");
+        foreach (var readingList in readingListCovers)
+        {
+            if (string.IsNullOrEmpty(readingList.CoverImage)) continue;
+
+            var newFile = await SaveAsWebP(coverDirectory, readingList.CoverImage, coverDirectory);
+            readingList.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.ReadingListRepository.Update(readingList);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+            count++;
+        }
+
+        _logger.LogInformation("[BookmarkService] Starting conversion of collections");
+        foreach (var collection in collectionCovers)
+        {
+            if (string.IsNullOrEmpty(collection.CoverImage)) continue;
+
+            var newFile = await SaveAsWebP(coverDirectory, collection.CoverImage, coverDirectory);
+            collection.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.CollectionTagRepository.Update(collection);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
             count++;
         }
 
