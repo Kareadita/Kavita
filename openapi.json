@@ -14993,7 +14993,8 @@
             "description": "Manga Reader Option: Background color of the reader"
           },
           "swipeToPaginate": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
           },
           "autoCloseMenu": {
             "type": "boolean",

@@ -103,7 +103,8 @@ export class CollectionDetailComponent implements OnInit, OnDestroy, AfterConten
         });
         break;
       case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, () => {
+        this.actionService.deleteMultipleSeries(selectedSeries, successful => {
+          if (!successful) return;
           this.bulkSelectionService.deselectAll();
           this.loadPage();
           this.cdRef.markForCheck();
