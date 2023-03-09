@@ -30,6 +30,7 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
+    Task CovertAllCoversToWebP();
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -46,6 +47,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
+    private readonly IBookmarkService _bookmarkService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     public const string ScanQueue = "scan";
@@ -66,7 +68,8 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService)
+        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
+        IBookmarkService bookmarkService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -80,6 +83,7 @@ public class TaskScheduler : ITaskScheduler
         _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
+        _bookmarkService = bookmarkService;
     }
 
     public async Task ScheduleTasks()
@@ -172,6 +176,17 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogInformation("Enqueueing Site Theme scan");
         BackgroundJob.Enqueue(() => _themeService.Scan());
+    }
+
+    public async Task CovertAllCoversToWebP()
+    {
+        await _bookmarkService.ConvertAllCoverToWebP();
+        _logger.LogInformation("[BookmarkService] Queuing tasks to update Series and Volume references via Cover Refresh");
+        var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
+        foreach (var lib in libraryIds)
+        {
+            RefreshMetadata(lib.Id, false);
+        }
     }
 
     #endregion

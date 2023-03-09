@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -130,7 +131,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
-    Task<IList<Series>> GetAllWithNonWebPCovers();
+    Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -560,10 +561,18 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<IList<Series>> GetAllWithNonWebPCovers()
+
+    /// <summary>
+    /// Returns custom images only
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true)
     {
+        var prefix = ImageService.GetSeriesFormat(0).Replace("0", string.Empty);
         return await _context.Series
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage)
+                        && !c.CoverImage.EndsWith(".webp")
+                        && (!customOnly || c.CoverImage.StartsWith(prefix)))
             .ToListAsync();
     }
 
