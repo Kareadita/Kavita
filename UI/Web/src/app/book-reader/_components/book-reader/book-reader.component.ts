@@ -156,6 +156,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   clickToPaginateVisualOverlay = false;
   clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
   clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
+  updateImageSizeTimeout: any = undefined;
   /**
    * This is the html we get from the server
    */
@@ -590,7 +591,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         });
 
         this.updateImageSizes();
-
 
         if (this.pageNum >= this.maxPages) {
           this.pageNum = this.maxPages - 1;
@@ -1373,7 +1373,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateWritingStyle(writingStyle: WritingStyle) {
     this.writingStyle = writingStyle;
-    this.updateImageSizes()
+    setTimeout(() => this.updateImageSizes());
     if (this.layoutMode !== BookPageLayoutMode.Default) {
       const lastSelector = this.lastSeenScrollPartPath;
       setTimeout(() => {
@@ -1394,8 +1394,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const layoutModeChanged = mode !== this.layoutMode;
     this.layoutMode = mode;
     this.cdRef.markForCheck();
-    // Remove any max-heights from column layout
-    this.updateImageSizes();
+
+    this.clearTimeout(this.updateImageSizeTimeout);
+    this.updateImageSizeTimeout = setTimeout( () => {
+      this.updateImageSizes()
+    }, 200);
+
     this.updateSingleImagePageStyles()
 
     // Calulate if bottom actionbar is needed. On a timeout to get accurate heights
