@@ -50,13 +50,6 @@ public class UsersController : BaseApiController
         return Ok(await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync(!includePending));
     }
 
-    [Authorize(Policy = "RequireAdminRole")]
-    [HttpGet("pending")]
-    public ActionResult<IEnumerable<MemberDto>> GetPendingUsers()
-    {
-        return Ok(_unitOfWork.UserRepository.GetPendingMemberDtosAsync());
-    }
-
     [HttpGet("myself")]
     public async Task<ActionResult<IEnumerable<MemberDto>>> GetMyself()
     {
