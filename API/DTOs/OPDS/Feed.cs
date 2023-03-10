@@ -26,7 +26,7 @@ public class Feed
     public FeedAuthor Author { get; set; } = new FeedAuthor()
     {
         Name = "Kavita",
-        Uri = "https://kavitareader.com"
+        Uri = "https://www.kavitareader.com"
     };
 
     [XmlElement("totalResults", Namespace = "http://a9.com/-/spec/opensearch/1.1/")]

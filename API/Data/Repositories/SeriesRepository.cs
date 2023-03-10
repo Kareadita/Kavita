@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -130,6 +131,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
+    Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -556,6 +558,21 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking()
             .ProjectTo<SeriesMetadataDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
+            .ToListAsync();
+    }
+
+
+    /// <summary>
+    /// Returns custom images only
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true)
+    {
+        var prefix = ImageService.GetSeriesFormat(0).Replace("0", string.Empty);
+        return await _context.Series
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage)
+                        && !c.CoverImage.EndsWith(".webp")
+                        && (!customOnly || c.CoverImage.StartsWith(prefix)))
             .ToListAsync();
     }
 
@@ -1262,38 +1279,40 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="format"></param>
     /// <param name="withFullIncludes">Defaults to true. This will query against all foreign keys (deep). If false, just the series will come back</param>
     /// <returns></returns>
-    public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId, MangaFormat format, bool withFullIncludes = true)
+    public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId,
+        MangaFormat format, bool withFullIncludes = true)
     {
         var normalizedSeries = seriesName.ToNormalized();
         var normalizedLocalized = localizedName.ToNormalized();
         var query = _context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
-            .Where(s => s.NormalizedName.Equals(normalizedSeries)
-                               || (s.NormalizedLocalizedName == normalizedSeries)
-                               || (s.OriginalName == seriesName));
+            .Where(s =>
+                s.NormalizedName.Equals(normalizedSeries)
+                || s.NormalizedName.Equals(normalizedLocalized)
 
-        if (!string.IsNullOrEmpty(normalizedLocalized))
-        {
-            // TODO: Apply WhereIf
-            query = query.Where(s =>
-                s.NormalizedName.Equals(normalizedLocalized)
-                || (s.NormalizedLocalizedName != null && s.NormalizedLocalizedName.Equals(normalizedLocalized)));
-        }
+                || s.NormalizedLocalizedName.Equals(normalizedSeries)
+                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
 
+                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
+            );
         if (!withFullIncludes)
         {
             return query.SingleOrDefaultAsync();
         }
 
         #nullable disable
-        return query.Include(s => s.Metadata)
+        query = query.Include(s => s.Library)
+
+            .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.Genres)
 
-            .Include(s => s.Library)
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(cm => cm.People)
@@ -1306,15 +1325,12 @@ public class SeriesRepository : ISeriesRepository
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Genres)
 
-
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Tags)
-
             .Include(s => s.Volumes)
             .ThenInclude(v => v.Chapters)
             .ThenInclude(c => c.Files)
-            .AsSplitQuery()
-            .SingleOrDefaultAsync();
+
+            .AsSplitQuery();
+        return query.SingleOrDefaultAsync();
     #nullable enable
     }
 

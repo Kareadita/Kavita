@@ -1,9 +1,12 @@
-﻿using System.Xml.Serialization;
+﻿using System;
+using System.Xml.Serialization;
 
 namespace API.DTOs.OPDS;
 
 public class FeedLink
 {
+    [XmlIgnore]
+    public bool IsPageStream { get; set; }
     /// <summary>
     /// Relation on the Link
     /// </summary>
@@ -24,6 +27,34 @@ public class FeedLink
 
     [XmlAttribute("count", Namespace = "http://vaemendis.net/opds-pse/ns")]
     public int TotalPages { get; set; }
+
+    /// <summary>
+    /// lastRead MUST provide the last page read for this document. The numbering starts at 1.
+    /// </summary>
+    [XmlAttribute("lastRead", Namespace = "http://vaemendis.net/opds-pse/ns")]
+    public int LastRead { get; set; } = -1;
+
+    /// <summary>
+    /// lastReadDate MAY provide the date of when the lastRead attribute was last updated.
+    /// </summary>
+    /// <remarks>Attribute MUST conform Atom's Date construct</remarks>
+    [XmlAttribute("lastReadDate", Namespace = "http://vaemendis.net/opds-pse/ns")]
+    public DateTime LastReadDate { get; set; }
+
+    public bool ShouldSerializeLastReadDate()
+    {
+        return IsPageStream;
+    }
+
+    public bool ShouldSerializeLastRead()
+    {
+        return LastRead >= 0;
+    }
+
+    public bool ShouldSerializeTitle()
+    {
+        return !string.IsNullOrEmpty(Title);
+    }
 
     public bool ShouldSerializeTotalPages()
     {

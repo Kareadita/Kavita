@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.12"
+    "version": "0.7.1.13"
   },
   "servers": [
     {
@@ -3427,10 +3427,12 @@
         "tags": [
           "Opds"
         ],
+        "summary": "This returns a streamed image following OPDS-PS v1.2",
         "parameters": [
           {
             "name": "apiKey",
             "in": "path",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string"
@@ -3439,6 +3441,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3447,6 +3450,7 @@
           {
             "name": "seriesId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3455,6 +3459,7 @@
           {
             "name": "volumeId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3463,6 +3468,7 @@
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3471,6 +3477,7 @@
           {
             "name": "pageNumber",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -12236,6 +12243,10 @@
             "type": "string",
             "description": "For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -14993,7 +15004,8 @@
             "description": "Manga Reader Option: Background color of the reader"
           },
           "swipeToPaginate": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
           },
           "autoCloseMenu": {
             "type": "boolean",

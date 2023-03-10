@@ -51,6 +51,7 @@ public interface ILibraryRepository
     Task<string?> GetLibraryCoverImageAsync(int libraryId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
+    Task<IList<Library>> GetAllWithNonWebPCovers();
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -367,5 +368,12 @@ public class LibraryRepository : ILibraryRepository
         }
 
         return dict;
+    }
+
+    public async Task<IList<Library>> GetAllWithNonWebPCovers()
+    {
+        return await _context.Library
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .ToListAsync();
     }
 }

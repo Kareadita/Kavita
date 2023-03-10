@@ -103,7 +103,7 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
-            var format = Path.GetExtension(path).Replace(".", "");
+            var format = Path.GetExtension(path).Replace(".", string.Empty);
 
             return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
         }

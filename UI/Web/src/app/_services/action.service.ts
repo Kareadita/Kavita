@@ -537,12 +537,18 @@ export class ActionService implements OnDestroy {
    * @param chapters? Chapters, should have id
    * @param callback Optional callback to perform actions after API completes 
    */
-   deleteMultipleSeries(seriesIds: Array<Series>, callback?: VoidActionCallback) {
+   async deleteMultipleSeries(seriesIds: Array<Series>, callback?: BooleanActionCallback) {
+    if (!await this.confirmService.confirm('Are you sure you want to delete ' + seriesIds.length + ' series? It will not modify files on disk.')) {
+      if (callback) {
+        callback(false);
+      }
+      return;
+    }
     this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
       this.toastr.success('Series deleted');
 
       if (callback) {
-        callback();
+        callback(true);
       }
     });
   }

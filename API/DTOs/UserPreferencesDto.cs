@@ -46,10 +46,10 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public string BackgroundColor { get; set; } = "#000000";
-    [Required]
     /// <summary>
     /// Manga Reader Option: Should swiping trigger pagination
     /// </summary>
+    [Required]
     public bool SwipeToPaginate { get; set; }
     /// <summary>
     /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction

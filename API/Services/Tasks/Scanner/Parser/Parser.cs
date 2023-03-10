@@ -907,7 +907,7 @@ public static class Parser
 
     public static bool IsImage(string filePath)
     {
-        return !filePath.StartsWith(".") && ImageRegex.IsMatch(Path.GetExtension(filePath));
+        return !filePath.StartsWith('.') && ImageRegex.IsMatch(Path.GetExtension(filePath));
     }
 
     public static bool IsXml(string filePath)

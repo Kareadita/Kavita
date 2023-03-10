@@ -311,7 +311,7 @@ public class ParseScannedFiles
                 .ToList();
 
 
-            MergeLocalizedSeriesWithSeries(infos!);
+            MergeLocalizedSeriesWithSeries(infos);
 
             foreach (var info in infos)
             {

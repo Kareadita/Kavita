@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Tests.Helpers.Builders;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -117,20 +119,20 @@ public class SeriesRepositoryTests
     {
         var library = new Library()
         {
-            Name = "Manga",
+            Name = "GetFullSeriesByAnyName Manga",
             Type = LibraryType.Manga,
             Folders = new List<FolderPath>()
             {
                 new FolderPath() {Path = "C:/data/manga/"}
+            },
+            Series = new List<Series>()
+            {
+                new SeriesBuilder("The Idaten Deities Know Only Peace")
+                    .WithLocalizedName("Heion Sedai no Idaten-tachi")
+                    .WithFormat(MangaFormat.Archive)
+                    .Build()
             }
-        };
 
-        var s = DbFactory.Series("The Idaten Deities Know Only Peace", "Heion Sedai no Idaten-tachi");
-        s.Format = MangaFormat.Archive;
-
-        library.Series = new List<Series>()
-        {
-            s,
         };
 
         _unitOfWork.LibraryRepository.Add(library);
@@ -138,16 +140,18 @@ public class SeriesRepositoryTests
     }
 
 
-    // This test case isn't ready to go
-    [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, "", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
+    [Theory]
+    [InlineData("The Idaten Deities Know Only Peace", MangaFormat.Archive, "", "The Idaten Deities Know Only Peace")] // Matching on series name in DB
+    [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, "The Idaten Deities Know Only Peace", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
     [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Pdf, "", null)]
     public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
     {
         await ResetDb();
         await SetupSeriesData();
+
         var series =
             await _unitOfWork.SeriesRepository.GetFullSeriesByAnyName(seriesName, localizedName,
-                1, format);
+                2, format, false);
         if (expected == null)
         {
             Assert.Null(series);
