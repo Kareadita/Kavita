@@ -834,10 +834,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.bookService.getBookPage(this.chapterId, this.pageNum).pipe(take(1)).subscribe(content => {
-      const safeHtml = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
-      this.isSingleImagePage = this.checkSingleImagePage(safeHtml) // This needs be performed before we set this.page to avoid image jumping
+      this.isSingleImagePage = this.checkSingleImagePage(content) // This needs be performed before we set this.page to avoid image jumping
       this.updateSingleImagePageStyles()
-      this.page = safeHtml;
+      this.page = this.domSanitizer.bypassSecurityTrustHtml(content); // PERF: Potential optimization to prefetch next/prev page and store in localStorage
+
 
       this.cdRef.markForCheck();
 
@@ -912,22 +912,21 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  checkSingleImagePage(safeHtml: SafeHtml) {
+  checkSingleImagePage(content: string) {
+    // Exclude the style element from the HTML content as it messes up innerText
+    const htmlContent = content.replace(/<style>.*<\/style>/s, '');
+
     const parser = new DOMParser();
-    const doc = parser.parseFromString(safeHtml.toString(), "text/html");
-    const images = doc.querySelectorAll("img");
-    const text = doc.querySelectorAll("p");
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const html = doc.querySelector('html');
 
+    if (html?.innerText.trim() !== '') {
+      return false;
+    }
 
-    if (images.length > 1 || text.length > 1) {
-      return false
-    }
-    // A p tag could hold the image, and needs to be checked
-    if (text.length) {
-      return text[0].textContent === "";
-    } else {
-      return true;
-    }
+    const images = doc.querySelectorAll('img, svg');
+    return images.length === 1;
+
   }
 
 
