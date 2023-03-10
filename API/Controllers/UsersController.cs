@@ -38,18 +38,23 @@ public class UsersController : BaseApiController
         return BadRequest("Could not delete the user.");
     }
 
+    /// <summary>
+    /// Returns all users of this server
+    /// </summary>
+    /// <param name="includePending">This will include pending members</param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers()
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers(bool includePending = false)
     {
-        return Ok(await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync());
+        return Ok(await _unitOfWork.UserRepository.GetEmailConfirmedMemberDtosAsync(!includePending));
     }
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("pending")]
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetPendingUsers()
+    public ActionResult<IEnumerable<MemberDto>> GetPendingUsers()
     {
-        return Ok(await _unitOfWork.UserRepository.GetPendingMemberDtosAsync());
+        return Ok(_unitOfWork.UserRepository.GetPendingMemberDtosAsync());
     }
 
     [HttpGet("myself")]

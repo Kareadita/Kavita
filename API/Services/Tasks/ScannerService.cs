@@ -520,12 +520,14 @@ public class ScannerService : IScannerService
 
         var scanElapsedTime = await ScanFiles(library, libraryFolderPaths, shouldUseLibraryScan, TrackFiles, forceUpdate);
 
+        // NOTE: This runs sync after every file is scanned
         foreach (var task in processTasks)
         {
             await task();
         }
 
-        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
+        await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 

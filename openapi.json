@@ -8926,6 +8926,18 @@
         "tags": [
           "Users"
         ],
+        "summary": "Returns all users of this server",
+        "parameters": [
+          {
+            "name": "includePending",
+            "in": "query",
+            "description": "This will include pending members",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -12074,6 +12086,10 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "isPending": {
+            "type": "boolean",
+            "description": "If the member is still pending or not"
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
