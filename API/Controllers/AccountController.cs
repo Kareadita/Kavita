@@ -182,6 +182,8 @@ public class AccountController : BaseApiController
             .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
         if (user == null) return Unauthorized("Your credentials are not correct");
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized("Your account is disabled. Contact the server admin.");
 
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
