@@ -144,6 +144,7 @@ public class AccountController : BaseApiController
 
             var roleResult = await _userManager.AddToRoleAsync(user, PolicyConstants.AdminRole);
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
+            await _userManager.AddToRoleAsync(user, PolicyConstants.LoginRole);
 
             return new UserDto
             {
