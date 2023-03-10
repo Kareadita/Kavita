@@ -272,6 +272,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return BookPageLayoutMode;
   }
 
+  get WritingStyle() {
+    return WritingStyle;
+  }
   get TabID(): typeof TabID {
     return TabID;
   }
@@ -396,7 +399,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  get WritingStyle() {
+  get WritingStyleClass() {
     switch (this.writingStyle) {
         case WritingStyle.Horizontal:
           return '';
@@ -913,9 +916,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.scrollService.scrollTo(0, this.reader.nativeElement);
       } else if (this.writingStyle === WritingStyle.Vertical) {
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
-            setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement));
+            setTimeout(() => this.scrollService.scrollTo(this.bookContentElemRef.nativeElement.scrollHeight, this.bookContentElemRef.nativeElement, 'auto'));
         } else {
-            setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement));
+            setTimeout(() => this.scrollService.scrollTo(0, this.bookContentElemRef.nativeElement,'auto' ));
         }
       }
       else {
@@ -1000,7 +1003,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (currentVirtualPage > 1) {
         // -2 apparently goes back 1 virtual page...
         if (this.writingStyle === WritingStyle.Vertical) {
-          this.scrollService.scrollTo((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement, "auto");
+          this.scrollService.scrollTo((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement, 'auto');
         } else {
           this.scrollService.scrollToX((currentVirtualPage - 2) * pageWidth, this.bookContentElemRef.nativeElement);
         }
