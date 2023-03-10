@@ -866,35 +866,35 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Updates the image properties to fit the current layout mode and screen size
    */
   updateImageSizes() {
-    const isVerticalWritingStyle = this.writingStyle === WritingStyle.Vertical
-    const height = this.windowHeight - (this.topOffset * 2)
-    let maxHeight = 'unset'
-    let maxWidth = ''
+    const isVerticalWritingStyle = this.writingStyle === WritingStyle.Vertical;
+    const height = this.windowHeight - (this.topOffset * 2);
+    let maxHeight = 'unset';
+    let maxWidth = '';
     switch (this.layoutMode) {
       case BookPageLayoutMode.Default:
         if (isVerticalWritingStyle) {
-          maxHeight = `${height}px`
+          maxHeight = `${height}px`;
         } else {
-          maxWidth = `${this.getVerticalPageWidth()}px`
+          maxWidth = `${this.getVerticalPageWidth()}px`;
         }
         break
 
       case BookPageLayoutMode.Column1:
-        maxHeight = `${height}px`
-        maxWidth = `${this.getVerticalPageWidth()}px`
+        maxHeight = `${height}px`;
+        maxWidth = `${this.getVerticalPageWidth()}px`;
         break
 
       case BookPageLayoutMode.Column2:
-        maxWidth = `${this.getVerticalPageWidth()}px`
+        maxWidth = `${this.getVerticalPageWidth()}px`;
         if (isVerticalWritingStyle && !this.isSingleImagePage)  {
-          maxHeight = `${height / 2}px`
+          maxHeight = `${height / 2}px`;
         } else {
-          maxHeight = `${height}px`
+          maxHeight = `${height}px`;
         }
         break
     }
-    this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight)
-    this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth)
+    this.document.documentElement.style.setProperty('--book-reader-content-max-height', maxHeight);
+    this.document.documentElement.style.setProperty('--book-reader-content-max-width', maxWidth);
 
   }
 
