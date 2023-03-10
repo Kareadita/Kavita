@@ -348,8 +348,9 @@ public class BookmarkService : IBookmarkService
     /// <param name="filename">The file to convert</param>
     /// <param name="targetFolder">Full path to where files should be stored or any stem</param>
     /// <returns></returns>
-    private async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
+    public async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
     {
+        // This must be Public as it's used in via Hangfire as a background task
         var fullSourcePath = _directoryService.FileSystem.Path.Join(imageDirectory, filename);
         var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(filename).Name, string.Empty);
 
