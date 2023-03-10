@@ -901,10 +901,12 @@ public class OpdsController : BaseApiController
         var userId = await GetUser(apiKey);
         var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
 
-        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
+        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
+            $"{Prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
         link.LastRead = progress.PageNum;
         link.LastReadDate = progress.LastModifiedUtc;
+        link.IsPageStream = true;
         return link;
     }
 
