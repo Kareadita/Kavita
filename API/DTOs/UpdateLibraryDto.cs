@@ -24,7 +24,4 @@ public class UpdateLibraryDto
     public bool IncludeInSearch { get; init; }
     [Required]
     public bool ManageCollections { get; init; }
-    [Required]
-    public bool CollapseSeriesRelationships { get; init; }
-
 }

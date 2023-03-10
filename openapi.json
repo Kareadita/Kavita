@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.13"
+    "version": "0.7.1.16"
   },
   "servers": [
     {
@@ -9811,6 +9811,10 @@
             "type": "boolean",
             "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
           },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -11728,10 +11732,6 @@
           "manageCollections": {
             "type": "boolean",
             "description": "Should this library create and manage collections from Metadata"
-          },
-          "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
           },
           "created": {
             "type": "string",
@@ -14130,6 +14130,11 @@
             "description": "Name of the Theme",
             "nullable": true
           },
+          "normalizedName": {
+            "type": "string",
+            "description": "Normalized name for lookups",
+            "nullable": true
+          },
           "fileName": {
             "type": "string",
             "description": "File path to the content. Stored under API.Services.DirectoryService.SiteThemeDirectory.\r\nMust be a .css file",
@@ -14367,7 +14372,6 @@
       },
       "UpdateLibraryDto": {
         "required": [
-          "collapseSeriesRelationships",
           "folders",
           "folderWatching",
           "id",
@@ -14410,9 +14414,6 @@
             "type": "boolean"
           },
           "manageCollections": {
-            "type": "boolean"
-          },
-          "collapseSeriesRelationships": {
             "type": "boolean"
           }
         },
@@ -14964,6 +14965,7 @@
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
           "bookReaderWritingStyle",
+          "collapseSeriesRelationships",
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
@@ -15073,6 +15075,10 @@
           "noTransitions": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           }
         },
         "additionalProperties": false

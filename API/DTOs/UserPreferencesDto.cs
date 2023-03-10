@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
@@ -137,4 +137,9 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool NoTransitions { get; set; } = false;
+    /// <summary>
+    /// When showing series, only parent series or series with no relationships will be returned
+    /// </summary>
+    [Required]
+    public bool CollapseSeriesRelationships { get; set; } = false;
 }

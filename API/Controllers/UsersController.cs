@@ -110,6 +110,7 @@ public class UsersController : BaseApiController
         existingPreferences.PromptForDownloadSize = preferencesDto.PromptForDownloadSize;
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
+        existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

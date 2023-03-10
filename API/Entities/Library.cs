@@ -31,10 +31,6 @@ public class Library : IEntityDate
     /// Should this library create and manage collections from Metadata
     /// </summary>
     public bool ManageCollections { get; set; } = true;
-    /// <summary>
-    /// When showing series, only parent series or series with no relationships will be returned
-    /// </summary>
-    public bool CollapseSeriesRelationships { get; set; } = false;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

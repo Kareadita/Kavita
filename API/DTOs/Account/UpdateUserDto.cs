@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs.Account;
 
@@ -17,5 +18,4 @@ public record UpdateUserDto
     /// An Age Rating which will limit the account to seeing everything equal to or below said rating.
     /// </summary>
     public AgeRestrictionDto AgeRestriction { get; init; } = default!;
-
 }
