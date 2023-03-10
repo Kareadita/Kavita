@@ -121,6 +121,12 @@
     <None Remove="kavita.db" />
     <None Remove="covers\**" />
     <None Remove="wwwroot\**" />
+    <None Remove="config\cache\**" />
+    <None Remove="config\logs\**" />
+    <None Remove="config\covers\**" />
+    <None Remove="config\bookmarks\**" />
+    <None Remove="config\backups\**" />
+    <None Remove="config\temp\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -131,6 +137,12 @@
     <Compile Remove="temp\**" />
     <Compile Remove="covers\**" />
     <Compile Remove="wwwroot\**" />
+    <Compile Remove="config\cache\**" />
+    <Compile Remove="config\logs\**" />
+    <Compile Remove="config\covers\**" />
+    <Compile Remove="config\bookmarks\**" />
+    <Compile Remove="config\backups\**" />
+    <Compile Remove="config\temp\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -146,6 +158,8 @@
     <EmbeddedResource Remove="config\temp\**" />
     <EmbeddedResource Remove="config\stats\**" />
     <EmbeddedResource Remove="wwwroot\**" />
+    <EmbeddedResource Remove="config\cache\**" />
+    <EmbeddedResource Remove="config\bookmarks\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -169,6 +183,7 @@
     <Content Update="bin\$(Configuration)\$(AssemblyName).xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Remove="config\bookmarks\**" />
   </ItemGroup>
 
   <ItemGroup>

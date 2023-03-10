@@ -85,7 +85,7 @@ public static class PersonHelper
         foreach (var person in existingPeople)
         {
             var existingPerson = removeAllExcept
-                .FirstOrDefault(p => person.NormalizedName != null && p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
+                .FirstOrDefault(p => p.Role == person.Role && person.NormalizedName.Equals(p.NormalizedName));
             if (existingPerson == null)
             {
                 action?.Invoke(person);
@@ -100,8 +100,9 @@ public static class PersonHelper
     /// <param name="person"></param>
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
+        if (string.IsNullOrEmpty(person.Name)) return;
         var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == person.Name?.ToNormalized() && p.Role == person.Role);
+            p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
         if (existingPerson == null)
         {
             metadataPeople.Add(person);

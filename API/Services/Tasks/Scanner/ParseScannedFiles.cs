@@ -236,6 +236,11 @@ public class ParseScannedFiles
                         p.Key.Format == info.Format)
                     .Key;
 
+            if (existingName == null)
+            {
+                return info.Series;
+            }
+
             if (!string.IsNullOrEmpty(existingName.Name))
             {
                 return existingName.Name;
