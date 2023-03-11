@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
-using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 
-namespace API.Tests.Helpers.Builders;
+namespace API.Helpers.Builders;
 
 public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
 {
-    private SeriesMetadata _seriesMetadata;
+    private readonly SeriesMetadata _seriesMetadata;
     public SeriesMetadata Build() => _seriesMetadata;
 
     public SeriesMetadataBuilder()

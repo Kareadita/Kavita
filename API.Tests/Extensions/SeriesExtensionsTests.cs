@@ -4,7 +4,7 @@ using API.Comparators;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Tests.Helpers.Builders;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Extensions;

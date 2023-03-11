@@ -6,7 +6,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
-using API.Tests.Helpers.Builders;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Extensions;
@@ -226,40 +226,28 @@ public class QueryableExtensionsTests
     {
         var items = new List<Person>()
         {
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadata()
                 {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
+                    AgeRating = AgeRating.Teen,
+                })
+                .Build(),
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadata()
                 {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Unknown,
-                    },
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
+                    AgeRating = AgeRating.Unknown,
+                })
+                .WithSeriesMetadata(new SeriesMetadata()
                 {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.X18Plus,
-                    }
-                }
-            },
+                    AgeRating = AgeRating.Teen,
+                })
+                .Build(),
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadata()
+                {
+                    AgeRating = AgeRating.X18Plus,
+                })
+                .Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()

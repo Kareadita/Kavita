@@ -5,7 +5,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 
-namespace API.Tests.Helpers.Builders;
+namespace API.Helpers.Builders;
 
 public class SeriesBuilder : IEntityBuilder<Series>
 {

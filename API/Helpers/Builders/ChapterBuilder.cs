@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 
-namespace API.Tests.Helpers.Builders;
+namespace API.Helpers.Builders;
 
 public class ChapterBuilder : IEntityBuilder<Chapter>
 {
-    private Chapter _chapter;
+    private readonly Chapter _chapter;
     public Chapter Build() => _chapter;
 
     public ChapterBuilder(string number, string? range=null)
