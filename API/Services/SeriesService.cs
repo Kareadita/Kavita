@@ -182,7 +182,12 @@ public class SeriesService : ISeriesService
                 return true;
             }
 
-            if (await _unitOfWork.CommitAsync() && updateSeriesMetadataDto.CollectionTags != null)
+            await _unitOfWork.CommitAsync();
+
+            // Trigger code to cleanup tags, collections, people, etc
+            await _taskScheduler.CleanupDbEntries();
+
+            if (updateSeriesMetadataDto.CollectionTags != null)
             {
                 foreach (var tag in updateSeriesMetadataDto.CollectionTags)
                 {
