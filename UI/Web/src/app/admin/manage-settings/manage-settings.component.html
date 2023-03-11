@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <p class="text-warning pt-2">Changing Port requires a manual restart of Kavita to take effect.</p>
+        <p class="text-warning pt-2">Changing Port or Base Url requires a manual restart of Kavita to take effect.</p>
         <div class="mb-3">
             <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
             <ng-template #cacheDirectoryTooltip>Where the server places temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
@@ -34,9 +34,9 @@
         </div>
 
         <div class="mb-3">
-            <label for="settings-baseurl" class="form-label">Base Url (WARNING: Requires server restart)</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
-            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita (WARNING: Requires server restart)</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita (WARNING: Requires server restart)</span>
+            <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
+            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
+            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</span>
             <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
             [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
             <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">

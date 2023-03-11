@@ -9,6 +9,7 @@ namespace Kavita.Common;
 public static class Configuration
 {
     public const string DefaultIpAddresses = "0.0.0.0,::";
+    public const string DefaultBaseUrl = "/";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
@@ -211,7 +212,7 @@ public static class Configuration
     {
         if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
         {
-            return "/";
+            return DefaultBaseUrl;
         }
 
         try
@@ -223,7 +224,19 @@ public static class Configuration
             if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
             {
                 var baseUrl = tokenElement.GetString();
-                return String.IsNullOrEmpty(baseUrl) ? "/" : baseUrl;
+                if (!String.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = !baseUrl.StartsWith("/")
+                                ? $"/{baseUrl}"
+                                : baseUrl;
+
+                    baseUrl = !baseUrl.EndsWith("/")
+                                ? $"{baseUrl}/"
+                                : baseUrl;
+
+                    return baseUrl;
+                }
+                return DefaultBaseUrl;
             }
         }
         catch (Exception ex)
@@ -231,7 +244,7 @@ public static class Configuration
             Console.WriteLine("Error reading app settings: " + ex.Message);
         }
 
-        return "/";
+        return DefaultBaseUrl;
     }
 
     private static void SetBaseUrl(string filePath, string value)
@@ -241,11 +254,19 @@ public static class Configuration
             return;
         }
 
+        var baseUrl = !value.StartsWith("/")
+            ? $"/{value}"
+            : value;
+
+        baseUrl = !baseUrl.EndsWith("/")
+                    ? $"{baseUrl}/"
+                    : baseUrl;
+
         try
         {
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
-            jsonObj.BaseUrl = value;
+            jsonObj.BaseUrl = baseUrl;
             json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(filePath, json);
         }

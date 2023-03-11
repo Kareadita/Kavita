@@ -274,13 +274,7 @@ public class Startup
 
         app.UseForwardedHeaders();
 
-        var basePath = !Configuration.BaseUrl.StartsWith("/")
-            ? $"/{Configuration.BaseUrl}"
-            : Configuration.BaseUrl;
-
-        basePath = !basePath.EndsWith("/")
-                    ? $"{basePath}/"
-                    : basePath;
+        var basePath = Configuration.BaseUrl;
 
         app.UsePathBase(basePath);
         UpdateBaseUrlInIndex(basePath);
@@ -345,8 +339,6 @@ public class Startup
             endpoints.MapFallbackToController("Index", "Fallback");
         });
 
-        Console.WriteLine("Starting with base url as " + basePath);
-
         applicationLifetime.ApplicationStopping.Register(OnShutdown);
         applicationLifetime.ApplicationStarted.Register(() =>
         {
@@ -361,25 +353,19 @@ public class Startup
             }
             Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
+
+        var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
+        _logger.LogInformation("Starting with base url as {baseUrl}", basePath);
     }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)
     {
         var htmlDoc = new HtmlDocument();
-        string indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+        var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
         htmlDoc.Load(indexHtmlPath);
 
         var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
-        if (baseNode != null)
-        {
-            baseNode.SetAttributeValue("href", baseUrl);
-        }
-        else
-        {
-            var newBaseNode = htmlDoc.CreateElement("base");
-            newBaseNode.SetAttributeValue("href", baseUrl);
-            htmlDoc.DocumentNode.SelectSingleNode("/html/head").AppendChild(newBaseNode);
-        }
+        baseNode.SetAttributeValue("href", baseUrl);
         htmlDoc.Save(indexHtmlPath);
     }
 
