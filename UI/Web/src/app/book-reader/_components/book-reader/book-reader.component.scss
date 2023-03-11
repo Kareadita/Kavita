@@ -212,7 +212,6 @@ $action-bar-height: 38px;
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
         &.writing-style-vertical {
-            height: auto;
             padding: 0 10px 0 0;
             margin: 20px 0;
         }
@@ -222,10 +221,13 @@ $action-bar-height: 38px;
         height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
         &.writing-style-vertical {
-            height: auto;
             padding: 0 10px 0 0;
             margin: 20px 0;
         }
+    }
+
+    &.writing-style-vertical {
+        height: auto;
     }
 
     // &.immersive {
@@ -301,11 +303,18 @@ $action-bar-height: 38px;
 ::ng-deep .kavita-scale-width-container {
     width: auto;
     max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
+    max-width: calc(var(--book-reader-content-max-width)) !important;
+    position: var(--book-reader-content-position) !important;
+    top: var(--book-reader-content-top) !important;
+    left: var(--book-reader-content-left) !important;
+    transform: var(--book-reader-content-transform) !important;
+
 }
 
 // This is applied to images in the backend
 ::ng-deep .kavita-scale-width {
-    max-width: 100%;
+    max-height: calc(var(--book-reader-content-max-height) - ($action-bar-height)) !important;
+    max-width: calc(var(--book-reader-content-max-width)) !important;
     object-fit: contain;
     object-position: top center;
     break-inside: avoid;
