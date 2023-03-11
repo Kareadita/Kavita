@@ -508,7 +508,7 @@ public class BookService : IBookService
 
         return null;
     }
-    
+
     private static (int year, int month, int day) GetPublicationDate(string publicationDate)
     {
         var dateParsed = DateTime.TryParse(publicationDate, out var date);
@@ -571,7 +571,7 @@ public class BookService : IBookService
             }
 
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
-            return epubBook.Content.Html.Count;
+            return epubBook.GetReadingOrder().Count;
         }
         catch (Exception ex)
         {

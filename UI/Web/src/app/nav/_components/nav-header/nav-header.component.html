@@ -213,10 +213,13 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
                 </div>
                 <div class="ms-1">
                   <app-series-format [format]="item.format"></app-series-format>
-                  <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
-                  <ng-template #localizedName>
-                    <span [innerHTML]="item.localizedName"></span>
-                  </ng-template>
+                  <ng-container *ngIf="searchTerm.toLowerCase().trim() as st">
+                    <span *ngIf="item.name.toLowerCase().trim().indexOf(st) >= 0; else localizedName">{{item.name}}</span>
+                    <ng-template #localizedName>
+                      <span [innerHTML]="item.localizedName"></span>
+                    </ng-template>
+                  </ng-container>
+                  
                   <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
                 </div>
               </div>
