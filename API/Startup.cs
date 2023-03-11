@@ -19,6 +19,7 @@ using API.Services.HostedServices;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -277,6 +278,11 @@ public class Startup
 
         app.UseForwardedHeaders();
 
+        var basePath = Configuration.BaseUrl;
+
+        app.UsePathBase(basePath);
+        UpdateBaseUrlInIndex(basePath);
+
         app.UseRouting();
 
         // Ordering is important. Cors, authentication, authorization
@@ -351,6 +357,20 @@ public class Startup
             }
             Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
+
+        var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
+        _logger.LogInformation("Starting with base url as {baseUrl}", basePath);
+    }
+
+    private static void UpdateBaseUrlInIndex(string baseUrl)
+    {
+        var htmlDoc = new HtmlDocument();
+        var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+        htmlDoc.Load(indexHtmlPath);
+
+        var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
+        baseNode.SetAttributeValue("href", baseUrl);
+        htmlDoc.Save(indexHtmlPath);
     }
 
     private static void OnShutdown()

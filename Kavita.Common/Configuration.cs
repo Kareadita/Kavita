@@ -9,6 +9,7 @@ namespace Kavita.Common;
 public static class Configuration
 {
     public const string DefaultIpAddresses = "0.0.0.0,::";
+    public const string DefaultBaseUrl = "/";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
@@ -27,6 +28,12 @@ public static class Configuration
     {
         get => GetJwtToken(GetAppSettingFilename());
         set => SetJwtToken(GetAppSettingFilename(), value);
+    }
+
+    public static string BaseUrl
+    {
+        get => GetBaseUrl(GetAppSettingFilename());
+        set => SetBaseUrl(GetAppSettingFilename(), value);
     }
 
     private static string GetAppSettingFilename()
@@ -200,10 +207,81 @@ public static class Configuration
     }
     #endregion
 
+    #region BaseUrl
+    private static string GetBaseUrl(string filePath)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return DefaultBaseUrl;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "BaseUrl";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                var baseUrl = tokenElement.GetString();
+                if (!String.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = !baseUrl.StartsWith("/")
+                                ? $"/{baseUrl}"
+                                : baseUrl;
+
+                    baseUrl = !baseUrl.EndsWith("/")
+                                ? $"{baseUrl}/"
+                                : baseUrl;
+
+                    return baseUrl;
+                }
+                return DefaultBaseUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return DefaultBaseUrl;
+    }
+
+    private static void SetBaseUrl(string filePath, string value)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return;
+        }
+
+        var baseUrl = !value.StartsWith("/")
+            ? $"/{value}"
+            : value;
+
+        baseUrl = !baseUrl.EndsWith("/")
+                    ? $"{baseUrl}/"
+                    : baseUrl;
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.BaseUrl = baseUrl;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+    #endregion
+
     private class AppSettings
     {
         public string TokenKey { get; set; }
         public int Port { get; set; }
         public string IpAddresses { get; set; }
+        public string BaseUrl { get; set; }
     }
 }

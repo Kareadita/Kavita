@@ -22,6 +22,7 @@ import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mod
 import { forkJoin, Subject } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
+import { environment } from 'src/environments/environment';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -252,6 +253,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
 
   transformKeyToOpdsUrl(key: string) {
+    if (environment.production) {
+      return `${location.origin}${environment.apiUrl}opds/${key}`;
+    }
+
     return `${location.origin}/api/opds/${key}`;
   }
 
