@@ -156,6 +156,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('blurUnreadSummaries', new FormControl(this.user.preferences.blurUnreadSummaries, []));
       this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
       this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
+      this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
 
       this.cdRef.markForCheck();
     });
@@ -202,6 +203,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('noTransitions')?.setValue(this.user.preferences.noTransitions);
     this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
+    this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -234,7 +236,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       promptForDownloadSize: modelSettings.promptForDownloadSize,
       noTransitions: modelSettings.noTransitions,
       emulateBook: modelSettings.emulateBook,
-      swipeToPaginate: modelSettings.swipeToPaginate
+      swipeToPaginate: modelSettings.swipeToPaginate,
+      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

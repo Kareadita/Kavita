@@ -31,6 +31,7 @@ public interface ITaskScheduler
     Task RunStatCollection();
     void ScanSiteThemes();
     Task CovertAllCoversToWebP();
+    Task CleanupDbEntries();
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -229,6 +230,11 @@ public class TaskScheduler : ITaskScheduler
     }
 
     #endregion
+
+    public async Task CleanupDbEntries()
+    {
+        await _cleanupService.CleanupDbEntries();
+    }
 
     public void ScanLibraries()
     {

@@ -433,7 +433,7 @@ public class ProcessSeries : IProcessSeries
         var genres = chapters.SelectMany(c => c.Genres).ToList();
         GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
         {
-            if (series.Metadata.GenresLocked) return;
+            if (series.Metadata.GenresLocked) return; // NOTE: Doesn't it make sense to do the locked skip outside this loop?
             series.Metadata.Genres.Remove(genre);
         });
 

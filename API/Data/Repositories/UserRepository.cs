@@ -39,8 +39,7 @@ public interface IUserRepository
     void Add(AppUserBookmark bookmark);
     public void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
-    Task<IEnumerable<MemberDto>>  GetEmailConfirmedMemberDtosAsync();
-    Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync();
+    Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
@@ -329,10 +328,10 @@ public class UserRepository : IUserRepository
     }
 
 
-    public async Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync()
+    public async Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true)
     {
         return await _context.Users
-            .Where(u => u.EmailConfirmed)
+            .Where(u => (emailConfirmed && u.EmailConfirmed) || !emailConfirmed)
             .Include(x => x.Libraries)
             .Include(r => r.UserRoles)
             .ThenInclude(r => r.Role)
@@ -344,45 +343,8 @@ public class UserRepository : IUserRepository
                 Email = u.Email,
                 Created = u.Created,
                 LastActive = u.LastActive,
-                Roles = u.UserRoles.Select(r => r.Role.Name).ToList()!,
-                AgeRestriction = new AgeRestrictionDto()
-                {
-                    AgeRating = u.AgeRestriction,
-                    IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
-                },
-                Libraries =  u.Libraries.Select(l => new LibraryDto
-                {
-                    Name = l.Name,
-                    Type = l.Type,
-                    LastScanned = l.LastScanned,
-                    Folders = l.Folders.Select(x => x.Path).ToList()
-                }).ToList()
-            })
-            .AsSplitQuery()
-            .AsNoTracking()
-            .ToListAsync();
-    }
-
-    /// <summary>
-    /// Returns a list of users that are considered Pending by invite. This means email is unconfirmed and they have never logged in
-    /// </summary>
-    /// <returns></returns>
-    public async Task<IEnumerable<MemberDto>> GetPendingMemberDtosAsync()
-    {
-        return await _context.Users
-            .Where(u => !u.EmailConfirmed && u.LastActive == DateTime.MinValue)
-            .Include(x => x.Libraries)
-            .Include(r => r.UserRoles)
-            .ThenInclude(r => r.Role)
-            .OrderBy(u => u.UserName)
-            .Select(u => new MemberDto
-            {
-                Id = u.Id,
-                Username = u.UserName,
-                Email = u.Email,
-                Created = u.Created,
-                LastActive = u.LastActive,
-                Roles = u.UserRoles.Select(r => r.Role.Name).ToList()!,
+                Roles = u.UserRoles.Select(r => r.Role.Name).ToList(),
+                IsPending = !u.EmailConfirmed,
                 AgeRestriction = new AgeRestrictionDto()
                 {
                     AgeRating = u.AgeRestriction,

@@ -245,6 +245,17 @@ public class ArchiveServiceTests
     }
 
     [Fact]
+    public void ShouldHaveComicInfo_CanParseUmlaut()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");
+        var archive = Path.Join(testDirectory, "Umlaut.zip");
+
+        var comicInfo = _archiveService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("Belladonna", comicInfo.Series);
+    }
+
+    [Fact]
     public void ShouldHaveComicInfo_WithAuthors()
     {
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/ComicInfos");

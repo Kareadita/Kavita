@@ -3,7 +3,7 @@ using System.Linq;
 using API.Data;
 using API.Entities;
 
-namespace API.Tests.Helpers.Builders;
+namespace API.Helpers.Builders;
 
 public class VolumeBuilder : IEntityBuilder<Volume>
 {

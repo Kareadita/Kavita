@@ -53,8 +53,15 @@ export class RoleSelectorComponent implements OnInit {
           foundRole[0].selected = true;
         }
       });
-      this.cdRef.markForCheck();
+    } else {
+      // For new users, preselect LoginRole
+      this.selectedRoles.forEach(role => {
+        if (role.data == 'Login') {
+          role.selected = true;
+        }
+      });
     }
+    this.cdRef.markForCheck();
   }
 
   handleModelUpdate() {

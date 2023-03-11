@@ -52,6 +52,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
 
+
     /// <inheritdoc />
     [ConcurrencyCheck]
     public uint RowVersion { get; private set; }

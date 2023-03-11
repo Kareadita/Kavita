@@ -77,6 +77,19 @@
                                         </div>
                                     </div>
 
+                                    <div class="row g-0">
+                                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                                            <div class="mb-3 mt-1">
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" id="collapse-relationships" role="switch" formControlName="collapseSeriesRelationships" aria-describedby="settings-collapse-relationships-help" class="form-check-input" aria-labelledby="auto-close-label">
+                                                    <label class="form-check-label" for="collapse-relationships">Collapse Series Relationships</label>
+                                                </div>
+                                            </div>
+                                            <ng-template #noTransitionsTooltip>Experiemental: Should Kavita show Series that have no relationships or is the parent/prequel</ng-template>
+                                            <span class="visually-hidden" id="settings-collapse-relationships-help">Experiemental: Should Kavita show Series that have no relationships or is the parent/prequel</span>
+                                        </div>
+                                    </div>
+
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
                                         <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()" aria-describedby="reading-panel">Reset</button>
                                         <button type="submit" class="flex-fill btn btn-primary" (click)="save()" aria-describedby="reading-panel" [disabled]="!settingsForm.dirty">Save</button>

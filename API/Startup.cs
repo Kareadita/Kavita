@@ -214,6 +214,7 @@ public class Startup
 
 
                     logger.LogInformation("Running Migrations");
+
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
@@ -234,6 +235,9 @@ public class Startup
 
                     // v0.7
                     await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
+
+                    // v0.7.2
+                    await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

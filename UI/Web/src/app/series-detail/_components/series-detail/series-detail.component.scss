@@ -53,3 +53,7 @@
 .info-container {
   align-items: flex-start;
 }
+
+::ng-deep .progress {
+  border-radius: 0px;
+}

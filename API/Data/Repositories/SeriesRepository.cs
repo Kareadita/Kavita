@@ -770,9 +770,9 @@ public class SeriesRepository : ISeriesRepository
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
-        var onlyParentSeries = await _context.Library.AsNoTracking()
-            .Where(l => filter.Libraries.Contains(l.Id))
-            .AllAsync(l => l.CollapseSeriesRelationships);
+        var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
+            .Select(u => u.CollapseSeriesRelationships)
+            .SingleOrDefaultAsync();
 
         var formats = ExtractFilters(libraryId, userId, filter, ref userLibraries,
             out var allPeopleIds, out var hasPeopleFilter, out var hasGenresFilter,

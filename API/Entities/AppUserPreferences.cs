@@ -119,6 +119,10 @@ public class AppUserPreferences
     /// UI Site Global Setting: Should Kavita disable CSS transitions
     /// </summary>
     public bool NoTransitions { get; set; } = false;
+    /// <summary>
+    /// UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned
+    /// </summary>
+    public bool CollapseSeriesRelationships { get; set; } = false;
 
     public AppUser AppUser { get; set; } = null!;
     public int AppUserId { get; set; }
