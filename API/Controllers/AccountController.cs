@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
@@ -605,19 +606,14 @@ public class AccountController : BaseApiController
             var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
-                try
+                // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
+                BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                 {
-                    await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-                    {
-                        EmailAddress = dto.Email,
-                        InvitingUser = adminUser.UserName!,
-                        ServerConfirmationLink = emailLink
-                    });
-                }
-                catch (Exception)
-                {
-                    /* Swallow exception */
-                }
+                    EmailAddress = dto.Email,
+                    InvitingUser = adminUser.UserName!,
+                    ServerConfirmationLink = emailLink
+                }));
+
             }
 
             return Ok(new InviteUserResponse
