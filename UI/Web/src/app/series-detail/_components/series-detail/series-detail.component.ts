@@ -654,14 +654,14 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     });
   }
 
-  read() {
+  read(incognitoMode: boolean = false) {
     if (this.currentlyReadingChapter !== undefined) {
-      this.openChapter(this.currentlyReadingChapter);
+      this.openChapter(this.currentlyReadingChapter, incognitoMode);
       return;
     }
 
     this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
-      this.openChapter(chapter);
+      this.openChapter(chapter, incognitoMode);
     });
   }
 
