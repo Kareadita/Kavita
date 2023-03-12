@@ -8,13 +8,13 @@ namespace API.Entities.Enums;
 public enum WritingStyle
 {
     /// <summary>
-    /// Vertical writing style for the book-reader
-    /// </summary>
-    [Description ("Vertical")]
-    Vertical = 0,
-    /// <summary>
     /// Horizontal writing style for the book-reader
     /// </summary>
     [Description ("Horizontal")]
-    Horizontal = 1
+    Horizontal = 0,
+    /// <summary>
+    /// Vertical writing style for the book-reader
+    /// </summary>
+    [Description ("Vertical")]
+    Vertical = 1
 }

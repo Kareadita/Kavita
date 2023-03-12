@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
@@ -86,10 +87,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.BackgroundColor)
             .HasDefaultValue("#000000");
-
         builder.Entity<AppUserPreferences>()
             .Property(b => b.GlobalPageLayoutMode)
             .HasDefaultValue(PageLayoutMode.Cards);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.BookReaderWritingStyle)
+            .HasDefaultValue(WritingStyle.Horizontal);
 
 
         builder.Entity<Library>()
