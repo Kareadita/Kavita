@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
 
-internal abstract class GithubReleaseMetadata
+internal class GithubReleaseMetadata
 {
     /// <summary>
     /// Name of the Tag
