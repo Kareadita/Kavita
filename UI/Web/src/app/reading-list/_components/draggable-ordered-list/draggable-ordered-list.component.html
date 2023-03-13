@@ -1,7 +1,7 @@
 <ng-container>
 
     <ng-container *ngIf="items.length > 100; else dragList">
-        <virtual-scroller #scroll [items]="items" [bufferAmount]="20" [parentScroll]="parentScroll">
+        <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
             <div class="example-list list-group-flush">   
                 <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
                     <div class="d-flex list-container">

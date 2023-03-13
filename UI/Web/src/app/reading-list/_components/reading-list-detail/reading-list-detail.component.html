@@ -104,7 +104,7 @@
 
   <div class="row mb-3">
     <ng-container *ngIf="characters$ | async as characters">
-      <div class="row g-0" *ngIf="characters && characters.length > 0">
+      <div class="row" *ngIf="characters && characters.length > 0">
         <h5>Characters</h5>
         <app-badge-expander [items]="characters">
           <ng-template #badgeExpanderItem let-item let-position="idx">
@@ -115,7 +115,7 @@
     </ng-container>
   </div>
 
-  <div class="row mb-3" #scrollingBlock>
+  <div class="row mb-3 scroll-container" #scrollingBlock>
     <div class="mx-auto" style="width: 200px;">
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
@@ -124,7 +124,7 @@
     </div>
 
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-       [showRemoveButton]="false" [parentScroll]="scrollingBlock">
+       [showRemoveButton]="false">
         <ng-template #draggableItem let-item let-position="idx">
           <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>

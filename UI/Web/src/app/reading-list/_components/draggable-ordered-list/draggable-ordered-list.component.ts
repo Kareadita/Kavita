@@ -36,6 +36,10 @@ export class DraggableOrderedListComponent {
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
+  get BufferAmount() {
+    return Math.min(this.items.length / 20, 20);
+  }
+
   constructor(private readonly cdRef: ChangeDetectorRef) { }
 
   drop(event: CdkDragDrop<string[]>) {

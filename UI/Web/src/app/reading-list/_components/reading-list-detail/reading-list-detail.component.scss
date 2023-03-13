@@ -22,3 +22,22 @@
 .reading-list-years {
     color: var(--input-placeholder-color);
 }
+
+.scroll-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: calc((var(--vh) *100) - 173px);
+    margin-bottom: 10px;
+  
+    &.empty {
+        height: auto;
+    }
+  }
+
+// .scroll-container {
+//     // Height set dynamically by  get ScrollingBlockHeight()
+//     overflow-y: auto;
+//     position: relative;
+//     overscroll-behavior-y: none;
+//   }
