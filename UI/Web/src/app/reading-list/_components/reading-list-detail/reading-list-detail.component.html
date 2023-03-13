@@ -83,6 +83,20 @@
           </div>
         </div>
       </div>
+      <div class="row g-0 mt-2" *ngIf="readingList.startingYear !== 0">
+        <h4 class="reading-list-years">
+          <ng-container *ngIf="readingList.startingMonth > 0">{{readingList.startingMonth | date:'MMM'}}</ng-container>
+          <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
+          <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
+          - 
+          <ng-container *ngIf="readingList.endingYear > 0">
+            <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
+            <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
+            <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
+          </ng-container>
+          
+        </h4>
+      </div>
       <!-- Summary row-->
       <div class="row g-0 mt-2">
         <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
