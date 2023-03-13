@@ -46,6 +46,7 @@ public interface IReadingListRepository
     Task<bool> ReadingListExists(string name);
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
     Task<IList<ReadingList>> GetAllWithNonWebPCovers();
+    Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -111,6 +112,23 @@ public class ReadingListRepository : IReadingListRepository
     {
         return await _context.ReadingList
             .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// If less than 4 images exist, will return nothing back. Will not be full paths, but just cover image filenames
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public async Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId)
+    {
+        return await _context.ReadingListItem
+            .Where(ri => ri.ReadingListId == readingListId)
+            .Include(ri => ri.Chapter)
+            .Where(ri => ri.Chapter.CoverImage != null)
+            .Select(ri => ri.Chapter.CoverImage)
+            .Take(4)
             .ToListAsync();
     }
 

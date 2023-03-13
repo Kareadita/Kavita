@@ -88,7 +88,7 @@
           <ng-container *ngIf="readingList.startingMonth > 0">{{readingList.startingMonth | date:'MMM'}}</ng-container>
           <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
           <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
-          - 
+          — 
           <ng-container *ngIf="readingList.endingYear > 0">
             <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
             <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
@@ -121,7 +121,7 @@
     </ng-container>
   </div>
 
-  <div class="row mb-3" cdkScrollable>
+  <div class="row mb-3" #scrollingBlock>
     <div class="mx-auto" style="width: 200px;">
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
@@ -129,8 +129,8 @@
       <app-loading [loading]="isLoading"></app-loading>
     </div>
 
-    <!-- TODO: This needs virtualization -->
-    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode" [showRemoveButton]="false">
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
+       [showRemoveButton]="false" [parentScroll]="scrollingBlock">
         <ng-template #draggableItem let-item let-position="idx">
           <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>

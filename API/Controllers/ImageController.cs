@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -118,7 +119,23 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId)
     {
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+        {
+
+            // var coverImages = (await _unitOfWork.ReadingListRepository.GetFirstFourCoverImagesByReadingListId(readingListId)).ToList();
+            // if (coverImages.Count < 4) return BadRequest($"No cover image");
+            // var fullImages = coverImages
+            //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
+            //
+            // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
+            // // TODO: webp
+            // if (!string.IsNullOrEmpty(combinedFile))
+            // {
+            //     return PhysicalFile(combinedFile, "image/" + "png", _directoryService.FileSystem.Path.GetFileName(combinedFile));
+            // }
+
+            return BadRequest($"No cover image");
+        }
         var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));

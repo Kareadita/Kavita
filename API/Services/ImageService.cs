@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -218,4 +219,23 @@ public class ImageService : IImageService
     }
 
 
+    public static string CreateMergedImage(List<string> coverImages, string dest)
+    {
+        // TODO: Needs testing
+        // Currently this doesn't work due to non-standard cover image sizes and dimensions
+        var image = Image.Black(320*4, 160*4);
+
+        for (var i = 0; i < coverImages.Count; i++)
+        {
+            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
+
+            var x = (i % 2) * (image.Width / 2);
+            var y = (i / 2) * (image.Height / 2);
+
+            image = image.Insert(tile, x, y);
+        }
+
+        image.WriteToFile(dest);
+        return dest;
+    }
 }

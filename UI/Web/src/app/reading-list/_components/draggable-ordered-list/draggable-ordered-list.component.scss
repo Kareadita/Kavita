@@ -9,7 +9,6 @@
   
 .example-box {
   margin: 5px 0;
-  //border-bottom: solid 1px #ccc;
   display: flex;
   flex-direction: row;
   box-sizing: border-box;
@@ -58,4 +57,14 @@
   padding: 10px;
   border-radius: 5px;
   width: 100%;
+}
+
+
+.virtual-scroller, virtual-scroller {
+  width: 100%;
+  height: calc(var(--vh) * 100 - 173px);
+}
+
+virtual-scroller.empty {
+    display: none;
 }

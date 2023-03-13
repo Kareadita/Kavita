@@ -39,58 +39,52 @@
 
                     <div class="row g-0 mb-3">
                         <div class="col-md-6 col-sm-12">
-                            <h6>Starting</h6>
-                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingMonth') as formControl">
+                            <h6 id="starting-year-header">Starting</h6>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingMonth') as formControl" style="width: 90%">
                                 <label for="start-month" class="form-label">Month</label>
-                                <input id="start-month" class="form-control" formControlName="startingMonth" type="number" [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                <input id="start-month" class="form-control" formControlName="startingMonth" 
+                                type="number" [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                                aria-describedby="starting-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                                    <div *ngIf="formControl.errors?.required">
-                                        This field is required
-                                    </div>
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12
+                                        Must be between 1 and 12 or blank
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingYear') as formControl">
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingYear') as formControl" style="width: 90%">
                                 <label for="start-year" class="form-label">Year</label>
                                 <input id="start-year" class="form-control" formControlName="startingYear" type="number" 
-                                [class.is-invalid]="formControl.invalid && formControl.touched">
+                                [class.is-invalid]="formControl.invalid && formControl.touched"
+                                aria-describedby="starting-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                                    <div *ngIf="formControl.errors?.required">
-                                        This field is required
-                                    </div>
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12
+                                        Must be between 1 and 12 or blank
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6 col-sm-12">
-                            <h6>Ending</h6>
-                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingMonth') as formControl">
+                            <h6 id="ending-year-heading">Ending</h6>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingMonth') as formControl" style="width: 90%">
                                 <label for="library-name" class="form-label">Month</label>
-                                <input id="library-name" class="form-control" formControlName="endingMonth" type="number" [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                <input id="library-name" class="form-control" formControlName="endingMonth" type="number"
+                                 [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                                 aria-describedby="ending-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                                    <div *ngIf="formControl?.errors?.required">
-                                        This field is required
-                                    </div>
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12
+                                        Must be between 1 and 12 or blank
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingYear') as formControl">
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingYear') as formControl" style="width: 90%">
                                 <label for="library-name" class="form-label">Year</label>
                                 <input id="library-name" class="form-control" formControlName="endingYear" type="number" 
-                                [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                                aria-describedby="ending-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
-                                    <div *ngIf="formControl?.errors?.required">
-                                        This field is required
-                                    </div>
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12
+                                        Must be between 1 and 12 or blank
                                     </div>
                                 </div>
                             </div>
