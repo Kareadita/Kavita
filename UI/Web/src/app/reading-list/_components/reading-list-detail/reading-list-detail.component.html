@@ -1,8 +1,6 @@
 <app-side-nav-companion-bar [hasExtras]="readingList !== undefined" [extraDrawer]="extrasDrawer">
   <h2 title>
-    <span *ngIf="actions.length > 0">
-      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title"></app-card-actionables>
-    </span>
+    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
     {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
@@ -36,7 +34,7 @@
     </div>
 </ng-template>
 </app-side-nav-companion-bar>
-<div class="container-fluid mt-2" *ngIf="readingList">
+<div class="container-fluid mt-2" *ngIf="readingList" >
 
   <div class="row mb-3">
     <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="readingList.coverImage !== '' && readingList.coverImage !== undefined && readingList.coverImage !== null">
@@ -107,16 +105,12 @@
   <div class="row mb-3">
     <ng-container *ngIf="characters$ | async as characters">
       <div class="row g-0" *ngIf="characters && characters.length > 0">
-        <div class="col-md-4">
-            <h5>Characters</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="characters">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                  <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-                </ng-template>  
-            </app-badge-expander>
-        </div>
+        <h5>Characters</h5>
+        <app-badge-expander [items]="characters">
+          <ng-template #badgeExpanderItem let-item let-position="idx">
+            <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+          </ng-template>  
+      </app-badge-expander>
       </div>
     </ng-container>
   </div>
@@ -132,7 +126,7 @@
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
        [showRemoveButton]="false" [parentScroll]="scrollingBlock">
         <ng-template #draggableItem let-item let-position="idx">
-          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>
