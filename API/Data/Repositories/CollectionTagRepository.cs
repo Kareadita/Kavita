@@ -6,6 +6,7 @@ using API.Data.Misc;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;

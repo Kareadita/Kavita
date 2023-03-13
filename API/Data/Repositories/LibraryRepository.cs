@@ -10,6 +10,7 @@ using API.DTOs.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.Common.Extensions;

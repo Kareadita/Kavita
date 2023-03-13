@@ -39,14 +39,22 @@ public class ReadingList : IEntityDate
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
-    // /// <summary>
-    // /// Minimum Year and Month the Reading List starts
-    // /// </summary>
-    // public DateOnly StartingYear { get; set; }
-    // /// <summary>
-    // ///  Maximum Year and Month the Reading List starts
-    // /// </summary>
-    // public DateOnly EndingYear { get; set; }
+    /// <summary>
+    /// Minimum Year the Reading List starts
+    /// </summary>
+    public int StartingYear { get; set; }
+    /// <summary>
+    /// Minimum Month the Reading List starts
+    /// </summary>
+    public int StartingMonth { get; set; }
+    /// <summary>
+    /// Maximum Year the Reading List starts
+    /// </summary>
+    public int EndingYear { get; set; }
+    /// <summary>
+    /// Maximum Month the Reading List starts
+    /// </summary>
+    public int EndingMonth { get; set; }
 
     // Relationships
     public int AppUserId { get; set; }

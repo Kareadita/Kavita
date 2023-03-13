@@ -9,6 +9,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;

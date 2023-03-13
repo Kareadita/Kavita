@@ -6,7 +6,7 @@
     {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
-  <h6 subtitle class="subtitle-with-actionables">{{items.length}} Items</h6>
+  <h6 subtitle class="subtitle-with-actionables">{{items.length | number}} Items</h6>
 
   <ng-template #extrasDrawer let-offcanvas>
     <div style="margin-top: 56px" *ngIf="readingList">

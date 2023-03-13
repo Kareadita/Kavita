@@ -12383,6 +12383,26 @@
             "type": "string",
             "format": "date-time"
           },
+          "startingYear": {
+            "type": "integer",
+            "description": "Minimum Year the Reading List starts",
+            "format": "int32"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "description": "Minimum Month the Reading List starts",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "description": "Maximum Year the Reading List starts",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "description": "Maximum Month the Reading List starts",
+            "format": "int32"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -12420,6 +12440,20 @@
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
             "nullable": true
+          },
+          "startYear": {
+            "type": "string",
+            "description": "Minimum Year and Month the Reading List starts",
+            "format": "date"
+          },
+          "startMonth": {
+            "type": "string",
+            "format": "date"
+          },
+          "endYear": {
+            "type": "string",
+            "description": "Maximum Year and Month the Reading List starts",
+            "format": "date"
           }
         },
         "additionalProperties": false

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -6,6 +7,7 @@ using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using API.Helpers;
 using API.Services;
 using AutoMapper;
@@ -15,10 +17,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
+[Flags]
+public enum ReadingListIncludes
+{
+    None = 1,
+    Items = 2,
+    ItemChapter = 4,
+}
+
 public interface IReadingListRepository
 {
     Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams);
-    Task<ReadingList?> GetReadingListByIdAsync(int readingListId);
+    Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
     Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
@@ -34,7 +44,6 @@ public interface IReadingListRepository
     Task<string?> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
-    Task<List<ReadingList>> GetAllReadingListsAsync();
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
     Task<IList<ReadingList>> GetAllWithNonWebPCovers();
 }
@@ -86,15 +95,6 @@ public class ReadingListRepository : IReadingListRepository
         var normalized = name.ToNormalized();
         return await _context.ReadingList
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
-    }
-
-    public async Task<List<ReadingList>> GetAllReadingListsAsync()
-    {
-        return await _context.ReadingList
-            .Include(r => r.Items.OrderBy(i => i.Order))
-            .AsSplitQuery()
-            .OrderBy(l => l.Title)
-            .ToListAsync();
     }
 
     public IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId)
@@ -151,10 +151,11 @@ public class ReadingListRepository : IReadingListRepository
         return await query.ToListAsync();
     }
 
-    public async Task<ReadingList?> GetReadingListByIdAsync(int readingListId)
+    public async Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None)
     {
         return await _context.ReadingList
             .Where(r => r.Id == readingListId)
+            .Includes(includes)
             .Include(r => r.Items.OrderBy(item => item.Order))
             .AsSplitQuery()
             .SingleOrDefaultAsync();

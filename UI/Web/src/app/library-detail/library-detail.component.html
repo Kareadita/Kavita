@@ -40,6 +40,6 @@
         </ul>
     </div>
 </app-side-nav-companion-bar>
-<h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{pagination.totalItems}} Series</h6>
+<h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{pagination.totalItems | number}} Series</h6>
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 <div [ngbNavOutlet]="nav"></div>

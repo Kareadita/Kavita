@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,6 +32,7 @@ public interface IReadingListService
 
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
+    Task CalculateStartAndEndDates(ReadingList readingListWithItems);
 }
 
 /// <summary>
@@ -182,6 +184,7 @@ public class ReadingListService : IReadingListService
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
             if (readingList == null) return true;
             await CalculateReadingListAgeRating(readingList);
+            await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
 
@@ -239,6 +242,7 @@ public class ReadingListService : IReadingListService
         }
 
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
 
@@ -252,6 +256,34 @@ public class ReadingListService : IReadingListService
     public async Task CalculateReadingListAgeRating(ReadingList readingList)
     {
         await CalculateReadingListAgeRating(readingList, readingList.Items.Select(i => i.SeriesId));
+    }
+
+    /// <summary>
+    /// Calculates the Start month/year and Ending month/year
+    /// </summary>
+    /// <param name="readingListWithItems">Reading list should have all items</param>
+    public async Task CalculateStartAndEndDates(ReadingList readingListWithItems)
+    {
+        var items = readingListWithItems.Items;
+        if (readingListWithItems.Items.All(i => i.Chapter == null))
+        {
+            items =
+                (await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListWithItems.Id, ReadingListIncludes.ItemChapter))?.Items;
+        }
+        if (items == null || items.Count == 0) return;
+
+        var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
+        if (maxReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.EndingMonth = maxReleaseDate.Month;
+            readingListWithItems.EndingYear = maxReleaseDate.Year;
+        }
+        if (minReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.StartingMonth = minReleaseDate.Month;
+            readingListWithItems.StartingYear = minReleaseDate.Year;
+        }
     }
 
     /// <summary>
@@ -522,6 +554,14 @@ public class ReadingListService : IReadingListService
         if (dryRun) return importSummary;
 
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
+
+        // For CBL Import only we override pre-calculated dates
+        if (cblReading.StartMonth > 0) readingList.StartingMonth = cblReading.StartMonth;
+        if (cblReading.StartYear > 1000) readingList.StartingYear = cblReading.StartYear;
+        if (cblReading.EndMonth > 0) readingList.EndingMonth = cblReading.EndMonth;
+        if (cblReading.EndYear > 1000) readingList.EndingYear = cblReading.EndYear;
+
         if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
         {
             readingList.Summary = readingList.Summary?.Trim();

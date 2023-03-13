@@ -8,6 +8,7 @@ using API.DTOs.Statistics;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
