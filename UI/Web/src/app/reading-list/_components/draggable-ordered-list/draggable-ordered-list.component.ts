@@ -1,5 +1,5 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 
 export interface IndexUpdateEvent {
@@ -31,11 +31,10 @@ export class DraggableOrderedListComponent {
    * Parent scroll for virtualize pagination
    */
   @Input() parentScroll!: Element | Window;
+  @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
-
-  trackBy = (index: number, item: any) => `${index}_${item.id}_${item.order}_${item.pagesRead}`;
 
   constructor(private readonly cdRef: ChangeDetectorRef) { }
 
