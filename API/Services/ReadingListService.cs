@@ -11,6 +11,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -143,6 +144,25 @@ public class ReadingListService : IReadingListService
         readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
+
+
+        if (NumberHelper.IsValidMonth(dto.StartingMonth))
+        {
+            readingList.StartingMonth = dto.StartingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.StartingYear))
+        {
+            readingList.StartingYear = dto.StartingYear;
+        }
+        if (NumberHelper.IsValidMonth(dto.EndingMonth))
+        {
+            readingList.EndingMonth = dto.EndingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.EndingYear))
+        {
+            readingList.EndingYear = dto.EndingYear;
+        }
+
 
         if (!dto.CoverImageLocked)
         {
@@ -557,10 +577,10 @@ public class ReadingListService : IReadingListService
         await CalculateStartAndEndDates(readingList);
 
         // For CBL Import only we override pre-calculated dates
-        if (cblReading.StartMonth > 0) readingList.StartingMonth = cblReading.StartMonth;
-        if (cblReading.StartYear > 1000) readingList.StartingYear = cblReading.StartYear;
-        if (cblReading.EndMonth > 0) readingList.EndingMonth = cblReading.EndMonth;
-        if (cblReading.EndYear > 1000) readingList.EndingYear = cblReading.EndYear;
+        if (NumberHelper.IsValidMonth(cblReading.StartMonth)) readingList.StartingMonth = cblReading.StartMonth;
+        if (NumberHelper.IsValidYear(cblReading.StartYear)) readingList.StartingYear = cblReading.StartYear;
+        if (NumberHelper.IsValidMonth(cblReading.EndMonth)) readingList.EndingMonth = cblReading.EndMonth;
+        if (NumberHelper.IsValidYear(cblReading.EndYear)) readingList.EndingYear = cblReading.EndYear;
 
         if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
         {

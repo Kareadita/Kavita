@@ -36,6 +36,66 @@
                             </div>
                         </ng-container>
                     </div>
+
+                    <div class="row g-0 mb-3">
+                        <div class="col-md-6 col-sm-12">
+                            <h6>Starting</h6>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingMonth') as formControl">
+                                <label for="start-month" class="form-label">Month</label>
+                                <input id="start-month" class="form-control" formControlName="startingMonth" type="number" [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                    <div *ngIf="formControl.errors?.required">
+                                        This field is required
+                                    </div>
+                                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
+                                        Must be between 1 and 12
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingYear') as formControl">
+                                <label for="start-year" class="form-label">Year</label>
+                                <input id="start-year" class="form-control" formControlName="startingYear" type="number" 
+                                [class.is-invalid]="formControl.invalid && formControl.touched">
+                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                    <div *ngIf="formControl.errors?.required">
+                                        This field is required
+                                    </div>
+                                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
+                                        Must be between 1 and 12
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-sm-12">
+                            <h6>Ending</h6>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingMonth') as formControl">
+                                <label for="library-name" class="form-label">Month</label>
+                                <input id="library-name" class="form-control" formControlName="endingMonth" type="number" [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                    <div *ngIf="formControl?.errors?.required">
+                                        This field is required
+                                    </div>
+                                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
+                                        Must be between 1 and 12
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingYear') as formControl">
+                                <label for="library-name" class="form-label">Year</label>
+                                <input id="library-name" class="form-control" formControlName="endingYear" type="number" 
+                                [class.is-invalid]="formControl?.invalid && formControl?.touched">
+                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                    <div *ngIf="formControl?.errors?.required">
+                                        This field is required
+                                    </div>
+                                    <div *ngIf="formControl.errors?.min || formControl.errors?.max">
+                                        Must be between 1 and 12
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
     
                     <div class="row g-0 mb-3">
                         <label for="summary" class="form-label">Summary</label>

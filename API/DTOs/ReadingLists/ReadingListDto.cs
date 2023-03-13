@@ -17,13 +17,20 @@ public class ReadingListDto
     /// </summary>
     public string CoverImage { get; set; } = string.Empty;
     /// <summary>
-    /// Minimum Year and Month the Reading List starts
+    /// Minimum Year the Reading List starts
     /// </summary>
-    public DateOnly StartYear { get; set; }
-    public DateOnly StartMonth { get; set; }
+    public int StartingYear { get; set; }
     /// <summary>
-    /// Maximum Year and Month the Reading List starts
+    /// Minimum Month the Reading List starts
     /// </summary>
-    public DateOnly EndYear { get; set; }
+    public int StartingMonth { get; set; }
+    /// <summary>
+    /// Maximum Year the Reading List starts
+    /// </summary>
+    public int EndingYear { get; set; }
+    /// <summary>
+    /// Maximum Month the Reading List starts
+    /// </summary>
+    public int EndingMonth { get; set; }
 
 }

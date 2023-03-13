@@ -14614,6 +14614,22 @@
           },
           "coverImageLocked": {
             "type": "boolean"
+          },
+          "startMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
