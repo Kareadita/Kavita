@@ -1,9 +1,5 @@
 .content-container {
     width: 100%;
-    // These properties are for non-virtualized scroll
-    // max-height: 140px;
-    // height: 140px;
-    
 }
 
 .non-virtualized-container {
@@ -33,11 +29,4 @@
     &.empty {
         height: auto;
     }
-  }
-
-// .scroll-container {
-//     // Height set dynamically by  get ScrollingBlockHeight()
-//     overflow-y: auto;
-//     position: relative;
-//     overscroll-behavior-y: none;
-//   }
+}
