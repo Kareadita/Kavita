@@ -13,6 +13,8 @@
   flex-direction: row;
   box-sizing: border-box;
   font-size: 14px;
+  max-height: 140px;
+  height: 140px;
 
   .drag-handle {
     cursor: move;

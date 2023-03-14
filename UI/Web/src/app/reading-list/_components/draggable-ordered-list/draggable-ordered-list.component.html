@@ -1,28 +1,28 @@
 <ng-container>
 
     <ng-container *ngIf="items.length > 100; else dragList">
-        <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
             <div class="example-list list-group-flush">   
-                <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
-                    <div class="d-flex list-container">
-                        <div class="me-3 align-middle">
-                            <div style="padding-top: 40px">
-                                <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
-                                <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
-                                (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
+                <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
+                    <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
+                        <div class="d-flex list-container">
+                            <div class="me-3 align-middle">
+                                <div style="padding-top: 40px">
+                                    <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
+                                    <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
+                                    (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
+                                </div>
                             </div>
+                    
+                            <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+            
+                            <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                                <span class="visually-hidden" attr.aria-labelledby="item.id--{{i}}">Remove item</span>
+                            </button>
                         </div>
-                
-                        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-        
-                        <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton">
-                            <i class="fa fa-times" aria-hidden="true"></i>
-                            <span class="visually-hidden" attr.aria-labelledby="item.id--{{i}}">Remove item</span>
-                        </button>
                     </div>
-                </div>
+                </virtual-scroller>
             </div>
-        </virtual-scroller>
     </ng-container>
     <ng-template #dragList>
         <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">   
