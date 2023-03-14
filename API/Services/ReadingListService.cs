@@ -293,6 +293,11 @@ public class ReadingListService : IReadingListService
         }
         if (items == null || items.Count == 0) return;
 
+        if (items.First().Chapter == null)
+        {
+            _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
+            return;
+        }
         var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
         var minReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
         if (maxReleaseDate != DateTime.MinValue)

@@ -15,7 +15,12 @@ public static class RestrictByAgeExtensions
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
         var q = queryable.Where(s => s.Metadata.AgeRating <= restriction.AgeRating);
 
-        q.WhereIf(!restriction.IncludeUnknowns, s => s.Metadata.AgeRating != AgeRating.Unknown);
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(s => s.Metadata.AgeRating != AgeRating.Unknown);
+        }
+
+        //q.WhereIf(!restriction.IncludeUnknowns, s => s.Metadata.AgeRating != AgeRating.Unknown);
 
         return q;
     }
