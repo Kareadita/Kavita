@@ -8,6 +8,7 @@ using API.DTOs.Statistics;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -340,29 +341,26 @@ public class StatisticService : IStatisticService
             .Join(_context.Volume, x => x.chapter.VolumeId, volume => volume.Id,
                 (x, volume) => new {x.appUserProgresses, x.chapter, volume})
             .Join(_context.Series, x => x.appUserProgresses.SeriesId, series => series.Id,
-                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series});
+                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series})
+            .WhereIf(userId > 0, x => x.appUserProgresses.AppUserId == userId)
+            .WhereIf(days > 0, x => x.appUserProgresses.LastModified >= DateTime.Now.AddDays(days * -1));
 
-        if (userId > 0)
-        {
-            query = query.Where(x => x.appUserProgresses.AppUserId == userId);
-        }
 
-        if (days > 0)
-        {
-            var date = DateTime.Now.AddDays(days * -1);
-            query = query.Where(x => x.appUserProgresses.LastModified >= date);
-        }
+        // .Where(p => p.chapter.AvgHoursToRead > 0)
+        // .SumAsync(p =>
+        //     p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))))
 
         var results = await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.LastModified.Date,
-                x.series.Format
+                x.series.Format,
             })
             .Select(g => new PagesReadOnADayCount<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
-                Count = g.Count()
+                Count = (long) g.Sum(x =>
+                    x.chapter.AvgHoursToRead * (x.appUserProgresses.PagesRead / (1.0f * x.chapter.Pages)))
             })
             .OrderBy(d => d.Value)
             .ToListAsync();

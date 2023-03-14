@@ -73,13 +73,29 @@
         <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
             <div class="row g-0">
                 <div class="col-auto">
-                    <button class="btn btn-primary" (click)="read()">
-                        <span>
-                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}} me-1"></i>
-                        </span>
-                        <span class="d-none d-sm-inline-block">{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
-                    </button>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" (click)="read()">
+                          <span>
+                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                            <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+                          </span>
+                        </button>
+                        <div class="btn-group" ngbDropdown role="group" display="dynamic" aria-label="Read options">
+                          <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                          <div class="dropdown-menu" ngbDropdownMenu>
+                            <button ngbDropdownItem (click)="read(true)">
+                              <span>
+                                <i class="fa fa-glasses" aria-hidden="true"></i>
+                                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}} Incognito</span>
+                              </span>
+                            </button>
+
+                          </div>
+                        </div>
+                      </div>
+
                 </div>
+                
                 <div class="col-auto ms-2">
                     <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
                         <span>

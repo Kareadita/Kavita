@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -31,6 +33,8 @@ public interface IReadingListService
 
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
+    Task CalculateStartAndEndDates(ReadingList readingListWithItems);
+    Task<string> GenerateMergedImage(int readingListId);
 }
 
 /// <summary>
@@ -142,6 +146,25 @@ public class ReadingListService : IReadingListService
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
+
+        if (NumberHelper.IsValidMonth(dto.StartingMonth))
+        {
+            readingList.StartingMonth = dto.StartingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.StartingYear))
+        {
+            readingList.StartingYear = dto.StartingYear;
+        }
+        if (NumberHelper.IsValidMonth(dto.EndingMonth))
+        {
+            readingList.EndingMonth = dto.EndingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.EndingYear))
+        {
+            readingList.EndingYear = dto.EndingYear;
+        }
+
+
         if (!dto.CoverImageLocked)
         {
             readingList.CoverImageLocked = false;
@@ -182,6 +205,7 @@ public class ReadingListService : IReadingListService
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
             if (readingList == null) return true;
             await CalculateReadingListAgeRating(readingList);
+            await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
 
@@ -239,6 +263,7 @@ public class ReadingListService : IReadingListService
         }
 
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
 
@@ -252,6 +277,52 @@ public class ReadingListService : IReadingListService
     public async Task CalculateReadingListAgeRating(ReadingList readingList)
     {
         await CalculateReadingListAgeRating(readingList, readingList.Items.Select(i => i.SeriesId));
+    }
+
+    /// <summary>
+    /// Calculates the Start month/year and Ending month/year
+    /// </summary>
+    /// <param name="readingListWithItems">Reading list should have all items</param>
+    public async Task CalculateStartAndEndDates(ReadingList readingListWithItems)
+    {
+        var items = readingListWithItems.Items;
+        if (readingListWithItems.Items.All(i => i.Chapter == null))
+        {
+            items =
+                (await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListWithItems.Id, ReadingListIncludes.ItemChapter))?.Items;
+        }
+        if (items == null || items.Count == 0) return;
+
+        if (items.First().Chapter == null)
+        {
+            _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
+            return;
+        }
+        var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
+        if (maxReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.EndingMonth = maxReleaseDate.Month;
+            readingListWithItems.EndingYear = maxReleaseDate.Year;
+        }
+        if (minReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.StartingMonth = minReleaseDate.Month;
+            readingListWithItems.StartingYear = minReleaseDate.Year;
+        }
+    }
+
+    public Task<string?> GenerateMergedImage(int readingListId)
+    {
+        throw new NotImplementedException();
+        // var coverImages = (await _unitOfWork.ReadingListRepository.GetFirstFourCoverImagesByReadingListId(readingListId)).ToList();
+        // if (coverImages.Count < 4) return null;
+        // var fullImages = coverImages
+        //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
+        //
+        // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
+        // // webp needs to be handled
+        // return combinedFile;
     }
 
     /// <summary>
@@ -522,6 +593,14 @@ public class ReadingListService : IReadingListService
         if (dryRun) return importSummary;
 
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
+
+        // For CBL Import only we override pre-calculated dates
+        if (NumberHelper.IsValidMonth(cblReading.StartMonth)) readingList.StartingMonth = cblReading.StartMonth;
+        if (NumberHelper.IsValidYear(cblReading.StartYear)) readingList.StartingYear = cblReading.StartYear;
+        if (NumberHelper.IsValidMonth(cblReading.EndMonth)) readingList.EndingMonth = cblReading.EndMonth;
+        if (NumberHelper.IsValidYear(cblReading.EndYear)) readingList.EndingYear = cblReading.EndYear;
+
         if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
         {
             readingList.Summary = readingList.Summary?.Trim();

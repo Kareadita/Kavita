@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
+using API.Helpers;
 using API.Parser;
 
 namespace API.Extensions;
@@ -39,6 +40,6 @@ public static class ChapterListExtensions
     /// <returns></returns>
     public static int MinimumReleaseYear(this IList<Chapter> chapters)
     {
-        return chapters.Select(v => v.ReleaseDate.Year).Where(y => y >= 1000).DefaultIfEmpty().Min();
+        return chapters.Select(v => v.ReleaseDate.Year).Where(y => NumberHelper.IsValidYear(y)).DefaultIfEmpty().Min();
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.ReadingLists;
+﻿using System;
+
+namespace API.DTOs.ReadingLists;
 
 public class ReadingListDto
 {
@@ -14,5 +16,21 @@ public class ReadingListDto
     /// This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.
     /// </summary>
     public string CoverImage { get; set; } = string.Empty;
+    /// <summary>
+    /// Minimum Year the Reading List starts
+    /// </summary>
+    public int StartingYear { get; set; }
+    /// <summary>
+    /// Minimum Month the Reading List starts
+    /// </summary>
+    public int StartingMonth { get; set; }
+    /// <summary>
+    /// Maximum Year the Reading List starts
+    /// </summary>
+    public int EndingYear { get; set; }
+    /// <summary>
+    /// Maximum Month the Reading List starts
+    /// </summary>
+    public int EndingMonth { get; set; }
 
 }

@@ -1,12 +1,10 @@
 <app-side-nav-companion-bar [hasExtras]="readingList !== undefined" [extraDrawer]="extrasDrawer">
   <h2 title>
-    <span *ngIf="actions.length > 0">
-      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title"></app-card-actionables>
-    </span>
+    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
     {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
-  <h6 subtitle class="subtitle-with-actionables">{{items.length}} Items</h6>
+  <h6 subtitle class="subtitle-with-actionables">{{items.length | number}} Items</h6>
 
   <ng-template #extrasDrawer let-offcanvas>
     <div style="margin-top: 56px" *ngIf="readingList">
@@ -36,7 +34,7 @@
     </div>
 </ng-template>
 </app-side-nav-companion-bar>
-<div class="container-fluid mt-2" *ngIf="readingList">
+<div class="container-fluid mt-2" *ngIf="readingList" >
 
   <div class="row mb-3">
     <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="readingList.coverImage !== '' && readingList.coverImage !== undefined && readingList.coverImage !== null">
@@ -83,6 +81,20 @@
           </div>
         </div>
       </div>
+      <div class="row g-0 mt-2" *ngIf="readingList.startingYear !== 0">
+        <h4 class="reading-list-years">
+          <ng-container *ngIf="readingList.startingMonth > 0">{{readingList.startingMonth | date:'MMM'}}</ng-container>
+          <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
+          <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
+          — 
+          <ng-container *ngIf="readingList.endingYear > 0">
+            <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
+            <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
+            <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
+          </ng-container>
+          
+        </h4>
+      </div>
       <!-- Summary row-->
       <div class="row g-0 mt-2">
         <app-read-more [text]="readingListSummary" [maxLength]="250"></app-read-more>
@@ -92,22 +104,18 @@
 
   <div class="row mb-3">
     <ng-container *ngIf="characters$ | async as characters">
-      <div class="row g-0" *ngIf="characters && characters.length > 0">
-        <div class="col-md-4">
-            <h5>Characters</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="characters">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                  <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-                </ng-template>  
-            </app-badge-expander>
-        </div>
+      <div class="row" *ngIf="characters && characters.length > 0">
+        <h5>Characters</h5>
+        <app-badge-expander [items]="characters">
+          <ng-template #badgeExpanderItem let-item let-position="idx">
+            <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+          </ng-template>  
+      </app-badge-expander>
       </div>
     </ng-container>
   </div>
 
-  <div class="row mb-3" cdkScrollable>
+  <div class="row mb-3 scroll-container" #scrollingBlock>
     <div class="mx-auto" style="width: 200px;">
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
@@ -115,10 +123,10 @@
       <app-loading [loading]="isLoading"></app-loading>
     </div>
 
-    <!-- TODO: This needs virtualization -->
-    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode" [showRemoveButton]="false">
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
+       [showRemoveButton]="false">
         <ng-template #draggableItem let-item let-position="idx">
-          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>

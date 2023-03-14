@@ -78,7 +78,7 @@ public class SeriesService : ISeriesService
                 series.Metadata.AgeRatingLocked = true;
             }
 
-            if (updateSeriesMetadataDto.SeriesMetadata.ReleaseYear > 1000 && series.Metadata.ReleaseYear != updateSeriesMetadataDto.SeriesMetadata.ReleaseYear)
+            if (NumberHelper.IsValidYear(updateSeriesMetadataDto.SeriesMetadata.ReleaseYear) && series.Metadata.ReleaseYear != updateSeriesMetadataDto.SeriesMetadata.ReleaseYear)
             {
                 series.Metadata.ReleaseYear = updateSeriesMetadataDto.SeriesMetadata.ReleaseYear;
                 series.Metadata.ReleaseYearLocked = true;

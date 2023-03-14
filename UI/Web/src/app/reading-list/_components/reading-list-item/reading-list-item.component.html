@@ -36,8 +36,10 @@
           <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}">{{item.seriesName}}</a>
         </div>
 
+        <!-- TODO: Let's add summary here-->
+
         <div class="ps-1 mt-2" *ngIf="item.releaseDate !== '0001-01-01T00:00:00'">
-          Released: {{item.releaseDate | date:'short'}}
+          Released: {{item.releaseDate | date:'longDate'}}
         </div>
     </div>
 </div>

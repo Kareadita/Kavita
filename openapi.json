@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.16"
+    "version": "0.7.1.19"
   },
   "servers": [
     {
@@ -12383,6 +12383,26 @@
             "type": "string",
             "format": "date-time"
           },
+          "startingYear": {
+            "type": "integer",
+            "description": "Minimum Year the Reading List starts",
+            "format": "int32"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "description": "Minimum Month the Reading List starts",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "description": "Maximum Year the Reading List starts",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "description": "Maximum Month the Reading List starts",
+            "format": "int32"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -12420,6 +12440,26 @@
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
             "nullable": true
+          },
+          "startingYear": {
+            "type": "integer",
+            "description": "Minimum Year the Reading List starts",
+            "format": "int32"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "description": "Minimum Month the Reading List starts",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "description": "Maximum Year the Reading List starts",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "description": "Maximum Month the Reading List starts",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -14580,6 +14620,22 @@
           },
           "coverImageLocked": {
             "type": "boolean"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startingYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -18,6 +18,7 @@ import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
 import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 
 @NgModule({
   declarations: [
@@ -48,6 +49,7 @@ import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL
     FileUploadModule, // Import CBL
+    VirtualScrollerModule,
   ],
   exports: [
     AddToListModalComponent,

@@ -33,28 +33,28 @@ public class CblReadingList
     /// </summary>
     /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
     [XmlElement(ElementName="StartYear")]
-    public int StartYear { get; set; }
+    public int StartYear { get; set; } = -1;
 
     /// <summary>
     /// Start Year of the Reading List. Overrides calculation
     /// </summary>
     /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
-    [XmlElement(ElementName="StartMonth")]
-    public int StartMonth { get; set; }
+    [XmlElement(ElementName = "StartMonth")]
+    public int StartMonth { get; set; } = -1;
 
     /// <summary>
     /// End Year of the Reading List. Overrides calculation
     /// </summary>
     /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
     [XmlElement(ElementName="EndYear")]
-    public int EndYear { get; set; }
+    public int EndYear { get; set; } = -1;
 
     /// <summary>
     /// End Year of the Reading List. Overrides calculation
     /// </summary>
     /// <remarks>This is not a standard, adding based on discussion with CBL Maintainers</remarks>
     [XmlElement(ElementName="EndMonth")]
-    public int EndMonth { get; set; }
+    public int EndMonth { get; set; } = -1;
 
     /// <summary>
     /// Issues of the Reading List

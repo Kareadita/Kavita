@@ -2,7 +2,7 @@
     <h2 title>
         {{title}}
     </h2>
-    <h6 subtitle *ngIf="pagination">{{pagination.totalItems}} Series</h6>
+    <h6 subtitle *ngIf="pagination">{{pagination.totalItems | number}} Series</h6>
 </app-side-nav-companion-bar>
 <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 <app-card-detail-layout 
