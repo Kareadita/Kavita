@@ -631,6 +631,128 @@ public class ReadingListServiceTests
 
     #endregion
 
+    #region CalculateStartAndEndDates
+
+    [Fact]
+    public async Task CalculateStartAndEndDates_ShouldBeNothing_IfNothing()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithVolumes(new List<Volume>()
+            {
+                new VolumeBuilder("0")
+                    .WithChapter(new ChapterBuilder("1")
+                        .Build()
+                    )
+                    .WithChapter(new ChapterBuilder("2")
+                        .Build()
+                    )
+                    .Build()
+            })
+            .Build();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        s
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = DbFactory.ReadingList("Test");
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        await _readingListService.CalculateStartAndEndDates(readingList);
+        Assert.Equal(0, readingList.StartingMonth);
+        Assert.Equal(0, readingList.StartingYear);
+        Assert.Equal(0, readingList.EndingMonth);
+        Assert.Equal(0, readingList.EndingYear);
+    }
+
+    [Fact]
+    public async Task CalculateStartAndEndDates_ShouldBeSomething_IfChapterHasSet()
+    {
+        await ResetDb();
+        var s = new SeriesBuilder("Test")
+            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithVolumes(new List<Volume>()
+            {
+                new VolumeBuilder("0")
+                    .WithChapter(new ChapterBuilder("1")
+                        .WithReleaseDate(new DateTime(2005, 03, 01))
+                        .Build()
+                    )
+                    .WithChapter(new ChapterBuilder("2")
+                        .WithReleaseDate(new DateTime(2002, 03, 01))
+                        .Build()
+                    )
+                    .Build()
+            })
+            .Build();
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007",
+            ReadingLists = new List<ReadingList>(),
+            Libraries = new List<Library>()
+            {
+                new Library()
+                {
+                    Name = "Test LIb",
+                    Type = LibraryType.Book,
+                    Series = new List<Series>()
+                    {
+                        s
+                    }
+                },
+            }
+        });
+
+        await _context.SaveChangesAsync();
+
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
+        var readingList = DbFactory.ReadingList("Test");
+        user.ReadingLists = new List<ReadingList>()
+        {
+            readingList
+        };
+
+        await _readingListService.AddChaptersToReadingList(1, new List<int>() {1, 2}, readingList);
+
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        await _readingListService.CalculateStartAndEndDates(readingList);
+        Assert.Equal(3, readingList.StartingMonth);
+        Assert.Equal(2002, readingList.StartingYear);
+        Assert.Equal(3, readingList.EndingMonth);
+        Assert.Equal(2005, readingList.EndingYear);
+    }
+
+    #endregion
+
     #region FormatTitle
 
     [Fact]

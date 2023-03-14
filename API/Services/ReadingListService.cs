@@ -299,7 +299,7 @@ public class ReadingListService : IReadingListService
             return;
         }
         var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
-        var minReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Min(item => item.Chapter.ReleaseDate);
         if (maxReleaseDate != DateTime.MinValue)
         {
             readingListWithItems.EndingMonth = maxReleaseDate.Month;

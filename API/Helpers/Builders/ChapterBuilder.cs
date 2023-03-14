@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
 
@@ -19,6 +20,12 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             Files = new List<MangaFile>(),
             Pages = 1
         };
+    }
+
+    public ChapterBuilder WithReleaseDate(DateTime time)
+    {
+        _chapter.ReleaseDate = time;
+        return this;
     }
 
     public ChapterBuilder WithAgeRating(AgeRating rating)
