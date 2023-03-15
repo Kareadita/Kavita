@@ -296,7 +296,17 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000", "https://kavita.majora2007.duckdns.org")
+                .WithExposedHeaders("Content-Disposition", "Pagination"));
+        }
+        else
+        {
+            // Allow CORS for Kavita's url
+            app.UseCors(policy => policy
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials() // For SignalR token query param
+                .WithOrigins("https://kavita.majora2007.duckdns.org")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
 
