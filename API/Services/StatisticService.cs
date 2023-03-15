@@ -103,7 +103,6 @@ public class StatisticService : IStatisticService
             })
             .ToListAsync();
 
-
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
@@ -112,7 +111,7 @@ public class StatisticService : IStatisticService
                     AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
                 })
             .Select(x => x.AverageReadingHours)
-            .Average() / 7.0;
+            .Average() * 7.0;
 
         return new UserReadStatistics()
         {
