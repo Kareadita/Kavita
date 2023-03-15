@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -33,6 +34,7 @@ public interface IReaderService
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
     IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
+    Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
 }
 
 public class ReaderService : IReaderService
@@ -40,6 +42,8 @@ public class ReaderService : IReaderService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
     private readonly IEventHub _eventHub;
+    private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -51,11 +55,14 @@ public class ReaderService : IReaderService
     public const float AvgPagesPerMinute = (MaxPagesPerMinute + MinPagesPerMinute) / 2F;
 
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
+        IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
+        _imageService = imageService;
+        _directoryService = directoryService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -645,6 +652,44 @@ public class ReaderService : IReaderService
     }
 
     /// <summary>
+    ///
+    /// </summary>
+    /// <param name="chapter"></param>
+    /// <param name="pageNum"></param>
+    /// <param name="cachedImages"></param>
+    /// <returns>Full path of thumbnail</returns>
+    public async Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages)
+    {
+        var outputDirectory =
+            _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
+        try
+        {
+            var saveAsWebp =
+                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                var outputtedThumbnails = cachedImages
+                    .Select((img, idx) =>
+                        _directoryService.FileSystem.Path.Join(outputDirectory,
+                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, saveAsWebp)))
+                    .ToArray();
+                return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
+            }
+
+            var files = _directoryService.GetFilesWithExtension(outputDirectory,
+                Tasks.Scanner.Parser.Parser.ImageFileExtensions);
+            return CacheService.GetPageFromFiles(files, pageNum);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error when trying to get thumbnail for Chapter {ChapterId}, Page {PageNum}", chapter.Id, pageNum);
+            _directoryService.ClearAndDeleteDirectory(outputDirectory);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Formats a Chapter name based on the library it's in
     /// </summary>
     /// <param name="libraryType"></param>
@@ -668,4 +713,6 @@ public class ReaderService : IReaderService
                 throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
         }
     }
+
+
 }

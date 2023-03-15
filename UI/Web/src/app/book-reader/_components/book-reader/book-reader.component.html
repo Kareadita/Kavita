@@ -32,7 +32,7 @@
                     </div>
                     <div class="d-flex align-items-center justify-content-between text-center row g-0">
                         <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                        <div class="col-1">{{pageNum}}</div>
+                        <div class="col-1" (click)="goToPage(0)">{{pageNum}}</div>
                         <div class="col-8">
                             <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
                         </div>

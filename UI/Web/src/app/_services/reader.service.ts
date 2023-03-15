@@ -101,6 +101,10 @@ export class ReaderService {
     return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
   }
 
+  getThumbnailUrl(chapterId: number, page: number) {
+    return this.baseUrl + 'reader/thumbnail?chapterId=' + chapterId + '&page=' + page;
+  }
+
   getBookmarkPageUrl(seriesId: number, apiKey: string, page: number) {
     return this.baseUrl + 'reader/bookmark-image?seriesId=' + seriesId + '&page=' + page + '&apiKey=' + encodeURIComponent(apiKey);
   }

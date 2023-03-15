@@ -32,6 +32,7 @@ public interface ICacheService
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
     string GetCachedPagePath(int chapterId, int page);
+    IEnumerable<string> GetCachedPages(int chapterId);
     IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
@@ -56,6 +57,13 @@ public class CacheService : ICacheService
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _bookmarkService = bookmarkService;
+    }
+
+    public IEnumerable<string> GetCachedPages(int chapterId)
+    {
+        var path = GetCachePath(chapterId);
+        return _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
+            .OrderByNatural(Path.GetFileNameWithoutExtension);
     }
 
     public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
@@ -276,15 +284,7 @@ public class CacheService : ICacheService
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
 
-        if (files.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        if (page > files.Length) page = files.Length;
-
-        // Since array is 0 based, we need to keep that in account (only affects last image)
-        return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
+        return GetPageFromFiles(files, page);
     }
 
     public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)
@@ -310,4 +310,28 @@ public class CacheService : ICacheService
 
         _directoryService.ClearAndDeleteDirectory(destDirectory);
     }
+
+    /// <summary>
+    /// Returns either the file or an empty string
+    /// </summary>
+    /// <param name="files"></param>
+    /// <param name="pageNum"></param>
+    /// <returns></returns>
+    public static string GetPageFromFiles(string[] files, int pageNum)
+    {
+        files = files
+            .AsEnumerable()
+            .OrderByNatural(Path.GetFileNameWithoutExtension)
+            .ToArray();
+
+        if (files.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        // Since array is 0 based, we need to keep that in account (only affects last image)
+        return pageNum == files.Length ? files.ElementAt(pageNum - 1) : files.ElementAt(pageNum);
+    }
+
+
 }

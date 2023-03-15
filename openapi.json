@@ -3631,6 +3631,36 @@
         }
       }
     },
+    "/api/Reader/thumbnail": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageNum",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Reader/bookmark-image": {
       "get": {
         "tags": [
@@ -3739,6 +3769,7 @@
           "Reader"
         ],
         "summary": "Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.",
+        "description": "This is generally the first call when attempting to read to allow pre-generation of assets needed for reading",
         "parameters": [
           {
             "name": "chapterId",
