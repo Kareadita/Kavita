@@ -31,8 +31,8 @@ import { DoubleRendererComponent } from '../double-renderer/double-renderer.comp
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { ChapterInfo } from '../../_models/chapter-info';
-import { SwipeEvent } from 'ng-swipe';
 import { DoubleNoCoverRendererComponent } from '../double-renderer-no-cover/double-no-cover-renderer.component';
+import { SwipeEvent } from 'src/app/ng-swipe/ag-swipe.core';
 
 
 const PREFETCH_PAGES = 10;
