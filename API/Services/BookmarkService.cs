@@ -76,7 +76,8 @@ public class BookmarkService : IBookmarkService
     /// <summary>
     /// This is a job that runs after a bookmark is saved
     /// </summary>
-    private async Task ConvertBookmarkToWebP(int bookmarkId)
+    /// <remarks>This must be public</remarks>
+    public async Task ConvertBookmarkToWebP(int bookmarkId)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
