@@ -279,9 +279,13 @@ public class Startup
         app.UseForwardedHeaders();
 
         var basePath = Configuration.BaseUrl;
-
         app.UsePathBase(basePath);
-        UpdateBaseUrlInIndex(basePath);
+        if (!env.IsDevelopment())
+        {
+            // We don't update the index.html in local as we don't serve from there
+            UpdateBaseUrlInIndex(basePath);
+        }
+
 
         app.UseRouting();
 
@@ -359,19 +363,26 @@ public class Startup
         });
 
         var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-        _logger.LogInformation("Starting with base url as {baseUrl}", basePath);
+        _logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
     }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
-        var htmlDoc = new HtmlDocument();
-        var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
-        htmlDoc.Load(indexHtmlPath);
+        try
+        {
+            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
+            var htmlDoc = new HtmlDocument();
+            var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+            htmlDoc.Load(indexHtmlPath);
 
-        var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
-        baseNode.SetAttributeValue("href", baseUrl);
-        htmlDoc.Save(indexHtmlPath);
+            var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
+            baseNode.SetAttributeValue("href", baseUrl);
+            htmlDoc.Save(indexHtmlPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "There was an error setting base url");
+        }
     }
 
     private static void OnShutdown()
