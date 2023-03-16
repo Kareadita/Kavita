@@ -90,6 +90,7 @@ public class CleanupService : ICleanupService
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
         await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries();
     }
 
     private async Task SendProgress(float progress, string subtitle)

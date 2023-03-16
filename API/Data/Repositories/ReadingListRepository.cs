@@ -47,6 +47,7 @@ public interface IReadingListRepository
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
     Task<IList<ReadingList>> GetAllWithNonWebPCovers();
     Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
+    Task<int> RemoveReadingListsWithoutSeries();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -130,6 +131,18 @@ public class ReadingListRepository : IReadingListRepository
             .Select(ri => ri.Chapter.CoverImage)
             .Take(4)
             .ToListAsync();
+    }
+
+    public async Task<int> RemoveReadingListsWithoutSeries()
+    {
+        var listsToDelete = await _context.ReadingList
+            .Include(c => c.Items)
+            .Where(c => c.Items.Count == 0)
+            .AsSplitQuery()
+            .ToListAsync();
+        _context.RemoveRange(listsToDelete);
+
+        return await _context.SaveChangesAsync();
     }
 
     public void Remove(ReadingListItem item)
