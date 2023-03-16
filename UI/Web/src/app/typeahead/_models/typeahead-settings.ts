@@ -29,9 +29,13 @@ export class TypeaheadSettings<T> {
     savedData!: T[] | T;
     /**
      * Function to compare the elements. Should return all elements that fit the matching criteria. 
-     * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead (TODO)
+     * This is only used with non-Observable based fetchFn, but must be defined for all uses of typeahead.
      */
     compareFn!: ((optionList: T[], filter: string)  => T[]);
+    /**
+     * Must be defined when addIfNonExisting is true. Used to ensure no duplicates exist when adding.
+     */
+    compareFnForAdd!: ((optionList: T[], filter: string)  => T[]);
     /**
      * Function which is used for comparing objects when keeping track of state. 
      * Useful over shallow equal when you have image urls that have random numbers on them.

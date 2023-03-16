@@ -329,6 +329,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.ageRatingSettings.compareFn = (options: AgeRatingDto[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
+    
 
     this.ageRatingSettings.selectionCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
       return a.title == b.title;
