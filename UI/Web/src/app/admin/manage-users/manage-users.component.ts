@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { catchError, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/auth/member';
-import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { ToastrService } from 'ngx-toastr';
 import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
@@ -23,7 +22,6 @@ import { Router } from '@angular/router';
 export class ManageUsersComponent implements OnInit, OnDestroy {
 
   members: Member[] = [];
-  pendingInvites: Member[] = [];
   loggedInUsername = '';
   loadingMembers = false;
 
@@ -47,8 +45,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadMembers();
-
-    this.loadPendingInvites();
   }
 
   ngOnDestroy() {
@@ -75,24 +71,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadPendingInvites() {
-    this.pendingInvites = [];
-    this.memberService.getPendingInvites().subscribe(members => {
-      this.pendingInvites = members;
-      // Show logged in user at the top of the list
-      this.pendingInvites.sort((a: Member, b: Member) => {
-        if (a.username === this.loggedInUsername) return 1;
-        if (b.username === this.loggedInUsername) return 1;
-
-        const nameA = a.username.toUpperCase();
-        const nameB = b.username.toUpperCase();
-        if (nameA < nameB) return -1;
-        if (nameA > nameB) return 1;
-        return 0;
-      })
-    });
-  }
-
   canEditMember(member: Member): boolean {
     return this.loggedInUsername !== member.username;
   }
@@ -111,7 +89,6 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.memberService.deleteMember(member.username).subscribe(() => {
         setTimeout(() => {
           this.loadMembers();
-          this.loadPendingInvites();
           this.toastr.success(member.username + ' has been deleted.');
         }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
       });
@@ -121,7 +98,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   inviteUser() {
     const modalRef = this.modalService.open(InviteUserComponent, {size: 'lg'});
     modalRef.closed.subscribe((successful: boolean) => {
-      this.loadPendingInvites();
+      this.loadMembers();
     });
   }
 
