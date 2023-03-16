@@ -2,6 +2,8 @@
 
 // Overrides for reverse
 .image-container {
+    height: calc(100vh); // override as on single, we -34px for the potential scrollbar
+    
     &.reverse {
         overflow: unset;
         display: flex;
