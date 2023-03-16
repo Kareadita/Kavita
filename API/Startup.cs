@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -14,6 +15,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
 using API.Middleware;
+using API.Middleware.RateLimit;
 using API.Services;
 using API.Services.HostedServices;
 using API.Services.Tasks;
@@ -179,6 +181,19 @@ public class Startup
 
         services.AddResponseCaching();
 
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("Authentication", httpContext =>
+                new AuthenticationRateLimiterPolicy().GetPartition(httpContext));
+            // RateLimitPartition.GetFixedWindowLimiter(httpContext.Connection.RemoteIpAddress?.ToString(),
+            //     partition => new FixedWindowRateLimiterOptions
+            //     {
+            //         AutoReplenishment = true,
+            //         PermitLimit = 1,
+            //         Window = TimeSpan.FromMinutes(1),
+            //     }));
+        });
+
         services.AddHangfire(configuration => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
@@ -278,6 +293,8 @@ public class Startup
         app.UseResponseCompression();
 
         app.UseForwardedHeaders();
+
+        app.UseRateLimiter();
 
         var basePath = Configuration.BaseUrl;
         app.UsePathBase(basePath);

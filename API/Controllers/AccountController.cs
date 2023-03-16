@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Middleware.RateLimit;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -22,6 +23,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -769,6 +771,7 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     [AllowAnonymous]
     [HttpPost("forgot-password")]
+    [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
@@ -847,6 +850,7 @@ public class AccountController : BaseApiController
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
+    [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
