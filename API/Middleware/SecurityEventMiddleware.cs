@@ -1,21 +1,34 @@
 ﻿using System;
+using System.IO;
+using System.Security.AccessControl;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Logging;
+using API.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
+using ILogger = Serilog.ILogger;
 
 namespace API.Middleware;
 
 public class SecurityEventMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger _logger;
 
     public SecurityEventMiddleware(RequestDelegate next)
     {
         _next = next;
+
+        _logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File(Path.Join(Directory.GetCurrentDirectory(), "config/logs/", "security.log"), rollingInterval: RollingInterval.Day)
+            .CreateLogger();
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -38,10 +51,9 @@ public class SecurityEventMiddleware
         using (var scope = context.RequestServices.CreateScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<DataContext>();
-            var logger = scope.ServiceProvider.GetRequiredService<ILogger<SecurityEventMiddleware>>();
             dbContext.Add(securityEvent);
             await dbContext.SaveChangesAsync();
-            logger.LogDebug("Request Processed: {@SecurityEvent}", securityEvent);
+            _logger.Debug("Request Processed: {@SecurityEvent}", securityEvent);
         }
 
 
