@@ -15,7 +15,7 @@ jobs:
           uses: JJ/github-pr-contains-action@releases/v7
           with:
               github-token: ${{ secrets.GITHUB_TOKEN }}
-              bodyDoesNotContain: "["]|[`]"
+              bodyDoesNotContain: "["|`]"
   build:
     name: Build .Net
     runs-on: windows-latest
