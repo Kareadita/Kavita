@@ -329,8 +329,13 @@ public class CacheService : ICacheService
             return string.Empty;
         }
 
+        if (pageNum < 0)
+        {
+            pageNum = 0;
+        }
+
         // Since array is 0 based, we need to keep that in account (only affects last image)
-        return pageNum == files.Length ? files.ElementAt(pageNum - 1) : files.ElementAt(pageNum);
+        return pageNum >= files.Length ? files.ElementAt(Math.Min(pageNum - 1, files.Length - 1)) : files.ElementAt(pageNum);
     }
 
 
