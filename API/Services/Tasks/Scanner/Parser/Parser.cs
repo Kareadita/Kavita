@@ -225,6 +225,11 @@ public static class Parser
         new Regex(
             @"(?<Series>.+?):? (\b|_|-)(vol)\.?(\s|-|_)?\d+",
             MatchOptions, RegexTimeout),
+        // [xPearse] Kyochuu Rettou Chapter 001 Volume 1 [English] [Manga] [Volume Scans]
+        new Regex(
+            @"(?<Series>.+?):?(\s|\b|_|-)Chapter(\s|\b|_|-)\d+(\s|\b|_|-)(vol)(ume)",
+            MatchOptions,
+            RegexTimeout),
         // [xPearse] Kyochuu Rettou Volume 1 [English] [Manga] [Volume Scans]
         new Regex(
             @"(?<Series>.+?):? (\b|_|-)(vol)(ume)",

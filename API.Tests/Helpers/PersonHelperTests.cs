@@ -9,6 +9,7 @@ namespace API.Tests.Helpers;
 
 public class PersonHelperTests
 {
+    #region UpdatePeople
     [Fact]
     public void UpdatePeople_ShouldAddNewPeople()
     {
@@ -47,7 +48,15 @@ public class PersonHelperTests
 
         Assert.Equal(3, allPeople.Count);
     }
+    #endregion
 
+    #region UpdatePeopleList
+
+
+
+    #endregion
+
+    #region RemovePeople
     [Fact]
     public void RemovePeople_ShouldRemovePeopleOfSameRole()
     {
@@ -111,6 +120,10 @@ public class PersonHelperTests
         Assert.Equal(2, peopleRemoved.Count);
     }
 
+
+    #endregion
+
+    #region KeepOnlySamePeopleBetweenLists
     [Fact]
     public void KeepOnlySamePeopleBetweenLists()
     {
@@ -135,6 +148,9 @@ public class PersonHelperTests
 
         Assert.Equal(2, peopleRemoved.Count);
     }
+    #endregion
+
+    #region AddPeople
 
     [Fact]
     public void AddPeople_ShouldAddOnlyNonExistingPeople()
@@ -156,5 +172,7 @@ public class PersonHelperTests
         PersonHelper.AddPersonIfNotExists(existingPeople, DbFactory.Person("Joe Shmo Two", PersonRole.CoverArtist));
         Assert.Equal(4, existingPeople.Count);
     }
+
+    #endregion
 
 }

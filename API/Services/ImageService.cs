@@ -22,8 +22,24 @@ public interface IImageService
     /// <param name="thumbnailWidth">Width of thumbnail</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = 320);
-
+    /// <summary>
+    /// Writes out a thumbnail by stream input
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="saveAsWebP"></param>
+    /// <returns></returns>
     string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
+    /// <summary>
+    /// Writes out a thumbnail by file path input
+    /// </summary>
+    /// <param name="sourceFile"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="saveAsWebP"></param>
+    /// <returns></returns>
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false);
     /// <summary>
     /// Converts the passed image to webP and outputs it in the same directory
     /// </summary>
@@ -105,6 +121,19 @@ public class ImageService : IImageService
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+        var filename = fileName + (saveAsWebP ? ".webp" : ".png");
+        _directoryService.ExistOrCreate(outputDirectory);
+        try
+        {
+            _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        } catch (Exception) {/* Swallow exception */}
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        return filename;
+    }
+
+    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false)
+    {
+        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth);
         var filename = fileName + (saveAsWebP ? ".webp" : ".png");
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -216,6 +245,16 @@ public class ImageService : IImageService
     public static string GetReadingListFormat(int readingListId)
     {
         return $"readinglist{readingListId}";
+    }
+
+    /// <summary>
+    /// Returns the name format for a thumbnail (temp thumbnail)
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    public static string GetThumbnailFormat(int chapterId)
+    {
+        return $"thumbnail{chapterId}";
     }
 
 

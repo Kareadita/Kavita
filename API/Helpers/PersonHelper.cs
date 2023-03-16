@@ -7,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Helpers;
 
@@ -156,7 +157,7 @@ public static class PersonHelper
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Person(tag.Name, role));
+                handleAdd(new PersonBuilder(tag.Name, role).Build());
                 isModified = true;
             }
         }

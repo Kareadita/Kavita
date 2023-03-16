@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -14,6 +15,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
 using API.Middleware;
+using API.Middleware.RateLimit;
 using API.Services;
 using API.Services.HostedServices;
 using API.Services.Tasks;
@@ -179,6 +181,19 @@ public class Startup
 
         services.AddResponseCaching();
 
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("Authentication", httpContext =>
+                new AuthenticationRateLimiterPolicy().GetPartition(httpContext));
+            // RateLimitPartition.GetFixedWindowLimiter(httpContext.Connection.RemoteIpAddress?.ToString(),
+            //     partition => new FixedWindowRateLimiterOptions
+            //     {
+            //         AutoReplenishment = true,
+            //         PermitLimit = 1,
+            //         Window = TimeSpan.FromMinutes(1),
+            //     }));
+        });
+
         services.AddHangfire(configuration => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
@@ -259,6 +274,7 @@ public class Startup
 
 
         app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<SecurityEventMiddleware>();
 
         if (env.IsDevelopment())
         {
@@ -278,10 +294,16 @@ public class Startup
 
         app.UseForwardedHeaders();
 
-        var basePath = Configuration.BaseUrl;
+        app.UseRateLimiter();
 
+        var basePath = Configuration.BaseUrl;
         app.UsePathBase(basePath);
-        UpdateBaseUrlInIndex(basePath);
+        if (!env.IsDevelopment())
+        {
+            // We don't update the index.html in local as we don't serve from there
+            UpdateBaseUrlInIndex(basePath);
+        }
+
 
         app.UseRouting();
 
@@ -292,7 +314,17 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000", "https://kavita.majora2007.duckdns.org")
+                .WithExposedHeaders("Content-Disposition", "Pagination"));
+        }
+        else
+        {
+            // Allow CORS for Kavita's url
+            app.UseCors(policy => policy
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials() // For SignalR token query param
+                .WithOrigins("https://kavita.majora2007.duckdns.org")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
 
@@ -311,6 +343,7 @@ public class Startup
             OnPrepareResponse = ctx =>
             {
                 ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
+                ctx.Context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
             }
         });
 
@@ -326,7 +359,7 @@ public class Startup
                 new[] { "Accept-Encoding" };
 
             // Don't let the site be iframed outside the same origin (clickjacking)
-            context.Response.Headers.XFrameOptions = "SAMEORIGIN";
+            context.Response.Headers.XFrameOptions = Configuration.XFrameOptions;
 
             // Setup CSP to ensure we load assets only from these origins
             context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
@@ -359,19 +392,26 @@ public class Startup
         });
 
         var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-        _logger.LogInformation("Starting with base url as {baseUrl}", basePath);
+        _logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
     }
 
     private static void UpdateBaseUrlInIndex(string baseUrl)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
-        var htmlDoc = new HtmlDocument();
-        var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
-        htmlDoc.Load(indexHtmlPath);
+        try
+        {
+            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
+            var htmlDoc = new HtmlDocument();
+            var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+            htmlDoc.Load(indexHtmlPath);
 
-        var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
-        baseNode.SetAttributeValue("href", baseUrl);
-        htmlDoc.Save(indexHtmlPath);
+            var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
+            baseNode.SetAttributeValue("href", baseUrl);
+            htmlDoc.Save(indexHtmlPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "There was an error setting base url");
+        }
     }
 
     private static void OnShutdown()

@@ -58,6 +58,17 @@ public class CleanupService : ICleanupService
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     public async Task Cleanup()
     {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true) ||
+            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true))
+        {
+            _logger.LogInformation("Cleanup put on hold as a conversion to WebP in progress");
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a conversion to WebP in progress"));
+            return;
+        }
+
         _logger.LogInformation("Starting Cleanup");
         await SendProgress(0F, "Starting cleanup");
         _logger.LogInformation("Cleaning temp directory");
@@ -90,6 +101,7 @@ public class CleanupService : ICleanupService
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
         await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries();
     }
 
     private async Task SendProgress(float progress, string subtitle)

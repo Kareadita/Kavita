@@ -27,6 +27,8 @@ public class TachiyomiServiceTests
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly DataContext _context;
+    private readonly ReaderService _readerService;
+    private readonly TachiyomiService _tachiyomiService;
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
     private const string BackupDirectory = "C:/kavita/config/backups/";
@@ -44,6 +46,10 @@ public class TachiyomiServiceTests
         _mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, _mapper, null);
 
+        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+        _tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), _readerService);
 
     }
 
@@ -151,10 +157,7 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Null(latestChapter);
     }
@@ -201,16 +204,14 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkSeriesAsRead(user,1);
+        await _readerService.MarkSeriesAsRead(user,1);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("96", latestChapter.Number);
     }
@@ -257,16 +258,14 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("21", latestChapter.Number);
     }
@@ -312,17 +311,15 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0001", latestChapter.Number);
     }
 
@@ -362,17 +359,15 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await readerService.MarkSeriesAsRead(user, 1);
+        await _readerService.MarkSeriesAsRead(user, 1);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0003", latestChapter.Number);
     }
 
@@ -417,17 +412,14 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
+        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.2002", latestChapter.Number);
     }
 
@@ -478,10 +470,7 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Null(latestChapter);
     }
@@ -527,16 +516,13 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkSeriesAsRead(user,1);
+        await _readerService.MarkSeriesAsRead(user,1);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("96", latestChapter.Number);
     }
@@ -583,16 +569,13 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
 
         Assert.Equal("21", latestChapter.Number);
     }
@@ -637,17 +620,14 @@ public class TachiyomiServiceTests
         });
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), readerService);
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await _tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
 
         await _context.SaveChangesAsync();
 
 
-        var latestChapter = await tachiyomiService.GetLatestChapter(1, 1);
+        var latestChapter = await _tachiyomiService.GetLatestChapter(1, 1);
         Assert.Equal("0.0001", latestChapter.Number);
     }
 

@@ -8,17 +8,25 @@ on:
     types: [synchronize]
 
 jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Check PR Body
+          uses: JJ/github-pr-contains-action@releases/v7
+          with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              bodyDoesNotContain: "["|`]"
   build:
     name: Build .Net
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
             fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -74,19 +82,18 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
-
   version:
     name: Bump version on Develop push
     needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -139,7 +146,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: develop
 
@@ -176,7 +183,7 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -253,7 +260,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
 
@@ -293,7 +300,7 @@ jobs:
         id: parse-version
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
       - name: Install Swashbuckle CLI

@@ -29,10 +29,9 @@ namespace API.Tests.Services;
 public class ReaderServiceTests
 {
     private readonly ITestOutputHelper _testOutputHelper;
-
     private readonly IUnitOfWork _unitOfWork;
-
     private readonly DataContext _context;
+    private readonly ReaderService _readerService;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
@@ -50,6 +49,9 @@ public class ReaderServiceTests
         var config = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperProfiles>());
         var mapper = config.CreateMapper();
         _unitOfWork = new UnitOfWork(_context, mapper, null);
+        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
     }
 
     #region Setup
@@ -147,10 +149,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        Assert.Equal(0, await readerService.CapPageToChapter(1, -1));
-        Assert.Equal(1, await readerService.CapPageToChapter(1, 10));
+        Assert.Equal(0, await _readerService.CapPageToChapter(1, -1));
+        Assert.Equal(1, await _readerService.CapPageToChapter(1, 10));
     }
 
     #endregion
@@ -186,9 +187,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var successful = await readerService.SaveReadingProgress(new ProgressDto()
+
+        var successful = await _readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -230,9 +231,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var successful = await readerService.SaveReadingProgress(new ProgressDto()
+
+        var successful = await _readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -244,7 +245,7 @@ public class ReaderServiceTests
         Assert.True(successful);
         Assert.NotNull(await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(1, 1));
 
-        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
+        Assert.True(await _readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
             PageNum = 1,
@@ -294,10 +295,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumes(1);
-        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
         await _context.SaveChangesAsync();
 
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
@@ -338,15 +339,15 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
 
         await _context.SaveChangesAsync();
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
 
-        await readerService.MarkChaptersAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _readerService.MarkChaptersAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
         await _context.SaveChangesAsync();
 
         var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
@@ -427,9 +428,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("2", actualChapter.Range);
     }
@@ -475,10 +476,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -524,10 +525,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("21", actualChapter.Range);
     }
@@ -566,10 +567,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 4, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("1", actualChapter.Range);
@@ -614,9 +615,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("0", actualChapter.Range);
@@ -658,10 +659,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 4, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 4, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -693,10 +694,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -735,10 +736,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -777,10 +778,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
@@ -815,10 +816,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 2, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
@@ -857,10 +858,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 1, 3, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 3, 1);
         Assert.Equal(-1, nextChapter);
     }
 
@@ -898,10 +899,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var nextChapter = await readerService.GetNextChapterIdAsync(1, 2, 3, 1);
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("B.cbz", actualChapter.Range);
@@ -952,9 +953,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("1", actualChapter.Range);
     }
@@ -998,9 +999,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 3, 5, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("22", actualChapter.Range);
     }
@@ -1044,10 +1045,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // prevChapter should be id from ch.21 from volume 2001
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 4, 7, 1);
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 4, 7, 1);
 
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.NotNull(actualChapter);
@@ -1091,10 +1092,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("2", actualChapter.Range);
     }
@@ -1133,10 +1134,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 3, 1);
         Assert.Equal(2, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("2", actualChapter.Range);
@@ -1170,10 +1171,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1204,10 +1205,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1244,10 +1245,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1293,14 +1294,14 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,5, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,5, 1);
         var chapterInfoDto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(prevChapter);
         Assert.Equal(1, float.Parse(chapterInfoDto.ChapterNumber));
 
         // This is first chapter of first volume
-        prevChapter = await readerService.GetPrevChapterIdAsync(1, 2,4, 1);
+        prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2,4, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1332,10 +1333,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.Equal(-1, prevChapter);
     }
 
@@ -1374,10 +1375,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 4, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("A.cbz", actualChapter.Range);
@@ -1418,10 +1419,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
 
-        var prevChapter = await readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
+
+        var prevChapter = await _readerService.GetPrevChapterIdAsync(1, 1, 1, 1);
         Assert.NotEqual(-1, prevChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("22", actualChapter.Range);
@@ -1472,9 +1473,9 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1511,15 +1512,15 @@ public class ReaderServiceTests
 
 
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        await readerService.SaveReadingProgress(new ProgressDto()
+
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 2,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1560,24 +1561,24 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1587,7 +1588,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("22", nextChapter.Range);
 
@@ -1638,10 +1639,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume and 1st chapter of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 6, // Chapter 0 volume 1 id
@@ -1650,7 +1651,7 @@ public class ReaderServiceTests
         }, 1);
 
 
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 7, // Chapter 21 volume 2 id
@@ -1660,7 +1661,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("22", nextChapter.Range);
 
@@ -1702,24 +1703,24 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1729,7 +1730,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("31", nextChapter.Range);
     }
@@ -1769,8 +1770,8 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1811,21 +1812,21 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Mark everything but chapter 101 as read
-        await readerService.MarkSeriesAsRead(user, 1);
+        await _readerService.MarkSeriesAsRead(user, 1);
         await _unitOfWork.CommitAsync();
 
         // Unmark last chapter as read
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = (await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1)).Chapters.ElementAt(1).Id,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
             ChapterId = (await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1)).Chapters.ElementAt(2).Id,
@@ -1834,7 +1835,7 @@ public class ReaderServiceTests
         }, 1);
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("101", nextChapter.Range);
     }
@@ -1869,24 +1870,24 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -1896,7 +1897,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("1", nextChapter.Range);
     }
@@ -1933,14 +1934,14 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await readerService.MarkSeriesAsRead(user, 1);
+        await _readerService.MarkSeriesAsRead(user, 1);
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("11", nextChapter.Range);
     }
@@ -1973,24 +1974,24 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 1,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 2,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
-        await readerService.SaveReadingProgress(new ProgressDto()
+        await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 1,
             ChapterId = 3,
@@ -2000,7 +2001,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal("Some Special Title", nextChapter.Range);
     }
@@ -2041,9 +2042,9 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await readerService.MarkSeriesAsRead(user, 1);
+        await _readerService.MarkSeriesAsRead(user, 1);
         await _context.SaveChangesAsync();
 
         // Add 2 new unread series to the Series
@@ -2053,7 +2054,7 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         // This tests that if you add a series later to a volume and a loose leaf chapter, we continue from that volume, rather than loose leaf
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
         Assert.Equal("14.9", nextChapter.Range);
     }
 
@@ -2104,18 +2105,18 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         // Save progress on first volume chapters and 1st of second volume
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress);
-        await readerService.MarkChaptersAsRead(user, 1,
+        await _readerService.MarkChaptersAsRead(user, 1,
             new List<Chapter>()
             {
                 readChapter1, readChapter2
             });
         await _context.SaveChangesAsync();
 
-        var nextChapter = await readerService.GetContinuePoint(1, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
 
         Assert.Equal(4, nextChapter.VolumeId);
     }
@@ -2152,10 +2153,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await _readerService.MarkChaptersUntilAsRead(user, 1, 5);
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
@@ -2194,10 +2195,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkChaptersUntilAsRead(user, 1, 2.5f);
+        await _readerService.MarkChaptersUntilAsRead(user, 1, 2.5f);
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
@@ -2236,10 +2237,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkChaptersUntilAsRead(user, 1, 2);
+        await _readerService.MarkChaptersUntilAsRead(user, 1, 2);
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
@@ -2289,12 +2290,12 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         const int markReadUntilNumber = 47;
 
-        await readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
+        await _readerService.MarkChaptersUntilAsRead(user, 1, markReadUntilNumber);
         await _context.SaveChangesAsync();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(1, 1);
@@ -2347,9 +2348,9 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
 
-        await readerService.MarkSeriesAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+
+        await _readerService.MarkSeriesAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
         await _context.SaveChangesAsync();
 
         Assert.Equal(4, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
@@ -2386,15 +2387,15 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(1)).ToList();
-        await readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
+        await _readerService.MarkChaptersAsRead(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1, volumes.First().Chapters);
 
         await _context.SaveChangesAsync();
         Assert.Equal(2, (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses.Count);
 
-        await readerService.MarkSeriesAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
+        await _readerService.MarkSeriesAsUnread(await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress), 1);
         await _context.SaveChangesAsync();
 
         var progresses = (await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Progress)).Progresses;
@@ -2476,10 +2477,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        await _readerService.MarkVolumesUntilAsRead(user, 1, 2002);
         await _context.SaveChangesAsync();
 
         // Validate loose leaf chapters don't get marked as read
@@ -2534,10 +2535,10 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkVolumesUntilAsRead(user, 1, 2002);
+        await _readerService.MarkVolumesUntilAsRead(user, 1, 2002);
         await _context.SaveChangesAsync();
 
         // Validate loose leaf chapters don't get marked as read
@@ -2577,9 +2578,9 @@ public class ReaderServiceTests
         new [] {"0,0", "1,1", "2,1", "3,3", "4,3", "5,5", "6,6", "7,6", "8,8", "9,9"})]
     public void GetPairs_ShouldReturnPairsForNoWideImages(string caseName, IList<bool> wides, IList<string> expectedPairs)
     {
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
         var files = wides.Select((b, i) => new FileDimensionDto() {PageNumber = i, Height = 1, Width = 1, FileName = string.Empty, IsWide = b}).ToList();
-        var pairs = readerService.GetPairs(files);
+        var pairs = _readerService.GetPairs(files);
         var expectedDict = new Dictionary<int, int>();
         foreach (var pair in expectedPairs)
         {

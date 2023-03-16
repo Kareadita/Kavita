@@ -10,6 +10,7 @@ public static class Configuration
 {
     public const string DefaultIpAddresses = "0.0.0.0,::";
     public const string DefaultBaseUrl = "/";
+    public const string DefaultXFrameOptions = "SAMEORIGIN";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
@@ -35,6 +36,8 @@ public static class Configuration
         get => GetBaseUrl(GetAppSettingFilename());
         set => SetBaseUrl(GetAppSettingFilename(), value);
     }
+
+    public static string XFrameOptions => GetXFrameOptions(GetAppSettingFilename());
 
     private static string GetAppSettingFilename()
     {
@@ -224,7 +227,7 @@ public static class Configuration
             if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
             {
                 var baseUrl = tokenElement.GetString();
-                if (!String.IsNullOrEmpty(baseUrl))
+                if (!string.IsNullOrEmpty(baseUrl))
                 {
                     baseUrl = !baseUrl.StartsWith("/")
                                 ? $"/{baseUrl}"
@@ -274,6 +277,35 @@ public static class Configuration
         {
             /* Swallow exception */
         }
+    }
+    #endregion
+
+    #region XFrameOrigins
+    private static string GetXFrameOptions(string filePath)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return DefaultBaseUrl;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "XFrameOrigins";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                var origins = tokenElement.GetString();
+                return !string.IsNullOrEmpty(origins) ? origins : DefaultBaseUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return DefaultXFrameOptions;
     }
     #endregion
 

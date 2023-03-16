@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -34,12 +34,14 @@ public class ReaderController : BaseApiController
     private readonly IBookmarkService _bookmarkService;
     private readonly IAccountService _accountService;
     private readonly IEventHub _eventHub;
+    private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
         IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
         IReaderService readerService, IBookmarkService bookmarkService,
-        IAccountService accountService, IEventHub eventHub)
+        IAccountService accountService, IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -48,6 +50,8 @@ public class ReaderController : BaseApiController
         _bookmarkService = bookmarkService;
         _accountService = accountService;
         _eventHub = eventHub;
+        _imageService = imageService;
+        _directoryService = directoryService;
     }
 
     /// <summary>
@@ -114,6 +118,20 @@ public class ReaderController : BaseApiController
         }
     }
 
+    [HttpGet("thumbnail")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    [AllowAnonymous]
+    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum)
+    {
+        var chapter = await _cacheService.Ensure(chapterId, true);
+        if (chapter == null) return BadRequest("There was an issue extracting images from chapter");
+        var images = _cacheService.GetCachedPages(chapterId);
+
+        var path = await _readerService.GetThumbnail(chapter, pageNum, images);
+        var format = Path.GetExtension(path).Replace(".", string.Empty); // TODO: Make this an extension
+        return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
+    }
+
     /// <summary>
     /// Returns an image for a given bookmark series. Side effect: This will cache the bookmark images for reading.
     /// </summary>
@@ -172,13 +190,14 @@ public class ReaderController : BaseApiController
     /// <summary>
     /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
     /// </summary>
+    /// <remarks>This is generally the first call when attempting to read to allow pre-generation of assets needed for reading</remarks>
     /// <param name="chapterId"></param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <param name="includeDimensions">Include file dimensions. Only useful for image based reading</param>
     /// <returns></returns>
     [HttpGet("chapter-info")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf", "includeDimensions"})]
-    public async Task<ActionResult<ChapterInfoDto?>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
+    public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
         if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);

@@ -31,8 +31,8 @@ import { DoubleRendererComponent } from '../double-renderer/double-renderer.comp
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
 import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
 import { ChapterInfo } from '../../_models/chapter-info';
-import { SwipeEvent } from 'ng-swipe';
 import { DoubleNoCoverRendererComponent } from '../double-renderer-no-cover/double-no-cover-renderer.component';
+import { SwipeEvent } from 'src/app/ng-swipe/ag-swipe.core';
 
 
 const PREFETCH_PAGES = 10;
@@ -379,7 +379,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // This is for the pagination area
   get MaxHeight() {
     if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
-      return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
+      return Math.min(this.readingArea?.nativeElement?.clientHeight, this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) + 'px';
     }
     return 'calc(var(--vh) * 100)';
   }

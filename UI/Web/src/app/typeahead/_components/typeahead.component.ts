@@ -236,16 +236,16 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     this.filteredOptions = this.typeaheadForm.get('typeahead')!.valueChanges
       .pipe(
         // Adjust input box to grow
-        tap(val => {
+        tap((val: string) => {
           if (this.inputElem != null && this.inputElem.nativeElement != null) {
             this.renderer2.setStyle(this.inputElem.nativeElement, 'width', 15 * (val.trim().length + 1) + 'px');
             this.focusedIndex = 0;
           }
         }),
-        map(val => val.trim()),
+        map((val: string) => val.trim()),
         auditTime(this.settings.debounce),
         //distinctUntilChanged(), // ?!: BUG Doesn't trigger the search to run when filtered array changes
-        filter(val => {
+        filter((val: string) => {
           // If minimum filter characters not met, do not filter
           if (this.settings.minCharacters === 0) return true;
 
@@ -256,11 +256,11 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
           return true;
         }),
 
-        switchMap(val => {
+        switchMap((val: string) => {
           this.isLoadingOptions = true;
           return this.settings.fetchFn(val.trim()).pipe(takeUntil(this.onDestroy), map((items: any[]) => items.filter(item => this.filterSelected(item))));
         }),
-        tap((filteredOptions) => {
+        tap((filteredOptions: any[]) => {
           this.isLoadingOptions = false;
           this.focusedIndex = 0;
           this.cdRef.markForCheck();
@@ -398,6 +398,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     }
 
     this.toggleSelection(opt);
+    console.log('Selected ', opt);
 
     this.resetField();
     this.onInputFocus();
@@ -410,6 +411,7 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
     const newItem = this.settings.addTransformFn(title);
     this.newItemAdded.emit(newItem);
     this.toggleSelection(newItem);
+    console.log('Selected ', newItem);
 
     this.resetField();
     this.onInputFocus();
@@ -482,14 +484,43 @@ export class TypeaheadComponent implements OnInit, OnDestroy {
 
   updateShowAddItem(options: any[]) {
     // ?! BUG This will still technicially allow you to add the same thing as a previously added item. (Code will just toggle it though)
-    this.showAddItem = this.settings.addIfNonExisting && this.typeaheadControl.value.trim()
-          && this.typeaheadControl.value.trim().length >= Math.max(this.settings.minCharacters, 1)
-          && this.typeaheadControl.dirty
-          && (typeof this.settings.compareFn == 'function' && this.settings.compareFn(options, this.typeaheadControl.value.trim()).length === 0);
+    this.showAddItem = false;
+    this.cdRef.markForCheck();
+    if (!this.settings.addIfNonExisting) return;
+
+    const inputText = this.typeaheadControl.value.trim();
+    if (inputText.length < Math.max(this.settings.minCharacters, 1)) return;
+    if (!this.typeaheadControl.dirty) return; // Do we need this?
+
+    // Check if this new option will interfere with any existing ones not shown
+    
+    if (typeof this.settings.compareFnForAdd == 'function') {
+      console.log('filtered options: ', this.optionSelection.selected());
+      const willDuplicateExist = this.settings.compareFnForAdd(this.optionSelection.selected(), inputText);
+      console.log('duplicate check: ', willDuplicateExist);
+      if (willDuplicateExist.length > 0) {
+        console.log("can't show add, duplicates will exist");
+        return;
+      }
+    }
+
+    if (typeof this.settings.compareFn == 'function') {
+      // The problem here is that compareFn can report that duplicate will exist as it does contains not match
+      const matches = this.settings.compareFn(options, inputText);
+      console.log('matches for ', inputText, ': ', matches);
+      console.log('matches include input string: ', matches.includes(this.settings.addTransformFn(inputText)));
+      if (matches.length > 0 && matches.includes(this.settings.addTransformFn(inputText))) {
+        console.log("can't show add, there are still ");
+        return;
+      }
+    }
+    
+    this.showAddItem = true;
 
     if (this.showAddItem) {
       this.hasFocus = true;
     }
+    this.cdRef.markForCheck();
   }
 
   toggleLock(event: any) {

@@ -509,7 +509,7 @@ public class ReadingListService : IReadingListService
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
         {
-            readingList = DbFactory.ReadingList(cblReading.Name, string.Empty, false);
+            readingList = DbFactory.ReadingList(cblReading.Name, cblReading.Summary, false);
             user.ReadingLists.Add(readingList);
         }
         else

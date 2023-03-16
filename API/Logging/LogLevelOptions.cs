@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Filters;
 using Serilog.Formatting.Display;
 
 namespace API.Logging;
@@ -12,6 +13,7 @@ namespace API.Logging;
 public static class LogLevelOptions
 {
     public const string LogFile = "config/logs/kavita.log";
+    public const string SecurityLogFile = "config/logs/security.log";
     public const bool LogRollingEnabled = true;
     /// <summary>
     /// Controls the Logging Level of the Application
