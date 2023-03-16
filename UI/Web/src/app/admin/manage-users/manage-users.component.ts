@@ -102,6 +102,8 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     });
   }
 
+  log(o: any) {console.log(o)}
+
   resendEmail(member: Member) {
     this.serverService.isServerAccessible().subscribe(canAccess => {
       this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
