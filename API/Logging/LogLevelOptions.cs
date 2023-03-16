@@ -13,7 +13,6 @@ namespace API.Logging;
 public static class LogLevelOptions
 {
     public const string LogFile = "config/logs/kavita.log";
-    public const string SecurityLogFile = "config/logs/security.log";
     public const bool LogRollingEnabled = true;
     /// <summary>
     /// Controls the Logging Level of the Application
@@ -59,7 +58,7 @@ public static class LogLevelOptions
             .Filter.ByIncludingOnly(ShouldIncludeLogStatement);
     }
 
-    private static  bool ShouldIncludeLogStatement(LogEvent e)
+    private static bool ShouldIncludeLogStatement(LogEvent e)
     {
         var isRequestLoggingMiddleware = e.Properties.ContainsKey("SourceContext") &&
                                          e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==

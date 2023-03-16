@@ -274,7 +274,6 @@ public class Startup
 
 
         app.UseMiddleware<ExceptionMiddleware>();
-        app.UseMiddleware<SecurityEventMiddleware>();
 
         if (env.IsDevelopment())
         {
