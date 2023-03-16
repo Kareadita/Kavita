@@ -21,7 +21,8 @@ namespace API.Data.Migrations
                     RequestMethod = table.Column<string>(type: "TEXT", nullable: true),
                     RequestPath = table.Column<string>(type: "TEXT", nullable: true),
                     UserAgent = table.Column<string>(type: "TEXT", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {

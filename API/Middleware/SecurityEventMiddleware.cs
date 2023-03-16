@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,8 @@ public class SecurityEventMiddleware
             RequestMethod = requestMethod,
             RequestPath = requestPath,
             UserAgent = userAgent,
-            CreatedAt = DateTime.Now
+            CreatedAt = DateTime.Now,
+            CreatedAtUtc = DateTime.UtcNow,
         };
 
         using (var scope = context.RequestServices.CreateScope())

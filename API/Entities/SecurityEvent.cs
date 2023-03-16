@@ -10,4 +10,5 @@ public class SecurityEvent
     public string RequestPath { get; set; }
     public string UserAgent { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAtUtc { get; set; }
 }
