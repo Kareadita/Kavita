@@ -8,6 +8,14 @@ on:
     types: [synchronize]
 
 jobs:
+  check_pr:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Check PR Body
+          uses: JJ/github-pr-contains-action@releases/v7
+          with:
+              github-token: ${{ secrets.GITHUB_TOKEN }}
+              bodyDoesNotContain: "\"|`"
   build:
     name: Build .Net
     runs-on: windows-latest
@@ -73,7 +81,6 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
-
 
   version:
     name: Bump version on Develop push
