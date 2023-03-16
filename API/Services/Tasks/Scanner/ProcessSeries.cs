@@ -51,6 +51,9 @@ public class ProcessSeries : IProcessSeries
     private IList<Person> _people;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
+    private readonly object _peopleLock;
+    private readonly object _genreLock;
+    private readonly object _tagLock;
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -838,7 +841,7 @@ public class ProcessSeries : IProcessSeries
             if (person == null)
             {
                 person = DbFactory.Person(name, role);
-                lock (_people)
+                lock (_peopleLock)
                 {
                     _people.Add(person);
                 }
@@ -865,7 +868,7 @@ public class ProcessSeries : IProcessSeries
             if (newTag)
             {
                 genre = DbFactory.Genre(name);
-                lock (_genres)
+                lock (_genreLock)
                 {
                     _genres.Add(normalizedName, genre);
                     _unitOfWork.GenreRepository.Attach(genre);
@@ -894,7 +897,7 @@ public class ProcessSeries : IProcessSeries
             if (tag == null)
             {
                 tag = DbFactory.Tag(name);
-                lock (_tags)
+                lock (_tagLock)
                 {
                     _tags.Add(normalizedName, tag);
                 }
