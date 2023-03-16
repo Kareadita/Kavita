@@ -13,12 +13,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
             fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -81,12 +81,12 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -139,7 +139,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: develop
 
@@ -176,7 +176,7 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
 
@@ -253,7 +253,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           ref: main
 
@@ -293,7 +293,7 @@ jobs:
         id: parse-version
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3
         with:
             dotnet-version: 7.0.x
       - name: Install Swashbuckle CLI
