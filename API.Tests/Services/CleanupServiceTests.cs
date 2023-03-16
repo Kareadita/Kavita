@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,6 @@ using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
-using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -437,7 +437,8 @@ public class CleanupServiceTests : AbstractDbTest
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
+            Substitute.For<IImageService>(), new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
         await readerService.MarkChaptersUntilAsRead(user, 1, 5);
@@ -534,7 +535,8 @@ public class CleanupServiceTests : AbstractDbTest
         await _unitOfWork.CommitAsync();
 
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>());
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
 
         await readerService.MarkSeriesAsRead(user, s.Id);
         await _unitOfWork.CommitAsync();

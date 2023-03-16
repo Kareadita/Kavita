@@ -500,7 +500,8 @@ public class ReadingListServiceTests
         Assert.Equal(3, readingList.Items.Count);
 
         var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>());
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
         // Mark 2 as fully read
         await readerService.MarkChaptersAsRead(user, 1,
             (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2})).ToList());

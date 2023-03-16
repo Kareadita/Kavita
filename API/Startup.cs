@@ -326,6 +326,7 @@ public class Startup
             OnPrepareResponse = ctx =>
             {
                 ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
+                ctx.Context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
             }
         });
 
