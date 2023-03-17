@@ -111,20 +111,6 @@ public static class PersonHelper
         }
     }
 
-    /// <summary>
-    /// Adds the person to the list if it's not already in there
-    /// </summary>
-    /// <param name="metadataPeople"></param>
-    /// <param name="person"></param>
-    public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
-    {
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == person.Name?.ToNormalized() && p.Role == person.Role);
-        if (existingPerson == null)
-        {
-            metadataPeople.Add(person);
-        }
-    }
 
     /// <summary>
     /// For a given role and people dtos, update a series

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using API.Data;
 using API.DTOs;
@@ -298,6 +299,95 @@ public class PersonHelperTests
     #endregion
 
     #region AddPeople
+
+    [Fact]
+    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonDoesNotExist()
+    {
+        // Arrange
+        var metadataPeople = new List<Person>();
+        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
+
+        // Act
+        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
+
+        // Assert
+        Assert.Single(metadataPeople);
+        Assert.Contains(person, metadataPeople);
+    }
+
+    [Fact]
+    public void AddPersonIfNotExists_ShouldNotAddPerson_WhenPersonAlreadyExists()
+    {
+        // Arrange
+        var metadataPeople = new List<Person>
+        {
+            new PersonBuilder("John Smith", PersonRole.Character)
+                .WithId(1)
+                .Build()
+        };
+        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
+        // Act
+        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
+
+        // Assert
+        Assert.Single(metadataPeople);
+        Assert.NotNull(metadataPeople.SingleOrDefault(p =>
+            p.Name.Equals(person.Name) && p.Role == person.Role && p.NormalizedName == person.NormalizedName));
+        Assert.Equal(metadataPeople.First().Id, 1);
+    }
+
+    [Fact]
+    public void AddPersonIfNotExists_ShouldNotAddPerson_WhenPersonNameIsNullOrEmpty()
+    {
+        // Arrange
+        var metadataPeople = new List<Person>();
+        var person2 = new PersonBuilder(string.Empty, PersonRole.Character).Build();
+
+        // Act
+        PersonHelper.AddPersonIfNotExists(metadataPeople, person2);
+
+        // Assert
+        Assert.Empty(metadataPeople);
+    }
+
+    [Fact]
+    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonNameIsDifferentButRoleIsSame()
+    {
+        // Arrange
+        var metadataPeople = new List<Person>
+        {
+            new PersonBuilder("John Smith", PersonRole.Character).Build()
+        };
+        var person = new PersonBuilder("John Doe", PersonRole.Character).Build();
+
+        // Act
+        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
+
+        // Assert
+        Assert.Equal(2, metadataPeople.Count);
+        Assert.Contains(person, metadataPeople);
+    }
+
+    [Fact]
+    public void AddPersonIfNotExists_ShouldAddPerson_WhenPersonNameIsSameButRoleIsDifferent()
+    {
+        // Arrange
+        var metadataPeople = new List<Person>
+        {
+            new PersonBuilder("John Doe", PersonRole.Writer).Build()
+        };
+        var person = new PersonBuilder("John Smith", PersonRole.Character).Build();
+
+        // Act
+        PersonHelper.AddPersonIfNotExists(metadataPeople, person);
+
+        // Assert
+        Assert.Equal(2, metadataPeople.Count);
+        Assert.Contains(person, metadataPeople);
+    }
+
+
+
 
     [Fact]
     public void AddPeople_ShouldAddOnlyNonExistingPeople()
