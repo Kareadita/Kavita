@@ -39,7 +39,7 @@ public class PersonHelperTests
         {
             new PersonBuilder("Joe Shmo", PersonRole.CoverArtist).Build(),
             new PersonBuilder("Joe Shmo", PersonRole.Writer).Build(),
-            new PersonBuilder("Sally Ann", PersonRole.Writer).Build(),
+            new PersonBuilder("Sally Ann", PersonRole.CoverArtist).Build(),
 
         };
         var peopleAdded = new List<Person>();
@@ -160,7 +160,41 @@ public class PersonHelperTests
 
         // Assert
         Assert.False(handleAddCalled);
-        Assert.True(onModifiedCalled);
+        Assert.False(onModifiedCalled);
+        Assert.Single(series.Metadata.People);
+        Assert.Equal("John Doe", series.Metadata.People.First().Name);
+    }
+
+    [Fact]
+    public void UpdatePeopleList_NoChanges_HandleAddAndOnModifiedNotCalled()
+    {
+        // Arrange
+        const PersonRole role = PersonRole.Writer;
+        var tags = new List<PersonDto>
+        {
+            new PersonDto { Id = 1, Name = "John Doe", Role = role }
+        };
+        var series = new SeriesBuilder("Test Series").Build();
+        var person = new PersonBuilder("John Doe", role).Build();
+        person.Id = 1;
+        series.Metadata.People.Add(person);
+        var allTags = new List<Person>
+        {
+            new PersonBuilder("John Doe", role).Build()
+        };
+        var handleAddCalled = false;
+        var onModifiedCalled = false;
+
+        // Act
+        PersonHelper.UpdatePeopleList(role, tags, series, allTags, p =>
+        {
+            handleAddCalled = true;
+            series.Metadata.People.Add(p);
+        }, () => onModifiedCalled = true);
+
+        // Assert
+        Assert.False(handleAddCalled);
+        Assert.False(onModifiedCalled);
         Assert.Single(series.Metadata.People);
         Assert.Equal("John Doe", series.Metadata.People.First().Name);
     }
