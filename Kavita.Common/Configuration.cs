@@ -309,7 +309,7 @@ public static class Configuration
     }
     #endregion
 
-    private class AppSettings
+    private sealed class AppSettings
     {
         public string TokenKey { get; set; }
         public int Port { get; set; }

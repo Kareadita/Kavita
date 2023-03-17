@@ -25,6 +25,10 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
    * If a link should be generated when clicked. By default (undefined), no link will be generated
    */
   @Input() link: string | undefined;
+  /**
+   * If external, link will be used as full href and rel will be applied
+   */
+  @Input() external: boolean = false;
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
 

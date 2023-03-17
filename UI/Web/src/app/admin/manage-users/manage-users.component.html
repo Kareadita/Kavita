@@ -10,7 +10,6 @@
         <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
             <div>
                 <h4>
-                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.id)"></i>
                     <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
                     <span *ngIf="member.username === loggedInUsername">
                         <i class="fas fa-star" aria-hidden="true"></i>
@@ -30,7 +29,7 @@
                     <div>Last Active:
                         <span *ngIf="member.lastActive === '0001-01-01T00:00:00'; else activeDate">Never</span>
                         <ng-template #activeDate>
-                            {{member.lastActive | date: 'short'}}
+                            {{member.lastActive | date: 'short'}} <i class="presence fa fa-circle ms-1" title="Online Now" aria-hidden="true" *ngIf="(messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
                         </ng-template>
                     </div>
                     <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>

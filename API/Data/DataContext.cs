@@ -47,7 +47,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<FolderPath> FolderPath { get; set; } = null!;
     public DbSet<Device> Device { get; set; } = null!;
     public DbSet<ServerStatistics> ServerStatistics { get; set; } = null!;
-    public DbSet<SecurityEvent> SecurityEvent { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

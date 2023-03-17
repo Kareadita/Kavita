@@ -36,10 +36,6 @@ export class MemberService {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + librayId);
   }
 
-  getPendingInvites() {
-    return this.httpClient.get<Array<Member>>(this.baseUrl + 'users/pending');
-  }
-
   addSeriesToWantToRead(seriesIds: Array<number>) {
     return this.httpClient.post<Array<Member>>(this.baseUrl + 'want-to-read/add-series', {seriesIds});
   }

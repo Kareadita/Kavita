@@ -17,6 +17,7 @@
         </app-side-nav-item>
         <app-side-nav-item icon="fa-bookmark" title="Bookmarks" link="/bookmarks/"></app-side-nav-item>
         <app-side-nav-item icon="fa-regular fa-rectangle-list" title="All Series" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>
+        <app-side-nav-item icon="fa-heart" title="Donate" link="https://opencollective.com/kavita" [external]="true"></app-side-nav-item>
         <div class="mb-2 mt-3 ms-2 me-2" *ngIf="libraries.length > 10 && (navService?.sideNavCollapsed$ | async) === false">
             <label for="filter" class="form-label visually-hidden">Filter</label>
             <div class="form-group">
