@@ -1,8 +1,68 @@
+.bottom {
+    position: absolute;
+    bottom: 12px;
+    width: 190px;
+    background: var(--navbar-bg-color);
+    border-radius: var(--side-nav-border-radius);
+    font-size: 12px;
+    transition: width var(--side-nav-openclose-transition);
+    z-index: 999;
+    
+    &.closed {
+        width: 50px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+}
+
+:host ::ng-deep .bottom .donate .side-nav-item {
+    justify-content: center;
+    min-height: 25px;
+    align-items: center;
+
+    :hover {
+        background-color: unset;
+    }
+ }
+
+:host ::ng-deep .bottom .donate .side-nav-item span {
+    flex-grow: unset !important;
+    min-width: unset !important;;
+}
+
+:host ::ng-deep .bottom .donate .side-nav-item span div {
+    min-width: unset !important;
+}
+
+:host ::ng-deep .bottom .donate .side-nav-item span div i{
+    font-size: 12px !important;
+}
+
+
+
+:host ::ng-deep .bottom .donate .side-nav-item.closed span.phone-hidden div {
+    width: 100%;
+}
+
+:host ::ng-deep .bottom .donate .side-nav-item.closed span.side-nav-text div {
+    width: 0;
+}
+
+@media (max-width: 576px) {
+    :host ::ng-deep .bottom .donate .side-nav-item.closed {
+        display: none;
+    }
+
+    :host ::ng-deep .bottom .donate .side-nav-item span.phone-hidden {
+        display: block !important;
+    }
+}
+
 .side-nav {
     padding-bottom: 10px;
     width: 190px;
     background-color: var(--side-nav-bg-color);
-    height: calc((var(--vh)*100) - 85px);
+    height: calc((var(--vh)*100) - 115px);
     position: fixed;
     margin: 0;
     left: 10px;
@@ -36,7 +96,7 @@
         padding: 10px 0;
         width: 55vw;
         background-color: var(--side-nav-mobile-bg-color);
-        height: calc((var(--vh)*100) - 56px);
+        height: calc((var(--vh)*100) - 125px);
         position: fixed;
         margin: 0;
         left: 0;
