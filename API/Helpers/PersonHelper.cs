@@ -25,6 +25,7 @@ public static class PersonHelper
     /// <param name="action"></param>
     public static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
+        // TODO: Validate if we need this, not used
         var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
 
         foreach (var name in names)
@@ -34,7 +35,7 @@ public static class PersonHelper
                 p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
-                person = DbFactory.Person(name, role);
+                person = new PersonBuilder(name, role).Build();
                 allPeople.Add(person);
             }
 
@@ -125,6 +126,15 @@ public static class PersonHelper
         }
     }
 
+    /// <summary>
+    /// For a given role and people dtos, update a series
+    /// </summary>
+    /// <param name="role"></param>
+    /// <param name="tags"></param>
+    /// <param name="series"></param>
+    /// <param name="allTags"></param>
+    /// <param name="handleAdd">This will call with an existing or new tag, but the method does not update the series Metadata</param>
+    /// <param name="onModified"></param>
     public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? tags, Series series, IReadOnlyCollection<Person> allTags,
         Action<Person> handleAdd, Action onModified)
     {

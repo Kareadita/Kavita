@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
         - name: Check PR Body
-          uses: JJ/github-pr-contains-action@releases/v7
+          uses: JJ/github-pr-contains-action@releases/v9
           with:
               github-token: ${{ secrets.GITHUB_TOKEN }}
               bodyDoesNotContain: "[\"|`]"
