@@ -8,7 +8,7 @@
                             <div class="me-3 align-middle">
                                 <div style="padding-top: 40px">
                                     <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
-                                    <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
+                                    <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" inputmode="numeric" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
                                     (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
                                 </div>
                             </div>
@@ -31,7 +31,7 @@
                     <div class="me-3 align-middle">
                         <div class="align-middle" style="padding-top: 40px" *ngIf="accessibilityMode">
                             <label for="reorder-{{i}}" class="form-label visually-hidden">Reorder</label>
-                            <input id="reorder-{{i}}" class="form-control" type="number" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
+                            <input id="reorder-{{i}}" class="form-control" type="number" inputmode="numeric" min="0" [max]="items.length - 1" [value]="i" style="width: 60px" 
                             (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
                         </div>
                         <i *ngIf="!accessibilityMode" class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
