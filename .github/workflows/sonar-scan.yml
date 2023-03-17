@@ -117,6 +117,9 @@ jobs:
     name: Build Nightly Docker if Develop push
     needs: [ build, version ]
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
       - name: Find Current Pull Request
@@ -193,10 +196,17 @@ jobs:
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -212,7 +222,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
+          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/${{ github.repository_owner }}/kavita:nightly, ghcr.io/${{ github.repository_owner }}/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -230,6 +240,9 @@ jobs:
     name: Build Stable Docker if Main push
     needs: [ build ]
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
 
@@ -309,10 +322,17 @@ jobs:
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -328,7 +348,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}
+          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/${{ github.repository_owner }}/kavita:latest, ghcr.io/${{ github.repository_owner }}/kavita:${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
