@@ -239,20 +239,14 @@ public class CleanupServiceTests : AbstractDbTest
             UserName = "Joe",
             ReadingLists = new List<ReadingList>()
             {
-                new ReadingList()
-                {
-                    Title = "Something",
-                    NormalizedTitle = "Something".ToNormalized(),
-                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg",
-                    AgeRating = AgeRating.Unknown
-                },
-                new ReadingList()
-                {
-                    Title = "Something 2",
-                    NormalizedTitle = "Something 2".ToNormalized(),
-                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
-                    AgeRating = AgeRating.Unknown
-                }
+                new ReadingListBuilder("Something")
+                    .WithRating(AgeRating.Unknown)
+                    .WithCoverImage($"{ImageService.GetReadingListFormat(1)}.jpg")
+                    .Build(),
+                new ReadingListBuilder("Something 2")
+                    .WithRating(AgeRating.Unknown)
+                    .WithCoverImage($"{ImageService.GetReadingListFormat(2)}.jpg")
+                    .Build(),
             }
         });
 

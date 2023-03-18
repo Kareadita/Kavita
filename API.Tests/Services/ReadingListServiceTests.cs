@@ -145,7 +145,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -191,7 +191,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -249,7 +249,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -309,7 +309,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -384,7 +384,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -445,7 +445,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -507,7 +507,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -558,7 +558,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -611,7 +611,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -665,7 +665,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList

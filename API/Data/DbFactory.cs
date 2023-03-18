@@ -31,19 +31,6 @@ public static class DbFactory
         };
     }
 
-    public static ReadingList ReadingList(string title, string? summary = null, bool promoted = false, AgeRating rating = AgeRating.Unknown)
-    {
-        title = title.Trim();
-        return new ReadingList()
-        {
-            NormalizedTitle = title.ToNormalized(),
-            Title = title,
-            Summary = summary?.Trim(),
-            Promoted = promoted,
-            Items = new List<ReadingListItem>(),
-            AgeRating = rating
-        };
-    }
 
     public static ReadingListItem ReadingListItem(int index, int seriesId, int volumeId, int chapterId)
     {

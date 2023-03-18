@@ -156,9 +156,9 @@ public class QueryableExtensionsTests
 
         var items = new List<ReadingList>()
         {
-            DbFactory.ReadingList("Test List", null, false, AgeRating.Teen),
-            DbFactory.ReadingList("Test List", null, false, AgeRating.Unknown),
-            DbFactory.ReadingList("Test List", null, false, AgeRating.X18Plus),
+            new ReadingListBuilder("Test List").WithRating(AgeRating.Teen).Build(),
+            new ReadingListBuilder("Test List").WithRating(AgeRating.Unknown).Build(),
+            new ReadingListBuilder("Test List").WithRating(AgeRating.X18Plus).Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()

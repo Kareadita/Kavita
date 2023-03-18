@@ -12,6 +12,7 @@ using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -118,7 +119,7 @@ public class ReadingListService : IReadingListService
             throw new KavitaException("A list of this name already exists");
         }
 
-        var readingList = DbFactory.ReadingList(title, string.Empty, false);
+        var readingList = new ReadingListBuilder("test").Build();
         userWithReadingList.ReadingLists.Add(readingList);
 
         if (!_unitOfWork.HasChanges()) throw new KavitaException("There was a problem creating list");
@@ -509,7 +510,7 @@ public class ReadingListService : IReadingListService
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
         {
-            readingList = DbFactory.ReadingList(cblReading.Name, cblReading.Summary, false);
+            readingList = new ReadingListBuilder(cblReading.Name).WithSummary(cblReading.Summary).Build();
             user.ReadingLists.Add(readingList);
         }
         else
