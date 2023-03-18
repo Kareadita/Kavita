@@ -117,17 +117,9 @@ public class CacheServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 

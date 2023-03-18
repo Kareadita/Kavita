@@ -2,6 +2,7 @@
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Tests.Helpers;
 using Xunit;
 
@@ -16,16 +17,14 @@ public class VolumeListExtensionsTests
     {
         var volumes = new List<Volume>()
         {
-            EntityFactory.CreateVolume("1", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("3", false),
-                EntityFactory.CreateChapter("4", false),
-            }),
-            EntityFactory.CreateVolume("0", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("0", true),
-            }),
+            new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
         };
 
         Assert.Equal(volumes[0].Number, volumes.GetCoverImage(MangaFormat.Archive).Number);
@@ -36,16 +35,14 @@ public class VolumeListExtensionsTests
     {
         var volumes = new List<Volume>()
         {
-            EntityFactory.CreateVolume("1", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("3", false),
-                EntityFactory.CreateChapter("4", false),
-            }),
-            EntityFactory.CreateVolume("0", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("0", true),
-            }),
+            new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
         };
 
         Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Epub).Name);
@@ -56,16 +53,14 @@ public class VolumeListExtensionsTests
     {
         var volumes = new List<Volume>()
         {
-            EntityFactory.CreateVolume("1", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("3", false),
-                EntityFactory.CreateChapter("4", false),
-            }),
-            EntityFactory.CreateVolume("0", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("0", true),
-            }),
+            new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
         };
 
         Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Pdf).Name);
@@ -76,16 +71,14 @@ public class VolumeListExtensionsTests
     {
         var volumes = new List<Volume>()
         {
-            EntityFactory.CreateVolume("1", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("3", false),
-                EntityFactory.CreateChapter("4", false),
-            }),
-            EntityFactory.CreateVolume("0", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("0", true),
-            }),
+            new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).WithIsSpecial(true).Build())
+                .Build(),
         };
 
         Assert.Equal(volumes[0].Name, volumes.GetCoverImage(MangaFormat.Image).Name);
@@ -96,16 +89,14 @@ public class VolumeListExtensionsTests
     {
         var volumes = new List<Volume>()
         {
-            EntityFactory.CreateVolume("2", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("3", false),
-                EntityFactory.CreateChapter("4", false),
-            }),
-            EntityFactory.CreateVolume("1", new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("0", true),
-            }),
+            new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("3").Build())
+                .WithChapter(new ChapterBuilder("4").Build())
+                .Build(),
+            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
+                .Build(),
         };
 
         Assert.Equal(volumes[1].Name, volumes.GetCoverImage(MangaFormat.Image).Name);

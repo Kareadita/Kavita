@@ -79,10 +79,10 @@ public class ReadingListServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
+
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -115,42 +115,32 @@ public class ReadingListServiceTests
     public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
     {
         await ResetDb();
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
+        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+            .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
+                .WithSeries(new SeriesBuilder("Test")
+                    .WithMetadata(new SeriesMetadataBuilder().Build())
+                    .WithVolumes(new List<Volume>()
                     {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .Build()
-                            })
-                            .Build(),
-                    }
-                },
-            }
-        });
+                        new VolumeBuilder("0")
+                            .WithChapter(new ChapterBuilder("1")
+                                .WithAgeRating(AgeRating.Everyone)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("2")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("3")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .Build()
+                    })
+                    .Build())
+                .Build()
+            )
+            .Build()
+        );
 
         await _context.SaveChangesAsync();
 
@@ -172,42 +162,31 @@ public class ReadingListServiceTests
     public async Task AddChaptersToReadingList_ShouldNewItems_AfterLastOrder()
     {
         await ResetDb();
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
+        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+            .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
+                .WithSeries(new SeriesBuilder("Test")
+                    .WithVolumes(new List<Volume>()
                     {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .Build()
-                            })
+                        new VolumeBuilder("0")
+                            .WithChapter(new ChapterBuilder("1")
+                                .WithAgeRating(AgeRating.Everyone)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("2")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("3")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
                             .Build()
-                    }
-                },
-            }
-        });
+                    })
+                    .Build())
+                .Build()
+            )
+            .Build()
+        );
 
         await _context.SaveChangesAsync();
 

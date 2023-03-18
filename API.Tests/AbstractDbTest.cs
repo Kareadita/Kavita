@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
@@ -78,18 +79,9 @@ public abstract class AbstractDbTest
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            },
-            Series = new List<Series>()
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 

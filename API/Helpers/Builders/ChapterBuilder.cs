@@ -16,7 +16,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         {
             Range = string.IsNullOrEmpty(range) ? number : range,
             Title = string.IsNullOrEmpty(range) ? number : range,
-            Number = API.Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(number) + string.Empty,
+            Number = Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(number) + string.Empty,
             Files = new List<MangaFile>(),
             Pages = 1
         };
@@ -59,6 +59,12 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     {
         _chapter.Files ??= new List<MangaFile>();
         _chapter.Files.Add(file);
+        return this;
+    }
+
+    public ChapterBuilder WithFiles(IList<MangaFile> files)
+    {
+        _chapter.Files = files ?? new List<MangaFile>();
         return this;
     }
 }

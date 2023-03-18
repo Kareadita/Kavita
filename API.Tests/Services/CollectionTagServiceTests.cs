@@ -34,16 +34,11 @@ public class CollectionTagServiceTests : AbstractDbTest
     private async Task SeedSeries()
     {
         if (_context.CollectionTag.Any()) return;
-        _context.Library.Add(new Library()
-        {
-            Name = "Library 2",
-            Type = LibraryType.Manga,
-            Series = new List<Series>()
-            {
-                EntityFactory.CreateSeries("Series 1"),
-                EntityFactory.CreateSeries("Series 2"),
-            }
-        });
+
+        _context.Library.Add(new LibraryBuilder("Library 2", LibraryType.Manga)
+            .WithSeries(new SeriesBuilder("Series 1").Build())
+            .WithSeries(new SeriesBuilder("Series 2").Build())
+            .Build());
 
         _context.CollectionTag.Add(new CollectionTagBuilder("Tag 1").Build());
         _context.CollectionTag.Add(new CollectionTagBuilder("Tag 2").WithIsPromoted(true).Build());

@@ -8,6 +8,7 @@ using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Device;
+using API.Helpers.Builders;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -42,9 +43,10 @@ public class DeviceService : IDeviceService
             var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name!.Equals(dto.Name));
             if (existingDevice != null) throw new KavitaException("A device with this name already exists");
 
-            existingDevice = DbFactory.Device(dto.Name);
-            existingDevice.Platform = dto.Platform;
-            existingDevice.EmailAddress = dto.EmailAddress;
+            existingDevice = new DeviceBuilder(dto.Name)
+                .WithPlatform(dto.Platform)
+                .WithEmail(dto.EmailAddress)
+                .Build();
 
 
             userWithDevices.Devices.Add(existingDevice);

@@ -71,10 +71,10 @@ public class CollectionTagRepositoryTests
 
         _context.ServerSetting.Update(setting);
 
-        var lib = new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        };
+
+        var lib = new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -119,7 +119,7 @@ public class CollectionTagRepositoryTests
     [Fact]
     public async Task RemoveTagsWithoutSeries_ShouldRemoveTags()
     {
-        var library = DbFactory.Library("Test", LibraryType.Manga);
+        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
         var series = new SeriesBuilder("Test 1").Build();
         var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);
@@ -152,7 +152,7 @@ public class CollectionTagRepositoryTests
     [Fact]
     public async Task RemoveTagsWithoutSeries_ShouldNotRemoveTags()
     {
-        var library = DbFactory.Library("Test", LibraryType.Manga);
+        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
         var series = new SeriesBuilder("Test 1").Build();
         var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);

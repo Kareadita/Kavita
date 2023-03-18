@@ -181,13 +181,13 @@ public class SeriesHelperTests
     {
         var existingSeries = new List<Series>()
         {
-            EntityFactory.CreateSeries("Darker than Black Vol 1"),
-            EntityFactory.CreateSeries("Darker than Black"),
-            EntityFactory.CreateSeries("Beastars"),
+            new SeriesBuilder("Darker than Black Vol 1").Build(),
+            new SeriesBuilder("Darker than Black").Build(),
+            new SeriesBuilder("Beastars").Build(),
         };
         var missingSeries = new List<Series>()
         {
-            EntityFactory.CreateSeries("Darker than Black Vol 1"),
+            new SeriesBuilder("Darker than Black Vol 1").Build(),
         };
         existingSeries = SeriesHelper.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
 

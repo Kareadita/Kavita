@@ -15,18 +15,6 @@ namespace API.Data;
 /// </summary>
 public static class DbFactory
 {
-    public static Library Library(string name, LibraryType type)
-    {
-        return new Library()
-        {
-            Name = name,
-            Type = type,
-            Series = new List<Series>(),
-            Folders = new List<FolderPath>(),
-            AppUsers = new List<AppUser>()
-        };
-    }
-
     public static Chapter Chapter(ParserInfo info)
     {
         var specialTreatment = info.IsSpecialInfo();
@@ -83,50 +71,6 @@ public static class DbFactory
         {
             Title = name.Trim().SentenceCase(),
             NormalizedTitle = name.ToNormalized()
-        };
-    }
-
-    public static Person Person(string name, PersonRole role)
-    {
-        return new Person()
-        {
-            Name = name.Trim(),
-            NormalizedName = name.ToNormalized(),
-            Role = role
-        };
-    }
-
-    public static MangaFile MangaFile(string filePath, MangaFormat format, int pages)
-    {
-        return new MangaFile()
-        {
-            FilePath = filePath,
-            Format = format,
-            Pages = pages,
-            LastModified = File.GetLastWriteTime(filePath),
-            LastModifiedUtc = File.GetLastWriteTimeUtc(filePath),
-        };
-    }
-
-    public static Device Device(string name)
-    {
-        return new Device()
-        {
-            Name = name,
-        };
-    }
-
-    public static AppUser AppUser(string username, string email, SiteTheme defaultTheme)
-    {
-        return new AppUser()
-        {
-            UserName = username,
-            Email = email,
-            ApiKey = HashUtil.ApiKey(),
-            UserPreferences = new AppUserPreferences
-            {
-                Theme = defaultTheme
-            }
         };
     }
 }

@@ -9,6 +9,7 @@ using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner;
@@ -118,17 +119,9 @@ public class ParseScannedFilesTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = DataDirectory
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 

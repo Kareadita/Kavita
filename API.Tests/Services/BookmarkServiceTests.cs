@@ -87,17 +87,9 @@ public class BookmarkServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -146,12 +138,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
-
+        series.Library = new LibraryBuilder("Test LIb").Build();
         _context.Series.Add(series);
 
 
@@ -200,11 +187,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -271,11 +254,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -352,11 +331,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -410,11 +385,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -468,11 +439,7 @@ public class BookmarkServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 

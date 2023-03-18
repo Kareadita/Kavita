@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Middleware.RateLimit;
 using API.Services;
 using API.SignalR;
@@ -126,16 +127,9 @@ public class AccountController : BaseApiController
                 return BadRequest(usernameValidation);
             }
 
-            var user = new AppUser()
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email,
-                UserPreferences = new AppUserPreferences
-                {
-                    Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-                },
-                ApiKey = HashUtil.ApiKey()
-            };
+            var user = new AppUserBuilder(registerDto.Username, registerDto.Email,
+                await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
+
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
@@ -204,6 +198,8 @@ public class AccountController : BaseApiController
 
         // Update LastActive on account
         user.UpdateLastActive();
+
+        // NOTE: This can likely be removed
         user.UserPreferences ??= new AppUserPreferences
         {
             Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
@@ -537,7 +533,7 @@ public class AccountController : BaseApiController
         }
 
         // Create a new user
-        var user = DbFactory.AppUser(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme());
+        var user = new AppUserBuilder(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
         try
         {

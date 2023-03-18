@@ -31,17 +31,9 @@ public class CleanupServiceTests : AbstractDbTest
 
     public CleanupServiceTests() : base()
     {
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
     }
 
     #region Setup
@@ -421,11 +413,7 @@ public class CleanupServiceTests : AbstractDbTest
                 .WithChapter(c)
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -474,11 +462,7 @@ public class CleanupServiceTests : AbstractDbTest
             .WithFormat(MangaFormat.Epub)
             .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
             .Build();
-        s.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        s.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(s);
 
@@ -515,11 +499,7 @@ public class CleanupServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
             .Build();
 
-        s.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        s.Library = new LibraryBuilder("Test LIb").Build();
         _context.Series.Add(s);
 
         var user = new AppUser()

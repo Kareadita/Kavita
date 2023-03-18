@@ -3,6 +3,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
@@ -45,7 +46,7 @@ public class ParserInfoListExtensions
                 string.Empty));
         }
 
-        var files = inputChapters.Select(s => EntityFactory.CreateMangaFile(s, MangaFormat.Archive, 199)).ToList();
+        var files = inputChapters.Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build()).ToList();
         var chapter = EntityFactory.CreateChapter("0-6", false, files);
 
         Assert.Equal(expectedHasInfo, infos.HasInfo(chapter));

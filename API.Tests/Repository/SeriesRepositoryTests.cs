@@ -72,10 +72,9 @@ public class SeriesRepositoryTests
 
         _context.ServerSetting.Update(setting);
 
-        var lib = new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        };
+        var lib = new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -117,23 +116,13 @@ public class SeriesRepositoryTests
 
     private async Task SetupSeriesData()
     {
-        var library = new Library()
-        {
-            Name = "GetFullSeriesByAnyName Manga",
-            Type = LibraryType.Manga,
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath() {Path = "C:/data/manga/"}
-            },
-            Series = new List<Series>()
-            {
-                new SeriesBuilder("The Idaten Deities Know Only Peace")
-                    .WithLocalizedName("Heion Sedai no Idaten-tachi")
-                    .WithFormat(MangaFormat.Archive)
-                    .Build()
-            }
-
-        };
+        var library = new LibraryBuilder("GetFullSeriesByAnyName Manga", LibraryType.Manga)
+            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
+            .WithSeries(new SeriesBuilder("The Idaten Deities Know Only Peace")
+                .WithLocalizedName("Heion Sedai no Idaten-tachi")
+                .WithFormat(MangaFormat.Archive)
+                .Build())
+            .Build();
 
         _unitOfWork.LibraryRepository.Add(library);
         await _unitOfWork.CommitAsync();

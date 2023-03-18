@@ -654,10 +654,11 @@ public class ProcessSeries : IProcessSeries
         }
         else
         {
-            var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
-            if (file == null) return;
-            file.Extension = fileInfo.Extension.ToLowerInvariant();
-            file.Bytes = fileInfo.Length;
+
+            var file = new MangaFileBuilder(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
+                .WithExtension(fileInfo.Extension)
+                .WithBytes(fileInfo.Length)
+                .Build();
             chapter.Files.Add(file);
         }
     }
@@ -841,7 +842,7 @@ public class ProcessSeries : IProcessSeries
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
                 if (person == null)
                 {
-                    person = DbFactory.Person(name, role);
+                    person = new PersonBuilder(name, role).Build();
                     _people.Add(person);
                 }
 

@@ -736,7 +736,7 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
         };
 
-        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
+        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -772,9 +772,9 @@ public class SeriesServiceTests : AbstractDbTest
             Name = "Test LIb",
             Type = LibraryType.Book,
         };
-        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
-        s.Metadata.People = new List<Person>() {DbFactory.Person("Existing Writer", PersonRole.Writer),
-            DbFactory.Person("Existing Translator", PersonRole.Translator), DbFactory.Person("Existing Publisher 2", PersonRole.Publisher)};
+        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
+        s.Metadata.People = new List<Person>() {new PersonBuilder("Existing Writer", PersonRole.Writer).Build(),
+            new PersonBuilder("Existing Translator", PersonRole.Translator).Build(), new PersonBuilder("Existing Publisher 2", PersonRole.Publisher).Build()};
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -812,7 +812,7 @@ public class SeriesServiceTests : AbstractDbTest
             Name = "Test LIb",
             Type = LibraryType.Book,
         };
-        var g = DbFactory.Person("Existing Person", PersonRole.Publisher);
+        var g = new PersonBuilder("Existing Person", PersonRole.Publisher).Build();
         _context.Series.Add(s);
 
         _context.Person.Add(g);
@@ -913,7 +913,7 @@ public class SeriesServiceTests : AbstractDbTest
 
     private static Series CreateSeriesMock()
     {
-        var file = EntityFactory.CreateMangaFile("Test.cbz", MangaFormat.Archive, 1);
+        var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
 
         var series = new SeriesBuilder("Test")
             .WithMetadata(new SeriesMetadata())
@@ -970,13 +970,13 @@ public class SeriesServiceTests : AbstractDbTest
         var series = CreateSeriesMock();
         var files = new List<MangaFile>()
         {
-            EntityFactory.CreateMangaFile("Test.cbz", MangaFormat.Archive, 1)
+            new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build()
         };
         series.Volumes[1].Chapters = new List<Chapter>()
         {
-            EntityFactory.CreateChapter("2", false, files, 1),
-            EntityFactory.CreateChapter("1.1", false, files, 1),
-            EntityFactory.CreateChapter("1.2", false, files, 1),
+            new ChapterBuilder("2").WithFiles(files).WithPages(1).Build(),
+            new ChapterBuilder("1.1").WithFiles(files).WithPages(1).Build(),
+            new ChapterBuilder("1.2").WithFiles(files).WithPages(1).Build(),
         };
 
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
