@@ -93,7 +93,7 @@ public class VolumeListExtensionsTests
                 .WithChapter(new ChapterBuilder("3").Build())
                 .WithChapter(new ChapterBuilder("4").Build())
                 .Build(),
-            new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+            new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter).Build())
                 .Build(),
