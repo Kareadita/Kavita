@@ -140,7 +140,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         // Add 2 series with cover images
         var s = new SeriesBuilder("Test 1").Build();
-        var v = DbFactory.Volume("1");
+        var v = new VolumeBuilder("1").Build();
         v.Chapters.Add(new Chapter()
         {
             Number = "0",
@@ -154,7 +154,7 @@ public class CleanupServiceTests : AbstractDbTest
         _context.Series.Add(s);
 
         s = new SeriesBuilder("Test 2").Build();
-        v = DbFactory.Volume("1");
+        v = new VolumeBuilder("1").Build();
         v.Chapters.Add(new Chapter()
         {
             Number = "0",

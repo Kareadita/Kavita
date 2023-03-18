@@ -520,8 +520,9 @@ public class ProcessSeries : IProcessSeries
             }
             if (volume == null)
             {
-                volume = DbFactory.Volume(volumeNumber);
-                volume.SeriesId = series.Id;
+                volume = new VolumeBuilder(volumeNumber)
+                    .WithSeriesId(series.Id)
+                    .Build();
                 series.Volumes.Add(volume);
             }
 

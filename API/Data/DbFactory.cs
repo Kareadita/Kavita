@@ -26,49 +26,6 @@ public static class DbFactory
             AppUsers = new List<AppUser>()
         };
     }
-    public static Series Series(string name)
-    {
-        return new Series
-        {
-            Name = name,
-            OriginalName = name,
-            LocalizedName = name,
-            NormalizedName = name.ToNormalized(),
-            NormalizedLocalizedName = name.ToNormalized(),
-            SortName = name,
-            Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(new List<CollectionTag>())
-        };
-    }
-
-    public static Series Series(string name, string localizedName)
-    {
-        if (string.IsNullOrEmpty(localizedName))
-        {
-            localizedName = name;
-        }
-        return new Series
-        {
-            Name = name,
-            OriginalName = name,
-            LocalizedName = localizedName,
-            NormalizedName = name.ToNormalized(),
-            NormalizedLocalizedName = localizedName.ToNormalized(),
-            SortName = name,
-            Volumes = new List<Volume>(),
-            Metadata = SeriesMetadata(new List<CollectionTag>())
-        };
-    }
-
-    public static Volume Volume(string volumeNumber)
-    {
-        return new Volume()
-        {
-            Name = volumeNumber,
-            Number = (int) Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
-            Chapters = new List<Chapter>()
-        };
-    }
 
     public static Chapter Chapter(ParserInfo info)
     {

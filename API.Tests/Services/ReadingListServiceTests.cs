@@ -1077,8 +1077,8 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fablesa");
-        var fables2Series = DbFactory.Series("Fablesa: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fablesa").Build();
+        var fables2Series = new SeriesBuilder("Fablesa: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new Volume()
         {

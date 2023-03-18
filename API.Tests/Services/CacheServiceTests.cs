@@ -168,7 +168,7 @@ public class CacheServiceTests
 
         await ResetDB();
         var s = new SeriesBuilder("Test").Build();
-        var v = DbFactory.Volume("1");
+        var v = new VolumeBuilder("1").Build();
         var c = new Chapter()
         {
             Number = "1",
@@ -209,7 +209,7 @@ public class CacheServiceTests
     //
     //     await ResetDB();
     //     var s = new SeriesBuilder("Test").Build();
-    //     var v = DbFactory.Volume("1");
+    //     var v = new VolumeBuilder("1").Build();
     //     var c = new Chapter()
     //     {
     //         Number = "1",
