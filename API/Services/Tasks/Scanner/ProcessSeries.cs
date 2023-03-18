@@ -51,9 +51,9 @@ public class ProcessSeries : IProcessSeries
     private IList<Person> _people;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
-    private readonly object _peopleLock;
-    private readonly object _genreLock;
-    private readonly object _tagLock;
+    private readonly object _peopleLock = new object();
+    private readonly object _genreLock = new object();
+    private readonly object _tagLock = new object();
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
@@ -70,6 +70,7 @@ public class ProcessSeries : IProcessSeries
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
+
 
         _genres = new Dictionary<string, Genre>();
         _people = new List<Person>();

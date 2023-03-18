@@ -31,8 +31,17 @@ public class SeriesBuilder : IEntityBuilder<Series>
         };
     }
 
+    /// <summary>
+    /// Sets the localized name. If null or empty, defaults back to the
+    /// </summary>
+    /// <param name="localizedName"></param>
+    /// <returns></returns>
     public SeriesBuilder WithLocalizedName(string localizedName)
     {
+        if (string.IsNullOrEmpty(localizedName))
+        {
+            localizedName = _series.Name;
+        }
         _series.LocalizedName = localizedName;
         _series.NormalizedLocalizedName = localizedName.ToNormalized();
         return this;
