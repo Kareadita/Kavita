@@ -45,4 +45,17 @@ public class MangaFileBuilder : IEntityBuilder<MangaFile>
         _mangaFile.Bytes = Math.Max(0, bytes);
         return this;
     }
+
+    public MangaFileBuilder WithLastModified(DateTime dateTime)
+    {
+        _mangaFile.LastModified = dateTime;
+        _mangaFile.LastModifiedUtc = dateTime.ToUniversalTime();
+        return this;
+    }
+
+    public MangaFileBuilder WithId(int id)
+    {
+        _mangaFile.Id = Math.Max(id, 0);
+        return this;
+    }
 }

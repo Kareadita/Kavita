@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services;
 using Xunit;
 
@@ -51,11 +53,10 @@ public class CacheHelperTests
     [Fact]
     public void ShouldUpdateCoverImage_OnFirstRun()
     {
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now
-        };
+
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now)
+            .Build();
         Assert.True(_cacheHelper.ShouldUpdateCoverImage(null, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
             false, false));
     }
@@ -64,11 +65,9 @@ public class CacheHelperTests
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked()
     {
         // Represents first run
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now)
+            .Build();
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
             false, false));
     }
@@ -77,11 +76,9 @@ public class CacheHelperTests
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetNotLocked_2()
     {
         // Represents first run
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now)
+            .Build();
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now,
             false, false));
     }
@@ -90,11 +87,9 @@ public class CacheHelperTests
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked()
     {
         // Represents first run
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now)
+            .Build();
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
             false, true));
     }
@@ -103,11 +98,9 @@ public class CacheHelperTests
     public void ShouldUpdateCoverImage_ShouldNotUpdateOnSecondRunWithCoverImageSetLocked_Modified()
     {
         // Represents first run
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now)
+            .Build();
         Assert.False(_cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, DateTime.Now.Subtract(TimeSpan.FromMinutes(1)),
             false, true));
     }
@@ -129,11 +122,10 @@ public class CacheHelperTests
         var cacheHelper = new CacheHelper(fileService);
 
         var created = DateTime.Now.Subtract(TimeSpan.FromHours(1));
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(1))
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(DateTime.Now.Subtract(TimeSpan.FromMinutes(1)))
+            .Build();
+
         Assert.True(cacheHelper.ShouldUpdateCoverImage(_testCoverPath, file, created,
             false, false));
     }
@@ -162,11 +154,9 @@ public class CacheHelperTests
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
 
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .Build();
         Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
@@ -194,11 +184,10 @@ public class CacheHelperTests
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
 
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .Build();
+
         Assert.True(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
@@ -226,11 +215,9 @@ public class CacheHelperTests
             LastModified = filesystemFile.LastWriteTime.DateTime
         };
 
-        var file = new MangaFile()
-        {
-            FilePath = TestCoverArchive,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .Build();
         Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, true, file));
     }
 
@@ -259,11 +246,9 @@ public class CacheHelperTests
             LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(10))
         };
 
-        var file = new MangaFile()
-        {
-            FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .Build();
         Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 
@@ -291,11 +276,10 @@ public class CacheHelperTests
             LastModified = DateTime.Now
         };
 
-        var file = new MangaFile()
-        {
-            FilePath = Path.Join(TestCoverImageDirectory, TestCoverArchive),
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .Build();
+
         Assert.False(cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, file));
     }
 

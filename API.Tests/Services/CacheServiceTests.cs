@@ -167,11 +167,7 @@ public class CacheServiceTests
             Range = "1",
             Files = new List<MangaFile>()
             {
-                new MangaFile()
-                {
-                    Format = MangaFormat.Archive,
-                    FilePath = $"{DataDirectory}Test v1.zip",
-                }
+                new MangaFileBuilder($"{DataDirectory}Test v1.zip", MangaFormat.Archive).Build()
             }
         };
         v.Chapters.Add(c);
@@ -270,14 +266,8 @@ public class CacheServiceTests
             Range = "1",
             Files = new List<MangaFile>()
             {
-                new MangaFile()
-                {
-                    FilePath = $"{DataDirectory}1.epub"
-                },
-                new MangaFile()
-                {
-                    FilePath = $"{DataDirectory}2.epub"
-                }
+                new MangaFileBuilder($"{DataDirectory}1.epub", MangaFormat.Epub).Build(),
+                new MangaFileBuilder($"{DataDirectory}2.epub", MangaFormat.Epub).Build()
             }
         };
         cs.GetCachedFile(c);
@@ -342,19 +332,14 @@ public class CacheServiceTests
             Range = "1",
             Files = new List<MangaFile>()
             {
-                new MangaFile()
-                {
-                    Id = 1,
-                    FilePath = $"{DataDirectory}1.zip",
-                    Pages = 10
-
-                },
-                new MangaFile()
-                {
-                    Id = 2,
-                    FilePath = $"{DataDirectory}2.zip",
-                    Pages = 5
-                }
+                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                    .WithPages(10)
+                    .WithId(1)
+                    .Build(),
+                new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
+                    .WithPages(5)
+                    .WithId(2)
+                    .Build(),
             }
         };
 
@@ -396,13 +381,10 @@ public class CacheServiceTests
             Range = "1",
             Files = new List<MangaFile>()
             {
-                new MangaFile()
-                {
-                    Id = 1,
-                    FilePath = $"{DataDirectory}1.zip",
-                    Pages = 10
-
-                }
+                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                    .WithPages(10)
+                    .WithId(1)
+                    .Build(),
             }
         };
         c.Pages = c.Files.Sum(f => f.Pages);
@@ -446,19 +428,14 @@ public class CacheServiceTests
             Range = "1",
             Files = new List<MangaFile>()
             {
-                new MangaFile()
-                {
-                    Id = 1,
-                    FilePath = $"{DataDirectory}1.zip",
-                    Pages = 10
-
-                },
-                new MangaFile()
-                {
-                    Id = 2,
-                    FilePath = $"{DataDirectory}2.zip",
-                    Pages = 5
-                }
+                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                    .WithPages(10)
+                    .WithId(1)
+                    .Build(),
+                new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
+                    .WithPages(5)
+                    .WithId(2)
+                    .Build(),
             }
         };
 

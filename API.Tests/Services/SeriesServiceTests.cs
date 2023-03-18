@@ -1112,11 +1112,11 @@ public class SeriesServiceTests : AbstractDbTest
         var lib1 = new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithSeries(new SeriesBuilder("Test Series")
                 .WithVolume(new VolumeBuilder("0")
-                    .WithChapter(new ChapterBuilder("1").WithFile(new MangaFile()
-                    {
-                        Pages = 1,
-                        FilePath = "fake file"
-                    }).Build())
+                    .WithChapter(new ChapterBuilder("1").WithFile(
+                        new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                            .WithPages(1)
+                            .Build()
+                        ).Build())
                     .Build())
                 .Build())
             .WithSeries(new SeriesBuilder("Test Series Prequels").Build())
