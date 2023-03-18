@@ -1,5 +1,6 @@
 ﻿using API.Data;
 using API.Extensions;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Entities;
@@ -14,7 +15,7 @@ public class SeriesTest
     public void CreateSeries(string name)
     {
         var key = name.ToNormalized();
-        var series = DbFactory.Series(name);
+        var series = new SeriesBuilder(name).Build();
         Assert.Equal(0, series.Id);
         Assert.Equal(0, series.Pages);
         Assert.Equal(name, series.Name);

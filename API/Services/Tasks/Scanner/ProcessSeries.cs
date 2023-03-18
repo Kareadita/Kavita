@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Parser;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
@@ -123,7 +124,9 @@ public class ProcessSeries : IProcessSeries
         if (series == null)
         {
             seriesAdded = true;
-            series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
+            series = new SeriesBuilder(firstInfo.Series)
+                .WithLocalizedName(firstInfo.LocalizedSeries)
+                .Build();
             _unitOfWork.SeriesRepository.Add(series);
         }
 

@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers.Builders;
 using API.Parser;
 using API.Services;
 using API.SignalR;
@@ -166,7 +167,7 @@ public class CacheServiceTests
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds), Substitute.For<IBookmarkService>());
 
         await ResetDB();
-        var s = DbFactory.Series("Test");
+        var s = new SeriesBuilder("Test").Build();
         var v = DbFactory.Volume("1");
         var c = new Chapter()
         {
@@ -207,7 +208,7 @@ public class CacheServiceTests
     //         new ReadingItemService(archiveService, Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds));
     //
     //     await ResetDB();
-    //     var s = DbFactory.Series("Test");
+    //     var s = new SeriesBuilder("Test").Build();
     //     var v = DbFactory.Volume("1");
     //     var c = new Chapter()
     //     {

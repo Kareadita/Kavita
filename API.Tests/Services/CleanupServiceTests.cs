@@ -71,15 +71,15 @@ public class CleanupServiceTests : AbstractDbTest
         // Delete all Series to reset state
         await ResetDb();
 
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 3");
+        s = new SeriesBuilder("Test 3").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1000)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -105,11 +105,11 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -139,7 +139,7 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         var v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
@@ -153,7 +153,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.LibraryId = 1;
         _context.Series.Add(s);
 
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         v = DbFactory.Volume("1");
         v.Chapters.Add(new Chapter()
         {
@@ -193,7 +193,7 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         s.Metadata.CollectionTags = new List<CollectionTag>();
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {
@@ -205,7 +205,7 @@ public class CleanupServiceTests : AbstractDbTest
         s.LibraryId = 1;
         _context.Series.Add(s);
 
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         s.Metadata.CollectionTags = new List<CollectionTag>();
         s.Metadata.CollectionTags.Add(new CollectionTag()
         {

@@ -817,7 +817,7 @@ public class ReadingListServiceTests
 
     private async Task CreateReadingList_SetupBaseData()
     {
-        var fablesSeries = DbFactory.Series("Fables");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
         fablesSeries.Volumes.Add(new Volume()
         {
             Number = 1,
@@ -1016,8 +1016,8 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new Volume()
         {
@@ -1153,8 +1153,8 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        // var fablesSeries = DbFactory.Series("Fables");
-        // var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        // var fablesSeries = new SeriesBuilder("Fables").Build();
+        // var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         var fablesSeries = new SeriesBuilder("Fables")
             .WithVolume(new VolumeBuilder("2002")
@@ -1245,8 +1245,8 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new Volume()
         {
@@ -1328,8 +1328,8 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
         fablesSeries.Volumes.Add(new Volume()
         {

@@ -1038,9 +1038,9 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series"),
-                DbFactory.Series("Test Series Prequels"),
-                DbFactory.Series("Test Series Sequels"),
+                new SeriesBuilder("Test Series").Build(),
+                new SeriesBuilder("Test Series Prequels").Build(),
+                new SeriesBuilder("Test Series Sequels").Build(),
             }
         });
 
@@ -1080,8 +1080,8 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Series A"),
-                DbFactory.Series("Series B"),
+                new SeriesBuilder("Series A").Build(),
+                new SeriesBuilder("Series B").Build(),
             }
         });
 
@@ -1125,8 +1125,8 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Series A"),
-                DbFactory.Series("Series B"),
+                new SeriesBuilder("Series A").Build(),
+                new SeriesBuilder("Series B").Build(),
             }
         });
 
@@ -1170,8 +1170,8 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series"),
-                DbFactory.Series("Test Series Prequels"),
+                new SeriesBuilder("Test Series").Build(),
+                new SeriesBuilder("Test Series Prequels").Build(),
             }
         });
 
@@ -1215,11 +1215,11 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series"),
-                DbFactory.Series("Test Series Editions"),
-                DbFactory.Series("Test Series Prequels"),
-                DbFactory.Series("Test Series Sequels"),
-                DbFactory.Series("Test Series Adaption"),
+                new SeriesBuilder("Test Series").Build(),
+                new SeriesBuilder("Test Series Editions").Build(),
+                new SeriesBuilder("Test Series Prequels").Build(),
+                new SeriesBuilder("Test Series Sequels").Build(),
+                new SeriesBuilder("Test Series Adaption").Build(),
             }
         });
         await _context.SaveChangesAsync();
@@ -1256,9 +1256,9 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series"),
-                DbFactory.Series("Test Series Prequels"),
-                DbFactory.Series("Test Series Sequels"),
+                new SeriesBuilder("Test Series").Build(),
+                new SeriesBuilder("Test Series Prequels").Build(),
+                new SeriesBuilder("Test Series Sequels").Build(),
             }
         };
         _context.Library.Add(lib);
@@ -1331,9 +1331,9 @@ public class SeriesServiceTests : AbstractDbTest
             Type = LibraryType.Book,
             Series = new List<Series>()
             {
-                DbFactory.Series("Test Series 2"),
-                DbFactory.Series("Test Series Prequels 2"),
-                DbFactory.Series("Test Series Prequels 2"),
+                new SeriesBuilder("Test Series 2").Build(),
+                new SeriesBuilder("Test Series Prequels 2").Build(),
+                new SeriesBuilder("Test Series Prequels 2").Build(), // TODO: Is this a bug
             }
         };
         _context.Library.Add(lib2);
