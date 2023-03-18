@@ -7,6 +7,7 @@ using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Metadata;
+using API.Helpers.Builders;
 using API.SignalR;
 using Kavita.Common;
 
@@ -163,7 +164,7 @@ public class CollectionTagService : ICollectionTagService
     /// <returns></returns>
     public CollectionTag CreateTag(string title)
     {
-        var tag = DbFactory.CollectionTag(0, title, string.Empty, false);
+        var tag = new CollectionTagBuilder(title).Build();
         _unitOfWork.CollectionTagRepository.Add(tag);
         return tag;
     }

@@ -5,6 +5,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Tests.Helpers;
 
@@ -62,11 +63,6 @@ public static class EntityFactory
             Format = format,
             Pages = pages
         };
-    }
-
-    public static CollectionTag CreateCollectionTag(int id, string title, string summary, bool promoted)
-    {
-        return DbFactory.CollectionTag(id, title, summary, promoted);
     }
 }
 

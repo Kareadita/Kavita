@@ -121,9 +121,9 @@ public class CollectionTagRepositoryTests
     {
         var library = DbFactory.Library("Test", LibraryType.Manga);
         var series = new SeriesBuilder("Test 1").Build();
-        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
+        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
 
         var series2 = new SeriesBuilder("Test 1").Build();
         series2.Metadata.CollectionTags.Add(commonTag);
@@ -154,9 +154,9 @@ public class CollectionTagRepositoryTests
     {
         var library = DbFactory.Library("Test", LibraryType.Manga);
         var series = new SeriesBuilder("Test 1").Build();
-        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
+        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
 
         var series2 = new SeriesBuilder("Test 1").Build();
         series2.Metadata.CollectionTags.Add(commonTag);

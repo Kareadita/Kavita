@@ -43,20 +43,6 @@ public static class DbFactory
         };
     }
 
-    public static CollectionTag CollectionTag(int id, string title, string? summary = null, bool promoted = false)
-    {
-        title = title.Trim();
-        return new CollectionTag()
-        {
-            Id = id,
-            NormalizedTitle = title.ToNormalized(),
-            Title = title,
-            Summary = summary?.Trim(),
-            Promoted = promoted,
-            SeriesMetadatas = new List<SeriesMetadata>()
-        };
-    }
-
     public static ReadingList ReadingList(string title, string? summary = null, bool promoted = false, AgeRating rating = AgeRating.Unknown)
     {
         title = title.Trim();

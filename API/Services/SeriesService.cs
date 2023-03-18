@@ -72,7 +72,11 @@ public class SeriesService : ISeriesService
 
             series.Metadata ??= new SeriesMetadataBuilder()
                 .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
-                    DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList())
+                    new CollectionTagBuilder(dto.Title)
+                        .WithId(dto.Id)
+                        .WithSummary(dto.Summary)
+                        .WithIsPromoted(dto.Promoted)
+                        .Build()).ToList())
                 .Build();
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
@@ -247,7 +251,11 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+                handleAdd(new CollectionTagBuilder(tag.Title)
+                    .WithId(tag.Id)
+                    .WithSummary(tag.Summary)
+                    .WithIsPromoted(tag.Promoted)
+                    .Build());
             }
         }
     }

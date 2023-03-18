@@ -6,6 +6,7 @@ using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers.Builders;
 using API.Services;
 using API.SignalR;
 using API.Tests.Helpers;
@@ -44,8 +45,8 @@ public class CollectionTagServiceTests : AbstractDbTest
             }
         });
 
-        _context.CollectionTag.Add(DbFactory.CollectionTag(0, "Tag 1", string.Empty, false));
-        _context.CollectionTag.Add(DbFactory.CollectionTag(0, "Tag 2", string.Empty, true));
+        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 1").Build());
+        _context.CollectionTag.Add(new CollectionTagBuilder("Tag 2").WithIsPromoted(true).Build());
         await _unitOfWork.CommitAsync();
     }
 
@@ -63,8 +64,8 @@ public class CollectionTagServiceTests : AbstractDbTest
     public async Task UpdateTag_ShouldUpdateFields()
     {
         await SeedSeries();
-        _context.CollectionTag.Add(EntityFactory.CreateCollectionTag(3, "UpdateTag_ShouldUpdateFields",
-            string.Empty, true));
+
+        _context.CollectionTag.Add(new CollectionTagBuilder("UpdateTag_ShouldUpdateFields").WithId(3).WithIsPromoted(true).Build());
         await _unitOfWork.CommitAsync();
 
         await _service.UpdateTag(new CollectionTagDto()
