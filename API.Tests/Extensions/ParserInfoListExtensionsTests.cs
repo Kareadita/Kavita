@@ -47,7 +47,9 @@ public class ParserInfoListExtensions
         }
 
         var files = inputChapters.Select(s => new MangaFileBuilder(s, MangaFormat.Archive, 199).Build()).ToList();
-        var chapter = EntityFactory.CreateChapter("0-6", false, files);
+        var chapter = new ChapterBuilder("0-6")
+            .WithFiles(files)
+            .Build();
 
         Assert.Equal(expectedHasInfo, infos.HasInfo(chapter));
     }

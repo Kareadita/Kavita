@@ -48,4 +48,10 @@ public class CollectionTagBuilder : IEntityBuilder<CollectionTag>
         _collectionTag.SeriesMetadatas.Add(seriesMetadata);
         return this;
     }
+
+    public CollectionTagBuilder WithCoverImage(string cover)
+    {
+        _collectionTag.CoverImage = cover;
+        return this;
+    }
 }

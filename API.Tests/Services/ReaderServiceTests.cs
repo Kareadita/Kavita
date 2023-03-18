@@ -1846,8 +1846,12 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         // Add 2 new unread series to the Series
-        series.Volumes[0].Chapters.Add(EntityFactory.CreateChapter("231", false, new List<MangaFile>(), 1));
-        series.Volumes[2].Chapters.Add(EntityFactory.CreateChapter("14.9", false, new List<MangaFile>(), 1));
+        series.Volumes[0].Chapters.Add(new ChapterBuilder("231")
+            .WithPages(1)
+            .Build());
+        series.Volumes[2].Chapters.Add(new ChapterBuilder("14.9")
+            .WithPages(1)
+            .Build());
         _context.Series.Attach(series);
         await _context.SaveChangesAsync();
 

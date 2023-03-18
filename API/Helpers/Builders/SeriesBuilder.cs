@@ -77,4 +77,16 @@ public class SeriesBuilder : IEntityBuilder<Series>
         _series.Pages = pages;
         return this;
     }
+
+    public SeriesBuilder WithCoverImage(string cover)
+    {
+        _series.CoverImage = cover;
+        return this;
+    }
+
+    public SeriesBuilder WithLibraryId(int id)
+    {
+        _series.LibraryId = id;
+        return this;
+    }
 }

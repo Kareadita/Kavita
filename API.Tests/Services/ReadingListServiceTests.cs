@@ -927,26 +927,28 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fables").Build();
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+        fablesSeries.Volumes.Add(new VolumeBuilder("1")
             .WithNumber(1)
+            .WithName("2002")
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
             .Build()
         );
-        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+        fables2Series.Volumes.Add(new VolumeBuilder("1")
             .WithNumber(1)
+            .WithName("2003")
             .WithChapter(new ChapterBuilder("1").Build())
             .WithChapter(new ChapterBuilder("2").Build())
             .WithChapter(new ChapterBuilder("3").Build())
             .Build()
         );
 
-        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
-            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
-                                     .WithSeries(fablesSeries)
-                                     .WithSeries(fables2Series)
-                                     .Build())
+        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty).Build());
+
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .WithSeries(fables2Series)
             .Build()
         );
 

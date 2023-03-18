@@ -51,4 +51,10 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         _volume.SeriesId = seriesId;
         return this;
     }
+
+    public VolumeBuilder WithCoverImage(string cover)
+    {
+        _volume.CoverImage = cover;
+        return this;
+    }
 }

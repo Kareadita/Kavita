@@ -74,7 +74,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -110,7 +110,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -147,7 +147,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -181,10 +181,9 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -282,7 +281,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -319,7 +318,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Manga)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -356,7 +355,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -410,7 +409,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+        _context.Library.Add(new LibraryBuilder("Test LIb")
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
 
@@ -1073,7 +1072,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary()
     {
         await ResetDb();
-        var lib = new LibraryBuilder("Test LIb", LibraryType.Book)
+        var lib = new LibraryBuilder("Test LIb")
             .WithSeries(new SeriesBuilder("Test Series").Build())
             .WithSeries(new SeriesBuilder("Test Series Prequels").Build())
             .WithSeries(new SeriesBuilder("Test Series Sequels").Build())
@@ -1109,7 +1108,7 @@ public class SeriesServiceTests : AbstractDbTest
     public async Task SeriesRelation_ShouldAllowDeleteOnLibrary_WhenSeriesCrossLibraries()
     {
         await ResetDb();
-        var lib1 = new LibraryBuilder("Test LIb", LibraryType.Book)
+        var lib1 = new LibraryBuilder("Test LIb")
             .WithSeries(new SeriesBuilder("Test Series")
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("1").WithFile(

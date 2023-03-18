@@ -161,15 +161,9 @@ public class CacheServiceTests
         await ResetDB();
         var s = new SeriesBuilder("Test").Build();
         var v = new VolumeBuilder("1").Build();
-        var c = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-            {
-                new MangaFileBuilder($"{DataDirectory}Test v1.zip", MangaFormat.Archive).Build()
-            }
-        };
+        var c = new ChapterBuilder("1")
+                .WithFile(new MangaFileBuilder($"{DataDirectory}Test v1.zip", MangaFormat.Archive).Build())
+                .Build();
         v.Chapters.Add(c);
         s.Volumes.Add(v);
         s.LibraryId = 1;
@@ -260,16 +254,10 @@ public class CacheServiceTests
             new ReadingItemService(Substitute.For<IArchiveService>(),
                 Substitute.For<IBookService>(), Substitute.For<IImageService>(), ds), Substitute.For<IBookmarkService>());
 
-        var c = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-            {
-                new MangaFileBuilder($"{DataDirectory}1.epub", MangaFormat.Epub).Build(),
-                new MangaFileBuilder($"{DataDirectory}2.epub", MangaFormat.Epub).Build()
-            }
-        };
+        var c = new ChapterBuilder("1")
+            .WithFile(new MangaFileBuilder($"{DataDirectory}1.epub", MangaFormat.Epub).Build())
+            .WithFile(new MangaFileBuilder($"{DataDirectory}2.epub", MangaFormat.Epub).Build())
+            .Build();
         cs.GetCachedFile(c);
         Assert.Same($"{DataDirectory}1.epub", cs.GetCachedFile(c));
     }
@@ -286,13 +274,9 @@ public class CacheServiceTests
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
         filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
 
-        var c = new Chapter()
-        {
-            Id = 1,
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-        };
+        var c = new ChapterBuilder("1")
+            .WithId(1)
+            .Build();
 
         var fileIndex = 0;
         foreach (var file in c.Files)
@@ -325,23 +309,17 @@ public class CacheServiceTests
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
         filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
 
-        var c = new Chapter()
-        {
-            Id = 1,
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-            {
-                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
-                    .WithPages(10)
-                    .WithId(1)
-                    .Build(),
-                new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
-                    .WithPages(5)
-                    .WithId(2)
-                    .Build(),
-            }
-        };
+        var c = new ChapterBuilder("1")
+            .WithId(1)
+            .WithFile(new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                .WithPages(10)
+                .WithId(1)
+                .Build())
+            .WithFile(new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
+                .WithPages(5)
+                .WithId(2)
+                .Build())
+            .Build();
 
         var fileIndex = 0;
         foreach (var file in c.Files)
@@ -374,19 +352,13 @@ public class CacheServiceTests
         filesystem.AddDirectory($"{CacheDirectory}1/");
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
 
-        var c = new Chapter()
-        {
-            Id = 1,
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-            {
-                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
-                    .WithPages(10)
-                    .WithId(1)
-                    .Build(),
-            }
-        };
+        var c = new ChapterBuilder("1")
+            .WithId(1)
+            .WithFile(new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                .WithPages(10)
+                .WithId(1)
+                .Build())
+            .Build();
         c.Pages = c.Files.Sum(f => f.Pages);
 
         var fileIndex = 0;
@@ -421,23 +393,17 @@ public class CacheServiceTests
         filesystem.AddFile($"{DataDirectory}1.zip", new MockFileData(""));
         filesystem.AddFile($"{DataDirectory}2.zip", new MockFileData(""));
 
-        var c = new Chapter()
-        {
-            Id = 1,
-            Number = "1",
-            Range = "1",
-            Files = new List<MangaFile>()
-            {
-                new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
-                    .WithPages(10)
-                    .WithId(1)
-                    .Build(),
-                new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
-                    .WithPages(5)
-                    .WithId(2)
-                    .Build(),
-            }
-        };
+        var c = new ChapterBuilder("1")
+            .WithId(1)
+            .WithFile(new MangaFileBuilder($"{DataDirectory}1.zip", MangaFormat.Archive)
+                .WithPages(10)
+                .WithId(1)
+                .Build())
+            .WithFile(new MangaFileBuilder($"{DataDirectory}2.zip", MangaFormat.Archive)
+                .WithPages(5)
+                .WithId(2)
+                .Build())
+            .Build();
 
         var fileIndex = 0;
         foreach (var file in c.Files)

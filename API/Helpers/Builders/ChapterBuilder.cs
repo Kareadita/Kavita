@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
+using API.Parser;
 
 namespace API.Helpers.Builders;
 
@@ -20,6 +21,37 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
             Files = new List<MangaFile>(),
             Pages = 1
         };
+    }
+
+    public static ChapterBuilder FromParserInfo(ParserInfo info)
+    {
+        var specialTreatment = info.IsSpecialInfo();
+        var specialTitle = specialTreatment ? info.Filename : info.Chapters;
+        var builder = new ChapterBuilder(Services.Tasks.Scanner.Parser.Parser.DefaultChapter);
+        return builder.WithNumber(specialTreatment ? Services.Tasks.Scanner.Parser.Parser.DefaultChapter : Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty)
+            .WithRange(specialTreatment ? info.Filename : info.Chapters)
+            .WithTitle((specialTreatment && info.Format == MangaFormat.Epub)
+            ? info.Title
+            : specialTitle)
+            .WithIsSpecial(specialTreatment);
+    }
+
+    public ChapterBuilder WithId(int id)
+    {
+        _chapter.Id = Math.Max(id, 0);
+        return this;
+    }
+
+    private ChapterBuilder WithNumber(string number)
+    {
+        _chapter.Number = number;
+        return this;
+    }
+
+    private ChapterBuilder WithRange(string range)
+    {
+        _chapter.Range = range;
+        return this;
     }
 
     public ChapterBuilder WithReleaseDate(DateTime time)
@@ -65,6 +97,20 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
     public ChapterBuilder WithFiles(IList<MangaFile> files)
     {
         _chapter.Files = files ?? new List<MangaFile>();
+        return this;
+    }
+
+    public ChapterBuilder WithLastModified(DateTime lastModified)
+    {
+        _chapter.LastModified = lastModified;
+        _chapter.LastModifiedUtc = lastModified.ToUniversalTime();
+        return this;
+    }
+
+    public ChapterBuilder WithCreated(DateTime created)
+    {
+        _chapter.Created = created;
+        _chapter.CreatedUtc = created.ToUniversalTime();
         return this;
     }
 }

@@ -600,7 +600,7 @@ public class ProcessSeries : IProcessSeries
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                chapter = DbFactory.Chapter(info);
+                chapter = ChapterBuilder.FromParserInfo(info).Build();
                 volume.Chapters.Add(chapter);
                 series.UpdateLastChapterAdded();
             }

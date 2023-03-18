@@ -146,13 +146,10 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        var chapter = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Created = filesystemFile.LastWriteTime.DateTime,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var chapter = new ChapterBuilder("1")
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .WithCreated(filesystemFile.LastWriteTime.DateTime)
+            .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
             .WithLastModified(filesystemFile.LastWriteTime.DateTime)
@@ -176,13 +173,10 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        var chapter = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Created = filesystemFile.LastWriteTime.DateTime,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var chapter = new ChapterBuilder("1")
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .WithCreated(filesystemFile.LastWriteTime.DateTime)
+            .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
             .WithLastModified(filesystemFile.LastWriteTime.DateTime)
@@ -207,13 +201,10 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        var chapter = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Created = filesystemFile.LastWriteTime.DateTime,
-            LastModified = filesystemFile.LastWriteTime.DateTime
-        };
+        var chapter = new ChapterBuilder("1")
+            .WithLastModified(filesystemFile.LastWriteTime.DateTime)
+            .WithCreated(filesystemFile.LastWriteTime.DateTime)
+            .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
             .WithLastModified(filesystemFile.LastWriteTime.DateTime)
@@ -238,13 +229,10 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        var chapter = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
-            LastModified = DateTime.Now.Subtract(TimeSpan.FromMinutes(10))
-        };
+        var chapter = new ChapterBuilder("1")
+            .WithLastModified(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
+            .WithCreated(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
+            .Build();
 
         var file = new MangaFileBuilder(TestCoverArchive, MangaFormat.Archive)
             .WithLastModified(filesystemFile.LastWriteTime.DateTime)
@@ -268,13 +256,10 @@ public class CacheHelperTests
         var fileService = new FileService(fileSystem);
         var cacheHelper = new CacheHelper(fileService);
 
-        var chapter = new Chapter()
-        {
-            Number = "1",
-            Range = "1",
-            Created = DateTime.Now.Subtract(TimeSpan.FromMinutes(10)),
-            LastModified = DateTime.Now
-        };
+        var chapter = new ChapterBuilder("1")
+            .WithLastModified(DateTime.Now)
+            .WithCreated(DateTime.Now.Subtract(TimeSpan.FromMinutes(10)))
+            .Build();
 
         var file = new MangaFileBuilder(Path.Join(TestCoverImageDirectory, TestCoverArchive), MangaFormat.Archive)
             .WithLastModified(filesystemFile.LastWriteTime.DateTime)

@@ -44,13 +44,16 @@ public class WordCountAnalysisTests : AbstractDbTest
     public async Task ReadingTimeShouldBeNonZero()
     {
         await ResetDb();
-        var series = new SeriesBuilder("Test Series").Build();
-        series.Format = MangaFormat.Epub;
-        var chapter = EntityFactory.CreateChapter("", false, new List<MangaFile>()
-        {
-            new MangaFileBuilder(Path.Join(_testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
-                MangaFormat.Epub).Build()
-        });
+        var series = new SeriesBuilder("Test Series")
+            .WithFormat(MangaFormat.Epub)
+            .Build();
+
+        var chapter = new ChapterBuilder("")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
 
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithSeries(series)
@@ -97,11 +100,12 @@ public class WordCountAnalysisTests : AbstractDbTest
     public async Task ReadingTimeShouldIncreaseWhenNewBookAdded()
     {
         await ResetDb();
-        var chapter = EntityFactory.CreateChapter("", false, new List<MangaFile>()
-        {
-            new MangaFileBuilder(Path.Join(_testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
-                MangaFormat.Epub).Build()
-        });
+        var chapter = new ChapterBuilder("")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
         var series = new SeriesBuilder("Test Series")
             .WithFormat(MangaFormat.Epub)
             .WithVolume(new VolumeBuilder("0")
@@ -122,11 +126,12 @@ public class WordCountAnalysisTests : AbstractDbTest
             Substitute.For<IEventHub>(), cacheService, _readerService);
         await service.ScanSeries(1, 1);
 
-        var chapter2 = EntityFactory.CreateChapter("2", false, new List<MangaFile>()
-        {
-            new MangaFileBuilder(Path.Join(_testDirectory, "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
-                MangaFormat.Epub).Build()
-        });
+        var chapter2 = new ChapterBuilder("2")
+            .WithFile(new MangaFileBuilder(
+                Path.Join(_testDirectory,
+                    "The Golden Harpoon; Or, Lost Among the Floes A Story of the Whaling Grounds.epub"),
+                MangaFormat.Epub).Build())
+            .Build();
 
 
         series.Volumes.Add(new VolumeBuilder("1")

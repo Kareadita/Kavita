@@ -131,33 +131,23 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = new SeriesBuilder("Test 1").Build();
-        var v = new VolumeBuilder("1").Build();
-        v.Chapters.Add(new Chapter()
-        {
-            Number = "0",
-            Range = "0",
-            CoverImage = "v01_c01.jpg"
-        });
-        v.CoverImage = "v01_c01.jpg";
-        s.Volumes.Add(v);
-        s.CoverImage = "series_01.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 1")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c01.jpg").Build())
+                .WithCoverImage("v01_c01.jpg")
+                .Build())
+            .WithCoverImage("series_01.jpg")
+            .WithLibraryId(1)
+            .Build());
 
-        s = new SeriesBuilder("Test 2").Build();
-        v = new VolumeBuilder("1").Build();
-        v.Chapters.Add(new Chapter()
-        {
-            Number = "0",
-            Range = "0",
-            CoverImage = "v01_c03.jpg"
-        });
-        v.CoverImage = "v01_c03jpg";
-        s.Volumes.Add(v);
-        s.CoverImage = "series_03.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 2")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c03.jpg").Build())
+                .WithCoverImage("v01_c03.jpg")
+                .Build())
+            .WithCoverImage("series_03.jpg")
+            .WithLibraryId(1)
+            .Build());
 
 
         await _context.SaveChangesAsync();
@@ -185,29 +175,26 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = new SeriesBuilder("Test 1").Build();
-        s.Metadata.CollectionTags = new List<CollectionTag>();
-        s.Metadata.CollectionTags.Add(new CollectionTag()
-        {
-            Title = "Something",
-            NormalizedTitle = "Something".ToNormalized(),
-            CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
-        });
-        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
 
-        s = new SeriesBuilder("Test 2").Build();
-        s.Metadata.CollectionTags = new List<CollectionTag>();
-        s.Metadata.CollectionTags.Add(new CollectionTag()
-        {
-            Title = "Something 2",
-            NormalizedTitle = "Something 2".ToNormalized(),
-            CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
-        });
-        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 1")
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithCollectionTag(new CollectionTagBuilder("Something")
+                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(1)}.jpg")
+                    .Build())
+                .Build())
+            .WithCoverImage($"{ImageService.GetSeriesFormat(1)}.jpg")
+            .WithLibraryId(1)
+            .Build());
+
+        _context.Series.Add(new SeriesBuilder("Test 2")
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithCollectionTag(new CollectionTagBuilder("Something")
+                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(2)}.jpg")
+                    .Build())
+                .Build())
+            .WithCoverImage($"{ImageService.GetSeriesFormat(3)}.jpg")
+            .WithLibraryId(1)
+            .Build());
 
 
         await _context.SaveChangesAsync();

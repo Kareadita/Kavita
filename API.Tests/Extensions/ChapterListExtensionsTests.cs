@@ -14,13 +14,10 @@ public class ChapterListExtensionsTests
 {
     private static Chapter CreateChapter(string range, string number, MangaFile file, bool isSpecial)
     {
-        return new Chapter()
-        {
-            Range = range,
-            Number = number,
-            Files = new List<MangaFile>() {file},
-            IsSpecial = isSpecial
-        };
+        return new ChapterBuilder(number, range)
+            .WithIsSpecial(isSpecial)
+            .WithFile(file)
+            .Build();
     }
 
     private static MangaFile CreateFile(string file, MangaFormat format)
