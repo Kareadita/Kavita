@@ -285,9 +285,9 @@ export class AccountService implements OnDestroy {
     }
 
     const jwtToken = JSON.parse(atob(this.currentUser.token.split('.')[1]));
-    // set a timeout to refresh the token a minute before it expires
+    // set a timeout to refresh the token 10 mins before it expires
     const expires = new Date(jwtToken.exp * 1000);
-    const timeout = expires.getTime() - Date.now() - (60 * 1000);
+    const timeout = expires.getTime() - Date.now() - (60 * 10000);
     this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {}), timeout);
   }
 

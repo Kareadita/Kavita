@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -103,7 +101,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
         if (string.IsNullOrEmpty(person.Name)) return;
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
+        var existingPerson = metadataPeople.FirstOrDefault(p =>
             p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
         if (existingPerson == null)
         {

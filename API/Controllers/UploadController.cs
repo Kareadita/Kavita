@@ -229,7 +229,7 @@ public class UploadController : BaseApiController
         }
 
         return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-            filename, convertToWebP); ;
+            filename, convertToWebP);
     }
 
     /// <summary>

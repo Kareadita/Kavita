@@ -34,14 +34,12 @@ public class ReaderController : BaseApiController
     private readonly IBookmarkService _bookmarkService;
     private readonly IAccountService _accountService;
     private readonly IEventHub _eventHub;
-    private readonly IImageService _imageService;
-    private readonly IDirectoryService _directoryService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
         IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
         IReaderService readerService, IBookmarkService bookmarkService,
-        IAccountService accountService, IEventHub eventHub, IImageService imageService, IDirectoryService directoryService)
+        IAccountService accountService, IEventHub eventHub)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -50,8 +48,6 @@ public class ReaderController : BaseApiController
         _bookmarkService = bookmarkService;
         _accountService = accountService;
         _eventHub = eventHub;
-        _imageService = imageService;
-        _directoryService = directoryService;
     }
 
     /// <summary>
