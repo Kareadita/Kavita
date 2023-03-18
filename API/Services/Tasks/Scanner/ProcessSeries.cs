@@ -499,7 +499,7 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
+            _logger.LogTrace("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
             Volume? volume;
             try
             {
@@ -671,7 +671,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         if (comicInfo == null) return;
-        _logger.LogDebug("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
+        _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
 
@@ -753,6 +753,7 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
+        // TODO: Apply locking on each of these
         var people = GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
         UpdatePeople(people, PersonRole.Colorist,
