@@ -221,34 +221,28 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
@@ -287,34 +281,28 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
@@ -372,30 +360,24 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build(),
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
@@ -435,34 +417,28 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
@@ -509,28 +485,22 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(new SeriesMetadataBuilder().Build())
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
@@ -577,15 +547,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
@@ -638,15 +602,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
@@ -698,15 +656,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
@@ -814,15 +766,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test Lib",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .Build()
             },
         });
         _context.AppUser.Add(new AppUser()
@@ -831,15 +777,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test Lib 2",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .Build()
             }
         });
         await _unitOfWork.CommitAsync();
@@ -1031,16 +971,10 @@ public class ReadingListServiceTests
             Libraries = new List<Library>(),
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fablesSeries,
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .WithSeries(fables2Series)
+            .Build());
 
         await _unitOfWork.CommitAsync();
 
@@ -1092,16 +1026,10 @@ public class ReadingListServiceTests
             Libraries = new List<Library>(),
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fablesSeries,
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .WithSeries(fables2Series)
+            .Build());
 
         await _unitOfWork.CommitAsync();
 
@@ -1187,16 +1115,10 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                        fables2Series
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .WithSeries(fables2Series)
+                    .Build()
             },
         });
         await _unitOfWork.CommitAsync();
@@ -1259,27 +1181,15 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .Build()
             },
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fables2Series)
+            .Build());
 
         await _unitOfWork.CommitAsync();
 
@@ -1342,16 +1252,10 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                        fables2Series
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .WithSeries(fables2Series)
+                    .Build()
             },
         });
 

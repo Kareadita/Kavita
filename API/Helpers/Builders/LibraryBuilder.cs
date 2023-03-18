@@ -36,4 +36,11 @@ public class LibraryBuilder : IEntityBuilder<Library>
         _library.Series.Add(series);
         return this;
     }
+
+    public LibraryBuilder WithAppUser(AppUser appUser)
+    {
+        _library.AppUsers ??= new List<AppUser>();
+        _library.AppUsers.Add(appUser);
+        return this;
+    }
 }

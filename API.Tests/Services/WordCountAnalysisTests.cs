@@ -52,12 +52,9 @@ public class WordCountAnalysisTests : AbstractDbTest
                 MangaFormat.Epub).Build()
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test",
-            Type = LibraryType.Book,
-            Series = new List<Series>() {series}
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
+            .WithSeries(series)
+            .Build());
 
         series.Volumes = new List<Volume>()
         {

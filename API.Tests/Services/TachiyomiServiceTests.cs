@@ -81,10 +81,11 @@ public class TachiyomiServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        });
+        _context.Library.Add(
+            new LibraryBuilder("Manga")
+                .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+                .Build()
+            );
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -139,12 +140,10 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
+
 
         _context.AppUser.Add(new AppUser()
         {
@@ -186,12 +185,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -240,12 +236,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -293,12 +286,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -341,12 +331,9 @@ public class TachiyomiServiceTests
             .WithPages(646)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -394,12 +381,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Comic,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -452,12 +436,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -498,12 +479,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -551,12 +529,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -602,12 +577,9 @@ public class TachiyomiServiceTests
             .WithPages(7)
             .Build();
 
-        var library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-            Series = new List<Series>() { series }
-        };
+        var library = new LibraryBuilder("Test LIb", LibraryType.Manga)
+            .WithSeries(series)
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
