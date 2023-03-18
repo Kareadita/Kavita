@@ -27,6 +27,13 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         _seriesMetadata.CollectionTags.Add(tag);
         return this;
     }
+    public SeriesMetadataBuilder WithCollectionTags(IList<CollectionTag> tags)
+    {
+        if (tags == null) return this;
+        _seriesMetadata.CollectionTags ??= new List<API.Entities.CollectionTag>();
+        _seriesMetadata.CollectionTags = tags;
+        return this;
+    }
     public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status)
     {
         _seriesMetadata.PublicationStatus = status;

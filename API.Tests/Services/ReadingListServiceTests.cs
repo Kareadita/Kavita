@@ -11,6 +11,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
@@ -127,7 +128,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -184,7 +185,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -248,7 +249,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -314,7 +315,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -399,7 +400,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -462,7 +463,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -536,7 +537,7 @@ public class ReadingListServiceTests
                     Series = new List<Series>()
                     {
                         new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+                            .WithMetadata(new SeriesMetadataBuilder().Build())
                             .WithVolumes(new List<Volume>()
                             {
                                 new VolumeBuilder("0")
@@ -578,7 +579,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")
@@ -639,7 +640,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")
@@ -697,7 +698,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")

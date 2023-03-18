@@ -221,7 +221,7 @@ public class ProcessSeries : IProcessSeries
         //if (!library.ManageReadingLists) return;
         _logger.LogInformation("Generating Reading Lists for {SeriesName}", series.Name);
 
-        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+        series.Metadata ??= new SeriesMetadataBuilder().Build();
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             if (!string.IsNullOrEmpty(chapter.StoryArc))
@@ -267,7 +267,7 @@ public class ProcessSeries : IProcessSeries
 
     private void UpdateSeriesMetadata(Series series, Library library)
     {
-        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+        series.Metadata ??= new SeriesMetadataBuilder().Build();
         var isBook = library.Type == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 

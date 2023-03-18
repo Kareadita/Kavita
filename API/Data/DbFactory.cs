@@ -43,15 +43,6 @@ public static class DbFactory
         };
     }
 
-    public static SeriesMetadata SeriesMetadata(ICollection<CollectionTag> collectionTags)
-    {
-        return new SeriesMetadata()
-        {
-            CollectionTags = collectionTags,
-            Summary = string.Empty
-        };
-    }
-
     public static CollectionTag CollectionTag(int id, string title, string? summary = null, bool promoted = false)
     {
         title = title.Trim();
