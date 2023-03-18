@@ -20,4 +20,11 @@ public class GenreBuilder : IEntityBuilder<Genre>
             SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
+
+    public GenreBuilder WithSeriesMetadata(SeriesMetadata seriesMetadata)
+    {
+        _genre.SeriesMetadatas ??= new List<SeriesMetadata>();
+        _genre.SeriesMetadatas.Add(seriesMetadata);
+        return this;
+    }
 }

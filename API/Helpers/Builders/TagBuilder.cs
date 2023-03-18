@@ -20,4 +20,11 @@ public class TagBuilder : IEntityBuilder<Tag>
             SeriesMetadatas = new List<SeriesMetadata>()
         };
     }
+
+    public TagBuilder WithSeriesMetadata(SeriesMetadata seriesMetadata)
+    {
+        _tag.SeriesMetadatas ??= new List<SeriesMetadata>();
+        _tag.SeriesMetadatas.Add(seriesMetadata);
+        return this;
+    }
 }

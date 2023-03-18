@@ -129,7 +129,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -160,7 +159,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -200,7 +198,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -257,7 +254,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -297,7 +293,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -346,7 +341,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -417,7 +411,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -462,7 +455,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -507,7 +499,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -546,7 +537,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("66").Build())
@@ -589,7 +579,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -628,7 +617,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -659,7 +647,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -697,7 +684,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -737,7 +723,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -771,7 +756,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -808,7 +792,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -851,7 +834,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -895,7 +877,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -936,7 +917,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("40").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("50").WithPages(1).Build())
@@ -981,7 +961,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1022,7 +1001,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1061,7 +1039,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1092,7 +1069,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("0").Build())
@@ -1122,7 +1098,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1158,7 +1133,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("5").Build())
@@ -1207,7 +1181,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1238,13 +1211,11 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
@@ -1278,13 +1249,11 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("21").Build())
@@ -1320,12 +1289,10 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("95").Build())
                 .WithChapter(new ChapterBuilder("96").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -1365,11 +1332,9 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(3).Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
@@ -1406,7 +1371,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1472,7 +1436,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             // Loose chapters
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("45").WithPages(1).Build())
@@ -1541,12 +1504,10 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
@@ -1604,7 +1565,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("231").WithPages(1).Build())
@@ -1641,7 +1601,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
@@ -1701,7 +1660,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1759,7 +1717,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1799,7 +1757,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1855,7 +1813,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
                 //.WithChapter(new ChapterBuilder("231").WithPages(1).Build())  (Added later)
@@ -1907,7 +1865,7 @@ public class ReaderServiceTests
         var volume = new VolumeBuilder("3").WithChapter(new ChapterBuilder("0").WithPages(1).Build()).Build();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("51").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("52").WithPages(1).Build())
@@ -1966,7 +1924,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -2003,7 +1961,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -2042,7 +2000,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
@@ -2076,7 +2034,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("45").WithPages(5).Build())
                 .WithChapter(new ChapterBuilder("46").WithPages(46).Build())
@@ -2143,7 +2101,7 @@ public class ReaderServiceTests
         await ResetDb();
         // TODO: Validate this is correct, shouldn't be possible to have 2 Volume 0's in a series
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
@@ -2182,7 +2140,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
@@ -2255,7 +2213,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
@@ -2309,7 +2267,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())

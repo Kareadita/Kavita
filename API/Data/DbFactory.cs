@@ -21,7 +21,7 @@ public static class DbFactory
         var specialTitle = specialTreatment ? info.Filename : info.Chapters;
         return new Chapter()
         {
-            Number = specialTreatment ? "0" : Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
+            Number = specialTreatment ? Services.Tasks.Scanner.Parser.Parser.DefaultChapter : Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(info.Chapters) + string.Empty,
             Range = specialTreatment ? info.Filename : info.Chapters,
             Title = (specialTreatment && info.Format == MangaFormat.Epub)
                 ? info.Title

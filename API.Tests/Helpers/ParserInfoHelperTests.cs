@@ -25,7 +25,6 @@ public class ParserInfoHelperTests
 
         var series = new SeriesBuilder("Darker Than Black")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithName("1")
                 .Build())
@@ -46,7 +45,6 @@ public class ParserInfoHelperTests
 
         var series = new SeriesBuilder("Darker Than Black")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithName("1")
                 .Build())

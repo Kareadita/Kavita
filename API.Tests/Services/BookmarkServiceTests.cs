@@ -132,7 +132,6 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
@@ -180,7 +179,6 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("0")
@@ -247,7 +245,6 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
@@ -324,7 +321,6 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
@@ -378,7 +374,6 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
@@ -432,7 +427,6 @@ public class BookmarkServiceTests
         await ResetDB();
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")

@@ -77,7 +77,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("Omake").WithIsSpecial(true).WithTitle("Omake").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("Something SP02").WithIsSpecial(true).WithTitle("Something").WithPages(1).Build())
@@ -113,7 +113,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -150,7 +150,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -184,7 +184,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -221,7 +221,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("2")
                     .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                     .Build())
@@ -250,7 +250,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("0")
                     .WithChapter(new ChapterBuilder("Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub", "Ano Orokamono ni mo Kyakkou wo! - Volume 1.epub").WithIsSpecial(true).WithPages(1).Build())
                     .Build())
@@ -285,7 +285,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("2")
                     .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                     .Build())
@@ -322,7 +322,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .Build())
@@ -359,7 +359,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .Build())
@@ -413,7 +413,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .Build())
@@ -448,7 +448,7 @@ public class SeriesServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Test LIb", LibraryType.Book)
             .WithAppUser(new AppUserBuilder("majora2007", string.Empty).Build())
             .WithSeries(new SeriesBuilder("Test")
-                .WithMetadata(new SeriesMetadata())
+
                 .WithVolume(new VolumeBuilder("1")
                     .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                     .Build())
@@ -481,7 +481,6 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
@@ -511,7 +510,6 @@ public class SeriesServiceTests : AbstractDbTest
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
@@ -753,7 +751,6 @@ public class SeriesServiceTests : AbstractDbTest
         var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("95").WithPages(1).WithFile(file).Build())
                 .WithChapter(new ChapterBuilder("96").WithPages(1).WithFile(file).Build())

@@ -41,4 +41,11 @@ public class CollectionTagBuilder : IEntityBuilder<CollectionTag>
         _collectionTag.Promoted = promoted;
         return this;
     }
+
+    public CollectionTagBuilder WithSeriesMetadata(SeriesMetadata seriesMetadata)
+    {
+        _collectionTag.SeriesMetadatas ??= new List<SeriesMetadata>();
+        _collectionTag.SeriesMetadatas.Add(seriesMetadata);
+        return this;
+    }
 }
