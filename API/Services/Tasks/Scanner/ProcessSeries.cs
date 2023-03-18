@@ -333,156 +333,161 @@ public class ProcessSeries : IProcessSeries
             }
         }
 
-        // Handle People
-        foreach (var chapter in chapters)
+        lock (_genreLock)
         {
-            if (!series.Metadata.WriterLocked)
+            var genres = chapters.SelectMany(c => c.Genres).ToList();
+            GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
             {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Writer))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.CoverArtistLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.CoverArtist))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.PublisherLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Publisher))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.CharacterLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Character))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.ColoristLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Colorist))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.EditorLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Editor))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.InkerLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Inker))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.LettererLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Letterer))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.PencillerLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Penciller))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.TranslatorLocked)
-            {
-                foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Translator))
-                {
-                    PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
-                }
-            }
-
-            if (!series.Metadata.TagsLocked)
-            {
-                foreach (var tag in chapter.Tags)
-                {
-                    TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
-                }
-            }
-
-            if (!series.Metadata.GenresLocked)
-            {
-                foreach (var genre in chapter.Genres)
-                {
-                    GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
-                }
-            }
+                if (series.Metadata.GenresLocked) return; // NOTE: Doesn't it make sense to do the locked skip outside this loop?
+                series.Metadata.Genres.Remove(genre);
+            });
         }
 
-        var genres = chapters.SelectMany(c => c.Genres).ToList();
-        GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
+        // Handle People
+        lock (_peopleLock)
         {
-            if (series.Metadata.GenresLocked) return; // NOTE: Doesn't it make sense to do the locked skip outside this loop?
-            series.Metadata.Genres.Remove(genre);
-        });
-
-        // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
-        // I might be able to filter out people that are in locked fields?
-        var people = chapters.SelectMany(c => c.People).ToList();
-        PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
-            people, person =>
+            foreach (var chapter in chapters)
             {
-                switch (person.Role)
+                if (!series.Metadata.WriterLocked)
                 {
-                    case PersonRole.Writer:
-                        if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Penciller:
-                        if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Inker:
-                        if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Colorist:
-                        if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Letterer:
-                        if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.CoverArtist:
-                        if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Editor:
-                        if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Publisher:
-                        if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Character:
-                        if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
-                        break;
-                    case PersonRole.Translator:
-                        if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
-                        break;
-                    default:
-                        series.Metadata.People.Remove(person);
-                        break;
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Writer))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
                 }
-            });
+
+                if (!series.Metadata.CoverArtistLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.CoverArtist))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.PublisherLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Publisher))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.CharacterLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Character))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.ColoristLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Colorist))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.EditorLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Editor))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.InkerLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Inker))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.LettererLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Letterer))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.PencillerLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Penciller))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.TranslatorLocked)
+                {
+                    foreach (var person in chapter.People.Where(p => p.Role == PersonRole.Translator))
+                    {
+                        PersonHelper.AddPersonIfNotExists(series.Metadata.People, person);
+                    }
+                }
+
+                if (!series.Metadata.TagsLocked)
+                {
+                    foreach (var tag in chapter.Tags)
+                    {
+                        TagHelper.AddTagIfNotExists(series.Metadata.Tags, tag);
+                    }
+                }
+
+                if (!series.Metadata.GenresLocked)
+                {
+                    foreach (var genre in chapter.Genres)
+                    {
+                        GenreHelper.AddGenreIfNotExists(series.Metadata.Genres, genre);
+                    }
+                }
+            }
+            // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
+            // I might be able to filter out people that are in locked fields?
+            var people = chapters.SelectMany(c => c.People).ToList();
+            PersonHelper.KeepOnlySamePeopleBetweenLists(series.Metadata.People.ToList(),
+                people, person =>
+                {
+                    switch (person.Role)
+                    {
+                        case PersonRole.Writer:
+                            if (!series.Metadata.WriterLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Penciller:
+                            if (!series.Metadata.PencillerLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Inker:
+                            if (!series.Metadata.InkerLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Colorist:
+                            if (!series.Metadata.ColoristLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Letterer:
+                            if (!series.Metadata.LettererLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.CoverArtist:
+                            if (!series.Metadata.CoverArtistLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Editor:
+                            if (!series.Metadata.EditorLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Publisher:
+                            if (!series.Metadata.PublisherLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Character:
+                            if (!series.Metadata.CharacterLocked) series.Metadata.People.Remove(person);
+                            break;
+                        case PersonRole.Translator:
+                            if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
+                            break;
+                        default:
+                            series.Metadata.People.Remove(person);
+                            break;
+                    }
+                });
+        }
     }
 
     private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
