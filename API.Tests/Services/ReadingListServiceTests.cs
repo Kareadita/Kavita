@@ -750,38 +750,26 @@ public class ReadingListServiceTests
     private async Task CreateReadingList_SetupBaseData()
     {
         var fablesSeries = new SeriesBuilder("Fables").Build();
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-            }
-        });
+        fablesSeries.Volumes.Add(
+            new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithName("2002")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build()
+            );
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new LibraryBuilder("Test LIb 2", LibraryType.Book)
-                    .WithSeries(fablesSeries)
-                    .Build()
-            },
-        });
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "admin",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new LibraryBuilder("Test LIb 2", LibraryType.Book)
-                    .WithSeries(fablesSeries)
-                    .Build()
-            }
-        });
+        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
+            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                .WithSeries(fablesSeries)
+                .Build())
+            .Build()
+        );
+        _context.AppUser.Add(new AppUserBuilder("admin", string.Empty)
+            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                .WithSeries(fablesSeries)
+                .Build())
+            .Build()
+        );
         await _unitOfWork.CommitAsync();
     }
 
@@ -939,42 +927,28 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fables").Build();
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build()
+        );
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build()
+        );
 
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>(),
-        });
-
-        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
-            .WithSeries(fablesSeries)
-            .WithSeries(fables2Series)
-            .Build());
+        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
+            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                                     .WithSeries(fablesSeries)
+                                     .WithSeries(fables2Series)
+                                     .Build())
+            .Build()
+        );
 
         await _unitOfWork.CommitAsync();
 
@@ -994,30 +968,18 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fablesa").Build();
         var fables2Series = new SeriesBuilder("Fablesa: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1061,9 +1023,6 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        // var fablesSeries = new SeriesBuilder("Fables").Build();
-        // var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
-
         var fablesSeries = new SeriesBuilder("Fables")
             .WithVolume(new VolumeBuilder("2002")
                 .WithNumber(1)
@@ -1081,33 +1040,6 @@ public class ReadingListServiceTests
                 .WithChapter(new ChapterBuilder("3").Build())
                 .Build())
             .Build();
-
-
-
-        // fablesSeries.Volumes.Add(new Volume()
-        // {
-        //     Number = 1,
-        //     Name = "2002",
-        //     Chapters = new List<Chapter>()
-        //     {
-        //         EntityFactory.CreateChapter("1", false),
-        //         EntityFactory.CreateChapter("2", false),
-        //         EntityFactory.CreateChapter("3", false),
-        //
-        //     }
-        // });
-        // fables2Series.Volumes.Add(new Volume()
-        // {
-        //     Number = 1,
-        //     Name = "2003",
-        //     Chapters = new List<Chapter>()
-        //     {
-        //         EntityFactory.CreateChapter("1", false),
-        //         EntityFactory.CreateChapter("2", false),
-        //         EntityFactory.CreateChapter("3", false),
-        //
-        //     }
-        // });
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1150,30 +1082,18 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fables").Build();
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1221,30 +1141,18 @@ public class ReadingListServiceTests
         var fablesSeries = new SeriesBuilder("Fables").Build();
         var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
