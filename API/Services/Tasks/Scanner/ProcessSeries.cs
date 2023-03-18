@@ -753,59 +753,47 @@ public class ProcessSeries : IProcessSeries
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        // TODO: Apply locking on each of these
         var people = GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        UpdatePeople(people, PersonRole.Colorist,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Colorist, AddPerson);
 
         people = GetTagValues(comicInfo.Characters);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        UpdatePeople(people, PersonRole.Character,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Character, AddPerson);
 
 
         people = GetTagValues(comicInfo.Translator);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        UpdatePeople(people, PersonRole.Translator,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Translator, AddPerson);
 
 
         people = GetTagValues(comicInfo.Writer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        UpdatePeople(people, PersonRole.Writer,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Writer, AddPerson);
 
         people = GetTagValues(comicInfo.Editor);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        UpdatePeople(people, PersonRole.Editor,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Editor, AddPerson);
 
         people = GetTagValues(comicInfo.Inker);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        UpdatePeople(people, PersonRole.Inker,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Inker, AddPerson);
 
         people = GetTagValues(comicInfo.Letterer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        UpdatePeople(people, PersonRole.Letterer,
-            AddPerson);
-
+        UpdatePeople(people, PersonRole.Letterer, AddPerson);
 
         people = GetTagValues(comicInfo.Penciller);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        UpdatePeople(people, PersonRole.Penciller,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Penciller, AddPerson);
 
         people = GetTagValues(comicInfo.CoverArtist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        UpdatePeople(people, PersonRole.CoverArtist,
-            AddPerson);
+        UpdatePeople(people, PersonRole.CoverArtist, AddPerson);
 
         people = GetTagValues(comicInfo.Publisher);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        UpdatePeople(people, PersonRole.Publisher,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Publisher, AddPerson);
 
         var genres = GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
@@ -838,23 +826,23 @@ public class ProcessSeries : IProcessSeries
     /// <param name="action"></param>
     private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
-        var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
-
-        foreach (var name in names)
+        lock (_peopleLock)
         {
-            var normalizedName = name.ToNormalized();
-            var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
-            if (person == null)
+            var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+
+            foreach (var name in names)
             {
-                person = DbFactory.Person(name, role);
-                lock (_peopleLock)
+                var normalizedName = name.ToNormalized();
+                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                    p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
+                if (person == null)
                 {
+                    person = DbFactory.Person(name, role);
                     _people.Add(person);
                 }
-            }
 
-            action(person);
+                action(person);
+            }
         }
     }
 
