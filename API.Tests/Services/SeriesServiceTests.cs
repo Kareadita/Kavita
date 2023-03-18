@@ -555,7 +555,7 @@ public class SeriesServiceTests : AbstractDbTest
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
 
-        var g = DbFactory.Genre("Existing Genre");
+        var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre>() {g};
         _context.Series.Add(s);
 
@@ -688,7 +688,7 @@ public class SeriesServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().Build())
             .Build();
         s.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
-        var g = DbFactory.Genre("Existing Genre");
+        var g = new GenreBuilder("Existing Genre").Build();
         s.Metadata.Genres = new List<Genre>() {g};
         s.Metadata.GenresLocked = true;
         _context.Series.Add(s);

@@ -802,11 +802,11 @@ public class ProcessSeries : IProcessSeries
 
         var genres = GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
-            genres.Select(DbFactory.Genre).ToList());
+            genres.Select(g => new GenreBuilder(g).Build()).ToList());
         UpdateGenre(genres, AddGenre);
 
         var tags = GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(DbFactory.Tag).ToList());
+        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
         UpdateTag(tags, AddTag);
     }
 
@@ -867,7 +867,7 @@ public class ProcessSeries : IProcessSeries
             var newTag = genre == null;
             if (newTag)
             {
-                genre = DbFactory.Genre(name);
+                genre = new GenreBuilder(name).Build();
                 lock (_genreLock)
                 {
                     _genres.Add(normalizedName, genre);
@@ -896,7 +896,7 @@ public class ProcessSeries : IProcessSeries
             var added = tag == null;
             if (tag == null)
             {
-                tag = DbFactory.Tag(name);
+                tag = new TagBuilder(name).Build();
                 lock (_tagLock)
                 {
                     _tags.Add(normalizedName, tag);

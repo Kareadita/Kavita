@@ -55,22 +55,4 @@ public static class DbFactory
             VolumeId = volumeId
         };
     }
-
-    public static Genre Genre(string name)
-    {
-        return new Genre()
-        {
-            Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.ToNormalized()
-        };
-    }
-
-    public static Tag Tag(string name)
-    {
-        return new Tag()
-        {
-            Title = name.Trim().SentenceCase(),
-            NormalizedTitle = name.ToNormalized()
-        };
-    }
 }
