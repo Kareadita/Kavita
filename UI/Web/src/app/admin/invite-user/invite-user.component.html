@@ -13,7 +13,7 @@
             <div class="row g-0">
                 <div class="mb-3" style="width:100%">
                     <label for="email" class="form-label">Email</label>
-                    <input class="form-control" type="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+                    <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
                     <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
                         <div *ngIf="email?.errors?.required">
                             This field is required
