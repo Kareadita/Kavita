@@ -23,8 +23,15 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
 
     public SeriesMetadataBuilder WithCollectionTag(CollectionTag tag)
     {
-        _seriesMetadata.CollectionTags ??= new List<API.Entities.CollectionTag>();
+        _seriesMetadata.CollectionTags ??= new List<CollectionTag>();
         _seriesMetadata.CollectionTags.Add(tag);
+        return this;
+    }
+    public SeriesMetadataBuilder WithCollectionTags(IList<CollectionTag> tags)
+    {
+        if (tags == null) return this;
+        _seriesMetadata.CollectionTags ??= new List<CollectionTag>();
+        _seriesMetadata.CollectionTags = tags;
         return this;
     }
     public SeriesMetadataBuilder WithPublicationStatus(PublicationStatus status)
@@ -33,4 +40,9 @@ public class SeriesMetadataBuilder : IEntityBuilder<SeriesMetadata>
         return this;
     }
 
+    public SeriesMetadataBuilder WithAgeRating(AgeRating rating)
+    {
+        _seriesMetadata.AgeRating = rating;
+        return this;
+    }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using API.Data.Metadata;
 using API.Entities.Enums;
-using API.Parser;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Services;

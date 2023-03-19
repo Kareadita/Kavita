@@ -13,7 +13,7 @@
             <ng-template #emailServiceTooltip>Use fully qualified URL of the email service. Do not include ending slash.</ng-template>
             <span class="visually-hidden" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
             <div class="input-group">
-                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
+                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="url" autocapitalize="off" inputmode="url" aria-describedby="change-bookmarks-dir">
                 <button class="btn btn-outline-secondary" (click)="resetEmailServiceUrl()">
                     Reset
                 </button>

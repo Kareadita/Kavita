@@ -6,6 +6,7 @@ using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Helpers;
 
@@ -31,7 +32,7 @@ public static class TagHelper
             if (genre == null)
             {
                 added = true;
-                genre = DbFactory.Tag(name);
+                genre = new TagBuilder(name).Build();
                 allTags.Add(genre);
             }
 
@@ -129,7 +130,7 @@ public static class TagHelper
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Tag(tagTitle));
+                handleAdd(new TagBuilder(tagTitle).Build());
                 isModified = true;
             }
         }

@@ -12,7 +12,12 @@ public class VolumeBuilder : IEntityBuilder<Volume>
 
     public VolumeBuilder(string volumeNumber)
     {
-        _volume = DbFactory.Volume(volumeNumber);
+        _volume = new Volume()
+        {
+            Name = volumeNumber,
+            Number = (int) Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(volumeNumber),
+            Chapters = new List<Chapter>()
+        };
     }
 
     public VolumeBuilder WithName(string name)
@@ -38,6 +43,18 @@ public class VolumeBuilder : IEntityBuilder<Volume>
         _volume.Chapters ??= new List<Chapter>();
         _volume.Chapters.Add(chapter);
         _volume.Pages = _volume.Chapters.Sum(c => c.Pages);
+        return this;
+    }
+
+    public VolumeBuilder WithSeriesId(int seriesId)
+    {
+        _volume.SeriesId = seriesId;
+        return this;
+    }
+
+    public VolumeBuilder WithCoverImage(string cover)
+    {
+        _volume.CoverImage = cover;
         return this;
     }
 }

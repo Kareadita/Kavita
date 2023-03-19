@@ -1,5 +1,5 @@
 ﻿using API.Entities.Enums;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Parser;

@@ -12,6 +12,7 @@ using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -118,7 +119,7 @@ public class ReadingListService : IReadingListService
             throw new KavitaException("A list of this name already exists");
         }
 
-        var readingList = DbFactory.ReadingList(title, string.Empty, false);
+        var readingList = new ReadingListBuilder(title).Build();
         userWithReadingList.ReadingLists.Add(readingList);
 
         if (!_unitOfWork.HasChanges()) throw new KavitaException("There was a problem creating list");
@@ -410,7 +411,7 @@ public class ReadingListService : IReadingListService
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
         foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
         {
-            readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
+            readingList.Items.Add(new ReadingListItemBuilder(index, seriesId, chapter.VolumeId, chapter.Id).Build());
             index += 1;
         }
 
@@ -509,7 +510,7 @@ public class ReadingListService : IReadingListService
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
         {
-            readingList = DbFactory.ReadingList(cblReading.Name, cblReading.Summary, false);
+            readingList = new ReadingListBuilder(cblReading.Name).WithSummary(cblReading.Summary).Build();
             user.ReadingLists.Add(readingList);
         }
         else
@@ -645,8 +646,8 @@ public class ReadingListService : IReadingListService
                 item.SeriesId == seriesId && item.ChapterId == chapterId);
         if (readingListItem != null) return;
 
-        readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, seriesId,
-            volumeId, chapterId);
+        readingListItem = new ReadingListItemBuilder(readingList.Items.Count, seriesId,
+            volumeId, chapterId).Build();
         readingList.Items.Add(readingListItem);
     }
 

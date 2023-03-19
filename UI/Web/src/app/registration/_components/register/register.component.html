@@ -20,7 +20,7 @@
                 <span class="visually-hidden" id="email-help">
                     <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
                 </span>
-                <input class="form-control" type="email" id="email" formControlName="email" required aria-describedby="email-help"
+                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required aria-describedby="email-help"
                     [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
                     <div *ngIf="registerForm.get('email')?.errors?.required">

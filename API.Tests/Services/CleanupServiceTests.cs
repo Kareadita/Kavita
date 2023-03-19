@@ -31,17 +31,9 @@ public class CleanupServiceTests : AbstractDbTest
 
     public CleanupServiceTests() : base()
     {
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
     }
 
     #region Setup
@@ -71,15 +63,15 @@ public class CleanupServiceTests : AbstractDbTest
         // Delete all Series to reset state
         await ResetDb();
 
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 3");
+        s = new SeriesBuilder("Test 3").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1000)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -105,11 +97,11 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
+        var s = new SeriesBuilder("Test 1").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = DbFactory.Series("Test 2");
+        s = new SeriesBuilder("Test 2").Build();
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -139,33 +131,23 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
-        var v = DbFactory.Volume("1");
-        v.Chapters.Add(new Chapter()
-        {
-            Number = "0",
-            Range = "0",
-            CoverImage = "v01_c01.jpg"
-        });
-        v.CoverImage = "v01_c01.jpg";
-        s.Volumes.Add(v);
-        s.CoverImage = "series_01.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 1")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c01.jpg").Build())
+                .WithCoverImage("v01_c01.jpg")
+                .Build())
+            .WithCoverImage("series_01.jpg")
+            .WithLibraryId(1)
+            .Build());
 
-        s = DbFactory.Series("Test 2");
-        v = DbFactory.Volume("1");
-        v.Chapters.Add(new Chapter()
-        {
-            Number = "0",
-            Range = "0",
-            CoverImage = "v01_c03.jpg"
-        });
-        v.CoverImage = "v01_c03jpg";
-        s.Volumes.Add(v);
-        s.CoverImage = "series_03.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 2")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c03.jpg").Build())
+                .WithCoverImage("v01_c03.jpg")
+                .Build())
+            .WithCoverImage("series_03.jpg")
+            .WithLibraryId(1)
+            .Build());
 
 
         await _context.SaveChangesAsync();
@@ -193,29 +175,26 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = DbFactory.Series("Test 1");
-        s.Metadata.CollectionTags = new List<CollectionTag>();
-        s.Metadata.CollectionTags.Add(new CollectionTag()
-        {
-            Title = "Something",
-            NormalizedTitle = "Something".ToNormalized(),
-            CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
-        });
-        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
 
-        s = DbFactory.Series("Test 2");
-        s.Metadata.CollectionTags = new List<CollectionTag>();
-        s.Metadata.CollectionTags.Add(new CollectionTag()
-        {
-            Title = "Something 2",
-            NormalizedTitle = "Something 2".ToNormalized(),
-            CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
-        });
-        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
-        s.LibraryId = 1;
-        _context.Series.Add(s);
+        _context.Series.Add(new SeriesBuilder("Test 1")
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithCollectionTag(new CollectionTagBuilder("Something")
+                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(1)}.jpg")
+                    .Build())
+                .Build())
+            .WithCoverImage($"{ImageService.GetSeriesFormat(1)}.jpg")
+            .WithLibraryId(1)
+            .Build());
+
+        _context.Series.Add(new SeriesBuilder("Test 2")
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithCollectionTag(new CollectionTagBuilder("Something")
+                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(2)}.jpg")
+                    .Build())
+                .Build())
+            .WithCoverImage($"{ImageService.GetSeriesFormat(3)}.jpg")
+            .WithLibraryId(1)
+            .Build());
 
 
         await _context.SaveChangesAsync();
@@ -247,20 +226,14 @@ public class CleanupServiceTests : AbstractDbTest
             UserName = "Joe",
             ReadingLists = new List<ReadingList>()
             {
-                new ReadingList()
-                {
-                    Title = "Something",
-                    NormalizedTitle = "Something".ToNormalized(),
-                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg",
-                    AgeRating = AgeRating.Unknown
-                },
-                new ReadingList()
-                {
-                    Title = "Something 2",
-                    NormalizedTitle = "Something 2".ToNormalized(),
-                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg",
-                    AgeRating = AgeRating.Unknown
-                }
+                new ReadingListBuilder("Something")
+                    .WithRating(AgeRating.Unknown)
+                    .WithCoverImage($"{ImageService.GetReadingListFormat(1)}.jpg")
+                    .Build(),
+                new ReadingListBuilder("Something 2")
+                    .WithRating(AgeRating.Unknown)
+                    .WithCoverImage($"{ImageService.GetReadingListFormat(2)}.jpg")
+                    .Build(),
             }
         });
 
@@ -415,17 +388,12 @@ public class CleanupServiceTests : AbstractDbTest
             .Build();
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(1)
                 .WithChapter(c)
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -474,11 +442,7 @@ public class CleanupServiceTests : AbstractDbTest
             .WithFormat(MangaFormat.Epub)
             .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
             .Build();
-        s.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        s.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(s);
 
@@ -515,11 +479,7 @@ public class CleanupServiceTests : AbstractDbTest
             .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
             .Build();
 
-        s.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        s.Library = new LibraryBuilder("Test LIb").Build();
         _context.Series.Add(s);
 
         var user = new AppUser()

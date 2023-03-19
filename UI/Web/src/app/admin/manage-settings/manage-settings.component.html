@@ -35,8 +35,8 @@
 
         <div class="mb-3">
             <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
-            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</span>
+            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</ng-template>
+            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</span>
             <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
             [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
             <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
@@ -77,7 +77,7 @@
                 <ng-template #backupTasksTooltip>The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="backup-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
                 <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups"
-                type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                 [class.is-invalid]="settingsForm.get('totalBackups')?.invalid && settingsForm.get('totalBackups')?.touched">
                 <ng-container *ngIf="settingsForm.get('totalBackups')?.errors as errors">
                     <p class="invalid-feedback" *ngIf="errors.min">
@@ -97,7 +97,7 @@
                 <ng-template #logTasksTooltip>The number of logs to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
                 <span class="visually-hidden" id="log-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
                 <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs"
-                type="number" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                 [class.is-invalid]="settingsForm.get('totalLogs')?.invalid && settingsForm.get('totalLogs')?.touched">
                 <ng-container *ngIf="settingsForm.get('totalLogs')?.errors as errors">
                     <p class="invalid-feedback" *ngIf="errors.min">

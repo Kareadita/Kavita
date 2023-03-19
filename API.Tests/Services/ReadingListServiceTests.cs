@@ -11,6 +11,7 @@ using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
@@ -78,10 +79,10 @@ public class ReadingListServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
+
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -114,47 +115,37 @@ public class ReadingListServiceTests
     public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
     {
         await ResetDb();
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
+        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+            .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
+                .WithSeries(new SeriesBuilder("Test")
+                    .WithMetadata(new SeriesMetadataBuilder().Build())
+                    .WithVolumes(new List<Volume>()
                     {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .Build()
-                            })
-                            .Build(),
-                    }
-                },
-            }
-        });
+                        new VolumeBuilder("0")
+                            .WithChapter(new ChapterBuilder("1")
+                                .WithAgeRating(AgeRating.Everyone)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("2")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("3")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .Build()
+                    })
+                    .Build())
+                .Build()
+            )
+            .Build()
+        );
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -171,47 +162,36 @@ public class ReadingListServiceTests
     public async Task AddChaptersToReadingList_ShouldNewItems_AfterLastOrder()
     {
         await ResetDb();
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
+        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+            .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
+                .WithSeries(new SeriesBuilder("Test")
+                    .WithVolumes(new List<Volume>()
                     {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .Build()
-                            })
+                        new VolumeBuilder("0")
+                            .WithChapter(new ChapterBuilder("1")
+                                .WithAgeRating(AgeRating.Everyone)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("2")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
+                            .WithChapter(new ChapterBuilder("3")
+                                .WithAgeRating(AgeRating.X18Plus)
+                                .Build()
+                            )
                             .Build()
-                    }
-                },
-            }
-        });
+                    })
+                    .Build())
+                .Build()
+            )
+            .Build()
+        );
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -241,41 +221,35 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -307,41 +281,35 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -392,37 +360,31 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build(),
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -455,41 +417,35 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .WithAgeRating(AgeRating.Everyone)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("3")
-                                        .WithAgeRating(AgeRating.X18Plus)
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
+                                    .WithAgeRating(AgeRating.Everyone)
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .WithChapter(new ChapterBuilder("3")
+                                    .WithAgeRating(AgeRating.X18Plus)
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists | AppUserIncludes.Progress);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -529,35 +485,29 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        new SeriesBuilder("Test")
-                            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
-                            .WithVolumes(new List<Volume>()
-                            {
-                                new VolumeBuilder("0")
-                                    .WithChapter(new ChapterBuilder("1")
-                                        .Build()
-                                    )
-                                    .WithChapter(new ChapterBuilder("2")
-                                        .Build()
-                                    )
+                new LibraryBuilder("Test LIb", LibraryType.Book)
+                    .WithSeries(new SeriesBuilder("Test")
+                        .WithMetadata(new SeriesMetadataBuilder().Build())
+                        .WithVolumes(new List<Volume>()
+                        {
+                            new VolumeBuilder("0")
+                                .WithChapter(new ChapterBuilder("1")
                                     .Build()
-                            })
-                            .Build()
-                    }
-                },
+                                )
+                                .WithChapter(new ChapterBuilder("2")
+                                    .Build()
+                                )
+                                .Build()
+                        })
+                        .Build())
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user!.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -578,7 +528,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")
@@ -597,15 +547,9 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
@@ -614,7 +558,7 @@ public class ReadingListServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -639,7 +583,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")
@@ -658,22 +602,16 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -697,7 +635,7 @@ public class ReadingListServiceTests
     {
         await ResetDb();
         var s = new SeriesBuilder("Test")
-            .WithMetadata(DbFactory.SeriesMetadata(new List<CollectionTag>()))
+            .WithMetadata(new SeriesMetadataBuilder().Build())
             .WithVolumes(new List<Volume>()
             {
                 new VolumeBuilder("0")
@@ -718,22 +656,16 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        s
-                    }
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(s)
+                    .Build()
             }
         });
 
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.ReadingLists);
-        var readingList = DbFactory.ReadingList("Test");
+        var readingList = new ReadingListBuilder("test").Build();
         user.ReadingLists = new List<ReadingList>()
         {
             readingList
@@ -817,51 +749,27 @@ public class ReadingListServiceTests
 
     private async Task CreateReadingList_SetupBaseData()
     {
-        var fablesSeries = DbFactory.Series("Fables");
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-            }
-        });
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        fablesSeries.Volumes.Add(
+            new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithName("2002")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build()
+            );
 
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test Lib",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
-            },
-        });
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "admin",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>()
-            {
-                new Library()
-                {
-                    Name = "Test Lib 2",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
-            }
-        });
+        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
+            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                .WithSeries(fablesSeries)
+                .Build())
+            .Build()
+        );
+        _context.AppUser.Add(new AppUserBuilder("admin", string.Empty)
+            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                .WithSeries(fablesSeries)
+                .Build())
+            .Build()
+        );
         await _unitOfWork.CommitAsync();
     }
 
@@ -1016,51 +924,33 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
+        fablesSeries.Volumes.Add(new VolumeBuilder("1")
+            .WithNumber(1)
+            .WithName("2002")
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build()
+        );
+        fables2Series.Volumes.Add(new VolumeBuilder("1")
+            .WithNumber(1)
+            .WithName("2003")
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build()
+        );
 
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
+        _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty).Build());
 
-            }
-        });
-
-        _context.AppUser.Add(new AppUser()
-        {
-            UserName = "majora2007",
-            ReadingLists = new List<ReadingList>(),
-            Libraries = new List<Library>(),
-        });
-
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fablesSeries,
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .WithSeries(fables2Series)
+            .Build()
+        );
 
         await _unitOfWork.CommitAsync();
 
@@ -1077,33 +967,21 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fablesa");
-        var fables2Series = DbFactory.Series("Fablesa: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fablesa").Build();
+        var fables2Series = new SeriesBuilder("Fablesa: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1112,16 +990,10 @@ public class ReadingListServiceTests
             Libraries = new List<Library>(),
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fablesSeries,
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .WithSeries(fables2Series)
+            .Build());
 
         await _unitOfWork.CommitAsync();
 
@@ -1153,9 +1025,6 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        // var fablesSeries = DbFactory.Series("Fables");
-        // var fables2Series = DbFactory.Series("Fables: The Last Castle");
-
         var fablesSeries = new SeriesBuilder("Fables")
             .WithVolume(new VolumeBuilder("2002")
                 .WithNumber(1)
@@ -1174,49 +1043,16 @@ public class ReadingListServiceTests
                 .Build())
             .Build();
 
-
-
-        // fablesSeries.Volumes.Add(new Volume()
-        // {
-        //     Number = 1,
-        //     Name = "2002",
-        //     Chapters = new List<Chapter>()
-        //     {
-        //         EntityFactory.CreateChapter("1", false),
-        //         EntityFactory.CreateChapter("2", false),
-        //         EntityFactory.CreateChapter("3", false),
-        //
-        //     }
-        // });
-        // fables2Series.Volumes.Add(new Volume()
-        // {
-        //     Number = 1,
-        //     Name = "2003",
-        //     Chapters = new List<Chapter>()
-        //     {
-        //         EntityFactory.CreateChapter("1", false),
-        //         EntityFactory.CreateChapter("2", false),
-        //         EntityFactory.CreateChapter("3", false),
-        //
-        //     }
-        // });
-
         _context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007",
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                        fables2Series
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .WithSeries(fables2Series)
+                    .Build()
             },
         });
         await _unitOfWork.CommitAsync();
@@ -1245,33 +1081,21 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1279,27 +1103,15 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .Build()
             },
         });
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Test Lib 2",
-            Type = LibraryType.Book,
-            Series = new List<Series>()
-            {
-                fables2Series,
-            },
-        });
+        _context.Library.Add(new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fables2Series)
+            .Build());
 
         await _unitOfWork.CommitAsync();
 
@@ -1328,33 +1140,21 @@ public class ReadingListServiceTests
         var cblReadingList = LoadCblFromPath("Fables.cbl");
 
         // Mock up our series
-        var fablesSeries = DbFactory.Series("Fables");
-        var fables2Series = DbFactory.Series("Fables: The Last Castle");
+        var fablesSeries = new SeriesBuilder("Fables").Build();
+        var fables2Series = new SeriesBuilder("Fables: The Last Castle").Build();
 
-        fablesSeries.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2002",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
-        fables2Series.Volumes.Add(new Volume()
-        {
-            Number = 1,
-            Name = "2003",
-            Chapters = new List<Chapter>()
-            {
-                EntityFactory.CreateChapter("1", false),
-                EntityFactory.CreateChapter("2", false),
-                EntityFactory.CreateChapter("3", false),
-
-            }
-        });
+        fablesSeries.Volumes.Add(new VolumeBuilder("2002")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
+        fables2Series.Volumes.Add(new VolumeBuilder("2003")
+            .WithNumber(1)
+            .WithChapter(new ChapterBuilder("1").Build())
+            .WithChapter(new ChapterBuilder("2").Build())
+            .WithChapter(new ChapterBuilder("3").Build())
+            .Build());
 
         _context.AppUser.Add(new AppUser()
         {
@@ -1362,16 +1162,10 @@ public class ReadingListServiceTests
             ReadingLists = new List<ReadingList>(),
             Libraries = new List<Library>()
             {
-                new Library()
-                {
-                    Name = "Test LIb",
-                    Type = LibraryType.Book,
-                    Series = new List<Series>()
-                    {
-                        fablesSeries,
-                        fables2Series
-                    },
-                },
+                new LibraryBuilder("Test LIb 2", LibraryType.Book)
+                    .WithSeries(fablesSeries)
+                    .WithSeries(fables2Series)
+                    .Build()
             },
         });
 

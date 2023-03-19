@@ -81,10 +81,9 @@ public class ReaderServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -130,7 +129,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -138,11 +136,8 @@ public class ReaderServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
 
         _context.Series.Add(series);
 
@@ -164,7 +159,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -172,11 +166,7 @@ public class ReaderServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -208,7 +198,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -216,11 +205,7 @@ public class ReaderServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -269,7 +254,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -280,11 +264,7 @@ public class ReaderServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -313,7 +293,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("0")
@@ -324,11 +303,7 @@ public class ReaderServiceTests
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -366,7 +341,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -385,11 +359,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -441,7 +411,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -460,11 +429,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -490,7 +455,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -509,11 +473,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -539,7 +499,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -552,11 +511,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("22").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -582,7 +537,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("66").Build())
@@ -599,11 +553,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -629,7 +579,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -642,11 +591,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -672,18 +617,13 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -707,7 +647,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -720,11 +659,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("2").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -749,7 +684,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -762,11 +696,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -793,7 +723,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -801,11 +730,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -831,7 +756,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -843,11 +767,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -872,7 +792,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -884,11 +803,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -919,7 +834,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -938,11 +852,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -967,7 +877,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -986,11 +895,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
         _context.Series.Add(series);
         _context.AppUser.Add(new AppUser()
         {
@@ -1012,7 +917,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("40").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("50").WithPages(1).Build())
@@ -1032,11 +936,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("31").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
         _context.Series.Add(series);
         _context.AppUser.Add(new AppUser()
         {
@@ -1061,7 +961,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1077,11 +976,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1106,7 +1001,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1119,11 +1013,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1149,18 +1039,13 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1184,17 +1069,12 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1218,7 +1098,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
@@ -1230,11 +1109,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("0").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1258,7 +1133,6 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("5").Build())
@@ -1278,11 +1152,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("4").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1311,18 +1181,13 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1346,24 +1211,18 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("A.cbz").WithIsSpecial(true).Build())
                 .WithChapter(new ChapterBuilder("B.cbz").WithIsSpecial(true).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1390,13 +1249,11 @@ public class ReaderServiceTests
         await ResetDb();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithNumber(0)
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("21").Build())
@@ -1404,11 +1261,7 @@ public class ReaderServiceTests
                 .Build())
 
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1436,12 +1289,10 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("95").Build())
                 .WithChapter(new ChapterBuilder("96").Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").Build())
                 .WithChapter(new ChapterBuilder("2").Build())
@@ -1456,11 +1307,7 @@ public class ReaderServiceTests
                 .Build())
 
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1485,21 +1332,15 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(3).Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
             .WithPages(4)
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1530,7 +1371,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1545,11 +1385,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1600,7 +1436,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             // Loose chapters
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("45").WithPages(1).Build())
@@ -1624,11 +1459,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1673,12 +1504,10 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
                 .Build())
-
             .WithVolume(new VolumeBuilder("2")
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
@@ -1687,11 +1516,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("32").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1740,7 +1565,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("231").WithPages(1).Build())
@@ -1754,11 +1578,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1781,7 +1601,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
@@ -1796,11 +1615,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1845,7 +1660,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1855,11 +1669,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1907,7 +1717,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1919,11 +1729,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("22").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -1951,7 +1757,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -1959,11 +1765,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2011,7 +1813,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("230").WithPages(1).Build())
                 //.WithChapter(new ChapterBuilder("231").WithPages(1).Build())  (Added later)
@@ -2026,11 +1828,7 @@ public class ReaderServiceTests
                 //.WithChapter(new ChapterBuilder("14.9").WithPages(1).Build()) (added later)
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2048,8 +1846,12 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
         // Add 2 new unread series to the Series
-        series.Volumes[0].Chapters.Add(EntityFactory.CreateChapter("231", false, new List<MangaFile>(), 1));
-        series.Volumes[2].Chapters.Add(EntityFactory.CreateChapter("14.9", false, new List<MangaFile>(), 1));
+        series.Volumes[0].Chapters.Add(new ChapterBuilder("231")
+            .WithPages(1)
+            .Build());
+        series.Volumes[2].Chapters.Add(new ChapterBuilder("14.9")
+            .WithPages(1)
+            .Build());
         _context.Series.Attach(series);
         await _context.SaveChangesAsync();
 
@@ -2067,7 +1869,7 @@ public class ReaderServiceTests
         var volume = new VolumeBuilder("3").WithChapter(new ChapterBuilder("0").WithPages(1).Build()).Build();
 
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("51").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("52").WithPages(1).Build())
@@ -2089,11 +1891,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("41").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2130,7 +1928,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -2138,11 +1936,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2171,7 +1965,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("2").WithPages(1).Build())
@@ -2180,11 +1974,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("Some Special Title").WithIsSpecial(true).WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2214,7 +2004,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("1")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
@@ -2222,11 +2012,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2252,7 +2038,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("45").WithPages(5).Build())
                 .WithChapter(new ChapterBuilder("46").WithPages(46).Build())
@@ -2275,11 +2061,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("14").WithPages(5).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2323,7 +2105,7 @@ public class ReaderServiceTests
         await ResetDb();
         // TODO: Validate this is correct, shouldn't be possible to have 2 Volume 0's in a series
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
@@ -2333,11 +2115,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2366,17 +2144,13 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("1").WithPages(2).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2443,7 +2217,7 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
+
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
@@ -2462,11 +2236,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 
@@ -2501,7 +2271,6 @@ public class ReaderServiceTests
     {
         await ResetDb();
         var series = new SeriesBuilder("Test")
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("10").WithPages(1).Build())
                 .WithChapter(new ChapterBuilder("20").WithPages(1).Build())
@@ -2520,11 +2289,7 @@ public class ReaderServiceTests
                 .WithChapter(new ChapterBuilder("3").WithPages(1).Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
 
         _context.Series.Add(series);
 

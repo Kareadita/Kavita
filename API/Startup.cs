@@ -185,13 +185,6 @@ public class Startup
         {
             options.AddPolicy("Authentication", httpContext =>
                 new AuthenticationRateLimiterPolicy().GetPartition(httpContext));
-            // RateLimitPartition.GetFixedWindowLimiter(httpContext.Connection.RemoteIpAddress?.ToString(),
-            //     partition => new FixedWindowRateLimiterOptions
-            //     {
-            //         AutoReplenishment = true,
-            //         PermitLimit = 1,
-            //         Window = TimeSpan.FromMinutes(1),
-            //     }));
         });
 
         services.AddHangfire(configuration => configuration

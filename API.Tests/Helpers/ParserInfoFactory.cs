@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Parser;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Tests.Helpers;
 

@@ -23,7 +23,7 @@
                 <div class="col-md-6 col-sm-12">
                     <div class="mb-3" style="width:100%">
                         <label for="email" class="form-label">Email</label>
-                        <input class="form-control" type="email" id="email" formControlName="email">
+                        <input class="form-control" inputmode="email" type="email" id="email" formControlName="email">
                         <div id="inviteForm-validations" class="invalid-feedback" *ngIf="userForm.dirty || userForm.touched" [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
                             <div *ngIf="userForm.get('email')?.errors?.required">
                                 This field is required

@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO.Abstractions.TestingHelpers;
+using System.Linq;
 using API.Entities.Enums;
-using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using Microsoft.Extensions.Logging;
@@ -99,6 +100,14 @@ public class DefaultParserTests
 
 
     #region Parse
+
+    [Fact]
+    public void Parse_MangaLibrary_JustCover_ShouldReturnNull()
+    {
+        const string rootPath = @"E:/Manga/";
+        var actual = _defaultParser.Parse(@"E:/Manga/Accel World/cover.png", rootPath);
+        Assert.Null(actual);
+    }
 
     [Fact]
     public void Parse_ParseInfo_Manga()

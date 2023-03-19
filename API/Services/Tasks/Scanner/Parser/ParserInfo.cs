@@ -1,8 +1,7 @@
 ﻿using API.Data.Metadata;
 using API.Entities.Enums;
-using API.Services.Tasks.Scanner.Parser;
 
-namespace API.Parser;
+namespace API.Services.Tasks.Scanner.Parser;
 
 /// <summary>
 /// This represents all parsed information from a single file

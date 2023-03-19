@@ -87,17 +87,9 @@ public class BookmarkServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -140,18 +132,12 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("0")
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
-
+        series.Library = new LibraryBuilder("Test LIb").Build();
         _context.Series.Add(series);
 
 
@@ -193,18 +179,13 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("0")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -264,18 +245,13 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -345,18 +321,13 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -403,18 +374,13 @@ public class BookmarkServiceTests
 
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -461,18 +427,13 @@ public class BookmarkServiceTests
         await ResetDB();
         var series = new SeriesBuilder("Test")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithNumber(1)
                 .WithChapter(new ChapterBuilder("1")
                     .Build())
                 .Build())
             .Build();
-        series.Library = new Library()
-        {
-            Name = "Test LIb",
-            Type = LibraryType.Manga,
-        };
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 

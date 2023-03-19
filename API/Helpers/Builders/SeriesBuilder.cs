@@ -26,13 +26,22 @@ public class SeriesBuilder : IEntityBuilder<Series>
             SortName = name,
             NormalizedName = name.ToNormalized(),
             NormalizedLocalizedName = name.ToNormalized(),
-            Metadata = new SeriesMetadata(),
+            Metadata = new SeriesMetadataBuilder().Build(),
             Volumes = new List<Volume>()
         };
     }
 
+    /// <summary>
+    /// Sets the localized name. If null or empty, defaults back to the
+    /// </summary>
+    /// <param name="localizedName"></param>
+    /// <returns></returns>
     public SeriesBuilder WithLocalizedName(string localizedName)
     {
+        if (string.IsNullOrEmpty(localizedName))
+        {
+            localizedName = _series.Name;
+        }
         _series.LocalizedName = localizedName;
         _series.NormalizedLocalizedName = localizedName.ToNormalized();
         return this;
@@ -66,6 +75,18 @@ public class SeriesBuilder : IEntityBuilder<Series>
     public SeriesBuilder WithPages(int pages)
     {
         _series.Pages = pages;
+        return this;
+    }
+
+    public SeriesBuilder WithCoverImage(string cover)
+    {
+        _series.CoverImage = cover;
+        return this;
+    }
+
+    public SeriesBuilder WithLibraryId(int id)
+    {
+        _series.LibraryId = id;
         return this;
     }
 }

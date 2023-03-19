@@ -28,6 +28,7 @@ public class TokenService : ITokenService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SymmetricSecurityKey _key;
+    private const string RefreshTokenName = "RefreshToken";
 
     public TokenService(IConfiguration config, UserManager<AppUser> userManager)
     {
@@ -65,28 +66,40 @@ public class TokenService : ITokenService
 
     public async Task<string> CreateRefreshToken(AppUser user)
     {
-        await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken");
-        var refreshToken = await _userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken");
-        await _userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", refreshToken);
+        await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
+        var refreshToken = await _userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
+        await _userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, refreshToken);
         return refreshToken;
     }
 
     public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var tokenContent = tokenHandler.ReadJwtToken(request.Token);
-        var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
-        if (string.IsNullOrEmpty(username)) return null;
-        var user = await _userManager.FindByNameAsync(username);
-        if (user == null) return null; // This forces a logout
-        await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "RefreshToken", request.RefreshToken);
-
-        await _userManager.UpdateSecurityStampAsync(user);
-
-        return new TokenRequestDto()
+        try
         {
-            Token = await CreateToken(user),
-            RefreshToken = await CreateRefreshToken(user)
-        };
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenContent = tokenHandler.ReadJwtToken(request.Token);
+            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
+            if (string.IsNullOrEmpty(username)) return null;
+            var user = await _userManager.FindByIdAsync(username);
+            if (user == null) return null; // This forces a logout
+            var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
+            if (!validated) return null;
+            await _userManager.UpdateSecurityStampAsync(user);
+
+            return new TokenRequestDto()
+            {
+                Token = await CreateToken(user),
+                RefreshToken = await CreateRefreshToken(user)
+            };
+        } catch (SecurityTokenExpiredException)
+        {
+            // Handle expired token
+            return null;
+        }
+        catch (Exception)
+        {
+            // Handle other exceptions
+            return null;
+        }
     }
 }

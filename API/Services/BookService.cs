@@ -11,7 +11,7 @@ using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
 using Docnet.Core.Models;

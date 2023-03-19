@@ -7,6 +7,7 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
@@ -70,10 +71,10 @@ public class CollectionTagRepositoryTests
 
         _context.ServerSetting.Update(setting);
 
-        var lib = new Library()
-        {
-            Name = "Manga", Folders = new List<FolderPath>() {new FolderPath() {Path = "C:/data/"}}
-        };
+
+        var lib = new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build();
 
         _context.AppUser.Add(new AppUser()
         {
@@ -118,13 +119,13 @@ public class CollectionTagRepositoryTests
     [Fact]
     public async Task RemoveTagsWithoutSeries_ShouldRemoveTags()
     {
-        var library = DbFactory.Library("Test", LibraryType.Manga);
-        var series = DbFactory.Series("Test 1");
-        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
+        var series = new SeriesBuilder("Test 1").Build();
+        var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
+        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
 
-        var series2 = DbFactory.Series("Test 1");
+        var series2 = new SeriesBuilder("Test 1").Build();
         series2.Metadata.CollectionTags.Add(commonTag);
         library.Series.Add(series);
         library.Series.Add(series2);
@@ -151,13 +152,13 @@ public class CollectionTagRepositoryTests
     [Fact]
     public async Task RemoveTagsWithoutSeries_ShouldNotRemoveTags()
     {
-        var library = DbFactory.Library("Test", LibraryType.Manga);
-        var series = DbFactory.Series("Test 1");
-        var commonTag = DbFactory.CollectionTag(0, "Tag 1");
+        var library = new LibraryBuilder("Test", LibraryType.Manga).Build();
+        var series = new SeriesBuilder("Test 1").Build();
+        var commonTag = new CollectionTagBuilder("Tag 1").Build();
         series.Metadata.CollectionTags.Add(commonTag);
-        series.Metadata.CollectionTags.Add(DbFactory.CollectionTag(0, "Tag 2"));
+        series.Metadata.CollectionTags.Add(new CollectionTagBuilder("Tag 2").Build());
 
-        var series2 = DbFactory.Series("Test 1");
+        var series2 = new SeriesBuilder("Test 1").Build();
         series2.Metadata.CollectionTags.Add(commonTag);
         library.Series.Add(series);
         library.Series.Add(series2);

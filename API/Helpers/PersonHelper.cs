@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
@@ -25,6 +23,7 @@ public static class PersonHelper
     /// <param name="action"></param>
     public static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
+        // TODO: Validate if we need this, not used
         var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
 
         foreach (var name in names)
@@ -34,7 +33,7 @@ public static class PersonHelper
                 p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
-                person = DbFactory.Person(name, role);
+                person = new PersonBuilder(name, role).Build();
                 allPeople.Add(person);
             }
 
@@ -102,7 +101,7 @@ public static class PersonHelper
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
         if (string.IsNullOrEmpty(person.Name)) return;
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
+        var existingPerson = metadataPeople.FirstOrDefault(p =>
             p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
         if (existingPerson == null)
         {
@@ -110,21 +109,16 @@ public static class PersonHelper
         }
     }
 
-    /// <summary>
-    /// Adds the person to the list if it's not already in there
-    /// </summary>
-    /// <param name="metadataPeople"></param>
-    /// <param name="person"></param>
-    public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
-    {
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == person.Name?.ToNormalized() && p.Role == person.Role);
-        if (existingPerson == null)
-        {
-            metadataPeople.Add(person);
-        }
-    }
 
+    /// <summary>
+    /// For a given role and people dtos, update a series
+    /// </summary>
+    /// <param name="role"></param>
+    /// <param name="tags"></param>
+    /// <param name="series"></param>
+    /// <param name="allTags"></param>
+    /// <param name="handleAdd">This will call with an existing or new tag, but the method does not update the series Metadata</param>
+    /// <param name="onModified"></param>
     public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? tags, Series series, IReadOnlyCollection<Person> allTags,
         Action<Person> handleAdd, Action onModified)
     {

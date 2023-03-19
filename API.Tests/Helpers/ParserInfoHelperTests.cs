@@ -5,8 +5,8 @@ using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
-using API.Parser;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -25,7 +25,6 @@ public class ParserInfoHelperTests
 
         var series = new SeriesBuilder("Darker Than Black")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithName("1")
                 .Build())
@@ -46,7 +45,6 @@ public class ParserInfoHelperTests
 
         var series = new SeriesBuilder("Darker Than Black")
             .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadata())
             .WithVolume(new VolumeBuilder("1")
                 .WithName("1")
                 .Build())

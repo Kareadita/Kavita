@@ -23,6 +23,17 @@ public class PersonBuilder : IEntityBuilder<Person>
         };
     }
 
+    /// <summary>
+    /// Only call for Unit Tests
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public PersonBuilder WithId(int id)
+    {
+        _person.Id = id;
+        return this;
+    }
+
     public PersonBuilder WithSeriesMetadata(SeriesMetadata metadata)
     {
         _person.SeriesMetadatas ??= new List<SeriesMetadata>();

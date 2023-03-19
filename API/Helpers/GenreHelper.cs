@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Metadata;
 using API.Entities;
 using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Helpers;
 
@@ -26,7 +27,7 @@ public static class GenreHelper
             var genre = allGenres.FirstOrDefault(p => p.NormalizedTitle != null && p.NormalizedTitle.Equals(normalizedName));
             if (genre == null)
             {
-                genre = DbFactory.Genre(name);
+                genre = new GenreBuilder(name).Build();
                 allGenres.Add(genre);
             }
 
@@ -99,7 +100,7 @@ public static class GenreHelper
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.Genre(tagTitle));
+                handleAdd(new GenreBuilder(tagTitle).Build());
                 isModified = true;
             }
         }

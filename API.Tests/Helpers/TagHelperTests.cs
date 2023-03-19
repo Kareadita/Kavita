@@ -2,6 +2,7 @@
 using API.Data;
 using API.Entities;
 using API.Helpers;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -13,9 +14,9 @@ public class TagHelperTests
     {
         var allTags = new List<Tag>
         {
-            DbFactory.Tag("Action"),
-            DbFactory.Tag("action"),
-            DbFactory.Tag("Sci-fi"),
+            new TagBuilder("Action").Build(),
+            new TagBuilder("action").Build(),
+            new TagBuilder("Sci-fi").Build(),
         };
         var tagAdded = new List<Tag>();
 
@@ -37,9 +38,9 @@ public class TagHelperTests
     {
         var allTags = new List<Tag>
         {
-            DbFactory.Tag("Action"),
-            DbFactory.Tag("action"),
-            DbFactory.Tag("Sci-fi"),
+            new TagBuilder("Action").Build(),
+            new TagBuilder("action").Build(),
+            new TagBuilder("Sci-fi").Build(),
 
         };
         var tagAdded = new List<Tag>();
@@ -62,19 +63,19 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action"),
-            DbFactory.Tag("action"),
-            DbFactory.Tag("Sci-fi"),
+            new TagBuilder("Action").Build(),
+            new TagBuilder("action").Build(),
+            new TagBuilder("Sci-fi").Build(),
         };
 
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Action"));
+        TagHelper.AddTagIfNotExists(existingTags, new TagBuilder("Action").Build());
         Assert.Equal(3, existingTags.Count);
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("action"));
+        TagHelper.AddTagIfNotExists(existingTags, new TagBuilder("action").Build());
         Assert.Equal(3, existingTags.Count);
 
-        TagHelper.AddTagIfNotExists(existingTags, DbFactory.Tag("Shonen"));
+        TagHelper.AddTagIfNotExists(existingTags, new TagBuilder("Shonen").Build());
         Assert.Equal(4, existingTags.Count);
     }
 
@@ -83,13 +84,13 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action"),
-            DbFactory.Tag("Sci-fi"),
+            new TagBuilder("Action").Build(),
+            new TagBuilder("Sci-fi").Build(),
         };
 
         var peopleFromChapters = new List<Tag>
         {
-            DbFactory.Tag("Action"),
+            new TagBuilder("Action").Build(),
         };
 
         var tagRemoved = new List<Tag>();
@@ -107,8 +108,8 @@ public class TagHelperTests
     {
         var existingTags = new List<Tag>
         {
-            DbFactory.Tag("Action"),
-            DbFactory.Tag("Sci-fi"),
+            new TagBuilder("Action").Build(),
+            new TagBuilder("Sci-fi").Build(),
         };
 
         var peopleFromChapters = new List<Tag>();

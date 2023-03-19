@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
 
@@ -69,8 +70,14 @@ public class SeriesService : ISeriesService
             var allPeople = (await _unitOfWork.PersonRepository.GetAllPeople()).ToList();
             var allTags = (await _unitOfWork.TagRepository.GetAllTagsAsync()).ToList();
 
-            series.Metadata ??= DbFactory.SeriesMetadata((updateSeriesMetadataDto.CollectionTags ?? new List<CollectionTagDto>())
-                .Select(dto => DbFactory.CollectionTag(dto.Id, dto.Title, dto.Summary, dto.Promoted)).ToList());
+            series.Metadata ??= new SeriesMetadataBuilder()
+                .WithCollectionTags(updateSeriesMetadataDto.CollectionTags.Select(dto =>
+                    new CollectionTagBuilder(dto.Title)
+                        .WithId(dto.Id)
+                        .WithSummary(dto.Summary)
+                        .WithIsPromoted(dto.Promoted)
+                        .Build()).ToList())
+                .Build();
 
             if (series.Metadata.AgeRating != updateSeriesMetadataDto.SeriesMetadata.AgeRating)
             {
@@ -244,7 +251,11 @@ public class SeriesService : ISeriesService
             else
             {
                 // Add new tag
-                handleAdd(DbFactory.CollectionTag(tag.Id, tag.Title, tag.Summary, tag.Promoted));
+                handleAdd(new CollectionTagBuilder(tag.Title)
+                    .WithId(tag.Id)
+                    .WithSummary(tag.Summary)
+                    .WithIsPromoted(tag.Promoted)
+                    .Build());
             }
         }
     }
