@@ -1159,7 +1159,81 @@ public class SeriesServiceTests : AbstractDbTest
 
     #region UpdateRelatedList
 
+    // TODO: Implement UpdateRelatedList
 
+    #endregion
+
+    #region FormatChapterName
+
+    [Theory]
+    [InlineData(LibraryType.Manga, false, "Chapter")]
+    [InlineData(LibraryType.Comic, false, "Issue")]
+    [InlineData(LibraryType.Comic, true, "Issue #")]
+    [InlineData(LibraryType.Book, false, "Book")]
+    public void FormatChapterNameTest(LibraryType libraryType, bool withHash, string expected )
+    {
+        Assert.Equal(expected, SeriesService.FormatChapterName(libraryType, withHash));
+    }
+
+    #endregion
+
+    #region FormatChapterTitle
+
+    [Fact]
+    public void FormatChapterTitle_Manga_NonSpecial()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+        Assert.Equal("Chapter Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Manga, false));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Manga_Special()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Manga, false));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Comic_NonSpecial_WithoutHash()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+        Assert.Equal("Issue Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, false));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Comic_Special_WithoutHash()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, false));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Comic_NonSpecial_WithHash()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+        Assert.Equal("Issue #Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, true));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Comic_Special_WithHash()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, true));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Book_NonSpecial()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
+        Assert.Equal("Book Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Book, false));
+    }
+
+    [Fact]
+    public void FormatChapterTitle_Book_Special()
+    {
+        var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
+        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Book, false));
+    }
 
     #endregion
 }
