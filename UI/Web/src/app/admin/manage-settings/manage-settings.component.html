@@ -35,8 +35,8 @@
 
         <div class="mb-3">
             <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
-            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita</span>
+            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</ng-template>
+            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</span>
             <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
             [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
             <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
