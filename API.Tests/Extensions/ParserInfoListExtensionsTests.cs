@@ -4,7 +4,6 @@ using System.Linq;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers.Builders;
-using API.Parser;
 using API.Services;
 using API.Services.Tasks.Scanner.Parser;
 using API.Tests.Helpers;

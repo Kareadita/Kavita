@@ -5,9 +5,9 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers.Builders;
-using API.Parser;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using API.Tests.Helpers;
 using Xunit;
 

@@ -12,8 +12,8 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
-using API.Parser;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -30,6 +30,13 @@ public interface IProcessSeries
     Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false);
     void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
+
+    // These exists only for Unit testing
+    void UpdateSeriesMetadata(Series series, Library library);
+    void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info);
 }
 
 /// <summary>
@@ -265,7 +272,7 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    private void UpdateSeriesMetadata(Series series, Library library)
+    public void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         var isBook = library.Type == LibraryType.Book;
@@ -494,7 +501,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    public void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
@@ -578,7 +585,7 @@ public class ProcessSeries : IProcessSeries
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    public void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
@@ -638,7 +645,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    public void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
@@ -663,7 +670,7 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
@@ -812,7 +819,7 @@ public class ProcessSeries : IProcessSeries
 
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
-
+        // TODO: Move this to an extension and test it
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
             return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();

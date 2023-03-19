@@ -333,7 +333,7 @@ public class PersonHelperTests
         Assert.Single(metadataPeople);
         Assert.NotNull(metadataPeople.SingleOrDefault(p =>
             p.Name.Equals(person.Name) && p.Role == person.Role && p.NormalizedName == person.NormalizedName));
-        Assert.Equal(metadataPeople.First().Id, 1);
+        Assert.Equal(1, metadataPeople.First().Id);
     }
 
     [Fact]

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;

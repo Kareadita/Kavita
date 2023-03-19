@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using API.Entities;
 using API.Entities.Enums;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Helpers.Builders;
 

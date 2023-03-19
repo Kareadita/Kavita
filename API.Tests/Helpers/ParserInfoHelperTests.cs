@@ -5,8 +5,8 @@ using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
-using API.Parser;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Helpers;
