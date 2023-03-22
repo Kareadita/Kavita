@@ -1,13 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import { Observable, of, Subject, map, takeUntil, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
-import { ImageRenderer } from '../../_models/renderer';
+import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
 
 @Component({
@@ -31,6 +31,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   readerModeClass$!: Observable<string>;
   darkenss$: Observable<string> = of('brightness(100%)');
   currentImage!: HTMLImageElement;
+  emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 
@@ -49,6 +50,13 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.readerModeClass$ = this.readerSettings$.pipe(
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
+    this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(data => data.emulateBook),
+      map(enabled => enabled ? 'book-shadow' : ''), 
       filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
@@ -103,7 +111,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          return FITTING_OPTION.WIDTH + ' fit-to-screen';
+          return FITTING_OPTION.WIDTH + ' fit-to-screen wide';
         }
 
         return fit;

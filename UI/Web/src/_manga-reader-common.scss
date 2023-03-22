@@ -7,18 +7,31 @@ img {
   align-items: center;
 
   &.full-width {
-    height: calc(var(--vh)*100);
+    width: 100%;
     display: grid;
+
+    canvas {
+      margin: 0 auto;
+    }
   }
 
   &.full-height {
-    height: calc(100vh - 34px); // 34px is the height of the horizontal scrollbar that will appear
+    height: calc(var(--vh)*100); // 34px is the height of the horizontal scrollbar that will appear
     display: flex; // changed from inline-block to fix the centering on tablets not working
+    justify-content: center;
+    align-items: center;
+
+    canvas {
+      height: calc(var(--vh)*100);
+    }
   }
 
   &.original {
-    height: 100vh;
     display: grid;
+
+    canvas {
+      margin: 0 auto;
+    }
   }
 
   .full-height {

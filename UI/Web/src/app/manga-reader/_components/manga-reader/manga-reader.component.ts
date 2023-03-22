@@ -520,13 +520,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(this.user.preferences.pageSplitOption);
           this.generalSettingsForm.get('pageSplitOption')?.enable();
           this.generalSettingsForm.get('fittingOption')?.enable();
-          this.generalSettingsForm.get('emulateBook')?.disable();
         } else {
           this.generalSettingsForm.get('pageSplitOption')?.setValue(PageSplitOption.NoSplit);
           this.generalSettingsForm.get('pageSplitOption')?.disable();
           this.generalSettingsForm.get('fittingOption')?.setValue(this.mangaReaderService.translateScalingOption(ScalingOption.FitToHeight));
           this.generalSettingsForm.get('fittingOption')?.disable();
-          this.generalSettingsForm.get('emulateBook')?.enable();
         }
         this.cdRef.markForCheck();
 
