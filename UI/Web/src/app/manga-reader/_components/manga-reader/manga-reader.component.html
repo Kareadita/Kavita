@@ -27,18 +27,14 @@
         </div>
     </div>
     <app-loading [loading]="isLoading" [absolute]="true"></app-loading>
+    <div>
     <div class="reading-area" 
             ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
         
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div (dblclick)="bookmarkPage($event)">
-                <app-canvas-renderer 
-                    [readerSettings$]="readerSettings$"
-                    [image$]="currentImage$" 
-                    [bookmark$]="showBookmarkEffect$"
-                    [showClickOverlay$]="showClickOverlay$">
-                </app-canvas-renderer>
+
             </div>
 
             <!-- Pagination controls and screen hints-->
@@ -62,7 +58,14 @@
                 </div>
             </div>
 
-            <div (dblclick)="bookmarkPage($event)">
+            <div class="reader-container" (dblclick)="bookmarkPage($event)">
+                <app-canvas-renderer 
+                    [readerSettings$]="readerSettings$"
+                    [image$]="currentImage$" 
+                    [bookmark$]="showBookmarkEffect$"
+                    [showClickOverlay$]="showClickOverlay$">
+                </app-canvas-renderer>
+
                 <app-single-renderer [image$]="currentImage$" 
                     [readerSettings$]="readerSettings$" 
                     [bookmark$]="showBookmarkEffect$"

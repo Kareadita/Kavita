@@ -7,15 +7,22 @@ $pointer-offset: 5px;
 @use '../../.././../manga-reader-common';
 
 
-
+.reader-container {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
 
 .reading-area {
   position: relative;
   overflow: auto;
   text-align: center;
+  display: grid;
+  text-align: center;
+  align-content: center;
+  align-items: center;
   //height: calc(var(--vh)*100); // this needs to be applied on the DOM because it breaks infinite scroller
 }
-
 
 .reader {
     background-color: var(--manga-reader-bg-color);

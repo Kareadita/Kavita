@@ -3,41 +3,31 @@ img {
 }
 
 .image-container {
+  max-height: calc(var(--vh)*100 - 34px);
   text-align: center;
+  justify-content: center;
   align-items: center;
 
   &.full-width {
     width: 100%;
     display: grid;
-
-    canvas {
-      margin: 0 auto;
-    }
   }
 
   &.full-height {
-    height: calc(var(--vh)*100); // 34px is the height of the horizontal scrollbar that will appear
-    display: flex; // changed from inline-block to fix the centering on tablets not working
+    height: calc(var(--vh)*100 - 34px); // 34px is the height of the horizontal scrollbar that will appear
+    display: grid; // changed from inline-block to fix the centering on tablets not working
     justify-content: center;
     align-items: center;
-
-    canvas {
-      height: calc(var(--vh)*100);
-    }
   }
 
   &.original {
     display: grid;
-
-    canvas {
-      margin: 0 auto;
-    }
   }
 
   .full-height {
     width: auto;
     margin: 0 auto;
-    max-height: calc(var(--vh)*100);
+    max-height: calc(var(--vh) * 100 - 34px);
     vertical-align: top;
       &.wide {
         height: 100vh;

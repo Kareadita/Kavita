@@ -31,7 +31,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   readerModeClass$!: Observable<string>;
   darkenss$: Observable<string> = of('brightness(100%)');
   currentImage!: HTMLImageElement;
-  emulateBookClass$: Observable<string> = of('');
+  emulateBookClass$!: Observable<string>;
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
 

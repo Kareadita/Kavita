@@ -1,1 +1,27 @@
 @use '../../../../manga-reader-common';
+
+.image-container {
+    text-align: center;
+    align-items: center;
+  
+    &.full-width {
+      canvas {
+        margin: 0 auto;
+        width: 100%;
+      }
+    }
+  
+    &.full-height {
+      canvas {
+        height: calc(var(--vh)*100 - 34px);
+      }
+    }
+
+    &.original {
+        display: grid;
+    
+        canvas {
+          margin: 0 auto;
+        }
+    }
+}
