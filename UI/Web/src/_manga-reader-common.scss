@@ -49,7 +49,7 @@ img {
   }
 
   .fit-to-screen.full-width {
-    max-height: calc(var(--vh)*100);
+    max-height: calc(var(--vh)*100 - 32px);
   }
 }
 
