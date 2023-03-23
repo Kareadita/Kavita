@@ -18,6 +18,7 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
@@ -792,8 +793,12 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
             .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
-            .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
-            .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
+            // .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
+            // .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
+
+            .ReleaseYearFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, 2002)
+            //.ReleaseYearFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange!.Max)
+
             .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                                || EF.Functions.Like(s.OriginalName!, $"%{filter.SeriesNameQuery}%")

@@ -89,4 +89,53 @@ public static class QueryableExtensions
     {
         return condition ? queryable.Where(predicate) : queryable;
     }
+
+    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, Expression<Func<T, string>> propertySelector, string searchQuery)
+        where T : class
+    {
+        if (string.IsNullOrEmpty(searchQuery)) return queryable;
+
+        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
+        var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
+        var searchExpression = Expression.Constant($"%{searchQuery}%");
+        var likeExpression = Expression.Call(method, Expression.Constant(dbFunctions), propertySelector.Body, searchExpression);
+        var lambda = Expression.Lambda<Func<T, bool>>(likeExpression, propertySelector.Parameters[0]);
+
+        return queryable.Where(lambda);
+    }
+
+    /// <summary>
+    /// Performs a WhereLike that ORs multiple fields
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="propertySelectors"></param>
+    /// <param name="searchQuery"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, List<Expression<Func<T, string>>> propertySelectors, string searchQuery)
+        where T : class
+    {
+        if (string.IsNullOrEmpty(searchQuery)) return queryable;
+
+        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
+        var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
+        var searchExpression = Expression.Constant($"%{searchQuery}%");
+
+        Expression orExpression = null;
+        foreach (var propertySelector in propertySelectors)
+        {
+            var likeExpression = Expression.Call(method, Expression.Constant(dbFunctions), propertySelector.Body, searchExpression);
+            var lambda = Expression.Lambda<Func<T, bool>>(likeExpression, propertySelector.Parameters[0]);
+            orExpression = orExpression == null ? lambda.Body : Expression.OrElse(orExpression, lambda.Body);
+        }
+
+        if (orExpression == null)
+        {
+            throw new ArgumentNullException(nameof(orExpression));
+        }
+
+        var combinedLambda = Expression.Lambda<Func<T, bool>>(orExpression, propertySelectors[0].Parameters[0]);
+        return queryable.Where(combinedLambda);
+    }
 }
