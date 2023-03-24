@@ -792,16 +792,20 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
             .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
-            //.WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
+
+
+
+            //.PropertyFilter(hasTagsFilter, s => s.Metadata.Tags, FilterComparison.Contains, filter.Tags)
+            .PropertyFilter(hasPublicationFilter, s => s.Metadata.PublicationStatus, FilterComparison.Contains, filter.PublicationStatus)
             .PropertyFilter<Series, string, IList<string>>(hasLanguageFilter, s => s.Metadata.Language, FilterComparison.Contains, filter.Languages)
-            .PropertyFilter<Series, int, int?>(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
-            .PropertyFilter<Series, int, int?>(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
+            .PropertyFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
+            .PropertyFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
 
-
+            //.WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
             //.ReleaseYearFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
             //.ReleaseYearFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
 
-            .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
+            //.WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
                                                || EF.Functions.Like(s.OriginalName!, $"%{filter.SeriesNameQuery}%")
                                                || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))

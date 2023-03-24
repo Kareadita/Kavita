@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -37,28 +38,70 @@ public static class SeriesFilter
             throw new ArgumentException("Invalid property selector", nameof(propertySelector));
         }
 
-        var parameter = Expression.Parameter(typeof(T), "x");
-        var property = Expression.Property(parameter, propertyExpression.Member.Name);
 
-        var comparisonExpression = GetExpression<T, TV>(comparison, property, value);
+
+        //var parameter = Expression.Parameter(typeof(T), "x");
+        //var property = Expression.Property(parameter, propertyExpression.Member.Name);
+
+        // var parameter = propertySelector.Parameters[0];
+        // // This is wrong, it's not the end type, it's the end code that we actually need
+        // var nestedPropertyNames = typeof(TPV).FullName.Split('.');
+        //
+        // MemberExpression? property = null;
+        // foreach (var propertyName in nestedPropertyNames)
+        // {
+        //     if (property == null)
+        //     {
+        //         property = Expression.Property(parameter, propertyName);
+        //         continue;
+        //     }
+        //     property = Expression.Property(property, propertyName);
+        // }
+        var parameter = propertySelector.Parameters[0];
+        var property = GetNestedProperty(parameter, propertyExpression);
+
+        var comparisonExpression = GetExpression<T, TPV, TV>(comparison, property, value);
 
         var lambda = Expression.Lambda<Func<T, bool>>(comparisonExpression, parameter);
         return queryable.Where(lambda);
     }
-    private static Expression GetExpression<T, TV>(FilterComparison comparison, Expression property, TV? value)
+    private static Expression GetNestedProperty(ParameterExpression parameter, MemberExpression propertyExpression)
+    {
+        if (propertyExpression.Expression != parameter)
+        {
+            var nestedProperty = GetNestedProperty(parameter, propertyExpression.Expression as MemberExpression);
+            return Expression.Property(nestedProperty, propertyExpression.Member.Name);
+        }
+
+        return propertyExpression;
+    }
+    private static Expression GetExpression<T, TPV, TV>(FilterComparison comparison, Expression property, TV? value)
     {
         if (value == null) throw new NullReferenceException("value cannot be null");
-        return comparison switch
+        switch (comparison)
         {
-            FilterComparison.Equal => Expression.Equal(property, Expression.Constant(value)),
-            FilterComparison.GreaterThan => Expression.GreaterThan(property, Expression.Constant(value)),
-            FilterComparison.GreaterThanEqual => Expression.GreaterThanOrEqual(property, Expression.Constant(value)),
-            FilterComparison.LessThan => Expression.LessThan(property, Expression.Constant(value)),
-            FilterComparison.LessThanEqual => Expression.LessThanOrEqual(property, Expression.Constant(value)),
-            FilterComparison.Contains => (typeof(T) != typeof(List<T>)) ? Expression.Empty() :
-                Expression.Call(Expression.Constant(value), typeof(List<T>).GetMethod("Contains")!, property),
-            _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
-        };
+            case FilterComparison.Equal:
+                return Expression.Equal(property, Expression.Constant(value));
+            case FilterComparison.GreaterThan:
+                return Expression.GreaterThan(property, Expression.Constant(value));
+            case FilterComparison.GreaterThanEqual:
+                return Expression.GreaterThanOrEqual(property, Expression.Constant(value));
+            case FilterComparison.LessThan:
+                return Expression.LessThan(property, Expression.Constant(value));
+            case FilterComparison.LessThanEqual:
+                return Expression.LessThanOrEqual(property, Expression.Constant(value));
+            case FilterComparison.Contains:
+                if (!typeof(TV).FullName.Contains("IList"))
+                {
+                    throw new ArgumentException("Contains filter can only be applied to properties of type IList", nameof(property));
+                }
+                return Expression.Call(
+                    Expression.Constant(value),
+                    typeof(IList).GetMethod("Contains")!,
+                    property);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
     }
 
     #nullable disable
