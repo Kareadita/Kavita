@@ -57,13 +57,13 @@ export class UserLoginComponent implements OnInit {
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
-      this.isLoaded = true;
-
+      
       if (this.firstTimeFlow) {
         this.router.navigateByUrl('registration/register');
         return;
       }
 
+      this.isLoaded = true;
       this.cdRef.markForCheck();
     });
   }

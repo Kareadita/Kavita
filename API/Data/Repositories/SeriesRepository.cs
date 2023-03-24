@@ -792,12 +792,14 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
             .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
-            .WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
-            // .WhereIf(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear >= filter.ReleaseYearRange!.Min)
-            // .WhereIf(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear <= filter.ReleaseYearRange!.Max)
+            //.WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
+            .PropertyFilter<Series, string, IList<string>>(hasLanguageFilter, s => s.Metadata.Language, FilterComparison.Contains, filter.Languages)
+            .PropertyFilter<Series, int, int?>(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
+            .PropertyFilter<Series, int, int?>(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
 
-            .ReleaseYearFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, 2002)
-            //.ReleaseYearFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange!.Max)
+
+            //.ReleaseYearFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
+            //.ReleaseYearFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
 
             .WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
             .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
