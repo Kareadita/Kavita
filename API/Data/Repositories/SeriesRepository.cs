@@ -785,12 +785,7 @@ public class SeriesRepository : ISeriesRepository
 
         var query = _context.Series
             .AsNoTracking()
-            .WhereIf(hasGenresFilter, s => s.Metadata.Genres.Any(g => filter.Genres.Contains(g.Id)))
-            .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
-            .WhereIf(hasCollectionTagFilter,
-                s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
             .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
-            .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
 
             // This new style can handle any filterComparision coming from the user
             .HasLanguage(hasLanguageFilter, FilterComparison.Contains, filter.Languages)
@@ -801,12 +796,19 @@ public class SeriesRepository : ISeriesRepository
             .HasAgeRating(hasAgeRating, FilterComparison.Contains, filter.AgeRating)
             .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
+            .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags)
+            .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
+            .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
+            .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
+            .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
 
+            // This one might need to be redesigned
+            .HasReadingProgress(filter.ReadStatus.Read, FilterComparison.Equal, 100)
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
             .Where(s => userLibraries.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format))
+            //.Where(s => formats.Contains(s.Format))
             .RestrictAgainstAgeRestriction(userRating);
 
         // if (userRating.AgeRating != AgeRating.NotApplicable)

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
 using Kavita.Common;
@@ -132,6 +133,30 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
     }
+    public static IQueryable<Series> HasAverageReadTime(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, int avgReadTime)
+    {
+        if (!condition || avgReadTime < 0) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                return queryable.Where(s => s.AvgHoursToRead == avgReadTime);
+            case FilterComparison.GreaterThan:
+                return queryable.Where(s => s.AvgHoursToRead > avgReadTime);
+            case FilterComparison.GreaterThanEqual:
+                return queryable.Where(s => s.AvgHoursToRead >= avgReadTime);
+            case FilterComparison.LessThan:
+                return queryable.Where(s => s.AvgHoursToRead < avgReadTime);
+            case FilterComparison.LessThanEqual:
+                return queryable.Where(s => s.AvgHoursToRead <= avgReadTime);
+            case FilterComparison.Contains:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.AverageReadTime");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
 
     public static IQueryable<Series> HasPublicationStatus(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<PublicationStatus> pubStatues)
@@ -156,12 +181,66 @@ public static class SeriesFilter
         }
     }
 
+    public static IQueryable<Series> HasReadingProgress(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, int readProgress, int userId)
+    {
+        if (!condition) return queryable;
+        bool ProgressComparison(int pagesRead, int totalPages)
+        {
+            var result = false;
+            if (readStatus.NotRead)
+            {
+                result = (pagesRead == 0);
+            }
+
+            if (readStatus.Read)
+            {
+                result = result || (pagesRead == totalPages);
+            }
+
+            if (readStatus.InProgress)
+            {
+                result = result || (pagesRead > 0 && pagesRead < totalPages);
+            }
+
+            return result;
+        }
+
+        var seriesIds = queryable
+            .Include(s => s.Progress)
+            .Select(s => new
+            {
+                Series = s,
+                PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
+            })
+            .AsEnumerable()
+            .Where(s => ProgressComparison(s.PagesRead, s.Series.Pages))
+            .Select(s => s.Series.Id)
+            .ToList();
+
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                return queryable.Where(s => s.Metadata.PublicationStatus == firstStatus);
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.PublicationStatus");
+            case FilterComparison.Contains:
+                return queryable.Where(s => pubStatues.Contains(s.Metadata.PublicationStatus));
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
     public static IQueryable<Series> HasTags(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<int> tags)
     {
         if (!condition || tags.Count == 0) return queryable;
 
-        var first = tags.First();
         switch (comparison)
         {
             case FilterComparison.Equal:
@@ -172,7 +251,92 @@ public static class SeriesFilter
             case FilterComparison.LessThan:
             case FilterComparison.LessThanEqual:
             case FilterComparison.Matches:
-                throw new KavitaException($"{comparison} not applicable for Series.PublicationStatus");
+                throw new KavitaException($"{comparison} not applicable for Series.Tags");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
+    public static IQueryable<Series> HasPeople(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, IList<int> people)
+    {
+        if (!condition || people.Count == 0) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+            case FilterComparison.Contains:
+                return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.Id)));
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.People");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
+    public static IQueryable<Series> HasGenre(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, IList<int> genres)
+    {
+        if (!condition || genres.Count == 0) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+            case FilterComparison.Contains:
+                return queryable.Where(s => s.Metadata.Genres.Any(p => genres.Contains(p.Id)));
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.Genres");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
+    public static IQueryable<Series> HasFormat(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, IList<MangaFormat> formats)
+    {
+        if (!condition || formats.Count == 0) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+            case FilterComparison.Contains:
+                return queryable.Where(s => formats.Contains(s.Format));
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.Format");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+        }
+    }
+
+    public static IQueryable<Series> HasCollectionTags(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, IList<int> collectionTags)
+    {
+        if (!condition || collectionTags.Count == 0) return queryable;
+
+        var first = collectionTags.First();
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+            case FilterComparison.Contains:
+                return queryable.Where(s => s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Matches:
+                throw new KavitaException($"{comparison} not applicable for Series.CollectionTags");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
