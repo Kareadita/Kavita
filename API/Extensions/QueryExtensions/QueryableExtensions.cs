@@ -90,10 +90,10 @@ public static class QueryableExtensions
         return condition ? queryable.Where(predicate) : queryable;
     }
 
-    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, Expression<Func<T, string>> propertySelector, string searchQuery)
+    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, bool condition, Expression<Func<T, string>> propertySelector, string searchQuery)
         where T : class
     {
-        if (string.IsNullOrEmpty(searchQuery)) return queryable;
+        if (!condition || string.IsNullOrEmpty(searchQuery)) return queryable;
 
         var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
         var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
@@ -113,10 +113,10 @@ public static class QueryableExtensions
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, List<Expression<Func<T, string>>> propertySelectors, string searchQuery)
+    public static IQueryable<T> WhereLike<T>(this IQueryable<T> queryable, bool condition, List<Expression<Func<T, string>>> propertySelectors, string searchQuery)
         where T : class
     {
-        if (string.IsNullOrEmpty(searchQuery)) return queryable;
+        if (!condition || string.IsNullOrEmpty(searchQuery)) return queryable;
 
         var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
         var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);

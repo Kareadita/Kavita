@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
@@ -788,37 +789,31 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(hasPeopleFilter, s => s.Metadata.People.Any(p => allPeopleIds.Contains(p.Id)))
             .WhereIf(hasCollectionTagFilter,
                 s => s.Metadata.CollectionTags.Any(t => filter.CollectionTags.Contains(t.Id)))
-            .WhereIf(hasRatingFilter, s => s.Ratings.Any(r => r.Rating >= filter.Rating && r.AppUserId == userId))
             .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
-            .WhereIf(hasAgeRating, s => filter.AgeRating.Contains(s.Metadata.AgeRating))
             .WhereIf(hasTagsFilter, s => s.Metadata.Tags.Any(t => filter.Tags.Contains(t.Id)))
 
+            // This new style can handle any filterComparision coming from the user
+            .HasLanguage(hasLanguageFilter, FilterComparison.Contains, filter.Languages)
+            .HasReleaseYear(hasReleaseYearMaxFilter, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
+            .HasReleaseYear(hasReleaseYearMinFilter, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
+            .HasName(hasSeriesNameFilter, FilterComparison.Matches, filter.SeriesNameQuery)
+            .HasRating(hasRatingFilter, FilterComparison.GreaterThanEqual, filter.Rating, userId)
+            .HasAgeRating(hasAgeRating, FilterComparison.Contains, filter.AgeRating)
+            .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
+            .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
 
-
-            //.PropertyFilter(hasTagsFilter, s => s.Metadata.Tags, FilterComparison.Contains, filter.Tags)
-            .PropertyFilter(hasPublicationFilter, s => s.Metadata.PublicationStatus, FilterComparison.Contains, filter.PublicationStatus)
-            .PropertyFilter<Series, string, IList<string>>(hasLanguageFilter, s => s.Metadata.Language, FilterComparison.Contains, filter.Languages)
-            .PropertyFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
-            .PropertyFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
-
-            //.WhereIf(hasLanguageFilter, s => filter.Languages.Contains(s.Metadata.Language))
-            //.ReleaseYearFilter(hasReleaseYearMinFilter, s => s.Metadata.ReleaseYear, FilterComparison.GreaterThanEqual, filter.ReleaseYearRange?.Min)
-            //.ReleaseYearFilter(hasReleaseYearMaxFilter, s => s.Metadata.ReleaseYear, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
-
-            //.WhereIf(hasPublicationFilter, s => filter.PublicationStatus.Contains(s.Metadata.PublicationStatus))
-            .WhereIf(hasSeriesNameFilter, s => EF.Functions.Like(s.Name, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.OriginalName!, $"%{filter.SeriesNameQuery}%")
-                                               || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
             .Where(s => userLibraries.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format));
+            .Where(s => formats.Contains(s.Format))
+            .RestrictAgainstAgeRestriction(userRating);
 
-        if (userRating.AgeRating != AgeRating.NotApplicable)
-        {
-            query = query.RestrictAgainstAgeRestriction(userRating);
-        }
+        // if (userRating.AgeRating != AgeRating.NotApplicable)
+        // {
+        //      // this if statement is included in the extension
+        //     query = query.RestrictAgainstAgeRestriction(userRating);
+        // }
 
 
         // If no sort options, default to using SortName
