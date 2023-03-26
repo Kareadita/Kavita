@@ -181,59 +181,59 @@ public static class SeriesFilter
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="condition"></param>
+    /// <param name="comparison"></param>
+    /// <param name="readProgress"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    /// <remarks>This is more taxing on memory as the percentage calculation must be done in Memory</remarks>
+    /// <exception cref="KavitaException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static IQueryable<Series> HasReadingProgress(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, int readProgress, int userId)
     {
         if (!condition) return queryable;
-        bool ProgressComparison(int pagesRead, int totalPages)
-        {
-            var result = false;
-            if (readStatus.NotRead)
-            {
-                result = (pagesRead == 0);
-            }
 
-            if (readStatus.Read)
-            {
-                result = result || (pagesRead == totalPages);
-            }
-
-            if (readStatus.InProgress)
-            {
-                result = result || (pagesRead > 0 && pagesRead < totalPages);
-            }
-
-            return result;
-        }
-
-        var seriesIds = queryable
+        var subQuery = queryable
             .Include(s => s.Progress)
             .Select(s => new
             {
                 Series = s,
-                PagesRead = s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead),
+                Percentage = Math.Truncate(((double)s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead)
+                                            / s.Pages) * 100)
             })
-            .AsEnumerable()
-            .Where(s => ProgressComparison(s.PagesRead, s.Series.Pages))
-            .Select(s => s.Series.Id)
-            .ToList();
-
+            .AsEnumerable();
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                return queryable.Where(s => s.Metadata.PublicationStatus == firstStatus);
+                subQuery = subQuery.Where(s => s.Percentage == readProgress);
+                break;
             case FilterComparison.GreaterThan:
+                subQuery = subQuery.Where(s => s.Percentage > readProgress);
+                break;
             case FilterComparison.GreaterThanEqual:
+                subQuery = subQuery.Where(s => s.Percentage >= readProgress);
+                break;
             case FilterComparison.LessThan:
+                subQuery = subQuery.Where(s => s.Percentage < readProgress);
+                break;
             case FilterComparison.LessThanEqual:
+                subQuery = subQuery.Where(s => s.Percentage <= readProgress);
+                break;
             case FilterComparison.Matches:
-                throw new KavitaException($"{comparison} not applicable for Series.PublicationStatus");
             case FilterComparison.Contains:
-                return queryable.Where(s => pubStatues.Contains(s.Metadata.PublicationStatus));
+                throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
+
+        var ids = subQuery.Select(s => s.Series.Id).ToList();
+        return queryable.Where(s => ids.Contains(s.Id));
     }
 
     public static IQueryable<Series> HasTags(this IQueryable<Series> queryable, bool condition,

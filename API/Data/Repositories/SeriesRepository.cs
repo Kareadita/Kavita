@@ -785,7 +785,7 @@ public class SeriesRepository : ISeriesRepository
 
         var query = _context.Series
             .AsNoTracking()
-            .WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
+            //.WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
 
             // This new style can handle any filterComparision coming from the user
             .HasLanguage(hasLanguageFilter, FilterComparison.Contains, filter.Languages)
@@ -801,21 +801,17 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-
-            // This one might need to be redesigned
-            .HasReadingProgress(filter.ReadStatus.Read, FilterComparison.Equal, 100)
+            .HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId)
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
-            .Where(s => userLibraries.Contains(s.LibraryId))
-            //.Where(s => formats.Contains(s.Format))
-            .RestrictAgainstAgeRestriction(userRating);
+            .Where(s => userLibraries.Contains(s.LibraryId));
 
-        // if (userRating.AgeRating != AgeRating.NotApplicable)
-        // {
-        //      // this if statement is included in the extension
-        //     query = query.RestrictAgainstAgeRestriction(userRating);
-        // }
+        if (userRating.AgeRating != AgeRating.NotApplicable)
+        {
+             // this if statement is included in the extension
+            query = query.RestrictAgainstAgeRestriction(userRating);
+        }
 
 
         // If no sort options, default to using SortName
@@ -852,7 +848,7 @@ public class SeriesRepository : ISeriesRepository
             };
         }
 
-        return query;
+        return query.AsSplitQuery();
     }
 
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, IQueryable<Series> sQuery)

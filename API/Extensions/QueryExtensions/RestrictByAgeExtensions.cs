@@ -20,8 +20,6 @@ public static class RestrictByAgeExtensions
             return q.Where(s => s.Metadata.AgeRating != AgeRating.Unknown);
         }
 
-        //q.WhereIf(!restriction.IncludeUnknowns, s => s.Metadata.AgeRating != AgeRating.Unknown);
-
         return q;
     }
 
