@@ -27,6 +27,35 @@ public enum FilterComparison
     /// Performs a LIKE %value%
     /// </summary>
     Matches = 6,
+    NotContains = 7,
+    /// <summary>
+    /// Not Equal to
+    /// </summary>
+    NotEqual = 9,
+    /// <summary>
+    /// String starts with
+    /// </summary>
+    BeginsWith = 10,
+    /// <summary>
+    /// String ends with
+    /// </summary>
+    EndsWith = 11,
+    /// <summary>
+    /// Is Date before X
+    /// </summary>
+    IsBefore = 12,
+    /// <summary>
+    /// Is Date after X
+    /// </summary>
+    IsAfter = 13,
+    /// <summary>
+    /// Is Date between now and X seconds ago
+    /// </summary>
+    IsInLast = 14,
+    /// <summary>
+    /// Is Date not between now and X seconds ago
+    /// </summary>
+    IsNotInLast = 15,
 }
 
 #nullable enable

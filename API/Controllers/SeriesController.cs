@@ -6,6 +6,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -50,6 +51,23 @@ public class SeriesController : BaseApiController
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    [HttpPost("v2")]
+    public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest("Could not get series for library");
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        //Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
     }

@@ -10,6 +10,7 @@ using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
@@ -21,6 +22,7 @@ using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers;
+using API.Helpers.Converters;
 using API.Services;
 using API.Services.Tasks;
 using API.Services.Tasks.Scanner;
@@ -135,6 +137,7 @@ public interface ISeriesRepository
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
+    Task<List<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -579,6 +582,18 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
+    public async Task<List<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto)
+    {
+        var query = await CreateFilteredSearchQueryableV2(userId, filterDto, QueryContext.None);
+
+        var retSeries = query
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+    }
+
 
     public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
     {
@@ -785,8 +800,6 @@ public class SeriesRepository : ISeriesRepository
 
         var query = _context.Series
             .AsNoTracking()
-            //.WhereIf(hasProgressFilter, s => seriesIds.Contains(s.Id))
-
             // This new style can handle any filterComparision coming from the user
             .HasLanguage(hasLanguageFilter, FilterComparison.Contains, filter.Languages)
             .HasReleaseYear(hasReleaseYearMaxFilter, FilterComparison.LessThanEqual, filter.ReleaseYearRange?.Max)
@@ -797,11 +810,13 @@ public class SeriesRepository : ISeriesRepository
             .HasPublicationStatus(hasPublicationFilter, FilterComparison.Contains, filter.PublicationStatus)
             .HasTags(hasTagsFilter, FilterComparison.Contains, filter.Tags)
             .HasCollectionTags(hasCollectionTagFilter, FilterComparison.Contains, filter.Tags)
-            .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
             .HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId)
+
+            // This needs different treatment
+            .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
 
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
@@ -847,6 +862,151 @@ public class SeriesRepository : ISeriesRepository
                 _ => query
             };
         }
+
+        return query.AsSplitQuery();
+    }
+
+    private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter, QueryContext queryContext)
+    {
+        // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
+        var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext);
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
+            .Select(u => u.CollapseSeriesRelationships)
+            .SingleOrDefaultAsync();
+
+        var query = _context.Series
+            .AsNoTracking();
+
+        var filterLibs = new List<int>();
+
+        foreach (var group in filter.Groups)
+        {
+            var (value, valueType) = FilterFieldValueConverter.ConvertValue(group.Field, group.Value);
+            switch (group.Field)
+            {
+                case FilterField.Summary:
+                    break;
+                case FilterField.SeriesName:
+                    query = query.HasName(true, group.Comparison, (string) value);
+                    break;
+                case FilterField.PublicationStatus:
+                    query = query.HasPublicationStatus(true, group.Comparison, (IList<PublicationStatus>) value);
+                    break;
+                case FilterField.Languages:
+                    query = query.HasLanguage(true, group.Comparison, (IList<string>) value);
+                    break;
+                case FilterField.AgeRating:
+                    query = query.HasAgeRating(true, group.Comparison, (IList<AgeRating>) value);
+                    break;
+                case FilterField.UserRating:
+                    query = query.HasRating(true, group.Comparison, (int) value, userId);
+                    break;
+                case FilterField.Tags:
+                    query = query.HasTags(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.CollectionTags:
+                    query = query.HasCollectionTags(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Translators:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Characters:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Publisher:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Editor:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.CoverArtist:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Letterer:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Colorist:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Inker:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Penciller:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Writers:
+                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Genres:
+                    query = query.HasGenre(true, group.Comparison, (IList<int>) value);
+                    break;
+                case FilterField.Libraries:
+                    // This is handled above as we need to restrict to what user has access to as well
+                    var filterLibraries = (IList<int>) value;
+                    filterLibs.AddRange(userLibraries.Where(l => filterLibraries.Contains(l)));
+                    break;
+                case FilterField.ReadProgress:
+                    query = query.HasReadingProgress(true, group.Comparison, (int) value, userId);
+                    break;
+                case FilterField.Formats:
+                    query = query.HasFormat(true, group.Comparison, (IList<MangaFormat>) value);
+                    break;
+                case FilterField.ReleaseYear:
+                    query = query.HasReleaseYear(true, group.Comparison, (int) value);
+                    break;
+                case FilterField.ReadTime:
+                    query = query.HasAverageReadTime(true, group.Comparison, (int) value);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        query = query.WhereIf(onlyParentSeries, s =>
+            s.RelationOf.Count == 0 ||
+            s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
+
+        if (userRating.AgeRating != AgeRating.NotApplicable)
+        {
+             // this if statement is included in the extension
+            query = query.RestrictAgainstAgeRestriction(userRating);
+        }
+
+
+        // If no sort options, default to using SortName
+        // filter.SortOptions ??= new SortOptions()
+        // {
+        //     IsAscending = true,
+        //     SortField = SortField.SortName
+        // };
+        //
+        // if (filter.SortOptions.IsAscending)
+        // {
+        //     query = filter.SortOptions.SortField switch
+        //     {
+        //         SortField.SortName => query.OrderBy(s => s.SortName.ToLower()),
+        //         SortField.CreatedDate => query.OrderBy(s => s.Created),
+        //         SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
+        //         SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
+        //         SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
+        //         SortField.ReleaseYear => query.OrderBy(s => s.Metadata.ReleaseYear),
+        //         _ => query
+        //     };
+        // }
+        // else
+        // {
+        //     query = filter.SortOptions.SortField switch
+        //     {
+        //         SortField.SortName => query.OrderByDescending(s => s.SortName.ToLower()),
+        //         SortField.CreatedDate => query.OrderByDescending(s => s.Created),
+        //         SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
+        //         SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
+        //         SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
+        //         SortField.ReleaseYear => query.OrderByDescending(s => s.Metadata.ReleaseYear),
+        //         _ => query
+        //     };
+        // }
 
         return query.AsSplitQuery();
     }
