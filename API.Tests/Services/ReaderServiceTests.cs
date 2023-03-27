@@ -1367,6 +1367,45 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetContinuePoint_ShouldReturnFirstVolume_WhenFirstVolumeIsAlsoTaggedAsChapter1Through11_WithProgress()
+    {
+        await ResetDb();
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1", "1-11").WithPages(3).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                .Build())
+            .WithPages(4)
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 2,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("1-11", nextChapter.Range);
+    }
+
+    [Fact]
     public async Task GetContinuePoint_ShouldReturnFirstNonSpecial()
     {
         await ResetDb();
