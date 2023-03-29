@@ -880,90 +880,19 @@ public class SeriesRepository : ISeriesRepository
 
         var filterLibs = new List<int>();
 
-        foreach (var group in filter.Groups)
-        {
-            var (value, valueType) = FilterFieldValueConverter.ConvertValue(group.Field, group.Value);
-            switch (group.Field)
-            {
-                case FilterField.Summary:
-                    break;
-                case FilterField.SeriesName:
-                    query = query.HasName(true, group.Comparison, (string) value);
-                    break;
-                case FilterField.PublicationStatus:
-                    query = query.HasPublicationStatus(true, group.Comparison, (IList<PublicationStatus>) value);
-                    break;
-                case FilterField.Languages:
-                    query = query.HasLanguage(true, group.Comparison, (IList<string>) value);
-                    break;
-                case FilterField.AgeRating:
-                    query = query.HasAgeRating(true, group.Comparison, (IList<AgeRating>) value);
-                    break;
-                case FilterField.UserRating:
-                    query = query.HasRating(true, group.Comparison, (int) value, userId);
-                    break;
-                case FilterField.Tags:
-                    query = query.HasTags(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.CollectionTags:
-                    query = query.HasCollectionTags(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Translators:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Characters:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Publisher:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Editor:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.CoverArtist:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Letterer:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Colorist:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Inker:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Penciller:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Writers:
-                    query = query.HasPeople(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Genres:
-                    query = query.HasGenre(true, group.Comparison, (IList<int>) value);
-                    break;
-                case FilterField.Libraries:
-                    // This is handled above as we need to restrict to what user has access to as well
-                    var filterLibraries = (IList<int>) value;
-                    filterLibs.AddRange(userLibraries.Where(l => filterLibraries.Contains(l)));
-                    break;
-                case FilterField.ReadProgress:
-                    query = query.HasReadingProgress(true, group.Comparison, (int) value, userId);
-                    break;
-                case FilterField.Formats:
-                    query = query.HasFormat(true, group.Comparison, (IList<MangaFormat>) value);
-                    break;
-                case FilterField.ReleaseYear:
-                    query = query.HasReleaseYear(true, group.Comparison, (int) value);
-                    break;
-                case FilterField.ReadTime:
-                    query = query.HasAverageReadTime(true, group.Comparison, (int) value);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+        // foreach (var group in filter.Groups)
+        // {
+        //     foreach (var andStatement in group.And)
+        //     {
+        //
+        //     }
+        //     query = BuildFilterGroup(userId, group, query, filterLibs, userLibraries);
+        // }
+        query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries, false);
 
-        query = query.WhereIf(onlyParentSeries, s =>
+        query = query
+            .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
+            .WhereIf(onlyParentSeries, s =>
             s.RelationOf.Count == 0 ||
             s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
 
@@ -1009,6 +938,129 @@ public class SeriesRepository : ISeriesRepository
         // }
 
         return query.AsSplitQuery();
+    }
+
+    public static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query,
+        List<int> filterLibs, List<int> userLibraries, bool isAnd = true)
+    {
+        if (filterDto.Groups == null || !filterDto.Groups.Any())
+        {
+            // If there are no groups, return the original query
+            return query;
+        }
+
+        var filteredQuery = isAnd ? query : query.Where(b => false);
+        // Initialize filteredQuery to the original query if isAnd is true,
+        // or to a query that always returns false if isAnd is false (to handle the case when there are no And groups)
+
+        foreach (var group in filterDto.Groups)
+        {
+            if (group.Statements != null && group.Statements.Any())
+            {
+                foreach (var statement in group.Statements)
+                {
+                    filteredQuery = BuildFilterGroup(userId, statement, filteredQuery, filterLibs, userLibraries);
+                }
+            }
+            else if (group.And != null && group.And.Any())
+            {
+                var andQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.And }, query, filterLibs, userLibraries, true);
+                filteredQuery = filteredQuery.Intersect(andQuery);
+            }
+            else if (group.Or != null && group.Or.Any())
+            {
+                var orQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.Or }, query, filterLibs, userLibraries, false);
+                filteredQuery = filteredQuery.Union(orQuery);
+            }
+        }
+
+        return filteredQuery;
+    }
+
+    private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query, List<int> filterLibs,
+        IEnumerable<int> userLibraries)
+    {
+        var (value, _) = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
+        switch (statement.Field)
+        {
+            case FilterField.Summary:
+                break;
+            case FilterField.SeriesName:
+                query = query.HasName(true, statement.Comparison, (string) value);
+                break;
+            case FilterField.PublicationStatus:
+                query = query.HasPublicationStatus(true, statement.Comparison, (IList<PublicationStatus>) value);
+                break;
+            case FilterField.Languages:
+                query = query.HasLanguage(true, statement.Comparison, (IList<string>) value);
+                break;
+            case FilterField.AgeRating:
+                query = query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value);
+                break;
+            case FilterField.UserRating:
+                query = query.HasRating(true, statement.Comparison, (int) value, userId);
+                break;
+            case FilterField.Tags:
+                query = query.HasTags(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.CollectionTags:
+                query = query.HasCollectionTags(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Translators:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Characters:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Publisher:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Editor:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.CoverArtist:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Letterer:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Colorist:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Inker:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Penciller:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Writers:
+                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Genres:
+                query = query.HasGenre(true, statement.Comparison, (IList<int>) value);
+                break;
+            case FilterField.Libraries:
+                // This is handled above as we need to restrict to what user has access to as well
+                var filterLibraries = (IList<int>) value;
+                filterLibs.AddRange(userLibraries.Where(l => filterLibraries.Contains(l)));
+                break;
+            case FilterField.ReadProgress:
+                query = query.HasReadingProgress(true, statement.Comparison, (int) value, userId);
+                break;
+            case FilterField.Formats:
+                query = query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value);
+                break;
+            case FilterField.ReleaseYear:
+                query = query.HasReleaseYear(true, statement.Comparison, (int) value);
+                break;
+            case FilterField.ReadTime:
+                query = query.HasAverageReadTime(true, statement.Comparison, (int) value);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+        return query;
     }
 
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, IQueryable<Series> sQuery)

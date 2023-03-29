@@ -6116,14 +6116,6 @@
         ],
         "parameters": [
           {
-            "name": "libraryId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
             "name": "PageNumber",
             "in": "query",
             "schema": {
@@ -11594,6 +11586,34 @@
       "FilterGroupDto": {
         "type": "object",
         "properties": {
+          "and": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterGroupDto"
+            },
+            "nullable": true
+          },
+          "or": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterGroupDto"
+            },
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterStatementDto"
+            },
+            "description": "If there are statements then it is assumed there are no And/Ors",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilterStatementDto": {
+        "type": "object",
+        "properties": {
           "comparison": {
             "$ref": "#/components/schemas/FilterComparison"
           },
@@ -11620,6 +11640,9 @@
               "$ref": "#/components/schemas/FilterGroupDto"
             },
             "nullable": true
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/SortOptions"
           }
         },
         "additionalProperties": false,

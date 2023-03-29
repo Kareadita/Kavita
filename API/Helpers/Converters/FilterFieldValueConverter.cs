@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using API.DTOs.Filtering.v2;
-using API.DTOs.Metadata;
-using API.DTOs.Settings;
-using API.Entities;
 using API.Entities.Enums;
-using AutoMapper;
 
 namespace API.Helpers.Converters;
 

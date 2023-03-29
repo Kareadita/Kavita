@@ -1,0 +1,25 @@
+<div class="col-md-2 me-3">
+    <div class="row g-0">
+        <form [formGroup]="formGroup">
+        
+
+            <ng-container *ngIf="formGroup.get('input') as control">
+                <select class="col form-select me-1" formControlName="input">
+                    <option *ngFor="let field of allFields" [value]="field">{{field | filterField}}</option>
+                </select>
+            </ng-container>
+    
+            <select class="col form-select me-1">
+                <option *ngFor="let comparison of validComprisons" [value]="comparison">{{comparison | filterComparison}}</option>
+            </select>
+    
+            <ng-container *ngIf="IsTextInput">
+                <input type="text" class="form-control col me-1" autocomplete="true" formGroupName="filterValue">
+            </ng-container>
+            
+            <button class="btn btn-icon" (click)="remove()">
+
+            </button>
+        </form>
+    </div>
+</div>
