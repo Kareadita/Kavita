@@ -20,6 +20,7 @@ using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes;
 using SharpCompress.Common;
 
 namespace API.Controllers;
@@ -581,7 +582,8 @@ public class OpdsController : BaseApiController
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ",
+            $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
         foreach (var chapter in chapters)
         {
@@ -591,9 +593,7 @@ public class OpdsController : BaseApiController
             {
                 feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey));
             }
-
         }
-
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -612,7 +612,8 @@ public class OpdsController : BaseApiController
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s",
+            $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
@@ -858,7 +859,7 @@ public class OpdsController : BaseApiController
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
 
             var content = await _directoryService.ReadFileAsync(path);
-            var format = Path.GetExtension(path).Replace(".", string.Empty);
+            var format = Path.GetExtension(path);
 
             // Calculates SHA1 Hash for byte[]
             Response.AddCacheHeader(content);
@@ -873,7 +874,7 @@ public class OpdsController : BaseApiController
                 LibraryId =libraryId
             }, await GetUser(apiKey));
 
-            return File(content, "image/" + format);
+            return File(content, MimeTypeMap.GetMimeType(format));
         }
         catch (Exception)
         {
@@ -890,9 +891,9 @@ public class OpdsController : BaseApiController
         if (files.Length == 0) return BadRequest("Cannot find icon");
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
-        var format = Path.GetExtension(path).Replace(".", string.Empty);
+        var format = Path.GetExtension(path);
 
-        return File(content, "image/" + format);
+        return File(content, MimeTypeMap.GetMimeType(format));
     }
 
     /// <summary>
