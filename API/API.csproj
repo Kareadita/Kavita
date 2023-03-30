@@ -78,6 +78,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
+    <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="NetVips" Version="2.2.0" />
     <PackageReference Include="NetVips.Native" Version="8.13.2" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.6" />

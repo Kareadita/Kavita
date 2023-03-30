@@ -466,9 +466,13 @@ public class SeriesService : ISeriesService
                 if (string.IsNullOrEmpty(title)) return;
                 volume.Name += $" - {title}";
             }
-            else
+            else if (volume.Name != "0")
             {
                 volume.Name += $" - {firstChapter.TitleName}";
+            }
+            else
+            {
+                volume.Name += $"";
             }
 
             return;

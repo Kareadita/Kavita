@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using MimeTypes;
 
 namespace API.Controllers;
 
@@ -103,9 +104,9 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
-            var format = Path.GetExtension(path).Replace(".", string.Empty);
+            var format = Path.GetExtension(path);
 
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
         }
         catch (Exception)
         {
@@ -124,8 +125,8 @@ public class ReaderController : BaseApiController
         var images = _cacheService.GetCachedPages(chapterId);
 
         var path = await _readerService.GetThumbnail(chapter, pageNum, images);
-        var format = Path.GetExtension(path).Replace(".", string.Empty); // TODO: Make this an extension
-        return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
+        var format = Path.GetExtension(path);
+        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
     }
 
     /// <summary>
@@ -154,9 +155,9 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-            var format = Path.GetExtension(path).Replace(".", string.Empty);
+            var format = Path.GetExtension(path);
 
-            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));
         }
         catch (Exception)
         {
