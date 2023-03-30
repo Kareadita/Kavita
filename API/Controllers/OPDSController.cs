@@ -21,7 +21,6 @@ using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
-using SharpCompress.Common;
 
 namespace API.Controllers;
 
@@ -732,25 +731,6 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{searchResultDto.SeriesId}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}")
-            }
-        };
-    }
-
-    private static FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId, string apiKey)
-    {
-        return new FeedEntry()
-        {
-            Id = volumeDto.Id.ToString(),
-            Title = volumeDto.Name,
-            Summary = volumeDto.Chapters.First().Summary ?? string.Empty,
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
-                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                    $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                    $"/api/image/volume-cover?volumeId={volumeDto.Id}")
             }
         };
     }
