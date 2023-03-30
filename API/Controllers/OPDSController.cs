@@ -790,7 +790,7 @@ public class OpdsController : BaseApiController
             SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
             if (volume.Name != "0")
             {
-                title += $"- {volume.Name}";
+                title += $" - {volume.Name}";
             }
         }
         else if (volume.Number != 0)
