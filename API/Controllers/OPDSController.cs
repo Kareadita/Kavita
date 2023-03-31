@@ -777,11 +777,11 @@ public class OpdsController : BaseApiController
         }
         else if (volume.Number != 0)
         {
-            title = $" - {series.Name} - Volume {volume.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+            title = $"{series.Name} - Volume {volume.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
         }
         else
         {
-            title = $" - {series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+            title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
         }
 
         // Chunky requires a file at the end. Our API ignores this
