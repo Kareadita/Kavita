@@ -38,13 +38,13 @@
                     Password must be between 6 and 32 characters in length
                 </ng-template>
                 <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-                <input id="password" class="form-control" maxlength="32" minlength="6" formControlName="password"
+                <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
                     <div *ngIf="registerForm.get('password')?.errors?.required">
                         This field is required
                     </div>
-                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength">
+                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
                         Password must be between 6 and 32 characters in length
                     </div>
                 </div>

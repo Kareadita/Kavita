@@ -20,7 +20,7 @@ export class RegisterComponent {
   registerForm: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.email]),
     username: new FormControl('', [Validators.required]),
-    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6)]),
+    password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
   });
 
   constructor(private router: Router, private accountService: AccountService, 
