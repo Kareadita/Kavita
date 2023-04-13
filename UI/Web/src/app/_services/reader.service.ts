@@ -16,6 +16,9 @@ import { FilterUtilitiesService } from '../shared/_services/filter-utilities.ser
 import { FileDimension } from '../manga-reader/_models/file-dimension';
 import screenfull from 'screenfull';
 import { TextResonse } from '../_types/text-response';
+import { AccountService } from './account.service';
+import { Subject, takeUntil } from 'rxjs';
+import { OnDestroy } from '@angular/core';
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -23,16 +26,29 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 @Injectable({
   providedIn: 'root'
 })
-export class ReaderService {
+export class ReaderService implements OnDestroy {
 
   baseUrl = environment.apiUrl;
+  encodedKey: string = '';
+  private onDestroy: Subject<void> = new Subject();
 
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
   constructor(private httpClient: HttpClient, private router: Router, 
     private location: Location, private utilityService: UtilityService,
-    private filterUtilitySerivce: FilterUtilitiesService) { }
+    private filterUtilitySerivce: FilterUtilitiesService, private accountService: AccountService) {
+      this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+        if (user) {
+          this.encodedKey = encodeURIComponent(user.apiKey);
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
 
   getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
     if (format === undefined) format = MangaFormat.ARCHIVE;
@@ -47,7 +63,7 @@ export class ReaderService {
   }
 
   downloadPdf(chapterId: number) {
-    return this.baseUrl + 'reader/pdf?chapterId=' + chapterId;
+    return `${this.baseUrl}reader/pdf?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
   bookmark(seriesId: number, volumeId: number, chapterId: number, page: number) {
@@ -98,11 +114,11 @@ export class ReaderService {
   }
 
   getPageUrl(chapterId: number, page: number) {
-    return this.baseUrl + 'reader/image?chapterId=' + chapterId + '&page=' + page;
+    return `${this.baseUrl}reader/image?chapterId=${chapterId}&apiKey=${this.encodedKey}&page=${page}`;
   }
 
   getThumbnailUrl(chapterId: number, page: number) {
-    return this.baseUrl + 'reader/thumbnail?chapterId=' + chapterId + '&page=' + page;
+    return `${this.baseUrl}reader/thumbnail?chapterId=${chapterId}&apiKey=${this.encodedKey}&page=${page}`;
   }
 
   getBookmarkPageUrl(seriesId: number, apiKey: string, page: number) {
