@@ -5,7 +5,6 @@ import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../confirm.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
-import { ToastrService } from 'ngx-toastr';
 import { asyncScheduler, BehaviorSubject, Observable, tap, finalize, of, filter } from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
@@ -57,8 +56,7 @@ export class DownloadService {
   public activeDownloads$ = this.downloadsSource.asObservable();
 
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService, 
-    private toastr: ToastrService, @Inject(SAVER) private save: Saver, 
-    private accountService: AccountService) { }
+    @Inject(SAVER) private save: Saver, private accountService: AccountService) { }
 
   /**
    * Returns the entity subtitle (for the event widget) for a given entity
