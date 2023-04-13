@@ -392,7 +392,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get SplitIconClass() {
-    // TODO: make this a pipe
     if (this.mangaReaderService.isSplitLeftToRight(this.pageSplitOption)) {
       return 'left-side';
     } else if (this.mangaReaderService.isNoSplit(this.pageSplitOption)) {
