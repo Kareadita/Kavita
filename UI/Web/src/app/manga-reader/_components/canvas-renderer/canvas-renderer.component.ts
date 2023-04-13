@@ -51,7 +51,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
-    this.readerSettings$.pipe(takeUntil(this.onDestroy), tap(value => {
+    this.readerSettings$.pipe(takeUntil(this.onDestroy), tap((value: ReaderSetting) => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
       this.layoutMode = value.layoutMode;
@@ -70,9 +70,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
     this.imageFitClass$ = this.readerSettings$.pipe(
       takeUntil(this.onDestroy),
-      map(values => values.fitting),
+      map((values: ReaderSetting) => values.fitting),
       map(fit => {
-        if (fit === FITTING_OPTION.WIDTH || this.layoutMode === LayoutMode.Single) return fit;
+        if (fit === FITTING_OPTION.WIDTH) return fit; // || this.layoutMode === LayoutMode.Single (so that we can check the wide stuff)
         if (this.canvasImage === null) return fit;
 
         // Would this ever execute given that we perform splitting only in this renderer? 
@@ -181,9 +181,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     
     const needsSplitting = this.updateSplitPage();
     if (!needsSplitting) return;
-    if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
 
     this.renderWithCanvas = true;
+    if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
+
     this.setCanvasSize();
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
