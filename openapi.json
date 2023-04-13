@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.28"
+    "version": "0.7.1.32"
   },
   "servers": [
     {
@@ -1845,6 +1845,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1868,6 +1875,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1893,6 +1907,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1916,6 +1937,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1941,6 +1969,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1964,6 +1999,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -2027,6 +2069,13 @@
             "name": "filename",
             "in": "query",
             "description": "Filename of file. This is used with upload/upload-by-url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -3579,6 +3628,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3612,6 +3668,14 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "User's API Key for authentication",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3651,6 +3715,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],

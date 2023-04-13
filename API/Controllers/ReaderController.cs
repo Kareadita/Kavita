@@ -57,9 +57,10 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("pdf")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
-    public async Task<ActionResult> GetPdf(int chapterId)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
+    public async Task<ActionResult> GetPdf(int chapterId, string apiKey)
     {
+        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId);
         if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
@@ -89,14 +90,16 @@ public class ReaderController : BaseApiController
     /// <remarks>This will cache the chapter images for reading</remarks>
     /// <param name="chapterId">Chapter Id</param>
     /// <param name="page">Page in question</param>
+    /// <param name="apiKey">User's API Key for authentication</param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId","page", "extractPdf", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult> GetImage(int chapterId, int page, bool extractPdf = false)
+    public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
+        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -116,10 +119,11 @@ public class ReaderController : BaseApiController
     }
 
     [HttpGet("thumbnail")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum)
+    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
+        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return BadRequest("There was an issue extracting images from chapter");
         var images = _cacheService.GetCachedPages(chapterId);
@@ -138,12 +142,13 @@ public class ReaderController : BaseApiController
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
     [HttpGet("bookmark-image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "page", "apiKey"})]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
 
         var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
         if (page > totalPages)
@@ -750,6 +755,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("time-left")]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId"})]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());

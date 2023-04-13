@@ -1,6 +1,6 @@
 <div class="image-container {{imageFitClass$ | async}}" 
      [ngClass]="{'d-none': !renderWithCanvas }"
      [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
-     <canvas #content ondragstart="return false;" onselectstart="return false;"></canvas>
+     <canvas #content ondragstart="return false;" onselectstart="return false;" class="{{imageFitClass$ | async}}"></canvas>
 </div>
 
