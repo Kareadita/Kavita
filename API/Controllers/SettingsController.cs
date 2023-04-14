@@ -76,7 +76,7 @@ public class SettingsController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("reset-ip-addresses")]
-    public async Task<ActionResult<ServerSettingDto>> ResetIPAddressesSettings()
+    public async Task<ActionResult<ServerSettingDto>> ResetIpAddressesSettings()
     {
         _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
         var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
