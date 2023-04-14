@@ -63,7 +63,7 @@ public class OpdsController : BaseApiController
         SortOptions = null,
         PublicationStatus = new List<PublicationStatus>()
     };
-    private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
+    private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
@@ -80,7 +80,6 @@ public class OpdsController : BaseApiController
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
-
     }
 
     [HttpPost("{apiKey}")]
