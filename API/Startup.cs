@@ -391,7 +391,6 @@ public class Startup
     {
         try
         {
-            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
             var htmlDoc = new HtmlDocument();
             var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
             htmlDoc.Load(indexHtmlPath);
