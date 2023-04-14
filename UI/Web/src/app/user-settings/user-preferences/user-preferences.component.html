@@ -340,8 +340,8 @@
 
 
               <ng-container *ngIf="tab.fragment === FragmentID.Clients">
+                <div class="alert alert-warning" role="alert" *ngIf="!opdsEnabled">OPDS is not enabled on this server. This will not affect Tachiyomi users.</div>
                 <p>All 3rd Party clients will either use the API key or the Connection Url below. These are like passwords, keep it private.</p>
-                <p class="alert alert-warning" role="alert" *ngIf="!opdsEnabled">OPDS is not enabled on this server.</p>
                 <app-api-key tooltipText="The API key is like a password. Keep it secret, Keep it safe."></app-api-key>
                 <app-api-key title="OPDS URL" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
               </ng-container>

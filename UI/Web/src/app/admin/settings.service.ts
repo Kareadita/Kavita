@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { TextResonse } from '../_types/text-response';
 import { ServerSettings } from './_models/server-settings';
@@ -58,6 +59,6 @@ export class SettingsService {
   }
 
   getOpdsEnabled() {
-    return this.http.get<boolean>(this.baseUrl + 'settings/opds-enabled', TextResonse);
+    return this.http.get<string>(this.baseUrl + 'settings/opds-enabled', TextResonse).pipe(map(d => d === 'true'));
   }
 }
