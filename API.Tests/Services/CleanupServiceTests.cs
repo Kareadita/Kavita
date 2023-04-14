@@ -38,7 +38,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
             Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()), Substitute.For<ICleanupService>());
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
     }
 
     #region Setup

@@ -242,6 +242,9 @@ public class CleanupService : ICleanupService
         _logger.LogInformation("Temp directory purged");
     }
 
+    /// <summary>
+    /// This does not cleanup any Series that are not Completed or Cancelled
+    /// </summary>
     public async Task CleanupWantToRead()
     {
         _logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
