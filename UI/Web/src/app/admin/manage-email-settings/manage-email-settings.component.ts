@@ -69,7 +69,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   testEmailServiceUrl() {
     this.settingsService.testEmailServerSettings(this.settingsForm.get('emailServiceUrl')?.value || '').pipe(take(1)).subscribe(async (result: EmailTestResult) => {
       if (result.successful) {
-        this.toastr.success('Email Service Url validated');
+        this.toastr.success('Email Service was reachable');
       } else {
         this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
       }

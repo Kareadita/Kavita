@@ -138,7 +138,9 @@ public class SettingsController : BaseApiController
     [HttpPost("test-email-url")]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
     {
-        return Ok(await _emailService.TestConnectivity(dto.Url));
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var emailService = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        return Ok(await _emailService.TestConnectivity(dto.Url, user!.Email, !emailService.Equals(EmailService.DefaultApiUrl)));
     }
 
 

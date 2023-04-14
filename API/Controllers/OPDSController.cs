@@ -91,17 +91,7 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
 
-        var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
-        if (!Configuration.DefaultBaseUrl.Equals(baseUrl))
-        {
-            // We need to update the Prefix to account for baseUrl
-            _prefix = baseUrl + _prefix;
-            _baseUrl = baseUrl;
-        }
-        else
-        {
-            _prefix = "/api/opds";
-        }
+        var (baseUrl, prefix) = await GetPrefix();
 
         var feed = CreateFeed("Kavita", string.Empty, apiKey);
         SetFeedId(feed, "root");
@@ -115,7 +105,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/on-deck"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/on-deck"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -128,7 +118,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/recently-added"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-added"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -141,7 +131,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/reading-list"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -154,7 +144,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/libraries"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -167,10 +157,27 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/collections"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/collections"),
             }
         });
         return CreateXmlResult(SerializeXml(feed));
+    }
+
+    private async Task<Tuple<string, string>> GetPrefix()
+    {
+        var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
+        if (!Configuration.DefaultBaseUrl.Equals(baseUrl))
+        {
+            // We need to update the Prefix to account for baseUrl
+            _prefix = baseUrl + _prefix;
+            _baseUrl = baseUrl;
+        }
+        else
+        {
+            _prefix = "/api/opds/";
+        }
+
+        return new Tuple<string, string>(_baseUrl, _prefix);
     }
 
 
@@ -182,7 +189,7 @@ public class OpdsController : BaseApiController
             return BadRequest("OPDS is not enabled on this server");
         var userId = await GetUser(apiKey);
         var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
-        var feed = CreateFeed("All Libraries", $"{apiKey}/libraries", apiKey);
+        var feed = CreateFeed("All Libraries", $"{_prefix}{apiKey}/libraries", apiKey);
         SetFeedId(feed, "libraries");
         foreach (var library in libraries)
         {
@@ -192,7 +199,7 @@ public class OpdsController : BaseApiController
                 Title = library.Name,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, _prefix + $"{apiKey}/libraries/{library.Id}"),
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{_prefix}{apiKey}/libraries/{library.Id}"),
                 }
             });
         }
@@ -211,11 +218,11 @@ public class OpdsController : BaseApiController
         if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
+        var tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
             : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
 
 
-        var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
+        var feed = CreateFeed("All Collections", $"{_prefix}{apiKey}/collections", apiKey);
         SetFeedId(feed, "collections");
         foreach (var tag in tags)
         {
@@ -411,6 +418,9 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
+
+        var (prefix, baseUrl) = await GetPrefix();
+
         var userId = await GetUser(apiKey);
         var userParams = new UserParams()
         {
@@ -421,7 +431,7 @@ public class OpdsController : BaseApiController
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-        var feed = CreateFeed("On Deck", $"{apiKey}/on-deck", apiKey);
+        var feed = CreateFeed("On Deck", $"{_prefix}{apiKey}/on-deck", apiKey);
         SetFeedId(feed, "on-deck");
         AddPagination(feed, pagedList, $"{_prefix}{apiKey}/on-deck");
 
@@ -944,12 +954,12 @@ public class OpdsController : BaseApiController
         return new Feed()
         {
             Title = title,
-            Icon = _prefix + $"{apiKey}/favicon",
+            Icon = $"{_prefix}{apiKey}/favicon",
             Links = new List<FeedLink>()
             {
                 link,
-                CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, _prefix + apiKey),
-                CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, _prefix + $"{apiKey}/search")
+                CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, $"{_prefix}{apiKey}"),
+                CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, $"{_prefix}{_baseUrl}{apiKey}/search")
             },
         };
     }
