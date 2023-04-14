@@ -92,6 +92,28 @@ public class SettingsController : BaseApiController
     }
 
     /// <summary>
+    /// Resets the Base url
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-base-url")]
+    public async Task<ActionResult<ServerSettingDto>> ResetBaseUrlSettings()
+    {
+        _logger.LogInformation("{UserName} is resetting Base Url Setting", User.GetUsername());
+        var baseUrl = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl);
+        baseUrl.Value = Configuration.DefaultBaseUrl;
+        _unitOfWork.SettingsRepository.Update(baseUrl);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        Configuration.BaseUrl = baseUrl.Value;
+        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+    }
+
+    /// <summary>
     /// Resets the email service url
     /// </summary>
     /// <returns></returns>
@@ -177,7 +199,7 @@ public class SettingsController : BaseApiController
                 }
 
                 setting.Value = updateSettingsDto.IpAddresses;
-                // IpAddesses is managed in appSetting.json
+                // IpAddresses is managed in appSetting.json
                 Configuration.IpAddresses = updateSettingsDto.IpAddresses;
                 _unitOfWork.SettingsRepository.Update(setting);
             }

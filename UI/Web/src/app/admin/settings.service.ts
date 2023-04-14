@@ -38,6 +38,10 @@ export class SettingsService {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-ip-addresses', {});
   }
 
+  resetBaseUrl() {
+    return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-base-url', {});
+  }
+
   resetEmailServerSettings() {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings/reset-email-url', {});
   }

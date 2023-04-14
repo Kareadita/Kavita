@@ -80,7 +80,7 @@ export class ManageSettingsComponent implements OnInit {
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
 
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -90,7 +90,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -100,10 +100,20 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetIPAddresses() {
-    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
-      this.settingsForm.get("ipAddresses")?.setValue(this.serverSettings.ipAddresses);
+      this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
       this.toastr.success('IP Addresses Reset');
+    }, (err: any) => {
+      console.error('error: ', err);
+    });
+  }
+
+  resetBaseUrl() {
+    this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
+      this.serverSettings.baseUrl = settings.baseUrl;
+      this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
+      this.toastr.success('Base Url Reset');
     }, (err: any) => {
       console.error('error: ', err);
     });

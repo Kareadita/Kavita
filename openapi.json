@@ -7761,6 +7761,36 @@
         }
       }
     },
+    "/api/Settings/reset-base-url": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the Base url",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/reset-email-url": {
       "post": {
         "tags": [
