@@ -22,18 +22,6 @@
             </div>
         </div>
 
-        <div class="mb-3">
-            <label for="settings-hostname" class="form-label">Host Name</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
-            <ng-template #hostNameTooltip>Domain Name (of Reverse Proxy). If set, email generation will always use this.</ng-template>
-            <span class="visually-hidden" id="settings-hostname-help">Domain Name (of Reverse Proxy). If set, email generation will always use this.</span>
-            <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-            [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
-            <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-                <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
-                    Host name must start with http(s) and not end in /
-                </div>
-            </div>
-        </div>
 
         <div class="mb-3">
             <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>

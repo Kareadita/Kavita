@@ -4,6 +4,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
+import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
@@ -27,7 +28,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private modalService: NgbModal) { }
+    private modalService: NgbModal, private serverService: ServerService) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -54,6 +55,13 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
+
+      this.serverService.getServerInfo().subscribe(info => {
+        if (info.isDocker) {
+          this.settingsForm.get('ipAddresses')?.disable();
+          this.settingsForm.get('port')?.disable();
+        }
+      })
     });
   }
 

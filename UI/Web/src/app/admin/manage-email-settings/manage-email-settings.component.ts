@@ -21,19 +21,23 @@ export class ManageEmailSettingsComponent implements OnInit {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
+      this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, []));
     });
   }
 
   resetForm() {
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl);
+    this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
     this.settingsForm.markAsPristine();
   }
 
   async saveSettings() {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
-
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    modelSettings.hostName = this.settingsForm.get('hostName')?.value;
+    
+    
+    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -43,7 +47,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   }
 
   resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -53,7 +57,7 @@ export class ManageEmailSettingsComponent implements OnInit {
   }
 
   resetEmailServiceUrl() {
-    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
+    this.settingsService.resetEmailServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.emailServiceUrl = settings.emailServiceUrl;
       this.resetForm();
       this.toastr.success('Email Service Reset');
