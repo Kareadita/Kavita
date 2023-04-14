@@ -25,7 +25,7 @@
     "@angular/platform-browser": "^15.1.2",
     "@angular/platform-browser-dynamic": "^15.1.2",
     "@angular/router": "^15.1.2",
-    "@fortawesome/fontawesome-free": "^6.4.0",
+    "@fortawesome/fontawesome-free": "^6.2.0",
     "@iharbeck/ngx-virtual-scroller": "^15.2.0",
     "@iplab/ngx-file-upload": "^15.0.0",
     "@microsoft/signalr": "^7.0.5",
