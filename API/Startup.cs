@@ -401,6 +401,11 @@ public class Startup
         }
         catch (Exception ex)
         {
+            if (ex.Message.Contains("Permission denied") && baseUrl.Equals(Configuration.DefaultBaseUrl) && new OsInfo().IsDocker)
+            {
+                // Swallow the exception as the install is non-root and Docker
+                return;
+            }
             Log.Error(ex, "There was an error setting base url");
         }
     }
