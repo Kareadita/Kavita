@@ -43,7 +43,7 @@
     "ngx-extended-pdf-viewer": "^16.2.16",
     "ngx-file-drop": "^15.0.0",
     "ngx-slider-v2": "^15.0.4",
-    "ngx-toastr": "^16.1.0",
+    "ngx-toastr": "^16.1.1",
     "rxjs": "^7.8.0",
     "screenfull": "^6.0.2",
     "swiper": "^8.4.6",
