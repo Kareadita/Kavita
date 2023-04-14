@@ -77,6 +77,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
+  baseUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
 
   private onDestroy = new Subject<void>();
@@ -105,6 +106,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
+
+    this.settingsService.getServerSettings().subscribe(settings => this.baseUrl = settings.baseUrl);
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
@@ -257,7 +260,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       return `${location.origin}${environment.apiUrl}opds/${key}`;
     }
 
-    return `${location.origin}/api/opds/${key}`;
+    return `${location.origin}${this.baseUrl}api/opds/${key}`;
   }
 
   handleBackgroundColorChange() {
