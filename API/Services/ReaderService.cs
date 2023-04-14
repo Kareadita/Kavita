@@ -12,6 +12,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Tasks;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
@@ -44,6 +45,7 @@ public class ReaderService : IReaderService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly ICleanupService _cleanupService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -56,13 +58,14 @@ public class ReaderService : IReaderService
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService)
+        IDirectoryService directoryService, ICleanupService cleanupService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _cleanupService = cleanupService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -82,6 +85,12 @@ public class ReaderService : IReaderService
         foreach (var volume in volumes)
         {
             await MarkChaptersAsRead(user, seriesId, volume.Chapters);
+        }
+
+        // Check if the Series belongs to
+        if (await _unitOfWork.SeriesRepository.IsSeriesInWantToRead(user.Id, seriesId))
+        {
+            await _cleanupService.CleanupWantToRead();
         }
     }
 

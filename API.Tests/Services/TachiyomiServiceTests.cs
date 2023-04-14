@@ -1,5 +1,6 @@
 ﻿using API.Extensions;
 using API.Helpers.Builders;
+using API.Services.Tasks;
 
 namespace API.Tests.Services;
 using System.Collections.Generic;
@@ -48,7 +49,8 @@ public class TachiyomiServiceTests
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<ICleanupService>());
         _tachiyomiService = new TachiyomiService(_unitOfWork, _mapper, Substitute.For<ILogger<ReaderService>>(), _readerService);
 
     }

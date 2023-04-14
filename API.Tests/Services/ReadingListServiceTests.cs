@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
@@ -32,6 +33,7 @@ public class ReadingListServiceTests
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReadingListService _readingListService;
     private readonly DataContext _context;
+    private readonly IReaderService _readerService;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";
     private const string CoverImageDirectory = "C:/kavita/config/covers/";
@@ -50,6 +52,11 @@ public class ReadingListServiceTests
         _unitOfWork = new UnitOfWork(_context, mapper, null!);
 
         _readingListService = new ReadingListService(_unitOfWork, Substitute.For<ILogger<ReadingListService>>(), Substitute.For<IEventHub>());
+
+        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<ICleanupService>());
     }
 
     #region Setup
@@ -455,11 +462,8 @@ public class ReadingListServiceTests
         await _unitOfWork.CommitAsync();
         Assert.Equal(3, readingList.Items.Count);
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
         // Mark 2 as fully read
-        await readerService.MarkChaptersAsRead(user, 1,
+        await _readerService.MarkChaptersAsRead(user, 1,
             (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(new List<int>() {2})).ToList());
         await _unitOfWork.CommitAsync();
 
