@@ -340,7 +340,7 @@ public class DirectoryServiceTests
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
         var ex = Assert.Throws<DirectoryNotFoundException>(() => ds.CopyDirectoryToDirectory("/comics/", "/manga/output/"));
-        Assert.Equal(ex.Message, "Source directory does not exist or could not be found: " + "/comics/");
+        Assert.Equal("Source directory does not exist or could not be found: " + "/comics/", ex.Message);
     }
 
     [Fact]
