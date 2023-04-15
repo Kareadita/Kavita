@@ -54,6 +54,7 @@ public class ProcessSeries : IProcessSeries
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly ICollectionTagService _collectionTagService;
+    private readonly IReadingListService _readingListService;
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
@@ -66,7 +67,7 @@ public class ProcessSeries : IProcessSeries
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService)
+        ICollectionTagService collectionTagService, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -78,6 +79,7 @@ public class ProcessSeries : IProcessSeries
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
+        _readingListService = readingListService;
 
 
         _genres = new Dictionary<string, Genre>();
@@ -179,8 +181,6 @@ public class ProcessSeries : IProcessSeries
 
             UpdateSeriesMetadata(series, library);
 
-            //CreateReadingListsFromSeries(series, library); This will be implemented later when I solution it
-
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
 
@@ -205,6 +205,9 @@ public class ProcessSeries : IProcessSeries
                     return;
                 }
 
+                // Process reading list after commit as we need to commit per list
+                await _readingListService.CreateReadingListsFromSeries(series, library);
+
                 if (seriesAdded)
                 {
                     await _eventHub.SendMessageAsync(MessageFactory.SeriesAdded,
@@ -223,26 +226,6 @@ public class ProcessSeries : IProcessSeries
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
-    private void CreateReadingListsFromSeries(Series series, Library library)
-    {
-        //if (!library.ManageReadingLists) return;
-        _logger.LogInformation("Generating Reading Lists for {SeriesName}", series.Name);
-
-        series.Metadata ??= new SeriesMetadataBuilder().Build();
-        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
-        {
-            if (!string.IsNullOrEmpty(chapter.StoryArc))
-            {
-                var readingLists = chapter.StoryArc.Split(',');
-                var readingListOrders = chapter.StoryArcNumber.Split(',');
-                if (readingListOrders.Length == 0)
-                {
-                    _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
-
-                }
-            }
-        }
-    }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
     {
@@ -517,13 +500,10 @@ public class ProcessSeries : IProcessSeries
             }
             catch (Exception ex)
             {
-                if (ex.Message.Equals("Sequence contains more than one matching element"))
-                {
-                    _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
-                    throw new KavitaException(
-                        $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
-                }
-                throw;
+                if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
+                _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                throw new KavitaException(
+                    $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
             }
             if (volume == null)
             {

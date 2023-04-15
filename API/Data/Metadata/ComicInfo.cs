@@ -61,7 +61,7 @@ public class ComicInfo
     public string SeriesGroup { get; set; } = string.Empty;
 
     /// <summary>
-    ///
+    /// Can contain multiple comma separated numbers that match with StoryArcNumber
     /// </summary>
     public string StoryArc { get; set; } = string.Empty;
     /// <summary>

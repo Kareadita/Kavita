@@ -110,6 +110,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.ManageCollections)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageReadingLists)
+            .HasDefaultValue(true);
     }
 
 
