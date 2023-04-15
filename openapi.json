@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.35"
+    "version": "0.7.1.36"
   },
   "servers": [
     {
@@ -11928,6 +11928,10 @@
             "type": "boolean",
             "description": "Should this library create and manage collections from Metadata"
           },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create and manage reading lists from Metadata"
+          },
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
@@ -14568,6 +14572,9 @@
             "type": "boolean"
           },
           "manageCollections": {
+            "type": "boolean"
+          },
+          "manageReadingLists": {
             "type": "boolean"
           }
         },

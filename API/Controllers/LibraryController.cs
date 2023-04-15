@@ -338,6 +338,8 @@ public class LibraryController : BaseApiController
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
+        library.ManageReadingLists = dto.ManageReadingLists;
+
 
         _unitOfWork.LibraryRepository.Update(library);
 

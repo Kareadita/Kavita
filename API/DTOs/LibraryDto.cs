@@ -34,6 +34,10 @@ public class LibraryDto
     /// </summary>
     public bool ManageCollections { get; set; } = true;
     /// <summary>
+    /// Should this library create and manage reading lists from Metadata
+    /// </summary>
+    public bool ManageReadingLists { get; set; } = true;
+    /// <summary>
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;

@@ -16,5 +16,6 @@ export interface Library {
     includeInRecommended: boolean;
     includeInSearch: boolean;
     manageCollections: boolean;
+    manageReadingLists: boolean;
     collapseSeriesRelationships: boolean;
 }
