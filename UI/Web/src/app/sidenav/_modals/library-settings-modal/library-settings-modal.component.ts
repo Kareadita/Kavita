@@ -121,7 +121,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
       this.libraryForm.get('includeInRecommended')?.setValue(this.library.includeInRecommended);
       this.libraryForm.get('includeInSearch')?.setValue(this.library.includeInSearch);
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
-      this.libraryForm.get('manageCollections')?.setValue(this.library.manageReadingLists);
+      this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
