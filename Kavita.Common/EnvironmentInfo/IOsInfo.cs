@@ -16,7 +16,7 @@ public class OsInfo : IOsInfo
     public static bool IsWindows => Os == Os.Windows;
 
     // this needs to not be static so we can mock it
-    public bool IsDocker { get; }
+    public bool IsDocker { get; private set; }
 
     public string Version { get; }
     public string Name { get; }
@@ -41,7 +41,6 @@ public class OsInfo : IOsInfo
                 break;
             }
         }
-
     }
 
     public OsInfo(IEnumerable<IOsVersionAdapter> versionAdapters)
