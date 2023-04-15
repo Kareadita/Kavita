@@ -62,6 +62,7 @@ public interface IUserRepository
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
+    Task<AppUser> GetDefaultAdminUser();
 }
 
 public class UserRepository : IUserRepository
@@ -218,6 +219,17 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUser
             .SingleOrDefaultAsync(u => u.ConfirmationToken != null && u.ConfirmationToken.Equals(token));
+    }
+
+    /// <summary>
+    /// Returns the first admin account created
+    /// </summary>
+    /// <returns></returns>
+    public async Task<AppUser> GetDefaultAdminUser()
+    {
+        return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole))
+            .OrderByDescending(u => u.Created)
+            .First();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

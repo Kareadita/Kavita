@@ -11837,7 +11837,11 @@
           },
           "manageCollections": {
             "type": "boolean",
-            "description": "Should this library create and manage collections from Metadata"
+            "description": "Should this library create collections from Metadata"
+          },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create reading lists from Metadata"
           },
           "created": {
             "type": "string",
