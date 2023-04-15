@@ -647,7 +647,11 @@ public class AccountController : BaseApiController
 
         // Validate Password and Username
         var validationErrors = new List<ApiException>();
-        validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
+        if (user.UserName != null && !user.UserName.Equals(dto.Username))
+        {
+            // Only check for username if the user changed username on the form
+            validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
+        }
         validationErrors.AddRange(await _accountService.ValidatePassword(user, dto.Password));
 
         if (validationErrors.Any())
