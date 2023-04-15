@@ -235,21 +235,26 @@ public class ReadingListService : IReadingListService
     public async Task<bool> UpdateReadingListItemPosition(UpdateReadingListPosition dto)
     {
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
-        var item = items.Find(r => r.Id == dto.ReadingListItemId);
+        ReorderItems(items, dto.ReadingListItemId, dto.ToPosition);
+
+        if (!_unitOfWork.HasChanges()) return true;
+
+        return await _unitOfWork.CommitAsync();
+    }
+
+    private static void ReorderItems(List<ReadingListItem> items, int readingListItemId, int toPosition)
+    {
+        var item = items.Find(r => r.Id == readingListItemId);
         if (item != null)
         {
             items.Remove(item);
-            items.Insert(dto.ToPosition, item);
+            items.Insert(toPosition, item);
         }
 
         for (var i = 0; i < items.Count; i++)
         {
             items[i].Order = i;
         }
-
-        if (!_unitOfWork.HasChanges()) return true;
-
-        return await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
@@ -464,12 +469,19 @@ public class ReadingListService : IReadingListService
                     _unitOfWork.ReadingListRepository.Add(readingList);
 
                 }
-                var readingListItem = readingList.Items.FirstOrDefault(item => item.Order == order);
+
+                var items = readingList.Items.ToList();
+                var readingListItem = items.FirstOrDefault(item => item.Order == order);
                 if (readingListItem == null)
                 {
-                    readingList.Items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
+                    items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
+                }
+                else
+                {
+                    ReorderItems(items, readingListItem.Id, order);
                 }
 
+                readingList.Items = items;
                 await CalculateReadingListAgeRating(readingList);
                 await _unitOfWork.CommitAsync();
             }
