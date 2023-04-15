@@ -1,9 +1,5 @@
 ﻿namespace API.Errors;
 
-public record ApiException
-{
-    public ApiException(int status, string? message = null, string? details = null)
-    {
-
-    }
-}
+#nullable enable
+public record ApiException(int Status, string? Message = null, string? Details = null);
+#nullable disable

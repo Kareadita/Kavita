@@ -8,6 +8,8 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
 
+const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
+
 @Component({
   selector: 'app-canvas-renderer',
   templateUrl: './canvas-renderer.component.html',
@@ -178,9 +180,15 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (!this.ctx || !this.canvas) return;
     this.canvasImage = img[0];
     this.cdRef.markForCheck();
+
+    if (this.layoutMode !== LayoutMode.Single || !ValidSplits.includes(this.pageSplit)) {
+      return;
+    }
     
     const needsSplitting = this.updateSplitPage();
     if (!needsSplitting) return;
+
+    // This is toggling true when manga reader shouldn't use this code
 
     this.renderWithCanvas = true;
     if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
