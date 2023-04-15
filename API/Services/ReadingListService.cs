@@ -494,15 +494,16 @@ public class ReadingListService : IReadingListService
         if (string.IsNullOrEmpty(storyArc)) return data;
 
         var arcs = storyArc.Split(",");
-        var arcNumbers = storyArcNumbers.Split(",").Where(s => int.TryParse(s, out _)).ToList();
-        if (arcNumbers.Count != arcs.Length)
+        var arcNumbers = storyArcNumbers.Split(",");
+        if (arcNumbers.Length != arcs.Length)
         {
             _logger.LogError("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
         }
 
-        var maxPairs = Math.Min(arcs.Length, arcNumbers.Count);
+        var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
         }
 
