@@ -14,7 +14,7 @@ img {
   }
 
   &.full-height {
-    height: calc(100vh - $scrollbarHeight);
+    height: calc(100vh); // We need to  - $scrollbarHeight when there is a horizontal scroll on macos
     display: flex; 
     align-content: center;
   }
