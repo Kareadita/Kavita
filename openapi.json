@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.32"
+    "version": "0.7.1.34"
   },
   "servers": [
     {
@@ -7737,6 +7737,36 @@
           "Settings"
         ],
         "summary": "Resets the IP Addresses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/reset-base-url": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the Base url",
         "responses": {
           "200": {
             "description": "Success",

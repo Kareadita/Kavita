@@ -12,7 +12,9 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Tasks;
 using API.SignalR;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 

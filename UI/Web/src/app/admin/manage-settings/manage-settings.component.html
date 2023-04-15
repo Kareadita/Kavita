@@ -1,12 +1,14 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <p class="text-warning pt-2">Changing Port or Base Url requires a manual restart of Kavita to take effect.</p>
-        <div class="mb-3">
+        <div class="alert alert-warning" role="alert">
+            <strong>Notice:</strong> Changing Port or Base Url requires a manual restart of Kavita to take effect.
+        </div>
+        <!-- <div class="mb-3">
             <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
             <ng-template #cacheDirectoryTooltip>Where the server places temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
             <span class="visually-hidden" id="settings-cachedir-help">Where the server places temporary files when reading. This will be cleaned up on a regular basis.</span>
             <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
-        </div>
+        </div> -->
 
         <div class="mb-3">
             <label for="settings-bookmarksdir" class="form-label">Bookmarks Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="bookmarksDirectoryTooltip" role="button" tabindex="0"></i>
@@ -20,25 +22,16 @@
             </div>
         </div>
 
-        <div class="mb-3">
-            <label for="settings-hostname" class="form-label">Host Name</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
-            <ng-template #hostNameTooltip>Domain Name (of Reverse Proxy). If set, email generation will always use this.</ng-template>
-            <span class="visually-hidden" id="settings-hostname-help">Domain Name (of Reverse Proxy). If set, email generation will always use this.</span>
-            <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-            [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
-            <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-                <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
-                    Host name must start with http(s) and not end in /
-                </div>
-            </div>
-        </div>
 
         <div class="mb-3">
             <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
             <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</ng-template>
             <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</span>
-            <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
-            [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
+            <div class="input-group">
+                <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
+                [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
+                <button class="btn btn-outline-secondary" (click)="resetBaseUrl()">Reset</button>
+            </div>
             <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
               <div *ngIf="settingsForm.get('baseUrl')?.errors?.pattern">
                   Base URL must start and end with /

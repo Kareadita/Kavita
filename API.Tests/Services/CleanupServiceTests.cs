@@ -27,6 +27,7 @@ public class CleanupServiceTests : AbstractDbTest
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
+    private readonly IReaderService _readerService;
 
 
     public CleanupServiceTests() : base()
@@ -34,6 +35,10 @@ public class CleanupServiceTests : AbstractDbTest
         _context.Library.Add(new LibraryBuilder("Manga")
             .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
             .Build());
+
+        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
+            Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
     }
 
     #region Setup
@@ -405,11 +410,8 @@ public class CleanupServiceTests : AbstractDbTest
 
         await _context.SaveChangesAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
-            Substitute.For<IImageService>(), new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await _readerService.MarkChaptersUntilAsRead(user, 1, 5);
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
@@ -494,11 +496,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         await _unitOfWork.CommitAsync();
 
-        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
-
-        await readerService.MarkSeriesAsRead(user, s.Id);
+        await _readerService.MarkSeriesAsRead(user, s.Id);
         await _unitOfWork.CommitAsync();
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,

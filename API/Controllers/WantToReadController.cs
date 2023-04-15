@@ -36,6 +36,9 @@ public class WantToReadController : BaseApiController
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(User.GetUserId(), userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(User.GetUserId(), pagedList);
+
         return Ok(pagedList);
     }
 

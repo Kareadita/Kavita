@@ -9,6 +9,7 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.SignalR;
 using API.Tests.Helpers;
