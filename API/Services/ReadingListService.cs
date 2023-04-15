@@ -442,32 +442,36 @@ public class ReadingListService : IReadingListService
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
+            List<Tuple<string, string>> pairs = new List<Tuple<string, string>>();
             if (!string.IsNullOrEmpty(chapter.StoryArc))
             {
-                var pairs = GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber);
-                foreach (var arcPair in pairs)
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber));
+            }
+            if (!string.IsNullOrEmpty(chapter.AlternateSeries))
+            {
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.AlternateSeries, chapter.AlternateNumber));
+            }
+
+            foreach (var arcPair in pairs)
+            {
+                var order = int.Parse(arcPair.Item2);
+                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
+                if (readingList == null)
                 {
-                    var order = int.Parse(arcPair.Item2);
-                    var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
-                    if (readingList == null)
-                    {
-                        readingList = new ReadingListBuilder(arcPair.Item1)
-                            .WithAppUserId(user.Id)
-                            .Build();
-                        _unitOfWork.ReadingListRepository.Add(readingList);
+                    readingList = new ReadingListBuilder(arcPair.Item1)
+                        .WithAppUserId(user.Id)
+                        .Build();
+                    _unitOfWork.ReadingListRepository.Add(readingList);
 
-                    }
-                    var readingListItem = readingList.Items.FirstOrDefault(item => item.Order == order);
-                    if (readingListItem == null)
-                    {
-                        readingList.Items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
-                    }
-
-                    await CalculateReadingListAgeRating(readingList);
-                    await _unitOfWork.CommitAsync();
+                }
+                var readingListItem = readingList.Items.FirstOrDefault(item => item.Order == order);
+                if (readingListItem == null)
+                {
+                    readingList.Items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
                 }
 
-
+                await CalculateReadingListAgeRating(readingList);
+                await _unitOfWork.CommitAsync();
             }
         }
     }
