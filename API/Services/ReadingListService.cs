@@ -488,7 +488,7 @@ public class ReadingListService : IReadingListService
         }
     }
 
-    private IList<Tuple<string, string>> GeneratePairs(string filename, string storyArc, string storyArcNumbers)
+    private IEnumerable<Tuple<string, string>> GeneratePairs(string filename, string storyArc, string storyArcNumbers)
     {
         var data = new List<Tuple<string, string>>();
         if (string.IsNullOrEmpty(storyArc)) return data;

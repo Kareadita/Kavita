@@ -1201,4 +1201,13 @@ public class ReadingListServiceTests
     }
     #endregion
 
+    #region CreateReadingListsFromSeries
+
+    // [Fact]
+    // public async Task CreateReadingListsFromSeries_ShouldCreateFromSinglePair()
+    // {
+    //
+    // }
+
+    #endregion
 }
