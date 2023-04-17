@@ -61,7 +61,8 @@ public class TaskScheduler : ITaskScheduler
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
 
-    private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
+    private static readonly ImmutableArray<string> ScanTasks =
+        ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
     private static readonly Random Rnd = new Random();
 

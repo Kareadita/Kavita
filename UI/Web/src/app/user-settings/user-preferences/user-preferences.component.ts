@@ -257,10 +257,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   transformKeyToOpdsUrl(key: string) {
     if (environment.production) {
-      return `${location.origin}${environment.apiUrl}opds/${key}`;
+      return `${location.origin}${environment.apiUrl}opds/${key}`.replace('//', '/');
     }
 
-    return `${location.origin}${this.baseUrl}api/opds/${key}`;
+    return `${location.origin}${this.baseUrl}api/opds/${key}`.replace('//', '/');
   }
 
   handleBackgroundColorChange() {

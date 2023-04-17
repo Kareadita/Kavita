@@ -59,6 +59,7 @@ export class InviteUserComponent implements OnInit {
       }
     }, err => {
       this.isSending = false;
+      this.toastr.error(err)
     });
   }
 

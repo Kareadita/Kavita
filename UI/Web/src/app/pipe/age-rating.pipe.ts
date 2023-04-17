@@ -32,6 +32,8 @@ export class AgeRatingPipe implements PipeTransform {
       case AgeRating.Teen: return of('Teen');
       case AgeRating.X18Plus: return of('X18+');
       case AgeRating.NotApplicable: return of('Not Applicable');
+      case AgeRating.PG: return of('PG');
+      case AgeRating.R18Plus: return of('R18+')
     }
 
     return of('Unknown');
