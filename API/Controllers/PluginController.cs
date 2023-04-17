@@ -43,6 +43,7 @@ public class PluginController : BaseApiController
         {
             Username = user.UserName!,
             Token = await _tokenService.CreateToken(user),
+            RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
         };
     }
