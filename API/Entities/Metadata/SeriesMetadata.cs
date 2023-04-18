@@ -39,7 +39,7 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     public int TotalCount { get; set; } = 0;
     /// <summary>
-    /// Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)
+    /// Max number of issues/volumes in the series (Max of Volume/Number field in ComicInfo)
     /// </summary>
     public int MaxCount { get; set; } = 0;
     public PublicationStatus PublicationStatus { get; set; }

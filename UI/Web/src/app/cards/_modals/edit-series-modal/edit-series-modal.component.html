@@ -380,11 +380,11 @@
                     <div class="row g-0 mb-2" *ngIf="metadata">
                         <div class="col-md-6">
                             Max Items: {{metadata.maxCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max of Volume/Issue field in ComicInfo. Used in conjunction with total items to determine publication status." role="button" tabindex="0"></i>
+                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Highest Count found across all ComicInfo in the Series" role="button" tabindex="0"></i>
                         </div>
                         <div class="col-md-6">
                             Total Items: {{metadata.totalCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Total number of issues/volumes in the series" role="button" tabindex="0"></i>
+                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max Issue or Volume field from all ComicInfo in the series" role="button" tabindex="0"></i>
                         </div>
                         <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
                         <div class="col-md-6">Total Pages: {{series.pages}}</div>
