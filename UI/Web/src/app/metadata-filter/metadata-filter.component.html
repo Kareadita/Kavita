@@ -321,7 +321,7 @@
                         <label for="series-name" class="form-label me-1">Series Name</label><i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="seriesNameFilterTooltip" role="button" tabindex="0"></i>
                         <span class="visually-hidden" id="filter-series-name-help"><ng-container [ngTemplateOutlet]="seriesNameFilterTooltip"></ng-container></span>
                         <ng-template #seriesNameFilterTooltip>Series name will filter against Name, Sort Name, or Localized Name</ng-template>
-                        <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help">
+                        <input type="text" id="series-name" formControlName="seriesNameQuery" class="form-control" aria-describedby="filter-series-name-help" (keyup.enter)="apply()">
                     </div>
                 </form>
             </div>
@@ -329,14 +329,14 @@
                 <form [formGroup]="releaseYearRange" class="d-flex justify-content-between">
                     <div class="mb-3">
                         <label for="release-year-min" class="form-label">Release</label>
-                        <input type="text" id="release-year-min" formControlName="min" class="form-control" style="width: 62px" placeholder="Min">
+                        <input type="text" id="release-year-min" formControlName="min" class="form-control" style="width: 62px" placeholder="Min" (keyup.enter)="apply()">
                     </div>
                     <div style="margin-top: 37px !important;">
                         <i class="fa-solid fa-minus" aria-hidden="true"></i>
                     </div>
                     <div class="mb-3" style="margin-top: 0.5rem">
                         <label for="release-year-max" class="form-label"><span class="visually-hidden">Max</span></label>
-                        <input type="text" id="release-year-max" formControlName="max" class="form-control" style="width: 62px" placeholder="Max">
+                        <input type="text" id="release-year-max" formControlName="max" class="form-control" style="width: 62px" placeholder="Max" (keyup.enter)="apply()">
                     </div>
                 </form>
             </div>
