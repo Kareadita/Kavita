@@ -154,7 +154,7 @@ public class ComicInfo
             return Math.Max(Count, (int) Math.Floor(float.Parse(Volume)));
         }
 
-        return Count;
+        return 0;
     }
 
 

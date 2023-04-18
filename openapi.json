@@ -13559,7 +13559,7 @@
           },
           "maxCount": {
             "type": "integer",
-            "description": "Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)",
+            "description": "Max number of issues/volumes in the series (Max of Volume/Number field in ComicInfo)",
             "format": "int32"
           },
           "publicationStatus": {
