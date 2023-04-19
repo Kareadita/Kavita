@@ -58,7 +58,7 @@
                                 aria-describedby="starting-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12 or blank
+                                        Must be greater than 1000, 0 or blank
                                     </div>
                                 </div>
                             </div>
@@ -84,7 +84,7 @@
                                 aria-describedby="ending-year-header">
                                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
-                                        Must be between 1 and 12 or blank
+                                        Must be greater than 1000, 0 or blank
                                     </div>
                                 </div>
                             </div>
@@ -109,7 +109,7 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-    <button type="submit" class="btn btn-primary" [disabled]="!reviewGroup.valid" (click)="save()">Save</button>
+    <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
 </div>
 
 
