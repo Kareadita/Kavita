@@ -32,8 +32,10 @@ public interface ICacheService
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
     string GetCachedPagePath(int chapterId, int page);
+    string GetCachePath(int chapterId);
+    string GetBookmarkCachePath(int seriesId);
     IEnumerable<string> GetCachedPages(int chapterId);
-    IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId);
+    IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
@@ -66,11 +68,15 @@ public class CacheService : ICacheService
             .OrderByNatural(Path.GetFileNameWithoutExtension);
     }
 
-    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
+    /// <summary>
+    /// For a given path, scan all files (in reading order) and generate File Dimensions for it. Path must exist
+    /// </summary>
+    /// <param name="cachePath"></param>
+    /// <returns></returns>
+    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath)
     {
         var sw = Stopwatch.StartNew();
-        var path = GetCachePath(chapterId);
-        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
+        var files = _directoryService.GetFilesWithExtension(cachePath, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
 
@@ -94,13 +100,13 @@ public class CacheService : ICacheService
                     Height = image.Height,
                     Width = image.Width,
                     IsWide = image.Width > image.Height,
-                    FileName = file.Replace(path, string.Empty)
+                    FileName = file.Replace(cachePath, string.Empty)
                 });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error calculating image dimensions for {ChapterId}", chapterId);
+            _logger.LogError(ex, "There was an error calculating image dimensions for {CachePath}", cachePath);
         }
         finally
         {
@@ -259,12 +265,17 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    private string GetCachePath(int chapterId)
+    public string GetCachePath(int chapterId)
     {
         return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
     }
 
-    private string GetBookmarkCachePath(int seriesId)
+    /// <summary>
+    /// Returns the cache path for a given series' bookmarks. Should be cacheDirectory/{seriesId_bookmarks}/
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    public string GetBookmarkCachePath(int seriesId)
     {
         return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{seriesId}_bookmarks/"));
     }

@@ -276,7 +276,9 @@ public class ProcessSeries : IProcessSeries
         // Set the AgeRating as highest in all the comicInfos
         if (!series.Metadata.AgeRatingLocked) series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
+        // Count (aka expected total number of chapters or volumes from metadata) across all chapters
         series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
+        // The actual number of count's defined across all chapter's metadata
         series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
         // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
         if (series.Metadata.MaxCount != series.Metadata.TotalCount)
@@ -294,7 +296,7 @@ public class ProcessSeries : IProcessSeries
             if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
-            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
+            } else if (series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Ended;
             }
