@@ -371,8 +371,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ImageHeight() {
     if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
+      console.log('ImageHeight: ', this.mangaReaderService.getPageDimensions(this.pageNum)?.height);
       return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
     }
+    
     return this.readingArea?.nativeElement?.clientHeight + 'px';
   }
 
@@ -806,6 +808,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.subtitle = 'Bookmarks';
         this.libraryType = bookmarkInfo.libraryType;
         this.maxPages = bookmarkInfo.pages;
+        this.mangaReaderService.load(bookmarkInfo);
 
         // Due to change detection rules in Angular, we need to re-create the options object to apply the change
         const newOptions: Options = Object.assign({}, this.pageOptions);

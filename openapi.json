@@ -3909,6 +3909,15 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions (extra I/O). Defaults to true.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
           }
         ],
         "responses": {
@@ -10191,6 +10200,23 @@
           "pages": {
             "type": "integer",
             "format": "int32"
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
+            "nullable": true
           }
         },
         "additionalProperties": false

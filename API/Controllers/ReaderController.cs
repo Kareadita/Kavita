@@ -186,7 +186,7 @@ public class ReaderController : BaseApiController
         if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
-        return Ok(_cacheService.GetCachedFileDimensions(chapterId));
+        return Ok(_cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId)));
     }
 
     /// <summary>
@@ -228,7 +228,7 @@ public class ReaderController : BaseApiController
 
         if (includeDimensions)
         {
-            info.PageDimensions = _cacheService.GetCachedFileDimensions(chapterId);
+            info.PageDimensions = _cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId));
             info.DoublePairs = _readerService.GetPairs(info.PageDimensions);
         }
 
@@ -260,21 +260,31 @@ public class ReaderController : BaseApiController
     /// Returns various information about all bookmark files for a Series. Side effect: This will cache the bookmark images for reading.
     /// </summary>
     /// <param name="seriesId">Series Id for all bookmarks</param>
+    /// <param name="includeDimensions">Include file dimensions (extra I/O). Defaults to true.</param>
     /// <returns></returns>
     [HttpGet("bookmark-info")]
-    public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "includeDimensions"})]
+    public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId, bool includeDimensions = true)
     {
         var totalPages = await _cacheService.CacheBookmarkForSeries(User.GetUserId(), seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
-        return Ok(new BookmarkInfoDto()
+        var info = new BookmarkInfoDto()
         {
             SeriesName = series!.Name,
             SeriesFormat = series.Format,
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             Pages = totalPages,
-        });
+        };
+
+        if (includeDimensions)
+        {
+            info.PageDimensions = _cacheService.GetCachedFileDimensions(_cacheService.GetBookmarkCachePath(seriesId));
+            info.DoublePairs = _readerService.GetPairs(info.PageDimensions);
+        }
+
+        return Ok(info);
     }
 
 
@@ -606,7 +616,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user?.Bookmarks == null) return Ok("Nothing to remove");
+        if (user.Bookmarks == null) return Ok("Nothing to remove");
 
         try
         {
@@ -643,7 +653,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
     }
 
@@ -657,7 +667,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user?.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
+        if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
     }
@@ -721,7 +731,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -740,7 +750,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -755,7 +765,7 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("time-left")]
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId"})]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
