@@ -12,7 +12,7 @@
                     <div class="mb-2">
                         <label for="password" class="form-label visually-hidden">Password</label>
                         <input class="form-control custom-input" formControlName="password" name="password"
-                         id="password" type="password" ngModel pattern="^.{6,32}$" placeholder="Password">
+                         id="password" type="password" pattern="^.{6,32}$" placeholder="Password">
                         <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
                             <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
                                 Password must be between 6 and 32 characters in length
