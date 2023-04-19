@@ -1634,7 +1634,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.readingDirection = this.readingDirection;
       data.emulateBook = modelSettings.emulateBook;
       data.swipeToPaginate = modelSettings.swipeToPaginate;
-      this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+      data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
+
+      this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
         this.toastr.success('User preferences updated');
         if (this.user) {
           this.user.preferences = updatedPrefs;
