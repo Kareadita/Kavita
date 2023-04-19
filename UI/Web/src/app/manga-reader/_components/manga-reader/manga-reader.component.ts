@@ -823,10 +823,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.inSetup = false;
         this.cdRef.markForCheck();
 
-        for (let i = 0; i < PREFETCH_PAGES; i++) {
-          this.cachedImages.push(new Image())
-        }
-
         this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
         this.render();
