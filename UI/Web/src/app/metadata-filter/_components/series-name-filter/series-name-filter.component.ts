@@ -17,19 +17,23 @@ export class SeriesNameFilterComponent implements OnInit {
 
   formGroup: FormGroup = new FormGroup({
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
-    'filterValue': new FormControl<string>('', []),
-
+    'filterValue': new FormControl<string | number>('', []),
   });
-  tooltipHelp: string = 'Series name will filter against Name, Sort Name, or Localized Name';
+  //tooltipHelp: string = 'Series name will filter against Name, Sort Name, or Localized Name';
   validComprisons = [
     FilterComparison.Equal,
     FilterComparison.NotEqual,
     FilterComparison.BeginsWith,
     FilterComparison.EndsWith,
-    FilterComparison.Matches
+    FilterComparison.Matches,
+    FilterComparison.NotContains,
+    FilterComparison.BeginsWith,
+    FilterComparison.EndsWith,
+    
   ];
   allFields = allFields;
   
+
 
   get IsTextInput() {
     return [FilterField.SeriesName, FilterField.Summary].includes(this.formGroup.get('input')?.value!);
@@ -38,6 +42,20 @@ export class SeriesNameFilterComponent implements OnInit {
   get IsNumberInput() {
     return [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(this.formGroup.get('input')?.value!);
   }
+
+  // Multi-selection dropdown is also a thing
+  get IsDropdown() {
+    return [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating, 
+      FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+      FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+      FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+      FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+      FilterField.Formats,
+    ].includes(this.formGroup.get('input')?.value!);
+  }
+
+  // We actually need the input type to be determined dynamically based on both field and comparison
+
 
   constructor() {}
 
@@ -52,6 +70,7 @@ export class SeriesNameFilterComponent implements OnInit {
         field: FilterField.SeriesName,
         value: this.formGroup.get('input')?.value!
       });
+      
     });
   }
 

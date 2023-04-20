@@ -185,8 +185,10 @@ public static class SeriesFilter
             .Select(s => new
             {
                 Series = s,
-                Percentage = Math.Truncate(((double)s.Progress.Where(p => p.AppUserId == userId).Sum(p => p.PagesRead)
-                                            / s.Pages) * 100)
+                Percentage = Math.Truncate(((double) s.Progress.DefaultIfEmpty()
+                    .Where(p => p != null)
+                    .Where(p => p != null && p.AppUserId == userId)
+                    .Sum(p => p != null ? p.PagesRead : 0) / s.Pages) * 100)
             })
             .AsEnumerable();
 
@@ -210,6 +212,14 @@ public static class SeriesFilter
             case FilterComparison.Matches:
             case FilterComparison.Contains:
                 throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
+            case FilterComparison.NotContains:
+            case FilterComparison.NotEqual:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }

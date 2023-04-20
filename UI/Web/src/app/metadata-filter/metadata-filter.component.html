@@ -325,7 +325,6 @@
                     </div>
                 </form>
             </div> -->
-            <app-series-name-filter></app-series-name-filter>
             <div class="col-md-2 me-3">
                 <form [formGroup]="releaseYearRange" class="d-flex justify-content-between">
                     <div class="mb-3">
@@ -368,6 +367,9 @@
             <div class="col-md-2 me-3 mt-4">
                 <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
             </div>
+        </div>
+        <div class="row">
+            <app-series-name-filter></app-series-name-filter>
         </div>
     </div>
 </ng-template>

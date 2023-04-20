@@ -1,25 +1,40 @@
-<div class="col-md-2 me-3">
-    <div class="row g-0">
-        <form [formGroup]="formGroup">
-        
 
+<form [formGroup]="formGroup">
+    <div class="row g-0">
+        <div class="col-md-4">
             <ng-container *ngIf="formGroup.get('input') as control">
-                <select class="col form-select me-1" formControlName="input">
+                <select class="form-select me-1" formControlName="input">
                     <option *ngFor="let field of allFields" [value]="field">{{field | filterField}}</option>
                 </select>
             </ng-container>
-    
-            <select class="col form-select me-1">
+        </div>
+        
+        <div class="col-md-2 comparison-control">
+            <select class="col-auto form-select me-1">
                 <option *ngFor="let comparison of validComprisons" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
-    
-            <ng-container *ngIf="IsTextInput">
-                <input type="text" class="form-control col me-1" autocomplete="true" formGroupName="filterValue">
-            </ng-container>
-            
-            <button class="btn btn-icon" (click)="remove()">
+        </div>
 
+        <div class="col-md-4">
+            <ng-container *ngIf="IsTextInput">
+                <input type="text" class="form-control me-1" autocomplete="true" formGroupName="filterValue">
+            </ng-container>
+            <ng-container *ngIf="IsNumberInput">
+                <input type="number" inputmode="numeric" class="form-control me-1" formGroupName="filterValue">
+            </ng-container>
+            <ng-container *ngIf="IsDropdown">
+                <select class="col-auto form-select me-1">
+                    <option >This will be dynamically generated</option>
+                    <option >This will be dynamically generated</option>
+                </select>
+            </ng-container>
+        </div>
+
+
+        <div class="col-md-1">
+            <button class="btn btn-icon" (click)="remove()">
+                Remove
             </button>
-        </form>
+        </div>
     </div>
-</div>
+</form>

@@ -813,7 +813,7 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-            .HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId)
+            //.HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // This has some nullable issue
 
             // This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
