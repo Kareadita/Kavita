@@ -14,6 +14,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;

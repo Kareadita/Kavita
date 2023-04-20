@@ -36,6 +36,13 @@ public interface IReadingListService
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
     Task<string> GenerateMergedImage(int readingListId);
+    /// <summary>
+    /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="library"></param>
+    /// <returns></returns>
+    Task CreateReadingListsFromSeries(Series series, Library library);
 }
 
 /// <summary>
@@ -228,21 +235,26 @@ public class ReadingListService : IReadingListService
     public async Task<bool> UpdateReadingListItemPosition(UpdateReadingListPosition dto)
     {
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
-        var item = items.Find(r => r.Id == dto.ReadingListItemId);
+        ReorderItems(items, dto.ReadingListItemId, dto.ToPosition);
+
+        if (!_unitOfWork.HasChanges()) return true;
+
+        return await _unitOfWork.CommitAsync();
+    }
+
+    private static void ReorderItems(List<ReadingListItem> items, int readingListItemId, int toPosition)
+    {
+        var item = items.Find(r => r.Id == readingListItemId);
         if (item != null)
         {
             items.Remove(item);
-            items.Insert(dto.ToPosition, item);
+            items.Insert(toPosition, item);
         }
 
         for (var i = 0; i < items.Count; i++)
         {
             items[i].Order = i;
         }
-
-        if (!_unitOfWork.HasChanges()) return true;
-
-        return await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
@@ -418,6 +430,84 @@ public class ReadingListService : IReadingListService
         await CalculateReadingListAgeRating(readingList, new []{ seriesId });
 
         return index > lastOrder + 1;
+    }
+
+    public async Task CreateReadingListsFromSeries(Series series, Library library)
+    {
+        if (!library.ManageReadingLists) return;
+
+        var hasReadingListMarkers = series.Volumes
+            .SelectMany(c => c.Chapters)
+            .Any(c => !string.IsNullOrEmpty(c.StoryArc) || !string.IsNullOrEmpty(c.AlternateSeries));
+
+        if (!hasReadingListMarkers) return;
+
+        _logger.LogInformation("Processing Reading Lists for {SeriesName}", series.Name);
+        var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        series.Metadata ??= new SeriesMetadataBuilder().Build();
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            List<Tuple<string, string>> pairs = new List<Tuple<string, string>>();
+            if (!string.IsNullOrEmpty(chapter.StoryArc))
+            {
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber));
+            }
+            if (!string.IsNullOrEmpty(chapter.AlternateSeries))
+            {
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.AlternateSeries, chapter.AlternateNumber));
+            }
+
+            foreach (var arcPair in pairs)
+            {
+                var order = int.Parse(arcPair.Item2);
+                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
+                if (readingList == null)
+                {
+                    readingList = new ReadingListBuilder(arcPair.Item1)
+                        .WithAppUserId(user.Id)
+                        .Build();
+                    _unitOfWork.ReadingListRepository.Add(readingList);
+
+                }
+
+                var items = readingList.Items.ToList();
+                var readingListItem = items.FirstOrDefault(item => item.Order == order);
+                if (readingListItem == null)
+                {
+                    items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
+                }
+                else
+                {
+                    ReorderItems(items, readingListItem.Id, order);
+                }
+
+                readingList.Items = items;
+                await CalculateReadingListAgeRating(readingList);
+                await _unitOfWork.CommitAsync();
+            }
+        }
+    }
+
+    private IEnumerable<Tuple<string, string>> GeneratePairs(string filename, string storyArc, string storyArcNumbers)
+    {
+        var data = new List<Tuple<string, string>>();
+        if (string.IsNullOrEmpty(storyArc)) return data;
+
+        var arcs = storyArc.Split(",");
+        var arcNumbers = storyArcNumbers.Split(",");
+        if (arcNumbers.Length != arcs.Length)
+        {
+            _logger.LogError("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
+        }
+
+        var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
+        for (var i = 0; i < maxPairs; i++)
+        {
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
+            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
+        }
+
+        return data;
     }
 
     /// <summary>

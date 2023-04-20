@@ -48,6 +48,7 @@ public interface IReadingListRepository
     Task<IList<ReadingList>> GetAllWithNonWebPCovers();
     Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
     Task<int> RemoveReadingListsWithoutSeries();
+    Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -143,6 +144,15 @@ public class ReadingListRepository : IReadingListRepository
         _context.RemoveRange(listsToDelete);
 
         return await _context.SaveChangesAsync();
+    }
+
+
+    public async Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items)
+    {
+        var normalized = name.ToNormalized();
+        return await _context.ReadingList
+            .Includes(includes)
+            .FirstOrDefaultAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId);
     }
 
     public void Remove(ReadingListItem item)

@@ -213,10 +213,6 @@ public static class Configuration
     #region BaseUrl
     private static string GetBaseUrl(string filePath)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
-        {
-            return DefaultBaseUrl;
-        }
 
         try
         {
@@ -252,10 +248,6 @@ public static class Configuration
 
     private static void SetBaseUrl(string filePath, string value)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
-        {
-            return;
-        }
 
         var baseUrl = !value.StartsWith("/")
             ? $"/{value}"

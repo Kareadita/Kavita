@@ -54,4 +54,10 @@ public class ReadingListBuilder : IEntityBuilder<ReadingList>
         _readingList.CoverImage = coverImage;
         return this;
     }
+
+    public ReadingListBuilder WithAppUserId(int userId)
+    {
+        _readingList.AppUserId = userId;
+        return this;
+    }
 }

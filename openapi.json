@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.27"
+    "version": "0.7.1.38"
   },
   "servers": [
     {
@@ -1845,6 +1845,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1868,6 +1875,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1893,6 +1907,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1916,6 +1937,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1941,6 +1969,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1964,6 +1999,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -2027,6 +2069,13 @@
             "name": "filename",
             "in": "query",
             "description": "Filename of file. This is used with upload/upload-by-url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -3579,6 +3628,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3612,6 +3668,14 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "User's API Key for authentication",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -3651,6 +3715,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -3837,6 +3908,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions (extra I/O). Defaults to true.",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -7766,6 +7846,36 @@
         }
       }
     },
+    "/api/Settings/reset-base-url": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the Base url",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/reset-email-url": {
       "post": {
         "tags": [
@@ -10166,6 +10276,23 @@
           "pages": {
             "type": "integer",
             "format": "int32"
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -11929,7 +12056,11 @@
           },
           "manageCollections": {
             "type": "boolean",
-            "description": "Should this library create and manage collections from Metadata"
+            "description": "Should this library create collections from Metadata"
+          },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create reading lists from Metadata"
           },
           "created": {
             "type": "string",
@@ -12015,6 +12146,10 @@
           "manageCollections": {
             "type": "boolean",
             "description": "Should this library create and manage collections from Metadata"
+          },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create and manage reading lists from Metadata"
           },
           "includeInSearch": {
             "type": "boolean",
@@ -13643,7 +13778,7 @@
           },
           "maxCount": {
             "type": "integer",
-            "description": "Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)",
+            "description": "Max number of issues/volumes in the series (Max of Volume/Number field in ComicInfo)",
             "format": "int32"
           },
           "publicationStatus": {
@@ -14621,6 +14756,7 @@
           "includeInRecommended",
           "includeInSearch",
           "manageCollections",
+          "manageReadingLists",
           "name",
           "type"
         ],
@@ -14656,6 +14792,9 @@
             "type": "boolean"
           },
           "manageCollections": {
+            "type": "boolean"
+          },
+          "manageReadingLists": {
             "type": "boolean"
           }
         },

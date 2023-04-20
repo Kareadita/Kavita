@@ -391,7 +391,6 @@ public class Startup
     {
         try
         {
-            if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker) return;
             var htmlDoc = new HtmlDocument();
             var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
             htmlDoc.Load(indexHtmlPath);
@@ -402,6 +401,11 @@ public class Startup
         }
         catch (Exception ex)
         {
+            if ((ex.Message.Contains("Permission denied") || ex.Message.Contains("UnauthorizedAccessException")) && baseUrl.Equals(Configuration.DefaultBaseUrl) && new OsInfo().IsDocker)
+            {
+                // Swallow the exception as the install is non-root and Docker
+                return;
+            }
             Log.Error(ex, "There was an error setting base url");
         }
     }

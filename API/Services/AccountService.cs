@@ -7,6 +7,7 @@ using API.Constants;
 using API.Data;
 using API.Entities;
 using API.Errors;
+using Kavita.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +68,10 @@ public class AccountService : IAccountService
         if (!string.IsNullOrEmpty(serverSettings.HostName))
         {
             basePart = serverSettings.HostName;
+            if (!serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
+            {
+                basePart += serverSettings.BaseUrl.Substring(0, serverSettings.BaseUrl.Length - 1);
+            }
         }
 
         if (withHost) return $"{basePart}/registration/{routePart}?token={HttpUtility.UrlEncode(token)}&email={HttpUtility.UrlEncode(email)}";

@@ -373,15 +373,23 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
       return this.mangaReaderService.getPageDimensions(this.pageNum)?.height  + 'px';
     }
+    
     return this.readingArea?.nativeElement?.clientHeight + 'px';
   }
 
   // This is for the pagination area
   get MaxHeight() {
-    if (this.FittingOption !== FITTING_OPTION.HEIGHT) {
-      return Math.min(this.readingArea?.nativeElement?.clientHeight, this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) + 'px';
+    if (this.FittingOption ===  FITTING_OPTION.HEIGHT) {
+      return 'calc(var(--vh) * 100)';
     }
-    return 'calc(var(--vh) * 100)';
+
+    const needsScrolling = this.readingArea?.nativeElement?.scrollHeight > this.readingArea?.nativeElement?.clientHeight;
+    if (this.readingArea?.nativeElement?.clientHeight <= this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) {
+      if (needsScrolling) {
+        return Math.min(this.readingArea?.nativeElement?.scrollHeight, this.mangaReaderService.getPageDimensions(this.pageNum)?.height!) + 'px';
+      }
+    }
+    return this.readingArea?.nativeElement?.clientHeight + 'px';
   }
 
   get RightPaginationOffset() {
@@ -392,7 +400,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get SplitIconClass() {
-    // TODO: make this a pipe
     if (this.mangaReaderService.isSplitLeftToRight(this.pageSplitOption)) {
       return 'left-side';
     } else if (this.mangaReaderService.isNoSplit(this.pageSplitOption)) {
@@ -807,6 +814,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.subtitle = 'Bookmarks';
         this.libraryType = bookmarkInfo.libraryType;
         this.maxPages = bookmarkInfo.pages;
+        this.mangaReaderService.load(bookmarkInfo);
 
         // Due to change detection rules in Angular, we need to re-create the options object to apply the change
         const newOptions: Options = Object.assign({}, this.pageOptions);
@@ -814,10 +822,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.pageOptions = newOptions;
         this.inSetup = false;
         this.cdRef.markForCheck();
-
-        for (let i = 0; i < PREFETCH_PAGES; i++) {
-          this.cachedImages.push(new Image())
-        }
 
         this.goToPageEvent = new BehaviorSubject<number>(this.pageNum);
 
@@ -1626,7 +1630,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.readingDirection = this.readingDirection;
       data.emulateBook = modelSettings.emulateBook;
       data.swipeToPaginate = modelSettings.swipeToPaginate;
-      this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
+      data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
+
+      this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
         this.toastr.success('User preferences updated');
         if (this.user) {
           this.user.preferences = updatedPrefs;

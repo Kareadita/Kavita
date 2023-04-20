@@ -28,9 +28,13 @@ public class Library : IEntityDate
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
     /// <summary>
-    /// Should this library create and manage collections from Metadata
+    /// Should this library create collections from Metadata
     /// </summary>
     public bool ManageCollections { get; set; } = true;
+    /// <summary>
+    /// Should this library create reading lists from Metadata
+    /// </summary>
+    public bool ManageReadingLists { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

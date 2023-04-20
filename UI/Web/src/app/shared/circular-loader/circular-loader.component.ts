@@ -34,7 +34,7 @@ export class CircularLoaderComponent {
   /**
    * The height in pixels of the loader
    */
-   @Input() height: string = '100px';
+  @Input() height: string = '100px';
   /**
    * Centers the icon in the middle of the loader. Best for card use. 
    */

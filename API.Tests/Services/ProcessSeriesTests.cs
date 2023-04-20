@@ -60,7 +60,7 @@ public class ProcessSeriesTests
             , Substitute.For<ICacheHelper>(), Substitute.For<IReadingItemService>(), Substitute.For<IFileService>(),
             Substitute.For<IMetadataService>(),
             Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<ICollectionTagService>());
+            Substitute.For<ICollectionTagService>(), Substitute.For<IReadingListService>());
 
         ps.UpdateChapterFromComicInfo(chapter, new ComicInfo()
         {
