@@ -3,16 +3,17 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FilterComparison } from '../../_models/filter-comparison';
 import { FilterField, allFields } from '../../_models/filter-field';
 import { FilterStatement } from '../../_models/filter-statement';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
-  selector: 'app-series-name-filter',
-  templateUrl: './series-name-filter.component.html',
-  styleUrls: ['./series-name-filter.component.scss']
+  selector: 'app-metadata-row-filter',
+  templateUrl: './metadata-filter-row.component.html',
+  styleUrls: ['./metadata-filter-row.component.scss']
 })
-export class SeriesNameFilterComponent implements OnInit {
+export class MetadataFilterRowComponent implements OnInit {
 
-  @Input() preset: FilterField = FilterField.SeriesName;
   @Input() disabled: boolean = false;
+  @Input() preset: FilterStatement | undefined;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
   formGroup: FormGroup = new FormGroup({
@@ -32,6 +33,8 @@ export class SeriesNameFilterComponent implements OnInit {
     
   ];
   allFields = allFields;
+
+  validComprisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   
 
 
@@ -61,8 +64,45 @@ export class SeriesNameFilterComponent implements OnInit {
 
   ngOnInit() {
 
-    console.log('All Filter Fields: ', this.allFields);
+    this.formGroup.addControl('input', new FormControl('', []));
+    this.formGroup.get('input')?.valueChanges.subscribe((val: FilterField) => {
+      if ([FilterField.SeriesName, FilterField.Summary].includes(val)) {
+        this.validComprisons$.next([FilterComparison.Equal,
+          FilterComparison.NotEqual,
+          FilterComparison.BeginsWith,
+          FilterComparison.EndsWith,
+          FilterComparison.Matches,
+          FilterComparison.NotContains,
+          FilterComparison.BeginsWith,
+          FilterComparison.EndsWith]);
+      } 
+      
+      // Number based fields
+      else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(val)) {
+        let comps = [FilterComparison.Equal,
+          FilterComparison.NotEqual,
+          FilterComparison.LessThan,
+          FilterComparison.LessThanEqual,
+          FilterComparison.GreaterThan,
+          FilterComparison.GreaterThanEqual,];
+
+        if (val === FilterField.ReleaseYear) {
+          comps.push(...[FilterComparison.IsBefore, FilterComparison.IsAfter]);
+        }
+        this.validComprisons$.next(comps);
+      }
+      
+    });
+
+    
+    if (this.preset) {
+      this.formGroup.get('input')?.setValue(this.preset.field);
+    }
+
+  
     this.formGroup.addControl('input', new FormControl(this.preset, []));
+
+    
 
     this.formGroup.valueChanges.subscribe(_ => {
       this.filterStatement.emit({

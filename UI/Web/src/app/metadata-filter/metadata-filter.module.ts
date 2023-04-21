@@ -5,14 +5,14 @@ import { NgbCollapseModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootst
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
-import { SeriesNameFilterComponent } from './_components/series-name-filter/series-name-filter.component';
 import { FilterComparisonPipe } from './_pipes/filter-comparison.pipe';
 import { FilterFieldPipe } from './_pipes/filter-field.pipe';
+import { MetadataFilterRowComponent } from './_components/series-name-filter/metadata-filter-row.component';
 
 @NgModule({
   declarations: [
     MetadataFilterComponent,
-    SeriesNameFilterComponent,
+    MetadataFilterRowComponent,
     FilterComparisonPipe,
     FilterFieldPipe
   ],
