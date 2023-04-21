@@ -68,8 +68,10 @@ export class MetadataFilterRowComponent implements OnInit {
   ngOnInit() {
 
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
-    this.formGroup.get('input')?.valueChanges.subscribe((val: FilterField) => {
-      if ([FilterField.SeriesName, FilterField.Summary].includes(val)) {
+    this.formGroup.get('input')?.valueChanges.subscribe((val: string) => {
+      console.log('Input changed: ', val);
+      const inputVal = parseInt(val, 10) as FilterField;
+      if ([FilterField.SeriesName, FilterField.Summary].includes(inputVal)) {
         this.validComprisons$.next([FilterComparison.Equal,
           FilterComparison.NotEqual,
           FilterComparison.BeginsWith,
@@ -81,7 +83,7 @@ export class MetadataFilterRowComponent implements OnInit {
       } 
       
       // Number based fields
-      else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(val)) {
+      else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(inputVal)) {
         let comps = [FilterComparison.Equal,
           FilterComparison.NotEqual,
           FilterComparison.LessThan,
@@ -89,12 +91,26 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.GreaterThan,
           FilterComparison.GreaterThanEqual,];
 
-        if (val === FilterField.ReleaseYear) {
-          comps.push(...[FilterComparison.IsBefore, FilterComparison.IsAfter]);
+        if (inputVal === FilterField.ReleaseYear) {
+          comps.push(...[FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.IsInLast, FilterComparison.IsNotInLast]);
         }
         this.validComprisons$.next(comps);
       }
-      
+
+      // Multi-select dropdown fields
+      else if ([FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating, 
+        FilterField.Translators, FilterField.Characters, FilterField.Publisher,
+        FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
+        FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
+        FilterField.Writers, FilterField.Genres, FilterField.Libraries,
+        FilterField.Formats,
+      ].includes(inputVal)) {
+        this.validComprisons$.next([FilterComparison.Equal,
+          FilterComparison.NotEqual,
+          FilterComparison.Contains,
+          FilterComparison.NotContains]);
+      }
+
     });
 
     
@@ -102,8 +118,7 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('input')?.setValue(this.preset.field);
     }
 
-  
-    this.formGroup.addControl('input', new FormControl(this.preset, []));
+    this.validComprisons$.subscribe(v => console.log(v));
 
     
 

@@ -9,7 +9,7 @@
             </ng-container>
         </div>
         
-        <div class="col-md-2 comparison-control">
+        <div class="col-md-2">
             <select class="col-auto form-select me-1">
                 <option *ngFor="let comparison of validComprisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
