@@ -6,9 +6,9 @@ import { FilterStatement } from '../../_models/filter-statement';
 import { BehaviorSubject } from 'rxjs';
 
 enum PredicateType {
-  Text,
-  Dropdown,
-  Number,
+  Text = 1,
+  Number = 2,
+  Dropdown = 3,
 }
 
 @Component({
@@ -133,7 +133,8 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('input')?.setValue(this.preset.field);
     }
 
-    this.validComprisons$.subscribe(v => console.log(v));
+    this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
+    this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
 
     
 
