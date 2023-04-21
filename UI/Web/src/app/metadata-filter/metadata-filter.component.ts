@@ -20,6 +20,7 @@ import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-metadata-filter',
@@ -76,6 +77,9 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   fullyLoaded: boolean = false;
 
+  // TODO: This is the new way to do in Angular 14+. It lets you use services before constructor. Update all code to use this
+  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -89,7 +93,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   constructor(private libraryService: LibraryService, private metadataService: MetadataService, private utilityService: UtilityService, 
     private collectionTagService: CollectionTagService, public toggleService: ToggleService,
-    private readonly cdRef: ChangeDetectorRef, private filterUtilitySerivce: FilterUtilitiesService) {
+    private filterUtilitySerivce: FilterUtilitiesService) {
   }
 
   ngOnInit(): void {

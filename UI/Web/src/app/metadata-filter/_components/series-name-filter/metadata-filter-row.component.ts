@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, inject, OnInit, Output } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { FilterComparison } from '../../_models/filter-comparison';
 import { FilterField, allFields } from '../../_models/filter-field';
@@ -8,13 +8,16 @@ import { BehaviorSubject } from 'rxjs';
 @Component({
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
-  styleUrls: ['./metadata-filter-row.component.scss']
+  styleUrls: ['./metadata-filter-row.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit {
 
   @Input() disabled: boolean = false;
   @Input() preset: FilterStatement | undefined;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
+
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   formGroup: FormGroup = new FormGroup({
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
@@ -64,7 +67,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   ngOnInit() {
 
-    this.formGroup.addControl('input', new FormControl('', []));
+    this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
     this.formGroup.get('input')?.valueChanges.subscribe((val: FilterField) => {
       if ([FilterField.SeriesName, FilterField.Summary].includes(val)) {
         this.validComprisons$.next([FilterComparison.Equal,
