@@ -3,7 +3,12 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FilterComparison } from '../../_models/filter-comparison';
 import { FilterField, allFields } from '../../_models/filter-field';
 import { FilterStatement } from '../../_models/filter-statement';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, filter, map, merge, of, switchMap } from 'rxjs';
+import { MetadataService } from 'src/app/_services/metadata.service';
+import { mangaFormatFilters } from 'src/app/_models/metadata/series-filter';
+import { PersonRole } from 'src/app/_models/metadata/person';
+import { LibraryService } from 'src/app/_services/library.service';
+import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 
 enum PredicateType {
   Text = 1,
@@ -45,6 +50,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   validComprisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
+  dropdownOptions$ = of<{value: number, title: string}[]>([]);
   
 
 
@@ -72,7 +78,8 @@ export class MetadataFilterRowComponent implements OnInit {
   // We actually need the input type to be determined dynamically based on both field and comparison
 
 
-  constructor() {}
+  constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService, 
+    private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
 
@@ -95,7 +102,7 @@ export class MetadataFilterRowComponent implements OnInit {
       } 
 
       // Number based fields
-      else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(inputVal)) {
+      else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating].includes(inputVal)) {
         let comps = [FilterComparison.Equal,
           FilterComparison.NotEqual,
           FilterComparison.LessThan,
@@ -123,7 +130,6 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.Contains,
           FilterComparison.NotContains]);
         this.predicateType$.next(PredicateType.Dropdown);
-
       }
       
     });
@@ -131,25 +137,86 @@ export class MetadataFilterRowComponent implements OnInit {
     
     if (this.preset) {
       this.formGroup.get('input')?.setValue(this.preset.field);
+    } else {
+      this.formGroup.get('input')?.setValue(FilterField.SeriesName);
     }
 
     this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
     this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
+
+    // Dropdown dynamic option selection
+    // TODO: takeUntil(this.onDestroy)
+    this.dropdownOptions$ = merge([this.predicateType$, this.formGroup.get('input')?.valueChanges]).pipe(
+      switchMap((vals) => {
+        const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
+        switch (filterField) {
+          case FilterField.PublicationStatus:
+            return this.metadataService.getAllPublicationStatus().pipe(map(statuses => statuses.map(status => {
+              return {value: status.value, title: status.title}
+            })));
+          case FilterField.AgeRating:
+            return this.metadataService.getAllAgeRatings().pipe(map(statuses => statuses.map(status => {
+              return {value: status.value, title: status.title}
+            })));
+          case FilterField.Genres:
+            return this.metadataService.getAllGenres().pipe(map(statuses => statuses.map(status => {
+              return {value: status.id, title: status.title}
+            })));
+          case FilterField.Languages:
+            // TODO: Languages needs to be redesigned
+            return of([{value: 0, title: 'This field needs a different DTO'}]);
+            // return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
+            //   return {value: status.isoCode, title: status.title}
+            // })));
+          case FilterField.Formats:
+            return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
+              return {value: status.value, title: status.title}
+            })));
+          case FilterField.Libraries:
+            return this.libraryService.getLibraries().pipe(map(statuses => statuses.map(status => {
+              return {value: status.id, title: status.name}
+            })));
+          case FilterField.Tags:
+            return this.metadataService.getAllTags().pipe(map(statuses => statuses.map(status => {
+              return {value: status.id, title: status.title}
+            })));
+          case FilterField.CollectionTags:
+            return this.collectionTagService.allTags().pipe(map(statuses => statuses.map(status => {
+              return {value: status.id, title: status.title}
+            })));
+          case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
+          case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
+          case FilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
+          case FilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
+          case FilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
+          case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
+          case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
+          case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
+          case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
+          case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
+        }
+        return of([]);
+      })
+    );
+
+    this.dropdownOptions$.subscribe(options => console.log('Dropdown Options: ', options));
 
     
 
     this.formGroup.valueChanges.subscribe(_ => {
       this.filterStatement.emit({
         comparison: this.formGroup.get('comparison')?.value!,
-        field: FilterField.SeriesName,
+        field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('input')?.value!
       });
       
     });
   }
 
-  remove() {
-
+  getPersonOptions(role: PersonRole) {
+    return this.metadataService.getAllPeople().pipe(map(statuses => statuses.filter(p2 => p2.role === role).map(status => {
+      return {value: status.id, title: status.name}
+    })))
   }
 
 }

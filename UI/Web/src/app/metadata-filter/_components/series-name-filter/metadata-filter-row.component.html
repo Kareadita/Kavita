@@ -27,8 +27,7 @@
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
                         <select class="col-auto form-select me-1">
-                            <option >This will be dynamically generated</option>
-                            <option >This will be dynamically generated</option>
+                            <option *ngFor="let option of dropdownOptions$ | async" [value]="option.value">{{option.title}}</option>
                         </select>
                     </ng-container>
                 </ng-container>

@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { UtilityService } from '../shared/_services/utility.service';
 import { Genre } from '../_models/metadata/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
