@@ -146,8 +146,9 @@ export class MetadataFilterRowComponent implements OnInit {
 
     // Dropdown dynamic option selection
     // TODO: takeUntil(this.onDestroy)
-    this.dropdownOptions$ = merge([this.predicateType$, this.formGroup.get('input')?.valueChanges]).pipe(
+    this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       switchMap((vals) => {
+        console.log('Dropdown recalc');
         const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         switch (filterField) {
           case FilterField.PublicationStatus:
