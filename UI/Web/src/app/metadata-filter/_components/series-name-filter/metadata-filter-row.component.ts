@@ -5,6 +5,12 @@ import { FilterField, allFields } from '../../_models/filter-field';
 import { FilterStatement } from '../../_models/filter-statement';
 import { BehaviorSubject } from 'rxjs';
 
+enum PredicateType {
+  Text,
+  Dropdown,
+  Number,
+}
+
 @Component({
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
@@ -38,6 +44,7 @@ export class MetadataFilterRowComponent implements OnInit {
   allFields = allFields;
 
   validComprisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
+  predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   
 
 
@@ -48,6 +55,8 @@ export class MetadataFilterRowComponent implements OnInit {
   get IsNumberInput() {
     return [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(this.formGroup.get('input')?.value!);
   }
+
+  get PredicateType() { return PredicateType };
 
   // Multi-selection dropdown is also a thing
   get IsDropdown() {
@@ -70,6 +79,7 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => {
       console.log('Input changed: ', val);
+
       const inputVal = parseInt(val, 10) as FilterField;
       if ([FilterField.SeriesName, FilterField.Summary].includes(inputVal)) {
         this.validComprisons$.next([FilterComparison.Equal,
@@ -80,8 +90,10 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.NotContains,
           FilterComparison.BeginsWith,
           FilterComparison.EndsWith]);
+
+        this.predicateType$.next(PredicateType.Text);
       } 
-      
+
       // Number based fields
       else if ([FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(inputVal)) {
         let comps = [FilterComparison.Equal,
@@ -95,6 +107,7 @@ export class MetadataFilterRowComponent implements OnInit {
           comps.push(...[FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.IsInLast, FilterComparison.IsNotInLast]);
         }
         this.validComprisons$.next(comps);
+        this.predicateType$.next(PredicateType.Number);
       }
 
       // Multi-select dropdown fields
@@ -109,8 +122,10 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.NotEqual,
           FilterComparison.Contains,
           FilterComparison.NotContains]);
-      }
+        this.predicateType$.next(PredicateType.Dropdown);
 
+      }
+      
     });
 
     
