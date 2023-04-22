@@ -531,7 +531,7 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
-        var time = DateTime.UtcNow;
+        var time = DateTime.Now;
         foreach (var folderPath in library.Folders)
         {
             folderPath.UpdateLastScanned(time);
