@@ -449,7 +449,7 @@ public class ReadingListService : IReadingListService
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
-            List<Tuple<string, string>> pairs = new List<Tuple<string, string>>();
+            var pairs = new List<Tuple<string, string>>();
             if (!string.IsNullOrEmpty(chapter.StoryArc))
             {
                 pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber));
@@ -473,7 +473,7 @@ public class ReadingListService : IReadingListService
 
                 var items = readingList.Items.ToList();
                 var order = int.Parse(arcPair.Item2);
-                var readingListItem = items.FirstOrDefault(item => item.Order == order);
+                var readingListItem = items.FirstOrDefault(item => item.Order == order || item.ChapterId == chapter.Id);
                 if (readingListItem == null)
                 {
                     // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
@@ -485,13 +485,23 @@ public class ReadingListService : IReadingListService
                 }
                 else
                 {
-                    ReorderItems(items, readingListItem.Id, order);
+                    if (order == int.MaxValue)
+                    {
+                        _logger.LogWarning("{Filename} has a missing StoryArcNumber/AlternativeNumber but list already exists with this item. Skipping item", chapter.Files.FirstOrDefault()?.FilePath);
+                    }
+                    else
+                    {
+                        ReorderItems(items, readingListItem.Id, order);
+                    }
                 }
 
                 readingList.Items = items;
                 await CalculateReadingListAgeRating(readingList);
                 await CalculateStartAndEndDates(readingList);
-                await _unitOfWork.CommitAsync();
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                }
             }
         }
     }
