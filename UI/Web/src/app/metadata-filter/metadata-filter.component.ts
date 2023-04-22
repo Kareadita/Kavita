@@ -21,6 +21,9 @@ import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import { inject } from '@angular/core';
+import { FilterStatement } from './_models/filter-statement';
+import { FilterComparison } from './_models/filter-comparison';
+import { FilterField } from './_models/filter-field';
 
 @Component({
   selector: 'app-metadata-filter',
@@ -77,10 +80,24 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   fullyLoaded: boolean = false;
 
+
+  filterStatements: Array<FilterStatement> = [{
+    comparison: FilterComparison.Equal,
+    field: FilterField.SeriesName,
+    value: ''
+  }];
+  
+  updateFilter(index: number, filterStmt: FilterStatement) {
+    console.log('Filter at ', index, 'updated: ', filterStmt);
+    this.filterStatements[index] = filterStmt; // This is causing a re-render and thus component looses focus
+    //this.cdRef.markForCheck();
+  }
+
+
+
+
   // TODO: This is the new way to do in Angular 14+. It lets you use services before constructor. Update all code to use this
   private readonly cdRef = inject(ChangeDetectorRef);
-
-
   private onDestroy: Subject<void> = new Subject();
 
   get PersonRole(): typeof PersonRole {

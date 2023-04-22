@@ -368,14 +368,14 @@
                 <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
             </div>
         </div>
-        <div class="row">
+        <div class="row" *ngFor="let filterStmt of filterStatements; let i = index">
             <div class="col-md-1">
                 <button class="btn btn-icon">
                     A
                 </button>
             </div>
             <div class="col-md-10">
-                <app-metadata-row-filter></app-metadata-row-filter>
+                <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)"></app-metadata-row-filter>
             </div>
             <div class="col-md-1">
                 <button class="btn btn-icon">

@@ -3,7 +3,7 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { FilterComparison } from '../../_models/filter-comparison';
 import { FilterField, allFields } from '../../_models/filter-field';
 import { FilterStatement } from '../../_models/filter-statement';
-import { BehaviorSubject, filter, map, merge, of, switchMap } from 'rxjs';
+import { BehaviorSubject, filter, map, merge, of, switchMap, tap } from 'rxjs';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { mangaFormatFilters } from 'src/app/_models/metadata/series-filter';
 import { PersonRole } from 'src/app/_models/metadata/person';
@@ -24,8 +24,7 @@ enum PredicateType {
 })
 export class MetadataFilterRowComponent implements OnInit {
 
-  @Input() disabled: boolean = false;
-  @Input() preset: FilterStatement | undefined;
+  @Input() preset!: FilterStatement;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -34,49 +33,13 @@ export class MetadataFilterRowComponent implements OnInit {
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
     'filterValue': new FormControl<string | number>('', []),
   });
-  //tooltipHelp: string = 'Series name will filter against Name, Sort Name, or Localized Name';
-  validComprisons = [
-    FilterComparison.Equal,
-    FilterComparison.NotEqual,
-    FilterComparison.BeginsWith,
-    FilterComparison.EndsWith,
-    FilterComparison.Matches,
-    FilterComparison.NotContains,
-    FilterComparison.BeginsWith,
-    FilterComparison.EndsWith,
-    
-  ];
-  allFields = allFields;
-
   validComprisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   dropdownOptions$ = of<{value: number, title: string}[]>([]);
+  allFields = allFields;
   
 
-
-  get IsTextInput() {
-    return [FilterField.SeriesName, FilterField.Summary].includes(this.formGroup.get('input')?.value!);
-  }
-
-  get IsNumberInput() {
-    return [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.AgeRating, FilterField.ReadProgress, FilterField.UserRating].includes(this.formGroup.get('input')?.value!);
-  }
-
   get PredicateType() { return PredicateType };
-
-  // Multi-selection dropdown is also a thing
-  get IsDropdown() {
-    return [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating, 
-      FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-      FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-      FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-      FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-      FilterField.Formats,
-    ].includes(this.formGroup.get('input')?.value!);
-  }
-
-  // We actually need the input type to be determined dynamically based on both field and comparison
-
 
   constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService, 
     private readonly collectionTagService: CollectionTagService) {}
@@ -99,6 +62,7 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.EndsWith]);
 
         this.predicateType$.next(PredicateType.Text);
+        this.formGroup.get('filterValue')?.setValue('');
       } 
 
       // Number based fields
@@ -115,6 +79,7 @@ export class MetadataFilterRowComponent implements OnInit {
         }
         this.validComprisons$.next(comps);
         this.predicateType$.next(PredicateType.Number);
+        this.formGroup.get('filterValue')?.setValue('');
       }
 
       // Multi-select dropdown fields
@@ -131,18 +96,10 @@ export class MetadataFilterRowComponent implements OnInit {
           FilterComparison.NotContains]);
         this.predicateType$.next(PredicateType.Dropdown);
       }
-      
     });
-
-    
-    if (this.preset) {
-      this.formGroup.get('input')?.setValue(this.preset.field);
-    } else {
-      this.formGroup.get('input')?.setValue(FilterField.SeriesName);
-    }
-
-    this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
-    this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
+    this.formGroup.get('input')?.setValue(this.preset.field);
+    this.formGroup.get('filterValue')?.patchValue(this.preset.value);
+    this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
 
     // Dropdown dynamic option selection
     // TODO: takeUntil(this.onDestroy)
@@ -197,18 +154,23 @@ export class MetadataFilterRowComponent implements OnInit {
           case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
         }
         return of([]);
-      })
+      }),
+      tap(opts => this.formGroup.get('filterValue')?.setValue(opts[0].value))
     );
 
+
+    this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
+    this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
     this.dropdownOptions$.subscribe(options => console.log('Dropdown Options: ', options));
 
     
 
     this.formGroup.valueChanges.subscribe(_ => {
+      console.log('Form change ');
       this.filterStatement.emit({
         comparison: this.formGroup.get('comparison')?.value!,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
-        value: this.formGroup.get('input')?.value!
+        value: this.formGroup.get('filterValue')?.value!
       });
       
     });
