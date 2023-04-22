@@ -103,6 +103,7 @@ public static class PersonHelper
         if (string.IsNullOrEmpty(person.Name)) return;
         var existingPerson = metadataPeople.FirstOrDefault(p =>
             p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
+
         if (existingPerson == null)
         {
             metadataPeople.Add(person);

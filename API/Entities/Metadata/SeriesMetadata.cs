@@ -13,7 +13,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
-    public ICollection<CollectionTag> CollectionTags { get; set; } = null!;
+    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();

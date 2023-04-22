@@ -196,8 +196,9 @@ public class ProcessSeries : IProcessSeries
                 {
                     await _unitOfWork.RollbackAsync();
                     _logger.LogCritical(ex,
-                        "[ScannerService] There was an issue writing to the database for series {@SeriesName}",
+                        "[ScannerService] There was an issue writing to the database for series {SeriesName}",
                         series.Name);
+                    _logger.LogTrace("[ScannerService] Full Series Dump: {@Series}", series);
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
@@ -726,7 +727,18 @@ public class ProcessSeries : IProcessSeries
 
         void AddPerson(Person person)
         {
-            PersonHelper.AddPersonIfNotExists(chapter.People, person);
+            // TODO: Temp have code inlined to help debug foreign key constraint issue
+            //PersonHelper.AddPersonIfNotExists(chapter.People, person);
+            if (string.IsNullOrEmpty(person.Name)) return;
+            var existingPerson = chapter.People.FirstOrDefault(p =>
+                p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
+            _logger.LogTrace("[PersonHelper] Attempting to add {@Person} to {FileName} with ChapterID {ChapterId}, adding if not null: {@ExistingPerson}",
+                person, chapter.Files.FirstOrDefault()?.FilePath, chapter.Id, existingPerson);
+
+            if (existingPerson == null)
+            {
+                chapter.People.Add(person);
+            }
         }
 
         void AddGenre(Genre genre, bool newTag)
@@ -823,15 +835,19 @@ public class ProcessSeries : IProcessSeries
         lock (_peopleLock)
         {
             var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+            _logger.LogTrace("[UpdatePeople] for {Role} and Names of {Names}", role, names);
+            _logger.LogTrace("[UpdatePeople] for {Role} found {@People}", role, allPeopleTypeRole);
 
             foreach (var name in names)
             {
                 var normalizedName = name.ToNormalized();
                 var person = allPeopleTypeRole.FirstOrDefault(p =>
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
+
                 if (person == null)
                 {
                     person = new PersonBuilder(name, role).Build();
+                    _logger.LogTrace("[UpdatePeople] for {Role} no one found, adding to _people", role);
                     _people.Add(person);
                 }
 
