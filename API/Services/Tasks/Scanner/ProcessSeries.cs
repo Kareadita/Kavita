@@ -223,7 +223,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, false);
+        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
