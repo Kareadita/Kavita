@@ -1247,24 +1247,24 @@ public class ReadingListServiceTests
         return new Tuple<Series, Series>(series1, series2);
     }
 
-    [Fact]
-    public async Task CreateReadingListsFromSeries_ShouldCreateFromSinglePair()
-    {
-        //await SetupData();
-
-        var series1 = new SeriesBuilder("Series 1")
-            .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1")
-                    .WithStoryArc("CreateReadingListsFromSeries")
-                    .WithStoryArcNumber("1")
-                    .Build())
-                .WithChapter(new ChapterBuilder("2").Build())
-                .Build())
-            .Build();
-
-        _readingListService.CreateReadingListsFromSeries(series.Item1)
-    }
+    // [Fact]
+    // public async Task CreateReadingListsFromSeries_ShouldCreateFromSinglePair()
+    // {
+    //     //await SetupData();
+    //
+    //     var series1 = new SeriesBuilder("Series 1")
+    //         .WithFormat(MangaFormat.Archive)
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithChapter(new ChapterBuilder("1")
+    //                 .WithStoryArc("CreateReadingListsFromSeries")
+    //                 .WithStoryArcNumber("1")
+    //                 .Build())
+    //             .WithChapter(new ChapterBuilder("2").Build())
+    //             .Build())
+    //         .Build();
+    //
+    //     _readingListService.CreateReadingListsFromSeries(series.Item1)
+    // }
 
     #endregion
 }
