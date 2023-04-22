@@ -33,11 +33,12 @@ and modified
 })
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
 
-  private timer: number | null = null;
+	private timer: number | null = null;
 	constructor(private changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone) {}
 	transform(value: string) {
 		this.removeTimer();
 		const d = new Date(value);
+		console.log('date: ', d);
 		const now = new Date();
 		const seconds = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
 		const timeToUpdate = (Number.isNaN(seconds)) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;
@@ -61,37 +62,37 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
 			return '';
 		}
     
-    if (seconds <= 45) {
-			return 'just now';
-		}
-    if (seconds <= 90) {
-			return 'a minute ago';
-		}
-    if (minutes <= 45) {
-			return minutes + ' minutes ago';
-		}
-    if (minutes <= 90) {
-			return 'an hour ago';
-		}
-    if (hours <= 22) {
-			return hours + ' hours ago';
-		}
-    if (hours <= 36) {
-			return 'a day ago';
-		}
-    if (days <= 25) {
-			return days + ' days ago';
-		}
-    if (days <= 45) {
-			return 'a month ago';
-		}
-    if (days <= 345) {
-			return months + ' months ago';
-		}
-    if (days <= 545) {
-			return 'a year ago';
-		}
-    return years + ' years ago';
+		if (seconds <= 45) {
+				return 'just now';
+			}
+		if (seconds <= 90) {
+				return 'a minute ago';
+			}
+		if (minutes <= 45) {
+				return minutes + ' minutes ago';
+			}
+		if (minutes <= 90) {
+				return 'an hour ago';
+			}
+		if (hours <= 22) {
+				return hours + ' hours ago';
+			}
+		if (hours <= 36) {
+				return 'a day ago';
+			}
+		if (days <= 25) {
+				return days + ' days ago';
+			}
+		if (days <= 45) {
+				return 'a month ago';
+			}
+		if (days <= 345) {
+				return months + ' months ago';
+			}
+		if (days <= 545) {
+				return 'a year ago';
+			}
+		return years + ' years ago';
 	}
 
 	ngOnDestroy(): void {

@@ -17,7 +17,7 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         {
             Range = string.IsNullOrEmpty(range) ? number : range,
             Title = string.IsNullOrEmpty(range) ? number : range,
-            Number = Services.Tasks.Scanner.Parser.Parser.MinNumberFromRange(number) + string.Empty,
+            Number = Parser.MinNumberFromRange(number) + string.Empty,
             Files = new List<MangaFile>(),
             Pages = 1
         };
@@ -42,9 +42,21 @@ public class ChapterBuilder : IEntityBuilder<Chapter>
         return this;
     }
 
-    private ChapterBuilder WithNumber(string number)
+    public ChapterBuilder WithNumber(string number)
     {
         _chapter.Number = number;
+        return this;
+    }
+
+    public ChapterBuilder WithStoryArc(string arc)
+    {
+        _chapter.StoryArc = arc;
+        return this;
+    }
+
+    public ChapterBuilder WithStoryArcNumber(string number)
+    {
+        _chapter.StoryArcNumber = number;
         return this;
     }
 

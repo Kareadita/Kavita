@@ -116,6 +116,8 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
+    console.log(this.coverImageIndex)
+    this.cdRef.detectChanges();
   }
 
   updateSelectedImage(url: string) {
