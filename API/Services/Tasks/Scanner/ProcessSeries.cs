@@ -836,7 +836,7 @@ public class ProcessSeries : IProcessSeries
         {
             var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
             _logger.LogTrace("[UpdatePeople] for {Role} and Names of {Names}", role, names);
-            _logger.LogTrace("[UpdatePeople] for {Role} found {@People}", role, allPeopleTypeRole);
+            _logger.LogTrace("[UpdatePeople] for {Role} found {@People}", role, allPeopleTypeRole.Select(p => new {p.Id, p.Name, SeriesMetadataIds = p.SeriesMetadatas?.Select(m => m.Id).ToList()}));
 
             foreach (var name in names)
             {

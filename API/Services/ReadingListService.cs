@@ -13,9 +13,11 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
@@ -459,7 +461,6 @@ public class ReadingListService : IReadingListService
 
             foreach (var arcPair in pairs)
             {
-                var order = int.Parse(arcPair.Item2);
                 var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
                 if (readingList == null)
                 {
@@ -471,9 +472,15 @@ public class ReadingListService : IReadingListService
                 }
 
                 var items = readingList.Items.ToList();
+                var order = int.Parse(arcPair.Item2);
                 var readingListItem = items.FirstOrDefault(item => item.Order == order);
                 if (readingListItem == null)
                 {
+                    // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
+                    if (order == int.MaxValue)
+                    {
+                        order = items.Count > 0 ? items.Max(item => item.Order) + 1 : 0;
+                    }
                     items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
                 }
                 else
@@ -483,6 +490,7 @@ public class ReadingListService : IReadingListService
 
                 readingList.Items = items;
                 await CalculateReadingListAgeRating(readingList);
+                await CalculateStartAndEndDates(readingList);
                 await _unitOfWork.CommitAsync();
             }
         }
@@ -495,14 +503,19 @@ public class ReadingListService : IReadingListService
 
         var arcs = storyArc.Split(",");
         var arcNumbers = storyArcNumbers.Split(",");
-        if (arcNumbers.Length != arcs.Length)
+        if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
         {
-            _logger.LogError("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
+            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
         }
 
         var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
+            // When there is a mismatch on arcs and arc numbers, then we should default to a high number
+            if (string.IsNullOrEmpty(arcNumbers[i]) && !string.IsNullOrEmpty(arcs[i]))
+            {
+                arcNumbers[i] = int.MaxValue.ToString();
+            }
             if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
         }
