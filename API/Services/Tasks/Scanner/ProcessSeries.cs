@@ -732,18 +732,7 @@ public class ProcessSeries : IProcessSeries
 
         void AddPerson(Person person)
         {
-            // TODO: Temp have code inlined to help debug foreign key constraint issue
-            //PersonHelper.AddPersonIfNotExists(chapter.People, person);
-            if (string.IsNullOrEmpty(person.Name)) return;
-            var existingPerson = chapter.People.FirstOrDefault(p =>
-                p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
-            _logger.LogTrace("[PersonHelper] Attempting to add {@Person} to {FileName} with ChapterID {ChapterId}, adding if not null: {@ExistingPerson}",
-                person, chapter.Files.FirstOrDefault()?.FilePath, chapter.Id, existingPerson);
-
-            if (existingPerson == null)
-            {
-                chapter.People.Add(person);
-            }
+            PersonHelper.AddPersonIfNotExists(chapter.People, person);
         }
 
         void AddGenre(Genre genre, bool newTag)
