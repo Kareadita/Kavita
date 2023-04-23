@@ -27,6 +27,11 @@ export class MetadataBuilderComponent implements OnInit {
 
   filterStatements: Array<FilterStatement> = [this.createDefaultFilter()];
 
+  groupOptions: Array<{value: 'and' | 'or', title: string}> = [
+    {value: 'or', title: 'Match any of the following'},
+    {value: 'and', title: 'Match all of the following'},
+  ];
+
   
   
   updateFilter(index: number, filterStmt: FilterStatement) {
@@ -37,8 +42,10 @@ export class MetadataBuilderComponent implements OnInit {
     //this.cdRef.markForCheck();
   }
 
-  addFilter() {
-    this.filterStatements.push(this.createDefaultFilter());
+  addFilter(place: 'and' | 'or') {
+    if (place === 'and') {
+      this.filterStatements.push(this.createDefaultFilter());
+    }
   }
 
   removeFilter(index: number) {

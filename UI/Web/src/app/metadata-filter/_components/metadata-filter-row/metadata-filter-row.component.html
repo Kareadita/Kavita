@@ -3,14 +3,14 @@
     <div class="row g-0">
         <div class="col-md-4">
             <ng-container *ngIf="formGroup.get('input') as control">
-                <select class="form-select me-1" formControlName="input">
+                <select class="form-select me-2" formControlName="input">
                     <option *ngFor="let field of allFields" [value]="field">{{field | filterField}}</option>
                 </select>
             </ng-container>
         </div>
         
         <div class="col-md-2">
-            <select class="col-auto form-select me-1" formControlName="comparison">
+            <select class="col-auto form-select  me-2" formControlName="comparison">
                 <option *ngFor="let comparison of validComprisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
         </div>
@@ -20,13 +20,13 @@
             <ng-container *ngIf="predicateType$ | async as predicateType">
                 <ng-container [ngSwitch]="predicateType">
                     <ng-container *ngSwitchCase="PredicateType.Text">
-                        <input type="text" class="form-control me-1" autocomplete="true" formControlName="filterValue">
+                        <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Number">
-                        <input type="number" inputmode="numeric" class="form-control me-1" formControlName="filterValue">
+                        <input type="number" inputmode="numeric" class="form-control  me-2" formControlName="filterValue">
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
-                        <select class="col-auto form-select me-1" formControlName="filterValue">
+                        <select class="col-auto form-select  me-2" formControlName="filterValue">
                             <option *ngFor="let option of dropdownOptions$ | async" [value]="option.value">{{option.title}}</option>
                         </select>
                     </ng-container>
