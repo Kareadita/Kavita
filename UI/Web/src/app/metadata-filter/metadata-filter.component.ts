@@ -80,22 +80,13 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   fullyLoaded: boolean = false;
 
+  filterStatements: Array<FilterStatement> = [];
 
-  filterStatements: Array<FilterStatement> = [{
-    comparison: FilterComparison.Equal,
-    field: FilterField.SeriesName,
-    value: ''
-  }];
   
-  updateFilter(index: number, filterStmt: FilterStatement) {
-    console.log('Filter at ', index, 'updated: ', filterStmt);
-    this.filterStatements[index].comparison = filterStmt.comparison;
-    this.filterStatements[index].field = filterStmt.field;
-    this.filterStatements[index].value = filterStmt.value; 
-    //this.cdRef.markForCheck();
+  
+  handleFilters(filterStmts: FilterStatement[]) {
+    this.filterStatements = filterStmts;
   }
-
-
 
 
   // TODO: This is the new way to do in Angular 14+. It lets you use services before constructor. Update all code to use this

@@ -7,14 +7,16 @@ import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { FilterComparisonPipe } from './_pipes/filter-comparison.pipe';
 import { FilterFieldPipe } from './_pipes/filter-field.pipe';
-import { MetadataFilterRowComponent } from './_components/series-name-filter/metadata-filter-row.component';
+import { MetadataFilterRowComponent } from './_components/metadata-filter-row/metadata-filter-row.component';
+import { MetadataBuilderComponent } from './_components/metadata-builder/metadata-builder.component';
 
 @NgModule({
   declarations: [
     MetadataFilterComponent,
     MetadataFilterRowComponent,
     FilterComparisonPipe,
-    FilterFieldPipe
+    FilterFieldPipe,
+    MetadataBuilderComponent
   ],
   imports: [
     CommonModule,
