@@ -6,7 +6,7 @@ public enum FilterComparison
 {
     [Description("Equal")]
     Equal = 0,
-    GreaterThan =1,
+    GreaterThan = 1,
     GreaterThanEqual = 2,
     LessThan = 3,
     LessThanEqual = 4,

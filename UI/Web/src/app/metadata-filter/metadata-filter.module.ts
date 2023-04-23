@@ -9,6 +9,7 @@ import { FilterComparisonPipe } from './_pipes/filter-comparison.pipe';
 import { FilterFieldPipe } from './_pipes/filter-field.pipe';
 import { MetadataFilterRowComponent } from './_components/metadata-filter-row/metadata-filter-row.component';
 import { MetadataBuilderComponent } from './_components/metadata-builder/metadata-builder.component';
+import { MetadataFilterRowGroupComponent } from './_components/metadata-filter-row-group/metadata-filter-row-group.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { MetadataBuilderComponent } from './_components/metadata-builder/metadat
     MetadataFilterRowComponent,
     FilterComparisonPipe,
     FilterFieldPipe,
-    MetadataBuilderComponent
+    MetadataBuilderComponent,
+    MetadataFilterRowGroupComponent
   ],
   imports: [
     CommonModule,

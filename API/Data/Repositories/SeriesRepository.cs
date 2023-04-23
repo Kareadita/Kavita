@@ -881,14 +881,6 @@ public class SeriesRepository : ISeriesRepository
 
         var filterLibs = new List<int>();
 
-        // foreach (var group in filter.Groups)
-        // {
-        //     foreach (var andStatement in group.And)
-        //     {
-        //
-        //     }
-        //     query = BuildFilterGroup(userId, group, query, filterLibs, userLibraries);
-        // }
         query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries, false);
 
         query = query
@@ -950,7 +942,8 @@ public class SeriesRepository : ISeriesRepository
             return query;
         }
 
-        var filteredQuery = isAnd ? query : query.Where(b => false);
+        //var filteredQuery = isAnd ? query : query.Where(b => false);
+        var filteredQuery = query;
         // Initialize filteredQuery to the original query if isAnd is true,
         // or to a query that always returns false if isAnd is false (to handle the case when there are no And groups)
 
@@ -963,12 +956,12 @@ public class SeriesRepository : ISeriesRepository
                     filteredQuery = BuildFilterGroup(userId, statement, filteredQuery, filterLibs, userLibraries);
                 }
             }
-            else if (group.And != null && group.And.Any())
+            if (group.And != null && group.And.Any())
             {
                 var andQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.And }, query, filterLibs, userLibraries, true);
                 filteredQuery = filteredQuery.Intersect(andQuery);
             }
-            else if (group.Or != null && group.Or.Any())
+            if (group.Or != null && group.Or.Any())
             {
                 var orQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.Or }, query, filterLibs, userLibraries, false);
                 filteredQuery = filteredQuery.Union(orQuery);

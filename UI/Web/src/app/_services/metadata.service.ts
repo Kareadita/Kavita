@@ -11,6 +11,9 @@ import { PublicationStatusDto } from '../_models/metadata/publication-status-dto
 import { Person } from '../_models/metadata/person';
 import { Tag } from '../_models/tag';
 import { TextResonse } from '../_types/text-response';
+import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
+import { FilterField } from '../_models/metadata/v2/filter-field';
+import { FilterStatement } from '../_models/metadata/v2/filter-statement';
 
 @Injectable({
   providedIn: 'root'
@@ -98,5 +101,20 @@ export class MetadataService {
 
   getChapterSummary(chapterId: number) {
     return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
+  }
+
+  createDefaultFilterStatement() {
+    return {
+      comparison: FilterComparison.Equal,
+      field: FilterField.SeriesName,
+      value: ''
+    };
+  }
+
+  updateFilter(arr: Array<FilterStatement>, index: number, filterStmt: FilterStatement) {
+    console.log('Filter at ', index, 'updated: ', filterStmt);
+    arr[index].comparison = filterStmt.comparison;
+    arr[index].field = filterStmt.field;
+    arr[index].value = filterStmt.value; 
   }
 }

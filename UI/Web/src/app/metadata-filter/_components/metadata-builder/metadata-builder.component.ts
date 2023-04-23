@@ -3,6 +3,7 @@ import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
 import { Subject } from 'rxjs';
 import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
 import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
+import { MetadataService } from 'src/app/_services/metadata.service';
 
 @Component({
   selector: 'app-metadata-builder',
@@ -15,17 +16,12 @@ export class MetadataBuilderComponent implements OnInit {
   @Output() update: EventEmitter<FilterStatement[]> = new EventEmitter<FilterStatement[]>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly metadataService = inject(MetadataService);
   private onDestroy: Subject<void> = new Subject();
-  
-  createDefaultFilter() {
-    return {
-      comparison: FilterComparison.Equal,
-      field: FilterField.SeriesName,
-      value: ''
-    };
-  }
 
-  filterStatements: Array<FilterStatement> = [this.createDefaultFilter()];
+
+
+  filterStatements: Array<FilterStatement> = [this.metadataService.createDefaultFilterStatement()];
 
   groupOptions: Array<{value: 'and' | 'or', title: string}> = [
     {value: 'or', title: 'Match any of the following'},
@@ -36,15 +32,12 @@ export class MetadataBuilderComponent implements OnInit {
   
   updateFilter(index: number, filterStmt: FilterStatement) {
     console.log('Filter at ', index, 'updated: ', filterStmt);
-    this.filterStatements[index].comparison = filterStmt.comparison;
-    this.filterStatements[index].field = filterStmt.field;
-    this.filterStatements[index].value = filterStmt.value; 
-    //this.cdRef.markForCheck();
+    this.metadataService.updateFilter(this.filterStatements, index, filterStmt);
   }
 
   addFilter(place: 'and' | 'or') {
     if (place === 'and') {
-      this.filterStatements.push(this.createDefaultFilter());
+      this.filterStatements.push(this.metadataService.createDefaultFilterStatement());
     }
   }
 
