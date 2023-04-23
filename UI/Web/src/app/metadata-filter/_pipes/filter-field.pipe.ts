@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FilterField } from '../_models/filter-field';
+import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
 
 @Pipe({
   name: 'filterField'

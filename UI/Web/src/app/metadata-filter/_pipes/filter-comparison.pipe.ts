@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { FilterComparison } from '../_models/filter-comparison';
+import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
 
 @Pipe({
   name: 'filterComparison'

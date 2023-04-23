@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
-import { FilterComparison } from '../../_models/filter-comparison';
-import { FilterField } from '../../_models/filter-field';
-import { FilterStatement } from '../../_models/filter-statement';
+import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
 import { Subject } from 'rxjs';
+import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
+import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
 
 @Component({
   selector: 'app-metadata-builder',

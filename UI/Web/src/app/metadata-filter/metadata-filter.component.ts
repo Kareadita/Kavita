@@ -21,9 +21,7 @@ import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import { inject } from '@angular/core';
-import { FilterStatement } from './_models/filter-statement';
-import { FilterComparison } from './_models/filter-comparison';
-import { FilterField } from './_models/filter-field';
+import { FilterStatement } from '../_models/metadata/v2/filter-statement';
 
 @Component({
   selector: 'app-metadata-filter',
@@ -644,6 +642,10 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   }
 
   apply() {
+
+    //const filter = new FilterEvent();
+    //t/his.filterStatements.
+
     this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0});
 
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {

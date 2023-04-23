@@ -38,6 +38,10 @@ export interface SeriesFilter {
     releaseYearRange: Range<number> | null;
 }
 
+export interface SeriesFilterV2 {
+  
+}
+
 export interface SortOptions {
   sortField: SortField;
   isAscending: boolean;
