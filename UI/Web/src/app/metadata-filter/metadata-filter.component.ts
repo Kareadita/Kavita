@@ -89,7 +89,9 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   
   updateFilter(index: number, filterStmt: FilterStatement) {
     console.log('Filter at ', index, 'updated: ', filterStmt);
-    this.filterStatements[index] = filterStmt; // This is causing a re-render and thus component looses focus
+    this.filterStatements[index].comparison = filterStmt.comparison;
+    this.filterStatements[index].field = filterStmt.field;
+    this.filterStatements[index].value = filterStmt.value; 
     //this.cdRef.markForCheck();
   }
 

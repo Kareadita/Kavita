@@ -786,6 +786,7 @@ public class SeriesRepository : ISeriesRepository
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, QueryContext queryContext)
     {
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
+        // TODO: Remove the unneeded libraryId from all APIs so we can ust use FilterDto
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
