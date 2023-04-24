@@ -500,7 +500,6 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            _logger.LogTrace("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
             Volume? volume;
             try
             {

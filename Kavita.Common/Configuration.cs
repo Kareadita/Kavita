@@ -304,8 +304,11 @@ public static class Configuration
     private sealed class AppSettings
     {
         public string TokenKey { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public int Port { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public string IpAddresses { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public string BaseUrl { get; set; }
     }
 }
