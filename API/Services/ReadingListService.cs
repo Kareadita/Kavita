@@ -297,7 +297,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Calculates the Start month/year and Ending month/year
     /// </summary>
-    /// <param name="readingListWithItems">Reading list should have all items</param>
+    /// <param name="readingListWithItems">Reading list should have all items and Chapters</param>
     public async Task CalculateStartAndEndDates(ReadingList readingListWithItems)
     {
         var items = readingListWithItems.Items;
@@ -497,11 +497,12 @@ public class ReadingListService : IReadingListService
 
                 readingList.Items = items;
                 await CalculateReadingListAgeRating(readingList);
-                await CalculateStartAndEndDates(readingList);
                 if (_unitOfWork.HasChanges())
                 {
                     await _unitOfWork.CommitAsync();
                 }
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await _unitOfWork.CommitAsync();
             }
         }
     }
