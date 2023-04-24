@@ -14,6 +14,7 @@ import { TextResonse } from '../_types/text-response';
 import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
 import { FilterField } from '../_models/metadata/v2/filter-field';
 import { FilterStatement } from '../_models/metadata/v2/filter-statement';
+import { FilterGroup } from '../_models/metadata/v2/filter-group';
 
 @Injectable({
   providedIn: 'root'
@@ -101,6 +102,14 @@ export class MetadataService {
 
   getChapterSummary(chapterId: number) {
     return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
+  }
+
+  createDefaultFilterGroup(): FilterGroup {
+    return {
+      and: [],
+      or: [],
+      statements: [] as FilterStatement[]
+    };
   }
 
   createDefaultFilterStatement() {

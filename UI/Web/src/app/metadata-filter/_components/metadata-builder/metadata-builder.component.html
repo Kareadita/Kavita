@@ -1,10 +1,13 @@
 <div class="row mb-2">
-    <select class="col-auto form-select  me-2" formControlName="comparison">
+    <select class="col-md-4 form-select  me-2" formControlName="comparison">
         <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
     </select>
 </div>
-<div class="row mb-2" *ngFor="let filterStmt of filterStatements; let i = index">
-    <div class="col-md-1">
+
+<app-metadata-filter-row-group [filterGroup]="filterGroup"></app-metadata-filter-row-group>
+<!-- <div class="row mb-2" *ngFor="let filterStmt of filterGroup; let i = index">
+    
+     <div class="col-md-1">
         <button class="btn btn-icon" (click)="addFilter('and')" ngbTooltip="Add Row">
             <i class="fa-solid fa-plus" aria-hidden="true"></i>
             <span class="visually-hidden">Add Row {{i + 1}}</span>
@@ -22,4 +25,4 @@
             <span class="visually-hidden">Remove Row {{i}}</span>
         </button>
     </div>
-</div>
+</div> -->
