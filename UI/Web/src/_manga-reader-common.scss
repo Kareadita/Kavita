@@ -71,7 +71,7 @@ img {
 }
 
 
-::ng-deep .image-container.book-shadow.center-double:before {
+::ng-deep .image-container.book-shadow[class*="double-offset"]:before, ::ng-deep .image-container.book-shadow.wide:before {
   content: '';
   position: absolute;
   top: 0;
@@ -85,7 +85,7 @@ img {
 }
 
 @supports (-moz-appearance:none) {
-  ::ng-deep .image-container.book-shadow.center-double:before {
+  ::ng-deep .image-container.book-shadow[class*="double-offset"]:before, ::ng-deep .image-container.book-shadow.wide:before {
     box-shadow:
       0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
       0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),
