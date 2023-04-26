@@ -31,6 +31,7 @@ img, .full-width {
     height: auto;
 }
 
+// This is to force hardware acceleration to help address https://github.com/Kareadita/Kavita/issues/1848
 *:not(html) {
     -webkit-transform: translate3d(0, 0, 0);
     -moz-transform: translate3d(0, 0, 0);

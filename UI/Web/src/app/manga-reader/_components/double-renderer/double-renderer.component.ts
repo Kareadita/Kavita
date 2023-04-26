@@ -132,7 +132,7 @@ export class DoubleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.ORIGINAL) return 'original-double-offset';
-        return '';
+        return 'double-offset';
       }),
       filter(_ => this.isValid()),
     );
