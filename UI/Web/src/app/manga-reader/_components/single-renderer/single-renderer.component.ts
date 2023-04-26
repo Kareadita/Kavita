@@ -31,6 +31,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   darkenss$: Observable<string> = of('brightness(100%)');
+  emulateBookClass$!: Observable<string>;
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
@@ -50,6 +51,13 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     this.readerModeClass$ = this.readerSettings$.pipe(
       map(values => values.readerMode), 
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
+    this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(data => data.emulateBook),
+      map(enabled => enabled ? 'book-shadow' : ''), 
       filter(_ => this.isValid()),
       takeUntil(this.onDestroy)
     );
@@ -119,7 +127,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          return FITTING_OPTION.WIDTH + ' fit-to-screen';
+          return FITTING_OPTION.WIDTH + ' fit-to-screen wide';
         }
 
         return fit;
