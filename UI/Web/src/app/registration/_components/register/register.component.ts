@@ -18,7 +18,7 @@ import { MemberService } from 'src/app/_services/member.service';
 export class RegisterComponent {
 
   registerForm: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.email]),
+    email: new FormControl('', [Validators.required]),
     username: new FormControl('', [Validators.required]),
     password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
   });
