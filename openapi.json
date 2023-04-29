@@ -2175,6 +2175,7 @@
         "tags": [
           "Library"
         ],
+        "summary": "Return all libraries in the Server",
         "responses": {
           "200": {
             "description": "Success",
@@ -2213,10 +2214,12 @@
         "tags": [
           "Library"
         ],
+        "summary": "For a given library, generate the jump bar information",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2261,7 +2264,9 @@
         "tags": [
           "Library"
         ],
+        "summary": "Grants a user account access to a Library",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -2309,10 +2314,12 @@
         "tags": [
           "Library"
         ],
+        "summary": "Scans a given library for file changes.",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2321,6 +2328,31 @@
           {
             "name": "force",
             "in": "query",
+            "description": "If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Library/scan-all": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "description": "If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan",
             "schema": {
               "type": "boolean",
               "default": false
@@ -7463,6 +7495,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Downloads all the log files via a zip",
         "responses": {
           "200": {
             "description": "Success"
@@ -7505,6 +7538,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Pull the Changelog for Kavita from Github and display",
         "responses": {
           "200": {
             "description": "Success",
@@ -7574,6 +7608,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.",
         "responses": {
           "200": {
             "description": "Success",
