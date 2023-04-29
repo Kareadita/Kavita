@@ -156,6 +156,10 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Downloads all the log files via a zip
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("logs")]
     public ActionResult GetLogs()
     {
@@ -180,6 +184,10 @@ public class ServerController : BaseApiController
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
 
+    /// <summary>
+    /// Pull the Changelog for Kavita from Github and display
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
@@ -198,6 +206,10 @@ public class ServerController : BaseApiController
         return Ok(await _accountService.CheckIfAccessible(Request));
     }
 
+    /// <summary>
+    /// Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("jobs")]
     public ActionResult<IEnumerable<JobDto>> GetJobs()
     {
@@ -212,6 +224,7 @@ public class ServerController : BaseApiController
                 });
 
         return Ok(recurringJobs);
-
     }
+
+
 }
