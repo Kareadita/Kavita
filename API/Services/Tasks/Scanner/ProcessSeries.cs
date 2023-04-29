@@ -834,15 +834,12 @@ public class ProcessSeries : IProcessSeries
                 var normalizedName = name.ToNormalized();
                 var person = allPeopleTypeRole.FirstOrDefault(p =>
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
-                _logger.LogTrace("[UpdatePeople] Checking if we can add {Name} for {Role}", names, role);
 
                 if (person == null)
                 {
                     person = new PersonBuilder(name, role).Build();
-                    _logger.LogTrace("[UpdatePeople] for {Role} no one found, adding to _people", role);
                     _people.Add(person);
                 }
-                _logger.LogTrace("[UpdatePeople] For {Name}, found person with id: {Id}", role, person.Id);
                 action(person);
             }
         }

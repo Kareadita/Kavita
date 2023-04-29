@@ -51,7 +51,7 @@
             </div>
         
             <div class="float-end">
-                <button class="btn btn-secondary alt" type="submit">Register</button>
+                <button class="btn btn-secondary alt" type="submit" [disabled]="!registerForm.valid">Register</button>
             </div>
         </form>
     </ng-container>
