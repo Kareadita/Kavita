@@ -34,11 +34,10 @@ and modified
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
 
 	private timer: number | null = null;
-	constructor(private changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone) {}
+	constructor(private readonly changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone) {}
 	transform(value: string) {
 		this.removeTimer();
 		const d = new Date(value);
-		console.log('date: ', d);
 		const now = new Date();
 		const seconds = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
 		const timeToUpdate = (Number.isNaN(seconds)) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;
