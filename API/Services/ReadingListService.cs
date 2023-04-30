@@ -50,7 +50,7 @@ public interface IReadingListService
 /// <summary>
 /// Methods responsible for management of Reading Lists
 /// </summary>
-/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
 public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -193,7 +193,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
-    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
     /// <param name="user">User</param>
     /// <returns></returns>
