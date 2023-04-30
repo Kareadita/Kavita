@@ -294,7 +294,8 @@ public class OpdsController : BaseApiController
         var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
 
-        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, true, GetUserParams(pageNumber));
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId,
+            true, GetUserParams(pageNumber), false);
 
 
         var feed = CreateFeed("All Reading Lists", $"{prefix}{apiKey}/reading-list", apiKey, prefix, baseUrl);

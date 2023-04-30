@@ -5007,6 +5007,15 @@
               "type": "boolean",
               "default": true
             }
+          },
+          {
+            "name": "sortByLastModified",
+            "in": "query",
+            "description": "Sort by last modified or by title",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {

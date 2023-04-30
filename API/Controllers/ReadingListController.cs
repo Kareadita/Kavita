@@ -47,13 +47,15 @@ public class ReadingListController : BaseApiController
     /// </summary>
     /// <param name="includePromoted">Include Promoted Reading Lists along with user's Reading Lists. Defaults to true</param>
     /// <param name="userParams">Pagination parameters</param>
+    /// <param name="sortByLastModified">Sort by last modified (most recent first) or by title (alphabetical)</param>
     /// <returns></returns>
     [HttpPost("lists")]
-    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, bool includePromoted = true)
+    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams,
+        bool includePromoted = true, bool sortByLastModified = false)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
-            userParams);
+            userParams, sortByLastModified);
         Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
         return Ok(items);

@@ -97,7 +97,7 @@ export class ReadingListsComponent implements OnInit {
     this.loadingLists = true;
     this.cdRef.markForCheck();
 
-    this.readingListService.getReadingLists(true).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
+    this.readingListService.getReadingLists(true, false).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);
