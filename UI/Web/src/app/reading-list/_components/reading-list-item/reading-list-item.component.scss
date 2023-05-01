@@ -1,3 +1,5 @@
+$image-height: 125px;
+
 .progress-banner {
     height: 5px;
 
@@ -13,10 +15,20 @@
     position: relative;
 }
 
-.not-read-badge {
+.badge-container {
+    border-radius: 4px;
+    display: block;
+    height: $image-height;
+    overflow: hidden;
+    pointer-events: none;
     position: absolute;
-    top: 8px;
-    left: 108px;
+    width: 106px;
+}
+
+.not-read-badge {
+    position: relative;
+    top: -125px;
+    left: 78px;
     width: 0;
     height: 0;
     border-style: solid;
