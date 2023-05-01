@@ -203,8 +203,9 @@ public class ReadingListService : IReadingListService
         items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
-        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();
 
+        if (!itemIdsToRemove.Any()) return true;
         try
         {
             var listItems =
@@ -218,7 +219,6 @@ public class ReadingListService : IReadingListService
             await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
-
             return await _unitOfWork.CommitAsync();
         }
         catch
@@ -313,8 +313,8 @@ public class ReadingListService : IReadingListService
             _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
             return;
         }
-        var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
-        var minReleaseDate = items.Min(item => item.Chapter.ReleaseDate);
+        var maxReleaseDate = items.Where(item => item.Chapter != null).Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Where(item => item.Chapter != null).Min(item => item.Chapter.ReleaseDate);
         if (maxReleaseDate != DateTime.MinValue)
         {
             readingListWithItems.EndingMonth = maxReleaseDate.Month;

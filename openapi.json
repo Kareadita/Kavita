@@ -5011,7 +5011,7 @@
           {
             "name": "sortByLastModified",
             "in": "query",
-            "description": "Sort by last modified or by title",
+            "description": "Sort by last modified (most recent first) or by title (alphabetical)",
             "schema": {
               "type": "boolean",
               "default": false
