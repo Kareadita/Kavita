@@ -45,7 +45,6 @@ public class SettingsController : BaseApiController
         _libraryWatcher = libraryWatcher;
     }
 
-    [AllowAnonymous]
     [HttpGet("base-url")]
     public async Task<ActionResult<string>> GetBaseUrl()
     {

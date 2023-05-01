@@ -26,6 +26,10 @@ export class SettingsService {
     return this.http.get<ServerSettings>(this.baseUrl + 'settings');
   }
 
+  getBaseUrl() {
+    return this.http.get<string>(this.baseUrl + 'settings/base-url', TextResonse);
+  }
+
   updateServerSettings(model: ServerSettings) {
     return this.http.post<ServerSettings>(this.baseUrl + 'settings', model);
   }

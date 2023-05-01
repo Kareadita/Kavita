@@ -107,7 +107,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.settingsService.getServerSettings().subscribe(settings => this.baseUrl = settings.baseUrl);
+    this.settingsService.getBaseUrl().subscribe(url => this.baseUrl = url);
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
