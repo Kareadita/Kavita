@@ -152,7 +152,7 @@ public class ReadingListService : IReadingListService
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title.Trim();
-        readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 

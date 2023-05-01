@@ -55,6 +55,8 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
       endingYear: new FormControl(this.readingList.endingYear, { nonNullable: true, validators: [Validators.min(1000)] }),
     });
 
+    this.coverImageLocked = this.readingList.coverImageLocked;
+
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100), 
       distinctUntilChanged(),
