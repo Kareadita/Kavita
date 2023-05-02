@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.Entities.Enums;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -45,6 +47,7 @@ public class PluginController : BaseApiController
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 }

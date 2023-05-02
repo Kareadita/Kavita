@@ -7378,19 +7378,6 @@
         }
       }
     },
-    "/api/Server/restart": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Attempts to Restart the server. Does not work, will shutdown the instance.",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -15181,6 +15168,10 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          },
+          "kavitaVersion": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
