@@ -789,9 +789,10 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
+
         var title = $"{series.Name}";
 
-        if (volume.Chapters.Count == 1)
+        if (volume!.Chapters.Count == 1)
         {
             SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
             if (volume.Name != "0")
