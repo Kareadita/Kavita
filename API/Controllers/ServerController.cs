@@ -54,19 +54,6 @@ public class ServerController : BaseApiController
     }
 
     /// <summary>
-    /// Attempts to Restart the server. Does not work, will shutdown the instance.
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("restart")]
-    public ActionResult RestartServer()
-    {
-        _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
-
-        _applicationLifetime.StopApplication();
-        return Ok();
-    }
-
-    /// <summary>
     /// Performs an ad-hoc cleanup of Cache
     /// </summary>
     /// <returns></returns>

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
@@ -21,7 +22,7 @@ public interface IVolumeRepository
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
     Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
     Task<Volume?> GetVolumeAsync(int volumeId);
-    Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
+    Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
     Task<Volume?> GetVolumeByIdAsync(int volumeId);
@@ -119,7 +120,7 @@ public class VolumeRepository : IVolumeRepository
     /// <param name="volumeId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
+    public async Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId)
     {
         var volume = await _context.Volume
             .Where(vol => vol.Id == volumeId)
@@ -127,7 +128,9 @@ public class VolumeRepository : IVolumeRepository
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-            .SingleAsync(vol => vol.Id == volumeId);
+            .SingleOrDefaultAsync(vol => vol.Id == volumeId);
+
+        if (volume == null) return null;
 
         var volumeList = new List<VolumeDto>() {volume};
         await AddVolumeModifiers(userId, volumeList);

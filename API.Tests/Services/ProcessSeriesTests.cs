@@ -45,28 +45,28 @@ public class ProcessSeriesTests
 
     #region UpdateChapterFromComicInfo
 
-    public void UpdateChapterFromComicInfo_()
-    {
-        // TODO: Do this
-        var file = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Manga/Hajime no Ippo/Hajime no Ippo Chapter 1.cbz");
-        // Chapter and ComicInfo
-        var chapter = new ChapterBuilder("1")
-            .WithId(0)
-            .WithFile(new MangaFileBuilder(file, MangaFormat.Archive).Build())
-            .Build();
-
-        var ps = new ProcessSeries(Substitute.For<IUnitOfWork>(), Substitute.For<ILogger<ProcessSeries>>(),
-            Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>()
-            , Substitute.For<ICacheHelper>(), Substitute.For<IReadingItemService>(), Substitute.For<IFileService>(),
-            Substitute.For<IMetadataService>(),
-            Substitute.For<IWordCountAnalyzerService>(),
-            Substitute.For<ICollectionTagService>(), Substitute.For<IReadingListService>());
-
-        ps.UpdateChapterFromComicInfo(chapter, new ComicInfo()
-        {
-
-        });
-    }
+    // public void UpdateChapterFromComicInfo_()
+    // {
+    //     // TODO: Do this
+    //     var file = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ScannerService/Library/Manga/Hajime no Ippo/Hajime no Ippo Chapter 1.cbz");
+    //     // Chapter and ComicInfo
+    //     var chapter = new ChapterBuilder("1")
+    //         .WithId(0)
+    //         .WithFile(new MangaFileBuilder(file, MangaFormat.Archive).Build())
+    //         .Build();
+    //
+    //     var ps = new ProcessSeries(Substitute.For<IUnitOfWork>(), Substitute.For<ILogger<ProcessSeries>>(),
+    //         Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>()
+    //         , Substitute.For<ICacheHelper>(), Substitute.For<IReadingItemService>(), Substitute.For<IFileService>(),
+    //         Substitute.For<IMetadataService>(),
+    //         Substitute.For<IWordCountAnalyzerService>(),
+    //         Substitute.For<ICollectionTagService>(), Substitute.For<IReadingListService>());
+    //
+    //     ps.UpdateChapterFromComicInfo(chapter, new ComicInfo()
+    //     {
+    //
+    //     });
+    // }
 
     #endregion
 }

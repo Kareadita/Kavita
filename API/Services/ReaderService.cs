@@ -273,7 +273,8 @@ public class ReaderService : IReaderService
             {
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
+                        progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
                 return true;
             }
         }

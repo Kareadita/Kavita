@@ -111,7 +111,7 @@ public class SeriesController : BaseApiController
     }
 
     [HttpGet("volume")]
-    public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
+    public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId));

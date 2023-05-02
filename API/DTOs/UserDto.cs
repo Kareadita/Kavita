@@ -12,4 +12,5 @@ public class UserDto
     public string? ApiKey { get; init; }
     public UserPreferencesDto? Preferences { get; set; }
     public AgeRestrictionDto? AgeRestriction { get; init; }
+    public string KavitaVersion { get; set; }
 }

@@ -4,9 +4,6 @@ namespace API.Extensions;
 
 public static class StringExtensions
 {
-    // Wait for Rosyln bugfix
-    // [GeneratedRegex(@"(^[a-z])|\.\s+(.)", RegexOptions.ExplicitCapture | RegexOptions.Compiled)]
-    // private static partial Regex SentenceCaseRegex();
     private static readonly Regex SentenceCaseRegex = new Regex(@"(^[a-z])|\.\s+(.)",
         RegexOptions.ExplicitCapture | RegexOptions.Compiled, Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 

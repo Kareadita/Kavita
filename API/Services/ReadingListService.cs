@@ -50,7 +50,7 @@ public interface IReadingListService
 /// <summary>
 /// Methods responsible for management of Reading Lists
 /// </summary>
-/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
 public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -152,7 +152,7 @@ public class ReadingListService : IReadingListService
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title.Trim();
-        readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
@@ -193,7 +193,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
-    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
     /// <param name="user">User</param>
     /// <returns></returns>
@@ -203,8 +203,9 @@ public class ReadingListService : IReadingListService
         items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
-        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();
 
+        if (!itemIdsToRemove.Any()) return true;
         try
         {
             var listItems =
@@ -218,7 +219,6 @@ public class ReadingListService : IReadingListService
             await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
-
             return await _unitOfWork.CommitAsync();
         }
         catch
@@ -313,8 +313,8 @@ public class ReadingListService : IReadingListService
             _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
             return;
         }
-        var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
-        var minReleaseDate = items.Min(item => item.Chapter.ReleaseDate);
+        var maxReleaseDate = items.Where(item => item.Chapter != null).Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Where(item => item.Chapter != null).Min(item => item.Chapter.ReleaseDate);
         if (maxReleaseDate != DateTime.MinValue)
         {
             readingListWithItems.EndingMonth = maxReleaseDate.Month;

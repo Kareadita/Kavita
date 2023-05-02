@@ -140,10 +140,8 @@ public class SeriesRepository : ISeriesRepository
     private readonly DataContext _context;
     private readonly IMapper _mapper;
 
-
-    // [GeneratedRegex(@"\d{4}", RegexOptions.Compiled, 50000)]
-    // private static partial Regex YearRegex();
-    private readonly Regex _yearRegex = new Regex(@"\d{4}", RegexOptions.Compiled, Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
+    private readonly Regex _yearRegex = new Regex(@"\d{4}", RegexOptions.Compiled,
+        Services.Tasks.Scanner.Parser.Parser.RegexTimeout);
 
     public SeriesRepository(DataContext context, IMapper mapper)
     {

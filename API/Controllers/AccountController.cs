@@ -150,7 +150,8 @@ public class AccountController : BaseApiController
                 Token = await _tokenService.CreateToken(user),
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
             };
         }
         catch (Exception ex)
@@ -213,6 +214,8 @@ public class AccountController : BaseApiController
         var dto = _mapper.Map<UserDto>(user);
         dto.Token = await _tokenService.CreateToken(user);
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
+            .Value;
         var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
         if (pref == null) return Ok(dto);
 
@@ -687,7 +690,8 @@ public class AccountController : BaseApiController
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
-            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 
@@ -840,7 +844,8 @@ public class AccountController : BaseApiController
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
-            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 

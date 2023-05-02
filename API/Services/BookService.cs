@@ -72,27 +72,6 @@ public class BookService : IBookService
         }
     };
 
-    // Use when Rosyln fixed
-    // [GeneratedRegex(@"/\*[\d\D]*?\*/", RegexOptions.Compiled)]
-    // private static partial Regex CssComment();
-    //
-    // [GeneratedRegex(@"[a-zA-Z]+#", RegexOptions.Compiled)]
-    // private static partial Regex WhiteSpace1();
-    // [GeneratedRegex(@"[\n\r]+\s*", RegexOptions.Compiled)]
-    // private static partial Regex WhiteSpace2();
-    // [GeneratedRegex(@"\s+", RegexOptions.Compiled)]
-    // private static partial Regex WhiteSpace3();
-    // [GeneratedRegex(@"\s?([:,;{}])\s?", RegexOptions.Compiled)]
-    // private static partial Regex WhiteSpace4();
-    // [GeneratedRegex(@"([\s:]0)(px|pt|%|em)", RegexOptions.Compiled)]
-    // private static partial Regex UnitPadding();
-    //
-    // [GeneratedRegex(@"<script(.*)(/>)", RegexOptions.Compiled)]
-    // private static partial Regex StartingScriptTag();
-    // [GeneratedRegex(@"<title(.*)(/>)", RegexOptions.Compiled)]
-    // private static partial Regex StartingTitleTag();
-
-
     public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
     {
         _logger = logger;
@@ -286,7 +265,6 @@ public class BookService : IBookService
                      ?? doc.DocumentNode.SelectNodes("//image") ?? doc.DocumentNode.SelectNodes("//svg");
 
         if (images == null) return;
-
 
         var parent = images.First().ParentNode;
 

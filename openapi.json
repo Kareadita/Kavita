@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.43"
+    "version": "0.7.1.44"
   },
   "servers": [
     {
@@ -5007,6 +5007,15 @@
               "type": "boolean",
               "default": true
             }
+          },
+          {
+            "name": "sortByLastModified",
+            "in": "query",
+            "description": "Sort by last modified (most recent first) or by title (alphabetical)",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -7362,19 +7371,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Server/restart": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Attempts to Restart the server. Does not work, will shutdown the instance.",
         "responses": {
           "200": {
             "description": "Success"
@@ -15172,6 +15168,10 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          },
+          "kavitaVersion": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
