@@ -337,7 +337,7 @@ public class UserRepository : IUserRepository
         return await _context.AppUser
             .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
             .Select(u => u.Id)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
 
