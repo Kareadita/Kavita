@@ -25,6 +25,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
+using VersOne.Epub.Schema;
 
 namespace API.Services;
 
@@ -418,7 +419,6 @@ public class BookService : IBookService
             var info =  new ComicInfo
             {
                 Summary = epubBook.Schema.Package.Metadata.Description,
-                Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator))),
                 Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                 Month = month,
                 Day = day,
@@ -450,6 +450,7 @@ public class BookService : IBookService
                         break;
                 }
 
+
                 // EPUB 3.2+ only
                 switch (metadataItem.Property)
                 {
@@ -463,7 +464,57 @@ public class BookService : IBookService
                     case "collection-type":
                         // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                         break;
+                    case "role":
+                        if (!metadataItem.Scheme.Equals("marc:relators")) break;
+
+                        var creatorId = metadataItem.Refines.Replace("#", string.Empty);
+                        var person = epubBook.Schema.Package.Metadata.Creators.SingleOrDefault(c => c.Id == creatorId);
+                        if (person == null) break;
+
+                        if (metadataItem.Content.Equals("art") || metadataItem.Content.Equals("artist"))
+                        {
+                            info.CoverArtist += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("aut") || metadataItem.Content.Equals("author"))
+                        {
+                            info.Writer += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("pbl") || metadataItem.Content.Equals("publisher"))
+                        {
+                            info.Publisher += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("trl") || metadataItem.Content.Equals("translator"))
+                        {
+                            info.Translator += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("edt") || metadataItem.Content.Equals("editor"))
+                        {
+                            info.Editor += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("ill") || metadataItem.Content.Equals("illustrator"))
+                        {
+                            info.Letterer += AppendAuthor(person);
+                            break;
+                        }
+                        if (metadataItem.Content.Equals("clr") || metadataItem.Content.Equals("colorist"))
+                        {
+                            info.Colorist += AppendAuthor(person);
+                            break;
+                        }
+                        break;
                 }
+            }
+
+            // If no meta tags where filled, then default to capturing everything as a writer
+            if (string.IsNullOrEmpty(info.Writer))
+            {
+                info.Writer = string.Join(",",
+                    epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
             }
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
@@ -484,6 +535,11 @@ public class BookService : IBookService
         }
 
         return null;
+    }
+
+    private static string AppendAuthor(EpubMetadataCreator person)
+    {
+        return Parser.CleanAuthor(person.Creator) + ",";
     }
 
     private static (int year, int month, int day) GetPublicationDate(string publicationDate)
