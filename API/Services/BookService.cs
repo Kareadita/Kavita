@@ -471,41 +471,7 @@ public class BookService : IBookService
                         var person = epubBook.Schema.Package.Metadata.Creators.SingleOrDefault(c => c.Id == creatorId);
                         if (person == null) break;
 
-                        if (metadataItem.Content.Equals("art") || metadataItem.Content.Equals("artist"))
-                        {
-                            info.CoverArtist += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("aut") || metadataItem.Content.Equals("author"))
-                        {
-                            info.Writer += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("pbl") || metadataItem.Content.Equals("publisher"))
-                        {
-                            info.Publisher += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("trl") || metadataItem.Content.Equals("translator"))
-                        {
-                            info.Translator += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("edt") || metadataItem.Content.Equals("editor"))
-                        {
-                            info.Editor += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("ill") || metadataItem.Content.Equals("illustrator"))
-                        {
-                            info.Letterer += AppendAuthor(person);
-                            break;
-                        }
-                        if (metadataItem.Content.Equals("clr") || metadataItem.Content.Equals("colorist"))
-                        {
-                            info.Colorist += AppendAuthor(person);
-                            break;
-                        }
+                        PopulatePerson(metadataItem, info, person);
                         break;
                 }
             }
@@ -535,6 +501,41 @@ public class BookService : IBookService
         }
 
         return null;
+    }
+
+    private static void PopulatePerson(EpubMetadataMeta metadataItem, ComicInfo info, EpubMetadataCreator person)
+    {
+        switch (metadataItem.Content)
+        {
+            case "art":
+            case "artist":
+                info.CoverArtist += AppendAuthor(person);
+                return;
+            case "aut":
+            case "author":
+                info.Writer += AppendAuthor(person);
+                return;
+            case "pbl":
+            case "publisher":
+                info.Publisher += AppendAuthor(person);
+                return;
+            case "trl":
+            case "translator":
+                info.Translator += AppendAuthor(person);
+                return;
+            case "edt":
+            case "editor":
+                info.Editor += AppendAuthor(person);
+                return;
+            case "ill":
+            case "illustrator":
+                info.Letterer += AppendAuthor(person);
+                return;
+            case "clr":
+            case "colorist":
+                info.Colorist += AppendAuthor(person);
+                return;
+        }
     }
 
     private static string AppendAuthor(EpubMetadataCreator person)
