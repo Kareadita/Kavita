@@ -474,6 +474,8 @@ public class BookService : IBookService
                         PopulatePerson(metadataItem, info, person);
                         break;
                     case "title-type":
+                        break;
+                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes
                         if (!metadataItem.Content.Equals("collection")) break;
                         var titleId = metadataItem.Refines.Replace("#", string.Empty);
                         var readingListElem = epubBook.Schema.Package.Metadata.MetaItems.FirstOrDefault(item =>
