@@ -501,12 +501,9 @@ public class BookService : IBookService
                 }
             }
 
-            // If no meta tags where filled, then default to capturing everything as a writer
-            if (string.IsNullOrEmpty(info.Writer))
-            {
-                info.Writer = string.Join(",",
-                    epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
-            }
+            // Include regular Writer as well, for cases where there is no special tag
+            info.Writer = string.Join(",",
+                epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
                 .Equals(Parser.DefaultVolume);
