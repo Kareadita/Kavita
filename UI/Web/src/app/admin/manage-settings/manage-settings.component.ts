@@ -83,7 +83,7 @@ export class ManageSettingsComponent implements OnInit {
 
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
-
+    modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
