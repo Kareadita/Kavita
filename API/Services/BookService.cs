@@ -473,6 +473,29 @@ public class BookService : IBookService
 
                         PopulatePerson(metadataItem, info, person);
                         break;
+                    case "title-type":
+                        if (!metadataItem.Content.Equals("collection")) break;
+                        var titleId = metadataItem.Refines.Replace("#", string.Empty);
+                        var readingListElem = epubBook.Schema.Package.Metadata.MetaItems.FirstOrDefault(item =>
+                            item.Name == "dc:title" && item.Id == titleId);
+                        if (readingListElem == null) break;
+
+                        var count = epubBook.Schema.Package.Metadata.MetaItems
+                            .FirstOrDefault(item =>
+                                item.Property == "display-seq" && item.Refines == metadataItem.Refines);
+                        if (count == null || count.Content == "0")
+                        {
+                            // Treat this as a Collection
+                            info.StoryArc += "," + readingListElem.Content;
+                        }
+                        else
+                        {
+                            // Treat as a reading list
+                            info.AlternateSeries += "," + readingListElem.Content;
+                            info.AlternateNumber += "," + count.Content;
+                        }
+
+                        break;
                 }
             }
 
