@@ -60,6 +60,7 @@ public class BookService : IBookService
     private readonly ILogger<BookService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly IMediaErrorService _mediaErrorService;
     private readonly StylesheetParser _cssParser = new ();
     private static readonly RecyclableMemoryStreamManager StreamManager = new ();
     private const string CssScopeClass = ".book-content";
@@ -72,11 +73,12 @@ public class BookService : IBookService
         }
     };
 
-    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
+    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _imageService = imageService;
+        _mediaErrorService = mediaErrorService;
     }
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -481,6 +483,7 @@ public class BookService : IBookService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetComicInfo] There was an exception getting metadata");
+            _mediaErrorService.ReportMediaIssue(filePath, ex);
         }
 
         return null;
