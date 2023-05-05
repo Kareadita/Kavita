@@ -251,7 +251,7 @@ public class TaskScheduler : ITaskScheduler
             BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
             return;
         }
-        _scannerService.ScanLibraries(force);
+        BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
     }
 
     public void ScanLibrary(int libraryId, bool force = false)
