@@ -1,14 +1,9 @@
 ﻿using System;
-using API.Entities.Interfaces;
 
-namespace API.Entities;
+namespace API.DTOs.MediaErrors;
 
-/// <summary>
-/// Represents issues found during scanning or interacting with media. For example) Can't open file, corrupt media, missing content in epub.
-/// </summary>
-public class MediaError : IEntityDate
+public class MediaErrorDto
 {
-    public int Id { get; set; }
     /// <summary>
     /// Format Type (RAR, ZIP, 7Zip, Epub, PDF)
     /// </summary>
@@ -25,12 +20,6 @@ public class MediaError : IEntityDate
     /// Exception message
     /// </summary>
     public string Details { get; set; }
-    /// <summary>
-    /// Was the file imported or not
-    /// </summary>
-    //public bool Imported { get; set; }
     public DateTime Created { get; set; }
-    public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
-    public DateTime LastModifiedUtc { get; set; }
 }

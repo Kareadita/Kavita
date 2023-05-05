@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using API.Data;
+using API.Helpers.Builders;
+using Hangfire;
 
 namespace API.Services;
 
@@ -26,13 +28,20 @@ public class MediaErrorService : IMediaErrorService
         _unitOfWork = unitOfWork;
     }
 
-    public Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
+    public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
-        return Task.CompletedTask;
+        var error = new MediaErrorBuilder(filename)
+            .WithComment(errorMessage)
+            .WithDetails(ex.Message)
+            .Build();
+
+        _unitOfWork.MediaErrorRepository.Attach(error);
+        await _unitOfWork.CommitAsync();
     }
 
     public void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
-
+        // To avoid overhead on commits, do async. We don't need to wait.
+        BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, ex));
     }
 }

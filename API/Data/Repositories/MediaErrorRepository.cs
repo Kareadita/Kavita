@@ -1,7 +1,10 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using API.DTOs.MediaErrors;
 using API.Entities;
+using API.Helpers;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -11,6 +14,7 @@ public interface IMediaErrorRepository
     void Attach(MediaError error);
     void Remove(MediaError error);
     Task<MediaError> Find(string filename);
+    Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams);
 }
 
 public class MediaErrorRepository : IMediaErrorRepository
@@ -39,5 +43,14 @@ public class MediaErrorRepository : IMediaErrorRepository
     public Task<MediaError?> Find(string filename)
     {
         return _context.MediaError.Where(e => e.FilePath == filename).SingleOrDefaultAsync();
+    }
+
+    public Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams)
+    {
+        var query = _context.MediaError
+            .OrderByDescending(m => m.Created)
+            .ProjectTo<MediaErrorDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking();
+        return PagedList<MediaErrorDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 }

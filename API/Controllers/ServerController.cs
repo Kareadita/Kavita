@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
+using API.Data;
 using API.DTOs.Jobs;
+using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
+using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
@@ -34,11 +39,12 @@ public class ServerController : BaseApiController
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler)
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
@@ -51,6 +57,7 @@ public class ServerController : BaseApiController
         _scannerService = scannerService;
         _accountService = accountService;
         _taskScheduler = taskScheduler;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -211,6 +218,15 @@ public class ServerController : BaseApiController
                 });
 
         return Ok(recurringJobs);
+    }
+
+    [Authorize("RequireAdmin")]
+    [HttpGet("media-errors")]
+    public async Task<ActionResult<PagedList<MediaErrorDto>>> GetMediaErrors(UserParams userParams)
+    {
+        var pagedList = await _unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(userParams);
+        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+        return Ok(pagedList);
     }
 
 

@@ -25,6 +25,7 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
 import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
 
 
 
@@ -47,6 +48,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ManageEmailSettingsComponent,
     ManageTasksSettingsComponent,
     ManageLogsComponent,
+    ManageAlertsComponent,
   ],
   imports: [
     CommonModule,
