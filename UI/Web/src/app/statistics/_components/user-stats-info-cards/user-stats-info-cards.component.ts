@@ -34,7 +34,7 @@ export class UserStatsInfoCardsComponent {
     const numberPipe = new CompactNumberPipe();
     this.statsService.getWordsPerYear().subscribe(yearCounts => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
-      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} words`);
+      ref.componentInstance.items = yearCounts.map(t => `${t.name}: ${numberPipe.transform(t.value)} pages`);
       ref.componentInstance.title = 'Words Read By Year';
     });
   }

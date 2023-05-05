@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.System;
+using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -44,25 +47,33 @@ public interface IDirectoryService
     void ClearDirectory(string directoryPath);
     void ClearAndDeleteDirectory(string directoryPath);
     string[] GetFilesWithExtension(string path, string searchPatternExpression = "");
-    bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "");
+    bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "");
+
     Dictionary<string, string> FindHighestDirectoriesFromFiles(IEnumerable<string> libraryFolders,
         IList<string> filePaths);
+
     IEnumerable<string> GetFoldersTillRoot(string rootPath, string fullPath);
+
     IEnumerable<string> GetFiles(string path, string fileNameRegex = "", SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
     bool ExistOrCreate(string directoryPath);
     void DeleteFiles(IEnumerable<string> files);
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);
     Task<bool> CheckWriteAccess(string directoryName);
+
     IEnumerable<string> GetFilesWithCertainExtensions(string path,
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
+
     IEnumerable<string> GetDirectories(string folderPath);
-    IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher);
+    IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher);
     string GetParentDirectoryName(string fileOrFolder);
+#nullable enable
     IList<string> ScanFiles(string folderPath, GlobMatcher? matcher = null);
     DateTime GetLastWriteTime(string folderPath);
-    GlobMatcher? CreateMatcherFromFile(string filePath);
+    GlobMatcher CreateMatcherFromFile(string filePath);
+#nullable disable
 }
 public class DirectoryService : IDirectoryService
 {
@@ -76,14 +87,13 @@ public class DirectoryService : IDirectoryService
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
-    private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
     private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb",
-        MatchOptions,
+        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        MatchOptions,
+        RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 
@@ -120,7 +130,7 @@ public class DirectoryService : IDirectoryService
         SearchOption searchOption = SearchOption.TopDirectoryOnly)
     {
         if (!FileSystem.Directory.Exists(path)) return ImmutableList<string>.Empty;
-        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        var reSearchPattern = new Regex(searchPatternExpression, RegexOptions.IgnoreCase);
 
         return FileSystem.Directory.EnumerateFiles(path, "*", searchOption)
             .Where(file =>
@@ -162,7 +172,7 @@ public class DirectoryService : IDirectoryService
 
         while (FileSystem.Path.GetDirectoryName(path) != Path.GetDirectoryName(root))
         {
-            var folder = FileSystem.DirectoryInfo.New(path).Name;
+            var folder = FileSystem.DirectoryInfo.FromDirectoryName(path).Name;
             paths.Add(folder);
             path = path.Substring(0, path.LastIndexOf(separator));
         }
@@ -177,7 +187,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool Exists(string directory)
     {
-        var di = FileSystem.DirectoryInfo.New(directory);
+        var di = FileSystem.DirectoryInfo.FromDirectoryName(directory);
         return di.Exists;
     }
 
@@ -220,7 +230,7 @@ public class DirectoryService : IDirectoryService
     {
         try
         {
-            var fileInfo = FileSystem.FileInfo.New(fullFilePath);
+            var fileInfo = FileSystem.FileInfo.FromFileName(fullFilePath);
             if (!fileInfo.Exists) return;
 
             ExistOrCreate(targetDirectory);
@@ -240,12 +250,12 @@ public class DirectoryService : IDirectoryService
     /// <param name="searchPattern">Defaults to all files</param>
     /// <returns>If was successful</returns>
     /// <exception cref="DirectoryNotFoundException">Thrown when source directory does not exist</exception>
-    public bool CopyDirectoryToDirectory(string? sourceDirName, string destDirName, string searchPattern = "")
+    public bool CopyDirectoryToDirectory(string sourceDirName, string destDirName, string searchPattern = "")
     {
         if (string.IsNullOrEmpty(sourceDirName)) return false;
 
         // Get the subdirectories for the specified directory.
-        var dir = FileSystem.DirectoryInfo.New(sourceDirName);
+        var dir = FileSystem.DirectoryInfo.FromDirectoryName(sourceDirName);
 
         if (!dir.Exists)
         {
@@ -260,7 +270,7 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(destDirName);
 
         // Get the files in the directory and copy them to the new location.
-        var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => FileSystem.FileInfo.New(n));
+        var files = GetFilesWithExtension(dir.FullName, searchPattern).Select(n => FileSystem.FileInfo.FromFileName(n));
         foreach (var file in files)
         {
             var tempPath = FileSystem.Path.Combine(destDirName, file.Name);
@@ -284,7 +294,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool IsDriveMounted(string path)
     {
-        return FileSystem.DirectoryInfo.New(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
+        return FileSystem.DirectoryInfo.FromDirectoryName(FileSystem.Path.GetPathRoot(path) ?? string.Empty).Exists;
     }
 
 
@@ -315,7 +325,7 @@ public class DirectoryService : IDirectoryService
     /// <returns>Total bytes</returns>
     public long GetTotalSize(IEnumerable<string> paths)
     {
-        return paths.Sum(path => FileSystem.FileInfo.New(path).Length);
+        return paths.Sum(path => FileSystem.FileInfo.FromFileName(path).Length);
     }
 
     /// <summary>
@@ -325,7 +335,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public bool ExistOrCreate(string directoryPath)
     {
-        var di = FileSystem.DirectoryInfo.New(directoryPath);
+        var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
         if (di.Exists) return true;
         try
         {
@@ -346,7 +356,7 @@ public class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(directoryPath)) return;
 
-        var di = FileSystem.DirectoryInfo.New(directoryPath);
+        var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
 
         ClearDirectory(directoryPath);
 
@@ -360,7 +370,7 @@ public class DirectoryService : IDirectoryService
     /// <returns></returns>
     public void ClearDirectory(string directoryPath)
     {
-        var di = FileSystem.DirectoryInfo.New(directoryPath);
+        var di = FileSystem.DirectoryInfo.FromDirectoryName(directoryPath);
         if (!di.Exists) return;
         try
         {
@@ -391,7 +401,7 @@ public class DirectoryService : IDirectoryService
     public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, string prepend = "")
     {
         ExistOrCreate(directoryPath);
-        string? currentFile = null;
+        string currentFile = null;
         try
         {
             foreach (var file in filePaths)
@@ -403,8 +413,8 @@ public class DirectoryService : IDirectoryService
                     _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
                 }
-                var fileInfo = FileSystem.FileInfo.New(file);
-                var targetFile = FileSystem.FileInfo.New(RenameFileForCopy(file, directoryPath, prepend));
+                var fileInfo = FileSystem.FileInfo.FromFileName(file);
+                var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(file, directoryPath, prepend));
 
                 fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
             }
@@ -429,7 +439,7 @@ public class DirectoryService : IDirectoryService
     public bool CopyFilesToDirectory(IEnumerable<string> filePaths, string directoryPath, IList<string> newFilenames)
     {
         ExistOrCreate(directoryPath);
-        string? currentFile = null;
+        string currentFile = null;
         var index = 0;
         try
         {
@@ -442,8 +452,8 @@ public class DirectoryService : IDirectoryService
                     _logger.LogError("Unable to copy {File} to {DirectoryPath} as it doesn't exist", file, directoryPath);
                     continue;
                 }
-                var fileInfo = FileSystem.FileInfo.New(file);
-                var targetFile = FileSystem.FileInfo.New(RenameFileForCopy(newFilenames[index] + fileInfo.Extension, directoryPath));
+                var fileInfo = FileSystem.FileInfo.FromFileName(file);
+                var targetFile = FileSystem.FileInfo.FromFileName(RenameFileForCopy(newFilenames[index] + fileInfo.Extension, directoryPath));
 
                 fileInfo.CopyTo(FileSystem.Path.Join(directoryPath, targetFile.Name));
                 index++;
@@ -470,20 +480,18 @@ public class DirectoryService : IDirectoryService
     {
         while (true)
         {
-            var fileInfo = FileSystem.FileInfo.New(fileToCopy);
+            var fileInfo = FileSystem.FileInfo.FromFileName(fileToCopy);
             var filename = prepend + fileInfo.Name;
 
-            var targetFile = FileSystem.FileInfo.New(FileSystem.Path.Join(directoryPath, filename));
+            var targetFile = FileSystem.FileInfo.FromFileName(FileSystem.Path.Join(directoryPath, filename));
             if (!targetFile.Exists)
             {
                 return targetFile.FullName;
             }
 
             var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-            //if (FileCopyAppendRegex().IsMatch(noExtension))
             if (FileCopyAppend.IsMatch(noExtension))
             {
-                //var match = FileCopyAppendRegex().Match(noExtension).Value;
                 var match = FileCopyAppend.Match(noExtension).Value;
                 var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
                 noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
@@ -507,7 +515,7 @@ public class DirectoryService : IDirectoryService
     {
         if (!FileSystem.Directory.Exists(rootPath)) return ImmutableList<DirectoryDto>.Empty;
 
-        var di = FileSystem.DirectoryInfo.New(rootPath);
+        var di = FileSystem.DirectoryInfo.FromDirectoryName(rootPath);
         var dirs = di.GetDirectories()
             .Where(dir => !(dir.Attributes.HasFlag(FileAttributes.Hidden) || dir.Attributes.HasFlag(FileAttributes.System)))
             .Select(d => new DirectoryDto()
@@ -587,13 +595,13 @@ public class DirectoryService : IDirectoryService
     /// <param name="folderPath"></param>
     /// <param name="matcher">A set of glob rules that will filter directories out</param>
     /// <returns>List of directory paths, empty if path doesn't exist</returns>
-    public IEnumerable<string> GetDirectories(string folderPath, GlobMatcher? matcher)
+    public IEnumerable<string> GetDirectories(string folderPath, GlobMatcher matcher)
     {
         if (matcher == null) return GetDirectories(folderPath);
 
         return GetDirectories(folderPath)
             .Where(folder => !matcher.ExcludeMatches(
-                $"{FileSystem.DirectoryInfo.New(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
+                $"{FileSystem.DirectoryInfo.FromDirectoryName(folder).Name}{FileSystem.Path.AltDirectorySeparatorChar}"));
     }
 
     /// <summary>
@@ -673,7 +681,7 @@ public class DirectoryService : IDirectoryService
         {
             var foundFiles = GetFilesWithCertainExtensions(folderPath,
                     Tasks.Scanner.Parser.Parser.SupportedExtensions)
-                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.New(file).Name));
+                .Where(file => !matcher.ExcludeMatches(FileSystem.FileInfo.FromFileName(file).Name));
             files.AddRange(foundFiles);
         }
 
@@ -699,7 +707,7 @@ public class DirectoryService : IDirectoryService
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public GlobMatcher? CreateMatcherFromFile(string filePath)
+    public GlobMatcher CreateMatcherFromFile(string filePath)
     {
         if (!FileSystem.File.Exists(filePath))
         {
@@ -823,7 +831,7 @@ public class DirectoryService : IDirectoryService
         {
             try
             {
-                FileSystem.FileInfo.New(file).Delete();
+                FileSystem.FileInfo.FromFileName(file).Delete();
             }
             catch (Exception)
             {
@@ -926,7 +934,7 @@ public class DirectoryService : IDirectoryService
     {
         if (string.IsNullOrEmpty(directoryName) || !FileSystem.Directory.Exists(directoryName)) return;
 
-        var directory = FileSystem.DirectoryInfo.New(directoryName);
+        var directory = FileSystem.DirectoryInfo.FromDirectoryName(directoryName);
 
         var index = 0;
         FlattenDirectory(directory, directory, ref index);

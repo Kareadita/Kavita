@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
-import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
+import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
@@ -26,7 +27,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private serverService: ServerService) { }
+    private modalService: NgbModal) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -38,6 +39,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
+      this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
       this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
@@ -45,25 +47,19 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
-      this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
+      this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.required]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
-
-      this.serverService.getServerInfo().subscribe(info => {
-        if (info.isDocker) {
-          this.settingsForm.get('ipAddresses')?.disable();
-          this.settingsForm.get('port')?.disable();
-        }
-      })
     });
   }
 
   resetForm() {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
+    this.settingsForm.get('bookmarksDirectory')?.setValue(this.serverSettings.bookmarksDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
     this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
@@ -83,8 +79,8 @@ export class ManageSettingsComponent implements OnInit {
 
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
-    modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
-    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
+
+    this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -94,7 +90,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetToDefaults() {
-    this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
       this.toastr.success('Server settings updated');
@@ -104,24 +100,24 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   resetIPAddresses() {
-    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
+    this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
-      this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
+      this.settingsForm.get("ipAddresses")?.setValue(this.serverSettings.ipAddresses);
       this.toastr.success('IP Addresses Reset');
     }, (err: any) => {
       console.error('error: ', err);
     });
   }
 
-  resetBaseUrl() {
-    this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
-      this.serverSettings.baseUrl = settings.baseUrl;
-      this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
-      this.toastr.success('Base Url Reset');
-    }, (err: any) => {
-      console.error('error: ', err);
+  openDirectoryChooser(existingDirectory: string, formControl: string) {
+    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
+    modalRef.componentInstance.startingFolder = existingDirectory || '';
+    modalRef.componentInstance.helpUrl = '';
+    modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
+      if (closeResult.success && closeResult.folderPath !== '') {
+        this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
+        this.settingsForm.markAsDirty();
+      }
     });
   }
-
-  
 }

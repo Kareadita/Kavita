@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -8,10 +9,10 @@ using API.DTOs.Statistics;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -103,6 +104,7 @@ public class StatisticService : IStatisticService
             })
             .ToListAsync();
 
+
         var averageReadingTimePerWeek = _context.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Join(_context.Chapter, p => p.ChapterId, c => c.Id,
@@ -111,7 +113,7 @@ public class StatisticService : IStatisticService
                     AverageReadingHours = Math.Min((float) p.PagesRead / (float) c.Pages, 1.0) * ((float) c.AvgHoursToRead)
                 })
             .Select(x => x.AverageReadingHours)
-            .Average() * 7.0;
+            .Average() / 7.0;
 
         return new UserReadStatistics()
         {
@@ -340,26 +342,29 @@ public class StatisticService : IStatisticService
             .Join(_context.Volume, x => x.chapter.VolumeId, volume => volume.Id,
                 (x, volume) => new {x.appUserProgresses, x.chapter, volume})
             .Join(_context.Series, x => x.appUserProgresses.SeriesId, series => series.Id,
-                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series})
-            .WhereIf(userId > 0, x => x.appUserProgresses.AppUserId == userId)
-            .WhereIf(days > 0, x => x.appUserProgresses.LastModified >= DateTime.Now.AddDays(days * -1));
+                (x, series) => new {x.appUserProgresses, x.chapter, x.volume, series});
 
+        if (userId > 0)
+        {
+            query = query.Where(x => x.appUserProgresses.AppUserId == userId);
+        }
 
-        // .Where(p => p.chapter.AvgHoursToRead > 0)
-        // .SumAsync(p =>
-        //     p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))))
+        if (days > 0)
+        {
+            var date = DateTime.Now.AddDays(days * -1);
+            query = query.Where(x => x.appUserProgresses.LastModified >= date);
+        }
 
         var results = await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.LastModified.Date,
-                x.series.Format,
+                x.series.Format
             })
             .Select(g => new PagesReadOnADayCount<DateTime>
             {
                 Value = g.Key.Day,
                 Format = g.Key.Format,
-                Count = (long) g.Sum(x =>
-                    x.chapter.AvgHoursToRead * (x.appUserProgresses.PagesRead / (1.0f * x.chapter.Pages)))
+                Count = g.Count()
             })
             .OrderBy(d => d.Value)
             .ToListAsync();
@@ -588,14 +593,13 @@ public class StatisticService : IStatisticService
             user[userChapter.User.Id] = libraryTimes;
         }
 
-
         return user.Keys.Select(userId => new TopReadDto()
             {
                 UserId = userId,
                 Username = users.First(u => u.Id == userId).UserName,
-                BooksTime = user[userId].TryGetValue(LibraryType.Book, out var bookTime) ? bookTime : 0,
-                ComicsTime = user[userId].TryGetValue(LibraryType.Comic, out var comicTime) ? comicTime : 0,
-                MangaTime = user[userId].TryGetValue(LibraryType.Manga, out var mangaTime) ? mangaTime : 0,
+                BooksTime = user[userId].ContainsKey(LibraryType.Book) ? user[userId][LibraryType.Book] : 0,
+                ComicsTime = user[userId].ContainsKey(LibraryType.Comic) ? user[userId][LibraryType.Comic] : 0,
+                MangaTime = user[userId].ContainsKey(LibraryType.Manga) ? user[userId][LibraryType.Manga] : 0,
             })
             .ToList();
     }

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -15,13 +14,13 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Logging;
 using API.Middleware;
-using API.Middleware.RateLimit;
 using API.Services;
 using API.Services.HostedServices;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
-using HtmlAgilityPack;
+using Hangfire.MemoryStorage;
+using Hangfire.Storage.SQLite;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +31,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -113,7 +111,7 @@ public class Startup
         {
             options.ForwardedHeaders = ForwardedHeaders.All;
             foreach(var proxy in _config.GetSection("KnownProxies").AsEnumerable().Where(c => c.Value != null)) {
-                options.KnownProxies.Add(IPAddress.Parse(proxy.Value!));
+                options.KnownProxies.Add(IPAddress.Parse(proxy.Value));
             }
         });
         services.AddCors();
@@ -182,12 +180,6 @@ public class Startup
 
         services.AddResponseCaching();
 
-        services.AddRateLimiter(options =>
-        {
-            options.AddPolicy("Authentication", httpContext =>
-                new AuthenticationRateLimiterPolicy().GetPartition(httpContext));
-        });
-
         services.AddHangfire(configuration => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
@@ -224,7 +216,6 @@ public class Startup
 
 
                     logger.LogInformation("Running Migrations");
-
                     // Only run this if we are upgrading
                     await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
                     await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
@@ -245,9 +236,6 @@ public class Startup
 
                     // v0.7
                     await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7.2
-                    await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
@@ -287,26 +275,6 @@ public class Startup
 
         app.UseForwardedHeaders();
 
-        app.UseRateLimiter();
-
-        var basePath = Configuration.BaseUrl;
-        app.UsePathBase(basePath);
-        if (!env.IsDevelopment())
-        {
-            // We don't update the index.html in local as we don't serve from there
-            UpdateBaseUrlInIndex(basePath);
-
-            // Update DB with what's in config
-            var dataContext = serviceProvider.GetRequiredService<DataContext>();
-            var setting = dataContext.ServerSetting.SingleOrDefault(x => x.Key == ServerSettingKey.BaseUrl);
-            if (setting != null)
-            {
-                setting.Value = basePath;
-            }
-
-            dataContext.SaveChanges();
-        }
-
         app.UseRouting();
 
         // Ordering is important. Cors, authentication, authorization
@@ -316,17 +284,7 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000", "https://kavita.majora2007.duckdns.org")
-                .WithExposedHeaders("Content-Disposition", "Pagination"));
-        }
-        else
-        {
-            // Allow CORS for Kavita's url
-            app.UseCors(policy => policy
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials() // For SignalR token query param
-                .WithOrigins("https://kavita.majora2007.duckdns.org")
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
 
@@ -345,7 +303,6 @@ public class Startup
             OnPrepareResponse = ctx =>
             {
                 ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=" + TimeSpan.FromHours(24);
-                ctx.Context.Response.Headers["X-Robots-Tag"] = "noindex,nofollow";
             }
         });
 
@@ -361,7 +318,7 @@ public class Startup
                 new[] { "Accept-Encoding" };
 
             // Don't let the site be iframed outside the same origin (clickjacking)
-            context.Response.Headers.XFrameOptions = Configuration.XFrameOptions;
+            context.Response.Headers.XFrameOptions = "SAMEORIGIN";
 
             // Setup CSP to ensure we load assets only from these origins
             context.Response.Headers.Add("Content-Security-Policy", "frame-ancestors 'none';");
@@ -392,32 +349,6 @@ public class Startup
             }
             Console.WriteLine($"Kavita - v{BuildInfo.Version}");
         });
-
-        var _logger = serviceProvider.GetRequiredService<ILogger<Startup>>();
-        _logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
-    }
-
-    private static void UpdateBaseUrlInIndex(string baseUrl)
-    {
-        try
-        {
-            var htmlDoc = new HtmlDocument();
-            var indexHtmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
-            htmlDoc.Load(indexHtmlPath);
-
-            var baseNode = htmlDoc.DocumentNode.SelectSingleNode("/html/head/base");
-            baseNode.SetAttributeValue("href", baseUrl);
-            htmlDoc.Save(indexHtmlPath);
-        }
-        catch (Exception ex)
-        {
-            if ((ex.Message.Contains("Permission denied") || ex.Message.Contains("UnauthorizedAccessException")) && baseUrl.Equals(Configuration.DefaultBaseUrl) && new OsInfo().IsDocker)
-            {
-                // Swallow the exception as the install is non-root and Docker
-                return;
-            }
-            Log.Error(ex, "There was an error setting base url");
-        }
     }
 
     private static void OnShutdown()

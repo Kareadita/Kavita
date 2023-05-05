@@ -13,10 +13,9 @@ import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { IndexUpdateEvent } from '../draggable-ordered-list/draggable-ordered-list.component';
-import { forkJoin, Observable } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LibraryService } from 'src/app/_services/library.service';
-import { Person } from 'src/app/_models/metadata/person';
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -41,7 +40,6 @@ export class ReadingListDetailComponent implements OnInit {
   readingListImage: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
-  characters$!: Observable<Person[]>;
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -61,7 +59,6 @@ export class ReadingListDetailComponent implements OnInit {
       return;
     }
     this.listId = parseInt(listId, 10);
-    this.characters$ = this.readingListService.getCharacters(this.listId);
     this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     forkJoin([
@@ -118,7 +115,11 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   readChapter(item: ReadingListItem) {
+    let reader = 'manga';
     if (!this.readingList) return;
+    if (item.seriesFormat === MangaFormat.EPUB) {
+      reader = 'book;'
+    }
     const params = this.readerService.getQueryParamsObject(false, true, this.readingList.id);
     this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
@@ -177,15 +178,13 @@ export class ReadingListDetailComponent implements OnInit {
     });
   }
 
-  read(inconitoMode: boolean = false) {
+  read() {
     if (!this.readingList) return;
     const firstItem = this.items[0];
-    this.router.navigate(
-      this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat), 
-      {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
+    this.router.navigate(this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
   }
 
-  continue(inconitoMode: boolean = false) {
+  continue() {
     // TODO: Can I do this in the backend?
     if (!this.readingList) return;
     let currentlyReadingChapter = this.items[0];
@@ -197,13 +196,6 @@ export class ReadingListDetailComponent implements OnInit {
       break;
     }
 
-    this.router.navigate(
-      this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), 
-      {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
-  }
-
-  updateAccesibilityMode() {
-    this.accessibilityMode = !this.accessibilityMode;
-    this.cdRef.markForCheck();
+    this.router.navigate(this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), {queryParams: {readingListId: this.readingList.id}});
   }
 }

@@ -1,7 +1,13 @@
-﻿using Serilog;
+﻿using System;
+using System.IO;
+using System.Net;
+using API.Services;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Filters;
 using Serilog.Formatting.Display;
 
 namespace API.Logging;
@@ -58,7 +64,7 @@ public static class LogLevelOptions
             .Filter.ByIncludingOnly(ShouldIncludeLogStatement);
     }
 
-    private static bool ShouldIncludeLogStatement(LogEvent e)
+    private static  bool ShouldIncludeLogStatement(LogEvent e)
     {
         var isRequestLoggingMiddleware = e.Properties.ContainsKey("SourceContext") &&
                                          e.Properties["SourceContext"].ToString().Replace("\"", string.Empty) ==

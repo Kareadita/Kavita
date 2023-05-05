@@ -96,7 +96,7 @@ export class MessageHubService {
   private hubConnection!: HubConnection;
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
-  private onlineUsersSource = new BehaviorSubject<string[]>([]); // UserNames
+  private onlineUsersSource = new BehaviorSubject<number[]>([]); // UserIds
 
   /**
    * Any events that come from the backend
@@ -142,7 +142,7 @@ export class MessageHubService {
     .start()
     .catch(err => console.error(err));
 
-    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
+    this.hubConnection.on(EVENTS.OnlineUsers, (usernames: number[]) => {
       this.onlineUsersSource.next(usernames);
     });
 

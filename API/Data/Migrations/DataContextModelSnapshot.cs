@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.5");
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.10");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -224,18 +224,10 @@ namespace API.Data.Migrations
                     b.Property<bool>("BookReaderTapToPaginate")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BookReaderWritingStyle")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(0);
-
                     b.Property<string>("BookThemeName")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValue("Dark");
-
-                    b.Property<bool>("CollapseSeriesRelationships")
-                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("EmulateBook")
                         .HasColumnType("INTEGER");
@@ -649,11 +641,6 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<bool>("ManageReadingLists")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -878,12 +865,6 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("EndingMonth")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("EndingYear")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -894,12 +875,6 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Promoted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("StartingMonth")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("StartingYear")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Summary")

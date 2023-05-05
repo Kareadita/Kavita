@@ -20,7 +20,6 @@ using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MimeTypes;
 
 namespace API.Controllers;
 
@@ -38,6 +37,7 @@ public class OpdsController : BaseApiController
 
     private readonly XmlSerializer _xmlSerializer;
     private readonly XmlSerializer _xmlOpenSearchSerializer;
+    private const string Prefix = "/api/opds/";
     private readonly FilterDto _filterDto = new FilterDto()
     {
         Formats = new List<MangaFormat>(),
@@ -62,8 +62,7 @@ public class OpdsController : BaseApiController
         SortOptions = null,
         PublicationStatus = new List<PublicationStatus>()
     };
-    private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
-    private const int PageSize = 20;
+    private readonly ChapterSortComparer _chapterSortComparer = new ChapterSortComparer();
 
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
@@ -80,6 +79,7 @@ public class OpdsController : BaseApiController
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
+
     }
 
     [HttpPost("{apiKey}")]
@@ -89,10 +89,7 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-
-        var (baseUrl, prefix) = await GetPrefix();
-
-        var feed = CreateFeed("Kavita", string.Empty, apiKey, prefix, baseUrl);
+        var feed = CreateFeed("Kavita", string.Empty, apiKey);
         SetFeedId(feed, "root");
         feed.Entries.Add(new FeedEntry()
         {
@@ -104,7 +101,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/on-deck"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/on-deck"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -117,7 +114,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-added"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/recently-added"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -130,7 +127,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -143,7 +140,7 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/libraries"),
             }
         });
         feed.Entries.Add(new FeedEntry()
@@ -156,23 +153,10 @@ public class OpdsController : BaseApiController
             },
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/collections"),
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/collections"),
             }
         });
         return CreateXmlResult(SerializeXml(feed));
-    }
-
-    private async Task<Tuple<string, string>> GetPrefix()
-    {
-        var baseUrl = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl)).Value;
-        var prefix = "/api/opds/";
-        if (!Configuration.DefaultBaseUrl.Equals(baseUrl))
-        {
-            // We need to update the Prefix to account for baseUrl
-            prefix = baseUrl + "api/opds/";
-        }
-
-        return new Tuple<string, string>(baseUrl, prefix);
     }
 
 
@@ -182,10 +166,9 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
-        var feed = CreateFeed("All Libraries", $"{prefix}{apiKey}/libraries", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("All Libraries", $"{apiKey}/libraries", apiKey);
         SetFeedId(feed, "libraries");
         foreach (var library in libraries)
         {
@@ -195,7 +178,7 @@ public class OpdsController : BaseApiController
                 Title = library.Name,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries/{library.Id}"),
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/libraries/{library.Id}"),
                 }
             });
         }
@@ -209,17 +192,15 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-        var tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
+        IEnumerable<CollectionTagDto> tags = isAdmin ? (await _unitOfWork.CollectionTagRepository.GetAllTagDtosAsync())
             : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
 
 
-        var feed = CreateFeed("All Collections", $"{prefix}{apiKey}/collections", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("All Collections", $"{apiKey}/collections", apiKey);
         SetFeedId(feed, "collections");
         foreach (var tag in tags)
         {
@@ -230,9 +211,9 @@ public class OpdsController : BaseApiController
                 Summary = tag.Summary,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}")
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/collections/{tag.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/collection-cover?collectionId={tag.Id}")
                 }
             });
         }
@@ -247,10 +228,8 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         IEnumerable <CollectionTagDto> tags;
@@ -269,16 +248,20 @@ public class OpdsController : BaseApiController
             return BadRequest("Collection does not exist or you don't have access");
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, GetUserParams(pageNumber));
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, new UserParams()
+        {
+            PageNumber = pageNumber,
+            PageSize = 20
+        });
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
-        var feed = CreateFeed(tag.Title + " Collection", $"{prefix}{apiKey}/collections/{collectionId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(tag.Title + " Collection", $"{apiKey}/collections/{collectionId}", apiKey);
         SetFeedId(feed, $"collections-{collectionId}");
-        AddPagination(feed, series, $"{prefix}{apiKey}/collections/{collectionId}");
+        AddPagination(feed, series, $"{Prefix}{apiKey}/collections/{collectionId}");
 
         foreach (var seriesDto in series)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey));
         }
 
 
@@ -291,14 +274,15 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
 
-        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId,
-            true, GetUserParams(pageNumber), false);
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, true, new UserParams()
+        {
+            PageNumber = pageNumber
+        });
 
 
-        var feed = CreateFeed("All Reading Lists", $"{prefix}{apiKey}/reading-list", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("All Reading Lists", $"{apiKey}/reading-list", apiKey);
         SetFeedId(feed, "reading-list");
         foreach (var readingListDto in readingLists)
         {
@@ -309,21 +293,12 @@ public class OpdsController : BaseApiController
                 Summary = readingListDto.Summary,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list/{readingListDto.Id}"),
                 }
             });
         }
 
         return CreateXmlResult(SerializeXml(feed));
-    }
-
-    private static UserParams GetUserParams(int pageNumber)
-    {
-        return new UserParams()
-        {
-            PageNumber = pageNumber,
-            PageSize = PageSize
-        };
     }
 
     [HttpGet("{apiKey}/reading-list/{readingListId}")]
@@ -332,27 +307,23 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
-        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
-        if (userWithLists == null) return Unauthorized();
+        var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName, AppUserIncludes.ReadingListsWithItems);
         var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
         if (readingList == null)
         {
             return BadRequest("Reading list does not exist or you don't have access");
         }
 
-        var feed = CreateFeed(readingList.Title + " Reading List", $"{prefix}{apiKey}/reading-list/{readingListId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(readingList.Title + " Reading List", $"{apiKey}/reading-list/{readingListId}", apiKey);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
         foreach (var item in items)
         {
-            feed.Entries.Add(
-                CreateChapter(apiKey, $"{item.Order} - {item.SeriesName}: {item.Title}",
-                    string.Empty, item.ChapterId, item.VolumeId, item.SeriesId, prefix, baseUrl));
+            feed.Entries.Add(CreateChapter(apiKey, $"{item.Order} - {item.SeriesName}: {item.Title}", string.Empty, item.ChapterId, item.VolumeId, item.SeriesId));
         }
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -363,7 +334,6 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var library =
             (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).SingleOrDefault(l =>
@@ -373,16 +343,20 @@ public class OpdsController : BaseApiController
             return BadRequest("User does not have access to this library");
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, GetUserParams(pageNumber), _filterDto);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, new UserParams()
+        {
+            PageNumber = pageNumber,
+            PageSize = 20
+        }, _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
-        var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey);
         SetFeedId(feed, $"library-{library.Name}");
-        AddPagination(feed, series, $"{prefix}{apiKey}/libraries/{libraryId}");
+        AddPagination(feed, series, $"{Prefix}{apiKey}/libraries/{libraryId}");
 
         foreach (var seriesDto in series)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -394,18 +368,21 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
-        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, userId, GetUserParams(pageNumber), _filterDto);
+        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, userId, new UserParams()
+        {
+            PageNumber = pageNumber,
+            PageSize = 20
+        }, _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id));
 
-        var feed = CreateFeed("Recently Added", $"{prefix}{apiKey}/recently-added", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("Recently Added", $"{apiKey}/recently-added", apiKey);
         SetFeedId(feed, "recently-added");
-        AddPagination(feed, recentlyAdded, $"{prefix}{apiKey}/recently-added");
+        AddPagination(feed, recentlyAdded, $"{Prefix}{apiKey}/recently-added");
 
         foreach (var seriesDto in recentlyAdded)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -417,23 +394,23 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-
-        var (baseUrl, prefix) = await GetPrefix();
-
         var userId = await GetUser(apiKey);
-        var userParams = GetUserParams(pageNumber);
+        var userParams = new UserParams()
+        {
+            PageNumber = pageNumber,
+        };
         var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, 0, userParams, _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(pagedList.Select(s => s.Id));
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-        var feed = CreateFeed("On Deck", $"{prefix}{apiKey}/on-deck", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("On Deck", $"{apiKey}/on-deck", apiKey);
         SetFeedId(feed, "on-deck");
-        AddPagination(feed, pagedList, $"{prefix}{apiKey}/on-deck");
+        AddPagination(feed, pagedList, $"{Prefix}{apiKey}/on-deck");
 
         foreach (var seriesDto in pagedList)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -445,7 +422,6 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
@@ -456,17 +432,18 @@ public class OpdsController : BaseApiController
         query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
+
         if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         var series = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin, libraries.Select(l => l.Id).ToArray(), query);
 
-        var feed = CreateFeed(query, $"{prefix}{apiKey}/series?query=" + query, apiKey, prefix, baseUrl);
+        var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey);
         SetFeedId(feed, "search-series");
         foreach (var seriesDto in series.Series)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, apiKey, prefix, baseUrl));
+            feed.Entries.Add(CreateSeries(seriesDto, apiKey));
         }
 
         foreach (var collection in series.Collections)
@@ -479,11 +456,11 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
-                        $"{prefix}{apiKey}/collections/{collection.Id}"),
+                        Prefix + $"{apiKey}/collections/{collection.Id}"),
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}"),
+                        $"/api/image/collection-cover?collectionId={collection.Id}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}")
+                        $"/api/image/collection-cover?collectionId={collection.Id}")
                 }
             });
         }
@@ -497,7 +474,7 @@ public class OpdsController : BaseApiController
                 Summary = readingListDto.Summary,
                 Links = new List<FeedLink>()
                 {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/reading-list/{readingListDto.Id}"),
                 }
             });
         }
@@ -517,7 +494,6 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var feed = new OpenSearchDescription()
         {
             ShortName = "Search",
@@ -525,7 +501,7 @@ public class OpdsController : BaseApiController
             Url = new SearchLink()
             {
                 Type = FeedLinkType.AtomAcquisition,
-                Template = $"{prefix}{apiKey}/series?query=" + "{searchTerms}"
+                Template = $"{Prefix}{apiKey}/series?query=" + "{searchTerms}"
             }
         };
 
@@ -541,50 +517,39 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
 
-        var feed = CreateFeed(series.Name + " - Storyline", $"{prefix}{apiKey}/series/{series.Id}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(series.Name + " - Storyline", $"{apiKey}/series/{series.Id}", apiKey);
         SetFeedId(feed, $"series-{series.Id}");
-        feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}&apiKey={apiKey}"));
+        feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesId}"));
 
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
         {
-            var chapters = (await _unitOfWork.ChapterRepository.GetChaptersAsync(volume.Id)).OrderBy(x => double.Parse(x.Number),
-        _chapterSortComparer);
-
-            foreach (var chapter in chapters)
+            // If there is only one chapter to the Volume, we will emulate a volume to flatten the amount of hops a user must go through
+            if (volume.Chapters.Count == 1)
             {
-                var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-                var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
-                foreach (var mangaFile in files)
-                {
-                    feed.Entries.Add(await CreateChapterWithFile(seriesId, volume.Id, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
-                }
+                var firstChapter = volume.Chapters.First();
+                var chapter = CreateChapter(apiKey, volume.Name, firstChapter.Summary, firstChapter.Id, volume.Id, seriesId);
+                chapter.Id = firstChapter.Id.ToString();
+                feed.Entries.Add(chapter);
+            }
+            else
+            {
+                feed.Entries.Add(CreateVolume(volume, seriesId, apiKey));
             }
 
         }
 
         foreach (var storylineChapter in seriesDetail.StorylineChapters.Where(c => !c.IsSpecial))
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(storylineChapter.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(storylineChapter.Id);
-            foreach (var mangaFile in files)
-            {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
-            }
+            feed.Entries.Add(CreateChapter(apiKey, storylineChapter.Title, storylineChapter.Summary,  storylineChapter.Id, storylineChapter.VolumeId, seriesId));
         }
 
         foreach (var special in seriesDetail.Specials)
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(special.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(special.Id);
-            foreach (var mangaFile in files)
-            {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, special.VolumeId, special.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
-            }
+            feed.Entries.Add(CreateChapter(apiKey, special.Title, special.Summary,  special.Id, special.VolumeId, seriesId));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -596,7 +561,6 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
@@ -604,17 +568,21 @@ public class OpdsController : BaseApiController
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ",
-            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix, baseUrl);
+
+        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ", $"{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
         foreach (var chapter in chapters)
         {
-            var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
-            var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
-            foreach (var mangaFile in files)
+            feed.Entries.Add(new FeedEntry()
             {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
-            }
+                Id = chapter.Id.ToString(),
+                Title = SeriesService.FormatChapterTitle(chapter, libraryType),
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapter.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapter.Id}")
+                }
+            });
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -626,21 +594,18 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
-        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
-        if (chapter == null) return BadRequest("Chapter doesn't exist");
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
+        var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s",
-            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(series.Name + " - Volume " + volume.Name + $" - {SeriesService.FormatChapterName(libraryType)}s", $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey);
         SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
-            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey, prefix, baseUrl));
+            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -718,7 +683,7 @@ public class OpdsController : BaseApiController
         feed.StartIndex = (Math.Max(list.CurrentPage - 1, 0) * list.PageSize) + 1;
     }
 
-    private static FeedEntry CreateSeries(SeriesDto seriesDto, SeriesMetadataDto metadata, string apiKey, string prefix, string baseUrl)
+    private static FeedEntry CreateSeries(SeriesDto seriesDto, SeriesMetadataDto metadata, string apiKey)
     {
         return new FeedEntry()
         {
@@ -728,7 +693,7 @@ public class OpdsController : BaseApiController
             Authors = metadata.Writers.Select(p => new FeedAuthor()
             {
                 Name = p.Name,
-                Uri = "http://opds-spec.org/author/" + p.Id
+                Uri = "http://opds-spec.org/author"
             }).ToList(),
             Categories = metadata.Genres.Select(g => new FeedCategory()
             {
@@ -737,14 +702,14 @@ public class OpdsController : BaseApiController
             }).ToList(),
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/series/{seriesDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}")
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{seriesDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesDto.Id}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/series-cover?seriesId={seriesDto.Id}")
             }
         };
     }
 
-    private static FeedEntry CreateSeries(SearchResultDto searchResultDto, string apiKey, string prefix, string baseUrl)
+    private static FeedEntry CreateSeries(SearchResultDto searchResultDto, string apiKey)
     {
         return new FeedEntry()
         {
@@ -752,14 +717,33 @@ public class OpdsController : BaseApiController
             Title = $"{searchResultDto.Name} ({searchResultDto.Format})",
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/series/{searchResultDto.SeriesId}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}&apiKey={apiKey}")
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, Prefix + $"{apiKey}/series/{searchResultDto.SeriesId}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/series-cover?seriesId={searchResultDto.SeriesId}")
             }
         };
     }
 
-    private static FeedEntry CreateChapter(string apiKey, string title, string summary, int chapterId, int volumeId, int seriesId, string prefix, string baseUrl)
+    private static FeedEntry CreateVolume(VolumeDto volumeDto, int seriesId, string apiKey)
+    {
+        return new FeedEntry()
+        {
+            Id = volumeDto.Id.ToString(),
+            Title = volumeDto.Name,
+            Summary = volumeDto.Chapters.First().Summary ?? string.Empty,
+            Links = new List<FeedLink>()
+            {
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"/api/image/volume-cover?volumeId={volumeDto.Id}")
+            }
+        };
+    }
+
+    private static FeedEntry CreateChapter(string apiKey, string title, string summary, int chapterId, int volumeId, int seriesId)
     {
         return new FeedEntry()
         {
@@ -769,40 +753,30 @@ public class OpdsController : BaseApiController
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
-                     $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
+                    Prefix + $"{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
+                    $"/api/image/chapter-cover?chapterId={chapterId}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}")
+                    $"/api/image/chapter-cover?chapterId={chapterId}")
             }
         };
     }
 
-    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey, string prefix, string baseUrl)
+    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey)
     {
         var fileSize =
-            mangaFile.Bytes > 0 ? DirectoryService.GetHumanReadableBytes(mangaFile.Bytes) :
             DirectoryService.GetHumanReadableBytes(_directoryService.GetTotalSize(new List<string>()
                 {mangaFile.FilePath}));
         var fileType = _downloadService.GetContentTypeFromFile(mangaFile.FilePath);
-        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath));
+        var filename = Uri.EscapeDataString(Path.GetFileName(mangaFile.FilePath) ?? string.Empty);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
-
-        var title = $"{series.Name}";
-
-        if (volume!.Chapters.Count == 1)
+        var title = $"{series.Name} - ";
+        if (volume.Chapters.Count == 1)
         {
             SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
-            if (volume.Name != "0")
-            {
-                title += $" - {volume.Name}";
-            }
-        }
-        else if (volume.Number != 0)
-        {
-            title = $"{series.Name} - Volume {volume.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+            title += $"{volume.Name}";
         }
         else
         {
@@ -812,7 +786,7 @@ public class OpdsController : BaseApiController
         // Chunky requires a file at the end. Our API ignores this
         var accLink =
                 CreateLink(FeedLinkRelation.Acquisition, fileType,
-                    $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}",
+                    $"{Prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}",
                     filename);
         accLink.TotalPages = chapter.Pages;
 
@@ -825,11 +799,11 @@ public class OpdsController : BaseApiController
             Format = mangaFile.Format.ToString(),
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"/api/image/chapter-cover?chapterId={chapterId}"),
                 // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
-                await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix)
+                CreatePageStreamLink(series.LibraryId,seriesId, volumeId, chapterId, mangaFile, apiKey)
             },
             Content = new FeedEntryContent()
             {
@@ -841,16 +815,6 @@ public class OpdsController : BaseApiController
         return entry;
     }
 
-    /// <summary>
-    /// This returns a streamed image following OPDS-PS v1.2
-    /// </summary>
-    /// <param name="apiKey"></param>
-    /// <param name="libraryId"></param>
-    /// <param name="seriesId"></param>
-    /// <param name="volumeId"></param>
-    /// <param name="chapterId"></param>
-    /// <param name="pageNumber"></param>
-    /// <returns></returns>
     [HttpGet("{apiKey}/image")]
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
     {
@@ -864,7 +828,7 @@ public class OpdsController : BaseApiController
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
 
             var content = await _directoryService.ReadFileAsync(path);
-            var format = Path.GetExtension(path);
+            var format = Path.GetExtension(path).Replace(".", string.Empty);
 
             // Calculates SHA1 Hash for byte[]
             Response.AddCacheHeader(content);
@@ -879,7 +843,7 @@ public class OpdsController : BaseApiController
                 LibraryId =libraryId
             }, await GetUser(apiKey));
 
-            return File(content, MimeTypeMap.GetMimeType(format));
+            return File(content, "image/" + format);
         }
         catch (Exception)
         {
@@ -896,9 +860,9 @@ public class OpdsController : BaseApiController
         if (files.Length == 0) return BadRequest("Cannot find icon");
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
-        var format = Path.GetExtension(path);
+        var format = Path.GetExtension(path).Replace(".", string.Empty);
 
-        return File(content, MimeTypeMap.GetMimeType(format));
+        return File(content, "image/" + format);
     }
 
     /// <summary>
@@ -919,25 +883,14 @@ public class OpdsController : BaseApiController
         throw new KavitaException("User does not exist");
     }
 
-    private async Task<FeedLink> CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey, string prefix)
+    private static FeedLink CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey)
     {
-        var userId = await GetUser(apiKey);
-        var progress = await _unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(chapterId, userId);
-
-        // TODO: Type could be wrong
-        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
-            $"{prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
+        var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg", $"{Prefix}{apiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={volumeId}&chapterId={chapterId}&pageNumber=" + "{pageNumber}");
         link.TotalPages = mangaFile.Pages;
-        if (progress != null)
-        {
-            link.LastRead = progress.PageNum;
-            link.LastReadDate = progress.LastModifiedUtc;
-        }
-        link.IsPageStream = true;
         return link;
     }
 
-    private static FeedLink CreateLink(string rel, string type, string href, string? title = null)
+    private static FeedLink CreateLink(string rel, string type, string href, string title = null)
     {
         return new FeedLink()
         {
@@ -948,21 +901,21 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private static Feed CreateFeed(string title, string href, string apiKey, string prefix, string baseUrl)
+    private static Feed CreateFeed(string title, string href, string apiKey)
     {
         var link = CreateLink(FeedLinkRelation.Self, string.IsNullOrEmpty(href) ?
             FeedLinkType.AtomNavigation :
-            FeedLinkType.AtomAcquisition, prefix + href);
+            FeedLinkType.AtomAcquisition, Prefix + href);
 
         return new Feed()
         {
             Title = title,
-            Icon = $"{prefix}{apiKey}/favicon",
+            Icon = Prefix + $"{apiKey}/favicon",
             Links = new List<FeedLink>()
             {
                 link,
-                CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}"),
-                CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, $"{prefix}{apiKey}/search")
+                CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, Prefix + apiKey),
+                CreateLink(FeedLinkRelation.Search, FeedLinkType.AtomSearch, Prefix + $"{apiKey}/search")
             },
         };
     }

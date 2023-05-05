@@ -27,20 +27,6 @@
             </div>
         </div>
 
-        <div class="row g-0">
-            <div class="mb-3">
-                <label for="settings-bookmarksdir" class="form-label">Bookmarks Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="bookmarksDirectoryTooltip" role="button" tabindex="0"></i>
-                <ng-template #bookmarksDirectoryTooltip>Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed; other files within directory will be deleted. If Docker, mount an additional volume and use that.</ng-template>
-                <span class="visually-hidden" id="settings-bookmarksdir-help"><ng-container [ngTemplateOutlet]="bookmarksDirectoryTooltip"></ng-container></span>
-                <div class="input-group">
-                    <input readonly id="settings-bookmarksdir" aria-describedby="settings-bookmarksdir-help" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir">
-                    <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(settingsForm.get('bookmarksDirectory')?.value, 'bookmarksDirectory')">
-                        Change
-                    </button>
-                </div>
-            </div>
-        </div>
-
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
             <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>

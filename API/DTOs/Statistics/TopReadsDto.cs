@@ -1,9 +1,11 @@
-﻿namespace API.DTOs.Statistics;
+﻿using System.Collections.Generic;
+
+namespace API.DTOs.Statistics;
 
 public class TopReadDto
 {
     public int UserId { get; set; }
-    public string? Username { get; set; } = default!;
+    public string Username { get; set; }
     /// <summary>
     /// Amount of time read on Comic libraries
     /// </summary>

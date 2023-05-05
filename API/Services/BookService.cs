@@ -11,7 +11,7 @@ using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
-using API.Services.Tasks.Scanner.Parser;
+using API.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
 using Docnet.Core.Models;
@@ -25,6 +25,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace API.Services;
 
@@ -32,17 +33,8 @@ public interface IBookService
 {
     int GetNumberOfPages(string filePath);
     string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
-    ComicInfo? GetComicInfo(string filePath);
-    ParserInfo? ParseInfo(string filePath);
-    /// <summary>
-    /// Scopes styles to .reading-section and replaces img src to the passed apiBase
-    /// </summary>
-    /// <param name="stylesheetHtml"></param>
-    /// <param name="apiBase"></param>
-    /// <param name="filename">If the stylesheetHtml contains Import statements, when scoping the filename, scope needs to be wrt filepath.</param>
-    /// <param name="book">Book Reference, needed for if you expect Import statements</param>
-    /// <returns></returns>
-    Task<string> ScopeStyles(string stylesheetHtml, string apiBase, string filename, EpubBookRef book);
+    ComicInfo GetComicInfo(string filePath);
+    ParserInfo ParseInfo(string filePath);
     /// <summary>
     /// Extracts a PDF file's pages as images to an target directory
     /// </summary>
@@ -66,7 +58,7 @@ public class BookService : IBookService
     private const string BookApiUrl = "book-resources?file=";
     public static readonly EpubReaderOptions BookReaderOptions = new()
     {
-        PackageReaderOptions = new PackageReaderOptions
+        PackageReaderOptions = new PackageReaderOptions()
         {
             IgnoreMissingToc = true
         }
@@ -171,8 +163,7 @@ public class BookService : IBookService
         // @Import statements will be handled by browser, so we must inline the css into the original file that request it, so they can be Scoped
         var prepend = filename.Length > 0 ? filename.Replace(Path.GetFileName(filename), string.Empty) : string.Empty;
         var importBuilder = new StringBuilder();
-        //foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
-        foreach (Match match in Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
 
@@ -209,7 +200,7 @@ public class BookService : IBookService
         foreach (var styleRule in stylesheet.StyleRules)
         {
             if (styleRule.Selector.Text == CssScopeClass) continue;
-            if (styleRule.Selector.Text.Contains(','))
+            if (styleRule.Selector.Text.Contains(","))
             {
                 styleRule.Text = styleRule.Text.Replace(styleRule.SelectorText,
                     string.Join(", ",
@@ -223,8 +214,7 @@ public class BookService : IBookService
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        //foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
-        foreach (Match match in Parser.CssImportUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -234,8 +224,7 @@ public class BookService : IBookService
 
     private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        //foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex().Matches(stylesheetHtml))
-        foreach (Match match in Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
+        foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
             var importFile = match.Groups["Filename"].Value;
@@ -245,8 +234,7 @@ public class BookService : IBookService
 
     private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
     {
-        //var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex().Matches(stylesheetHtml);
-        var matches = Parser.CssImageUrlRegex.Matches(stylesheetHtml);
+        var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex.Matches(stylesheetHtml);
         foreach (Match match in matches)
         {
             if (!match.Success) continue;
@@ -266,12 +254,13 @@ public class BookService : IBookService
 
         if (images == null) return;
 
+
         var parent = images.First().ParentNode;
 
         foreach (var image in images)
         {
 
-            string? key = null;
+            string key = null;
             if (image.Attributes["src"] != null)
             {
                 key = "src";
@@ -399,9 +388,9 @@ public class BookService : IBookService
         }
     }
 
-    public ComicInfo? GetComicInfo(string filePath)
+    public ComicInfo GetComicInfo(string filePath)
     {
-        if (!IsValidFile(filePath) || Parser.IsPdf(filePath)) return null;
+        if (!IsValidFile(filePath) || Tasks.Scanner.Parser.Parser.IsPdf(filePath)) return null;
 
         try
         {
@@ -415,10 +404,10 @@ public class BookService : IBookService
             }
             var (year, month, day) = GetPublicationDate(publicationDate);
 
-            var info =  new ComicInfo
+            var info =  new ComicInfo()
             {
                 Summary = epubBook.Schema.Package.Metadata.Description,
-                Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator))),
+                Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Tasks.Scanner.Parser.Parser.CleanAuthor(c.Creator))),
                 Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                 Month = month,
                 Day = day,
@@ -432,7 +421,6 @@ public class BookService : IBookService
             // Parse tags not exposed via Library
             foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
             {
-                // EPUB 2 and 3
                 switch (metadataItem.Name)
                 {
                     case "calibre:rating":
@@ -449,31 +437,16 @@ public class BookService : IBookService
                         info.Volume = metadataItem.Content;
                         break;
                 }
-
-                // EPUB 3.2+ only
-                switch (metadataItem.Property)
-                {
-                    case "group-position":
-                        info.Volume = metadataItem.Content;
-                        break;
-                    case "belongs-to-collection":
-                        info.Series = metadataItem.Content;
-                        info.SeriesSort = metadataItem.Content;
-                        break;
-                    case "collection-type":
-                        // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
-                        break;
-                }
             }
 
-            var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
-                .Equals(Parser.DefaultVolume);
+            var hasVolumeInSeries = !Tasks.Scanner.Parser.Parser.ParseVolume(info.Title)
+                .Equals(Tasks.Scanner.Parser.Parser.DefaultVolume);
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries && (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
             {
                 // This is likely a light novel for which we can set series from parsed title
-                info.Series = Parser.ParseSeries(info.Title);
-                info.Volume = Parser.ParseVolume(info.Title);
+                info.Series = Tasks.Scanner.Parser.Parser.ParseSeries(info.Title);
+                info.Volume = Tasks.Scanner.Parser.Parser.ParseVolume(info.Title);
             }
 
             return info;
@@ -507,19 +480,23 @@ public class BookService : IBookService
         return (year, month, day);
     }
 
+#nullable enable
     private static string ValidateLanguage(string? language)
     {
         if (string.IsNullOrEmpty(language)) return string.Empty;
 
         try
         {
-            return CultureInfo.GetCultureInfo(language).ToString();
+            CultureInfo.GetCultureInfo(language);
         }
         catch (Exception)
         {
             return string.Empty;
         }
+
+        return language;
     }
+    #nullable disable
 
     private bool IsValidFile(string filePath)
     {
@@ -529,7 +506,7 @@ public class BookService : IBookService
             return false;
         }
 
-        if (Parser.IsBook(filePath)) return true;
+        if (Tasks.Scanner.Parser.Parser.IsBook(filePath)) return true;
 
         _logger.LogWarning("[BookService] Book {EpubFile} is not a valid EPUB/PDF", filePath);
         return false;
@@ -541,14 +518,14 @@ public class BookService : IBookService
 
         try
         {
-            if (Parser.IsPdf(filePath))
+            if (Tasks.Scanner.Parser.Parser.IsPdf(filePath))
             {
                 using var docReader = DocLib.Instance.GetDocReader(filePath, new PageDimensions(1080, 1920));
                 return docReader.GetPageCount();
             }
 
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
-            return epubBook.GetReadingOrder().Count;
+            return epubBook.Content.Html.Count;
         }
         catch (Exception ex)
         {
@@ -560,10 +537,8 @@ public class BookService : IBookService
 
     private static string EscapeTags(string content)
     {
-        // content = StartingScriptTag().Replace(content, "<script$1></script>");
-        // content = StartingTitleTag().Replace(content, "<title$1></title>");
-        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Parser.RegexTimeout);
-        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Parser.RegexTimeout);
+        content = Regex.Replace(content, @"<script(.*)(/>)", "<script$1></script>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        content = Regex.Replace(content, @"<title(.*)(/>)", "<title$1></title>", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         return content;
     }
 
@@ -597,9 +572,9 @@ public class BookService : IBookService
     /// </summary>
     /// <param name="filePath"></param>
     /// <returns></returns>
-    public ParserInfo? ParseInfo(string filePath)
+    public ParserInfo ParseInfo(string filePath)
     {
-        if (!Parser.IsEpub(filePath)) return null;
+        if (!Tasks.Scanner.Parser.Parser.IsEpub(filePath)) return null;
 
         try
         {
@@ -659,13 +634,13 @@ public class BookService : IBookService
                     {
                         specialName = epubBook.Title;
                     }
-                    var info = new ParserInfo
+                    var info = new ParserInfo()
                     {
-                        Chapters = Parser.DefaultChapter,
+                        Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter,
                         Edition = string.Empty,
                         Format = MangaFormat.Epub,
                         Filename = Path.GetFileName(filePath),
-                        Title = specialName?.Trim() ?? string.Empty,
+                        Title = specialName?.Trim(),
                         FullFilePath = filePath,
                         IsSpecial = false,
                         Series = series.Trim(),
@@ -681,9 +656,9 @@ public class BookService : IBookService
                 // Swallow exception
             }
 
-            return new ParserInfo
+            return new ParserInfo()
             {
-                Chapters = Parser.DefaultChapter,
+                Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter,
                 Edition = string.Empty,
                 Format = MangaFormat.Epub,
                 Filename = Path.GetFileName(filePath),
@@ -691,7 +666,7 @@ public class BookService : IBookService
                 FullFilePath = filePath,
                 IsSpecial = false,
                 Series = epubBook.Title.Trim(),
-                Volumes = Parser.DefaultVolume,
+                Volumes = Tasks.Scanner.Parser.Parser.DefaultVolume,
             };
         }
         catch (Exception ex)
@@ -811,7 +786,7 @@ public class BookService : IBookService
                 var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
                 if (mappings.ContainsKey(key))
                 {
-                    nestedChapters.Add(new BookChapterItem
+                    nestedChapters.Add(new BookChapterItem()
                     {
                         Title = nestedChapter.Title,
                         Page = mappings[key],
@@ -848,7 +823,7 @@ public class BookService : IBookService
             {
                 part = anchor.Attributes["href"].Value.Split("#")[1];
             }
-            chaptersList.Add(new BookChapterItem
+            chaptersList.Add(new BookChapterItem()
             {
                 Title = anchor.InnerText,
                 Page = mappings[key],
@@ -928,7 +903,7 @@ public class BookService : IBookService
     {
         if (navigationItem.Link == null)
         {
-            var item = new BookChapterItem
+            var item = new BookChapterItem()
             {
                 Title = navigationItem.Title,
                 Children = nestedChapters
@@ -945,7 +920,7 @@ public class BookService : IBookService
             var groupKey = CleanContentKeys(navigationItem.Link.ContentFileName);
             if (mappings.ContainsKey(groupKey))
             {
-                chaptersList.Add(new BookChapterItem
+                chaptersList.Add(new BookChapterItem()
                 {
                     Title = navigationItem.Title,
                     Page = mappings[groupKey],
@@ -968,7 +943,7 @@ public class BookService : IBookService
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
-        if (Parser.IsPdf(fileFilePath))
+        if (Tasks.Scanner.Parser.Parser.IsPdf(fileFilePath))
         {
             return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, saveAsWebP);
         }
@@ -979,7 +954,7 @@ public class BookService : IBookService
         {
             // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
             var coverImageContent = epubBook.Content.Cover
-                                    ?? epubBook.Content.Images.Values.FirstOrDefault(file => Parser.IsCoverImage(file.FileName))
+                                    ?? epubBook.Content.Images.Values.FirstOrDefault(file => Tasks.Scanner.Parser.Parser.IsCoverImage(file.FileName))
                                     ?? epubBook.Content.Images.Values.FirstOrDefault();
 
             if (coverImageContent == null) return string.Empty;
@@ -1046,18 +1021,12 @@ public class BookService : IBookService
         }
 
         // Remove comments from CSS
-        // body = CssComment().Replace(body, string.Empty);
-        //
-        // body = WhiteSpace1().Replace(body, "#");
-        // body = WhiteSpace2().Replace(body, string.Empty);
-        // body = WhiteSpace3().Replace(body, " ");
-        // body = WhiteSpace4().Replace(body, "$1");
-        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty, RegexOptions.None, Parser.RegexTimeout);
+        body = Regex.Replace(body, @"/\*[\d\D]*?\*/", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
-        body = Regex.Replace(body, @"[a-zA-Z]+#", "#", RegexOptions.None, Parser.RegexTimeout);
-        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Parser.RegexTimeout);
-        body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Parser.RegexTimeout);
-        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Parser.RegexTimeout);
+        body = Regex.Replace(body, @"[a-zA-Z]+#", "#", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
+        body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
         try
         {
             body = body.Replace(";}", "}");
@@ -1067,8 +1036,7 @@ public class BookService : IBookService
             //Swallow exception. Some css don't have style rules ending in ';'
         }
 
-        //body = UnitPadding().Replace(body, "$1");
-        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1", RegexOptions.None, Parser.RegexTimeout);
+        body = Regex.Replace(body, @"([\s:]0)(px|pt|%|em)", "$1", RegexOptions.None, Tasks.Scanner.Parser.Parser.RegexTimeout);
 
 
         return body;

@@ -2,36 +2,31 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportReason } from 'src/app/_models/reading-list/cbl/cbl-import-reason.enum';
 
-const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid fa-circle-xmark me-1"></i>';
-const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';
-
 @Pipe({
   name: 'cblConflictReason'
 })
 export class CblConflictReasonPipe implements PipeTransform {
 
   transform(result: CblBookResult): string {
+    if (result.reason === undefined)
+      return result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully';
     switch (result.reason) {
       case CblImportReason.AllSeriesMissing:
-        return failIcon + 'Your account is missing access to all series in the list or Kavita does not have anything present in the list.';
+        return 'Your account is missing access to all series in the list or Kavita does not have anything present in the list.';
       case CblImportReason.ChapterMissing:
-        return failIcon + result.series + ': ' + 'Chapter ' + result.number + ' is missing from Kavita. This item will be skipped.';
+        return 'Chapter ' + result.number + ' is missing from Kavita. This item will be skipped.';
       case CblImportReason.EmptyFile:
-        return failIcon + 'The cbl file is empty, nothing to be done.';
+        return 'The Cbl file is empty, nothing to be done.';
       case CblImportReason.NameConflict:
-        return failIcon + 'A reading list (' + result.readingListName + ') already exists on your account that matches the cbl file.';
+        return 'A reading list already exists on your account that matches the Cbl file.';
       case CblImportReason.SeriesCollision:
-        return failIcon + 'The series, ' + `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>` + ', collides with another series of the same name in another library.';
+        return 'The series, ' + result.series + ', collides with another series of the same name in another library.';
       case CblImportReason.SeriesMissing:
-        return failIcon + 'The series, ' + result.series + ', is missing from Kavita or your account does not have permission. All items with this series will be skipped from import.';
+        return 'The series, ' + result.series + ', is missing from Kavita or your account does not have permission. All items with this series will be skipped from import.';
       case CblImportReason.VolumeMissing:
-        return failIcon + result.series + ': ' + 'Volume ' + result.volume + ' is missing from Kavita. All items with this volume number will be skipped.';
+        return 'Volume ' + result.volume + ' is missing from Kavita. All items with this volume number will be skipped.';
       case CblImportReason.AllChapterMissing:
-        return failIcon + 'All chapters cannot be matched to Chapters in Kavita.';
-      case CblImportReason.Success:
-        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully.';
-      case CblImportReason.InvalidFile:
-        return failIcon + 'The file is corrupted or not matching the expected tags/spec.';
+        return 'All chapters cannot be matched to Chapters in Kavita.';
     }
   }
 

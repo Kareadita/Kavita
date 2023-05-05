@@ -1,40 +1,14 @@
-<app-side-nav-companion-bar [hasExtras]="readingList !== undefined" [extraDrawer]="extrasDrawer">
+<app-side-nav-companion-bar>
   <h2 title>
-    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
+    <span *ngIf="actions.length > 0">
+      <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title"></app-card-actionables>
+    </span>
     {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
-  <h6 subtitle class="subtitle-with-actionables">{{items.length | number}} Items</h6>
-
-  <ng-template #extrasDrawer let-offcanvas>
-    <div style="margin-top: 56px" *ngIf="readingList">
-        <div class="offcanvas-header">
-            <h4 class="offcanvas-title" id="offcanvas-basic-title">Page Settings</h4>
-            <button type="button" class="btn-close" aria-label="Close" (click)="offcanvas.dismiss()"></button>
-        </div>
-        <div class="offcanvas-body">
-          <div class="row g-0">
-            <div class="col-md-12 col-sm-12 pe-2 mb-3">
-                <button class="btn btn-danger" (click)="removeRead()" [disabled]="readingList.promoted && !this.isAdmin">
-                  <span>
-                      <i class="fa fa-check"></i>
-                  </span>
-                  <span class="read-btn--text">&nbsp;Remove Read</span>
-              </button>
-
-              <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
-                <div class="form-check form-check-inline">
-                  <input class="form-check-input" type="checkbox" id="accessibility-mode" [value]="accessibilityMode" (change)="updateAccesibilityMode()">
-                  <label class="form-check-label" for="accessibility-mode">Order Numbers</label>
-                </div>
-              </div>
-            </div>
-        </div>
-        </div>
-    </div>
-</ng-template>
+  <h6 subtitle class="subtitle-with-actionables">{{items.length}} Items</h6>
 </app-side-nav-companion-bar>
-<div class="container-fluid mt-2" *ngIf="readingList" >
+<div class="container-fluid mt-2" *ngIf="readingList">
 
   <div class="row mb-3">
     <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="readingList.coverImage !== '' && readingList.coverImage !== undefined && readingList.coverImage !== null">
@@ -44,56 +18,34 @@
       <div class="row g-0 mb-3">
         <div class="col-auto me-2">
           <!-- Action row-->
-          <div class="btn-group me-3">
-            <button type="button" class="btn btn-primary" (click)="continue()">
+          <button class="btn btn-primary" title="Read from beginning" (click)="read()">
               <span>
+                  <i class="fa fa-book" aria-hidden="true"></i>
+                  <span class="read-btn--text">&nbsp;Read</span>
+              </span>
+          </button>
+          <button class="btn btn-primary ms-2" title="Continue from last reading position" (click)="continue()">
+            <span>
                 <i class="fa fa-book-open" aria-hidden="true"></i>
                 <span class="read-btn--text">&nbsp;Continue</span>
-              </span>
+            </span>
+        </button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-secondary" (click)="removeRead()" [disabled]="readingList.promoted && !this.isAdmin">
+                <span>
+                    <i class="fa fa-check"></i>
+                </span>
+                <span class="read-btn--text">&nbsp;Remove Read</span>
             </button>
-            <div class="btn-group" ngbDropdown role="group" aria-label="Read options">
-              <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
-              <div class="dropdown-menu" ngbDropdownMenu>
-                <button ngbDropdownItem (click)="read()">
-                  <span>
-                    <i class="fa fa-book" aria-hidden="true"></i>
-                    <span class="read-btn--text">&nbsp;Read</span>
-                  </span>
-                </button>
-                <button ngbDropdownItem (click)="continue(true)">
-                  <span>
-                    <i class="fa fa-book-open" aria-hidden="true"></i>
-                    <span class="read-btn--text">&nbsp;Continue</span>
-                    (<i class="fa fa-glasses ms-1" aria-hidden="true"></i>)
-                    <span class="visually-hidden">(Incognito)</span>
-                  </span>
-                </button>
-                <button ngbDropdownItem (click)="read(true)">
-                  <span>
-                    <i class="fa fa-book" aria-hidden="true"></i>
-                    <span class="read-btn--text">&nbsp;Read</span>
-                    (<i class="fa fa-glasses ms-1" aria-hidden="true"></i>)
-                    <span class="visually-hidden">(Incognito)</span>
-                  </span>
-                </button>
-              </div>
-            </div>
+        </div>
+        <!-- TODO: Move this in companion bar's page actions -->
+        <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="accessibilit-mode" [value]="accessibilityMode" (change)="accessibilityMode = !accessibilityMode">
+            <label class="form-check-label" for="accessibilit-mode">Order Numbers</label>
           </div>
         </div>
-      </div>
-      <div class="row g-0 mt-2" *ngIf="readingList.startingYear !== 0">
-        <h4 class="reading-list-years">
-          <ng-container *ngIf="readingList.startingMonth > 0">{{readingList.startingMonth | date:'MMM'}}</ng-container>
-          <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
-          <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
-          — 
-          <ng-container *ngIf="readingList.endingYear > 0">
-            <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
-            <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
-            <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
-          </ng-container>
-          
-        </h4>
       </div>
       <!-- Summary row-->
       <div class="row g-0 mt-2">
@@ -102,20 +54,7 @@
     </div>
   </div>
 
-  <div class="row mb-3">
-    <ng-container *ngIf="characters$ | async as characters">
-      <div class="row" *ngIf="characters && characters.length > 0">
-        <h5>Characters</h5>
-        <app-badge-expander [items]="characters">
-          <ng-template #badgeExpanderItem let-item let-position="idx">
-            <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-          </ng-template>  
-      </app-badge-expander>
-      </div>
-    </ng-container>
-  </div>
-
-  <div class="row mb-3 scroll-container" #scrollingBlock>
+  <div class="row mb-3" cdkScrollable>
     <div class="mx-auto" style="width: 200px;">
       <ng-container *ngIf="items.length === 0 && !isLoading">
         Nothing added
@@ -123,10 +62,10 @@
       <app-loading [loading]="isLoading"></app-loading>
     </div>
 
-    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-       [showRemoveButton]="false">
+    <!-- TODO: This needs virtualization -->
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode" [showRemoveButton]="false">
         <ng-template #draggableItem let-item let-position="idx">
-          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+          <app-reading-list-item class="content-container" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>

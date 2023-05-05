@@ -8,8 +8,8 @@ namespace API.Entities;
 public class Library : IEntityDate
 {
     public int Id { get; set; }
-    public required string Name { get; set; }
-    public string? CoverImage { get; set; }
+    public string Name { get; set; }
+    public string CoverImage { get; set; }
     public LibraryType Type { get; set; }
     /// <summary>
     /// If Folder Watching is enabled for this library
@@ -28,13 +28,9 @@ public class Library : IEntityDate
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
     /// <summary>
-    /// Should this library create collections from Metadata
+    /// Should this library create and manage collections from Metadata
     /// </summary>
     public bool ManageCollections { get; set; } = true;
-    /// <summary>
-    /// Should this library create reading lists from Metadata
-    /// </summary>
-    public bool ManageReadingLists { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
@@ -45,9 +41,9 @@ public class Library : IEntityDate
     /// </summary>
     /// <remarks>Time stored in UTC</remarks>
     public DateTime LastScanned { get; set; }
-    public ICollection<FolderPath> Folders { get; set; } = null!;
-    public ICollection<AppUser> AppUsers { get; set; } = null!;
-    public ICollection<Series> Series { get; set; } = null!;
+    public ICollection<FolderPath> Folders { get; set; }
+    public ICollection<AppUser> AppUsers { get; set; }
+    public ICollection<Series> Series { get; set; }
 
     public void UpdateLastModified()
     {

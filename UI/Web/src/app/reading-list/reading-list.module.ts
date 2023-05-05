@@ -8,7 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { SharedModule } from '../shared/shared.module';
-import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
@@ -16,9 +16,7 @@ import { ReadingListsComponent } from './_components/reading-lists/reading-lists
 import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
 import { FileUploadModule } from '@iplab/ngx-file-upload';
 import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
-import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
-import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
-import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+
 
 @NgModule({
   declarations: [
@@ -30,8 +28,6 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     ReadingListItemComponent,
     ImportCblModalComponent,
     CblConflictReasonPipe,
-    StepTrackerComponent,
-    CblImportResultPipe,
   ],
   imports: [
     CommonModule,
@@ -40,7 +36,6 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     NgbNavModule,
     NgbProgressbarModule,
     NgbTooltipModule,
-    NgbDropdownModule,
 
     PipeModule,
     SharedModule,
@@ -49,7 +44,6 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL
     FileUploadModule, // Import CBL
-    VirtualScrollerModule,
   ],
   exports: [
     AddToListModalComponent,

@@ -2,37 +2,30 @@ name: .NET Build Test and Sonar Scan
 
 on:
   push:
-    branches: '**'
+    branches: '*'
   pull_request:
     branches: [ main, develop ]
     types: [synchronize]
-
+  workflow_dispatch:
+ 
 jobs:
-  check_pr:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Check PR Body
-          uses: JJ/github-pr-contains-action@releases/v10
-          with:
-              github-token: ${{ secrets.GITHUB_TOKEN }}
-              bodyDoesNotContain: "[\"|`]"
   build:
     name: Build .Net
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
             fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 7.0.x
+            dotnet-version: 6.0.x
 
       - name: Install Swashbuckle CLI
         shell: powershell
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
@@ -82,23 +75,24 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
 
+
   version:
     name: Bump version on Develop push
     needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 7.0.x
+            dotnet-version: 6.0.x
 
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
@@ -117,9 +111,6 @@ jobs:
     name: Build Nightly Docker if Develop push
     needs: [ build, version ]
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
       - name: Find Current Pull Request
@@ -149,7 +140,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           ref: develop
 
@@ -160,7 +151,7 @@ jobs:
       - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm ci
+          npm ci --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
@@ -186,27 +177,20 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 7.0.x
+            dotnet-version: 6.0.x
 
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -222,7 +206,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
+          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -240,9 +224,6 @@ jobs:
     name: Build Stable Docker if Main push
     needs: [ build ]
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
 
@@ -273,7 +254,7 @@ jobs:
           echo "::set-output name=BODY::$body"
 
       - name: Check Out Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           ref: main
 
@@ -285,7 +266,7 @@ jobs:
 
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm install
+          npm ci --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
@@ -313,26 +294,19 @@ jobs:
         id: parse-version
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v2
         with:
-            dotnet-version: 7.0.x
+            dotnet-version: 6.0.x
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+        run: dotnet tool install -g --version 6.4.0 Swashbuckle.AspNetCore.Cli
 
       - run: ./monorepo-build.sh
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -348,7 +322,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}
+          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

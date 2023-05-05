@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -8,7 +7,6 @@ using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MimeTypes;
 
 namespace API.Controllers;
 
@@ -34,15 +32,14 @@ public class ImageController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId"})]
+    public async Task<ActionResult> GetChapterCoverImage(int chapterId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -51,15 +48,14 @@ public class ImageController : BaseApiController
     /// <param name="libraryId"></param>
     /// <returns></returns>
     [HttpGet("library-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"libraryId", "apiKey"})]
-    public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"libraryId"})]
+    public async Task<ActionResult> GetLibraryCoverImage(int libraryId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -68,15 +64,14 @@ public class ImageController : BaseApiController
     /// <param name="volumeId"></param>
     /// <returns></returns>
     [HttpGet("volume-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"volumeId", "apiKey"})]
-    public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"volumeId"})]
+    public async Task<ActionResult> GetVolumeCoverImage(int volumeId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -84,18 +79,17 @@ public class ImageController : BaseApiController
     /// </summary>
     /// <param name="seriesId">Id of Series</param>
     /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"seriesId", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"seriesId"})]
     [HttpGet("series-cover")]
-    public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
+    public async Task<ActionResult> GetSeriesCoverImage(int seriesId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
         Response.AddCacheHeader(path);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -104,15 +98,14 @@ public class ImageController : BaseApiController
     /// <param name="collectionTagId"></param>
     /// <returns></returns>
     [HttpGet("collection-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"collectionTagId", "apiKey"})]
-    public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"collectionTagId"})]
+    public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -121,15 +114,14 @@ public class ImageController : BaseApiController
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"readingListId", "apiKey"})]
-    public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"readingListId"})]
+    public async Task<ActionResult> GetReadingListCoverImage(int readingListId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 
     /// <summary>
@@ -145,16 +137,15 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
         if (bookmark == null) return BadRequest("Bookmark does not exist");
 
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
-        var format = Path.GetExtension(file.FullName);
+        var format = Path.GetExtension(file.FullName).Replace(".", string.Empty);
 
-        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+        return PhysicalFile(file.FullName, "image/" + format, Path.GetFileName(file.FullName));
     }
 
     /// <summary>
@@ -164,16 +155,15 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy="RequireAdminRole")]
     [HttpGet("cover-upload")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"filename", "apiKey"})]
-    public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"filename"})]
+    public ActionResult GetCoverUploadImage(string filename)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         if (filename.Contains("..")) return BadRequest("Invalid Filename");
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        var format = _directoryService.FileSystem.Path.GetExtension(path).Replace(".", string.Empty);
 
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+        return PhysicalFile(path, "image/" + format, _directoryService.FileSystem.Path.GetFileName(path));
     }
 }

@@ -7,9 +7,9 @@ public static class HashUtil
 {
     private static string CalculateCrc(string input)
     {
-        uint mCrc = 0xffffffff;
-        byte[] bytes = Encoding.UTF8.GetBytes(input);
-        foreach (byte myByte in bytes)
+        var mCrc = 0xffffffff;
+        var bytes = Encoding.UTF8.GetBytes(input);
+        foreach (var myByte in bytes)
         {
             mCrc ^=  (uint)myByte << 24;
             for (var i = 0; i < 8; i++)

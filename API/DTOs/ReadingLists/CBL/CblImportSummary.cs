@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using API.DTOs.ReadingLists.CBL;
 
-namespace API.DTOs.ReadingLists.CBL;
+namespace API.DTOs.ReadingLists;
 
 public enum CblImportResult {
     /// <summary>
@@ -63,39 +64,13 @@ public enum CblImportReason
     /// </summary>
     [Description("All Chapters Missing")]
     AllChapterMissing = 7,
-    /// <summary>
-    /// The Chapter was imported
-    /// </summary>
-    [Description("Success")]
-    Success = 8,
-    /// <summary>
-    /// The file does not match the XML spec
-    /// </summary>
-    [Description("Invalid File")]
-    InvalidFile = 9,
 }
 
 public class CblBookResult
 {
-    /// <summary>
-    /// Order in the CBL
-    /// </summary>
-    public int Order { get; set; }
     public string Series { get; set; }
     public string Volume { get; set; }
     public string Number { get; set; }
-    /// <summary>
-    /// Used on Series conflict
-    /// </summary>
-    public int LibraryId { get; set; }
-    /// <summary>
-    /// Used on Series conflict
-    /// </summary>
-    public int SeriesId { get; set; }
-    /// <summary>
-    /// The name of the reading list
-    /// </summary>
-    public string ReadingListName { get; set; }
     public CblImportReason Reason { get; set; }
 
     public CblBookResult(CblBook book)
@@ -117,12 +92,13 @@ public class CblBookResult
 public class CblImportSummaryDto
 {
     public string CblName { get; set; }
-    /// <summary>
-    /// Used only for Kavita's UI, the filename of the cbl
-    /// </summary>
-    public string FileName { get; set; }
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }
+    /// <summary>
+    /// A list of Series that are within the CBL but map to multiple libraries within Kavita
+    /// </summary>
+    public IList<SeriesDto> Conflicts { get; set; }
+    public IList<CblConflictQuestion> Conflicts2 { get; set; }
 
 }

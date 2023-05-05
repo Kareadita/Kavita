@@ -8,9 +8,9 @@ namespace API.Entities;
 public class Tag
 {
     public int Id { get; set; }
-    public required string Title { get; set; }
-    public required string NormalizedTitle { get; set; }
+    public string Title { get; set; }
+    public string NormalizedTitle { get; set; }
 
-    public ICollection<SeriesMetadata> SeriesMetadatas { get; set; } = null!;
-    public ICollection<Chapter> Chapters { get; set; } = null!;
+    public ICollection<SeriesMetadata> SeriesMetadatas { get; set; }
+    public ICollection<Chapter> Chapters { get; set; }
 }

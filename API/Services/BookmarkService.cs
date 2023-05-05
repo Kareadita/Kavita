@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
@@ -22,6 +23,8 @@ public interface IBookmarkService
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     Task ConvertAllBookmarkToWebP();
     Task ConvertAllCoverToWebP();
+    Task ConvertBookmarkToWebP(int bookmarkId);
+
 }
 
 public class BookmarkService : IBookmarkService
@@ -47,23 +50,21 @@ public class BookmarkService : IBookmarkService
     /// Deletes the files associated with the list of Bookmarks passed. Will clean up empty folders.
     /// </summary>
     /// <param name="bookmarks"></param>
-    public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark?> bookmarks)
+    public async Task DeleteBookmarkFiles(IEnumerable<AppUserBookmark> bookmarks)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
 
-        var bookmarkFilesToDelete = bookmarks
-            .Where(b => b != null)
-            .Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(
-                _directoryService.FileSystem.Path.Join(bookmarkDirectory, b!.FileName)))
-            .ToList();
+        var bookmarkFilesToDelete = bookmarks.Select(b => Tasks.Scanner.Parser.Parser.NormalizePath(
+            _directoryService.FileSystem.Path.Join(bookmarkDirectory,
+                b.FileName))).ToList();
 
         if (bookmarkFilesToDelete.Count == 0) return;
 
         _directoryService.DeleteFiles(bookmarkFilesToDelete);
 
         // Delete any leftover folders
-        foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, string.Empty, SearchOption.AllDirectories))
+        foreach (var directory in _directoryService.FileSystem.Directory.GetDirectories(bookmarkDirectory, "", SearchOption.AllDirectories))
         {
             if (_directoryService.FileSystem.Directory.GetFiles(directory, "", SearchOption.AllDirectories).Length == 0 &&
                 _directoryService.FileSystem.Directory.GetDirectories(directory).Length == 0)
@@ -72,32 +73,6 @@ public class BookmarkService : IBookmarkService
             }
         }
     }
-
-    /// <summary>
-    /// This is a job that runs after a bookmark is saved
-    /// </summary>
-    /// <remarks>This must be public</remarks>
-    public async Task ConvertBookmarkToWebP(int bookmarkId)
-    {
-        var bookmarkDirectory =
-            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-        var convertBookmarkToWebP =
-            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
-
-        if (!convertBookmarkToWebP) return;
-
-        // Validate the bookmark still exists
-        var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
-        if (bookmark == null) return;
-
-        bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
-            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
-        _unitOfWork.UserRepository.Update(bookmark);
-
-        await _unitOfWork.CommitAsync();
-    }
-
-
     /// <summary>
     /// Creates a new entry in the AppUserBookmarks and copies an image to BookmarkDirectory.
     /// </summary>
@@ -117,7 +92,7 @@ public class BookmarkService : IBookmarkService
                 return true;
             }
 
-            var fileInfo = _directoryService.FileSystem.FileInfo.New(imageToBookmark);
+            var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(imageToBookmark);
             var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             var targetFolderStem = BookmarkStem(userWithBookmarks.Id, bookmarkDto.SeriesId, bookmarkDto.ChapterId);
             var targetFilepath = Path.Join(settings.BookmarksDirectory, targetFolderStem);
@@ -161,6 +136,7 @@ public class BookmarkService : IBookmarkService
     /// <returns></returns>
     public async Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto)
     {
+        if (userWithBookmarks.Bookmarks == null) return true;
         var bookmarkToDelete = userWithBookmarks.Bookmarks.SingleOrDefault(x =>
             x.ChapterId == bookmarkDto.ChapterId && x.Page == bookmarkDto.Page);
         try
@@ -230,109 +206,22 @@ public class BookmarkService : IBookmarkService
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllCoverToWebP()
     {
-        _logger.LogInformation("[BookmarkService] Starting conversion of all covers to webp");
         var coverDirectory = _directoryService.CoverImageDirectory;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
-        var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
-        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithNonWebPCovers();
-
-        var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithNonWebPCovers();
-        var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithNonWebPCovers();
-        var collectionCovers = await _unitOfWork.CollectionTagRepository.GetAllWithNonWebPCovers();
-
-        var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
-                         libraryCovers.Count + collectionCovers.Count;
+        var chapters = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
 
         var count = 1F;
-        _logger.LogInformation("[BookmarkService] Starting conversion of chapters");
-        foreach (var chapter in chapterCovers)
+        foreach (var chapter in chapters)
         {
-            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
-
             var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
             chapter.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
+                MessageFactory.ConvertCoverProgressEvent(count / chapters.Count, ProgressEventType.Started));
             count++;
-        }
-
-        _logger.LogInformation("[BookmarkService] Starting conversion of series");
-        foreach (var series in seriesCovers)
-        {
-            if (string.IsNullOrEmpty(series.CoverImage)) continue;
-
-            var newFile = await SaveAsWebP(coverDirectory, series.CoverImage, coverDirectory);
-            series.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.SeriesRepository.Update(series);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
-            count++;
-        }
-
-        _logger.LogInformation("[BookmarkService] Starting conversion of libraries");
-        foreach (var library in libraryCovers)
-        {
-            if (string.IsNullOrEmpty(library.CoverImage)) continue;
-
-            var newFile = await SaveAsWebP(coverDirectory, library.CoverImage, coverDirectory);
-            library.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.LibraryRepository.Update(library);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
-            count++;
-        }
-
-        _logger.LogInformation("[BookmarkService] Starting conversion of reading lists");
-        foreach (var readingList in readingListCovers)
-        {
-            if (string.IsNullOrEmpty(readingList.CoverImage)) continue;
-
-            var newFile = await SaveAsWebP(coverDirectory, readingList.CoverImage, coverDirectory);
-            readingList.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.ReadingListRepository.Update(readingList);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
-            count++;
-        }
-
-        _logger.LogInformation("[BookmarkService] Starting conversion of collections");
-        foreach (var collection in collectionCovers)
-        {
-            if (string.IsNullOrEmpty(collection.CoverImage)) continue;
-
-            var newFile = await SaveAsWebP(coverDirectory, collection.CoverImage, coverDirectory);
-            collection.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.CollectionTagRepository.Update(collection);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Started));
-            count++;
-        }
-
-        // Now null out all series and volumes that aren't webp or custom
-        var nonCustomOrConvertedVolumeCovers = await _unitOfWork.VolumeRepository.GetAllWithNonWebPCovers();
-        foreach (var volume in nonCustomOrConvertedVolumeCovers)
-        {
-            if (string.IsNullOrEmpty(volume.CoverImage)) continue;
-            volume.CoverImage = null; // We null it out so when we call Refresh Metadata it will auto update from first chapter
-            _unitOfWork.VolumeRepository.Update(volume);
-            await _unitOfWork.CommitAsync();
-        }
-
-        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithNonWebPCovers(false);
-        foreach (var series in nonCustomOrConvertedSeriesCovers)
-        {
-            if (string.IsNullOrEmpty(series.CoverImage)) continue;
-            series.CoverImage = null; // We null it out so when we call Refresh Metadata it will auto update from first chapter
-            _unitOfWork.SeriesRepository.Update(series);
-            await _unitOfWork.CommitAsync();
         }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -341,6 +230,28 @@ public class BookmarkService : IBookmarkService
         _logger.LogInformation("[BookmarkService] Converted covers to WebP");
     }
 
+    /// <summary>
+    /// This is a job that runs after a bookmark is saved
+    /// </summary>
+    public async Task ConvertBookmarkToWebP(int bookmarkId)
+    {
+        var bookmarkDirectory =
+            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        var convertBookmarkToWebP =
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+
+        if (!convertBookmarkToWebP) return;
+
+        // Validate the bookmark still exists
+        var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
+        if (bookmark == null) return;
+
+        bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
+            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
+        _unitOfWork.UserRepository.Update(bookmark);
+
+        await _unitOfWork.CommitAsync();
+    }
 
     /// <summary>
     /// Converts an image file, deletes original and returns the new path back
@@ -349,9 +260,8 @@ public class BookmarkService : IBookmarkService
     /// <param name="filename">The file to convert</param>
     /// <param name="targetFolder">Full path to where files should be stored or any stem</param>
     /// <returns></returns>
-    public async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
+    private async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
     {
-        // This must be Public as it's used in via Hangfire as a background task
         var fullSourcePath = _directoryService.FileSystem.Path.Join(imageDirectory, filename);
         var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(filename).Name, string.Empty);
 

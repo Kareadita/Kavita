@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -16,10 +17,12 @@ public interface IMangaFileRepository
 public class MangaFileRepository : IMangaFileRepository
 {
     private readonly DataContext _context;
+    private readonly IMapper _mapper;
 
-    public MangaFileRepository(DataContext context)
+    public MangaFileRepository(DataContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public void Update(MangaFile file)

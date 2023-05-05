@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,13 +13,13 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using MimeTypes;
 
 namespace API.Controllers;
 
@@ -57,10 +57,9 @@ public class ReaderController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("pdf")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult> GetPdf(int chapterId, string apiKey)
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
+    public async Task<ActionResult> GetPdf(int chapterId)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId);
         if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
 
@@ -90,16 +89,14 @@ public class ReaderController : BaseApiController
     /// <remarks>This will cache the chapter images for reading</remarks>
     /// <param name="chapterId">Chapter Id</param>
     /// <param name="page">Page in question</param>
-    /// <param name="apiKey">User's API Key for authentication</param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <returns></returns>
     [HttpGet("image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId","page", "extractPdf", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [AllowAnonymous]
-    public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
+    public async Task<ActionResult> GetImage(int chapterId, int page, bool extractPdf = false)
     {
         if (page < 0) page = 0;
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("There was an issue finding image file for reading");
 
@@ -107,30 +104,15 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
-            var format = Path.GetExtension(path);
+            var format = Path.GetExtension(path).Replace(".", "");
 
-            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path), true);
         }
         catch (Exception)
         {
             _cacheService.CleanupChapters(new []{ chapterId });
             throw;
         }
-    }
-
-    [HttpGet("thumbnail")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
-    [AllowAnonymous]
-    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
-    {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
-        var chapter = await _cacheService.Ensure(chapterId, true);
-        if (chapter == null) return BadRequest("There was an issue extracting images from chapter");
-        var images = _cacheService.GetCachedPages(chapterId);
-
-        var path = await _readerService.GetThumbnail(chapter, pageNum, images);
-        var format = Path.GetExtension(path);
-        return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
     }
 
     /// <summary>
@@ -142,13 +124,12 @@ public class ReaderController : BaseApiController
     /// <remarks>We must use api key as bookmarks could be leaked to other users via the API</remarks>
     /// <returns></returns>
     [HttpGet("bookmark-image")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "page", "apiKey"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     [AllowAnonymous]
     public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
 
         var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
         if (page > totalPages)
@@ -160,9 +141,9 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
-            var format = Path.GetExtension(path);
+            var format = Path.GetExtension(path).Replace(".", string.Empty);
 
-            return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));
+            return PhysicalFile(path, "image/" + format, Path.GetFileName(path));
         }
         catch (Exception)
         {
@@ -183,16 +164,15 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf"})]
     public async Task<ActionResult<IEnumerable<FileDimensionDto>>> GetFileDimensions(int chapterId, bool extractPdf = false)
     {
-        if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
+        if (chapterId <= 0) return null;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
-        return Ok(_cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId)));
+        return Ok(_cacheService.GetCachedFileDimensions(chapterId));
     }
 
     /// <summary>
     /// Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.
     /// </summary>
-    /// <remarks>This is generally the first call when attempting to read to allow pre-generation of assets needed for reading</remarks>
     /// <param name="chapterId"></param>
     /// <param name="extractPdf">Should Kavita extract pdf into images. Defaults to false.</param>
     /// <param name="includeDimensions">Include file dimensions. Only useful for image based reading</param>
@@ -201,7 +181,7 @@ public class ReaderController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "extractPdf", "includeDimensions"})]
     public async Task<ActionResult<ChapterInfoDto>> GetChapterInfo(int chapterId, bool extractPdf = false, bool includeDimensions = false)
     {
-        if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
+        if (chapterId <= 0) return null; // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return BadRequest("Could not find Chapter");
 
@@ -228,7 +208,7 @@ public class ReaderController : BaseApiController
 
         if (includeDimensions)
         {
-            info.PageDimensions = _cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId));
+            info.PageDimensions = _cacheService.GetCachedFileDimensions(chapterId);
             info.DoublePairs = _readerService.GetPairs(info.PageDimensions);
         }
 
@@ -260,31 +240,21 @@ public class ReaderController : BaseApiController
     /// Returns various information about all bookmark files for a Series. Side effect: This will cache the bookmark images for reading.
     /// </summary>
     /// <param name="seriesId">Series Id for all bookmarks</param>
-    /// <param name="includeDimensions">Include file dimensions (extra I/O). Defaults to true.</param>
     /// <returns></returns>
     [HttpGet("bookmark-info")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "includeDimensions"})]
-    public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId, bool includeDimensions = true)
+    public async Task<ActionResult<BookmarkInfoDto>> GetBookmarkInfo(int seriesId)
     {
         var totalPages = await _cacheService.CacheBookmarkForSeries(User.GetUserId(), seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None);
 
-        var info = new BookmarkInfoDto()
+        return Ok(new BookmarkInfoDto()
         {
-            SeriesName = series!.Name,
+            SeriesName = series.Name,
             SeriesFormat = series.Format,
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             Pages = totalPages,
-        };
-
-        if (includeDimensions)
-        {
-            info.PageDimensions = _cacheService.GetCachedFileDimensions(_cacheService.GetBookmarkCachePath(seriesId));
-            info.DoublePairs = _readerService.GetPairs(info.PageDimensions);
-        }
-
-        return Ok(info);
+        });
     }
 
 
@@ -297,7 +267,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkRead(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -315,7 +284,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkUnread(MarkReadDto markReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
@@ -332,7 +300,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkVolumeAsUnread(MarkVolumeReadDto markVolumeReadDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         await _readerService.MarkChaptersAsUnread(user, markVolumeReadDto.SeriesId, chapters);
@@ -356,10 +323,9 @@ public class ReaderController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
-        if (user == null) return Unauthorized();
         await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
+            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         if (await _unitOfWork.CommitAsync())
@@ -380,7 +346,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsRead(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -409,7 +374,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleAsUnread(MarkVolumesReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var chapterIds = await _unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -437,7 +401,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsRead(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -463,7 +426,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> MarkMultipleSeriesAsUnread(MarkMultipleSeriesAsReadDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
-        if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
@@ -538,6 +500,44 @@ public class ReaderController : BaseApiController
     }
 
     /// <summary>
+    /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.
+    /// </summary>
+    /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
+    /// <returns></returns>
+    [Obsolete("Deprecated. Use 'Tachiyomi/mark-chapter-until-as-read'")]
+    [HttpPost("mark-chapter-until-as-read")]
+    public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
+        user.Progresses ??= new List<AppUserProgress>();
+
+        // Tachiyomi sends chapter 0.0f when there's no chapters read.
+        // Due to the encoding for volumes this marks all chapters in volume 0 (loose chapters) as read so we ignore it
+        if (chapterNumber == 0.0f) return true;
+
+        if (chapterNumber < 1.0f)
+        {
+            // This is a hack to track volume number. We need to map it back by x100
+            var volumeNumber = int.Parse($"{chapterNumber * 100f}");
+            await _readerService.MarkVolumesUntilAsRead(user, seriesId, volumeNumber);
+        }
+        else
+        {
+            await _readerService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber);
+        }
+
+
+        _unitOfWork.UserRepository.Update(user);
+
+        if (!_unitOfWork.HasChanges()) return Ok(true);
+        if (await _unitOfWork.CommitAsync()) return Ok(true);
+
+        await _unitOfWork.RollbackAsync();
+        return Ok(false);
+    }
+
+
+    /// <summary>
     /// Returns a list of bookmarked pages for a given Chapter
     /// </summary>
     /// <param name="chapterId"></param>
@@ -546,7 +546,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarks(int chapterId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForChapter(user.Id, chapterId));
     }
@@ -560,7 +559,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterDto filterDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(user.Id, filterDto));
@@ -575,7 +573,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> RemoveBookmarks(RemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok("Nothing to remove");
 
         try
@@ -615,7 +612,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> BulkRemoveBookmarks(BulkRemoveBookmarkForSeriesDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok("Nothing to remove");
 
         try
@@ -652,7 +648,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForVolume(int volumeId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForVolume(user.Id, volumeId));
     }
@@ -666,7 +661,6 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetBookmarksForSeries(int seriesId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
-        if (user == null) return Unauthorized();
         if (user.Bookmarks == null) return Ok(Array.Empty<BookmarkDto>());
 
         return Ok(await _unitOfWork.UserRepository.GetBookmarkDtosForSeries(user.Id, seriesId));
@@ -731,7 +725,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("next-chapter")]
     public async Task<ActionResult<int>> GetNextChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -750,7 +744,7 @@ public class ReaderController : BaseApiController
     /// <param name="volumeId"></param>
     /// <param name="currentChapterId"></param>
     /// <returns>chapter id for next manga</returns>
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId", "volumeId", "currentChapterId"})]
+    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new string[] { "seriesId", "volumeId", "currentChapterId"})]
     [HttpGet("prev-chapter")]
     public async Task<ActionResult<int>> GetPreviousChapter(int seriesId, int volumeId, int currentChapterId)
     {
@@ -765,7 +759,6 @@ public class ReaderController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("time-left")]
-    [ResponseCache(CacheProfileName = "Hour", VaryByQueryKeys = new [] { "seriesId"})]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletion(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());

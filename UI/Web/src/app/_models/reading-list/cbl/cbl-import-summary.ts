@@ -9,8 +9,10 @@ export interface CblConflictQuestion {
 
 export interface CblImportSummary {
     cblName: string;
-    fileName: string;
     results: Array<CblBookResult>;
     success: CblImportResult;
     successfulInserts: Array<CblBookResult>;
+    conflicts: Array<Series>;
+    conflicts2: Array<CblConflictQuestion>;
+    
 }

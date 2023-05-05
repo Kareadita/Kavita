@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
@@ -21,7 +22,6 @@ public interface ITaskScheduler
     void ScanFolder(string folderPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
-    void ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
@@ -31,9 +31,6 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-    Task CovertAllCoversToWebP();
-    Task CleanupDbEntries();
-
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -50,7 +47,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
-    private readonly IBookmarkService _bookmarkService;
 
     public static BackgroundJobServer Client => new BackgroundJobServer();
     public const string ScanQueue = "scan";
@@ -63,8 +59,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
 
-    private static readonly ImmutableArray<string> ScanTasks =
-        ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
+    private static readonly ImmutableArray<string> ScanTasks = ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
 
     private static readonly Random Rnd = new Random();
 
@@ -72,8 +67,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IBookmarkService bookmarkService)
+        IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -87,7 +81,6 @@ public class TaskScheduler : ITaskScheduler
         _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
-        _bookmarkService = bookmarkService;
     }
 
     public async Task ScheduleTasks()
@@ -99,12 +92,12 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(false),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
@@ -182,17 +175,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    public async Task CovertAllCoversToWebP()
-    {
-        await _bookmarkService.ConvertAllCoverToWebP();
-        _logger.LogInformation("[BookmarkService] Queuing tasks to update Series and Volume references via Cover Refresh");
-        var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
-        foreach (var lib in libraryIds)
-        {
-            RefreshMetadata(lib.Id, false);
-        }
-    }
-
     #endregion
 
     #region UpdateTasks
@@ -234,24 +216,15 @@ public class TaskScheduler : ITaskScheduler
 
     #endregion
 
-    public async Task CleanupDbEntries()
-    {
-        await _cleanupService.CleanupDbEntries();
-    }
-
-    /// <summary>
-    /// Attempts to call ScanLibraries on ScannerService, but if another scan task is in progress, will reschedule the invocation for 3 hours in future.
-    /// </summary>
-    /// <param name="force"></param>
-    public void ScanLibraries(bool force = false)
+    public void ScanLibraries()
     {
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours");
-            BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
+            BackgroundJob.Schedule(() => ScanLibraries(), TimeSpan.FromHours(3));
             return;
         }
-        BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
+        _scannerService.ScanLibraries();
     }
 
     public void ScanLibrary(int libraryId, bool force = false)
@@ -349,7 +322,6 @@ public class TaskScheduler : ITaskScheduler
     public async Task CheckForUpdate()
     {
         var update = await _versionUpdaterService.CheckForUpdate();
-        if (update == null) return;
         await _versionUpdaterService.PushUpdate(update);
     }
 

@@ -7,7 +7,6 @@ using API.Data;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
-using API.Helpers.Builders;
 using API.Services;
 using AutoMapper;
 using Microsoft.Data.Sqlite;
@@ -30,7 +29,6 @@ public abstract class AbstractDbTest
     protected const string BackupDirectory = "C:/kavita/config/backups/";
     protected const string LogDirectory = "C:/kavita/config/logs/";
     protected const string BookmarkDirectory = "C:/kavita/config/bookmarks/";
-    protected const string SiteThemeDirectory = "C:/kavita/config/themes/";
     protected const string TempDirectory = "C:/kavita/config/temp/";
     protected const string DataDirectory = "C:/data/";
 
@@ -79,9 +77,18 @@ public abstract class AbstractDbTest
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
-            .Build());
+        _context.Library.Add(new Library()
+        {
+            Name = "Manga",
+            Folders = new List<FolderPath>()
+            {
+                new FolderPath()
+                {
+                    Path = "C:/data/"
+                }
+            },
+            Series = new List<Series>()
+        });
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -96,7 +103,6 @@ public abstract class AbstractDbTest
         fileSystem.AddDirectory(CoverImageDirectory);
         fileSystem.AddDirectory(BackupDirectory);
         fileSystem.AddDirectory(BookmarkDirectory);
-        fileSystem.AddDirectory(SiteThemeDirectory);
         fileSystem.AddDirectory(LogDirectory);
         fileSystem.AddDirectory(TempDirectory);
         fileSystem.AddDirectory(DataDirectory);

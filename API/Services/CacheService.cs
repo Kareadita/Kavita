@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
@@ -24,7 +25,7 @@ public interface ICacheService
     /// <param name="chapterId"></param>
     /// <param name="extractPdfToImages">Extracts a PDF into images for a different reading experience</param>
     /// <returns>Chapter for the passed chapterId. Side-effect from ensuring cache.</returns>
-    Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false);
+    Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false);
     /// <summary>
     /// Clears cache directory of all volumes. This can be invoked from deleting a library or a series.
     /// </summary>
@@ -32,10 +33,7 @@ public interface ICacheService
     void CleanupChapters(IEnumerable<int> chapterIds);
     void CleanupBookmarks(IEnumerable<int> seriesIds);
     string GetCachedPagePath(int chapterId, int page);
-    string GetCachePath(int chapterId);
-    string GetBookmarkCachePath(int seriesId);
-    IEnumerable<string> GetCachedPages(int chapterId);
-    IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath);
+    IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId);
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
@@ -61,22 +59,11 @@ public class CacheService : ICacheService
         _bookmarkService = bookmarkService;
     }
 
-    public IEnumerable<string> GetCachedPages(int chapterId)
-    {
-        var path = GetCachePath(chapterId);
-        return _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
-            .OrderByNatural(Path.GetFileNameWithoutExtension);
-    }
-
-    /// <summary>
-    /// For a given path, scan all files (in reading order) and generate File Dimensions for it. Path must exist
-    /// </summary>
-    /// <param name="cachePath"></param>
-    /// <returns></returns>
-    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(string cachePath)
+    public IEnumerable<FileDimensionDto> GetCachedFileDimensions(int chapterId)
     {
         var sw = Stopwatch.StartNew();
-        var files = _directoryService.GetFilesWithExtension(cachePath, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
+        var path = GetCachePath(chapterId);
+        var files = _directoryService.GetFilesWithExtension(path, Tasks.Scanner.Parser.Parser.ImageFileExtensions)
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
 
@@ -100,13 +87,13 @@ public class CacheService : ICacheService
                     Height = image.Height,
                     Width = image.Width,
                     IsWide = image.Width > image.Height,
-                    FileName = file.Replace(cachePath, string.Empty)
+                    FileName = file.Replace(path, string.Empty)
                 });
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error calculating image dimensions for {CachePath}", cachePath);
+            _logger.LogError(ex, "There was an error calculating image dimensions for {ChapterId}", chapterId);
         }
         finally
         {
@@ -145,21 +132,14 @@ public class CacheService : ICacheService
     {
         var extractPath = GetCachePath(chapter.Id);
         var path = Path.Join(extractPath, _directoryService.FileSystem.Path.GetFileName(chapter.Files.First().FilePath));
-        if (!(_directoryService.FileSystem.FileInfo.New(path).Exists))
+        if (!(_directoryService.FileSystem.FileInfo.FromFileName(path).Exists))
         {
             path = chapter.Files.First().FilePath;
         }
         return path;
     }
 
-
-    /// <summary>
-    /// Caches the files for the given chapter to CacheDirectory
-    /// </summary>
-    /// <param name="chapterId"></param>
-    /// <param name="extractPdfToImages">Defaults to false. Extract pdf file into images rather than copying just the pdf file</param>
-    /// <returns>This will always return the Chapter for the chapterId</returns>
-    public async Task<Chapter?> Ensure(int chapterId, bool extractPdfToImages = false)
+    public async Task<Chapter> Ensure(int chapterId, bool extractPdfToImages = false)
     {
         _directoryService.ExistOrCreate(_directoryService.CacheDirectory);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
@@ -180,13 +160,12 @@ public class CacheService : ICacheService
     /// <param name="files"></param>
     /// <param name="extractPdfImages">Defaults to false, if true, will extract the images from the PDF renderer and not move the pdf file</param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
+    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false)
     {
-        if (files == null) return;
         var removeNonImages = true;
         var fileCount = files.Count;
         var extraPath = string.Empty;
-        var extractDi = _directoryService.FileSystem.DirectoryInfo.New(extractPath);
+        var extractDi = _directoryService.FileSystem.DirectoryInfo.FromDirectoryName(extractPath);
 
         if (files.Count > 0 && files[0].Format == MangaFormat.Image)
         {
@@ -265,17 +244,12 @@ public class CacheService : ICacheService
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
-    public string GetCachePath(int chapterId)
+    private string GetCachePath(int chapterId)
     {
         return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{chapterId}/"));
     }
 
-    /// <summary>
-    /// Returns the cache path for a given series' bookmarks. Should be cacheDirectory/{seriesId_bookmarks}/
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <returns></returns>
-    public string GetBookmarkCachePath(int seriesId)
+    private string GetBookmarkCachePath(int seriesId)
     {
         return _directoryService.FileSystem.Path.GetFullPath(_directoryService.FileSystem.Path.Join(_directoryService.CacheDirectory, $"{seriesId}_bookmarks/"));
     }
@@ -295,7 +269,15 @@ public class CacheService : ICacheService
             .OrderByNatural(Path.GetFileNameWithoutExtension)
             .ToArray();
 
-        return GetPageFromFiles(files, page);
+        if (files.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        if (page > files.Length) page = files.Length;
+
+        // Since array is 0 based, we need to keep that in account (only affects last image)
+        return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
     }
 
     public async Task<int> CacheBookmarkForSeries(int userId, int seriesId)
@@ -321,33 +303,4 @@ public class CacheService : ICacheService
 
         _directoryService.ClearAndDeleteDirectory(destDirectory);
     }
-
-    /// <summary>
-    /// Returns either the file or an empty string
-    /// </summary>
-    /// <param name="files"></param>
-    /// <param name="pageNum"></param>
-    /// <returns></returns>
-    public static string GetPageFromFiles(string[] files, int pageNum)
-    {
-        files = files
-            .AsEnumerable()
-            .OrderByNatural(Path.GetFileNameWithoutExtension)
-            .ToArray();
-
-        if (files.Length == 0)
-        {
-            return string.Empty;
-        }
-
-        if (pageNum < 0)
-        {
-            pageNum = 0;
-        }
-
-        // Since array is 0 based, we need to keep that in account (only affects last image)
-        return pageNum >= files.Length ? files.ElementAt(Math.Min(pageNum - 1, files.Length - 1)) : files.ElementAt(pageNum);
-    }
-
-
 }

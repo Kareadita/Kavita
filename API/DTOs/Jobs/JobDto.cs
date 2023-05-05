@@ -7,11 +7,11 @@ public class JobDto
     /// <summary>
     /// Job Id
     /// </summary>
-    public string Id { get; set; } = default!;
+    public string Id { get; set; }
     /// <summary>
     /// Human Readable title for the Job
     /// </summary>
-    public string Title { get; set; } = default!;
+    public string Title { get; set; }
     /// <summary>
     /// When the job was created
     /// </summary>
@@ -28,5 +28,5 @@ public class JobDto
     /// Last time the job was run
     /// </summary>
     public DateTime? LastExecutionUtc { get; set; }
-    public string Cron { get; set; } = default!;
+    public string Cron { get; set; }
 }

@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
-using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
-using API.Extensions;
 using API.Helpers;
-using API.Helpers.Builders;
+using API.Helpers.Converters;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
+using API.Tests.Helpers;
+using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -27,18 +33,21 @@ public class CleanupServiceTests : AbstractDbTest
 {
     private readonly ILogger<CleanupService> _logger = Substitute.For<ILogger<CleanupService>>();
     private readonly IEventHub _messageHub = Substitute.For<IEventHub>();
-    private readonly IReaderService _readerService;
 
 
     public CleanupServiceTests() : base()
     {
-        _context.Library.Add(new LibraryBuilder("Manga")
-            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
-            .Build());
-
-        _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
-            Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+        _context.Library.Add(new Library()
+        {
+            Name = "Manga",
+            Folders = new List<FolderPath>()
+            {
+                new FolderPath()
+                {
+                    Path = "C:/data/"
+                }
+            }
+        });
     }
 
     #region Setup
@@ -68,15 +77,15 @@ public class CleanupServiceTests : AbstractDbTest
         // Delete all Series to reset state
         await ResetDb();
 
-        var s = new SeriesBuilder("Test 1").Build();
+        var s = DbFactory.Series("Test 1");
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = new SeriesBuilder("Test 2").Build();
+        s = DbFactory.Series("Test 2");
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = new SeriesBuilder("Test 3").Build();
+        s = DbFactory.Series("Test 3");
         s.CoverImage = $"{ImageService.GetSeriesFormat(1000)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -102,11 +111,11 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        var s = new SeriesBuilder("Test 1").Build();
+        var s = DbFactory.Series("Test 1");
         s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
-        s = new SeriesBuilder("Test 2").Build();
+        s = DbFactory.Series("Test 2");
         s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
         s.LibraryId = 1;
         _context.Series.Add(s);
@@ -136,23 +145,29 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
-        _context.Series.Add(new SeriesBuilder("Test 1")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c01.jpg").Build())
-                .WithCoverImage("v01_c01.jpg")
-                .Build())
-            .WithCoverImage("series_01.jpg")
-            .WithLibraryId(1)
-            .Build());
+        var s = DbFactory.Series("Test 1");
+        var v = DbFactory.Volume("1");
+        v.Chapters.Add(new Chapter()
+        {
+            CoverImage = "v01_c01.jpg"
+        });
+        v.CoverImage = "v01_c01.jpg";
+        s.Volumes.Add(v);
+        s.CoverImage = "series_01.jpg";
+        s.LibraryId = 1;
+        _context.Series.Add(s);
 
-        _context.Series.Add(new SeriesBuilder("Test 2")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("0").WithCoverImage("v01_c03.jpg").Build())
-                .WithCoverImage("v01_c03.jpg")
-                .Build())
-            .WithCoverImage("series_03.jpg")
-            .WithLibraryId(1)
-            .Build());
+        s = DbFactory.Series("Test 2");
+        v = DbFactory.Volume("1");
+        v.Chapters.Add(new Chapter()
+        {
+            CoverImage = "v01_c03.jpg"
+        });
+        v.CoverImage = "v01_c03jpg";
+        s.Volumes.Add(v);
+        s.CoverImage = "series_03.jpg";
+        s.LibraryId = 1;
+        _context.Series.Add(s);
 
 
         await _context.SaveChangesAsync();
@@ -180,26 +195,27 @@ public class CleanupServiceTests : AbstractDbTest
         await ResetDb();
 
         // Add 2 series with cover images
+        var s = DbFactory.Series("Test 1");
+        s.Metadata.CollectionTags = new List<CollectionTag>();
+        s.Metadata.CollectionTags.Add(new CollectionTag()
+        {
+            Title = "Something",
+            CoverImage = $"{ImageService.GetCollectionTagFormat(1)}.jpg"
+        });
+        s.CoverImage = $"{ImageService.GetSeriesFormat(1)}.jpg";
+        s.LibraryId = 1;
+        _context.Series.Add(s);
 
-        _context.Series.Add(new SeriesBuilder("Test 1")
-            .WithMetadata(new SeriesMetadataBuilder()
-                .WithCollectionTag(new CollectionTagBuilder("Something")
-                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(1)}.jpg")
-                    .Build())
-                .Build())
-            .WithCoverImage($"{ImageService.GetSeriesFormat(1)}.jpg")
-            .WithLibraryId(1)
-            .Build());
-
-        _context.Series.Add(new SeriesBuilder("Test 2")
-            .WithMetadata(new SeriesMetadataBuilder()
-                .WithCollectionTag(new CollectionTagBuilder("Something")
-                    .WithCoverImage($"{ImageService.GetCollectionTagFormat(2)}.jpg")
-                    .Build())
-                .Build())
-            .WithCoverImage($"{ImageService.GetSeriesFormat(3)}.jpg")
-            .WithLibraryId(1)
-            .Build());
+        s = DbFactory.Series("Test 2");
+        s.Metadata.CollectionTags = new List<CollectionTag>();
+        s.Metadata.CollectionTags.Add(new CollectionTag()
+        {
+            Title = "Something 2",
+            CoverImage = $"{ImageService.GetCollectionTagFormat(2)}.jpg"
+        });
+        s.CoverImage = $"{ImageService.GetSeriesFormat(3)}.jpg";
+        s.LibraryId = 1;
+        _context.Series.Add(s);
 
 
         await _context.SaveChangesAsync();
@@ -231,14 +247,18 @@ public class CleanupServiceTests : AbstractDbTest
             UserName = "Joe",
             ReadingLists = new List<ReadingList>()
             {
-                new ReadingListBuilder("Something")
-                    .WithRating(AgeRating.Unknown)
-                    .WithCoverImage($"{ImageService.GetReadingListFormat(1)}.jpg")
-                    .Build(),
-                new ReadingListBuilder("Something 2")
-                    .WithRating(AgeRating.Unknown)
-                    .WithCoverImage($"{ImageService.GetReadingListFormat(2)}.jpg")
-                    .Build(),
+                new ReadingList()
+                {
+                    Title = "Something",
+                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something"),
+                    CoverImage = $"{ImageService.GetReadingListFormat(1)}.jpg"
+                },
+                new ReadingList()
+                {
+                    Title = "Something 2",
+                    NormalizedTitle = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something 2"),
+                    CoverImage = $"{ImageService.GetReadingListFormat(2)}.jpg"
+                }
             }
         });
 
@@ -388,20 +408,22 @@ public class CleanupServiceTests : AbstractDbTest
     [Fact]
     public async Task CleanupDbEntries_CleanupAbandonedChapters()
     {
-        var c = new ChapterBuilder("0")
-            .WithPages(1)
-            .Build();
-        var series = new SeriesBuilder("Test")
-            .WithFormat(MangaFormat.Epub)
-            .WithVolume(new VolumeBuilder("0")
-                .WithNumber(1)
-                .WithChapter(c)
-                .Build())
-            .Build();
-        series.Library = new LibraryBuilder("Test LIb").Build();
-
-        _context.Series.Add(series);
-
+        var c = EntityFactory.CreateChapter("1", false, new List<MangaFile>(), 1);
+        _context.Series.Add(new Series()
+        {
+            Name = "Test",
+            Library = new Library() {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>()
+            {
+                EntityFactory.CreateVolume("0", new List<Chapter>()
+                {
+                    c,
+                }),
+            }
+        });
 
         _context.AppUser.Add(new AppUser()
         {
@@ -410,8 +432,10 @@ public class CleanupServiceTests : AbstractDbTest
 
         await _context.SaveChangesAsync();
 
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>());
+
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await _readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
         await _context.SaveChangesAsync();
 
         // Validate correct chapters have read status
@@ -437,15 +461,25 @@ public class CleanupServiceTests : AbstractDbTest
     {
         var c = new CollectionTag()
         {
-            Title = "Test Tag",
-            NormalizedTitle = "Test Tag".ToNormalized(),
+            Title = "Test Tag"
         };
-        var s = new SeriesBuilder("Test")
-            .WithFormat(MangaFormat.Epub)
-            .WithMetadata(new SeriesMetadataBuilder().WithCollectionTag(c).Build())
-            .Build();
-        s.Library = new LibraryBuilder("Test LIb").Build();
-
+        var s = new Series()
+        {
+            Name = "Test",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+            {
+                CollectionTags = new List<CollectionTag>()
+                {
+                    c
+                }
+            }
+        };
         _context.Series.Add(s);
 
         _context.AppUser.Add(new AppUser()
@@ -477,11 +511,20 @@ public class CleanupServiceTests : AbstractDbTest
     {
         await ResetDb();
 
-        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldRemoveFullyReadSeries")
-            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
-            .Build();
-
-        s.Library = new LibraryBuilder("Test LIb").Build();
+        var s = new Series()
+        {
+            Name = "Test CleanupWantToRead_ShouldRemoveFullyReadSeries",
+            Library = new Library()
+            {
+                Name = "Test LIb",
+                Type = LibraryType.Manga,
+            },
+            Volumes = new List<Volume>(),
+            Metadata = new SeriesMetadata()
+            {
+                PublicationStatus = PublicationStatus.Completed
+            }
+        };
         _context.Series.Add(s);
 
         var user = new AppUser()
@@ -496,7 +539,10 @@ public class CleanupServiceTests : AbstractDbTest
 
         await _unitOfWork.CommitAsync();
 
-        await _readerService.MarkSeriesAsRead(user, s.Id);
+        var readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>());
+
+        await readerService.MarkSeriesAsRead(user, s.Id);
         await _unitOfWork.CommitAsync();
 
         var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), _unitOfWork,

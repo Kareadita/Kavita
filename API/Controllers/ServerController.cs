@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,7 @@ using API.DTOs.Jobs;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
+using API.Logging;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
@@ -14,6 +16,7 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
@@ -30,15 +33,14 @@ public class ServerController : BaseApiController
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
+    private readonly IEmailService _emailService;
     private readonly IBookmarkService _bookmarkService;
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
-    private readonly ITaskScheduler _taskScheduler;
 
     public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler)
+        ICleanupService cleanupService, IEmailService emailService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
@@ -47,10 +49,23 @@ public class ServerController : BaseApiController
         _versionUpdaterService = versionUpdaterService;
         _statsService = statsService;
         _cleanupService = cleanupService;
+        _emailService = emailService;
         _bookmarkService = bookmarkService;
         _scannerService = scannerService;
         _accountService = accountService;
-        _taskScheduler = taskScheduler;
+    }
+
+    /// <summary>
+    /// Attempts to Restart the server. Does not work, will shutdown the instance.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("restart")]
+    public ActionResult RestartServer()
+    {
+        _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
+
+        _applicationLifetime.StopApplication();
+        return Ok();
     }
 
     /// <summary>
@@ -139,14 +154,10 @@ public class ServerController : BaseApiController
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToWebP());
+        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllCoverToWebP());
         return Ok();
     }
 
-    /// <summary>
-    /// Downloads all the log files via a zip
-    /// </summary>
-    /// <returns></returns>
     [HttpGet("logs")]
     public ActionResult GetLogs()
     {
@@ -171,10 +182,6 @@ public class ServerController : BaseApiController
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
 
-    /// <summary>
-    /// Pull the Changelog for Kavita from Github and display
-    /// </summary>
-    /// <returns></returns>
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
@@ -193,10 +200,6 @@ public class ServerController : BaseApiController
         return Ok(await _accountService.CheckIfAccessible(Request));
     }
 
-    /// <summary>
-    /// Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.
-    /// </summary>
-    /// <returns></returns>
     [HttpGet("jobs")]
     public ActionResult<IEnumerable<JobDto>> GetJobs()
     {
@@ -211,7 +214,6 @@ public class ServerController : BaseApiController
                 });
 
         return Ok(recurringJobs);
+
     }
-
-
 }

@@ -17,7 +17,7 @@
                 <span class="visually-hidden" id="email-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
                 
                 <input id="email" aria-describedby="email-help" 
-                class="form-control" formControlName="email" type="email" inputmode="email"
+                class="form-control" formControlName="email" type="email" 
                 placeholder="id@kindle.com" [class.is-invalid]="settingsForm.get('email')?.invalid && settingsForm.get('email')?.touched">
                 <ng-container *ngIf="settingsForm.get('email')?.errors as errors">
                     <p class="invalid-feedback" *ngIf="errors.email">

@@ -1,1 +1,26 @@
 @use '../../../../manga-reader-common';
+
+.full-height {
+    width: auto;
+    margin: 0 auto;
+    max-height: calc(var(--vh)*100);
+    vertical-align: top;
+
+    &.wide {
+        height: 100vh;
+    }
+  }
+  
+  .original {
+    align-self: center;
+    width: auto;
+    margin: 0 auto;
+    vertical-align: top;
+  }
+  
+  .full-width {
+    width: 100%;
+    margin: 0 auto;
+    vertical-align: top;
+    max-width: fit-content;
+  }

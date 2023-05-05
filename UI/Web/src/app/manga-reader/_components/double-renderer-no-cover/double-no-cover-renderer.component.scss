@@ -1,8 +1,6 @@
 @use '../../../../manga-reader-common';
 
 .image-container {
-    height: calc(100vh); // override as on single, we -34px for the potential scrollbar
-    
     #image-1 {
         &.double {
             margin: 0 0 0 auto;

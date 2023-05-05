@@ -1,38 +1,26 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
-using API.Extensions.QueryExtensions;
 using API.Helpers;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
-[Flags]
-public enum ReadingListIncludes
-{
-    None = 1,
-    Items = 2,
-    ItemChapter = 4,
-}
-
 public interface IReadingListRepository
 {
-    Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true);
-    Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
+    Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams);
+    Task<ReadingList> GetReadingListByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
-    Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
+    Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId);
     Task<IEnumerable<ReadingListItemDto>> AddReadingProgressModifiers(int userId, IList<ReadingListItemDto> items);
-    Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title);
+    Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title);
     Task<IEnumerable<ReadingListItem>> GetReadingListItemsByIdAsync(int readingListId);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted);
@@ -41,14 +29,10 @@ public interface IReadingListRepository
     void BulkRemove(IEnumerable<ReadingListItem> items);
     void Update(ReadingList list);
     Task<int> Count();
-    Task<string?> GetCoverImageAsync(int readingListId);
+    Task<string> GetCoverImageAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
-    IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
-    Task<IList<ReadingList>> GetAllWithNonWebPCovers();
-    Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
-    Task<int> RemoveReadingListsWithoutSeries();
-    Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
+    Task<List<ReadingList>> GetAllReadingListsAsync();
 }
 
 public class ReadingListRepository : IReadingListRepository
@@ -77,82 +61,38 @@ public class ReadingListRepository : IReadingListRepository
         return await _context.ReadingList.CountAsync();
     }
 
-    public async Task<string?> GetCoverImageAsync(int readingListId)
+    public async Task<string> GetCoverImageAsync(int readingListId)
     {
         return await _context.ReadingList
             .Where(c => c.Id == readingListId)
             .Select(c => c.CoverImage)
+            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
     public async Task<IList<string>> GetAllCoverImagesAsync()
     {
-        return (await _context.ReadingList
+        return await _context.ReadingList
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
-            .ToListAsync())!;
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<bool> ReadingListExists(string name)
     {
-        var normalized = name.ToNormalized();
+        var normalized = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
         return await _context.ReadingList
-            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
+            .AnyAsync(x => x.NormalizedTitle.Equals(normalized));
     }
 
-    public IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId)
-    {
-        return _context.ReadingListItem
-            .Where(item => item.ReadingListId == readingListId)
-            .SelectMany(item => item.Chapter.People.Where(p => p.Role == PersonRole.Character))
-            .OrderBy(p => p.NormalizedName)
-            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
-            .AsEnumerable();
-    }
-
-    public async Task<IList<ReadingList>> GetAllWithNonWebPCovers()
+    public async Task<List<ReadingList>> GetAllReadingListsAsync()
     {
         return await _context.ReadingList
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
-            .ToListAsync();
-    }
-
-    /// <summary>
-    /// If less than 4 images exist, will return nothing back. Will not be full paths, but just cover image filenames
-    /// </summary>
-    /// <param name="readingListId"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public async Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId)
-    {
-        return await _context.ReadingListItem
-            .Where(ri => ri.ReadingListId == readingListId)
-            .Include(ri => ri.Chapter)
-            .Where(ri => ri.Chapter.CoverImage != null)
-            .Select(ri => ri.Chapter.CoverImage)
-            .Take(4)
-            .ToListAsync();
-    }
-
-    public async Task<int> RemoveReadingListsWithoutSeries()
-    {
-        var listsToDelete = await _context.ReadingList
-            .Include(c => c.Items)
-            .Where(c => c.Items.Count == 0)
+            .Include(r => r.Items.OrderBy(i => i.Order))
             .AsSplitQuery()
+            .OrderBy(l => l.Title)
             .ToListAsync();
-        _context.RemoveRange(listsToDelete);
-
-        return await _context.SaveChangesAsync();
-    }
-
-
-    public async Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items)
-    {
-        var normalized = name.ToNormalized();
-        return await _context.ReadingList
-            .Includes(includes)
-            .FirstOrDefaultAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId);
     }
 
     public void Remove(ReadingListItem item)
@@ -166,18 +106,17 @@ public class ReadingListRepository : IReadingListRepository
     }
 
 
-    public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true)
+    public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
     {
         var userAgeRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
-            .Where(l => l.AgeRating >= userAgeRating);
-        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.NormalizedTitle);
-
-       var finalQuery = query.ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+            .Where(l => l.AgeRating >= userAgeRating)
+            .OrderBy(l => l.LastModified)
+            .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 
-        return await PagedList<ReadingListDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
+        return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)
@@ -193,11 +132,10 @@ public class ReadingListRepository : IReadingListRepository
         return await query.ToListAsync();
     }
 
-    public async Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None)
+    public async Task<ReadingList> GetReadingListByIdAsync(int readingListId)
     {
         return await _context.ReadingList
             .Where(r => r.Id == readingListId)
-            .Includes(includes)
             .Include(r => r.Items.OrderBy(item => item.Order))
             .AsSplitQuery()
             .SingleOrDefaultAsync();
@@ -303,7 +241,7 @@ public class ReadingListRepository : IReadingListRepository
         return items;
     }
 
-    public async Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId)
+    public async Task<ReadingListDto> GetReadingListDtoByIdAsync(int readingListId, int userId)
     {
         return await _context.ReadingList
             .Where(r => r.Id == readingListId && (r.AppUserId == userId || r.Promoted))
@@ -323,14 +261,14 @@ public class ReadingListRepository : IReadingListRepository
         {
             var progress = userProgress.Where(p => p.ChapterId == item.ChapterId).ToList();
             if (progress.Count == 0) continue;
-            item.PagesRead = progress.Sum(p => p.PagesRead);
+                item.PagesRead = progress.Sum(p => p.PagesRead);
             item.LastReadingProgressUtc = progress.Max(p => p.LastModifiedUtc);
         }
 
         return items;
     }
 
-    public async Task<ReadingListDto?> GetReadingListDtoByTitleAsync(int userId, string title)
+    public async Task<ReadingListDto> GetReadingListDtoByTitleAsync(int userId, string title)
     {
         return await _context.ReadingList
             .Where(r => r.Title.Equals(title) && r.AppUserId == userId)

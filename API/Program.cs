@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
@@ -42,8 +43,7 @@ public class Program
             .Information()
             .CreateBootstrapLogger();
 
-        var directoryService = new DirectoryService(null!, new FileSystem());
-
+        var directoryService = new DirectoryService(null, new FileSystem());
         // Before anything, check if JWT has been generated properly or if user still has default
         if (!Configuration.CheckIfJwtTokenSet() &&
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
@@ -126,7 +126,7 @@ public class Program
 
     private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
     {
-        string? currentVersion = null;
+        string currentVersion = null;
         try
         {
             if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
@@ -173,29 +173,29 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
+                    if (string.IsNullOrEmpty(ipAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }
                     else
                     {
-                        foreach (var ipAddress in ipAddresses.Split(','))
+                        foreach(var ipAddress in ipAddresses.Split(','))
                         {
-                            try
-                            {
+                            try {
                                 var address = System.Net.IPAddress.Parse(ipAddress.Trim());
                                 opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                             }
-                            catch (Exception ex)
+                            catch(Exception ex)
                             {
-                                Log.Fatal(ex, "Could not parse ip address {IPAddress}", ipAddress);
+                                Log.Fatal(ex, "Could not parse ip addess '{0}'", ipAddress);
                             }
                         }
                     }
                 });
 
-                    webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
             });
+
 
 
 

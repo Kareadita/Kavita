@@ -66,7 +66,7 @@
         <ng-container>
             <div class="col-auto mb-2">
                 <app-icon-and-title label="Total Read Time" [clickable]="false" fontClasses="fas fa-eye" title="Total Read Time: {{stats.totalReadingTime | number}}">
-                    {{stats.totalReadingTime | timeDuration}}
+                    {{stats.totalReadingTime | compactNumber}} Hours
                 </app-icon-and-title>
             </div>
         </ng-container>

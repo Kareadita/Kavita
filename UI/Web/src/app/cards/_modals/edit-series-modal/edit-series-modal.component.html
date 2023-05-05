@@ -88,7 +88,7 @@
                                     <label for="release-year" class="form-label">Release Year</label>
                                     <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
                                         <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
-                                        <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
+                                        <input type="number" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
                                         <ng-container *ngIf="editSeriesForm.get('releaseYear')?.errors as errors">
                                             <p class="invalid-feedback" *ngIf="errors.pattern">
                                                 This must be a valid year greater than 1000 and 4 characters long
@@ -379,12 +379,10 @@
                     </div>
                     <div class="row g-0 mb-2" *ngIf="metadata">
                         <div class="col-md-6">
-                            Max Items: {{metadata.maxCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Highest Count found across all ComicInfo in the Series" role="button" tabindex="0"></i>
+                            Max Items: {{metadata.maxCount}} <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max of Volume/Issue field in ComicInfo. Used in conjunction with total items to determine publication status." role="button" tabindex="0"></i>
                         </div>
-                        <div class="col-md-6">
-                            Total Items: {{metadata.totalCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max Issue or Volume field from all ComicInfo in the series" role="button" tabindex="0"></i>
+                        <div class="col-md-6" title="">
+                            Total Items: {{metadata.totalCount}} <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Total number of issues/volumes in the series" role="button" tabindex="0"></i>
                         </div>
                         <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
                         <div class="col-md-6">Total Pages: {{series.pages}}</div>
