@@ -15,6 +15,8 @@ public enum MediaErrorProducer
 
 public interface IMediaErrorService
 {
+    Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details);
+    void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, string details);
     Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
     void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex);
 }
@@ -30,18 +32,36 @@ public class MediaErrorService : IMediaErrorService
 
     public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
-        var error = new MediaErrorBuilder(filename)
-            .WithComment(errorMessage)
-            .WithDetails(ex.Message)
-            .Build();
-
-        _unitOfWork.MediaErrorRepository.Attach(error);
-        await _unitOfWork.CommitAsync();
+        await ReportMediaIssueAsync(filename, producer, errorMessage, ex.Message);
     }
 
     public void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
         // To avoid overhead on commits, do async. We don't need to wait.
-        BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, ex));
+        BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, ex.Message));
     }
+
+    public void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, string details)
+    {
+        // To avoid overhead on commits, do async. We don't need to wait.
+        BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, details));
+    }
+
+    public async Task ReportMediaIssueAsync(string filename, MediaErrorProducer producer, string errorMessage, string details)
+    {
+        var error = new MediaErrorBuilder(filename)
+            .WithComment(errorMessage)
+            .WithDetails(details)
+            .Build();
+
+        if (await _unitOfWork.MediaErrorRepository.ExistsAsync(error))
+        {
+            return;
+        }
+
+
+        _unitOfWork.MediaErrorRepository.Attach(error);
+        await _unitOfWork.CommitAsync();
+    }
+
 }

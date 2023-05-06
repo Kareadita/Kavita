@@ -15,6 +15,7 @@ public interface IMediaErrorRepository
     void Remove(MediaError error);
     Task<MediaError> Find(string filename);
     Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams);
+    Task<bool> ExistsAsync(MediaError error);
 }
 
 public class MediaErrorRepository : IMediaErrorRepository
@@ -52,5 +53,13 @@ public class MediaErrorRepository : IMediaErrorRepository
             .ProjectTo<MediaErrorDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
         return PagedList<MediaErrorDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public Task<bool> ExistsAsync(MediaError error)
+    {
+        return _context.MediaError.AnyAsync(m => m.FilePath.Equals(error.FilePath)
+                                                 && m.Comment.Equals(error.Comment)
+                                                 && m.Details.Equals(error.Details)
+        );
     }
 }

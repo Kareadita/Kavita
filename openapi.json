@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.1.46"
+    "version": "0.7.2.0"
   },
   "servers": [
     {
@@ -7638,6 +7638,63 @@
         }
       }
     },
+    "/api/Server/media-errors": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserParams"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
@@ -12231,6 +12288,40 @@
         "additionalProperties": false,
         "description": "This is used for bulk updating a set of volume and or chapters in one go"
       },
+      "MediaErrorDto": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "Format Type (RAR, ZIP, 7Zip, Epub, PDF)",
+            "nullable": true
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Full Filepath to the file that has some issue",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "description": "Developer defined string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "description": "Exception message",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
       "MemberDto": {
         "type": "object",
         "properties": {
@@ -15185,6 +15276,21 @@
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UserParams": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "If set to 0, will set as MaxInt",
+            "format": "int32"
           }
         },
         "additionalProperties": false
