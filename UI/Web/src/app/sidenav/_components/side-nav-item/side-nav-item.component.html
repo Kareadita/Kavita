@@ -5,9 +5,17 @@
 </ng-container>
 
 <ng-template #useLink>
-    <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link">
-        <ng-container [ngTemplateOutlet]="inner"></ng-container>
-    </a>
+    <ng-container *ngIf="external; else internal">
+        <a class="side-nav-item" [href]="link" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" rel="noopener noreferrer" target="_blank">
+            <ng-container [ngTemplateOutlet]="inner"></ng-container>
+        </a>
+    </ng-container>
+    <ng-template #internal>
+        <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link">
+            <ng-container [ngTemplateOutlet]="inner"></ng-container>
+        </a>
+    </ng-template>
+    
 </ng-template>
 
 

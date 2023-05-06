@@ -13,6 +13,7 @@ export class ImageService implements OnDestroy {
 
   baseUrl = environment.apiUrl;
   apiKey: string = '';
+  encodedKey: string = '';
   public placeholderImage = 'assets/images/image-placeholder-min.png';
   public errorImage = 'assets/images/error-placeholder2-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
@@ -33,6 +34,7 @@ export class ImageService implements OnDestroy {
     this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
       if (user) {
         this.apiKey = user.apiKey;
+        this.encodedKey = encodeURIComponent(this.apiKey);
       }
     });
   }
@@ -62,35 +64,35 @@ export class ImageService implements OnDestroy {
   }
 
   getLibraryCoverImage(libraryId: number) {
-    return this.baseUrl + 'image/library-cover?libraryId=' + libraryId;
+    return `${this.baseUrl}image/library-cover?libraryId=${libraryId}&apiKey=${this.encodedKey}`;
   }
 
   getVolumeCoverImage(volumeId: number) {
-    return this.baseUrl + 'image/volume-cover?volumeId=' + volumeId;
+    return `${this.baseUrl}image/volume-cover?volumeId=${volumeId}&apiKey=${this.encodedKey}`;
   }
 
   getSeriesCoverImage(seriesId: number) {
-    return this.baseUrl + 'image/series-cover?seriesId=' + seriesId;
+    return `${this.baseUrl}image/series-cover?seriesId=${seriesId}&apiKey=${this.encodedKey}`;
   }
 
   getCollectionCoverImage(collectionTagId: number) {
-    return this.baseUrl + 'image/collection-cover?collectionTagId=' + collectionTagId;
+    return `${this.baseUrl}image/collection-cover?collectionTagId=${collectionTagId}&apiKey=${this.encodedKey}`;
   }
 
   getReadingListCoverImage(readingListId: number) {
-    return this.baseUrl + 'image/readinglist-cover?readingListId=' + readingListId;
+    return `${this.baseUrl}image/readinglist-cover?readingListId=${readingListId}&apiKey=${this.encodedKey}`;
   }
 
   getChapterCoverImage(chapterId: number) {
-    return this.baseUrl + 'image/chapter-cover?chapterId=' + chapterId;
+    return `${this.baseUrl}image/chapter-cover?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
   }
 
   getBookmarkedImage(chapterId: number, pageNum: number) {
-    return this.baseUrl + 'image/bookmark?chapterId=' + chapterId + '&pageNum=' + pageNum + '&apiKey=' + encodeURIComponent(this.apiKey);
+    return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}`;
   }
 
   getCoverUploadImage(filename: string) {
-    return this.baseUrl + 'image/cover-upload?filename=' + encodeURIComponent(filename);
+    return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }
 
   updateErroredImage(event: any) {

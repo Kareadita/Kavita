@@ -74,5 +74,24 @@ public class ParserBenchmarks
         }
     }
 
+    [Benchmark]
+    public void Test_CharacterReplace()
+    {
+        foreach (var name in _names)
+        {
+            var d = name.Contains('a');
+        }
+    }
+
+    [Benchmark]
+    public void Test_StringReplace()
+    {
+        foreach (var name in _names)
+        {
+
+            var d = name.Contains("a");
+        }
+    }
+
 
 }

@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
+using API.Helpers.Builders;
 
 namespace API.Helpers;
 
@@ -22,16 +23,17 @@ public static class PersonHelper
     /// <param name="action"></param>
     public static void UpdatePeople(ICollection<Person> allPeople, IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
+        // TODO: Validate if we need this, not used
         var allPeopleTypeRole = allPeople.Where(p => p.Role == role).ToList();
 
         foreach (var name in names)
         {
-            var normalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName));
+                p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
             if (person == null)
             {
-                person = DbFactory.Person(name, role);
+                person = new PersonBuilder(name, role).Build();
                 allPeople.Add(person);
             }
 
@@ -47,7 +49,7 @@ public static class PersonHelper
     /// <param name="people">People from metadata</param>
     /// <param name="role">Role to filter on</param>
     /// <param name="action">Callback which will be executed for each person removed</param>
-    public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person> action = null)
+    public static void RemovePeople(ICollection<Person> existingPeople, IEnumerable<string> people, PersonRole role, Action<Person>? action = null)
     {
         var normalizedPeople = people.Select(Services.Tasks.Scanner.Parser.Parser.Normalize).ToList();
         if (normalizedPeople.Count == 0)
@@ -78,7 +80,7 @@ public static class PersonHelper
     /// <param name="existingPeople"></param>
     /// <param name="removeAllExcept"></param>
     /// <param name="action">Callback for all entities that should be removed</param>
-    public static void KeepOnlySamePeopleBetweenLists(IEnumerable<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person> action = null)
+    public static void KeepOnlySamePeopleBetweenLists(IEnumerable<Person> existingPeople, ICollection<Person> removeAllExcept, Action<Person>? action = null)
     {
         foreach (var person in existingPeople)
         {
@@ -98,26 +100,66 @@ public static class PersonHelper
     /// <param name="person"></param>
     public static void AddPersonIfNotExists(ICollection<Person> metadataPeople, Person person)
     {
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
+        if (string.IsNullOrEmpty(person.Name)) return;
+        var existingPerson = metadataPeople.FirstOrDefault(p =>
+            p.NormalizedName == person.Name.ToNormalized() && p.Role == person.Role);
+
         if (existingPerson == null)
         {
             metadataPeople.Add(person);
         }
     }
 
+
     /// <summary>
-    /// Adds the person to the list if it's not already in there
+    /// For a given role and people dtos, update a series
     /// </summary>
-    /// <param name="metadataPeople"></param>
-    /// <param name="person"></param>
-    public static void AddPersonIfNotExists(BlockingCollection<Person> metadataPeople, Person person)
+    /// <param name="role"></param>
+    /// <param name="tags"></param>
+    /// <param name="series"></param>
+    /// <param name="allTags"></param>
+    /// <param name="handleAdd">This will call with an existing or new tag, but the method does not update the series Metadata</param>
+    /// <param name="onModified"></param>
+    public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? tags, Series series, IReadOnlyCollection<Person> allTags,
+        Action<Person> handleAdd, Action onModified)
     {
-        var existingPerson = metadataPeople.SingleOrDefault(p =>
-            p.NormalizedName == Services.Tasks.Scanner.Parser.Parser.Normalize(person.Name) && p.Role == person.Role);
-        if (existingPerson == null)
+        if (tags == null) return;
+        var isModified = false;
+        // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
+        var existingTags = series.Metadata.People.Where(p => p.Role == role).ToList();
+        foreach (var existing in existingTags)
         {
-            metadataPeople.Add(person);
+            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
+            {
+                // Remove tag
+                series.Metadata.People.Remove(existing);
+                isModified = true;
+            }
+        }
+
+        // At this point, all tags that aren't in dto have been removed.
+        foreach (var tag in tags)
+        {
+            var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
+            if (existingTag != null)
+            {
+                if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => t.Name != null && !t.Name.Equals(tag.Name)))
+                {
+                    handleAdd(existingTag);
+                    isModified = true;
+                }
+            }
+            else
+            {
+                // Add new tag
+                handleAdd(new PersonBuilder(tag.Name, role).Build());
+                isModified = true;
+            }
+        }
+
+        if (isModified)
+        {
+            onModified();
         }
     }
 }

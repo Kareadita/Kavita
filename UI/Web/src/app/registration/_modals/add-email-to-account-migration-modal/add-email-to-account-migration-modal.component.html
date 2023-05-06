@@ -24,7 +24,7 @@
 
         <div class="mb-3" style="width:100%">
             <label for="email" class="form-label">Email</label>
-            <input class="form-control" type="email" id="email" formControlName="email" [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
             <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
                 <div *ngIf="registerForm.get('email')?.errors?.required">
                     This field is required

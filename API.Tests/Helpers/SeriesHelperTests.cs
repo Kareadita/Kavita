@@ -3,7 +3,9 @@ using System.Linq;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services.Tasks.Scanner;
 using Xunit;
 
@@ -15,147 +17,161 @@ public class SeriesHelperTests
     [Fact]
     public void FindSeries_ShouldFind_SameFormat()
     {
-        var series = DbFactory.Series("Darker than Black");
+        var series = new SeriesBuilder("Darker than Black").Build();
         series.OriginalName = "Something Random";
         series.Format = MangaFormat.Archive;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Darker than Black".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
+        }));
+    }
+
+    [Fact]
+    public void FindSeries_ShouldFind_NullName()
+    {
+        var series = new SeriesBuilder("Darker than Black").Build();
+        series.OriginalName = null;
+        series.Format = MangaFormat.Archive;
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "Darker than Black",
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
     }
 
     [Fact]
     public void FindSeries_ShouldNotFind_WrongFormat()
     {
-        var series = DbFactory.Series("Darker than Black");
+        var series = new SeriesBuilder("Darker than Black").Build();
         series.OriginalName = "Something Random";
         series.Format = MangaFormat.Archive;
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
 
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Darker than Black".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker than Black")
+            NormalizedName = "Darker than Black".ToNormalized()
         }));
     }
 
     [Fact]
     public void FindSeries_ShouldFind_UsingOriginalName()
     {
-        var series = DbFactory.Series("Darker than Black");
+        var series = new SeriesBuilder("Darker than Black").Build();
         series.OriginalName = "Something Random";
         series.Format = MangaFormat.Image;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "SomethingRandom".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("SomethingRandom")
+            NormalizedName = "SomethingRandom".ToNormalized()
         }));
     }
 
     [Fact]
     public void FindSeries_ShouldFind_UsingLocalizedName()
     {
-        var series = DbFactory.Series("Darker than Black");
+        var series = new SeriesBuilder("Darker than Black").Build();
         series.LocalizedName = "Something Random";
         series.Format = MangaFormat.Image;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "Something Random".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Something Random")
+            NormalizedName = "Something Random".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Image,
             Name = "SomethingRandom".ToUpper(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("SomethingRandom")
+            NormalizedName = "SomethingRandom".ToNormalized()
         }));
     }
 
     [Fact]
     public void FindSeries_ShouldFind_UsingLocalizedName_2()
     {
-        var series = DbFactory.Series("My Dress-Up Darling");
+        var series = new SeriesBuilder("My Dress-Up Darling").Build();
         series.LocalizedName = "Sono Bisque Doll wa Koi wo Suru";
         series.Format = MangaFormat.Archive;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "My Dress-Up Darling",
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("My Dress-Up Darling")
+            NormalizedName = "My Dress-Up Darling".ToNormalized()
         }));
 
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
             Format = MangaFormat.Archive,
             Name = "Sono Bisque Doll wa Koi wo Suru".ToLower(),
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Sono Bisque Doll wa Koi wo Suru")
+            NormalizedName = "Sono Bisque Doll wa Koi wo Suru".ToNormalized()
         }));
     }
     #endregion
@@ -165,13 +181,13 @@ public class SeriesHelperTests
     {
         var existingSeries = new List<Series>()
         {
-            EntityFactory.CreateSeries("Darker than Black Vol 1"),
-            EntityFactory.CreateSeries("Darker than Black"),
-            EntityFactory.CreateSeries("Beastars"),
+            new SeriesBuilder("Darker than Black Vol 1").Build(),
+            new SeriesBuilder("Darker than Black").Build(),
+            new SeriesBuilder("Beastars").Build(),
         };
         var missingSeries = new List<Series>()
         {
-            EntityFactory.CreateSeries("Darker than Black Vol 1"),
+            new SeriesBuilder("Darker than Black Vol 1").Build(),
         };
         existingSeries = SeriesHelper.RemoveMissingSeries(existingSeries, missingSeries, out var removeCount).ToList();
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
@@ -9,15 +8,13 @@ using API.Data;
 using API.Data.Metadata;
 using API.Entities;
 using API.Entities.Enums;
-using API.Parser;
+using API.Extensions;
+using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
-using API.Tests.Helpers;
 using AutoMapper;
-using DotNet.Globbing;
-using Flurl.Util;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -121,17 +118,9 @@ public class ParseScannedFilesTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = DataDirectory
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder(DataDirectory).Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -254,7 +243,7 @@ public class ParseScannedFilesTests
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles.First().Series,
-                NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = parsedFiles.First().Series.ToNormalized(),
                 Format = parsedFiles.First().Format
             };
 

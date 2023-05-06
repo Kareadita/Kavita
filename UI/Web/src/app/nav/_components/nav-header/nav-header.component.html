@@ -1,202 +1,27 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
-    <div class="container-fluid">
-      <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
-      <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-      <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active">
-        <svg
-   width="28px"
-   height="28px"
-   viewBox="0 0 135.46666 135.46667"
-   version="1.1"
-   id="svg5"
-   xml:space="preserve"
+  <div class="container-fluid">
+    <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+    <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
+    <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active">
+      <img width="28px" height="28px" class="logo" src="assets/images/logo.png" alt="kavita icon" aria-hidden="true"/>
+      <span class="d-none d-md-inline logo"> Kavita</span>
+    </a>
+    <ul class="navbar-nav col me-auto">
 
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-     <g id="layer1"
-     transform="translate(-34.013356,-59.091761)">
-     <image
-       width="135.46666"
-       height="135.46666"
-       preserveAspectRatio="none"
-       style="image-rendering:optimizeQuality"
-       xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAACE1BMVEUAAABQvplGxZNXt6FO2sxG
-wppKx5RJx5RIxpRHxZNGxZVJxpNLw5ZIxpRLyJFHw5BIxZJKxJVIyJRIx5RIxpRIxZRFxZNKyJZI
-xpRKyJRJyZVIxZRKx5VKx5RJxpNHx5RHu4xXuJNJx5NJxpRJyJZMv49KxZNKxpNIyJFIw5NHxpNI
-x5RJxZRHyZRJx5VJyJVIx5NJx5VIyJVHxZJIx5RHxpVHxpNHxJNFxJRGxI1JyJVIxZNJxZRJxJJM
-x5VKyJRGx5RGxpNJx5NFxpNKx5dKxZNJyJRFzJlKxpZLxZVKyZRGxZVHxJZLyJNJxJZKxpT///9C
-THLk5+/9/f3n6vFX0ffl6PD+/v9CSXHm6fD7+/1EZHhMypjl5uvl9u5FTnRLyJXR1eBLyJZEYXdM
-zJhKypfj5u1JyZVMypfv+v5T0PdW0ffr7fPo6/Fx2Phd0vf5+vvv8fVKxZT5+/zt7/RCRnFEX3f3
-+Pp02Pj19vld0/fO0t1CSHFGxZNCxJBIyJREUnU7RW1JwJJGg4BGjoRFd33X2uVEcnxIso5IrI1H
-nohQWHxEaHk+SG9HmYdDV3XS8OO659Ov5M1+1bCGjKVey59It5D7/f1JvpHn9/Dg9Ou+wdCa3cFs
-0KdgaIhEbXpDXXZIpIrw+vXEyNWk38V5gZvw8vbx+/5S0PfI69vFyNWus8SfpbhocI6J3vlu1/hO
-0Pe/V/w3AAAAT3RSTlMABzIFAhLF0rRiSDYi6lMpbD/typ1XTPfA9vHm3KOHdRYL+vh9Du/ajlAe
-1XE7reTNuyaW4LiLXToa+8eS+PPogSunffy9tgrzvvnzfvl+T9nnOAAAH1hJREFUeNrs3Flz2jAQ
-AGBhMAaDua9yhiNAKBCOnDRp0yPpdDpT/QE9aDTS1P+if7017STNRSCEYEv7vfHEw0qrXa0AqcOv
-9+LawDyuHU0/hYLGQclqfz//9ev8e9sqHRjB0KfpUe3YHGjxnu5HQBYBPRoxw63psDDqlNrnlNhC
-MMboH/ia84kxJoRN6Hm71BkVhtNW2IxE9QACHvW1p+USZ6F0x2qQOVswSvGTKGXCJnMNq5MOnSVy
-Wu8rAt5RnyTD3UOj1CAOwSh+JsoEcTRKxmE3nJzUEXC5HS1bPTRSzNnwjOIXQpmTEljKOKxmtR0E
-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
-"
-       id="image71"
-       x="34.013355"
-       y="59.091763"/></g></svg>
-        <span class="d-none d-md-inline logo"> Kavita</span>
-      </a>
-      <ul class="navbar-nav col me-auto">
-        
-        <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
-          <label for="nav-search" class="form-label visually-hidden">Search series</label>
-          <div class="ng-autocomplete">
-            <app-grouped-typeahead
-              #search
-              id="nav-search"
-              [minQueryLength]="2"
-              initialValue=""
-              placeholder="Search…"
-              [grouppedData]="searchResults"
-              (inputChanged)="onChangeSearch($event)"
-              (clearField)="clearSearch()"
-              (focusChanged)="focusUpdate($event)"
-            >
+      <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
+        <label for="nav-search" class="form-label visually-hidden">Search series</label>
+        <div class="ng-autocomplete">
+          <app-grouped-typeahead
+            #search
+            id="nav-search"
+            [minQueryLength]="2"
+            initialValue=""
+            placeholder="Search…"
+            [grouppedData]="searchResults"
+            (inputChanged)="onChangeSearch($event)"
+            (clearField)="clearSearch()"
+            (focusChanged)="focusUpdate($event)"
+          >
 
             <ng-template #libraryTemplate let-item>
               <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
@@ -213,10 +38,13 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
                 </div>
                 <div class="ms-1">
                   <app-series-format [format]="item.format"></app-series-format>
-                  <span *ngIf="item.name.toLowerCase().trim().indexOf(searchTerm) >= 0; else localizedName">{{item.name}}</span>
-                  <ng-template #localizedName>
-                    <span [innerHTML]="item.localizedName"></span>
-                  </ng-template>
+                  <ng-container *ngIf="searchTerm.toLowerCase().trim() as st">
+                    <span *ngIf="item.name.toLowerCase().trim().indexOf(st) >= 0; else localizedName">{{item.name}}</span>
+                    <ng-template #localizedName>
+                      <span [innerHTML]="item.localizedName"></span>
+                    </ng-template>
+                  </ng-container>
+
                   <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
                 </div>
               </div>
@@ -260,7 +88,7 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
             <ng-template #personTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
                 <div class="ms-1">
-                  
+
                   <div [innerHTML]="item.name"></div>
                   <div class="text-light fst-italic">{{item.role | personRole}}</div>
                 </div>
@@ -275,7 +103,7 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
               </div>
             </ng-template>
 
-            
+
 
             <ng-template #chapterTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
@@ -302,44 +130,44 @@ NZ0ZV4zm4/L1dfnYNCrjTFq9G03rmj5D+Y4i0OHuL3GFPJytaM54AAAAAElFTkSuQmCC
             </ng-template>
 
           </app-grouped-typeahead>
-          </div>
         </div>
-      </ul>
+      </div>
+    </ul>
 
-      <ng-container *ngIf="!searchFocused">
-        <div class="back-to-top" *ngIf="backToTopNeeded">
-          <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
-            <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
-            <span class="visually-hidden">Scroll to Top</span>
+    <ng-container *ngIf="!searchFocused">
+      <div class="back-to-top" *ngIf="backToTopNeeded">
+        <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
+          <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
+          <span class="visually-hidden">Scroll to Top</span>
+        </button>
+      </div>
+
+      <ng-container *ngIf="(accountService.currentUser$ | async) as user">
+        <div class="nav-item">
+          <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
+        </div>
+        <div class="nav-item not-xs-only">
+          <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
+            <i class="fa fa-cogs nav" aria-hidden="true"></i>
+            <span class="visually-hidden">Server Settings</span>
+          </a>
+        </div>
+
+
+        <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+          <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+            <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
           </button>
+          <div ngbDropdownMenu>
+            <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
+            <a ngbDropdownItem routerLink="/preferences/">Settings</a>
+            <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">Help</a>
+            <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Announcements</a>
+            <a ngbDropdownItem (click)="logout()">Logout</a>
+          </div>
         </div>
-
-        <ng-container *ngIf="(accountService.currentUser$ | async) as user">
-          <div class="nav-item">
-            <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
-          </div>
-          <div class="nav-item not-xs-only">
-            <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
-              <i class="fa fa-cogs nav" aria-hidden="true"></i>
-              <span class="visually-hidden">Server Settings</span>
-            </a>
-          </div>
-          
-
-          <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-            <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-              <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
-            </button>
-            <div ngbDropdownMenu>
-              <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
-              <a ngbDropdownItem routerLink="/preferences/">Settings</a>
-              <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">Help</a>
-              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Announcements</a>
-              <a ngbDropdownItem (click)="logout()">Logout</a>
-            </div>
-          </div>
-        </ng-container>
       </ng-container>
-    </div>
+    </ng-container>
+  </div>
 </nav>
-  
+

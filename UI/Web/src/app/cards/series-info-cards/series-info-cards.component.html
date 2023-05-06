@@ -12,7 +12,7 @@
         <ng-container *ngIf="seriesMetadata.ageRating">
             <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
                 <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
-                    {{metadataService.getAgeRating(this.seriesMetadata.ageRating) | async}}
+                    {{this.seriesMetadata.ageRating | ageRating | async}}
                 </app-icon-and-title>
             </div>
             <div class="vr d-none d-lg-block m-2"></div>

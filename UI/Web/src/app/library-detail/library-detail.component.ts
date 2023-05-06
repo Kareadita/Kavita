@@ -95,7 +95,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         });
         break;
       case Action.Delete:
-        this.actionService.deleteMultipleSeries(selectedSeries, () => {
+        this.actionService.deleteMultipleSeries(selectedSeries, (successful) => {
+          if (!successful) return;
           this.bulkSelectionService.deselectAll();
           this.loadPage();
         });

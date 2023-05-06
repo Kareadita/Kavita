@@ -61,7 +61,7 @@ public class ComicInfo
     public string SeriesGroup { get; set; } = string.Empty;
 
     /// <summary>
-    ///
+    /// Can contain multiple comma separated numbers that match with StoryArcNumber
     /// </summary>
     public string StoryArc { get; set; } = string.Empty;
     /// <summary>
@@ -119,7 +119,7 @@ public class ComicInfo
             .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
     }
 
-    public static void CleanComicInfo(ComicInfo info)
+    public static void CleanComicInfo(ComicInfo? info)
     {
         if (info == null) return;
 
@@ -154,7 +154,7 @@ public class ComicInfo
             return Math.Max(Count, (int) Math.Floor(float.Parse(Volume)));
         }
 
-        return Count;
+        return 0;
     }
 
 

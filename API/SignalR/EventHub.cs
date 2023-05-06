@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System;
 using System.Threading.Tasks;
 using API.Data;
 using API.SignalR.Presence;
@@ -54,8 +55,8 @@ public class EventHub : IEventHub
     /// <returns></returns>
     public async Task SendMessageToAsync(string method, SignalRMessage message, int userId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        await _messageHub.Clients.User(user.UserName).SendAsync(method, message);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId) ?? throw new InvalidOperationException();
+        await _messageHub.Clients.User(user.UserName!).SendAsync(method, message);
     }
 
 }

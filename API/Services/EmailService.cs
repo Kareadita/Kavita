@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Email;
 using API.Entities.Enums;
+using Flurl;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -22,7 +23,7 @@ public interface IEmailService
     Task<bool> SendMigrationEmail(EmailMigrationDto data);
     Task<bool> SendPasswordResetEmail(PasswordResetEmailDto data);
     Task<bool> SendFilesToEmail(SendToDto data);
-    Task<EmailTestResultDto> TestConnectivity(string emailUrl);
+    Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail);
     Task<bool> IsDefaultEmailService();
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
 }
@@ -55,7 +56,7 @@ public class EmailService : IEmailService
     /// <remarks>This will do some basic filtering to auto return false if the emailUrl is a LAN ip</remarks>
     /// <param name="emailUrl"></param>
     /// <returns></returns>
-    public async Task<EmailTestResultDto> TestConnectivity(string emailUrl)
+    public async Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail)
     {
         var result = new EmailTestResultDto();
         try
@@ -65,7 +66,7 @@ public class EmailService : IEmailService
                 result.Successful = false;
                 result.ErrorMessage = "This is a local IP address";
             }
-            result.Successful = await SendEmailWithGet(emailUrl + "/api/test");
+            result.Successful = await SendEmailWithGet($"{emailUrl}/api/test?adminEmail={Url.Encode(adminEmail)}&sendEmail={sendEmail}");
         }
         catch (KavitaException ex)
         {
@@ -78,13 +79,13 @@ public class EmailService : IEmailService
 
     public async Task<bool> IsDefaultEmailService()
     {
-        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value
+        return (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value!
             .Equals(DefaultApiUrl);
     }
 
     public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
     {
-        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        var emailLink = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl))!.Value;
         var success = await SendEmailWithPost(emailLink + "/api/account/email-change", data);
         if (!success)
         {

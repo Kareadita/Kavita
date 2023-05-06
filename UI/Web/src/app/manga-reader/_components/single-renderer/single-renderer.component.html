@@ -1,6 +1,6 @@
 <ng-container *ngIf="isValid() && !this.mangaReaderService.shouldSplit(this.currentImage, this.pageSplit)">
-    <div class="image-container {{imageFitClass$ | async}}" 
-        [style.filter]="(darkenss$ | async)  ?? '' | safeStyle">
+    <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass$ | async}}"
+        [style.filter]="(darkenss$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
         <ng-container *ngIf="currentImage">
             <img alt=" " 
                 #image [src]="currentImage.src" 

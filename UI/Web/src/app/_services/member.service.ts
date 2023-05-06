@@ -12,8 +12,8 @@ export class MemberService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getMembers() {
-    return this.httpClient.get<Member[]>(this.baseUrl + 'users');
+  getMembers(includePending: boolean = false) {
+    return this.httpClient.get<Member[]>(this.baseUrl + 'users?includePending=' + includePending);
   }
 
   getMemberNames() {
@@ -34,10 +34,6 @@ export class MemberService {
 
   hasReadingProgress(librayId: number) {
     return this.httpClient.get<boolean>(this.baseUrl + 'users/has-reading-progress?libraryId=' + librayId);
-  }
-
-  getPendingInvites() {
-    return this.httpClient.get<Array<Member>>(this.baseUrl + 'users/pending');
   }
 
   addSeriesToWantToRead(seriesIds: Array<number>) {

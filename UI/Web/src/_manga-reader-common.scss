@@ -1,3 +1,5 @@
+$scrollbarHeight: 34px;
+
 img {
   user-select: none;
 }
@@ -12,8 +14,9 @@ img {
   }
 
   &.full-height {
-    height: calc(100vh - 34px); // 34px is the height of the horizontal scrollbar that will appear
-    display: flex; // changed from inline-block to fix the centering on tablets not working
+    height: calc(100vh); // We need to  - $scrollbarHeight when there is a horizontal scroll on macos
+    display: flex; 
+    align-content: center;
   }
 
   &.original {
@@ -55,14 +58,6 @@ img {
     animation: bookmark 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-// TODO: Move this into a dedicated component
-.loading {
-  position: absolute;
-  left: 48%;
-  top: 20%;
-  z-index: 1;
-}
-
 
 .highlight {
   background-color: var(--manga-reader-next-highlight-bg-color) !important;
@@ -76,7 +71,7 @@ img {
 }
 
 
-::ng-deep .image-container.book-shadow.center-double:before {
+::ng-deep .image-container.book-shadow[class*="double-offset"]:before, ::ng-deep .image-container.book-shadow.wide:before {
   content: '';
   position: absolute;
   top: 0;
@@ -90,7 +85,7 @@ img {
 }
 
 @supports (-moz-appearance:none) {
-  ::ng-deep .image-container.book-shadow.center-double:before {
+  ::ng-deep .image-container.book-shadow[class*="double-offset"]:before, ::ng-deep .image-container.book-shadow.wide:before {
     box-shadow:
       0px 0px calc(17px*3.14) 25px rgb(0 0 0 / 43%),
       0px 0px calc(2px*3.14) 2px rgb(0 0 0 / 43%),

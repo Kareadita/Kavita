@@ -4,7 +4,8 @@ using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Parser;
+using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Extensions;
@@ -13,22 +14,15 @@ public class ChapterListExtensionsTests
 {
     private static Chapter CreateChapter(string range, string number, MangaFile file, bool isSpecial)
     {
-        return new Chapter()
-        {
-            Range = range,
-            Number = number,
-            Files = new List<MangaFile>() {file},
-            IsSpecial = isSpecial
-        };
+        return new ChapterBuilder(number, range)
+            .WithIsSpecial(isSpecial)
+            .WithFile(file)
+            .Build();
     }
 
     private static MangaFile CreateFile(string file, MangaFormat format)
     {
-        return new MangaFile()
-        {
-            FilePath = file,
-            Format = format
-        };
+        return new MangaFileBuilder(file, format).Build();
     }
 
     [Fact]

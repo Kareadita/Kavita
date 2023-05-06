@@ -9,12 +9,13 @@ public class JumpKeyDto
     /// Number of items in this Key
     /// </summary>
     public int Size { get; set; }
+
     /// <summary>
     /// Code to use in URL (url encoded)
     /// </summary>
-    public string Key { get; set; }
+    public string Key { get; set; } = default!;
     /// <summary>
     /// What is visible to user
     /// </summary>
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
 }

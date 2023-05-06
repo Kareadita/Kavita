@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +18,15 @@ public interface IVolumeRepository
     void Update(Volume volume);
     void Remove(Volume volume);
     Task<IList<MangaFile>> GetFilesForVolume(int volumeId);
-    Task<string> GetVolumeCoverImageAsync(int volumeId);
+    Task<string?> GetVolumeCoverImageAsync(int volumeId);
     Task<IList<int>> GetChapterIdsByVolumeIds(IReadOnlyList<int> volumeIds);
     Task<IEnumerable<VolumeDto>> GetVolumesDtoAsync(int seriesId, int userId);
-    Task<Volume> GetVolumeAsync(int volumeId);
-    Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId);
+    Task<Volume?> GetVolumeAsync(int volumeId);
+    Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId);
     Task<IEnumerable<Volume>> GetVolumesForSeriesAsync(IList<int> seriesIds, bool includeChapters = false);
     Task<IEnumerable<Volume>> GetVolumes(int seriesId);
-    Task<Volume> GetVolumeByIdAsync(int volumeId);
+    Task<Volume?> GetVolumeByIdAsync(int volumeId);
+    Task<IList<Volume>> GetAllWithNonWebPCovers();
 }
 public class VolumeRepository : IVolumeRepository
 {
@@ -72,12 +75,11 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<string> GetVolumeCoverImageAsync(int volumeId)
+    public async Task<string?> GetVolumeCoverImageAsync(int volumeId)
     {
         return await _context.Volume
             .Where(v => v.Id == volumeId)
             .Select(v => v.CoverImage)
-            .AsNoTracking()
             .SingleOrDefaultAsync();
     }
 
@@ -118,7 +120,7 @@ public class VolumeRepository : IVolumeRepository
     /// <param name="volumeId"></param>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<VolumeDto> GetVolumeDtoAsync(int volumeId, int userId)
+    public async Task<VolumeDto?> GetVolumeDtoAsync(int volumeId, int userId)
     {
         var volume = await _context.Volume
             .Where(vol => vol.Id == volumeId)
@@ -126,7 +128,9 @@ public class VolumeRepository : IVolumeRepository
             .ThenInclude(c => c.Files)
             .AsSplitQuery()
             .ProjectTo<VolumeDto>(_mapper.ConfigurationProvider)
-            .SingleAsync(vol => vol.Id == volumeId);
+            .SingleOrDefaultAsync(vol => vol.Id == volumeId);
+
+        if (volume == null) return null;
 
         var volumeList = new List<VolumeDto>() {volume};
         await AddVolumeModifiers(userId, volumeList);
@@ -155,7 +159,7 @@ public class VolumeRepository : IVolumeRepository
     /// </summary>
     /// <param name="volumeId"></param>
     /// <returns></returns>
-    public async Task<Volume> GetVolumeAsync(int volumeId)
+    public async Task<Volume?> GetVolumeAsync(int volumeId)
     {
         return await _context.Volume
             .Include(vol => vol.Chapters)
@@ -191,9 +195,16 @@ public class VolumeRepository : IVolumeRepository
         return volumes;
     }
 
-    public async Task<Volume> GetVolumeByIdAsync(int volumeId)
+    public async Task<Volume?> GetVolumeByIdAsync(int volumeId)
     {
         return await _context.Volume.SingleOrDefaultAsync(x => x.Id == volumeId);
+    }
+
+    public async Task<IList<Volume>> GetAllWithNonWebPCovers()
+    {
+        return await _context.Volume
+                    .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+                    .ToListAsync();
     }
 
 

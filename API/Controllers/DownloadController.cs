@@ -93,13 +93,13 @@ public class DownloadController : BaseApiController
     public async Task<ActionResult> DownloadVolume(int volumeId)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
-
-        var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
+        if (volume == null) return BadRequest("Volume doesn't exist");
+        var files = await _unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series.Name} - Volume {volume.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_v{volumeId}", $"{series!.Name} - Volume {volume.Number}.zip");
         }
         catch (KavitaException ex)
         {
@@ -110,6 +110,7 @@ public class DownloadController : BaseApiController
     private async Task<bool> HasDownloadPermission()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return false;
         return await _accountService.HasDownloadPermission(user);
     }
 
@@ -130,11 +131,12 @@ public class DownloadController : BaseApiController
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter == null) return BadRequest("Invalid chapter");
         var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
         try
         {
-            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series.Name} - Chapter {chapter.Number}.zip");
+            return await DownloadFiles(files, $"download_{User.GetUsername()}_c{chapterId}", $"{series!.Name} - Chapter {chapter.Number}.zip");
         }
         catch (KavitaException ex)
         {
@@ -177,8 +179,9 @@ public class DownloadController : BaseApiController
     public async Task<ActionResult> DownloadSeries(int seriesId)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
-        var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) return BadRequest("Invalid Series");
+        var files = await _unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
         try
         {
             return await DownloadFiles(files, $"download_{User.GetUsername()}_s{seriesId}", $"{series.Name}.zip");
@@ -201,13 +204,13 @@ public class DownloadController : BaseApiController
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest("Bookmarks cannot be empty");
 
         // We know that all bookmarks will be for one single seriesId
-        var userId = User.GetUserId();
-        var username = User.GetUsername();
+        var userId = User.GetUserId()!;
+        var username = User.GetUsername()!;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(downloadBookmarkDto.Bookmarks.First().SeriesId);
 
         var files = await _bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
-        var filename = $"{series.Name} - Bookmarks.zip";
+        var filename = $"{series!.Name} - Bookmarks.zip";
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 0F));
         var seriesIds = string.Join("_", downloadBookmarkDto.Bookmarks.Select(b => b.SeriesId).Distinct());

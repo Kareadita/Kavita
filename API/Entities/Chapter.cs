@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
-using API.Parser;
-using API.Services;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Entities;
 
@@ -13,15 +12,15 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Range of numbers. Chapter 2-4 -> "2-4". Chapter 2 -> "2".
     /// </summary>
-    public string Range { get; set; }
+    public required string Range { get; set; }
     /// <summary>
     /// Smallest number of the Range. Can be a partial like Chapter 4.5
     /// </summary>
-    public string Number { get; set; }
+    public required string Number { get; set; }
     /// <summary>
     /// The files that represent this Chapter
     /// </summary>
-    public ICollection<MangaFile> Files { get; set; }
+    public ICollection<MangaFile> Files { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
@@ -31,7 +30,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Relative path to the (managed) image file representing the cover image
     /// </summary>
     /// <remarks>The file is managed internally to Kavita's APPDIR</remarks>
-    public string CoverImage { get; set; }
+    public string? CoverImage { get; set; }
     public bool CoverImageLocked { get; set; }
     /// <summary>
     /// Total number of pages in all MangaFiles
@@ -44,7 +43,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Used for books/specials to display custom title. For non-specials/books, will be set to <see cref="Range"/>
     /// </summary>
-    public string Title { get; set; }
+    public string? Title { get; set; }
     /// <summary>
     /// Age Rating for the issue/chapter
     /// </summary>
@@ -62,11 +61,11 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// Summary for the Chapter/Issue
     /// </summary>
-    public string Summary { get; set; }
+    public string? Summary { get; set; }
     /// <summary>
     /// Language for the Chapter/Issue
     /// </summary>
-    public string Language { get; set; }
+    public string? Language { get; set; }
     /// <summary>
     /// Total number of issues or volumes in the series
     /// </summary>
@@ -79,7 +78,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// <summary>
     /// SeriesGroup tag in ComicInfo
     /// </summary>
-    public string SeriesGroup { get; set; }
+    public string SeriesGroup { get; set; } = string.Empty;
     public string StoryArc { get; set; } = string.Empty;
     public string StoryArcNumber { get; set; } = string.Empty;
     public string AlternateNumber { get; set; } = string.Empty;
@@ -118,7 +117,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
 
 
     // Relationships
-    public Volume Volume { get; set; }
+    public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
 
     public void UpdateFrom(ParserInfo info)

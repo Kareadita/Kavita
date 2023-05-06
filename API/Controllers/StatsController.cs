@@ -32,7 +32,7 @@ public class StatsController : BaseApiController
     public async Task<ActionResult<UserReadStatistics>> GetUserReadStatistics(int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user.Id != userId && !await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
+        if (user!.Id != userId && !await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
             return Unauthorized("You are not authorized to view another user's statistics");
 
         return Ok(await _statService.GetUserReadStatistics(userId, new List<int>()));
@@ -116,7 +116,7 @@ public class StatsController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user.Id) return BadRequest();
+        if (!isAdmin && userId != user!.Id) return BadRequest();
 
         return Ok(await _statService.ReadCountByDay(userId, days));
     }
@@ -136,7 +136,7 @@ public class StatsController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-        if (!isAdmin && userId != user.Id) return BadRequest();
+        if (!isAdmin && userId != user!.Id) return BadRequest();
 
         return Ok(await _statService.GetReadingHistory(userId));
     }

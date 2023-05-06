@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums.Theme;
+using API.Extensions;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -56,7 +57,7 @@ public class ThemeService : IThemeService
         var reservedNames = Seed.DefaultThemes.Select(t => t.NormalizedName).ToList();
         var themeFiles = _directoryService
             .GetFilesWithExtension(Scanner.Parser.Parser.NormalizePath(_directoryService.SiteThemeDirectory), @"\.css")
-            .Where(name => !reservedNames.Contains(Scanner.Parser.Parser.Normalize(name))).ToList();
+            .Where(name => !reservedNames.Contains(name.ToNormalized())).ToList();
 
         var allThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
@@ -78,7 +79,7 @@ public class ThemeService : IThemeService
         foreach (var themeFile in themeFiles)
         {
             var themeName =
-                Scanner.Parser.Parser.Normalize(_directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile));
+                _directoryService.FileSystem.Path.GetFileNameWithoutExtension(themeFile).ToNormalized();
             if (allThemeNames.Contains(themeName)) continue;
 
             _unitOfWork.SiteThemeRepository.Add(new SiteTheme()

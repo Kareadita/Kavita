@@ -14,22 +14,11 @@ namespace API.Benchmark;
 [MemoryDiagnoser]
 [RankColumn]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[SimpleJob(launchCount: 1, warmupCount: 5, targetCount: 20)]
+[SimpleJob(launchCount: 1, warmupCount: 5, invocationCount: 20)]
 public class EpubBenchmark
 {
     private const string FilePath = @"E:\Books\Invaders of the Rokujouma\Invaders of the Rokujouma - Volume 01.epub";
-    private readonly Regex WordRegex = new Regex(@"\b\w+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    // [Benchmark]
-    // public async Task GetWordCount_PassByString()
-    // {
-    //     using var book = await EpubReader.OpenBookAsync(FilePath, BookService.BookReaderOptions);
-    //     foreach (var bookFile in book.Content.Html.Values)
-    //     {
-    //         GetBookWordCount_PassByString(await bookFile.ReadContentAsTextAsync());
-    //         ;
-    //     }
-    // }
+    private readonly Regex _wordRegex = new Regex(@"\b\w+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     [Benchmark]
     public async Task GetWordCount_PassByRef()
@@ -111,6 +100,6 @@ public class EpubBenchmark
 
 
         return doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]")
-            .Sum(node => WordRegex.Matches(node.InnerText).Count);
+            .Sum(node => _wordRegex.Matches(node.InnerText).Count);
     }
 }

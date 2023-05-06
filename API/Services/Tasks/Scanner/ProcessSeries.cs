@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Metadata;
@@ -12,8 +11,9 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
-using API.Parser;
+using API.Helpers.Builders;
 using API.Services.Tasks.Metadata;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -30,6 +30,13 @@ public interface IProcessSeries
     Task Prime();
     Task ProcessSeriesAsync(IList<ParserInfo> parsedInfos, Library library, bool forceUpdate = false);
     void EnqueuePostSeriesProcessTasks(int libraryId, int seriesId, bool forceUpdate = false);
+
+    // These exists only for Unit testing
+    void UpdateSeriesMetadata(Series series, Library library);
+    void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
+    void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info);
 }
 
 /// <summary>
@@ -47,16 +54,20 @@ public class ProcessSeries : IProcessSeries
     private readonly IMetadataService _metadataService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly ICollectionTagService _collectionTagService;
+    private readonly IReadingListService _readingListService;
 
     private Dictionary<string, Genre> _genres;
     private IList<Person> _people;
     private Dictionary<string, Tag> _tags;
     private Dictionary<string, CollectionTag> _collectionTags;
+    private readonly object _peopleLock = new object();
+    private readonly object _genreLock = new object();
+    private readonly object _tagLock = new object();
 
     public ProcessSeries(IUnitOfWork unitOfWork, ILogger<ProcessSeries> logger, IEventHub eventHub,
         IDirectoryService directoryService, ICacheHelper cacheHelper, IReadingItemService readingItemService,
         IFileService fileService, IMetadataService metadataService, IWordCountAnalyzerService wordCountAnalyzerService,
-        ICollectionTagService collectionTagService)
+        ICollectionTagService collectionTagService, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -68,6 +79,13 @@ public class ProcessSeries : IProcessSeries
         _metadataService = metadataService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _collectionTagService = collectionTagService;
+        _readingListService = readingListService;
+
+
+        _genres = new Dictionary<string, Genre>();
+        _people = new List<Person>();
+        _tags = new Dictionary<string, Tag>();
+        _collectionTags = new Dictionary<string, CollectionTag>();
     }
 
     /// <summary>
@@ -96,7 +114,7 @@ public class ProcessSeries : IProcessSeries
 
         // Check if there is a Series
         var firstInfo = parsedInfos.First();
-        Series series;
+        Series? series;
         try
         {
             series =
@@ -115,7 +133,9 @@ public class ProcessSeries : IProcessSeries
         if (series == null)
         {
             seriesAdded = true;
-            series = DbFactory.Series(firstInfo.Series, firstInfo.LocalizedSeries);
+            series = new SeriesBuilder(firstInfo.Series)
+                .WithLocalizedName(firstInfo.LocalizedSeries)
+                .Build();
             _unitOfWork.SeriesRepository.Add(series);
         }
 
@@ -131,7 +151,7 @@ public class ProcessSeries : IProcessSeries
             UpdateVolumes(series, parsedInfos, forceUpdate);
             series.Pages = series.Volumes.Sum(v => v.Pages);
 
-            series.NormalizedName = Parser.Parser.Normalize(series.Name);
+            series.NormalizedName = series.Name.ToNormalized();
             series.OriginalName ??= firstParsedInfo.Series;
             if (series.Format == MangaFormat.Unknown)
             {
@@ -156,12 +176,10 @@ public class ProcessSeries : IProcessSeries
             if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
             {
                 series.LocalizedName = localizedSeries;
-                series.NormalizedLocalizedName = Parser.Parser.Normalize(series.LocalizedName);
+                series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
             UpdateSeriesMetadata(series, library);
-
-            //CreateReadingListsFromSeries(series, library); This will be implemented later when I solution it
 
             // Update series FolderPath here
             await UpdateSeriesFolderPath(parsedInfos, library, series);
@@ -178,14 +196,25 @@ public class ProcessSeries : IProcessSeries
                 {
                     await _unitOfWork.RollbackAsync();
                     _logger.LogCritical(ex,
-                        "[ScannerService] There was an issue writing to the database for series {@SeriesName}",
+                        "[ScannerService] There was an issue writing to the database for series {SeriesName}",
                         series.Name);
+                    _logger.LogTrace("[ScannerService] Series Metadata Dump: {@Series}", series.Metadata);
+                    _logger.LogTrace("[ScannerService] People Dump: {@People}", _people
+                        .Select(p =>
+                            new {p.Id, p.Name, SeriesMetadataIds =
+                                p.SeriesMetadatas?.Select(m => m.Id),
+                                ChapterMetadataIds =
+                                    p.ChapterMetadatas?.Select(m => m.Id)
+                                    .ToList()}));
 
                     await _eventHub.SendMessageAsync(MessageFactory.Error,
                         MessageFactory.ErrorEvent($"There was an issue writing to the DB for Series {series}",
                             ex.Message));
                     return;
                 }
+
+                // Process reading list after commit as we need to commit per list
+                await _readingListService.CreateReadingListsFromSeries(series, library);
 
                 if (seriesAdded)
                 {
@@ -201,30 +230,10 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, false);
+        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
-    private void CreateReadingListsFromSeries(Series series, Library library)
-    {
-        //if (!library.ManageReadingLists) return;
-        _logger.LogInformation("Generating Reading Lists for {SeriesName}", series.Name);
-
-        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
-        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
-        {
-            if (!string.IsNullOrEmpty(chapter.StoryArc))
-            {
-                var readingLists = chapter.StoryArc.Split(',');
-                var readingListOrders = chapter.StoryArcNumber.Split(',');
-                if (readingListOrders.Length == 0)
-                {
-                    _logger.LogDebug("[ScannerService] There are no StoryArc orders listed, all reading lists fueled from StoryArc will be unordered");
-
-                }
-            }
-        }
-    }
 
     private async Task UpdateSeriesFolderPath(IEnumerable<ParserInfo> parsedInfos, Library library, Series series)
     {
@@ -254,9 +263,9 @@ public class ProcessSeries : IProcessSeries
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    private void UpdateSeriesMetadata(Series series, Library library)
+    public void UpdateSeriesMetadata(Series series, Library library)
     {
-        series.Metadata ??= DbFactory.SeriesMetadata(new List<CollectionTag>());
+        series.Metadata ??= new SeriesMetadataBuilder().Build();
         var isBook = library.Type == LibraryType.Book;
         var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
 
@@ -275,7 +284,9 @@ public class ProcessSeries : IProcessSeries
         // Set the AgeRating as highest in all the comicInfos
         if (!series.Metadata.AgeRatingLocked) series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
 
+        // Count (aka expected total number of chapters or volumes from metadata) across all chapters
         series.Metadata.TotalCount = chapters.Max(chapter => chapter.TotalCount);
+        // The actual number of count's defined across all chapter's metadata
         series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
         // To not have to rely completely on ComicInfo, try to parse out if the series is complete by checking parsed filenames as well.
         if (series.Metadata.MaxCount != series.Metadata.TotalCount)
@@ -293,26 +304,25 @@ public class ProcessSeries : IProcessSeries
             if (series.Metadata.MaxCount >= series.Metadata.TotalCount && series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Completed;
-            } else if (series.Metadata.TotalCount > 0 && series.Metadata.MaxCount > 0)
+            } else if (series.Metadata.TotalCount > 0)
             {
                 series.Metadata.PublicationStatus = PublicationStatus.Ended;
             }
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Summary) && !series.Metadata.SummaryLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
         {
             series.Metadata.Summary = firstChapter.Summary;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.Language) && !series.Metadata.LanguageLocked)
+        if (!string.IsNullOrEmpty(firstChapter?.Language) && !series.Metadata.LanguageLocked)
         {
             series.Metadata.Language = firstChapter.Language;
         }
 
-        if (!string.IsNullOrEmpty(firstChapter.SeriesGroup) && library.ManageCollections)
+        if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-
             foreach (var collection in firstChapter.SeriesGroup.Split(','))
             {
                 var normalizedName = Parser.Parser.Normalize(collection);
@@ -325,6 +335,16 @@ public class ProcessSeries : IProcessSeries
                 _collectionTagService.AddTagToSeriesMetadata(tag, series.Metadata);
             }
         }
+
+        if (!series.Metadata.GenresLocked)
+        {
+            var genres = chapters.SelectMany(c => c.Genres).ToList();
+            GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
+            {
+                series.Metadata.Genres.Remove(genre);
+            });
+        }
+
 
         // Handle People
         foreach (var chapter in chapters)
@@ -425,14 +445,6 @@ public class ProcessSeries : IProcessSeries
                 }
             }
         }
-
-        var genres = chapters.SelectMany(c => c.Genres).ToList();
-        GenreHelper.KeepOnlySameGenreBetweenLists(series.Metadata.Genres.ToList(), genres, genre =>
-        {
-            if (series.Metadata.GenresLocked) return;
-            series.Metadata.Genres.Remove(genre);
-        });
-
         // NOTE: The issue here is that people is just from chapter, but series metadata might already have some people on it
         // I might be able to filter out people that are in locked fields?
         var people = chapters.SelectMany(c => c.People).ToList();
@@ -471,14 +483,16 @@ public class ProcessSeries : IProcessSeries
                     case PersonRole.Translator:
                         if (!series.Metadata.TranslatorLocked) series.Metadata.People.Remove(person);
                         break;
+                    case PersonRole.Other:
                     default:
                         series.Metadata.People.Remove(person);
                         break;
                 }
             });
+
     }
 
-    private void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    public void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         var startingVolumeCount = series.Volumes.Count;
         // Add new volumes and update chapters per volume
@@ -486,26 +500,23 @@ public class ProcessSeries : IProcessSeries
         _logger.LogDebug("[ScannerService] Updating {DistinctVolumes} volumes on {SeriesName}", distinctVolumes.Count, series.Name);
         foreach (var volumeNumber in distinctVolumes)
         {
-            _logger.LogDebug("[ScannerService] Looking up volume for {VolumeNumber}", volumeNumber);
-            Volume volume;
+            Volume? volume;
             try
             {
                 volume = series.Volumes.SingleOrDefault(s => s.Name == volumeNumber);
             }
             catch (Exception ex)
             {
-                if (ex.Message.Equals("Sequence contains more than one matching element"))
-                {
-                    _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
-                    throw new KavitaException(
-                        $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
-                }
-                throw;
+                if (!ex.Message.Equals("Sequence contains more than one matching element")) throw;
+                _logger.LogCritical("[ScannerService] Kavita found corrupted volume entries on {SeriesName}. Please delete the series from Kavita via UI and rescan", series.Name);
+                throw new KavitaException(
+                    $"Kavita found corrupted volume entries on {series.Name}. Please delete the series from Kavita via UI and rescan");
             }
             if (volume == null)
             {
-                volume = DbFactory.Volume(volumeNumber);
-                volume.SeriesId = series.Id;
+                volume = new VolumeBuilder(volumeNumber)
+                    .WithSeriesId(series.Id)
+                    .Build();
                 series.Volumes.Add(volume);
             }
 
@@ -561,14 +572,14 @@ public class ProcessSeries : IProcessSeries
             series.Name, startingVolumeCount, series.Volumes.Count);
     }
 
-    private void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
+    public void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false)
     {
         // Add new chapters
         foreach (var info in parsedInfos)
         {
             // Specials go into their own chapters with Range being their filename and IsSpecial = True. Non-Specials with Vol and Chap as 0
             // also are treated like specials for UI grouping.
-            Chapter chapter;
+            Chapter? chapter;
             try
             {
                 chapter = volume.Chapters.GetChapterByRange(info);
@@ -583,7 +594,7 @@ public class ProcessSeries : IProcessSeries
             {
                 _logger.LogDebug(
                     "[ScannerService] Adding new chapter, {Series} - Vol {Volume} Ch {Chapter}", info.Series, info.Volumes, info.Chapters);
-                chapter = DbFactory.Chapter(info);
+                chapter = ChapterBuilder.FromParserInfo(info).Build();
                 volume.Chapters.Add(chapter);
                 series.UpdateLastChapterAdded();
             }
@@ -621,11 +632,11 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    private void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
+    public void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false)
     {
         chapter.Files ??= new List<MangaFile>();
         var existingFile = chapter.Files.SingleOrDefault(f => f.FilePath == info.FullFilePath);
-        var fileInfo = _directoryService.FileSystem.FileInfo.FromFileName(info.FullFilePath);
+        var fileInfo = _directoryService.FileSystem.FileInfo.New(info.FullFilePath);
         if (existingFile != null)
         {
             existingFile.Format = info.Format;
@@ -637,16 +648,16 @@ public class ProcessSeries : IProcessSeries
         }
         else
         {
-            var file = DbFactory.MangaFile(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format));
-            if (file == null) return;
-            file.Extension = fileInfo.Extension.ToLowerInvariant();
-            file.Bytes = fileInfo.Length;
+
+            var file = new MangaFileBuilder(info.FullFilePath, info.Format, _readingItemService.GetNumberOfPages(info.FullFilePath, info.Format))
+                .WithExtension(fileInfo.Extension)
+                .WithBytes(fileInfo.Length)
+                .Build();
             chapter.Files.Add(file);
         }
     }
 
-    #nullable enable
-    private void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
@@ -659,7 +670,7 @@ public class ProcessSeries : IProcessSeries
         }
 
         if (comicInfo == null) return;
-        _logger.LogDebug("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
+        _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
 
@@ -743,77 +754,65 @@ public class ProcessSeries : IProcessSeries
 
         var people = GetTagValues(comicInfo.Colorist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Colorist);
-        UpdatePeople(people, PersonRole.Colorist,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Colorist, AddPerson);
 
         people = GetTagValues(comicInfo.Characters);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Character);
-        UpdatePeople(people, PersonRole.Character,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Character, AddPerson);
 
 
         people = GetTagValues(comicInfo.Translator);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Translator);
-        UpdatePeople(people, PersonRole.Translator,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Translator, AddPerson);
 
 
         people = GetTagValues(comicInfo.Writer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Writer);
-        UpdatePeople(people, PersonRole.Writer,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Writer, AddPerson);
 
         people = GetTagValues(comicInfo.Editor);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Editor);
-        UpdatePeople(people, PersonRole.Editor,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Editor, AddPerson);
 
         people = GetTagValues(comicInfo.Inker);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Inker);
-        UpdatePeople(people, PersonRole.Inker,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Inker, AddPerson);
 
         people = GetTagValues(comicInfo.Letterer);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Letterer);
-        UpdatePeople(people, PersonRole.Letterer,
-            AddPerson);
-
+        UpdatePeople(people, PersonRole.Letterer, AddPerson);
 
         people = GetTagValues(comicInfo.Penciller);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Penciller);
-        UpdatePeople(people, PersonRole.Penciller,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Penciller, AddPerson);
 
         people = GetTagValues(comicInfo.CoverArtist);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.CoverArtist);
-        UpdatePeople(people, PersonRole.CoverArtist,
-            AddPerson);
+        UpdatePeople(people, PersonRole.CoverArtist, AddPerson);
 
         people = GetTagValues(comicInfo.Publisher);
         PersonHelper.RemovePeople(chapter.People, people, PersonRole.Publisher);
-        UpdatePeople(people, PersonRole.Publisher,
-            AddPerson);
+        UpdatePeople(people, PersonRole.Publisher, AddPerson);
 
         var genres = GetTagValues(comicInfo.Genre);
         GenreHelper.KeepOnlySameGenreBetweenLists(chapter.Genres,
-            genres.Select(DbFactory.Genre).ToList());
+            genres.Select(g => new GenreBuilder(g).Build()).ToList());
         UpdateGenre(genres, AddGenre);
 
         var tags = GetTagValues(comicInfo.Tags);
-        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(DbFactory.Tag).ToList());
+        TagHelper.KeepOnlySameTagBetweenLists(chapter.Tags, tags.Select(t => new TagBuilder(t).Build()).ToList());
         UpdateTag(tags, AddTag);
     }
 
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
-
+        // TODO: Move this to an extension and test it
         if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
             return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();
         }
         return ImmutableList<string>.Empty;
     }
-    #nullable disable
 
     /// <summary>
     /// Given a list of all existing people, this will check the new names and roles and if it doesn't exist in allPeople, will create and
@@ -826,23 +825,23 @@ public class ProcessSeries : IProcessSeries
     /// <param name="action"></param>
     private void UpdatePeople(IEnumerable<string> names, PersonRole role, Action<Person> action)
     {
-        var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
-
-        foreach (var name in names)
+        lock (_peopleLock)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
-            var person = allPeopleTypeRole.FirstOrDefault(p =>
-                p.NormalizedName.Equals(normalizedName));
-            if (person == null)
+            var allPeopleTypeRole = _people.Where(p => p.Role == role).ToList();
+
+            foreach (var name in names)
             {
-                person = DbFactory.Person(name, role);
-                lock (_people)
+                var normalizedName = name.ToNormalized();
+                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                    p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
+
+                if (person == null)
                 {
+                    person = new PersonBuilder(name, role).Build();
                     _people.Add(person);
                 }
+                action(person);
             }
-
-            action(person);
         }
     }
 
@@ -855,15 +854,15 @@ public class ProcessSeries : IProcessSeries
     {
         foreach (var name in names)
         {
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             if (string.IsNullOrEmpty(normalizedName)) continue;
 
             _genres.TryGetValue(normalizedName, out var genre);
             var newTag = genre == null;
             if (newTag)
             {
-                genre = DbFactory.Genre(name);
-                lock (_genres)
+                genre = new GenreBuilder(name).Build();
+                lock (_genreLock)
                 {
                     _genres.Add(normalizedName, genre);
                     _unitOfWork.GenreRepository.Attach(genre);
@@ -885,14 +884,14 @@ public class ProcessSeries : IProcessSeries
         {
             if (string.IsNullOrEmpty(name.Trim())) continue;
 
-            var normalizedName = Parser.Parser.Normalize(name);
+            var normalizedName = name.ToNormalized();
             _tags.TryGetValue(normalizedName, out var tag);
 
             var added = tag == null;
             if (tag == null)
             {
-                tag = DbFactory.Tag(name);
-                lock (_tags)
+                tag = new TagBuilder(name).Build();
+                lock (_tagLock)
                 {
                     _tags.Add(normalizedName, tag);
                 }

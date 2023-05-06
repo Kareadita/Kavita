@@ -17,6 +17,7 @@ import { SafeStylePipe } from './safe-style.pipe';
 import { DefaultDatePipe } from './default-date.pipe';
 import { BytesPipe } from './bytes.pipe';
 import { TimeAgoPipe } from './time-ago.pipe';
+import { TimeDurationPipe } from './time-duration.pipe';
 
 
 
@@ -39,6 +40,7 @@ import { TimeAgoPipe } from './time-ago.pipe';
     DefaultDatePipe,
     BytesPipe,
     TimeAgoPipe,
+    TimeDurationPipe,
   ],
   imports: [
     CommonModule,
@@ -60,7 +62,8 @@ import { TimeAgoPipe } from './time-ago.pipe';
     SafeStylePipe,
     DefaultDatePipe,
     BytesPipe,
-    TimeAgoPipe
+    TimeAgoPipe,
+    TimeDurationPipe
   ]
 })
 export class PipeModule { }

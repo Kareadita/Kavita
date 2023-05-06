@@ -19,5 +19,7 @@ public class ProgressDto
     /// For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position
     /// on pages that combine multiple "chapters".
     /// </summary>
-    public string BookScrollId { get; set; }
+    public string? BookScrollId { get; set; }
+
+    public DateTime LastModifiedUtc { get; set; }
 }

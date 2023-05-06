@@ -7,11 +7,11 @@ namespace API.Entities;
 public class ServerSetting : IHasConcurrencyToken
 {
     [Key]
-    public ServerSettingKey Key { get; set; }
+    public required ServerSettingKey Key { get; set; }
     /// <summary>
     /// The value of the Setting. Converter knows how to convert to the correct type
     /// </summary>
-    public string Value { get; set; }
+    public required string Value { get; set; }
 
     /// <inheritdoc />
     [ConcurrencyCheck]

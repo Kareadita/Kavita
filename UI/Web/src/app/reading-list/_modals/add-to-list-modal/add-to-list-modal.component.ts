@@ -73,7 +73,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
     this.listForm.addControl('filterQuery', new FormControl('', []));
     
     this.loading = true;
-    this.readingListService.getReadingLists(false).subscribe(lists => {
+    this.readingListService.getReadingLists(false, true).subscribe(lists => {
       this.lists = lists.result;
       this.loading = false;
     });

@@ -49,7 +49,13 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
       title: new FormControl(this.readingList.title, { nonNullable: true, validators: [Validators.required] }),
       summary: new FormControl(this.readingList.summary, { nonNullable: true, validators: [] }),
       promoted: new FormControl(this.readingList.promoted, { nonNullable: true, validators: [] }),
+      startingMonth: new FormControl(this.readingList.startingMonth, { nonNullable: true, validators: [Validators.min(1), Validators.max(12)] }),
+      startingYear: new FormControl(this.readingList.startingYear, { nonNullable: true, validators: [Validators.min(1000)] }),
+      endingMonth: new FormControl(this.readingList.endingMonth, { nonNullable: true, validators: [Validators.min(1), Validators.max(12)] }),
+      endingYear: new FormControl(this.readingList.endingYear, { nonNullable: true, validators: [Validators.min(1000)] }),
     });
+
+    this.coverImageLocked = this.readingList.coverImageLocked;
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100), 
@@ -68,6 +74,13 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));
+    if (!this.readingList.items || this.readingList.items.length === 0) {
+      this.readingListService.getListItems(this.readingList.id).subscribe(items => {
+        this.imageUrls.push(...(items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
+      });
+    } else {
+      this.imageUrls.push(...(this.readingList.items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
+    }
   }
 
   ngOnDestroy() {
@@ -83,6 +96,10 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
     if (this.reviewGroup.value.title.trim() === '') return;
 
     const model = {...this.reviewGroup.value, readingListId: this.readingList.id, coverImageLocked: this.coverImageLocked};
+    model.startingMonth = model.startingMonth || 0;
+    model.startingYear = model.startingYear || 0;
+    model.endingMonth = model.endingMonth || 0;
+    model.endingYear = model.endingYear || 0;
     const apis = [this.readingListService.update(model)];
     
     if (this.selectedCover !== '') {
@@ -101,6 +118,8 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
+    console.log(this.coverImageIndex)
+    this.cdRef.detectChanges();
   }
 
   updateSelectedImage(url: string) {

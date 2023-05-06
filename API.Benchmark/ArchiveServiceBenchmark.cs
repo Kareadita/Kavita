@@ -16,7 +16,7 @@ namespace API.Benchmark;
 [MemoryDiagnoser]
 [RankColumn]
 [Orderer(SummaryOrderPolicy.FastestToSlowest)]
-[SimpleJob(launchCount: 1, warmupCount: 5, targetCount: 20)]
+[SimpleJob(launchCount: 1, warmupCount: 5, invocationCount: 20)]
 public class ArchiveServiceBenchmark
 {
     private readonly ArchiveService _archiveService;

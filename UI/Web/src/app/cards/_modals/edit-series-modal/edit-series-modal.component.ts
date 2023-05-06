@@ -278,6 +278,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.collectionTagSettings.compareFn = (options: CollectionTag[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
+    this.collectionTagSettings.compareFnForAdd = (options: CollectionTag[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    }
     this.collectionTagSettings.selectionCompareFn = (a: CollectionTag, b: CollectionTag) => {
       return a.title === b.title;
     }
@@ -310,6 +313,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
       return a.id == b.id;
     }
+    this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    }
 
     if (this.metadata.tags) {
       this.tagsSettings.savedData = this.metadata.tags;
@@ -330,6 +336,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     };
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.genreSettings.compareFnForAdd = (options: Genre[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
     this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
       return a.title == b.title;
@@ -371,6 +380,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     this.languageSettings.addIfNonExisting = false;
     this.languageSettings.compareFn = (options: Language[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    this.languageSettings.compareFnForAdd = (options: Language[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
     }
     this.languageSettings.fetchFn = (filter: string) => of(this.validLanguages)
       .pipe(map(items => this.languageSettings.compareFn(items, filter)));
@@ -425,6 +437,9 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     personSettings.id = id;
     personSettings.compareFn = (options: Person[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.name, filter));
+    }
+    personSettings.compareFnForAdd = (options: Person[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.name, filter));
     }
 
     personSettings.selectionCompareFn = (a: Person, b: Person) => {

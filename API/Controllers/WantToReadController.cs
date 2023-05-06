@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -37,6 +36,9 @@ public class WantToReadController : BaseApiController
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(User.GetUserId(), userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(User.GetUserId(), pagedList);
+
         return Ok(pagedList);
     }
 
@@ -56,6 +58,7 @@ public class WantToReadController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
+        if (user == null) return Unauthorized();
 
         var existingIds = user.WantToRead.Select(s => s.Id).ToList();
         existingIds.AddRange(dto.SeriesIds);
@@ -84,6 +87,7 @@ public class WantToReadController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(),
             AppUserIncludes.WantToRead);
+        if (user == null) return Unauthorized();
 
         user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
 

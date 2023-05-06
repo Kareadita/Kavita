@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
+using API.Entities.Enums;
 using API.Services;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -38,12 +40,14 @@ public class PluginController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId <= 0) return Unauthorized();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user.UserName, userId);
+        _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user!.UserName, userId);
         return new UserDto
         {
-            Username = user.UserName,
+            Username = user.UserName!,
             Token = await _tokenService.CreateToken(user),
+            RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 }

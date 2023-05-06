@@ -2,6 +2,7 @@
 using API.Data;
 using API.Entities;
 using API.Helpers;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -13,9 +14,9 @@ public class GenreHelperTests
     {
         var allGenres = new List<Genre>
         {
-            DbFactory.Genre("Action"),
-            DbFactory.Genre("action"),
-            DbFactory.Genre("Sci-fi"),
+            new GenreBuilder("Action").Build(),
+            new GenreBuilder("action").Build(),
+            new GenreBuilder("Sci-fi").Build(),
         };
         var genreAdded = new List<Genre>();
 
@@ -33,9 +34,9 @@ public class GenreHelperTests
     {
         var allGenres = new List<Genre>
         {
-            DbFactory.Genre("Action"),
-            DbFactory.Genre("action"),
-            DbFactory.Genre("Sci-fi"),
+            new GenreBuilder("Action").Build(),
+            new GenreBuilder("action").Build(),
+            new GenreBuilder("Sci-fi").Build(),
 
         };
         var genreAdded = new List<Genre>();
@@ -54,19 +55,19 @@ public class GenreHelperTests
     {
         var existingGenres = new List<Genre>
         {
-            DbFactory.Genre("Action"),
-            DbFactory.Genre("action"),
-            DbFactory.Genre("Sci-fi"),
+            new GenreBuilder("Action").Build(),
+            new GenreBuilder("action").Build(),
+            new GenreBuilder("Sci-fi").Build(),
         };
 
 
-        GenreHelper.AddGenreIfNotExists(existingGenres, DbFactory.Genre("Action"));
+        GenreHelper.AddGenreIfNotExists(existingGenres, new GenreBuilder("Action").Build());
         Assert.Equal(3, existingGenres.Count);
 
-        GenreHelper.AddGenreIfNotExists(existingGenres, DbFactory.Genre("action"));
+        GenreHelper.AddGenreIfNotExists(existingGenres, new GenreBuilder("action").Build());
         Assert.Equal(3, existingGenres.Count);
 
-        GenreHelper.AddGenreIfNotExists(existingGenres, DbFactory.Genre("Shonen"));
+        GenreHelper.AddGenreIfNotExists(existingGenres, new GenreBuilder("Shonen").Build());
         Assert.Equal(4, existingGenres.Count);
     }
 
@@ -75,13 +76,13 @@ public class GenreHelperTests
     {
         var existingGenres = new List<Genre>
         {
-            DbFactory.Genre("Action"),
-            DbFactory.Genre("Sci-fi"),
+            new GenreBuilder("Action").Build(),
+            new GenreBuilder("Sci-fi").Build(),
         };
 
         var peopleFromChapters = new List<Genre>
         {
-            DbFactory.Genre("Action"),
+            new GenreBuilder("Action").Build(),
         };
 
         var genreRemoved = new List<Genre>();
@@ -99,8 +100,8 @@ public class GenreHelperTests
     {
         var existingGenres = new List<Genre>
         {
-            DbFactory.Genre("Action"),
-            DbFactory.Genre("Sci-fi"),
+            new GenreBuilder("Action").Build(),
+            new GenreBuilder("Sci-fi").Build(),
         };
 
         var peopleFromChapters = new List<Genre>();

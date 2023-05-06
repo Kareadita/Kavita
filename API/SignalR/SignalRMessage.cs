@@ -10,8 +10,8 @@ public class SignalRMessage
     /// <summary>
     /// Body of the event type
     /// </summary>
-    public object Body { get; set; }
-    public string Name { get; set; }
+    public object? Body { get; set; }
+    public required string Name { get; set; }
     /// <summary>
     /// User friendly Title of the Event
     /// </summary>

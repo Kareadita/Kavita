@@ -47,12 +47,14 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     includeInRecommended: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
   });
 
   selectedFolders: string[] = [];
   madeChanges = false;
   libraryTypes: string[] = []
-
+  
   isAddLibrary = false;
   setupStep = StepID.General;
   private readonly onDestroy = new Subject<void>();
@@ -62,7 +64,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
   get StepID() { return StepID; }
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
-    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
+    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
     private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
     private imageService: ImageService) { }
 
@@ -85,7 +87,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     }
 
     this.libraryForm.get('name')?.valueChanges.pipe(
-      debounceTime(100),
+      debounceTime(100), 
       distinctUntilChanged(),
       switchMap(name => this.libraryService.libraryNameExists(name)),
       tap(exists => {
@@ -93,7 +95,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
         if (!exists || isExistingName) {
           this.libraryForm.get('name')?.setErrors(null);
         } else {
-          this.libraryForm.get('name')?.setErrors({duplicateName: true})
+          this.libraryForm.get('name')?.setErrors({duplicateName: true})  
         }
         this.cdRef.markForCheck();
       }),
@@ -108,7 +110,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     this.onDestroy.next();
     this.onDestroy.complete();
   }
-
+  
 
   setValues() {
     if (this.library !== undefined) {
@@ -119,6 +121,8 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
       this.libraryForm.get('includeInRecommended')?.setValue(this.library.includeInRecommended);
       this.libraryForm.get('includeInSearch')?.setValue(this.library.includeInSearch);
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
+      this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
+      this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       this.cdRef.markForCheck();
@@ -155,7 +159,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
       model.type = parseInt(model.type, 10);
 
       if (model.type !== this.library.type) {
-        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to
+        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to 
         series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?`)) return;
       }
 
@@ -217,7 +221,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
 
   isNextDisabled() {
     switch (this.setupStep) {
-      case StepID.General:
+      case StepID.General: 
         return this.libraryForm.get('name')?.invalid || this.libraryForm.get('type')?.invalid;
       case StepID.Folder:
         return this.selectedFolders.length === 0;

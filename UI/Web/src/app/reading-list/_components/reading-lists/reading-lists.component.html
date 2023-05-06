@@ -3,7 +3,7 @@
         <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
         <span>Reading Lists</span>
     </h2>
-    <h6 subtitle *ngIf="pagination">{{pagination.totalItems}} Items</h6>
+    <h6 subtitle class="subtitle-with-actionables" *ngIf="pagination">{{pagination.totalItems | number}} Items</h6>
 </app-side-nav-companion-bar>
 
 <app-card-detail-layout

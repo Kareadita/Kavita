@@ -9,6 +9,7 @@ namespace API.Data;
 /// v0.7 introduced UTC dates and GMT+1 users would sometimes have dates stored as '0000-12-31 23:00:00'.
 /// This Migration will update those dates.
 /// </summary>
+// ReSharper disable once InconsistentNaming
 public static class MigrateBrokenGMT1Dates
 {
     public static async Task Migrate(IUnitOfWork unitOfWork, DataContext dataContext, ILogger<Program> logger)

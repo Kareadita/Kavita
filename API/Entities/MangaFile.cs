@@ -15,7 +15,7 @@ public class MangaFile : IEntityDate
     /// <summary>
     /// Absolute path to the archive file
     /// </summary>
-    public string FilePath { get; set; }
+    public required string FilePath { get; set; }
     /// <summary>
     /// Number of pages for the given file
     /// </summary>
@@ -28,7 +28,7 @@ public class MangaFile : IEntityDate
     /// <summary>
     /// File extension
     /// </summary>
-    public string Extension { get; set; }
+    public string? Extension { get; set; }
     /// <inheritdoc cref="IEntityDate.Created"/>
     public DateTime Created { get; set; }
     /// <summary>
@@ -48,7 +48,7 @@ public class MangaFile : IEntityDate
 
 
     // Relationship Mapping
-    public Chapter Chapter { get; set; }
+    public Chapter Chapter { get; set; } = null!;
     public int ChapterId { get; set; }
 
 
@@ -57,6 +57,7 @@ public class MangaFile : IEntityDate
     /// </summary>
     public void UpdateLastModified()
     {
+        if (FilePath == null) return;
         LastModified = File.GetLastWriteTime(FilePath);
         LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
     }

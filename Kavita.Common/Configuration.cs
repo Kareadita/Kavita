@@ -8,8 +8,10 @@ namespace Kavita.Common;
 
 public static class Configuration
 {
-    public const string DefaultIPAddresses = "0.0.0.0,::";
-    public static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
+    public const string DefaultIpAddresses = "0.0.0.0,::";
+    public const string DefaultBaseUrl = "/";
+    public const string DefaultXFrameOptions = "SAMEORIGIN";
+    private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static int Port
     {
@@ -28,6 +30,14 @@ public static class Configuration
         get => GetJwtToken(GetAppSettingFilename());
         set => SetJwtToken(GetAppSettingFilename(), value);
     }
+
+    public static string BaseUrl
+    {
+        get => GetBaseUrl(GetAppSettingFilename());
+        set => SetBaseUrl(GetAppSettingFilename(), value);
+    }
+
+    public static string XFrameOptions => GetXFrameOptions(GetAppSettingFilename());
 
     private static string GetAppSettingFilename()
     {
@@ -177,7 +187,7 @@ public static class Configuration
     {
         if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
         {
-            return DefaultIPAddresses;
+            return string.Empty;
         }
 
         try
@@ -196,14 +206,109 @@ public static class Configuration
             Console.WriteLine("Error writing app settings: " + ex.Message);
         }
 
-        return DefaultIPAddresses;
+        return string.Empty;
     }
     #endregion
 
-    private class AppSettings
+    #region BaseUrl
+    private static string GetBaseUrl(string filePath)
+    {
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "BaseUrl";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                var baseUrl = tokenElement.GetString();
+                if (!string.IsNullOrEmpty(baseUrl))
+                {
+                    baseUrl = !baseUrl.StartsWith("/")
+                                ? $"/{baseUrl}"
+                                : baseUrl;
+
+                    baseUrl = !baseUrl.EndsWith("/")
+                                ? $"{baseUrl}/"
+                                : baseUrl;
+
+                    return baseUrl;
+                }
+                return DefaultBaseUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return DefaultBaseUrl;
+    }
+
+    private static void SetBaseUrl(string filePath, string value)
+    {
+
+        var baseUrl = !value.StartsWith("/")
+            ? $"/{value}"
+            : value;
+
+        baseUrl = !baseUrl.EndsWith("/")
+                    ? $"{baseUrl}/"
+                    : baseUrl;
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.BaseUrl = baseUrl;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow exception */
+        }
+    }
+    #endregion
+
+    #region XFrameOrigins
+    private static string GetXFrameOptions(string filePath)
+    {
+        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        {
+            return DefaultBaseUrl;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "XFrameOrigins";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                var origins = tokenElement.GetString();
+                return !string.IsNullOrEmpty(origins) ? origins : DefaultBaseUrl;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error reading app settings: " + ex.Message);
+        }
+
+        return DefaultXFrameOptions;
+    }
+    #endregion
+
+    private sealed class AppSettings
     {
         public string TokenKey { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public int Port { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
         public string IpAddresses { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
+        public string BaseUrl { get; set; }
     }
 }

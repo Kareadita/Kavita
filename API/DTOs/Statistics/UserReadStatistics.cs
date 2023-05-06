@@ -20,6 +20,6 @@ public class UserReadStatistics
     public long ChaptersRead { get; set; }
     public DateTime LastActive { get; set; }
     public double AvgHoursPerWeekSpentReading { get; set; }
-    public IEnumerable<StatCount<float>> PercentReadPerLibrary { get; set; }
+    public IEnumerable<StatCount<float>>? PercentReadPerLibrary { get; set; }
 
 }

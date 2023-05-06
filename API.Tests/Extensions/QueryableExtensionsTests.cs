@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Data;
 using API.Data.Misc;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Extensions.QueryExtensions;
+using API.Helpers.Builders;
 using Xunit;
 
 namespace API.Tests.Extensions;
@@ -18,27 +21,15 @@ public class QueryableExtensionsTests
     {
         var items = new List<Series>()
         {
-            new Series()
-            {
-                Metadata = new SeriesMetadata()
-                {
-                    AgeRating = AgeRating.Teen,
-                }
-            },
-            new Series()
-            {
-                Metadata = new SeriesMetadata()
-                {
-                    AgeRating = AgeRating.Unknown,
-                }
-            },
-            new Series()
-            {
-                Metadata = new SeriesMetadata()
-                {
-                    AgeRating = AgeRating.X18Plus,
-                }
-            },
+            new SeriesBuilder("Test 1")
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new SeriesBuilder("Test 2")
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .Build(),
+            new SeriesBuilder("Test 3")
+                .WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+                .Build()
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
@@ -56,40 +47,16 @@ public class QueryableExtensionsTests
     {
         var items = new List<CollectionTag>()
         {
-            new CollectionTag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new CollectionTag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Unknown,
-                    },
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new CollectionTag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.X18Plus,
-                    }
-                }
-            },
+            new CollectionTagBuilder("Test")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new CollectionTagBuilder("Test 2")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new CollectionTagBuilder("Test 3")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+                .Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
@@ -107,40 +74,16 @@ public class QueryableExtensionsTests
     {
         var items = new List<Genre>()
         {
-            new Genre()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Genre()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Unknown,
-                    },
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Genre()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.X18Plus,
-                    }
-                }
-            },
+            new GenreBuilder("A")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new GenreBuilder("B")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new GenreBuilder("C")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+                .Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
@@ -158,40 +101,16 @@ public class QueryableExtensionsTests
     {
         var items = new List<Tag>()
         {
-            new Tag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Tag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Unknown,
-                    },
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Tag()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.X18Plus,
-                    }
-                }
-            },
+            new TagBuilder("Test 1")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new TagBuilder("Test 2")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new TagBuilder("Test 3")
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+                .Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
@@ -209,40 +128,16 @@ public class QueryableExtensionsTests
     {
         var items = new List<Person>()
         {
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Unknown,
-                    },
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.Teen,
-                    }
-                }
-            },
-            new Person()
-            {
-                SeriesMetadatas = new List<SeriesMetadata>()
-                {
-                    new SeriesMetadata()
-                    {
-                        AgeRating = AgeRating.X18Plus,
-                    }
-                }
-            },
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Unknown).Build())
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Teen).Build())
+                .Build(),
+            new PersonBuilder("Test", PersonRole.Character)
+                .WithSeriesMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.X18Plus).Build())
+                .Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()
@@ -258,20 +153,12 @@ public class QueryableExtensionsTests
     [InlineData(false, 1)]
     public void RestrictAgainstAgeRestriction_ReadingList_ShouldRestrictEverythingAboveTeen(bool includeUnknowns, int expectedCount)
     {
+
         var items = new List<ReadingList>()
         {
-            new ReadingList()
-            {
-                AgeRating = AgeRating.Teen,
-            },
-            new ReadingList()
-            {
-                AgeRating = AgeRating.Unknown,
-            },
-            new ReadingList()
-            {
-                AgeRating = AgeRating.X18Plus
-            },
+            new ReadingListBuilder("Test List").WithRating(AgeRating.Teen).Build(),
+            new ReadingListBuilder("Test List").WithRating(AgeRating.Unknown).Build(),
+            new ReadingListBuilder("Test List").WithRating(AgeRating.X18Plus).Build(),
         };
 
         var filtered = items.AsQueryable().RestrictAgainstAgeRestriction(new AgeRestriction()

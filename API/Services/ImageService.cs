@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,11 +18,28 @@ public interface IImageService
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <param name="fileName"></param>
+    /// <param name="saveAsWebP">Convert and save as webp</param>
     /// <param name="thumbnailWidth">Width of thumbnail</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = 0);
-
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = 320);
+    /// <summary>
+    /// Writes out a thumbnail by stream input
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="saveAsWebP"></param>
+    /// <returns></returns>
     string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
+    /// <summary>
+    /// Writes out a thumbnail by file path input
+    /// </summary>
+    /// <param name="sourceFile"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="saveAsWebP"></param>
+    /// <returns></returns>
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false);
     /// <summary>
     /// Converts the passed image to webP and outputs it in the same directory
     /// </summary>
@@ -42,7 +60,6 @@ public class ImageService : IImageService
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
 
-
     /// <summary>
     /// Width of the Thumbnail generation
     /// </summary>
@@ -58,8 +75,9 @@ public class ImageService : IImageService
         _directoryService = directoryService;
     }
 
-    public void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1)
+    public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
     {
+        if (string.IsNullOrEmpty(fileFilePath)) return;
         _directoryService.ExistOrCreate(targetDirectory);
         if (fileCount == 1)
         {
@@ -67,7 +85,7 @@ public class ImageService : IImageService
         }
         else
         {
-            _directoryService.CopyDirectoryToDirectory(Path.GetDirectoryName(fileFilePath), targetDirectory,
+            _directoryService.CopyDirectoryToDirectory(_directoryService.FileSystem.Path.GetDirectoryName(fileFilePath), targetDirectory,
                 Tasks.Scanner.Parser.Parser.ImageFileExtensions);
         }
     }
@@ -113,9 +131,22 @@ public class ImageService : IImageService
         return filename;
     }
 
+    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false)
+    {
+        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth);
+        var filename = fileName + (saveAsWebP ? ".webp" : ".png");
+        _directoryService.ExistOrCreate(outputDirectory);
+        try
+        {
+            _directoryService.FileSystem.File.Delete(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        } catch (Exception) {/* Swallow exception */}
+        thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
+        return filename;
+    }
+
     public Task<string> ConvertToWebP(string filePath, string outputPath)
     {
-        var file = _directoryService.FileSystem.FileInfo.FromFileName(filePath);
+        var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
         var outputFile = Path.Join(outputPath, fileName + ".webp");
 
@@ -124,6 +155,11 @@ public class ImageService : IImageService
         return Task.FromResult(outputFile);
     }
 
+    /// <summary>
+    /// Performs I/O to determine if the file is a valid Image
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
     public async Task<bool> IsImage(string filePath)
     {
         try
@@ -143,14 +179,14 @@ public class ImageService : IImageService
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, int thumbnailWidth = ThumbnailWidth)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = ThumbnailWidth)
     {
         try
         {
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), ThumbnailWidth);
-            var filename = fileName + ".png";
-            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName + ".png"));
-            return filename;
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+            fileName += (saveAsWebP ? ".webp" : ".png");
+            thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName));
+            return fileName;
         }
         catch (Exception e)
         {
@@ -211,5 +247,33 @@ public class ImageService : IImageService
         return $"readinglist{readingListId}";
     }
 
+    /// <summary>
+    /// Returns the name format for a thumbnail (temp thumbnail)
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    public static string GetThumbnailFormat(int chapterId)
+    {
+        return $"thumbnail{chapterId}";
+    }
 
+
+    public static string CreateMergedImage(List<string> coverImages, string dest)
+    {
+        // Currently this doesn't work due to non-standard cover image sizes and dimensions
+        var image = Image.Black(320*4, 160*4);
+
+        for (var i = 0; i < coverImages.Count; i++)
+        {
+            var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
+
+            var x = (i % 2) * (image.Width / 2);
+            var y = (i / 2) * (image.Height / 2);
+
+            image = image.Insert(tile, x, y);
+        }
+
+        image.WriteToFile(dest);
+        return dest;
+    }
 }

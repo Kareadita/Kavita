@@ -31,6 +31,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all genres</param>
     /// <returns></returns>
     [HttpGet("genres")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
@@ -51,6 +52,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all people</param>
     /// <returns></returns>
     [HttpGet("people")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
@@ -68,6 +70,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all tags</param>
     /// <returns></returns>
     [HttpGet("tags")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
@@ -132,6 +135,7 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <returns></returns>
     [HttpGet("languages")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
@@ -145,6 +149,7 @@ public class MetadataController : BaseApiController
     }
 
     [HttpGet("all-languages")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
     public IEnumerable<LanguageDto> GetAllValidLanguages()
     {
         return CultureInfo.GetCultures(CultureTypes.AllCultures).Select(c =>

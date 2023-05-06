@@ -5,7 +5,7 @@ namespace API.Comparators;
 public class NumericComparer : IComparer
 {
 
-    public int Compare(object x, object y)
+    public int Compare(object? x, object? y)
     {
         if((x is string xs) && (y is string ys))
         {

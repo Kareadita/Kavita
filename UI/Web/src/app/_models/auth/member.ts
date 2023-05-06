@@ -10,4 +10,5 @@ export interface Member {
     roles: string[];
     libraries: Library[];
     ageRestriction: AgeRestriction;
+    isPending: boolean;
 }

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.CollectionTags;
 using API.Entities;
 using API.Entities.Metadata;
+using API.Helpers.Builders;
 using API.SignalR;
 using Kavita.Common;
-using Microsoft.Extensions.Logging;
 
 namespace API.Services;
 
@@ -17,10 +18,10 @@ public interface ICollectionTagService
 {
     Task<bool> TagExistsByName(string name);
     Task<bool> UpdateTag(CollectionTagDto dto);
-    Task<bool> AddTagToSeries(CollectionTag tag, IEnumerable<int> seriesIds);
-    Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds);
+    Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
+    Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
     Task<CollectionTag> GetTagOrCreate(int tagId, string title);
-    void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata);
+    void AddTagToSeriesMetadata(CollectionTag? tag, SeriesMetadata metadata);
     CollectionTag CreateTag(string title);
     Task<bool> RemoveTagsWithoutSeries();
 }
@@ -93,8 +94,9 @@ public class CollectionTagService : ICollectionTagService
     /// <param name="tag">A full Tag</param>
     /// <param name="seriesIds"></param>
     /// <returns></returns>
-    public async Task<bool> AddTagToSeries(CollectionTag tag, IEnumerable<int> seriesIds)
+    public async Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
     {
+        if (tag == null) return false;
         var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesIds);
         foreach (var metadata in metadatas)
         {
@@ -112,8 +114,9 @@ public class CollectionTagService : ICollectionTagService
     /// <param name="tag"></param>
     /// <param name="metadata"></param>
     /// <returns></returns>
-    public void AddTagToSeriesMetadata(CollectionTag tag, SeriesMetadata metadata)
+    public void AddTagToSeriesMetadata(CollectionTag? tag, SeriesMetadata metadata)
     {
+        if (tag == null) return;
         metadata.CollectionTags ??= new List<CollectionTag>();
         if (metadata.CollectionTags.Any(t => t.NormalizedTitle.Equals(tag.NormalizedTitle, StringComparison.InvariantCulture))) return;
 
@@ -124,8 +127,9 @@ public class CollectionTagService : ICollectionTagService
         }
     }
 
-    public async Task<bool> RemoveTagFromSeries(CollectionTag tag, IEnumerable<int> seriesIds)
+    public async Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
     {
+        if (tag == null) return false;
         foreach (var seriesIdToRemove in seriesIds)
         {
             tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));
@@ -150,7 +154,7 @@ public class CollectionTagService : ICollectionTagService
     /// <returns></returns>
     public async Task<CollectionTag> GetTagOrCreate(int tagId, string title)
     {
-        return await _unitOfWork.CollectionTagRepository.GetFullTagAsync(tagId) ?? CreateTag(title);
+        return await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata) ?? CreateTag(title);
     }
 
     /// <summary>
@@ -160,7 +164,7 @@ public class CollectionTagService : ICollectionTagService
     /// <returns></returns>
     public CollectionTag CreateTag(string title)
     {
-        var tag = DbFactory.CollectionTag(0, title, string.Empty, false);
+        var tag = new CollectionTagBuilder(title).Build();
         _unitOfWork.CollectionTagRepository.Add(tag);
         return tag;
     }

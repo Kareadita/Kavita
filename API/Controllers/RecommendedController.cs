@@ -58,7 +58,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("highly-rated")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams userParams)
     {
-        var userId = User.GetUserId();
+        var userId = User.GetUserId()!;
         userParams ??= new UserParams();
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);

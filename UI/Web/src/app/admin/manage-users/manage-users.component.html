@@ -1,61 +1,35 @@
 
 
 <div class="container-fluid">
-    <ng-container>
-        <div class="row mb-2">
-            <div class="col-8"><h3>Pending Invites</h3></div>
-            <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
-        </div>
-        <ul class="list-group">
-            <li  class="list-group-item no-hover" *ngFor="let invite of pendingInvites; let idx = index;">
-                <div>
-                    <h4>
-                        <span id="member-name--{{idx}}">{{invite.username | titlecase}} </span>
-                        <div class="float-end">
-                            <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(invite)">Cancel</button>
-                            <button class="btn btn-secondary btn-sm me-2" (click)="resendEmail(invite)">Resend</button>
-                            <button class="btn btn-secondary btn-sm" (click)="setup(invite)">Setup</button>
-                        </div>
-                    </h4>
-
-                    <div>Invited: {{invite.created | date: 'short'}}</div>
-                </div>
-            </li>
-            <li *ngIf="loadingMembers" class="list-group-item no-hover">
-                <div class="spinner-border text-secondary" role="status">
-                    <span class="invisible">Loading...</span>
-                </div>
-            </li>
-            <li class="list-group-item no-hover" *ngIf="pendingInvites.length === 0 && !loadingMembers">
-                There are no invited Users
-            </li>
-        </ul>
-    </ng-container>
-
-
-
-    <h3 class="mt-3">Active Users</h3>
+    <div class="row mb-2">
+        <div class="col-8"><h3>Active Users</h3></div>
+        <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
+    </div>
+    
     <ul class="list-group">
         <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
             <div>
                 <h4>
-                    <i class="presence fa fa-circle" title="Active" aria-hidden="true" *ngIf="false && (messageHub.onlineUsers$ | async)?.includes(member.id)"></i>
                     <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
                     <span *ngIf="member.username === loggedInUsername">
                         <i class="fas fa-star" aria-hidden="true"></i>
                         <span class="visually-hidden">(You)</span>
                     </span>
+                    <span class="badge bg-secondary text-dark" *ngIf="member.isPending">Pending</span>
                     <div class="float-end" *ngIf="canEditMember(member)">
                         <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
-                        <button class="btn btn-secondary btn-sm me-2" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
-                        <button class="btn btn-primary btn-sm" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
+                        <button class="btn btn-primary btn-sm me-2" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
+
+                        <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)" placement="top" ngbTooltip="Resend Invite" attr.aria-label="Delete Invite {{member.username | titlecase}}">Resend</button>
+                        <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="setup(member)" placement="top" ngbTooltip="Setup User" attr.aria-label="Setup User {{member.username | titlecase}}">Setup</button>
+                        <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
                     </div>
                 </h4>
                 <div class="user-info">
                     <div>Last Active:
                         <span *ngIf="member.lastActive === '0001-01-01T00:00:00'; else activeDate">Never</span>
                         <ng-template #activeDate>
-                            {{member.lastActive | date: 'short'}}
+                            {{member.lastActive | date: 'short'}} <i class="presence fa fa-circle ms-1" title="Online Now" aria-hidden="true" *ngIf="(messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
                         </ng-template>
                     </div>
                     <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>

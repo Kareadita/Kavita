@@ -7,14 +7,17 @@ using System.Threading.Tasks;
 using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
 using API.DTOs.ReadingLists;
 using API.DTOs.ReadingLists.CBL;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
+using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
@@ -33,12 +36,21 @@ public interface IReadingListService
 
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
+    Task CalculateStartAndEndDates(ReadingList readingListWithItems);
+    Task<string> GenerateMergedImage(int readingListId);
+    /// <summary>
+    /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
+    /// </summary>
+    /// <param name="series"></param>
+    /// <param name="library"></param>
+    /// <returns></returns>
+    Task CreateReadingListsFromSeries(Series series, Library library);
 }
 
 /// <summary>
 /// Methods responsible for management of Reading Lists
 /// </summary>
-/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
 public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -116,7 +128,7 @@ public class ReadingListService : IReadingListService
             throw new KavitaException("A list of this name already exists");
         }
 
-        var readingList = DbFactory.ReadingList(title, string.Empty, false);
+        var readingList = new ReadingListBuilder(title).Build();
         userWithReadingList.ReadingLists.Add(readingList);
 
         if (!_unitOfWork.HasChanges()) throw new KavitaException("There was a problem creating list");
@@ -140,9 +152,28 @@ public class ReadingListService : IReadingListService
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title.Trim();
-        readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
+
+
+        if (NumberHelper.IsValidMonth(dto.StartingMonth))
+        {
+            readingList.StartingMonth = dto.StartingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.StartingYear))
+        {
+            readingList.StartingYear = dto.StartingYear;
+        }
+        if (NumberHelper.IsValidMonth(dto.EndingMonth))
+        {
+            readingList.EndingMonth = dto.EndingMonth;
+        }
+        if (NumberHelper.IsValidYear(dto.EndingYear))
+        {
+            readingList.EndingYear = dto.EndingYear;
+        }
+
 
         if (!dto.CoverImageLocked)
         {
@@ -162,7 +193,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
-    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
     /// <param name="user">User</param>
     /// <returns></returns>
@@ -172,8 +203,9 @@ public class ReadingListService : IReadingListService
         items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
-        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();
 
+        if (!itemIdsToRemove.Any()) return true;
         try
         {
             var listItems =
@@ -182,10 +214,11 @@ public class ReadingListService : IReadingListService
             _unitOfWork.ReadingListRepository.BulkRemove(listItems);
 
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+            if (readingList == null) return true;
             await CalculateReadingListAgeRating(readingList);
+            await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
-
             return await _unitOfWork.CommitAsync();
         }
         catch
@@ -204,18 +237,26 @@ public class ReadingListService : IReadingListService
     public async Task<bool> UpdateReadingListItemPosition(UpdateReadingListPosition dto)
     {
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
-        var item = items.Find(r => r.Id == dto.ReadingListItemId);
-        items.Remove(item);
-        items.Insert(dto.ToPosition, item);
+        ReorderItems(items, dto.ReadingListItemId, dto.ToPosition);
+
+        if (!_unitOfWork.HasChanges()) return true;
+
+        return await _unitOfWork.CommitAsync();
+    }
+
+    private static void ReorderItems(List<ReadingListItem> items, int readingListItemId, int toPosition)
+    {
+        var item = items.Find(r => r.Id == readingListItemId);
+        if (item != null)
+        {
+            items.Remove(item);
+            items.Insert(toPosition, item);
+        }
 
         for (var i = 0; i < items.Count; i++)
         {
             items[i].Order = i;
         }
-
-        if (!_unitOfWork.HasChanges()) return true;
-
-        return await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
@@ -226,6 +267,7 @@ public class ReadingListService : IReadingListService
     public async Task<bool> DeleteReadingListItem(UpdateReadingListPosition dto)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+        if (readingList == null) return false;
         readingList.Items = readingList.Items.Where(r => r.Id != dto.ReadingListItemId).OrderBy(r => r.Order).ToList();
 
         var index = 0;
@@ -236,6 +278,7 @@ public class ReadingListService : IReadingListService
         }
 
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
 
@@ -252,6 +295,52 @@ public class ReadingListService : IReadingListService
     }
 
     /// <summary>
+    /// Calculates the Start month/year and Ending month/year
+    /// </summary>
+    /// <param name="readingListWithItems">Reading list should have all items and Chapters</param>
+    public async Task CalculateStartAndEndDates(ReadingList readingListWithItems)
+    {
+        var items = readingListWithItems.Items;
+        if (readingListWithItems.Items.All(i => i.Chapter == null))
+        {
+            items =
+                (await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListWithItems.Id, ReadingListIncludes.ItemChapter))?.Items;
+        }
+        if (items == null || items.Count == 0) return;
+
+        if (items.First().Chapter == null)
+        {
+            _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
+            return;
+        }
+        var maxReleaseDate = items.Where(item => item.Chapter != null).Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Where(item => item.Chapter != null).Min(item => item.Chapter.ReleaseDate);
+        if (maxReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.EndingMonth = maxReleaseDate.Month;
+            readingListWithItems.EndingYear = maxReleaseDate.Year;
+        }
+        if (minReleaseDate != DateTime.MinValue)
+        {
+            readingListWithItems.StartingMonth = minReleaseDate.Month;
+            readingListWithItems.StartingYear = minReleaseDate.Year;
+        }
+    }
+
+    public Task<string?> GenerateMergedImage(int readingListId)
+    {
+        throw new NotImplementedException();
+        // var coverImages = (await _unitOfWork.ReadingListRepository.GetFirstFourCoverImagesByReadingListId(readingListId)).ToList();
+        // if (coverImages.Count < 4) return null;
+        // var fullImages = coverImages
+        //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
+        //
+        // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
+        // // webp needs to be handled
+        // return combinedFile;
+    }
+
+    /// <summary>
     /// Calculates the highest Age Rating from each Reading List Item
     /// </summary>
     /// <remarks>This method is used when the ReadingList doesn't have items yet</remarks>
@@ -260,7 +349,8 @@ public class ReadingListService : IReadingListService
     private async Task CalculateReadingListAgeRating(ReadingList readingList, IEnumerable<int> seriesIds)
     {
         var ageRating = await _unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
-        readingList.AgeRating = ageRating;
+        if (ageRating == null) readingList.AgeRating = AgeRating.Unknown;
+        else readingList.AgeRating = (AgeRating) ageRating;
     }
 
     /// <summary>
@@ -274,7 +364,7 @@ public class ReadingListService : IReadingListService
         // We need full reading list with items as this is used by many areas that manipulate items
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username,
             AppUserIncludes.ReadingListsWithItems);
-        if (!await UserHasReadingListAccess(readingListId, user))
+        if (user == null || !await UserHasReadingListAccess(readingListId, user))
         {
             return null;
         }
@@ -302,6 +392,7 @@ public class ReadingListService : IReadingListService
     public async Task<bool> DeleteReadingList(int readingListId, AppUser user)
     {
         var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
+        if (readingList == null) return true;
         user.ReadingLists.Remove(readingList);
 
         if (!_unitOfWork.HasChanges()) return true;
@@ -322,7 +413,7 @@ public class ReadingListService : IReadingListService
         var lastOrder = 0;
         if (readingList.Items.Any())
         {
-            lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli.Order);
+            lastOrder = readingList.Items.DefaultIfEmpty().Max(rli => rli!.Order);
         }
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
@@ -334,13 +425,113 @@ public class ReadingListService : IReadingListService
         var index = readingList.Items.Count == 0 ? 0 : lastOrder + 1;
         foreach (var chapter in chaptersForSeries.Where(chapter => !existingChapterExists.Contains(chapter.Id)))
         {
-            readingList.Items.Add(DbFactory.ReadingListItem(index, seriesId, chapter.VolumeId, chapter.Id));
+            readingList.Items.Add(new ReadingListItemBuilder(index, seriesId, chapter.VolumeId, chapter.Id).Build());
             index += 1;
         }
 
         await CalculateReadingListAgeRating(readingList, new []{ seriesId });
 
         return index > lastOrder + 1;
+    }
+
+    public async Task CreateReadingListsFromSeries(Series series, Library library)
+    {
+        if (!library.ManageReadingLists) return;
+
+        var hasReadingListMarkers = series.Volumes
+            .SelectMany(c => c.Chapters)
+            .Any(c => !string.IsNullOrEmpty(c.StoryArc) || !string.IsNullOrEmpty(c.AlternateSeries));
+
+        if (!hasReadingListMarkers) return;
+
+        _logger.LogInformation("Processing Reading Lists for {SeriesName}", series.Name);
+        var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        series.Metadata ??= new SeriesMetadataBuilder().Build();
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            var pairs = new List<Tuple<string, string>>();
+            if (!string.IsNullOrEmpty(chapter.StoryArc))
+            {
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber));
+            }
+            if (!string.IsNullOrEmpty(chapter.AlternateSeries))
+            {
+                pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.AlternateSeries, chapter.AlternateNumber));
+            }
+
+            foreach (var arcPair in pairs)
+            {
+                var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
+                if (readingList == null)
+                {
+                    readingList = new ReadingListBuilder(arcPair.Item1)
+                        .WithAppUserId(user.Id)
+                        .Build();
+                    _unitOfWork.ReadingListRepository.Add(readingList);
+
+                }
+
+                var items = readingList.Items.ToList();
+                var order = int.Parse(arcPair.Item2);
+                var readingListItem = items.FirstOrDefault(item => item.Order == order || item.ChapterId == chapter.Id);
+                if (readingListItem == null)
+                {
+                    // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
+                    if (order == int.MaxValue)
+                    {
+                        order = items.Count > 0 ? items.Max(item => item.Order) + 1 : 0;
+                    }
+                    items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
+                }
+                else
+                {
+                    if (order == int.MaxValue)
+                    {
+                        _logger.LogWarning("{Filename} has a missing StoryArcNumber/AlternativeNumber but list already exists with this item. Skipping item", chapter.Files.FirstOrDefault()?.FilePath);
+                    }
+                    else
+                    {
+                        ReorderItems(items, readingListItem.Id, order);
+                    }
+                }
+
+                readingList.Items = items;
+                await CalculateReadingListAgeRating(readingList);
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                }
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await _unitOfWork.CommitAsync();
+            }
+        }
+    }
+
+    private IEnumerable<Tuple<string, string>> GeneratePairs(string filename, string storyArc, string storyArcNumbers)
+    {
+        var data = new List<Tuple<string, string>>();
+        if (string.IsNullOrEmpty(storyArc)) return data;
+
+        var arcs = storyArc.Split(",");
+        var arcNumbers = storyArcNumbers.Split(",");
+        if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
+        {
+            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
+        }
+
+        var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
+        for (var i = 0; i < maxPairs; i++)
+        {
+            // When there is a mismatch on arcs and arc numbers, then we should default to a high number
+            if (string.IsNullOrEmpty(arcNumbers[i]) && !string.IsNullOrEmpty(arcs[i]))
+            {
+                arcNumbers[i] = int.MaxValue.ToString();
+            }
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
+            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
+        }
+
+        return data;
     }
 
     /// <summary>
@@ -355,13 +546,22 @@ public class ReadingListService : IReadingListService
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
             Results = new List<CblBookResult>(),
-            SuccessfulInserts = new List<CblBookResult>(),
-            Conflicts = new List<SeriesDto>(),
-            Conflicts2 = new List<CblConflictQuestion>()
+            SuccessfulInserts = new List<CblBookResult>()
         };
         if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        // Is there another reading list with the same name?
+        if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
+        {
+            importSummary.Success = CblImportResult.Fail;
+            importSummary.Results.Add(new CblBookResult()
+            {
+                Reason = CblImportReason.NameConflict,
+                ReadingListName = cblReading.Name
+            });
+        }
+
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         if (!userSeries.Any())
@@ -379,23 +579,15 @@ public class ReadingListService : IReadingListService
         if (!conflicts.Any()) return importSummary;
 
         importSummary.Success = CblImportResult.Fail;
-        if (conflicts.Count == cblReading.Books.Book.Count)
+        foreach (var conflict in conflicts)
         {
             importSummary.Results.Add(new CblBookResult()
             {
-                Reason = CblImportReason.AllChapterMissing,
+                Reason = CblImportReason.SeriesCollision,
+                Series = conflict.Name,
+                LibraryId = conflict.LibraryId,
+                SeriesId = conflict.Id,
             });
-        }
-        else
-        {
-            foreach (var conflict in conflicts)
-            {
-                importSummary.Results.Add(new CblBookResult()
-                {
-                    Reason = CblImportReason.SeriesCollision,
-                    Series = conflict.Name
-                });
-            }
         }
 
         return importSummary;
@@ -412,7 +604,7 @@ public class ReadingListService : IReadingListService
     public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
-        _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user.UserName);
+        _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
         var importSummary = new CblImportSummaryDto()
         {
             CblName = cblReading.Name,
@@ -421,17 +613,18 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct();
+        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
+        var allSeriesLocalized = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.LocalizedName));
 
         var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
         {
-            readingList = DbFactory.ReadingList(cblReading.Name, string.Empty, false);
+            readingList = new ReadingListBuilder(cblReading.Name).WithSummary(cblReading.Summary).Build();
             user.ReadingLists.Add(readingList);
         }
         else
@@ -452,38 +645,54 @@ public class ReadingListService : IReadingListService
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
             var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
-            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries))
+            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.SeriesMissing
+                    Reason = CblImportReason.SeriesMissing,
+                    Order = i
                 });
                 continue;
             }
             // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
-            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => book.Volume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
+            var bookVolume = string.IsNullOrEmpty(book.Volume)
+                ? Tasks.Scanner.Parser.Parser.DefaultVolume
+                : book.Volume;
+            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => bookVolume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.VolumeMissing
+                    Reason = CblImportReason.VolumeMissing,
+                    LibraryId = bookSeries.LibraryId,
+                    Order = i
                 });
                 continue;
             }
 
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == book.Number);
+            // We need to handle chapter 0 or empty string when it's just a volume
+            var bookNumber = string.IsNullOrEmpty(book.Number)
+                ? Tasks.Scanner.Parser.Parser.DefaultChapter
+                : book.Number;
+            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == bookNumber);
             if (chapter == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)
                 {
-                    Reason = CblImportReason.ChapterMissing
+                    Reason = CblImportReason.ChapterMissing,
+                    LibraryId = bookSeries.LibraryId,
+                    Order = i
                 });
                 continue;
             }
 
             // See if a matching item already exists
             ExistsOrAddReadingListItem(readingList, bookSeries.Id, matchingVolume.Id, chapter.Id);
-            importSummary.SuccessfulInserts.Add(new CblBookResult(book));
+            importSummary.SuccessfulInserts.Add(new CblBookResult(book)
+            {
+                Reason = CblImportReason.Success,
+                Order = i
+            });
         }
 
         if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
@@ -491,11 +700,29 @@ public class ReadingListService : IReadingListService
             importSummary.Success = CblImportResult.Partial;
         }
 
+        if (importSummary.SuccessfulInserts.Count == 0 && importSummary.Results.Count == cblReading.Books.Book.Count)
+        {
+            importSummary.Success = CblImportResult.Fail;
+        }
+
+        if (dryRun) return importSummary;
+
         await CalculateReadingListAgeRating(readingList);
+        await CalculateStartAndEndDates(readingList);
 
-        if (!dryRun) return importSummary;
+        // For CBL Import only we override pre-calculated dates
+        if (NumberHelper.IsValidMonth(cblReading.StartMonth)) readingList.StartingMonth = cblReading.StartMonth;
+        if (NumberHelper.IsValidYear(cblReading.StartYear)) readingList.StartingYear = cblReading.StartYear;
+        if (NumberHelper.IsValidMonth(cblReading.EndMonth)) readingList.EndingMonth = cblReading.EndMonth;
+        if (NumberHelper.IsValidYear(cblReading.EndYear)) readingList.EndingYear = cblReading.EndYear;
 
-        if (!_unitOfWork.HasChanges()) return importSummary;
+        if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
+        {
+            readingList.Summary = readingList.Summary?.Trim();
+        }
+
+        // If there are no items, don't create a blank list
+        if (!_unitOfWork.HasChanges() || !readingList.Items.Any()) return importSummary;
         await _unitOfWork.CommitAsync();
 
 
@@ -533,8 +760,8 @@ public class ReadingListService : IReadingListService
                 item.SeriesId == seriesId && item.ChapterId == chapterId);
         if (readingListItem != null) return;
 
-        readingListItem = DbFactory.ReadingListItem(readingList.Items.Count, seriesId,
-            volumeId, chapterId);
+        readingListItem = new ReadingListItemBuilder(readingList.Items.Count, seriesId,
+            volumeId, chapterId).Build();
         readingList.Items.Add(readingListItem);
     }
 

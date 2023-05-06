@@ -92,7 +92,7 @@
                     <ng-template #progressEvent>
                         <li class="list-group-item dark-menu-item">
                             <div class="h6 mb-1">{{message.title}}</div>
-                            <div class="accent-text mb-1" *ngIf="message.subTitle !== ''">{{message.subTitle}}</div>
+                            <div class="accent-text mb-1" *ngIf="message.subTitle !== ''" [title]="message.subTitle">{{message.subTitle}}</div>
                             <div class="progress-container row g-0 align-items-center">
                                 <div class="col-2">{{prettyPrintProgress(message.body.progress) + '%'}}</div>
                                 <div class="col-10 progress" style="height: 5px;">
@@ -122,7 +122,7 @@
                 <ng-container *ngFor="let download of activeDownloads">
                     <li class="list-group-item dark-menu-item">
                         <div class="h6 mb-1">Downloading {{download.entityType | sentenceCase}}</div>
-                        <div class="accent-text mb-1" *ngIf="download.subTitle !== ''">{{download.subTitle}}</div>
+                        <div class="accent-text mb-1" *ngIf="download.subTitle !== ''" [title]="download.subTitle">{{download.subTitle}}</div>
                         <div class="progress-container row g-0 align-items-center">
                             <div class="col-2">{{download.progress}}%</div>
                             <div class="col-10 progress" style="height: 5px;">

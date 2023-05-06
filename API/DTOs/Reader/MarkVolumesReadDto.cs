@@ -11,9 +11,9 @@ public class MarkVolumesReadDto
     /// <summary>
     /// A list of Volumes to mark read
     /// </summary>
-    public IReadOnlyList<int> VolumeIds { get; set; }
+    public IReadOnlyList<int> VolumeIds { get; set; } = default!;
     /// <summary>
     /// A list of additional Chapters to mark as read
     /// </summary>
-    public IReadOnlyList<int> ChapterIds { get; set; }
+    public IReadOnlyList<int> ChapterIds { get; set; } = default!;
 }

@@ -36,7 +36,6 @@ public class ComicInfoTests
     }
     #endregion
 
-
     #region CalculatedCount
 
     [Fact]

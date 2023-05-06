@@ -13,7 +13,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
     public string Summary { get; set; } = string.Empty;
 
-    public ICollection<CollectionTag> CollectionTags { get; set; }
+    public ICollection<CollectionTag> CollectionTags { get; set; } = new List<CollectionTag>();
 
     public ICollection<Genre> Genres { get; set; } = new List<Genre>();
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
@@ -39,7 +39,7 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     public int TotalCount { get; set; } = 0;
     /// <summary>
-    /// Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)
+    /// Max number of issues/volumes in the series (Max of Volume/Number field in ComicInfo)
     /// </summary>
     public int MaxCount { get; set; } = 0;
     public PublicationStatus PublicationStatus { get; set; }
@@ -71,7 +71,7 @@ public class SeriesMetadata : IHasConcurrencyToken
 
 
     // Relationship
-    public Series Series { get; set; }
+    public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
 
     /// <inheritdoc />

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -46,7 +45,6 @@ public class SettingsController : BaseApiController
         _libraryWatcher = libraryWatcher;
     }
 
-    [AllowAnonymous]
     [HttpGet("base-url")]
     public async Task<ActionResult<string>> GetBaseUrl()
     {
@@ -77,11 +75,11 @@ public class SettingsController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("reset-ip-addresses")]
-    public async Task<ActionResult<ServerSettingDto>> ResetIPAddressesSettings()
+    public async Task<ActionResult<ServerSettingDto>> ResetIpAddressesSettings()
     {
         _logger.LogInformation("{UserName} is resetting IP Addresses Setting", User.GetUsername());
         var ipAddresses = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.IpAddresses);
-        ipAddresses.Value = Configuration.DefaultIPAddresses;
+        ipAddresses.Value = Configuration.DefaultIpAddresses;
         _unitOfWork.SettingsRepository.Update(ipAddresses);
 
         if (!await _unitOfWork.CommitAsync())
@@ -89,6 +87,28 @@ public class SettingsController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
+        return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
+    }
+
+    /// <summary>
+    /// Resets the Base url
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("reset-base-url")]
+    public async Task<ActionResult<ServerSettingDto>> ResetBaseUrlSettings()
+    {
+        _logger.LogInformation("{UserName} is resetting Base Url Setting", User.GetUsername());
+        var baseUrl = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BaseUrl);
+        baseUrl.Value = Configuration.DefaultBaseUrl;
+        _unitOfWork.SettingsRepository.Update(baseUrl);
+
+        if (!await _unitOfWork.CommitAsync())
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        Configuration.BaseUrl = baseUrl.Value;
         return Ok(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync());
     }
 
@@ -117,7 +137,9 @@ public class SettingsController : BaseApiController
     [HttpPost("test-email-url")]
     public async Task<ActionResult<EmailTestResultDto>> TestEmailServiceUrl(TestEmailDto dto)
     {
-        return Ok(await _emailService.TestConnectivity(dto.Url));
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var emailService = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.EmailServiceUrl)).Value;
+        return Ok(await _emailService.TestConnectivity(dto.Url, user!.Email, !emailService.Equals(EmailService.DefaultApiUrl)));
     }
 
 
@@ -178,7 +200,7 @@ public class SettingsController : BaseApiController
                 }
 
                 setting.Value = updateSettingsDto.IpAddresses;
-                // IpAddesses is managed in appSetting.json
+                // IpAddresses is managed in appSetting.json
                 Configuration.IpAddresses = updateSettingsDto.IpAddresses;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
@@ -192,6 +214,7 @@ public class SettingsController : BaseApiController
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
+                Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

@@ -13,13 +13,26 @@
             <ng-template #emailServiceTooltip>Use fully qualified URL of the email service. Do not include ending slash.</ng-template>
             <span class="visually-hidden" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
             <div class="input-group">
-                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="text" aria-describedby="change-bookmarks-dir">
+                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="url" autocapitalize="off" inputmode="url" aria-describedby="change-bookmarks-dir">
                 <button class="btn btn-outline-secondary" (click)="resetEmailServiceUrl()">
                     Reset
                 </button>
                 <button class="btn btn-outline-secondary" (click)="testEmailServiceUrl()">
                     Test
                 </button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="settings-hostname" class="form-label">Host Name</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
+            <ng-template #hostNameTooltip>Domain Name (of Reverse Proxy). If set, email generation will always use this.</ng-template>
+            <span class="visually-hidden" id="settings-hostname-help">Domain Name (of Reverse Proxy). If set, email generation will always use this.</span>
+            <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
+            [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
+            <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+                <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
+                    Host name must start with http(s) and not end in /
+                </div>
             </div>
         </div>
 

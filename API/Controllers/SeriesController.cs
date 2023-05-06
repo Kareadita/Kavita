@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -11,7 +10,6 @@ using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
-using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -113,7 +111,7 @@ public class SeriesController : BaseApiController
     }
 
     [HttpGet("volume")]
-    public async Task<ActionResult<VolumeDto>> GetVolume(int volumeId)
+    public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId));
@@ -137,7 +135,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-        if (!await _seriesService.UpdateRating(user, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
+        if (!await _seriesService.UpdateRating(user!, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
         return Ok();
     }
 
@@ -159,14 +157,14 @@ public class SeriesController : BaseApiController
         }
 
         series.Name = updateSeries.Name.Trim();
-        series.NormalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(series.Name);
-        if (!string.IsNullOrEmpty(updateSeries.SortName.Trim()))
+        series.NormalizedName = series.Name.ToNormalized();
+        if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
         }
 
-        series.LocalizedName = updateSeries.LocalizedName.Trim();
-        series.NormalizedLocalizedName = Services.Tasks.Scanner.Parser.Parser.Normalize(series.LocalizedName);
+        series.LocalizedName = updateSeries.LocalizedName?.Trim();
+        series.NormalizedLocalizedName = series.LocalizedName?.ToNormalized();
 
         series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;

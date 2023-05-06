@@ -70,7 +70,8 @@ public static class ApplicationServiceExtensions
         {
             options.UseSqlite("Data source=config/kavita.db");
             options.EnableDetailedErrors();
-            options.EnableSensitiveDataLogging(env.IsDevelopment());
+
+            options.EnableSensitiveDataLogging();
         });
     }
 }

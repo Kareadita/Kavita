@@ -46,10 +46,10 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public string BackgroundColor { get; set; } = "#000000";
-    [Required]
     /// <summary>
     /// Manga Reader Option: Should swiping trigger pagination
     /// </summary>
+    [Required]
     public bool SwipeToPaginate { get; set; }
     /// <summary>
     /// Manga Reader Option: Allow the menu to close after 6 seconds without interaction
@@ -80,7 +80,8 @@ public class UserPreferencesDto
     /// Book Reader Option: Maps to the default Kavita font-family (inherit) or an override
     /// </summary>
     [Required]
-    public string BookReaderFontFamily { get; set; }
+    public string BookReaderFontFamily { get; set; } = null!;
+
     /// <summary>
     /// Book Reader Option: Allows tapping on side of screens to paginate
     /// </summary>
@@ -93,12 +94,19 @@ public class UserPreferencesDto
     public ReadingDirection BookReaderReadingDirection { get; set; }
 
     /// <summary>
+    /// Book Reader Option: What writing style should be used, horizontal or vertical.
+    /// </summary>
+    [Required]
+    public WritingStyle BookReaderWritingStyle { get; set; }
+
+    /// <summary>
     /// UI Site Global Setting: The UI theme the user should use.
     /// </summary>
     /// <remarks>Should default to Dark</remarks>
-    public SiteTheme Theme { get; set; }
     [Required]
-    public string BookReaderThemeName { get; set; }
+    public SiteTheme? Theme { get; set; }
+
+    [Required] public string BookReaderThemeName { get; set; } = null!;
     [Required]
     public BookPageLayoutMode BookReaderLayoutMode { get; set; }
     /// <summary>
@@ -129,4 +137,9 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool NoTransitions { get; set; } = false;
+    /// <summary>
+    /// When showing series, only parent series or series with no relationships will be returned
+    /// </summary>
+    [Required]
+    public bool CollapseSeriesRelationships { get; set; } = false;
 }

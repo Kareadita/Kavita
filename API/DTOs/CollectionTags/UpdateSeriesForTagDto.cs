@@ -4,6 +4,6 @@ namespace API.DTOs.CollectionTags;
 
 public class UpdateSeriesForTagDto
 {
-    public CollectionTagDto Tag { get; init; }
-    public IEnumerable<int> SeriesIdsToRemove { get; init; }
+    public CollectionTagDto Tag { get; init; } = default!;
+    public IEnumerable<int> SeriesIdsToRemove { get; init; } = default!;
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -11,7 +10,6 @@ using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -60,6 +58,17 @@ public class CleanupService : ICleanupService
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     public async Task Cleanup()
     {
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true) ||
+            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
+                TaskScheduler.DefaultQueue, true))
+        {
+            _logger.LogInformation("Cleanup put on hold as a conversion to WebP in progress");
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a conversion to WebP in progress"));
+            return;
+        }
+
         _logger.LogInformation("Starting Cleanup");
         await SendProgress(0F, "Starting cleanup");
         _logger.LogInformation("Cleaning temp directory");
@@ -92,6 +101,7 @@ public class CleanupService : ICleanupService
         await _unitOfWork.PersonRepository.RemoveAllPeopleNoLongerAssociated();
         await _unitOfWork.GenreRepository.RemoveAllGenreNoLongerAssociated();
         await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
+        await _unitOfWork.ReadingListRepository.RemoveReadingListsWithoutSeries();
     }
 
     private async Task SendProgress(float progress, string subtitle)
@@ -175,7 +185,7 @@ public class CleanupService : ICleanupService
 
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allBackups = _directoryService.GetFiles(backupDirectory).ToList();
-        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredBackups = allBackups.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 
@@ -198,7 +208,7 @@ public class CleanupService : ICleanupService
         var dayThreshold = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).TotalLogs;
         var deltaTime = DateTime.Today.Subtract(TimeSpan.FromDays(dayThreshold));
         var allLogs = _directoryService.GetFiles(_directoryService.LogDirectory).ToList();
-        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.FromFileName(filename))
+        var expiredLogs = allLogs.Select(filename => _directoryService.FileSystem.FileInfo.New(filename))
             .Where(f => f.CreationTime < deltaTime)
             .ToList();
 
@@ -232,6 +242,9 @@ public class CleanupService : ICleanupService
         _logger.LogInformation("Temp directory purged");
     }
 
+    /// <summary>
+    /// This does not cleanup any Series that are not Completed or Cancelled
+    /// </summary>
     public async Task CleanupWantToRead()
     {
         _logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");

@@ -20,7 +20,7 @@
                 <span class="visually-hidden" id="email-help">
                     <ng-container [ngTemplateOutlet]="emailTooltip"></ng-container>
                 </span>
-                <input class="form-control" type="email" id="email" formControlName="email" required aria-describedby="email-help"
+                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required aria-describedby="email-help"
                     [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
                     <div *ngIf="registerForm.get('email')?.errors?.required">
@@ -38,20 +38,20 @@
                     Password must be between 6 and 32 characters in length
                 </ng-template>
                 <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-                <input id="password" class="form-control" maxlength="32" minlength="6" formControlName="password"
+                <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password"
                  type="password" aria-describedby="password-help" [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
                 <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
                     <div *ngIf="registerForm.get('password')?.errors?.required">
                         This field is required
                     </div>
-                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength">
+                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
                         Password must be between 6 and 32 characters in length
                     </div>
                 </div>
             </div>
         
             <div class="float-end">
-                <button class="btn btn-secondary alt" type="submit">Register</button>
+                <button class="btn btn-secondary alt" type="submit" [disabled]="!registerForm.valid">Register</button>
             </div>
         </form>
     </ng-container>

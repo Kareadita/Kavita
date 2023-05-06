@@ -1,18 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.IO.Abstractions.TestingHelpers;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
 using API.Entities.Enums;
-using API.Extensions;
+using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks;
 using API.SignalR;
 using AutoMapper;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -83,18 +81,9 @@ public class BackupServiceTests
         setting.Value = BackupDirectory;
 
         _context.ServerSetting.Update(setting);
-
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 

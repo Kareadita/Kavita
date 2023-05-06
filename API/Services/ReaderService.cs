@@ -12,7 +12,9 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Tasks;
 using API.SignalR;
+using Hangfire;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -34,6 +36,7 @@ public interface IReaderService
     Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub);
     IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
+    Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
 }
 
 public class ReaderService : IReaderService
@@ -41,6 +44,8 @@ public class ReaderService : IReaderService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReaderService> _logger;
     private readonly IEventHub _eventHub;
+    private readonly IImageService _imageService;
+    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -49,14 +54,17 @@ public class ReaderService : IReaderService
     public const float AvgWordsPerHour = (MaxWordsPerHour + MinWordsPerHour) / 2F;
     private const float MinPagesPerMinute = 3.33F;
     private const float MaxPagesPerMinute = 2.75F;
-    public const float AvgPagesPerMinute = (MaxPagesPerMinute + MinPagesPerMinute) / 2F;
+    public const float AvgPagesPerMinute = (MaxPagesPerMinute + MinPagesPerMinute) / 2F; //3.04
 
 
-    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub)
+    public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
+        IDirectoryService directoryService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
+        _imageService = imageService;
+        _directoryService = directoryService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -105,6 +113,7 @@ public class ReaderService : IReaderService
     {
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        if (series == null) throw new KavitaException("Series suddenly doesn't exist, cannot mark as read");
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -128,14 +137,14 @@ public class ReaderService : IReaderService
             }
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId, chapter.VolumeId, chapter.Id, chapter.Pages));
 
             // Send out volume events for each distinct volume
             if (!seenVolume.ContainsKey(chapter.VolumeId))
             {
                 seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
 
@@ -164,14 +173,14 @@ public class ReaderService : IReaderService
             userProgress.VolumeId = chapter.VolumeId;
 
             await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
+                MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, userProgress.SeriesId, userProgress.VolumeId, userProgress.ChapterId, 0));
 
             // Send out volume events for each distinct volume
             if (!seenVolume.ContainsKey(chapter.VolumeId))
             {
                 seenVolume[chapter.VolumeId] = true;
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName, seriesId,
+                    MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, 0));
             }
         }
@@ -184,9 +193,9 @@ public class ReaderService : IReaderService
     /// <param name="user">Must have Progresses populated</param>
     /// <param name="chapter"></param>
     /// <returns></returns>
-    private static AppUserProgress GetUserProgressForChapter(AppUser user, Chapter chapter)
+    private static AppUserProgress? GetUserProgressForChapter(AppUser user, Chapter chapter)
     {
-        AppUserProgress userProgress = null;
+        AppUserProgress? userProgress = null;
 
         if (user.Progresses == null)
         {
@@ -227,7 +236,7 @@ public class ReaderService : IReaderService
 
         try
         {
-            // TODO: Rewrite this code to just pull user object with progress for that particiular appuserprogress, else create it
+            // TODO: Rewrite this code to just pull user object with progress for that particular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -237,6 +246,7 @@ public class ReaderService : IReaderService
                 // Create a user object
                 var userWithProgress =
                     await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Progress);
+                if (userWithProgress == null) return false;
                 userWithProgress.Progresses ??= new List<AppUserProgress>();
                 userWithProgress.Progresses.Add(new AppUserProgress
                 {
@@ -263,7 +273,8 @@ public class ReaderService : IReaderService
             {
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(userId, user.UserName, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
+                        progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
                 return true;
             }
         }
@@ -384,7 +395,7 @@ public class ReaderService : IReaderService
                 var chapterId = GetNextChapterId(volume.Chapters.OrderByNatural(x => x.Number),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
-            } else if (double.Parse(firstChapter.Number) > double.Parse(currentChapter.Number)) return firstChapter.Id;
+            } else if (double.Parse(firstChapter.Number) >= double.Parse(currentChapter.Number)) return firstChapter.Id;
             // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
             else if (double.Parse(firstChapter.Number) == 0) return firstChapter.Id;
         }
@@ -487,7 +498,7 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => double.Parse(c.Range), _chapterSortComparer)
+            .OrderBy(c => double.Parse(c.Number), _chapterSortComparer) // BUG: This is throwing an exception when Range is 1-11
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
@@ -644,6 +655,44 @@ public class ReaderService : IReaderService
     }
 
     /// <summary>
+    ///
+    /// </summary>
+    /// <param name="chapter"></param>
+    /// <param name="pageNum"></param>
+    /// <param name="cachedImages"></param>
+    /// <returns>Full path of thumbnail</returns>
+    public async Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages)
+    {
+        var outputDirectory =
+            _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
+        try
+        {
+            var saveAsWebp =
+                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                var outputtedThumbnails = cachedImages
+                    .Select((img, idx) =>
+                        _directoryService.FileSystem.Path.Join(outputDirectory,
+                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, saveAsWebp)))
+                    .ToArray();
+                return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
+            }
+
+            var files = _directoryService.GetFilesWithExtension(outputDirectory,
+                Tasks.Scanner.Parser.Parser.ImageFileExtensions);
+            return CacheService.GetPageFromFiles(files, pageNum);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error when trying to get thumbnail for Chapter {ChapterId}, Page {PageNum}", chapter.Id, pageNum);
+            _directoryService.ClearAndDeleteDirectory(outputDirectory);
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Formats a Chapter name based on the library it's in
     /// </summary>
     /// <param name="libraryType"></param>
@@ -667,4 +716,6 @@ public class ReaderService : IReaderService
                 throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
         }
     }
+
+
 }

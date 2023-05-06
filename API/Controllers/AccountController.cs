@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web;
 using API.Constants;
 using API.Data;
 using API.Data.Repositories;
@@ -14,16 +13,19 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Helpers.Builders;
+using API.Middleware.RateLimit;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -125,16 +127,9 @@ public class AccountController : BaseApiController
                 return BadRequest(usernameValidation);
             }
 
-            var user = new AppUser()
-            {
-                UserName = registerDto.Username,
-                Email = registerDto.Email,
-                UserPreferences = new AppUserPreferences
-                {
-                    Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-                },
-                ApiKey = HashUtil.ApiKey()
-            };
+            var user = new AppUserBuilder(registerDto.Username, registerDto.Email,
+                await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
+
 
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded) return BadRequest(result.Errors);
@@ -146,6 +141,7 @@ public class AccountController : BaseApiController
 
             var roleResult = await _userManager.AddToRoleAsync(user, PolicyConstants.AdminRole);
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
+            await _userManager.AddToRoleAsync(user, PolicyConstants.LoginRole);
 
             return new UserDto
             {
@@ -154,7 +150,8 @@ public class AccountController : BaseApiController
                 Token = await _tokenService.CreateToken(user),
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
-                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+                Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
             };
         }
         catch (Exception ex)
@@ -184,6 +181,8 @@ public class AccountController : BaseApiController
             .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
         if (user == null) return Unauthorized("Your credentials are not correct");
+        var roles = await _userManager.GetRolesAsync(user);
+        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized("Your account is disabled. Contact the server admin.");
 
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
@@ -200,6 +199,8 @@ public class AccountController : BaseApiController
 
         // Update LastActive on account
         user.UpdateLastActive();
+
+        // NOTE: This can likely be removed
         user.UserPreferences ??= new AppUserPreferences
         {
             Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
@@ -213,10 +214,15 @@ public class AccountController : BaseApiController
         var dto = _mapper.Map<UserDto>(user);
         dto.Token = await _tokenService.CreateToken(user);
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
-        var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName);
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
+            .Value;
+        var pref = await _unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
+        if (pref == null) return Ok(dto);
+
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
-        return dto;
+
+        return Ok(dto);
     }
 
     /// <summary>
@@ -248,7 +254,7 @@ public class AccountController : BaseApiController
             .GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.FieldType == typeof(string))
             .ToDictionary(f => f.Name,
-                f => (string) f.GetValue(null)).Values.ToList();
+                f => (string) f.GetValue(null)!).Values.ToList();
     }
 
 
@@ -260,6 +266,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
 
         user.ApiKey = HashUtil.ApiKey();
 
@@ -281,7 +288,7 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns>Returns just if the email was sent or server isn't reachable</returns>
     [HttpPost("update/email")]
-    public async Task<ActionResult> UpdateEmail(UpdateEmailDto dto)
+    public async Task<ActionResult> UpdateEmail(UpdateEmailDto? dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
@@ -297,7 +304,7 @@ public class AccountController : BaseApiController
         }
 
         // Validate no other users exist with this email
-        if (user.Email.Equals(dto.Email)) return Ok("Nothing to do");
+        if (user.Email!.Equals(dto.Email)) return Ok("Nothing to do");
 
         // Check if email is used by another user
         var existingUserEmail = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
@@ -335,7 +342,7 @@ public class AccountController : BaseApiController
                     {
                         EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
                         InstallId = BuildInfo.Version.ToString(),
-                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName,
+                        InvitingUser = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).First().UserName!,
                         ServerConfirmationLink = emailLink
                     });
                 }
@@ -357,7 +364,7 @@ public class AccountController : BaseApiController
         }
 
 
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         return Ok();
     }
@@ -367,9 +374,9 @@ public class AccountController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized("You do not have permission");
-        if (dto == null) return BadRequest("Invalid payload");
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        if (!await _accountService.HasChangeRestrictionRole(user)) return BadRequest("You do not have permission");
 
         user.AgeRestriction = isAdmin ? AgeRating.NotApplicable : dto.AgeRating;
         user.AgeRestrictionIncludeUnknowns = isAdmin || dto.IncludeUnknowns;
@@ -387,7 +394,7 @@ public class AccountController : BaseApiController
             return BadRequest("There was an error updating the age restriction");
         }
 
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         return Ok();
     }
@@ -402,13 +409,14 @@ public class AccountController : BaseApiController
     public async Task<ActionResult> UpdateAccount(UpdateUserDto dto)
     {
         var adminUser = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (adminUser == null) return Unauthorized();
         if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized("You do not have permission");
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId);
         if (user == null) return BadRequest("User does not exist");
 
         // Check if username is changing
-        if (!user.UserName.Equals(dto.Username))
+        if (!user.UserName!.Equals(dto.Username))
         {
             // Validate username change
             var errors = await _accountService.ValidateUsername(dto.Username);
@@ -488,12 +496,13 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> GetInviteUrl(int userId, bool withBaseUrl)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
         if (user.EmailConfirmed)
             return BadRequest("User is already confirmed");
         if (string.IsNullOrEmpty(user.ConfirmationToken))
             return BadRequest("Manual setup is unable to be completed. Please cancel and recreate the invite.");
 
-        return await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email, withBaseUrl);
+        return await _accountService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", user.Email!, withBaseUrl);
     }
 
 
@@ -520,23 +529,14 @@ public class AccountController : BaseApiController
             if (emailValidationErrors.Any())
             {
                 var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-                if (await _userManager.IsEmailConfirmedAsync(invitedUser))
-                    return BadRequest($"User is already registered as {invitedUser.UserName}");
+                if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
+                    return BadRequest($"User is already registered as {invitedUser!.UserName}");
                 return BadRequest("User is already invited under this email and has yet to accepted invite.");
             }
         }
 
         // Create a new user
-        var user = new AppUser()
-        {
-            UserName = dto.Email,
-            Email = dto.Email,
-            ApiKey = HashUtil.ApiKey(),
-            UserPreferences = new AppUserPreferences
-            {
-                Theme = await _unitOfWork.SiteThemeRepository.GetDefaultTheme()
-            }
-        };
+        var user = new AppUserBuilder(dto.Email, dto.Email, await _unitOfWork.SiteThemeRepository.GetDefaultTheme()).Build();
 
         try
         {
@@ -607,19 +607,14 @@ public class AccountController : BaseApiController
             var accessible = await _accountService.CheckIfAccessible(Request);
             if (accessible)
             {
-                try
+                // Do the email send on a background thread to ensure UI can move forward without having to wait for a timeout when users use fake emails
+                BackgroundJob.Enqueue(() => _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
                 {
-                    await _emailService.SendConfirmationEmail(new ConfirmationEmailDto()
-                    {
-                        EmailAddress = dto.Email,
-                        InvitingUser = adminUser.UserName,
-                        ServerConfirmationLink = emailLink
-                    });
-                }
-                catch (Exception)
-                {
-                    /* Swallow exception */
-                }
+                    EmailAddress = dto.Email,
+                    InvitingUser = adminUser.UserName!,
+                    ServerConfirmationLink = emailLink
+                }));
+
             }
 
             return Ok(new InviteUserResponse
@@ -655,7 +650,11 @@ public class AccountController : BaseApiController
 
         // Validate Password and Username
         var validationErrors = new List<ApiException>();
-        validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
+        // This allows users that use a fake email with the same username to continue setting up the account
+        if (!dto.Username.Equals(dto.Email) && !user.UserName!.Equals(dto.Username))
+        {
+            validationErrors.AddRange(await _accountService.ValidateUsername(dto.Username));
+        }
         validationErrors.AddRange(await _accountService.ValidatePassword(user, dto.Password));
 
         if (validationErrors.Any())
@@ -680,18 +679,19 @@ public class AccountController : BaseApiController
         await _unitOfWork.CommitAsync();
 
 
-        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
-            AppUserIncludes.UserPreferences);
+        user = (await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
+            AppUserIncludes.UserPreferences))!;
 
         // Perform Login code
         return new UserDto
         {
-            Username = user.UserName,
-            Email = user.Email,
+            Username = user.UserName!,
+            Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
-            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 
@@ -731,7 +731,7 @@ public class AccountController : BaseApiController
 
         // For the user's connected devices to pull the new information in
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+            MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 
         // Perform Login code
         return Ok();
@@ -775,6 +775,7 @@ public class AccountController : BaseApiController
     /// <returns></returns>
     [AllowAnonymous]
     [HttpPost("forgot-password")]
+    [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ForgotPassword([FromQuery] string email)
     {
         var user = await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
@@ -832,18 +833,19 @@ public class AccountController : BaseApiController
 
         await _unitOfWork.CommitAsync();
 
-        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
+        user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
             AppUserIncludes.UserPreferences);
 
         // Perform Login code
         return new UserDto
         {
-            Username = user.UserName,
-            Email = user.Email,
+            Username = user!.UserName!,
+            Email = user.Email!,
             Token = await _tokenService.CreateToken(user),
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
-            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences)
+            Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
 
@@ -853,6 +855,7 @@ public class AccountController : BaseApiController
     /// <param name="userId"></param>
     /// <returns></returns>
     [HttpPost("resend-confirmation-email")]
+    [EnableRateLimiting("Authentication")]
     public async Task<ActionResult<string>> ResendConfirmationSendEmail([FromQuery] int userId)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
@@ -873,8 +876,8 @@ public class AccountController : BaseApiController
             {
                 await _emailService.SendMigrationEmail(new EmailMigrationDto()
                 {
-                    EmailAddress = user.Email,
-                    Username = user.UserName,
+                    EmailAddress = user.Email!,
+                    Username = user.UserName!,
                     ServerConfirmationLink = emailLink,
                     InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
                 });
@@ -908,8 +911,8 @@ public class AccountController : BaseApiController
         if (emailValidationErrors.Any())
         {
             var invitedUser = await _unitOfWork.UserRepository.GetUserByEmailAsync(dto.Email);
-            if (await _userManager.IsEmailConfirmedAsync(invitedUser))
-                return BadRequest($"User is already registered as {invitedUser.UserName}");
+            if (await _userManager.IsEmailConfirmedAsync(invitedUser!))
+                return BadRequest($"User is already registered as {invitedUser!.UserName}");
 
             _logger.LogInformation("A user is attempting to login, but hasn't accepted email invite");
             return BadRequest("User is already invited under this email and has yet to accepted invite.");

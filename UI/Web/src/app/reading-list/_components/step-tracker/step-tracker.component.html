@@ -1,0 +1,11 @@
+
+<div class="card card-timeline px-2 mb-3 border-none"> 
+    <ul class="bs4-order-tracking"> 
+        <ng-container *ngFor="let step of steps">
+            <li class="step" [ngClass]="{'active': step.index === currentStep}"> 
+                <div><i class="{{step.icon}}"></i></div>
+                {{step.title}}
+            </li>
+        </ng-container>
+    </ul> 
+</div>

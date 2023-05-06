@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Common;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -10,7 +9,10 @@ using API.Data.Repositories;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
@@ -85,17 +87,9 @@ public class BookmarkServiceTests
 
         _context.ServerSetting.Update(setting);
 
-        _context.Library.Add(new Library()
-        {
-            Name = "Manga",
-            Folders = new List<FolderPath>()
-            {
-                new FolderPath()
-                {
-                    Path = "C:/data/"
-                }
-            }
-        });
+        _context.Library.Add(new LibraryBuilder("Manga")
+            .WithFolderPath(new FolderPathBuilder("C:/data/").Build())
+            .Build());
         return await _context.SaveChangesAsync() > 0;
     }
 
@@ -136,27 +130,16 @@ public class BookmarkServiceTests
         // Delete all Series to reset state
         await ResetDB();
 
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("1")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
+        _context.Series.Add(series);
 
-                        }
-                    }
-                }
-            }
-        });
 
         _context.AppUser.Add(new AppUser()
         {
@@ -194,27 +177,17 @@ public class BookmarkServiceTests
         // Delete all Series to reset state
         await ResetDB();
 
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("0")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
-                        }
-                    }
-                }
-            }
-        });
+        _context.Series.Add(series);
 
 
         _context.AppUser.Add(new AppUser()
@@ -270,28 +243,17 @@ public class BookmarkServiceTests
         // Delete all Series to reset state
         await ResetDB();
 
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
-                        }
-                    }
-                }
-            }
-        });
-
+        _context.Series.Add(series);
 
         _context.AppUser.Add(new AppUser()
         {
@@ -342,7 +304,7 @@ public class BookmarkServiceTests
 
 
         Assert.Equal(2, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
-        Assert.False(ds.FileSystem.FileInfo.FromFileName(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
+        Assert.False(ds.FileSystem.FileInfo.New(Path.Join(BookmarkDirectory, "1/1/1/0001.jpg")).Exists);
     }
     #endregion
 
@@ -357,27 +319,18 @@ public class BookmarkServiceTests
         // Delete all Series to reset state
         await ResetDB();
 
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
-                        }
-                    }
-                }
-            }
-        });
+        _context.Series.Add(series);
+
 
         _context.AppUser.Add(new AppUser()
         {
@@ -419,28 +372,17 @@ public class BookmarkServiceTests
         // Delete all Series to reset state
         await ResetDB();
 
-        _context.Series.Add(new Series()
-        {
-            Name = "Test",
-            Library = new Library() {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
-                        }
-                    }
-                }
-            }
-        });
-
+        _context.Series.Add(series);
 
         _context.AppUser.Add(new AppUser()
         {
@@ -483,28 +425,15 @@ public class BookmarkServiceTests
 
         // Delete all Series to reset state
         await ResetDB();
-        var series = new Series()
-        {
-            Name = "Test",
-            Library = new Library()
-            {
-                Name = "Test LIb",
-                Type = LibraryType.Manga,
-            },
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Chapters = new List<Chapter>()
-                    {
-                        new Chapter()
-                        {
-
-                        }
-                    }
-                }
-            }
-        };
+        var series = new SeriesBuilder("Test")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("1")
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb").Build();
 
         _context.Series.Add(series);
 
@@ -528,7 +457,7 @@ public class BookmarkServiceTests
         await _context.SaveChangesAsync();
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.Bookmarks);
-        Assert.NotEmpty(user.Bookmarks);
+        Assert.NotEmpty(user!.Bookmarks);
 
         series.Volumes = new List<Volume>();
         _unitOfWork.SeriesRepository.Update(series);

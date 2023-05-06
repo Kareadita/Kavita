@@ -2,6 +2,6 @@
 
 public class LoginDto
 {
-    public string Username { get; init; }
-    public string Password { get; set; }
+    public string Username { get; init; } = default!;
+    public string Password { get; set; } = default!;
 }

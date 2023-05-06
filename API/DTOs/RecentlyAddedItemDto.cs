@@ -8,14 +8,14 @@ namespace API.DTOs;
 /// </summary>
 public class RecentlyAddedItemDto
 {
-    public string SeriesName { get; set; }
+    public string SeriesName { get; set; } = default!;
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
     public LibraryType LibraryType { get; set; }
     /// <summary>
     /// This will automatically map to Volume X, Chapter Y, etc.
     /// </summary>
-    public string Title { get; set; }
+    public string Title { get; set; } = default!;
     public DateTime Created { get; set; }
     /// <summary>
     /// Chapter Id if this is a chapter. Not guaranteed to be set.

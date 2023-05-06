@@ -329,6 +329,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.ageRatingSettings.compareFn = (options: AgeRatingDto[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
+    
 
     this.ageRatingSettings.selectionCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
       return a.title == b.title;
@@ -622,6 +623,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.readProgressGroup.get('inProgress')?.setValue(true);
     this.sortGroup.get('sortField')?.setValue(SortField.SortName);
     this.isAscendingSort = true;
+    this.seriesNameGroup.get('seriesNameQuery')?.setValue('');
     this.cdRef.markForCheck();
     // Apply any presets which will trigger the apply
     this.loadFromPresetsAndSetup();

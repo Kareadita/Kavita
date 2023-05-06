@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using API.Entities;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
 

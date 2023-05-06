@@ -27,9 +27,11 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
   imageFitClass$!: Observable<string>;
+  imageContainerHeight$!: Observable<string>;
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   darkenss$: Observable<string> = of('brightness(100%)');
+  emulateBookClass$!: Observable<string>;
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
@@ -43,7 +45,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   get LayoutMode() {return LayoutMode;} 
 
   constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
-    @Inject(DOCUMENT) private document: Document, private readerService: ReaderService) { }
+    @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
@@ -53,13 +55,35 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       takeUntil(this.onDestroy)
     );
 
+    this.emulateBookClass$ = this.readerSettings$.pipe(
+      map(data => data.emulateBook),
+      map(enabled => enabled ? 'book-shadow' : ''), 
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
+    this.imageContainerHeight$ = this.readerSettings$.pipe(
+      map(values => values.fitting), 
+      map(mode => {
+        if ( mode !== FITTING_OPTION.HEIGHT) return '';
+
+        const readingArea = this.document.querySelector('.reading-area');
+        if (!readingArea) return 'calc(100vh)';
+
+        if (this.currentImage.width - readingArea.scrollWidth > 0) {
+          return 'calc(100vh - 34px)'
+        }
+        return 'calc(100vh)'
+      }),
+      filter(_ => this.isValid()),
+      takeUntil(this.onDestroy)
+    );
+
     this.pageNum$.pipe(
       takeUntil(this.onDestroy),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
-
-        // TODO: Put this here this.currentImage = this.getPagez
       }),
     ).subscribe(() => {});
 
@@ -103,7 +127,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
           ) {
           // Rewriting to fit to width for this cover image
-          return FITTING_OPTION.WIDTH + ' fit-to-screen';
+          return FITTING_OPTION.WIDTH + ' fit-to-screen wide';
         }
 
         return fit;

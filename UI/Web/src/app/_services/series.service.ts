@@ -67,10 +67,6 @@ export class SeriesService {
     return this.httpClient.get<Volume[]>(this.baseUrl + 'series/volumes?seriesId=' + seriesId);
   }
 
-  getVolume(volumeId: number) {
-    return this.httpClient.get<Volume>(this.baseUrl + 'series/volume?volumeId=' + volumeId);
-  }
-
   getChapter(chapterId: number) {
     return this.httpClient.get<Chapter>(this.baseUrl + 'series/chapter?chapterId=' + chapterId);
   }

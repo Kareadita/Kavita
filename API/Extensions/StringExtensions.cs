@@ -11,4 +11,15 @@ public static class StringExtensions
     {
         return SentenceCaseRegex.Replace(value.ToLower(), s => s.Value.ToUpper());
     }
+
+    /// <summary>
+    /// Apply normalization on the String
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    public static string ToNormalized(this string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return string.Empty;
+        return Services.Tasks.Scanner.Parser.Parser.Normalize(value);
+    }
 }

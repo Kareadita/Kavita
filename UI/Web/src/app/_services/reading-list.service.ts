@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
+import { Person } from '../_models/metadata/person';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
 import { CblImportResult } from '../_models/reading-list/cbl/cbl-import-result.enum';
@@ -23,11 +24,12 @@ export class ReadingListService {
     return this.httpClient.get<ReadingList>(this.baseUrl + 'readinglist?readingListId=' + readingListId);
   }
 
-  getReadingLists(includePromoted: boolean = true, pageNum?: number, itemsPerPage?: number) {
+  getReadingLists(includePromoted: boolean = true, sortByLastModified: boolean = false, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted, {}, {observe: 'response', params}).pipe(
+    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted 
+    + '&sortByLastModified=' + sortByLastModified, {}, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<ReadingList[]>());
       })
@@ -95,7 +97,15 @@ export class ReadingListService {
     return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
   }
 
+  validateCbl(form: FormData) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/validate', form);
+  }
+
   importCbl(form: FormData) {
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'readinglist/import-cbl', form);
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/import', form);
+  }
+
+  getCharacters(readingListId: number) {
+    return this.httpClient.get<Array<Person>>(this.baseUrl + 'readinglist/characters?readingListId=' + readingListId);
   }
 }

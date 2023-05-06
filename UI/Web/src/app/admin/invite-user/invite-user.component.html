@@ -5,7 +5,7 @@
     </div>
     <div class="modal-body scrollable-modal">
         <p>
-            Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" rel="noopener noreferrer" target="_blank" rel="noopener noreferrer">host your own</a> 
+            Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" rel="noopener noreferrer" target="_blank">host your own</a> 
             email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be used to setup the account manually.
         </p>
     
@@ -13,7 +13,7 @@
             <div class="row g-0">
                 <div class="mb-3" style="width:100%">
                     <label for="email" class="form-label">Email</label>
-                    <input class="form-control" type="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+                    <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
                     <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
                         <div *ngIf="email?.errors?.required">
                             This field is required

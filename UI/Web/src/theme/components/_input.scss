@@ -24,10 +24,10 @@ input:not([type="range"]), .form-control {
     }
 }
 
-.form-range::-webkit-slider-thumb:active {
+.form-range::-webkit-slider-thumb:active, .form-range::-moz-range-thumb:active {
     background-color: var(--input-range-active-color);
 }
 
-.form-range::-webkit-slider-thumb {
+.form-range::-webkit-slider-thumb, .form-range::-moz-range-thumb {
     background-color: var(--input-range-color);
 }

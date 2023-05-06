@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Parser;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
@@ -18,24 +18,24 @@ public class ParsedSeries
     /// <summary>
     /// Name of the Series
     /// </summary>
-    public string Name { get; init; }
+    public required string Name { get; init; }
     /// <summary>
     /// Normalized Name of the Series
     /// </summary>
-    public string NormalizedName { get; init; }
+    public required string NormalizedName { get; init; }
     /// <summary>
     /// Format of the Series
     /// </summary>
-    public MangaFormat Format { get; init; }
+    public required MangaFormat Format { get; init; }
 }
 
 public class SeriesModified
 {
-    public string FolderPath { get; set; }
-    public string SeriesName { get; set; }
+    public required string FolderPath { get; set; }
+    public required string SeriesName { get; set; }
     public DateTime LastScanned { get; set; }
     public MangaFormat Format { get; set; }
-    public IEnumerable<string> LibraryRoots { get; set; }
+    public IEnumerable<string> LibraryRoots { get; set; } = ArraySegment<string>.Empty;
 }
 
 /// <summary>
@@ -166,16 +166,16 @@ public class ParseScannedFiles
     /// </summary>
     /// <param name="scannedSeries">A localized list of a series' parsed infos</param>
     /// <param name="info"></param>
-    private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
+    private void TrackSeries(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo? info)
     {
-        if (info.Series == string.Empty) return;
+        if (info == null || info.Series == string.Empty) return;
 
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
-        var normalizedSeries = Parser.Parser.Normalize(info.Series);
-        var normalizedSortSeries = Parser.Parser.Normalize(info.SeriesSort);
-        var normalizedLocalizedSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+        var normalizedSeries = info.Series.ToNormalized();
+        var normalizedSortSeries = info.SeriesSort.ToNormalized();
+        var normalizedLocalizedSeries = info.LocalizedSeries.ToNormalized();
 
         try
         {
@@ -224,19 +224,24 @@ public class ParseScannedFiles
     /// <returns>Series Name to group this info into</returns>
     private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
     {
-        var normalizedSeries = Parser.Parser.Normalize(info.Series);
-        var normalizedLocalSeries = Parser.Parser.Normalize(info.LocalizedSeries);
+        var normalizedSeries = info.Series.ToNormalized();
+        var normalizedLocalSeries = info.LocalizedSeries.ToNormalized();
 
         try
         {
             var existingName =
                 scannedSeries.SingleOrDefault(p =>
-                        (Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedSeries) ||
-                         Parser.Parser.Normalize(p.Key.NormalizedName).Equals(normalizedLocalSeries)) &&
+                        (p.Key.NormalizedName.ToNormalized().Equals(normalizedSeries) ||
+                         p.Key.NormalizedName.ToNormalized().Equals(normalizedLocalSeries)) &&
                         p.Key.Format == info.Format)
                     .Key;
 
-            if (existingName != null && !string.IsNullOrEmpty(existingName.Name))
+            if (existingName == null)
+            {
+                return info.Series;
+            }
+
+            if (!string.IsNullOrEmpty(existingName.Name))
             {
                 return existingName.Name;
             }
@@ -245,8 +250,8 @@ public class ParseScannedFiles
         {
             _logger.LogCritical(ex, "[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
             var values = scannedSeries.Where(p =>
-                (Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedSeries ||
-                 Parser.Parser.Normalize(p.Key.NormalizedName) == normalizedLocalSeries) &&
+                (p.Key.NormalizedName.ToNormalized() == normalizedSeries ||
+                 p.Key.NormalizedName.ToNormalized() == normalizedLocalSeries) &&
                 p.Key.Format == info.Format);
             foreach (var pair in values)
             {
@@ -272,7 +277,7 @@ public class ParseScannedFiles
     /// <returns></returns>
     public async Task ScanLibrariesForSeries(LibraryType libraryType,
         IEnumerable<string> folders, string libraryName, bool isLibraryScan,
-        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task> processSeriesInfos, bool forceCheck = false)
+        IDictionary<string, IList<SeriesModified>> seriesPaths, Func<Tuple<bool, IList<ParserInfo>>, Task>? processSeriesInfos, bool forceCheck = false)
     {
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.FileScanProgressEvent("File Scan Starting", libraryName, ProgressEventType.Started));
@@ -287,14 +292,17 @@ public class ParseScannedFiles
                     Series = fp.SeriesName,
                     Format = fp.Format,
                 }).ToList();
-                await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
+                if (processSeriesInfos != null)
+                    await processSeriesInfos.Invoke(new Tuple<bool, IList<ParserInfo>>(true, parsedInfos));
                 _logger.LogDebug("[ScannerService] Skipped File Scan for {Folder} as it hasn't changed since last scan", folder);
+                await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.FileScanProgressEvent("Skipped " + normalizedFolder, libraryName, ProgressEventType.Updated));
                 return;
             }
 
             _logger.LogDebug("[ScannerService] Found {Count} files for {Folder}", files.Count, folder);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.FileScanProgressEvent(folder, libraryName, ProgressEventType.Updated));
+                MessageFactory.FileScanProgressEvent($"{files.Count} files in {folder}", libraryName, ProgressEventType.Updated));
             if (files.Count == 0)
             {
                 _logger.LogInformation("[ScannerService] {Folder} is empty or is no longer in this location", folder);
@@ -320,7 +328,7 @@ public class ParseScannedFiles
                 {
                     _logger.LogError(ex,
                         "[ScannerService] There was an exception that occurred during tracking {FilePath}. Skipping this file",
-                        info.FullFilePath);
+                        info?.FullFilePath);
                 }
             }
 
@@ -388,7 +396,7 @@ public class ParseScannedFiles
         if (string.IsNullOrEmpty(localizedSeries)) return;
 
         // NOTE: If we have multiple series in a folder with a localized title, then this will fail. It will group into one series. User needs to fix this themselves.
-        string nonLocalizedSeries;
+        string? nonLocalizedSeries;
         // Normalize this as many of the cases is a capitalization difference
         var nonLocalizedSeriesFound = infos
             .Where(i => !i.IsSpecial)
@@ -407,11 +415,11 @@ public class ParseScannedFiles
             nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
         }
 
-        if (string.IsNullOrEmpty(nonLocalizedSeries)) return;
+        if (nonLocalizedSeries == null) return;
 
-        var normalizedNonLocalizedSeries = Parser.Parser.Normalize(nonLocalizedSeries);
+        var normalizedNonLocalizedSeries = nonLocalizedSeries.ToNormalized();
         foreach (var infoNeedingMapping in infos.Where(i =>
-                     !Parser.Parser.Normalize(i.Series).Equals(normalizedNonLocalizedSeries)))
+                     !i.Series.ToNormalized().Equals(normalizedNonLocalizedSeries)))
         {
             infoNeedingMapping.Series = nonLocalizedSeries;
             infoNeedingMapping.LocalizedSeries = localizedSeries;

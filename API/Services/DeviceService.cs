@@ -8,7 +8,7 @@ using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Device;
-using API.SignalR;
+using API.Helpers.Builders;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
@@ -16,8 +16,8 @@ namespace API.Services;
 
 public interface IDeviceService
 {
-    Task<Device> Create(CreateDeviceDto dto, AppUser userWithDevices);
-    Task<Device> Update(UpdateDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices);
+    Task<Device?> Update(UpdateDeviceDto dto, AppUser userWithDevices);
     Task<bool> Delete(AppUser userWithDevices, int deviceId);
     Task<bool> SendTo(IReadOnlyList<int> chapterIds, int deviceId);
 }
@@ -34,18 +34,19 @@ public class DeviceService : IDeviceService
         _logger = logger;
         _emailService = emailService;
     }
-    #nullable enable
+
     public async Task<Device?> Create(CreateDeviceDto dto, AppUser userWithDevices)
     {
         try
         {
             userWithDevices.Devices ??= new List<Device>();
-            var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name.Equals(dto.Name));
+            var existingDevice = userWithDevices.Devices.SingleOrDefault(d => d.Name!.Equals(dto.Name));
             if (existingDevice != null) throw new KavitaException("A device with this name already exists");
 
-            existingDevice = DbFactory.Device(dto.Name);
-            existingDevice.Platform = dto.Platform;
-            existingDevice.EmailAddress = dto.EmailAddress;
+            existingDevice = new DeviceBuilder(dto.Name)
+                .WithPlatform(dto.Platform)
+                .WithEmail(dto.EmailAddress)
+                .Build();
 
 
             userWithDevices.Devices.Add(existingDevice);
@@ -85,7 +86,6 @@ public class DeviceService : IDeviceService
 
         return null;
     }
-    #nullable disable
 
     public async Task<bool> Delete(AppUser userWithDevices, int deviceId)
     {
@@ -119,7 +119,7 @@ public class DeviceService : IDeviceService
         await _unitOfWork.CommitAsync();
         var success = await _emailService.SendFilesToEmail(new SendToDto()
         {
-            DestinationEmail = device.EmailAddress,
+            DestinationEmail = device.EmailAddress!,
             FilePaths = files.Select(m => m.FilePath)
         });
 

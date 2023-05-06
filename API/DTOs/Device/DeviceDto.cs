@@ -17,11 +17,11 @@ public class DeviceDto
     /// </summary>
     /// <remarks>If this device is web, this will be the browser name</remarks>
     /// <example>Pixel 3a, John's Kindle</example>
-    public string Name { get; set; }
+    public string Name { get; set; } = default!;
     /// <summary>
     /// An email address associated with the device (ie Kindle). Will be used with Send to functionality
     /// </summary>
-    public string EmailAddress { get; set; }
+    public string EmailAddress { get; set; } = default!;
     /// <summary>
     /// Platform (ie) Windows 10
     /// </summary>

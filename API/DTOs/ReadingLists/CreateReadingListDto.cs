@@ -2,5 +2,5 @@
 
 public class CreateReadingListDto
 {
-    public string Title { get; init; }
+    public string Title { get; init; } = default!;
 }

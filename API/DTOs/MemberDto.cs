@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using API.Data.Misc;
 using API.DTOs.Account;
-using API.Entities.Enums;
 
 namespace API.DTOs;
 
@@ -12,11 +10,15 @@ namespace API.DTOs;
 public class MemberDto
 {
     public int Id { get; init; }
-    public string Username { get; init; }
-    public string Email { get; init; }
-    public AgeRestrictionDto AgeRestriction { get; init; }
+    public string? Username { get; init; }
+    public string? Email { get; init; }
+    /// <summary>
+    /// If the member is still pending or not
+    /// </summary>
+    public bool IsPending { get; init; }
+    public AgeRestrictionDto? AgeRestriction { get; init; }
     public DateTime Created { get; init; }
     public DateTime LastActive { get; init; }
-    public IEnumerable<LibraryDto> Libraries { get; init; }
-    public IEnumerable<string> Roles { get; init; }
+    public IEnumerable<LibraryDto>? Libraries { get; init; }
+    public IEnumerable<string>? Roles { get; init; }
 }

@@ -22,7 +22,7 @@ export class UserLoginComponent implements OnInit {
   //model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required])
+      password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")])
   });
 
   /**

@@ -161,11 +161,11 @@ public class StatsService : IStatsService
 
         if (firstAdminUser != null)
         {
-            var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName));
-            var activeTheme = firstAdminUserPref.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
+            var firstAdminUserPref = (await _unitOfWork.UserRepository.GetPreferencesAsync(firstAdminUser.UserName!));
+            var activeTheme = firstAdminUserPref?.Theme ?? Seed.DefaultThemes.First(t => t.IsDefault);
 
             serverInfo.ActiveSiteTheme = activeTheme.Name;
-            serverInfo.MangaReaderMode = firstAdminUserPref.ReaderMode;
+            if (firstAdminUserPref != null) serverInfo.MangaReaderMode = firstAdminUserPref.ReaderMode;
         }
 
         return serverInfo;
@@ -242,7 +242,7 @@ public class StatsService : IStatsService
         // If first time flow, just return 0
         if (!await _context.Series.AnyAsync()) return 0;
         return await _context.Series
-            .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series).Count())
+            .Select(s => _context.Library.Where(l => l.Id == s.LibraryId).SelectMany(l => l.Series!).Count())
             .MaxAsync();
     }
 
@@ -254,7 +254,7 @@ public class StatsService : IStatsService
             .Select(v => new
             {
                 v.SeriesId,
-                Count = _context.Series.Where(s => s.Id == v.SeriesId).SelectMany(s => s.Volumes).Count()
+                Count = _context.Series.Where(s => s.Id == v.SeriesId).SelectMany(s => s.Volumes!).Count()
             })
             .AsNoTracking()
             .AsSplitQuery()
@@ -268,9 +268,9 @@ public class StatsService : IStatsService
         return await _context.Series
             .AsNoTracking()
             .AsSplitQuery()
-            .MaxAsync(s => s.Volumes
+            .MaxAsync(s => s.Volumes!
                 .Where(v => v.Number == 0)
-                .SelectMany(v => v.Chapters)
+                .SelectMany(v => v.Chapters!)
                 .Count());
     }
 
@@ -292,13 +292,14 @@ public class StatsService : IStatsService
 
     private IEnumerable<FileFormatDto> AllFormats()
     {
+        // TODO: Rewrite this with new migration code in feature/basic-stats
         var results =  _context.MangaFile
             .AsNoTracking()
             .AsEnumerable()
             .Select(m => new FileFormatDto()
             {
                 Format = m.Format,
-                Extension = Path.GetExtension(m.FilePath)?.ToLowerInvariant()
+                Extension = Path.GetExtension(m.FilePath)?.ToLowerInvariant()!
             })
             .DistinctBy(f => f.Extension)
             .ToList();

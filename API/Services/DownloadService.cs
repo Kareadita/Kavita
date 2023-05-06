@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using API.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.StaticFiles;
+using MimeTypes;
 
 namespace API.Services;
 
@@ -49,11 +48,11 @@ public class DownloadService : IDownloadService
                 ".zip" => "application/zip",
                 ".tar.gz" => "application/gzip",
                 ".pdf" => "application/pdf",
-                _ => contentType
+                _ => MimeTypeMap.GetMimeType(contentType)
             };
         }
 
-        return contentType;
+        return contentType!;
     }
 
 

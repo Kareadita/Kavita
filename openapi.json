@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.0.2"
+    "version": "0.7.2.0"
   },
   "servers": [
     {
@@ -1024,6 +1024,185 @@
         }
       }
     },
+    "/api/Cbl/validate": {
+      "post": {
+        "tags": [
+          "Cbl"
+        ],
+        "summary": "The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.\r\nIf this returns errors, the cbl will always be rejected by Kavita.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ContentType": {
+                    "type": "string"
+                  },
+                  "ContentDisposition": {
+                    "type": "string"
+                  },
+                  "Headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "Length": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "Name": {
+                    "type": "string"
+                  },
+                  "FileName": {
+                    "type": "string"
+                  }
+                }
+              },
+              "encoding": {
+                "ContentType": {
+                  "style": "form"
+                },
+                "ContentDisposition": {
+                  "style": "form"
+                },
+                "Headers": {
+                  "style": "form"
+                },
+                "Length": {
+                  "style": "form"
+                },
+                "Name": {
+                  "style": "form"
+                },
+                "FileName": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Cbl/import": {
+      "post": {
+        "tags": [
+          "Cbl"
+        ],
+        "summary": "Performs the actual import (assuming dryRun = false)",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ContentType": {
+                    "type": "string"
+                  },
+                  "ContentDisposition": {
+                    "type": "string"
+                  },
+                  "Headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "Length": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "Name": {
+                    "type": "string"
+                  },
+                  "FileName": {
+                    "type": "string"
+                  },
+                  "dryRun": {
+                    "type": "boolean",
+                    "default": false
+                  }
+                }
+              },
+              "encoding": {
+                "ContentType": {
+                  "style": "form"
+                },
+                "ContentDisposition": {
+                  "style": "form"
+                },
+                "Headers": {
+                  "style": "form"
+                },
+                "Length": {
+                  "style": "form"
+                },
+                "Name": {
+                  "style": "form"
+                },
+                "FileName": {
+                  "style": "form"
+                },
+                "dryRun": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CblImportSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Collection": {
       "get": {
         "tags": [
@@ -1666,6 +1845,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1689,6 +1875,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1714,6 +1907,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1737,6 +1937,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1762,6 +1969,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1785,6 +1999,13 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1848,6 +2069,13 @@
             "name": "filename",
             "in": "query",
             "description": "Filename of file. This is used with upload/upload-by-url",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -1947,6 +2175,7 @@
         "tags": [
           "Library"
         ],
+        "summary": "Return all libraries in the Server",
         "responses": {
           "200": {
             "description": "Success",
@@ -1985,10 +2214,12 @@
         "tags": [
           "Library"
         ],
+        "summary": "For a given library, generate the jump bar information",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2033,7 +2264,9 @@
         "tags": [
           "Library"
         ],
+        "summary": "Grants a user account access to a Library",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -2081,10 +2314,12 @@
         "tags": [
           "Library"
         ],
+        "summary": "Scans a given library for file changes.",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2093,6 +2328,31 @@
           {
             "name": "force",
             "in": "query",
+            "description": "If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Library/scan-all": {
+      "post": {
+        "tags": [
+          "Library"
+        ],
+        "summary": "Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.",
+        "parameters": [
+          {
+            "name": "force",
+            "in": "query",
+            "description": "If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan",
             "schema": {
               "type": "boolean",
               "default": false
@@ -3248,10 +3508,12 @@
         "tags": [
           "Opds"
         ],
+        "summary": "This returns a streamed image following OPDS-PS v1.2",
         "parameters": [
           {
             "name": "apiKey",
             "in": "path",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string"
@@ -3260,6 +3522,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3268,6 +3531,7 @@
           {
             "name": "seriesId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3276,6 +3540,7 @@
           {
             "name": "volumeId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3284,6 +3549,7 @@
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3292,6 +3558,7 @@
           {
             "name": "pageNumber",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3393,6 +3660,13 @@
               "type": "integer",
               "format": "int32"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3429,12 +3703,57 @@
             }
           },
           {
+            "name": "apiKey",
+            "in": "query",
+            "description": "User's API Key for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "extractPdf",
             "in": "query",
             "description": "Should Kavita extract pdf into images. Defaults to false.",
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Reader/thumbnail": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageNum",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -3553,6 +3872,7 @@
           "Reader"
         ],
         "summary": "Returns various information about a Chapter. Side effect: This will cache the chapter images for reading.",
+        "description": "This is generally the first call when attempting to read to allow pre-generation of assets needed for reading",
         "parameters": [
           {
             "name": "chapterId",
@@ -3620,6 +3940,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "includeDimensions",
+            "in": "query",
+            "description": "Include file dimensions (extra I/O). Defaults to true.",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -4064,56 +4393,6 @@
             }
           }
         }
-      }
-    },
-    "/api/Reader/mark-chapter-until-as-read": {
-      "post": {
-        "tags": [
-          "Reader"
-        ],
-        "summary": "Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read.",
-        "description": "This is built for Tachiyomi and is not expected to be called by any other place",
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "chapterNumber",
-            "in": "query",
-            "schema": {
-              "type": "number",
-              "format": "float"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/Reader/chapter-bookmarks": {
@@ -4728,6 +5007,15 @@
               "type": "boolean",
               "default": true
             }
+          },
+          {
+            "name": "sortByLastModified",
+            "in": "query",
+            "description": "Sort by last modified (most recent first) or by title (alphabetical)",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
           }
         ],
         "responses": {
@@ -5194,6 +5482,56 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/ReadingList/characters": {
+      "get": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Returns a list of characters associated with the reading list",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -7040,19 +7378,6 @@
         }
       }
     },
-    "/api/Server/restart": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Attempts to Restart the server. Does not work, will shutdown the instance.",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -7166,6 +7491,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Downloads all the log files via a zip",
         "responses": {
           "200": {
             "description": "Success"
@@ -7208,6 +7534,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Pull the Changelog for Kavita from Github and display",
         "responses": {
           "200": {
             "description": "Success",
@@ -7277,6 +7604,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.",
         "responses": {
           "200": {
             "description": "Success",
@@ -7449,6 +7777,36 @@
           "Settings"
         ],
         "summary": "Resets the IP Addresses",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSettingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Settings/reset-base-url": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the Base url",
         "responses": {
           "200": {
             "description": "Success",
@@ -8740,43 +9098,17 @@
         "tags": [
           "Users"
         ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              }
+        "summary": "Returns all users of this server",
+        "parameters": [
+          {
+            "name": "includePending",
+            "in": "query",
+            "description": "This will include pending members",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
-        }
-      }
-    },
-    "/api/Users/pending": {
-      "get": {
-        "tags": [
-          "Users"
         ],
         "responses": {
           "200": {
@@ -9592,6 +9924,9 @@
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
           },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
+          },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
           },
@@ -9621,6 +9956,10 @@
           "noTransitions": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
           },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
@@ -9892,6 +10231,23 @@
           "pages": {
             "type": "integer",
             "format": "int32"
+          },
+          "pageDimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileDimensionDto"
+            },
+            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
+            "nullable": true
+          },
+          "doublePairs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -9909,6 +10265,105 @@
           }
         },
         "additionalProperties": false
+      },
+      "CblBookResult": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "integer",
+            "description": "Order in the CBL",
+            "format": "int32"
+          },
+          "series": {
+            "type": "string",
+            "nullable": true
+          },
+          "volume": {
+            "type": "string",
+            "nullable": true
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "Used on Series conflict",
+            "format": "int32"
+          },
+          "readingListName": {
+            "type": "string",
+            "description": "The name of the reading list",
+            "nullable": true
+          },
+          "reason": {
+            "$ref": "#/components/schemas/CblImportReason"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CblImportReason": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CblImportResult": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "CblImportSummaryDto": {
+        "type": "object",
+        "properties": {
+          "cblName": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string",
+            "description": "Used only for Kavita's UI, the filename of the cbl",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CblBookResult"
+            },
+            "nullable": true
+          },
+          "success": {
+            "$ref": "#/components/schemas/CblImportResult"
+          },
+          "successfulInserts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CblBookResult"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents the summary from the Import of a given CBL"
       },
       "Chapter": {
         "type": "object",
@@ -11439,7 +11894,11 @@
           },
           "manageCollections": {
             "type": "boolean",
-            "description": "Should this library create and manage collections from Metadata"
+            "description": "Should this library create collections from Metadata"
+          },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create reading lists from Metadata"
           },
           "created": {
             "type": "string",
@@ -11526,6 +11985,10 @@
             "type": "boolean",
             "description": "Should this library create and manage collections from Metadata"
           },
+          "manageReadingLists": {
+            "type": "boolean",
+            "description": "Should this library create and manage reading lists from Metadata"
+          },
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
@@ -11536,6 +11999,10 @@
               "type": "string"
             },
             "nullable": true
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           }
         },
         "additionalProperties": false
@@ -11779,6 +12246,10 @@
             "type": "string",
             "nullable": true
           },
+          "isPending": {
+            "type": "boolean",
+            "description": "If the member is still pending or not"
+          },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
           },
@@ -11822,9 +12293,6 @@
           "password": {
             "type": "string",
             "nullable": true
-          },
-          "sendEmail": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -11950,6 +12418,10 @@
             "type": "string",
             "description": "For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position\r\non pages that combine multiple \"chapters\".",
             "nullable": true
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -12108,6 +12580,26 @@
             "type": "string",
             "format": "date-time"
           },
+          "startingYear": {
+            "type": "integer",
+            "description": "Minimum Year the Reading List starts",
+            "format": "int32"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "description": "Minimum Month the Reading List starts",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "description": "Maximum Year the Reading List starts",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "description": "Maximum Month the Reading List starts",
+            "format": "int32"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -12145,6 +12637,26 @@
             "type": "string",
             "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
             "nullable": true
+          },
+          "startingYear": {
+            "type": "integer",
+            "description": "Minimum Year the Reading List starts",
+            "format": "int32"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "description": "Minimum Month the Reading List starts",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "description": "Maximum Year the Reading List starts",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "description": "Maximum Month the Reading List starts",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -12230,11 +12742,11 @@
             "type": "string",
             "nullable": true
           },
-          "chapterTitleName": {
+          "volumeNumber": {
             "type": "string",
             "nullable": true
           },
-          "volumeNumber": {
+          "chapterTitleName": {
             "type": "string",
             "nullable": true
           },
@@ -12246,14 +12758,14 @@
             "type": "integer",
             "format": "int32"
           },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
           "libraryType": {
             "$ref": "#/components/schemas/LibraryType"
           },
           "libraryName": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
             "type": "string",
             "nullable": true
           },
@@ -13104,7 +13616,7 @@
           },
           "maxCount": {
             "type": "integer",
-            "description": "Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)",
+            "description": "Max number of issues/volumes in the series (Max of Volume/Number field in ComicInfo)",
             "format": "int32"
           },
           "publicationStatus": {
@@ -13833,6 +14345,11 @@
             "description": "Name of the Theme",
             "nullable": true
           },
+          "normalizedName": {
+            "type": "string",
+            "description": "Normalized name for lookups",
+            "nullable": true
+          },
           "fileName": {
             "type": "string",
             "description": "File path to the content. Stored under API.Services.DirectoryService.SiteThemeDirectory.\r\nMust be a .css file",
@@ -14077,6 +14594,7 @@
           "includeInRecommended",
           "includeInSearch",
           "manageCollections",
+          "manageReadingLists",
           "name",
           "type"
         ],
@@ -14112,6 +14630,9 @@
             "type": "boolean"
           },
           "manageCollections": {
+            "type": "boolean"
+          },
+          "manageReadingLists": {
             "type": "boolean"
           }
         },
@@ -14300,6 +14821,22 @@
           },
           "coverImageLocked": {
             "type": "boolean"
+          },
+          "startingMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startingYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "endingYear": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -14590,12 +15127,15 @@
         "additionalProperties": false
       },
       "UploadUrlDto": {
+        "required": [
+          "url"
+        ],
         "type": "object",
         "properties": {
           "url": {
+            "minLength": 1,
             "type": "string",
-            "description": "External url",
-            "nullable": true
+            "description": "External url"
           }
         },
         "additionalProperties": false
@@ -14628,6 +15168,10 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          },
+          "kavitaVersion": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14659,6 +15203,8 @@
           "bookReaderReadingDirection",
           "bookReaderTapToPaginate",
           "bookReaderThemeName",
+          "bookReaderWritingStyle",
+          "collapseSeriesRelationships",
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
@@ -14669,7 +15215,8 @@
           "readingDirection",
           "scalingOption",
           "showScreenHints",
-          "swipeToPaginate"
+          "swipeToPaginate",
+          "theme"
         ],
         "type": "object",
         "properties": {
@@ -14698,7 +15245,8 @@
             "description": "Manga Reader Option: Background color of the reader"
           },
           "swipeToPaginate": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Manga Reader Option: Should swiping trigger pagination"
           },
           "autoCloseMenu": {
             "type": "boolean",
@@ -14735,6 +15283,9 @@
           "bookReaderReadingDirection": {
             "$ref": "#/components/schemas/ReadingDirection"
           },
+          "bookReaderWritingStyle": {
+            "$ref": "#/components/schemas/WritingStyle"
+          },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
           },
@@ -14763,6 +15314,10 @@
           "noTransitions": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should Kavita disable CSS transitions"
+          },
+          "collapseSeriesRelationships": {
+            "type": "boolean",
+            "description": "When showing series, only parent series or series with no relationships will be returned"
           }
         },
         "additionalProperties": false
@@ -14940,6 +15495,15 @@
           }
         },
         "additionalProperties": false
+      },
+      "WritingStyle": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "description": "Represents the writing styles for the book-reader",
+        "format": "int32"
       }
     },
     "securitySchemes": {
@@ -14960,6 +15524,10 @@
     {
       "name": "Account",
       "description": "All Account matters"
+    },
+    {
+      "name": "Cbl",
+      "description": "Responsible for the CBL import flow"
     },
     {
       "name": "Collection",

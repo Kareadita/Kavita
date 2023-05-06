@@ -7,7 +7,6 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.JumpBar;
-using API.DTOs.Search;
 using API.DTOs.System;
 using API.Entities;
 using API.Entities.Enums;
@@ -17,7 +16,6 @@ using API.Services;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
-using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -113,13 +111,21 @@ public class LibraryController : BaseApiController
         return Ok(_directoryService.ListDirectory(path));
     }
 
-
+    /// <summary>
+    /// Return all libraries in the Server
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
         return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
     }
 
+    /// <summary>
+    /// For a given library, generate the jump bar information
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpGet("jump-bar")]
     public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
     {
@@ -129,7 +135,11 @@ public class LibraryController : BaseApiController
         return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
     }
 
-
+    /// <summary>
+    /// Grants a user account access to a Library
+    /// </summary>
+    /// <param name="updateLibraryForUserDto"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("grant-access")]
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
@@ -174,11 +184,31 @@ public class LibraryController : BaseApiController
         return BadRequest("There was a critical issue. Please try again.");
     }
 
+    /// <summary>
+    /// Scans a given library for file changes.
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("scan")]
     public ActionResult Scan(int libraryId, bool force = false)
     {
+        if (libraryId <= 0) return BadRequest("Invalid libraryId");
         _taskScheduler.ScanLibrary(libraryId, force);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.
+    /// </summary>
+    /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("scan-all")]
+    public ActionResult ScanAll(bool force = false)
+    {
+        _taskScheduler.ScanLibraries(force);
         return Ok();
     }
 
@@ -209,6 +239,7 @@ public class LibraryController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(dto.ApiKey);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return Unauthorized();
 
         // Validate user has Admin privileges
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -244,13 +275,15 @@ public class LibraryController : BaseApiController
 
         try
         {
-            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.None);
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
                 return BadRequest(
                     "You cannot delete a library while a scan is in progress. Please wait for scan to complete or restart Kavita then try to delete");
             }
+
+            var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
+            if (library == null) return BadRequest("Library no longer exists");
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
             // Aka SeriesRelation has an invalid foreign key
@@ -317,8 +350,10 @@ public class LibraryController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
-        var newName = dto.Name.Trim();
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
+        if (library == null) return BadRequest("Library doesn't exist");
+
+        var newName = dto.Name.Trim();
         if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
             return BadRequest("Library name already exists");
 
@@ -335,6 +370,8 @@ public class LibraryController : BaseApiController
         library.IncludeInRecommended = dto.IncludeInRecommended;
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
+        library.ManageReadingLists = dto.ManageReadingLists;
+
 
         _unitOfWork.LibraryRepository.Update(library);
 

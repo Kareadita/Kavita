@@ -37,7 +37,7 @@ public class AppUserProgress : IEntityDate
     /// For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point
     /// on next load
     /// </summary>
-    public string BookScrollId { get; set; }
+    public string? BookScrollId { get; set; }
     /// <summary>
     /// When this was first created
     /// </summary>
@@ -54,7 +54,7 @@ public class AppUserProgress : IEntityDate
     /// <summary>
     /// Navigational Property for EF. Links to a unique AppUser
     /// </summary>
-    public AppUser AppUser { get; set; }
+    public AppUser AppUser { get; set; } = null!;
     /// <summary>
     /// User this progress belongs to
     /// </summary>

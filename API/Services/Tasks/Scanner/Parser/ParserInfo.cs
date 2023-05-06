@@ -1,8 +1,7 @@
 ﻿using API.Data.Metadata;
 using API.Entities.Enums;
-using API.Services.Tasks.Scanner.Parser;
 
-namespace API.Parser;
+namespace API.Services.Tasks.Scanner.Parser;
 
 /// <summary>
 /// This represents all parsed information from a single file
@@ -17,7 +16,7 @@ public class ParserInfo
     /// <summary>
     /// Represents the parsed series from the file or folder
     /// </summary>
-    public string Series { get; set; } = string.Empty;
+    public required string Series { get; set; } = string.Empty;
     /// <summary>
     /// This can be filled in from ComicInfo.xml/Epub during scanning. Will update the SortName field on <see cref="Entities.Series"/>
     /// </summary>
@@ -80,14 +79,14 @@ public class ParserInfo
     /// This will contain any EXTRA comicInfo information parsed from the epub or archive. If there is an archive with comicInfo.xml AND it contains
     /// series, volume information, that will override what we parsed.
     /// </summary>
-    public ComicInfo ComicInfo { get; set; }
+    public ComicInfo? ComicInfo { get; set; }
 
     /// <summary>
     /// Merges non empty/null properties from info2 into this entity.
     /// </summary>
     /// <remarks>This does not merge ComicInfo as they should always be the same</remarks>
     /// <param name="info2"></param>
-    public void Merge(ParserInfo info2)
+    public void Merge(ParserInfo? info2)
     {
         if (info2 == null) return;
         Chapters = string.IsNullOrEmpty(Chapters) || Chapters == "0" ? info2.Chapters: Chapters;

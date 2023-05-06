@@ -6,12 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
-using API.Extensions;
 using API.Logging;
 using API.SignalR;
 using Hangfire;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services.Tasks;
@@ -62,7 +59,7 @@ public class BackupService : IBackupService
     public IEnumerable<string> GetLogFiles(bool rollFiles = LogLevelOptions.LogRollingEnabled)
     {
         var multipleFileRegex = rollFiles ? @"\d*" : string.Empty;
-        var fi = _directoryService.FileSystem.FileInfo.FromFileName(LogLevelOptions.LogFile);
+        var fi = _directoryService.FileSystem.FileInfo.New(LogLevelOptions.LogFile);
 
         var files = rollFiles
             ? _directoryService.GetFiles(_directoryService.LogDirectory,

@@ -1,5 +1,6 @@
 #! /bin/bash
 
+# Removed - This is causing issues for Synology users
 ## Set default UID and GID for Kavita but allow overrides
 #PUID=${PUID:-0}
 #PGID=${PGID:-0}
@@ -18,13 +19,15 @@ if [ ! -f "/kavita/config/appsettings.json" ]; then
     echo "Kavita configuration file does not exist, creating..."
     echo '{
   "TokenKey": "super secret unguessable key",
-  "Port": 5000
+  "Port": 5000,
+  "IpAddresses": ""
 }' >> /kavita/config/appsettings.json
 fi
 
 chmod +x Kavita
 
 ./Kavita
+
 #if [[ "$PUID" -eq 0 ]]; then
 #    # Run as root
 #    ./Kavita

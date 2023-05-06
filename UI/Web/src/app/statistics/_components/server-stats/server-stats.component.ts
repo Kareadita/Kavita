@@ -101,7 +101,7 @@ export class ServerStatsComponent implements OnDestroy {
       ref.componentInstance.title = 'Genres';
       ref.componentInstance.clicked = (item: string) => {
         const params: any = {};
-        params[FilterQueryParam.Genres] = item;
+        params[FilterQueryParam.Genres] = genres.filter(g => g.title === item)[0].id;
         params[FilterQueryParam.Page] = 1;
         this.router.navigate(['all-series'], {queryParams: params});
       };
@@ -115,7 +115,7 @@ export class ServerStatsComponent implements OnDestroy {
       ref.componentInstance.title = 'Tags';
       ref.componentInstance.clicked = (item: string) => {
         const params: any = {};
-        params[FilterQueryParam.Tags] = item;
+        params[FilterQueryParam.Tags] = tags.filter(g => g.title === item)[0].id;
         params[FilterQueryParam.Page] = 1;
         this.router.navigate(['all-series'], {queryParams: params});
       };

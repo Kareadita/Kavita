@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Abstractions;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Comparators;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.ReadingLists;
-using API.DTOs.ReadingLists.CBL;
-using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -27,14 +22,12 @@ public class ReadingListController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
-    private readonly IDirectoryService _directoryService;
 
-    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService, IDirectoryService directoryService)
+    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _readingListService = readingListService;
-        _directoryService = directoryService;
     }
 
     /// <summary>
@@ -54,13 +47,15 @@ public class ReadingListController : BaseApiController
     /// </summary>
     /// <param name="includePromoted">Include Promoted Reading Lists along with user's Reading Lists. Defaults to true</param>
     /// <param name="userParams">Pagination parameters</param>
+    /// <param name="sortByLastModified">Sort by last modified (most recent first) or by title (alphabetical)</param>
     /// <returns></returns>
     [HttpPost("lists")]
-    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams, bool includePromoted = true)
+    public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams,
+        bool includePromoted = true, bool sortByLastModified = false)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
-            userParams);
+            userParams, sortByLastModified);
         Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
         return Ok(items);
@@ -186,8 +181,8 @@ public class ReadingListController : BaseApiController
     [HttpPost("create")]
     public async Task<ActionResult<ReadingListDto>> CreateList(CreateReadingListDto dto)
     {
-
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.ReadingLists);
+        if (user == null) return Unauthorized();
 
         try
         {
@@ -428,6 +423,18 @@ public class ReadingListController : BaseApiController
         return Ok("Nothing to do");
     }
 
+    /// <summary>
+    /// Returns a list of characters associated with the reading list
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [HttpGet("characters")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.TenMinute)]
+    public ActionResult<IEnumerable<PersonDto>> GetCharactersForList(int readingListId)
+    {
+        return Ok(_unitOfWork.ReadingListRepository.GetReadingListCharactersAsync(readingListId));
+    }
+
 
 
     /// <summary>
@@ -484,22 +491,4 @@ public class ReadingListController : BaseApiController
         if (string.IsNullOrEmpty(name)) return true;
         return Ok(await _unitOfWork.ReadingListRepository.ReadingListExists(name));
     }
-
-    // [HttpPost("import-cbl")]
-    // public async Task<ActionResult<CblImportSummaryDto>> ImportCbl([FromForm(Name = "cbl")] IFormFile file, [FromForm(Name = "dryRun")] bool dryRun = false)
-    // {
-    //     var userId = User.GetUserId();
-    //     var filename = Path.GetRandomFileName();
-    //     var outputFile = Path.Join(_directoryService.TempDirectory, filename);
-    //
-    //     await using var stream = System.IO.File.Create(outputFile);
-    //     await file.CopyToAsync(stream);
-    //     stream.Close();
-    //     var cbl = ReadingListService.LoadCblFromPath(outputFile);
-    //
-    //     // We need to pass the temp file back
-    //
-    //     var importSummary = await _readingListService.ValidateCblFile(userId, cbl);
-    //     return importSummary.Results.Any() ? Ok(importSummary) : Ok(await _readingListService.CreateReadingListFromCbl(userId, cbl, dryRun));
-    // }
 }

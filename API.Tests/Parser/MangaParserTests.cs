@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using API.Entities.Enums;
 using Xunit;
 using Xunit.Abstractions;
@@ -82,6 +81,7 @@ public class MangaParserTests
     [InlineData("몰?루 아카이브 7.5권", "7.5")]
     [InlineData("63권#200", "63")]
     [InlineData("시즌34삽화2", "34")]
+    [InlineData("Accel World Chapter 001 Volume 002", "2")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseVolume(filename));
@@ -196,6 +196,7 @@ public class MangaParserTests
     [InlineData("Манга Том 1 3-4 Глава", "Манга")]
     [InlineData("Esquire 6권 2021년 10월호", "Esquire")]
     [InlineData("Accel World: Vol 1", "Accel World")]
+    [InlineData("Accel World Chapter 001 Volume 002", "Accel World")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -279,6 +280,7 @@ public class MangaParserTests
     [InlineData("Манга Глава 2", "2")]
     [InlineData("Манга 2 Глава", "2")]
     [InlineData("Манга Том 1 2 Глава", "2")]
+    [InlineData("Accel World Chapter 001 Volume 002", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

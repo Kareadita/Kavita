@@ -15,13 +15,13 @@ public interface IAppUserProgressRepository
     void Update(AppUserProgress userProgress);
     Task<int> CleanupAbandonedChapters();
     Task<bool> UserHasProgress(LibraryType libraryType, int userId);
-    Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId);
+    Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId);
     Task<bool> HasAnyProgressOnSeriesAsync(int seriesId, int userId);
     /// <summary>
     /// This is built exclusively for <see cref="MigrateUserProgressLibraryId"/>
     /// </summary>
     /// <returns></returns>
-    Task<AppUserProgress> GetAnyProgress();
+    Task<AppUserProgress?> GetAnyProgress();
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
     Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId);
@@ -97,7 +97,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
     }
 
-    public async Task<AppUserProgress> GetAnyProgress()
+    public async Task<AppUserProgress?> GetAnyProgress()
     {
         return await _context.AppUserProgresses.FirstOrDefaultAsync();
     }
@@ -128,7 +128,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<AppUserProgress> GetUserProgressAsync(int chapterId, int userId)
+    public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
             .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Entities;
+using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
@@ -23,29 +24,29 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         ChangeTracker.StateChanged += OnEntityStateChanged;
     }
 
-    public DbSet<Library> Library { get; set; }
-    public DbSet<Series> Series { get; set; }
-    public DbSet<Chapter> Chapter { get; set; }
-    public DbSet<Volume> Volume { get; set; }
-    public DbSet<AppUser> AppUser { get; set; }
-    public DbSet<MangaFile> MangaFile { get; set; }
-    public DbSet<AppUserProgress> AppUserProgresses { get; set; }
-    public DbSet<AppUserRating> AppUserRating { get; set; }
-    public DbSet<ServerSetting> ServerSetting { get; set; }
-    public DbSet<AppUserPreferences> AppUserPreferences { get; set; }
-    public DbSet<SeriesMetadata> SeriesMetadata { get; set; }
-    public DbSet<CollectionTag> CollectionTag { get; set; }
-    public DbSet<AppUserBookmark> AppUserBookmark { get; set; }
-    public DbSet<ReadingList> ReadingList { get; set; }
-    public DbSet<ReadingListItem> ReadingListItem { get; set; }
-    public DbSet<Person> Person { get; set; }
-    public DbSet<Genre> Genre { get; set; }
-    public DbSet<Tag> Tag { get; set; }
-    public DbSet<SiteTheme> SiteTheme { get; set; }
-    public DbSet<SeriesRelation> SeriesRelation { get; set; }
-    public DbSet<FolderPath> FolderPath { get; set; }
-    public DbSet<Device> Device { get; set; }
-    public DbSet<ServerStatistics> ServerStatistics { get; set; }
+    public DbSet<Library> Library { get; set; } = null!;
+    public DbSet<Series> Series { get; set; } = null!;
+    public DbSet<Chapter> Chapter { get; set; } = null!;
+    public DbSet<Volume> Volume { get; set; } = null!;
+    public DbSet<AppUser> AppUser { get; set; } = null!;
+    public DbSet<MangaFile> MangaFile { get; set; } = null!;
+    public DbSet<AppUserProgress> AppUserProgresses { get; set; } = null!;
+    public DbSet<AppUserRating> AppUserRating { get; set; } = null!;
+    public DbSet<ServerSetting> ServerSetting { get; set; } = null!;
+    public DbSet<AppUserPreferences> AppUserPreferences { get; set; } = null!;
+    public DbSet<SeriesMetadata> SeriesMetadata { get; set; } = null!;
+    public DbSet<CollectionTag> CollectionTag { get; set; } = null!;
+    public DbSet<AppUserBookmark> AppUserBookmark { get; set; } = null!;
+    public DbSet<ReadingList> ReadingList { get; set; } = null!;
+    public DbSet<ReadingListItem> ReadingListItem { get; set; } = null!;
+    public DbSet<Person> Person { get; set; } = null!;
+    public DbSet<Genre> Genre { get; set; } = null!;
+    public DbSet<Tag> Tag { get; set; } = null!;
+    public DbSet<SiteTheme> SiteTheme { get; set; } = null!;
+    public DbSet<SeriesRelation> SeriesRelation { get; set; } = null!;
+    public DbSet<FolderPath> FolderPath { get; set; } = null!;
+    public DbSet<Device> Device { get; set; } = null!;
+    public DbSet<ServerStatistics> ServerStatistics { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -86,10 +87,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.BackgroundColor)
             .HasDefaultValue("#000000");
-
         builder.Entity<AppUserPreferences>()
             .Property(b => b.GlobalPageLayoutMode)
             .HasDefaultValue(PageLayoutMode.Cards);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.BookReaderWritingStyle)
+            .HasDefaultValue(WritingStyle.Horizontal);
 
 
         builder.Entity<Library>()
@@ -107,10 +110,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.ManageCollections)
             .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.ManageReadingLists)
+            .HasDefaultValue(true);
     }
 
 
-    private static void OnEntityTracked(object sender, EntityTrackedEventArgs e)
+    private static void OnEntityTracked(object? sender, EntityTrackedEventArgs e)
     {
         if (e.FromQuery || e.Entry.State != EntityState.Added || e.Entry.Entity is not IEntityDate entity) return;
 
@@ -120,7 +126,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         entity.LastModifiedUtc = DateTime.UtcNow;
     }
 
-    private static void OnEntityStateChanged(object sender, EntityStateChangedEventArgs e)
+    private static void OnEntityStateChanged(object? sender, EntityStateChangedEventArgs e)
     {
         if (e.NewState != EntityState.Modified || e.Entry.Entity is not IEntityDate entity) return;
         entity.LastModified = DateTime.Now;
@@ -142,28 +148,28 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
     public override int SaveChanges()
     {
-        this.OnSaveChanges();
+        OnSaveChanges();
 
         return base.SaveChanges();
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        this.OnSaveChanges();
+        OnSaveChanges();
 
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
     {
-        this.OnSaveChanges();
+        OnSaveChanges();
 
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
     {
-        this.OnSaveChanges();
+        OnSaveChanges();
 
         return base.SaveChangesAsync(cancellationToken);
     }

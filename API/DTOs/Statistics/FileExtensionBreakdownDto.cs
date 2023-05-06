@@ -5,7 +5,7 @@ namespace API.DTOs.Statistics;
 
 public class FileExtensionDto
 {
-    public string Extension { get; set; }
+    public string? Extension { get; set; }
     public MangaFormat Format { get; set; }
     public long TotalSize { get; set; }
     public long TotalFiles { get; set; }
@@ -17,6 +17,7 @@ public class FileExtensionBreakdownDto
     /// Total bytes for all files
     /// </summary>
     public long TotalFileSize { get; set; }
-    public IList<FileExtensionDto> FileBreakdown { get; set; }
+
+    public IList<FileExtensionDto> FileBreakdown { get; set; } = default!;
 
 }

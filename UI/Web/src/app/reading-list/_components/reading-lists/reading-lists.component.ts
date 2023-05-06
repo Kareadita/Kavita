@@ -28,7 +28,7 @@ export class ReadingListsComponent implements OnInit {
   isAdmin: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = []; //[{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}]
+  globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
 
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
@@ -63,6 +63,7 @@ export class ReadingListsComponent implements OnInit {
   importCbl() {
     const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
     ref.closed.subscribe(result => this.loadPage());
+    ref.dismissed.subscribe(_ => this.loadPage());
   }
 
   handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
@@ -96,7 +97,7 @@ export class ReadingListsComponent implements OnInit {
     this.loadingLists = true;
     this.cdRef.markForCheck();
 
-    this.readingListService.getReadingLists(true).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
+    this.readingListService.getReadingLists(true, false).pipe(take(1)).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists = readingLists.result;
       this.pagination = readingLists.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title);

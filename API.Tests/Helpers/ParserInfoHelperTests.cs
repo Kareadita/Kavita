@@ -2,9 +2,11 @@
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Extensions;
 using API.Helpers;
-using API.Parser;
+using API.Helpers.Builders;
 using API.Services.Tasks.Scanner;
+using API.Services.Tasks.Scanner.Parser;
 using Xunit;
 
 namespace API.Tests.Helpers;
@@ -21,23 +23,13 @@ public class ParserInfoHelperTests
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
         //AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
 
-        var series = new Series()
-        {
-            Name = "Darker Than Black",
-            LocalizedName = "Darker Than Black",
-            OriginalName = "Darker Than Black",
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Number = 1,
-                    Name = "1"
-                }
-            },
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
-            Metadata = new SeriesMetadata(),
-            Format = MangaFormat.Epub
-        };
+        var series = new SeriesBuilder("Darker Than Black")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithName("1")
+                .Build())
+            .WithLocalizedName("Darker Than Black")
+            .Build();
 
         Assert.False(ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(series, infos));
     }
@@ -50,23 +42,14 @@ public class ParserInfoHelperTests
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Archive});
         ParserInfoFactory.AddToParsedInfo(infos, new ParserInfo() {Series = "Darker than Black", Volumes = "1", Format = MangaFormat.Epub});
 
-        var series = new Series()
-        {
-            Name = "Darker Than Black",
-            LocalizedName = "Darker Than Black",
-            OriginalName = "Darker Than Black",
-            Volumes = new List<Volume>()
-            {
-                new Volume()
-                {
-                    Number = 1,
-                    Name = "1"
-                }
-            },
-            NormalizedName = API.Services.Tasks.Scanner.Parser.Parser.Normalize("Darker Than Black"),
-            Metadata = new SeriesMetadata(),
-            Format = MangaFormat.Epub
-        };
+
+        var series = new SeriesBuilder("Darker Than Black")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder("1")
+                .WithName("1")
+                .Build())
+            .WithLocalizedName("Darker Than Black")
+            .Build();
 
         Assert.True(ParserInfoHelpers.SeriesHasMatchingParserInfoFormat(series, infos));
     }
