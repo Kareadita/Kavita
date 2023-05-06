@@ -7643,25 +7643,6 @@
         "tags": [
           "Server"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserParams"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserParams"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserParams"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Success",
@@ -7691,6 +7672,18 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Server/clear-media-alerts": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -15276,21 +15269,6 @@
           "count": {
             "type": "integer",
             "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserParams": {
-        "type": "object",
-        "properties": {
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pageSize": {
-            "type": "integer",
-            "description": "If set to 0, will set as MaxInt",
-            "format": "int32"
           }
         },
         "additionalProperties": false

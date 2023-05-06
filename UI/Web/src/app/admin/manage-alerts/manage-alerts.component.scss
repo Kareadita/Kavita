@@ -1,0 +1,11 @@
+.scroll-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: calc((var(--vh) *100) - 173px);
+    margin-bottom: 10px;
+  
+    &.empty {
+        height: auto;
+    }
+}

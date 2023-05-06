@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.MediaErrors;
 using API.Entities;
@@ -15,7 +16,9 @@ public interface IMediaErrorRepository
     void Remove(MediaError error);
     Task<MediaError> Find(string filename);
     Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams);
+    IEnumerable<MediaErrorDto> GetAllErrorDtosAsync();
     Task<bool> ExistsAsync(MediaError error);
+    Task DeleteAll();
 }
 
 public class MediaErrorRepository : IMediaErrorRepository
@@ -55,11 +58,26 @@ public class MediaErrorRepository : IMediaErrorRepository
         return PagedList<MediaErrorDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
+    public IEnumerable<MediaErrorDto> GetAllErrorDtosAsync()
+    {
+        var query = _context.MediaError
+            .OrderByDescending(m => m.Created)
+            .ProjectTo<MediaErrorDto>(_mapper.ConfigurationProvider)
+            .AsNoTracking();
+        return query.AsEnumerable();
+    }
+
     public Task<bool> ExistsAsync(MediaError error)
     {
         return _context.MediaError.AnyAsync(m => m.FilePath.Equals(error.FilePath)
                                                  && m.Comment.Equals(error.Comment)
                                                  && m.Details.Equals(error.Details)
         );
+    }
+
+    public async Task DeleteAll()
+    {
+        _context.MediaError.RemoveRange(await _context.MediaError.ToListAsync());
+        await _context.SaveChangesAsync();
     }
 }

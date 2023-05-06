@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Constants;
 using API.Data;
 using API.DTOs.Jobs;
 using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
-using API.Entities;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -19,7 +17,6 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -28,7 +25,6 @@ namespace API.Controllers;
 [Authorize(Policy = "RequireAdminRole")]
 public class ServerController : BaseApiController
 {
-    private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<ServerController> _logger;
     private readonly IBackupService _backupService;
     private readonly IArchiveService _archiveService;
@@ -41,12 +37,11 @@ public class ServerController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
 
-    public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
+    public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
         ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
     {
-        _applicationLifetime = applicationLifetime;
         _logger = logger;
         _backupService = backupService;
         _archiveService = archiveService;
@@ -220,13 +215,21 @@ public class ServerController : BaseApiController
         return Ok(recurringJobs);
     }
 
-    [Authorize("RequireAdmin")]
+    [Authorize("RequireAdminRole")]
     [HttpGet("media-errors")]
-    public async Task<ActionResult<PagedList<MediaErrorDto>>> GetMediaErrors(UserParams userParams)
+    public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
     {
-        var pagedList = await _unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(userParams);
-        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
-        return Ok(pagedList);
+        // var pagedList = await _unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(userParams);
+        // Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+        return Ok(_unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpPost("clear-media-alerts")]
+    public async Task<ActionResult> ClearMediaErrors()
+    {
+        await _unitOfWork.MediaErrorRepository.DeleteAll();
+        return Ok();
     }
 
 
