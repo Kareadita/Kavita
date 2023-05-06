@@ -1,7 +1,7 @@
 <p>This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis.</p>
 
 <button class="btn btn-primary" (click)="clear()">Clear Alerts</button>
-<table class="table table-light table-striped table-hover table-sm">
+<table class="table table-light table-hover table-sm table-hover">
     <thead #header>
         <tr>
             <th scope="col" sortable="extension" (sort)="onSort($event)">
@@ -38,10 +38,10 @@
             </ng-container>
         </ng-container>
         <ng-template #loading>
-            <tr><app-loading></app-loading></tr>
+            <tr><td colspan="4"><app-loading></app-loading></td></tr>
         </ng-template>
         <ng-template #noData>
-            <tr>No issues</tr>
+            <tr><td colspan="4">No issues</td></tr>
         </ng-template>
     </tbody>
 </table>
