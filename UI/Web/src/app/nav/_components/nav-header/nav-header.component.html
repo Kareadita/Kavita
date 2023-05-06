@@ -1,27 +1,27 @@
 <nav class="navbar navbar-expand-md navbar-dark fixed-top" *ngIf="navService?.navbarVisible$ | async">
-    <div class="container-fluid">
-      <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
-      <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
-      <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active">
-        <img width="28px" height="28px" class="logo" src="assets/images/logo.png" alt="kavita icon" aria-hidden="true"/>
-        <span class="d-none d-md-inline logo"> Kavita</span>
-      </a>
-      <ul class="navbar-nav col me-auto">
-        
-        <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
-          <label for="nav-search" class="form-label visually-hidden">Search series</label>
-          <div class="ng-autocomplete">
-            <app-grouped-typeahead
-              #search
-              id="nav-search"
-              [minQueryLength]="2"
-              initialValue=""
-              placeholder="Search…"
-              [grouppedData]="searchResults"
-              (inputChanged)="onChangeSearch($event)"
-              (clearField)="clearSearch()"
-              (focusChanged)="focusUpdate($event)"
-            >
+  <div class="container-fluid">
+    <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
+    <a class="side-nav-toggle" *ngIf="navService?.sideNavVisibility$ | async" (click)="hideSideNav()"><i class="fas fa-bars"></i></a>
+    <a class="navbar-brand dark-exempt" routerLink="/libraries" routerLinkActive="active">
+      <img width="28px" height="28px" class="logo" src="assets/images/logo.png" alt="kavita icon" aria-hidden="true"/>
+      <span class="d-none d-md-inline logo"> Kavita</span>
+    </a>
+    <ul class="navbar-nav col me-auto">
+
+      <div class="nav-item" *ngIf="(accountService.currentUser$ | async) as user">
+        <label for="nav-search" class="form-label visually-hidden">Search series</label>
+        <div class="ng-autocomplete">
+          <app-grouped-typeahead
+            #search
+            id="nav-search"
+            [minQueryLength]="2"
+            initialValue=""
+            placeholder="Search…"
+            [grouppedData]="searchResults"
+            (inputChanged)="onChangeSearch($event)"
+            (clearField)="clearSearch()"
+            (focusChanged)="focusUpdate($event)"
+          >
 
             <ng-template #libraryTemplate let-item>
               <div style="display: flex;padding: 5px;" (click)="clickLibraryResult(item)">
@@ -44,7 +44,7 @@
                       <span [innerHTML]="item.localizedName"></span>
                     </ng-template>
                   </ng-container>
-                  
+
                   <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>
                 </div>
               </div>
@@ -88,7 +88,7 @@
             <ng-template #personTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="goToPerson(item.role, item.id)">
                 <div class="ms-1">
-                  
+
                   <div [innerHTML]="item.name"></div>
                   <div class="text-light fst-italic">{{item.role | personRole}}</div>
                 </div>
@@ -103,7 +103,7 @@
               </div>
             </ng-template>
 
-            
+
 
             <ng-template #chapterTemplate let-item>
               <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
@@ -130,44 +130,44 @@
             </ng-template>
 
           </app-grouped-typeahead>
-          </div>
         </div>
-      </ul>
+      </div>
+    </ul>
 
-      <ng-container *ngIf="!searchFocused">
-        <div class="back-to-top" *ngIf="backToTopNeeded">
-          <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
-            <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
-            <span class="visually-hidden">Scroll to Top</span>
+    <ng-container *ngIf="!searchFocused">
+      <div class="back-to-top" *ngIf="backToTopNeeded">
+        <button class="btn btn-icon scroll-to-top" (click)="scrollToTop()">
+          <i class="fa fa-angle-double-up nav" aria-hidden="true"></i>
+          <span class="visually-hidden">Scroll to Top</span>
+        </button>
+      </div>
+
+      <ng-container *ngIf="(accountService.currentUser$ | async) as user">
+        <div class="nav-item">
+          <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
+        </div>
+        <div class="nav-item not-xs-only">
+          <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
+            <i class="fa fa-cogs nav" aria-hidden="true"></i>
+            <span class="visually-hidden">Server Settings</span>
+          </a>
+        </div>
+
+
+        <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
+          <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
+            <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
           </button>
+          <div ngbDropdownMenu>
+            <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
+            <a ngbDropdownItem routerLink="/preferences/">Settings</a>
+            <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">Help</a>
+            <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Announcements</a>
+            <a ngbDropdownItem (click)="logout()">Logout</a>
+          </div>
         </div>
-
-        <ng-container *ngIf="(accountService.currentUser$ | async) as user">
-          <div class="nav-item">
-            <app-nav-events-toggle [user]="user"></app-nav-events-toggle>
-          </div>
-          <div class="nav-item not-xs-only">
-            <a routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')" class="dark-exempt btn btn-icon" title="Server Settings">
-              <i class="fa fa-cogs nav" aria-hidden="true"></i>
-              <span class="visually-hidden">Server Settings</span>
-            </a>
-          </div>
-          
-
-          <div ngbDropdown class="nav-item dropdown" display="dynamic" placement="bottom-right" *ngIf="(accountService.currentUser$ | async) as user" dropdown>
-            <button class="btn btn-outline-secondary primary-text" ngbDropdownToggle>
-              <i class="fa-solid fa-user-circle align-self-center phone-hidden d-xs-inline-block d-sm-inline-block d-md-none"></i><span class="d-none d-xs-none d-sm-none d-md-inline-block">{{user.username | sentenceCase}}</span>
-            </button>
-            <div ngbDropdownMenu>
-              <a class="xs-only" ngbDropdownItem routerLink="/admin/dashboard" *ngIf="user.roles.includes('Admin')">Server Settings</a>
-              <a ngbDropdownItem routerLink="/preferences/">Settings</a>
-              <a ngbDropdownItem href="https://wiki.kavitareader.com" rel="noopener noreferrer" target="_blank">Help</a>
-              <a ngbDropdownItem routerLink="/announcements/" *ngIf="accountService.hasAdminRole(user)">Announcements</a>
-              <a ngbDropdownItem (click)="logout()">Logout</a>
-            </div>
-          </div>
-        </ng-container>
       </ng-container>
-    </div>
+    </ng-container>
+  </div>
 </nav>
-  
+

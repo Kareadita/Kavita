@@ -57,7 +57,7 @@ public class MangaFile : IEntityDate
     /// </summary>
     public void UpdateLastModified()
     {
-        if (FilePath == null) return; 
+        if (FilePath == null) return;
         LastModified = File.GetLastWriteTime(FilePath);
         LastModifiedUtc = File.GetLastWriteTimeUtc(FilePath);
     }
