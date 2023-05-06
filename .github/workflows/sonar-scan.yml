@@ -84,7 +84,7 @@ jobs:
 
   version:
     name: Bump version on Develop push
-    needs: [ build, test ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
