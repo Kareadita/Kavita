@@ -4,44 +4,36 @@
 <table class="table table-light table-hover table-sm table-hover">
     <thead #header>
         <tr>
-            <th scope="col" sortable="extension" (sort)="onSort($event)">
+            <th scope="col"sortable="extension" (sort)="onSort($event)">
                 Extension
             </th>
-            <th scope="col" sortable="format" (sort)="onSort($event)">
+            <th scope="col" sortable="filePath" (sort)="onSort($event)">
                 File
             </th>
-            <th scope="col" sortable="totalSize" (sort)="onSort($event)">
+            <th scope="col" sortable="comment" (sort)="onSort($event)">
                 Comment
             </th>
-            <th scope="col" sortable="totalFiles" (sort)="onSort($event)">
+            <th scope="col" sortable="details" (sort)="onSort($event)">
                 Details
             </th>
         </tr>
     </thead>
     <tbody #container>
-        <ng-container *ngIf="rawData$ | async as data; else loading">
-            <ng-container *ngIf="data.length > 0; else noData">
-                <tr *ngFor="let item of data; index as i">
-                    <td>
-                      {{item.extension}}
-                    </td>
-                    <td>
-                      {{item.filePath}}
-                    </td>
-                    <td>
-                      {{item.comment}}
-                    </td>
-                    <td>
-                      {{item.details}}
-                    </td>
-                </tr>
-            </ng-container>
-        </ng-container>
-        <ng-template #loading>
-            <tr><td colspan="4"><app-loading></app-loading></td></tr>
-        </ng-template>
-        <ng-template #noData>
-            <tr><td colspan="4">No issues</td></tr>
-        </ng-template>
+        <tr *ngIf="isLoading"><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+        <tr *ngIf="data.length === 0 && !isLoading"><td colspan="4" style="text-align: center;">No issues</td></tr>
+        <tr *ngFor="let item of data; index as i">
+            <td>
+              {{item.extension}}
+            </td>
+            <td>
+              {{item.filePath}}
+            </td>
+            <td>
+              {{item.comment}}
+            </td>
+            <td>
+              {{item.details}}
+            </td>
+        </tr>
     </tbody>
 </table>

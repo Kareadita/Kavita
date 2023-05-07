@@ -7643,6 +7643,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)",
         "responses": {
           "200": {
             "description": "Success",
@@ -7681,6 +7682,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Deletes all media errors",
         "responses": {
           "200": {
             "description": "Success"

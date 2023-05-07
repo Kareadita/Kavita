@@ -1,58 +1,48 @@
-import { Component, EventEmitter, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, combineLatest, map, shareReplay, takeUntil } from 'rxjs';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
+import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
+import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 
 @Component({
   selector: 'app-manage-alerts',
   templateUrl: './manage-alerts.component.html',
-  styleUrls: ['./manage-alerts.component.scss']
+  styleUrls: ['./manage-alerts.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageAlertsComponent implements OnInit {
 
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
-  serverService = inject(ServerService); 
+  private readonly serverService = inject(ServerService); 
+  private readonly messageHub = inject(MessageHubService); 
+  private readonly cdRef = inject(ChangeDetectorRef); 
   private readonly onDestroy = new Subject<void>();
 
-  rawData$: Observable<KavitaMediaError[]> = this.serverService.getMediaErrors().pipe(takeUntil(this.onDestroy), shareReplay());
+  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<KavitaMediaError>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<KavitaMediaError>> = this.currentSort.asObservable();
-  dataUpdate$ = new EventEmitter<number>();
-  data$: Observable<Array<KavitaMediaError>> = combineLatest([this.currentSort$, this.rawData$, this.dataUpdate$]).pipe(
-    map(([sortConfig, data]) => {
-      return {sortConfig, data};
-    }),
-    map(({ sortConfig, data }) => {
-      return (sortConfig.column) ? data.sort((a: KavitaMediaError, b: KavitaMediaError) => {
+
+  data: Array<KavitaMediaError> = [];
+  isLoading = true;
+  
+
+  constructor() {}
+
+  ngOnInit(): void {
+
+    this.loadData();
+
+    this.messageHubUpdate$.subscribe(_ => this.loadData());
+
+    this.currentSort$.subscribe(sortConfig => {
+      this.data = (sortConfig.column) ? this.data.sort((a: KavitaMediaError, b: KavitaMediaError) => {
         if (sortConfig.column === '') return 0;
         const res = compare(a[sortConfig.column], b[sortConfig.column]);
         return sortConfig.direction === 'asc' ? res : -res;
-      }) : data;
-    }),
-    takeUntil(this.onDestroy)
-  );
-  
-  
-
-  constructor() {
-    // this.data$ = combineLatest([this.currentSort$, this.rawData$, this.dataUpdate$]).pipe(
-    //   map(([sortConfig, data]) => {
-    //     return {sortConfig, fileBreakdown: data};
-    //   }),
-    //   map(({ sortConfig, fileBreakdown }) => {
-    //     return (sortConfig.column) ? fileBreakdown.sort((a: KavitaMediaError, b: KavitaMediaError) => {
-    //       if (sortConfig.column === '') return 0;
-    //       const res = compare(a[sortConfig.column], b[sortConfig.column]);
-    //       return sortConfig.direction === 'asc' ? res : -res;
-    //     }) : fileBreakdown;
-    //   }),
-    //   takeUntil(this.onDestroy)
-    // );
-  }
-
-  ngOnInit(): void {
-    this.data$.subscribe(d => console.log('data: ', d));
+      }) : this.data;
+      this.cdRef.markForCheck();
+    });
   }
 
   onSort(evt: any) {
@@ -67,23 +57,19 @@ export class ManageAlertsComponent implements OnInit {
     });
   }
 
-  clear() {
-    this.serverService.clearMediaAlerts().subscribe(_ => this.dataUpdate$.next(1));
+  loadData() {
+    this.isLoading = true;
+    this.cdRef.markForCheck();
+    this.serverService.getMediaErrors().subscribe(d => {
+      this.data = d;
+      this.isLoading = false;
+      console.log(this.data)
+      console.log(this.isLoading)
+      this.cdRef.detectChanges();
+    });
   }
 
-//   protected fetchMore(event: IPageInfo) {
-//     if (event.endIndex !== this.buffer.length-1) return;
-//     this.loading = true;
-//     this.fetchNextChunk(this.buffer.length, 10).then(chunk => {
-//         this.buffer = this.buffer.concat(chunk);
-//         this.loading = false;
-//     }, () => this.loading = false);
-// }
-
-// protected fetchNextChunk(skip: number, limit: number): Promise<ListItem[]> {
-//     return new Promise((resolve, reject) => {
-//         ....
-//     });
-// }
-
+  clear() {
+    this.serverService.clearMediaAlerts().subscribe(_ => this.loadData());
+  }
 }

@@ -215,15 +215,21 @@ public class ServerController : BaseApiController
         return Ok(recurringJobs);
     }
 
+    /// <summary>
+    /// Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)
+    /// </summary>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpGet("media-errors")]
     public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
     {
-        // var pagedList = await _unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync(userParams);
-        // Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
         return Ok(_unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
     }
 
+    /// <summary>
+    /// Deletes all media errors
+    /// </summary>
+    /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpPost("clear-media-alerts")]
     public async Task<ActionResult> ClearMediaErrors()

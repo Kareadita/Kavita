@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { SharedModule } from '../shared/shared.module';
@@ -59,6 +59,7 @@ import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
     NgbTooltipModule,
     NgbTypeaheadModule, // Directory Picker
     NgbDropdownModule,
+    NgbAccordionModule,
     SharedModule,
     PipeModule,
     SidenavModule,
