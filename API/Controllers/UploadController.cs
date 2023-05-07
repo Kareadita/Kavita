@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Uploads;
 using API.Extensions;
@@ -78,7 +79,7 @@ public class UploadController : BaseApiController
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
-    [RequestSizeLimit(8_000_000)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("series")]
     public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
@@ -126,7 +127,7 @@ public class UploadController : BaseApiController
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
-    [RequestSizeLimit(8_000_000)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("collection")]
     public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
@@ -174,7 +175,7 @@ public class UploadController : BaseApiController
     /// <remarks>This is the only API that can be called by non-admins, but the authenticated user must have a readinglist permission</remarks>
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
-    [RequestSizeLimit(8_000_000)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("reading-list")]
     public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
@@ -238,7 +239,7 @@ public class UploadController : BaseApiController
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
-    [RequestSizeLimit(8_000_000)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("chapter")]
     public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
     {
@@ -294,7 +295,7 @@ public class UploadController : BaseApiController
     /// <param name="uploadFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
-    [RequestSizeLimit(8_000_000)]
+    [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("library")]
     public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadFileDto uploadFileDto)
     {

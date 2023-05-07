@@ -273,7 +273,8 @@ public class ReaderService : IReaderService
             {
                 var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId, progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+                    MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
+                        progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
                 return true;
             }
         }
@@ -394,7 +395,7 @@ public class ReaderService : IReaderService
                 var chapterId = GetNextChapterId(volume.Chapters.OrderByNatural(x => x.Number),
                     currentChapter.Range, dto => dto.Range);
                 if (chapterId > 0) return chapterId;
-            } else if (double.Parse(firstChapter.Number) > double.Parse(currentChapter.Number)) return firstChapter.Id;
+            } else if (double.Parse(firstChapter.Number) >= double.Parse(currentChapter.Number)) return firstChapter.Id;
             // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
             else if (double.Parse(firstChapter.Number) == 0) return firstChapter.Id;
         }

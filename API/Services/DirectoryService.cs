@@ -76,23 +76,14 @@ public class DirectoryService : IDirectoryService
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
-    private const int RegexTimeoutMs = 5000000;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
-
-    // [GeneratedRegex(@"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle",
-    //     MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
-    // private static partial Regex ExcludeDirectoriesRegex();
-    //
-    // [GeneratedRegex(@"\(\d+\)",
-    //     MatchOptions, matchTimeoutMilliseconds: RegexTimeoutMs)]
-    // private static partial Regex FileCopyAppendRegex();
 
     private static readonly Regex ExcludeDirectories = new Regex(
         @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        MatchOptions,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase,
+        MatchOptions,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     public static readonly string BackupDirectory = Path.Join(Directory.GetCurrentDirectory(), "config", "backups");
 

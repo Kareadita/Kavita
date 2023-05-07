@@ -39,12 +39,12 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     public ComicInfo? GetComicInfo(string filePath)
     {
-        if (Tasks.Scanner.Parser.Parser.IsEpub(filePath))
+        if (Parser.IsEpub(filePath))
         {
             return _bookService.GetComicInfo(filePath);
         }
 
-        if (Tasks.Scanner.Parser.Parser.IsComicInfoExtension(filePath))
+        if (Parser.IsComicInfoExtension(filePath))
         {
             return _archiveService.GetComicInfo(filePath);
         }
@@ -68,18 +68,18 @@ public class ReadingItemService : IReadingItemService
 
 
         // This catches when original library type is Manga/Comic and when parsing with non
-        if (Tasks.Scanner.Parser.Parser.IsEpub(path) && Tasks.Scanner.Parser.Parser.ParseVolume(info.Series) != Tasks.Scanner.Parser.Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
+        if (Parser.IsEpub(path) && Parser.ParseVolume(info.Series) != Parser.DefaultVolume) // Shouldn't this be info.Volume != DefaultVolume?
         {
-            var hasVolumeInTitle = !Tasks.Scanner.Parser.Parser.ParseVolume(info.Title)
-                    .Equals(Tasks.Scanner.Parser.Parser.DefaultVolume);
-            var hasVolumeInSeries = !Tasks.Scanner.Parser.Parser.ParseVolume(info.Series)
-                .Equals(Tasks.Scanner.Parser.Parser.DefaultVolume);
+            var hasVolumeInTitle = !Parser.ParseVolume(info.Title)
+                    .Equals(Parser.DefaultVolume);
+            var hasVolumeInSeries = !Parser.ParseVolume(info.Series)
+                .Equals(Parser.DefaultVolume);
 
             if (string.IsNullOrEmpty(info.ComicInfo?.Volume) && hasVolumeInTitle && (hasVolumeInSeries || string.IsNullOrEmpty(info.Series)))
             {
                 // This is likely a light novel for which we can set series from parsed title
-                info.Series = Tasks.Scanner.Parser.Parser.ParseSeries(info.Title);
-                info.Volumes = Tasks.Scanner.Parser.Parser.ParseVolume(info.Title);
+                info.Series = Parser.ParseSeries(info.Title);
+                info.Volumes = Parser.ParseVolume(info.Title);
             }
             else
             {
@@ -111,11 +111,11 @@ public class ReadingItemService : IReadingItemService
             info.SeriesSort = info.ComicInfo.TitleSort.Trim();
         }
 
-        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Tasks.Scanner.Parser.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
         {
             info.IsSpecial = true;
-            info.Chapters = Tasks.Scanner.Parser.Parser.DefaultChapter;
-            info.Volumes = Tasks.Scanner.Parser.Parser.DefaultVolume;
+            info.Chapters = Parser.DefaultChapter;
+            info.Volumes = Parser.DefaultVolume;
         }
 
         if (!string.IsNullOrEmpty(info.ComicInfo.SeriesSort))
@@ -216,6 +216,6 @@ public class ReadingItemService : IReadingItemService
     /// <returns></returns>
     private ParserInfo? Parse(string path, string rootPath, LibraryType type)
     {
-        return Tasks.Scanner.Parser.Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
+        return Parser.IsEpub(path) ? _bookService.ParseInfo(path) : _defaultParser.Parse(path, rootPath, type);
     }
 }

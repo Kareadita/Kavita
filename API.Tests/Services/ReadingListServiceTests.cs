@@ -1203,10 +1203,67 @@ public class ReadingListServiceTests
 
     #region CreateReadingListsFromSeries
 
+    private async Task<Tuple<Series, Series>> SetupData()
+    {
+        // Setup 2 series, only do this once tho
+        if (await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary("Series 1", 1, MangaFormat.Archive))
+        {
+            return new Tuple<Series, Series>(await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(1),
+                await _unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(2));
+        }
+
+        var library =
+            await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+                LibraryIncludes.Series | LibraryIncludes.AppUser);
+        var user = new AppUserBuilder("majora2007", "majora2007@fake.com").Build();
+        library!.AppUsers.Add(user);
+        library.ManageReadingLists = true;
+
+        // Setup the series for CreateReadingListsFromSeries
+        var series1 = new SeriesBuilder("Series 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithStoryArc("CreateReadingListsFromSeries")
+                    .WithStoryArcNumber("1")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+
+        var series2 = new SeriesBuilder("Series 2")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1").Build())
+                .WithChapter(new ChapterBuilder("2").Build())
+                .Build())
+            .Build();
+
+        library!.Series.Add(series1);
+        library!.Series.Add(series2);
+
+        await _unitOfWork.CommitAsync();
+
+        return new Tuple<Series, Series>(series1, series2);
+    }
+
     // [Fact]
     // public async Task CreateReadingListsFromSeries_ShouldCreateFromSinglePair()
     // {
+    //     //await SetupData();
     //
+    //     var series1 = new SeriesBuilder("Series 1")
+    //         .WithFormat(MangaFormat.Archive)
+    //         .WithVolume(new VolumeBuilder("1")
+    //             .WithChapter(new ChapterBuilder("1")
+    //                 .WithStoryArc("CreateReadingListsFromSeries")
+    //                 .WithStoryArcNumber("1")
+    //                 .Build())
+    //             .WithChapter(new ChapterBuilder("2").Build())
+    //             .Build())
+    //         .Build();
+    //
+    //     _readingListService.CreateReadingListsFromSeries(series.Item1)
     // }
 
     #endregion

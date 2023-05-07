@@ -231,8 +231,8 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}")
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}")
                 }
             });
         }
@@ -294,7 +294,8 @@ public class OpdsController : BaseApiController
         var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
 
-        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, true, GetUserParams(pageNumber));
+        var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId,
+            true, GetUserParams(pageNumber), false);
 
 
         var feed = CreateFeed("All Reading Lists", $"{prefix}{apiKey}/reading-list", apiKey, prefix, baseUrl);
@@ -480,9 +481,9 @@ public class OpdsController : BaseApiController
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
                         $"{prefix}{apiKey}/collections/{collection.Id}"),
                     CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}"),
+                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}"),
                     CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}")
+                        $"{baseUrl}api/image/collection-cover?collectionId={collection.Id}&apiKey={apiKey}")
                 }
             });
         }
@@ -546,7 +547,7 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed(series.Name + " - Storyline", $"{prefix}{apiKey}/series/{series.Id}", apiKey, prefix, baseUrl);
         SetFeedId(feed, $"series-{series.Id}");
-        feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}"));
+        feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}&apiKey={apiKey}"));
 
         var seriesDetail =  await _seriesService.GetSeriesDetail(seriesId, userId);
         foreach (var volume in seriesDetail.Volumes)
@@ -737,8 +738,8 @@ public class OpdsController : BaseApiController
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/series/{seriesDto.Id}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}")
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesDto.Id}&apiKey={apiKey}")
             }
         };
     }
@@ -752,8 +753,8 @@ public class OpdsController : BaseApiController
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/series/{searchResultDto.SeriesId}"),
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}")
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={searchResultDto.SeriesId}&apiKey={apiKey}")
             }
         };
     }
@@ -770,9 +771,9 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
                      $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}"),
                 CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}"),
+                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
                 CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}")
+                    $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}")
             }
         };
     }
@@ -788,9 +789,10 @@ public class OpdsController : BaseApiController
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, await GetUser(apiKey));
 
+
         var title = $"{series.Name}";
 
-        if (volume.Chapters.Count == 1)
+        if (volume!.Chapters.Count == 1)
         {
             SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
             if (volume.Name != "0")
@@ -823,8 +825,8 @@ public class OpdsController : BaseApiController
             Format = mangaFile.Format.ToString(),
             Links = new List<FeedLink>()
             {
-                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}"),
-                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/chapter-cover?chapterId={chapterId}&apiKey={apiKey}"),
                 // We can't not include acc link in the feed, panels doesn't work with just page streaming option. We have to block download directly
                 accLink,
                 await CreatePageStreamLink(series.LibraryId, seriesId, volumeId, chapterId, mangaFile, apiKey, prefix)

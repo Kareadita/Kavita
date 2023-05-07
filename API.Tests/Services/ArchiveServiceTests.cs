@@ -26,7 +26,9 @@ public class ArchiveServiceTests
     public ArchiveServiceTests(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _archiveService = new ArchiveService(_logger, _directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService));
+        _archiveService = new ArchiveService(_logger, _directoryService,
+            new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService),
+            Substitute.For<IMediaErrorService>());
     }
 
     [Theory]
@@ -164,7 +166,7 @@ public class ArchiveServiceTests
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds);
-        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService);
+        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
         var expectedBytes = Image.Thumbnail(Path.Join(testDirectory, expectedOutputFile), 320).WriteToBuffer(".png");
@@ -196,7 +198,8 @@ public class ArchiveServiceTests
     {
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
         var archiveService =  Substitute.For<ArchiveService>(_logger,
-            new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService);
+            new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
+            Substitute.For<IMediaErrorService>());
         var testDirectory = API.Services.Tasks.Scanner.Parser.Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages")));
 
         var outputDir = Path.Join(testDirectory, "output");
@@ -220,7 +223,7 @@ public class ArchiveServiceTests
     {
         var imageService = Substitute.For<IImageService>();
         imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>()).Returns(x => "cover.jpg");
-        var archiveService = new ArchiveService(_logger, _directoryService, imageService);
+        var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
         var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
         var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");

@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { SharedModule } from '../shared/shared.module';
@@ -25,6 +25,7 @@ import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tas
 import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
 
 
 
@@ -47,6 +48,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ManageEmailSettingsComponent,
     ManageTasksSettingsComponent,
     ManageLogsComponent,
+    ManageAlertsComponent,
   ],
   imports: [
     CommonModule,
@@ -57,6 +59,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     NgbTooltipModule,
     NgbTypeaheadModule, // Directory Picker
     NgbDropdownModule,
+    NgbAccordionModule,
     SharedModule,
     PipeModule,
     SidenavModule,

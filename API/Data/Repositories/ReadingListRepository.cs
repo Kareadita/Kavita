@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +27,7 @@ public enum ReadingListIncludes
 
 public interface IReadingListRepository
 {
-    Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams);
+    Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true);
     Task<ReadingList?> GetReadingListByIdAsync(int readingListId, ReadingListIncludes includes = ReadingListIncludes.None);
     Task<IEnumerable<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId);
     Task<ReadingListDto?> GetReadingListDtoByIdAsync(int readingListId, int userId);
@@ -166,17 +166,18 @@ public class ReadingListRepository : IReadingListRepository
     }
 
 
-    public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams)
+    public async Task<PagedList<ReadingListDto>> GetReadingListDtosForUserAsync(int userId, bool includePromoted, UserParams userParams, bool sortByLastModified = true)
     {
         var userAgeRating = (await _context.AppUser.SingleAsync(u => u.Id == userId)).AgeRestriction;
         var query = _context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
-            .Where(l => l.AgeRating >= userAgeRating)
-            .OrderBy(l => l.LastModified)
-            .ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
+            .Where(l => l.AgeRating >= userAgeRating);
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.NormalizedTitle);
+
+       var finalQuery = query.ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 
-        return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
+        return await PagedList<ReadingListDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)

@@ -111,13 +111,21 @@ public class LibraryController : BaseApiController
         return Ok(_directoryService.ListDirectory(path));
     }
 
-
+    /// <summary>
+    /// Return all libraries in the Server
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
         return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
     }
 
+    /// <summary>
+    /// For a given library, generate the jump bar information
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpGet("jump-bar")]
     public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
     {
@@ -127,7 +135,11 @@ public class LibraryController : BaseApiController
         return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
     }
 
-
+    /// <summary>
+    /// Grants a user account access to a Library
+    /// </summary>
+    /// <param name="updateLibraryForUserDto"></param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("grant-access")]
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
@@ -172,11 +184,31 @@ public class LibraryController : BaseApiController
         return BadRequest("There was a critical issue. Please try again.");
     }
 
+    /// <summary>
+    /// Scans a given library for file changes.
+    /// </summary>
+    /// <param name="libraryId"></param>
+    /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
+    /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("scan")]
     public ActionResult Scan(int libraryId, bool force = false)
     {
+        if (libraryId <= 0) return BadRequest("Invalid libraryId");
         _taskScheduler.ScanLibrary(libraryId, force);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Scans a given library for file changes. If another scan task is in progress, will reschedule the invocation for 3 hours in future.
+    /// </summary>
+    /// <param name="force">If true, will ignore any optimizations to avoid file I/O and will treat similar to a first scan</param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("scan-all")]
+    public ActionResult ScanAll(bool force = false)
+    {
+        _taskScheduler.ScanLibraries(force);
         return Ok();
     }
 

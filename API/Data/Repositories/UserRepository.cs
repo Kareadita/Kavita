@@ -228,7 +228,7 @@ public class UserRepository : IUserRepository
     public async Task<AppUser> GetDefaultAdminUser()
     {
         return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole))
-            .OrderByDescending(u => u.Created)
+            .OrderBy(u => u.Created)
             .First();
     }
 
@@ -337,7 +337,7 @@ public class UserRepository : IUserRepository
         return await _context.AppUser
             .Where(u => u.ApiKey != null && u.ApiKey.Equals(apiKey))
             .Select(u => u.Id)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
 

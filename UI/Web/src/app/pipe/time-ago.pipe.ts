@@ -24,7 +24,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This code was taken from https://github.com/AndrewPoyntz/time-ago-pipe/blob/master/time-ago.pipe.ts 
+This code was taken from https://github.com/AndrewPoyntz/time-ago-pipe/blob/master/time-ago.pipe.ts
 and modified
  */
 
@@ -39,14 +39,14 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   constructor() {}
-  
+
   transform(value: string) {
     this.removeTimer();
     const d = new Date(value);
     const now = new Date();
     const seconds = Math.round(Math.abs((now.getTime() - d.getTime()) / 1000));
     const timeToUpdate = (Number.isNaN(seconds)) ? 1000 : this.getSecondsUntilUpdate(seconds) * 1000;
-    
+
     this.timer = this.ngZone.runOutsideAngular(() => {
       if (typeof window !== 'undefined') {
         return window.setTimeout(() => {

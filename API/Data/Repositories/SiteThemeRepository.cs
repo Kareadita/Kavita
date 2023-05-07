@@ -71,7 +71,7 @@ public class SiteThemeRepository : ISiteThemeRepository
     {
         var result =  await _context.SiteTheme
             .Where(t => t.IsDefault)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
 
         if (result == null)
         {

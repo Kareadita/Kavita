@@ -21,6 +21,7 @@ public interface ITaskScheduler
     void ScanFolder(string folderPath, TimeSpan delay);
     void ScanFolder(string folderPath);
     void ScanLibrary(int libraryId, bool force = false);
+    void ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true);
     void RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false);
@@ -32,6 +33,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     Task CovertAllCoversToWebP();
     Task CleanupDbEntries();
+
 }
 public class TaskScheduler : ITaskScheduler
 {
@@ -97,12 +99,12 @@ public class TaskScheduler : ITaskScheduler
         {
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(),
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(false),
                 () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
         }
         else
         {
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false), Cron.Daily, TimeZoneInfo.Local);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
@@ -237,15 +239,19 @@ public class TaskScheduler : ITaskScheduler
         await _cleanupService.CleanupDbEntries();
     }
 
-    public void ScanLibraries()
+    /// <summary>
+    /// Attempts to call ScanLibraries on ScannerService, but if another scan task is in progress, will reschedule the invocation for 3 hours in future.
+    /// </summary>
+    /// <param name="force"></param>
+    public void ScanLibraries(bool force = false)
     {
         if (RunningAnyTasksByMethod(ScanTasks, ScanQueue))
         {
             _logger.LogInformation("A Scan is already running, rescheduling ScanLibraries in 3 hours");
-            BackgroundJob.Schedule(() => ScanLibraries(), TimeSpan.FromHours(3));
+            BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
             return;
         }
-        _scannerService.ScanLibraries();
+        BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
     }
 
     public void ScanLibrary(int libraryId, bool force = false)
@@ -393,6 +399,7 @@ public class TaskScheduler : ITaskScheduler
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
         ret = scheduledJobs.Any(j =>
+            j.Value.Job != null &&
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
             j.Value.Job.Method.DeclaringType.Name.Equals(className));

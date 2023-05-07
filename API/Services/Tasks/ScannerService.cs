@@ -35,7 +35,7 @@ public interface IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    Task ScanLibraries();
+    Task ScanLibraries(bool forceUpdate = false);
 
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -439,12 +439,12 @@ public class ScannerService : IScannerService
     [Queue(TaskScheduler.ScanQueue)]
     [DisableConcurrentExecution(60 * 60 * 60)]
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
-    public async Task ScanLibraries()
+    public async Task ScanLibraries(bool forceUpdate = false)
     {
         _logger.LogInformation("Starting Scan of All Libraries");
         foreach (var lib in await _unitOfWork.LibraryRepository.GetLibrariesAsync())
         {
-            await ScanLibrary(lib.Id);
+            await ScanLibrary(lib.Id, forceUpdate);
         }
         _logger.LogInformation("Scan of All Libraries Finished");
     }
@@ -531,7 +531,7 @@ public class ScannerService : IScannerService
 
         _logger.LogInformation("[ScannerService] Finished file scan in {ScanAndUpdateTime} milliseconds. Updating database", scanElapsedTime);
 
-        var time = DateTime.UtcNow;
+        var time = DateTime.Now;
         foreach (var folderPath in library.Folders)
         {
             folderPath.UpdateLastScanned(time);

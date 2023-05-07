@@ -107,7 +107,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.settingsService.getServerSettings().subscribe(settings => this.baseUrl = settings.baseUrl);
+    this.settingsService.getBaseUrl().subscribe(url => this.baseUrl = url);
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
@@ -257,10 +257,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   transformKeyToOpdsUrl(key: string) {
     if (environment.production) {
-      return `${location.origin}${environment.apiUrl}opds/${key}`.replace('//', '/');
+      return `${location.origin}` + `${this.baseUrl}${environment.apiUrl}opds/${key}`.replace('//', '/');
     }
 
-    return `${location.origin}${this.baseUrl}api/opds/${key}`.replace('//', '/');
+    return `${location.origin}${this.baseUrl.replace('//', '/')}api/opds/${key}`;
   }
 
   handleBackgroundColorChange() {

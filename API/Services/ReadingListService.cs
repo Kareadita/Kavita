@@ -13,9 +13,11 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
@@ -48,7 +50,7 @@ public interface IReadingListService
 /// <summary>
 /// Methods responsible for management of Reading Lists
 /// </summary>
-/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
 public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -150,7 +152,7 @@ public class ReadingListService : IReadingListService
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title.Trim();
-        readingList.NormalizedTitle = Tasks.Scanner.Parser.Parser.Normalize(readingList.Title);
+        readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
@@ -191,7 +193,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
-    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess"/> to be called beforehand</remarks>
+    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
     /// <param name="user">User</param>
     /// <returns></returns>
@@ -201,8 +203,9 @@ public class ReadingListService : IReadingListService
         items = await _unitOfWork.ReadingListRepository.AddReadingProgressModifiers(user.Id, items.ToList());
 
         // Collect all Ids to remove
-        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id);
+        var itemIdsToRemove = items.Where(item => item.PagesRead == item.PagesTotal).Select(item => item.Id).ToList();
 
+        if (!itemIdsToRemove.Any()) return true;
         try
         {
             var listItems =
@@ -216,7 +219,6 @@ public class ReadingListService : IReadingListService
             await CalculateStartAndEndDates(readingList);
 
             if (!_unitOfWork.HasChanges()) return true;
-
             return await _unitOfWork.CommitAsync();
         }
         catch
@@ -295,7 +297,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Calculates the Start month/year and Ending month/year
     /// </summary>
-    /// <param name="readingListWithItems">Reading list should have all items</param>
+    /// <param name="readingListWithItems">Reading list should have all items and Chapters</param>
     public async Task CalculateStartAndEndDates(ReadingList readingListWithItems)
     {
         var items = readingListWithItems.Items;
@@ -311,8 +313,8 @@ public class ReadingListService : IReadingListService
             _logger.LogError("Tried to calculate release dates for Reading List, but missing Chapter entities");
             return;
         }
-        var maxReleaseDate = items.Max(item => item.Chapter.ReleaseDate);
-        var minReleaseDate = items.Min(item => item.Chapter.ReleaseDate);
+        var maxReleaseDate = items.Where(item => item.Chapter != null).Max(item => item.Chapter.ReleaseDate);
+        var minReleaseDate = items.Where(item => item.Chapter != null).Min(item => item.Chapter.ReleaseDate);
         if (maxReleaseDate != DateTime.MinValue)
         {
             readingListWithItems.EndingMonth = maxReleaseDate.Month;
@@ -447,7 +449,7 @@ public class ReadingListService : IReadingListService
         series.Metadata ??= new SeriesMetadataBuilder().Build();
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
-            List<Tuple<string, string>> pairs = new List<Tuple<string, string>>();
+            var pairs = new List<Tuple<string, string>>();
             if (!string.IsNullOrEmpty(chapter.StoryArc))
             {
                 pairs.AddRange(GeneratePairs(chapter.Files.FirstOrDefault()!.FilePath, chapter.StoryArc, chapter.StoryArcNumber));
@@ -459,7 +461,6 @@ public class ReadingListService : IReadingListService
 
             foreach (var arcPair in pairs)
             {
-                var order = int.Parse(arcPair.Item2);
                 var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id);
                 if (readingList == null)
                 {
@@ -471,18 +472,36 @@ public class ReadingListService : IReadingListService
                 }
 
                 var items = readingList.Items.ToList();
-                var readingListItem = items.FirstOrDefault(item => item.Order == order);
+                var order = int.Parse(arcPair.Item2);
+                var readingListItem = items.FirstOrDefault(item => item.Order == order || item.ChapterId == chapter.Id);
                 if (readingListItem == null)
                 {
+                    // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
+                    if (order == int.MaxValue)
+                    {
+                        order = items.Count > 0 ? items.Max(item => item.Order) + 1 : 0;
+                    }
                     items.Add(new ReadingListItemBuilder(order, series.Id, chapter.VolumeId, chapter.Id).Build());
                 }
                 else
                 {
-                    ReorderItems(items, readingListItem.Id, order);
+                    if (order == int.MaxValue)
+                    {
+                        _logger.LogWarning("{Filename} has a missing StoryArcNumber/AlternativeNumber but list already exists with this item. Skipping item", chapter.Files.FirstOrDefault()?.FilePath);
+                    }
+                    else
+                    {
+                        ReorderItems(items, readingListItem.Id, order);
+                    }
                 }
 
                 readingList.Items = items;
                 await CalculateReadingListAgeRating(readingList);
+                if (_unitOfWork.HasChanges())
+                {
+                    await _unitOfWork.CommitAsync();
+                }
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
             }
         }
@@ -495,14 +514,19 @@ public class ReadingListService : IReadingListService
 
         var arcs = storyArc.Split(",");
         var arcNumbers = storyArcNumbers.Split(",");
-        if (arcNumbers.Length != arcs.Length)
+        if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
         {
-            _logger.LogError("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
+            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
         }
 
         var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
+            // When there is a mismatch on arcs and arc numbers, then we should default to a high number
+            if (string.IsNullOrEmpty(arcNumbers[i]) && !string.IsNullOrEmpty(arcs[i]))
+            {
+                arcNumbers[i] = int.MaxValue.ToString();
+            }
             if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
             data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
         }

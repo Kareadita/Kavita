@@ -1,12 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
-import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
 import { ServerSettings } from '../_models/server-settings';
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
@@ -28,7 +26,7 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
-    private modalService: NgbModal, private serverService: ServerService) { }
+    private serverService: ServerService) { }
 
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
@@ -40,7 +38,6 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.settingsForm.addControl('cacheDirectory', new FormControl(this.serverSettings.cacheDirectory, [Validators.required]));
-      this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
       this.settingsForm.addControl('ipAddresses', new FormControl(this.serverSettings.ipAddresses, [Validators.required, Validators.pattern(ValidIpAddress)]));
@@ -67,7 +64,6 @@ export class ManageSettingsComponent implements OnInit {
 
   resetForm() {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory);
-    this.settingsForm.get('bookmarksDirectory')?.setValue(this.serverSettings.bookmarksDirectory);
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
     this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
@@ -87,7 +83,7 @@ export class ManageSettingsComponent implements OnInit {
 
   async saveSettings() {
     const modelSettings = this.settingsForm.value;
-
+    modelSettings.bookmarksDirectory = this.serverSettings.bookmarksDirectory;
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
@@ -127,15 +123,5 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
-  openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
-    modalRef.componentInstance.startingFolder = existingDirectory || '';
-    modalRef.componentInstance.helpUrl = '';
-    modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
-      if (closeResult.success && closeResult.folderPath !== '') {
-        this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
-        this.settingsForm.markAsDirty();
-      }
-    });
-  }
+  
 }

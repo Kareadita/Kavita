@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Jobs;
+using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
@@ -14,7 +17,6 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -23,7 +25,6 @@ namespace API.Controllers;
 [Authorize(Policy = "RequireAdminRole")]
 public class ServerController : BaseApiController
 {
-    private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<ServerController> _logger;
     private readonly IBackupService _backupService;
     private readonly IArchiveService _archiveService;
@@ -34,13 +35,13 @@ public class ServerController : BaseApiController
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
+    public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler)
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
     {
-        _applicationLifetime = applicationLifetime;
         _logger = logger;
         _backupService = backupService;
         _archiveService = archiveService;
@@ -51,19 +52,7 @@ public class ServerController : BaseApiController
         _scannerService = scannerService;
         _accountService = accountService;
         _taskScheduler = taskScheduler;
-    }
-
-    /// <summary>
-    /// Attempts to Restart the server. Does not work, will shutdown the instance.
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("restart")]
-    public ActionResult RestartServer()
-    {
-        _logger.LogInformation("{UserName} is restarting server from admin dashboard", User.GetUsername());
-
-        _applicationLifetime.StopApplication();
-        return Ok();
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -156,6 +145,10 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Downloads all the log files via a zip
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("logs")]
     public ActionResult GetLogs()
     {
@@ -180,6 +173,10 @@ public class ServerController : BaseApiController
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
 
+    /// <summary>
+    /// Pull the Changelog for Kavita from Github and display
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("changelog")]
     public async Task<ActionResult<IEnumerable<UpdateNotificationDto>>> GetChangelog()
     {
@@ -198,6 +195,10 @@ public class ServerController : BaseApiController
         return Ok(await _accountService.CheckIfAccessible(Request));
     }
 
+    /// <summary>
+    /// Returns a list of reoccurring jobs. Scheduled ad-hoc jobs will not be returned.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("jobs")]
     public ActionResult<IEnumerable<JobDto>> GetJobs()
     {
@@ -212,6 +213,30 @@ public class ServerController : BaseApiController
                 });
 
         return Ok(recurringJobs);
-
     }
+
+    /// <summary>
+    /// Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("media-errors")]
+    public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
+    {
+        return Ok(_unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
+    }
+
+    /// <summary>
+    /// Deletes all media errors
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("clear-media-alerts")]
+    public async Task<ActionResult> ClearMediaErrors()
+    {
+        await _unitOfWork.MediaErrorRepository.DeleteAll();
+        return Ok();
+    }
+
+
 }

@@ -364,34 +364,6 @@ public class ReaderServiceTests
 
         _context.Series.Add(series);
 
-        // _context.Series.Add(new Series()
-        // {
-        //     Name = "Test",
-        //     NormalizedName = "Test".ToNormalized(),
-        //     Library = new Library() {
-        //         Name = "Test LIb",
-        //         Type = LibraryType.Manga,
-        //     },
-        //     Volumes = new List<Volume>()
-        //     {
-        //         EntityFactory.CreateVolume("1", new List<Chapter>()
-        //         {
-        //             EntityFactory.CreateChapter("1", false, new List<MangaFile>()),
-        //             EntityFactory.CreateChapter("2", false, new List<MangaFile>()),
-        //         }),
-        //         EntityFactory.CreateVolume("2", new List<Chapter>()
-        //         {
-        //             EntityFactory.CreateChapter("21", false, new List<MangaFile>()),
-        //             EntityFactory.CreateChapter("22", false, new List<MangaFile>()),
-        //         }),
-        //         EntityFactory.CreateVolume("3", new List<Chapter>()
-        //         {
-        //             EntityFactory.CreateChapter("31", false, new List<MangaFile>()),
-        //             EntityFactory.CreateChapter("32", false, new List<MangaFile>()),
-        //         }),
-        //     }
-        // });
-
         _context.AppUser.Add(new AppUser()
         {
             UserName = "majora2007"
@@ -441,9 +413,6 @@ public class ReaderServiceTests
         });
 
         await _context.SaveChangesAsync();
-
-
-
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
@@ -709,9 +678,6 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
-
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
@@ -741,8 +707,6 @@ public class ReaderServiceTests
         });
 
         await _context.SaveChangesAsync();
-
-
 
 
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 2, 1);
@@ -779,9 +743,6 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
-
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 3, 1);
         Assert.Equal(-1, nextChapter);
     }
@@ -816,12 +777,46 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-
-
         var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 3, 1);
         Assert.NotEqual(-1, nextChapter);
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
         Assert.Equal("B.cbz", actualChapter.Range);
+    }
+
+    [Fact]
+    public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume_WhenAllVolumesHaveAChapterToo()
+    {
+        await ResetDb();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("12").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2")
+                .WithNumber(2)
+                .WithChapter(new ChapterBuilder("12").Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        var user = new AppUserBuilder("majora2007", "fake").Build();
+
+        _context.AppUser.Add(user);
+
+        await _context.SaveChangesAsync();
+
+        await _readerService.MarkChaptersAsRead(user, 1, new List<Chapter>()
+        {
+            series.Volumes.First().Chapters.First()
+        });
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 1, 1, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
+        Assert.Equal(2, actualChapter.Volume.Number);
     }
 
     #endregion
@@ -1281,6 +1276,38 @@ public class ReaderServiceTests
         var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(prevChapter);
         Assert.Equal("22", actualChapter.Range);
     }
+
+    [Fact]
+    public async Task GetPrevChapterIdAsync_ShouldRollIntoPrevVolume_WhenAllVolumesHaveAChapterToo()
+    {
+        await ResetDb();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("12").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2")
+                .WithNumber(2)
+                .WithChapter(new ChapterBuilder("12").Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        var user = new AppUserBuilder("majora2007", "fake").Build();
+
+        _context.AppUser.Add(user);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetPrevChapterIdAsync(1, 2, 2, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter, ChapterIncludes.Volumes);
+        Assert.Equal(1, actualChapter.Volume.Number);
+    }
+
     #endregion
 
     #region GetContinuePoint
