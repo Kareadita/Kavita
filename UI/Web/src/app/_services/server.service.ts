@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { ServerInfo } from '../admin/_models/server-info';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { Job } from '../_models/job/job';
+import { KavitaMediaError } from '../admin/_models/media-error';
 
 @Injectable({
   providedIn: 'root'
@@ -60,5 +61,13 @@ export class ServerService {
 
   convertCovers() {
     return this.httpClient.post(this.baseUrl + 'server/convert-covers', {});
+  }
+
+  getMediaErrors() {
+    return this.httpClient.get<Array<KavitaMediaError>>(this.baseUrl + 'server/media-errors', {});
+  }
+
+  clearMediaAlerts() {
+    return this.httpClient.post(this.baseUrl + 'server/clear-media-alerts', {});
   }
 }

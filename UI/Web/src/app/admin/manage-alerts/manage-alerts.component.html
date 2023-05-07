@@ -1,0 +1,39 @@
+<p>This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis.</p>
+
+<button class="btn btn-primary mb-2" (click)="clear()">Clear Alerts</button>
+<table class="table table-light table-hover table-sm table-hover">
+    <thead #header>
+        <tr>
+            <th scope="col"sortable="extension" (sort)="onSort($event)">
+                Extension
+            </th>
+            <th scope="col" sortable="filePath" (sort)="onSort($event)">
+                File
+            </th>
+            <th scope="col" sortable="comment" (sort)="onSort($event)">
+                Comment
+            </th>
+            <th scope="col" sortable="details" (sort)="onSort($event)">
+                Details
+            </th>
+        </tr>
+    </thead>
+    <tbody #container>
+        <tr *ngIf="isLoading"><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+        <tr *ngIf="data.length === 0 && !isLoading"><td colspan="4" style="text-align: center;">No issues</td></tr>
+        <tr *ngFor="let item of data; index as i">
+            <td>
+              {{item.extension}}
+            </td>
+            <td>
+              {{item.filePath}}
+            </td>
+            <td>
+              {{item.comment}}
+            </td>
+            <td>
+              {{item.details}}
+            </td>
+        </tr>
+    </tbody>
+</table>

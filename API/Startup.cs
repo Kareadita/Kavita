@@ -32,6 +32,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -294,8 +295,17 @@ public class Startup
         {
             // We don't update the index.html in local as we don't serve from there
             UpdateBaseUrlInIndex(basePath);
-        }
 
+            // Update DB with what's in config
+            var dataContext = serviceProvider.GetRequiredService<DataContext>();
+            var setting = dataContext.ServerSetting.SingleOrDefault(x => x.Key == ServerSettingKey.BaseUrl);
+            if (setting != null)
+            {
+                setting.Value = basePath;
+            }
+
+            dataContext.SaveChanges();
+        }
 
         app.UseRouting();
 

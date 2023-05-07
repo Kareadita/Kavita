@@ -18,6 +18,7 @@ export interface SortEvent<T> {
 		'(click)': 'rotate()',
 	},
 })
+// eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SortableHeader<T> {
 	@Input() sortable: SortColumn<T> = '';
 	@Input() direction: SortDirection = '';

@@ -86,13 +86,13 @@
           <ng-container *ngIf="readingList.startingMonth > 0">{{readingList.startingMonth | date:'MMM'}}</ng-container>
           <ng-container *ngIf="readingList.startingMonth > 0 && readingList.startingYear > 0">, </ng-container>
           <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
-          — 
+          —
           <ng-container *ngIf="readingList.endingYear > 0">
             <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
             <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
             <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
           </ng-container>
-          
+
         </h4>
       </div>
       <!-- Summary row-->
@@ -109,7 +109,7 @@
         <app-badge-expander [items]="characters">
           <ng-template #badgeExpanderItem let-item let-position="idx">
             <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-          </ng-template>  
+          </ng-template>
       </app-badge-expander>
       </div>
     </ng-container>
@@ -126,7 +126,7 @@
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
        [showRemoveButton]="false">
         <ng-template #draggableItem let-item let-position="idx">
-          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes" 
+          <app-reading-list-item [ngClass]="{'content-container': items.length < 100, 'non-virtualized-container': items.length >= 100}" [item]="item" [position]="position" [libraryTypes]="libraryTypes"
             [promoted]="item.promoted" (read)="readChapter($event)" (remove)="itemRemoved($event, position)"></app-reading-list-item>
         </ng-template>
     </app-draggable-ordered-list>

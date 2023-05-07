@@ -119,7 +119,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     {
         return await _context.AppUserProgresses.ToListAsync();
     }
-    
+
     public async Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses

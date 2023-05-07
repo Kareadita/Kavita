@@ -4,6 +4,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.CollectionTags;
 using API.DTOs.Device;
+using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
@@ -33,6 +34,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Tag, TagDto>();
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
+        CreateMap<MediaError, MediaErrorDto>();
 
         CreateMap<AppUserProgress, ProgressDto>()
             .ForMember(dest => dest.PageNum,

@@ -44,13 +44,16 @@ public class ArchiveService : IArchiveService
     private readonly ILogger<ArchiveService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly IMediaErrorService _mediaErrorService;
     private const string ComicInfoFilename = "ComicInfo.xml";
 
-    public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
+    public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService,
+        IImageService imageService, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _imageService = imageService;
+        _mediaErrorService = mediaErrorService;
     }
 
     /// <summary>
@@ -120,6 +123,8 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
             return 0;
         }
     }
@@ -238,6 +243,8 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
         }
 
         return string.Empty;
@@ -403,6 +410,8 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
         }
 
         return null;
@@ -485,9 +494,11 @@ public class ArchiveService : IArchiveService
             }
 
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogWarning(e, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+            _logger.LogWarning(ex, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
             throw new KavitaException(
                 $"There was an error when extracting {archivePath}. Check the file exists, has read permissions or the server OS can support all path characters.");
         }

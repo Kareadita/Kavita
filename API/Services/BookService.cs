@@ -61,6 +61,7 @@ public class BookService : IBookService
     private readonly ILogger<BookService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly IMediaErrorService _mediaErrorService;
     private readonly StylesheetParser _cssParser = new ();
     private static readonly RecyclableMemoryStreamManager StreamManager = new ();
     private const string CssScopeClass = ".book-content";
@@ -73,11 +74,12 @@ public class BookService : IBookService
         }
     };
 
-    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService)
+    public BookService(ILogger<BookService> logger, IDirectoryService directoryService, IImageService imageService, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _imageService = imageService;
+        _mediaErrorService = mediaErrorService;
     }
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
@@ -395,6 +397,8 @@ public class BookService : IBookService
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "There was an error reading css file for inlining likely due to a key mismatch in metadata");
+                    await _mediaErrorService.ReportMediaIssueAsync(book.FilePath, MediaErrorProducer.BookService,
+                        "There was an error reading css file for inlining likely due to a key mismatch in metadata", ex);
                 }
             }
         }
@@ -519,7 +523,9 @@ public class BookService : IBookService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[GetComicInfo] There was an exception getting metadata");
+            _logger.LogWarning(ex, "[GetComicInfo] There was an exception parsing metadata");
+            _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
+                "There was an exception parsing metadata", ex);
         }
 
         return null;
@@ -632,6 +638,8 @@ public class BookService : IBookService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[BookService] There was an exception getting number of pages, defaulting to 0");
+            _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
+                "There was an exception getting number of pages, defaulting to 0", ex);
         }
 
         return 0;
@@ -776,6 +784,8 @@ public class BookService : IBookService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[BookService] There was an exception when opening epub book: {FileName}", filePath);
+            _mediaErrorService.ReportMediaIssue(filePath, MediaErrorProducer.BookService,
+                "There was an exception when opening epub book", ex);
         }
 
         return null;
@@ -995,8 +1005,9 @@ public class BookService : IBookService
             }
         } catch (Exception ex)
         {
-            // NOTE: We can log this to media analysis service
             _logger.LogError(ex, "There was an issue reading one of the pages for {Book}", book.FilePath);
+            await _mediaErrorService.ReportMediaIssueAsync(book.FilePath, MediaErrorProducer.BookService,
+                "There was an issue reading one of the pages for", ex);
         }
 
         throw new KavitaException("Could not find the appropriate html for that page");
@@ -1069,6 +1080,8 @@ public class BookService : IBookService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
+            _mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
+                "There was a critical error and prevented thumbnail generation", ex);
         }
 
         return string.Empty;
@@ -1093,6 +1106,8 @@ public class BookService : IBookService
             _logger.LogWarning(ex,
                 "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image",
                 fileFilePath);
+            _mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
+                "There was a critical error and prevented thumbnail generation", ex);
         }
 
         return string.Empty;

@@ -657,19 +657,13 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo)
     {
+        if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
-        var comicInfo = info;
-        if (info == null)
-        {
-            comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath);
-        }
-
-        if (comicInfo == null) return;
         _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
@@ -807,11 +801,15 @@ public class ProcessSeries : IProcessSeries
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
         // TODO: Move this to an extension and test it
-        if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
+        if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();
+            return ImmutableList<string>.Empty;
         }
-        return ImmutableList<string>.Empty;
+
+        return comicInfoTagSeparatedByComma.Split(",")
+            .Select(s => s.Trim())
+            .DistinctBy(Parser.Parser.Normalize)
+            .ToList();
     }
 
     /// <summary>

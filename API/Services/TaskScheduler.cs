@@ -251,7 +251,7 @@ public class TaskScheduler : ITaskScheduler
             BackgroundJob.Schedule(() => ScanLibraries(force), TimeSpan.FromHours(3));
             return;
         }
-        _scannerService.ScanLibraries(force);
+        BackgroundJob.Enqueue(() => _scannerService.ScanLibraries(force));
     }
 
     public void ScanLibrary(int libraryId, bool force = false)
@@ -399,6 +399,7 @@ public class TaskScheduler : ITaskScheduler
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
         ret = scheduledJobs.Any(j =>
+            j.Value.Job != null &&
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
             j.Value.Job.Method.DeclaringType.Name.Equals(className));
