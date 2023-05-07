@@ -166,7 +166,7 @@ public class ArchiveServiceTests
     {
         var ds = Substitute.For<DirectoryService>(_directoryServiceLogger, new FileSystem());
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), ds);
-        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<MediaErrorService>());
+        var archiveService =  Substitute.For<ArchiveService>(_logger, ds, imageService, Substitute.For<IMediaErrorService>());
 
         var testDirectory = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages"));
         var expectedBytes = Image.Thumbnail(Path.Join(testDirectory, expectedOutputFile), 320).WriteToBuffer(".png");
@@ -199,7 +199,7 @@ public class ArchiveServiceTests
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), _directoryService);
         var archiveService =  Substitute.For<ArchiveService>(_logger,
             new DirectoryService(_directoryServiceLogger, new FileSystem()), imageService,
-            Substitute.For<MediaErrorService>());
+            Substitute.For<IMediaErrorService>());
         var testDirectory = API.Services.Tasks.Scanner.Parser.Parser.NormalizePath(Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/CoverImages")));
 
         var outputDir = Path.Join(testDirectory, "output");
