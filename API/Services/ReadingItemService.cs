@@ -89,6 +89,7 @@ public class ReadingItemService : IReadingItemService
 
         }
 
+        // This is first time ComicInfo is called
         info.ComicInfo = GetComicInfo(path);
         if (info.ComicInfo == null) return info;
 

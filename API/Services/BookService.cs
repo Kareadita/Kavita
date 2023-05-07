@@ -25,6 +25,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
 using VersOne.Epub.Options;
+using VersOne.Epub.Schema;
 
 namespace API.Services;
 
@@ -422,7 +423,6 @@ public class BookService : IBookService
             var info =  new ComicInfo
             {
                 Summary = epubBook.Schema.Package.Metadata.Description,
-                Writer = string.Join(",", epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator))),
                 Publisher = string.Join(",", epubBook.Schema.Package.Metadata.Publishers),
                 Month = month,
                 Day = day,
@@ -454,6 +454,7 @@ public class BookService : IBookService
                         break;
                 }
 
+
                 // EPUB 3.2+ only
                 switch (metadataItem.Property)
                 {
@@ -467,8 +468,46 @@ public class BookService : IBookService
                     case "collection-type":
                         // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
                         break;
+                    case "role":
+                        if (!metadataItem.Scheme.Equals("marc:relators")) break;
+
+                        var creatorId = metadataItem.Refines.Replace("#", string.Empty);
+                        var person = epubBook.Schema.Package.Metadata.Creators.SingleOrDefault(c => c.Id == creatorId);
+                        if (person == null) break;
+
+                        PopulatePerson(metadataItem, info, person);
+                        break;
+                    case "title-type":
+                        break;
+                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes
+                        if (!metadataItem.Content.Equals("collection")) break;
+                        var titleId = metadataItem.Refines.Replace("#", string.Empty);
+                        var readingListElem = epubBook.Schema.Package.Metadata.MetaItems.FirstOrDefault(item =>
+                            item.Name == "dc:title" && item.Id == titleId);
+                        if (readingListElem == null) break;
+
+                        var count = epubBook.Schema.Package.Metadata.MetaItems
+                            .FirstOrDefault(item =>
+                                item.Property == "display-seq" && item.Refines == metadataItem.Refines);
+                        if (count == null || count.Content == "0")
+                        {
+                            // Treat this as a Collection
+                            info.StoryArc += "," + readingListElem.Content;
+                        }
+                        else
+                        {
+                            // Treat as a reading list
+                            info.AlternateSeries += "," + readingListElem.Content;
+                            info.AlternateNumber += "," + count.Content;
+                        }
+
+                        break;
                 }
             }
+
+            // Include regular Writer as well, for cases where there is no special tag
+            info.Writer = string.Join(",",
+                epubBook.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)));
 
             var hasVolumeInSeries = !Parser.ParseVolume(info.Title)
                 .Equals(Parser.DefaultVolume);
@@ -490,6 +529,46 @@ public class BookService : IBookService
         }
 
         return null;
+    }
+
+    private static void PopulatePerson(EpubMetadataMeta metadataItem, ComicInfo info, EpubMetadataCreator person)
+    {
+        switch (metadataItem.Content)
+        {
+            case "art":
+            case "artist":
+                info.CoverArtist += AppendAuthor(person);
+                return;
+            case "aut":
+            case "author":
+                info.Writer += AppendAuthor(person);
+                return;
+            case "pbl":
+            case "publisher":
+                info.Publisher += AppendAuthor(person);
+                return;
+            case "trl":
+            case "translator":
+                info.Translator += AppendAuthor(person);
+                return;
+            case "edt":
+            case "editor":
+                info.Editor += AppendAuthor(person);
+                return;
+            case "ill":
+            case "illustrator":
+                info.Letterer += AppendAuthor(person);
+                return;
+            case "clr":
+            case "colorist":
+                info.Colorist += AppendAuthor(person);
+                return;
+        }
+    }
+
+    private static string AppendAuthor(EpubMetadataCreator person)
+    {
+        return Parser.CleanAuthor(person.Creator) + ",";
     }
 
     private static (int year, int month, int day) GetPublicationDate(string publicationDate)
