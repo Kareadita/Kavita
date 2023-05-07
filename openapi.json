@@ -7638,6 +7638,58 @@
         }
       }
     },
+    "/api/Server/media-errors": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Server/clear-media-alerts": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Deletes all media errors",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
@@ -12230,6 +12282,40 @@
         },
         "additionalProperties": false,
         "description": "This is used for bulk updating a set of volume and or chapters in one go"
+      },
+      "MediaErrorDto": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "Format Type (RAR, ZIP, 7Zip, Epub, PDF)",
+            "nullable": true
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Full Filepath to the file that has some issue",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "description": "Developer defined string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "description": "Exception message",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "MemberDto": {
         "type": "object",

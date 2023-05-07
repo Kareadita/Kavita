@@ -1,5 +1,5 @@
 <div class="container-fluid">
-    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
+    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined" class="mb-2">
 
         <div class="row g-0">
             <p>WebP can drastically reduce space requirements for files. WebP is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">Can I Use</a>.</p>
@@ -48,6 +48,14 @@
         </div>
     </form>
 
-    <!-- Accordion with Issues from Media anaysis -->
-
+    <ngb-accordion #a="ngbAccordion">
+        <ngb-panel>
+            <ng-template ngbPanelTitle>
+                Media Issues
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <app-manage-alerts></app-manage-alerts>
+            </ng-template>
+        </ngb-panel>
+    </ngb-accordion>
 </div>
