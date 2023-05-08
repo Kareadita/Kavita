@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.2.0"
+    "version": "0.7.2.1"
   },
   "servers": [
     {
@@ -6230,6 +6230,82 @@
         }
       }
     },
+    "/api/Series/v2": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Series/{seriesId}": {
       "get": {
         "tags": [
@@ -11482,6 +11558,27 @@
         },
         "additionalProperties": false
       },
+      "FilterComparison": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "FilterDto": {
         "type": "object",
         "properties": {
@@ -11664,6 +11761,108 @@
           }
         },
         "additionalProperties": false
+      },
+      "FilterField": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "type": "integer",
+        "description": "Represents the field which will dictate the value type and the Extension used for filtering",
+        "format": "int32"
+      },
+      "FilterGroupDto": {
+        "type": "object",
+        "properties": {
+          "and": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterGroupDto"
+            },
+            "nullable": true
+          },
+          "or": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterGroupDto"
+            },
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterStatementDto"
+            },
+            "description": "If there are statements then it is assumed there are no And/Ors",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilterStatementDto": {
+        "type": "object",
+        "properties": {
+          "comparison": {
+            "$ref": "#/components/schemas/FilterComparison"
+          },
+          "field": {
+            "$ref": "#/components/schemas/FilterField"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilterV2Dto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the filter if not anonymous",
+            "nullable": true
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterGroupDto"
+            },
+            "nullable": true
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/SortOptions"
+          },
+          "limitTo": {
+            "type": "integer",
+            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Metadata filtering for v2 API only"
       },
       "FolderPath": {
         "type": "object",

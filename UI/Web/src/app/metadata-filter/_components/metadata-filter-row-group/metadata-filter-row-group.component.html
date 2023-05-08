@@ -13,6 +13,7 @@
 </ng-container>
 
 <ng-container *ngIf="filterGroup.statements && filterGroup.statements.length > 0">
+    STMT
     <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup, statements: filterGroup.statements }"></ng-container>
 </ng-container>
 

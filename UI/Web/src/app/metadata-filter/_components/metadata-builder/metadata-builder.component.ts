@@ -58,6 +58,8 @@ export class MetadataBuilderComponent implements OnInit {
       group.statements.push(this.metadataService.createDefaultFilterStatement());
       this.filterGroup.or.push(group);
     }
+
+    console.log('Group: ', this.filterGroup);
   }
 
 }
