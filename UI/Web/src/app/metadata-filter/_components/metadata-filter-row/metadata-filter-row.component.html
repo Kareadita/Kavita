@@ -1,7 +1,7 @@
 
 <form [formGroup]="formGroup">
     <div class="row g-0">
-        <div class="col-md-4">
+        <div class="col-md-4 me-2">
             <ng-container *ngIf="formGroup.get('input') as control">
                 <select class="form-select me-2" formControlName="input">
                     <option *ngFor="let field of allFields" [value]="field">{{field | filterField}}</option>
@@ -9,8 +9,8 @@
             </ng-container>
         </div>
         
-        <div class="col-md-2">
-            <select class="col-auto form-select  me-2" formControlName="comparison">
+        <div class="col-md-2 me-2">
+            <select class="col-auto form-select" formControlName="comparison">
                 <option *ngFor="let comparison of validComprisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
         </div>

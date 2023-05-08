@@ -1,4 +1,4 @@
-<form [formGroup]="formGroup">
+<form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}">
     <div class="row mb-2">
         <div class="col-md-4">
             <select class="form-select me-2" formControlName="comparison">
@@ -6,26 +6,27 @@
             </select>
         </div>
 
-        <div class="col-md-1">
-            <button class="btn btn-icon" (click)="addGroup()">+</button>
-        </div>
-
-        <div class="col-md-1">
+        <div class="col-md-2">
+            <button class="btn btn-icon" (click)="addFilter()" ngbTooltip="Add Rule">
+                <i class="fa fa-solid fa-plus"></i>
+                <span class="visually-hidden" aria-hidden="true">Add Rule</span>
+            </button>
             <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
-            <button class="btn btn-icon" (click)="addGroup()">+</button>
         </div>
     </div>
 </form>
 
 <ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">
     <ng-container *ngFor="let andGroup of filterGroup.and">
-        <app-metadata-filter-row-group [filterGroup]="andGroup" [groupPreset]="'and'" [nestedLevel]="nestedLevel + 1"></app-metadata-filter-row-group>
+        <app-metadata-filter-row-group [filterGroup]="andGroup" [groupPreset]="'and'" 
+            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>
 
 <ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
     <ng-container *ngFor="let orGroup of filterGroup.or">
-        <app-metadata-filter-row-group [filterGroup]="orGroup"  [groupPreset]="'or'" [nestedLevel]="nestedLevel + 1"></app-metadata-filter-row-group>
+        <app-metadata-filter-row-group [filterGroup]="orGroup"  [groupPreset]="'or'" 
+            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>
 
@@ -34,7 +35,7 @@
 </ng-container>
 
 <ng-template #statements let-group="group">
-    <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 10) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">
+    <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">
         <div class="col-md-10">
             <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)"></app-metadata-row-filter>
         </div>

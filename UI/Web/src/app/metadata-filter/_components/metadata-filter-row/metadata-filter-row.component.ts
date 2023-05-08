@@ -45,10 +45,10 @@ export class MetadataFilterRowComponent implements OnInit {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
-    console.log('Filter row setup')
+    //console.log('Filter row setup')
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => {
-      console.log('Input changed: ', val);
+      //console.log('Input changed: ', val);
 
       const inputVal = parseInt(val, 10) as FilterField;
       if ([FilterField.SeriesName, FilterField.Summary].includes(inputVal)) {
@@ -105,7 +105,7 @@ export class MetadataFilterRowComponent implements OnInit {
     // TODO: takeUntil(this.onDestroy)
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       switchMap((vals) => {
-        console.log('Dropdown recalc');
+        //console.log('Dropdown recalc');
         const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         switch (filterField) {
           case FilterField.PublicationStatus:
@@ -159,9 +159,9 @@ export class MetadataFilterRowComponent implements OnInit {
     );
 
 
-    this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
-    this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
-    this.dropdownOptions$.subscribe(options => console.log('Dropdown Options: ', options));
+    // this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
+    // this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
+    // this.dropdownOptions$.subscribe(options => console.log('Dropdown Options: ', options));
 
     
 

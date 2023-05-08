@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { FilterStatement } from 'src/app/_models/metadata/v2/filter-statement';
@@ -18,6 +18,8 @@ export class MetadataFilterRowGroupComponent {
   @Input() groupPreset: 'and' | 'or' = 'or';
   @Input() nestedLevel: number = 0;
 
+  @Output() filterGroupUpdate = new EventEmitter<FilterGroup>();
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   private readonly actionFactoryService = inject(ActionFactoryService);
@@ -33,7 +35,6 @@ export class MetadataFilterRowGroupComponent {
   actions: Array<ActionItem<any>> = this.actionFactoryService.getMetadataFilterActions(this.handleAction.bind(this));
 
   performAction(action: ActionItem<any>) {
-
     if (typeof action.callback === 'function') {
       action.callback(action, null);
     }
@@ -55,6 +56,7 @@ export class MetadataFilterRowGroupComponent {
   addGroup() {
     const group = this.metadataService.createDefaultFilterGroup();
     group.statements.push(this.metadataService.createDefaultFilterStatement());
+    group.id = this.formGroup.get('comparison')?.value + '-' + this.nestedLevel + 1;
 
     if (this.formGroup.get('comparison')?.value === 'or') {
       this.filterGroup.or.push(group);
@@ -70,19 +72,21 @@ export class MetadataFilterRowGroupComponent {
   updateFilter(index: number, filterStmt: FilterStatement) {
     console.log('Filter at ', index, 'updated: ', filterStmt);
     this.metadataService.updateFilter(this.filterGroup.statements, index, filterStmt);
+    this.filterGroupUpdate.emit(this.filterGroup);
   }
 
-  addFilter(place: 'and' | 'or') {
-    if (place === 'and') {
-      this.filterGroup.and.push(this.metadataService.createDefaultFilterGroup());
-    } else {
-      this.filterGroup.or.push(this.metadataService.createDefaultFilterGroup());
-    }
+  nestedFilterGroupUpdate(filterGroup: FilterGroup) {
+    console.log('nested filter group updated: ', this.filterGroup, filterGroup);
+    this.filterGroupUpdate.emit(this.filterGroup);
+    this.cdRef.markForCheck();
+  }
+
+  addFilter() {
+    this.filterGroup.statements.push(this.metadataService.createDefaultFilterStatement());
   }
 
   removeFilter(index: number, group: FilterGroup) {
     group.statements.slice(index, 1);
-    //this.filterStatements.splice(index, 1);
   }
 
 

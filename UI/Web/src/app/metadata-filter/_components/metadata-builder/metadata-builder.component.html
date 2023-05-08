@@ -1,36 +1,7 @@
-<!-- <div class="row mb-2">
-    <select class="col-md-4 form-select  me-2" formControlName="comparison">
-        <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
-    </select>
-</div> -->
-
-
-<!-- <div class="row mb-2" *ngFor="let filterStmt of filterGroup; let i = index">
-    
-     <div class="col-md-1">
-        <button class="btn btn-icon" (click)="addFilter('and')" ngbTooltip="Add Row">
-            <i class="fa-solid fa-plus" aria-hidden="true"></i>
-            <span class="visually-hidden">Add Row {{i + 1}}</span>
-        </button>
-        <button class="btn btn-icon" (click)="addFilter('or')">
-            OR
-        </button>
-    </div>
-    <div class="col-md-10">
-        <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)"></app-metadata-row-filter>
-    </div>
-    <div class="col-md-1">
-        <button class="btn btn-icon" (click)="removeFilter(i)" *ngIf="i > 0">
-            <i class="fa-solid fa-minus" aria-hidden="true"></i>
-            <span class="visually-hidden">Remove Row {{i}}</span>
-        </button>
-    </div>
-</div> -->
 
 <ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
-    
     <div class="container-fluid">
-        <app-metadata-filter-row-group [filterGroup]="filterGroup"></app-metadata-filter-row-group>
+        <app-metadata-filter-row-group [filterGroup]="filterGroup" (filterGroupUpdate)="updateFilterGroup($event)"></app-metadata-filter-row-group>
     </div>
 </ng-container>
 

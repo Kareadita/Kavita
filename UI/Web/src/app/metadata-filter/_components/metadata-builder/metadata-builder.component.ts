@@ -55,12 +55,17 @@ export class MetadataBuilderComponent implements OnInit {
 
     if (!this.filterGroup) {
       this.filterGroup = this.metadataService.createDefaultFilterGroup();
-      const group = this.metadataService.createDefaultFilterGroup();
-      group.statements.push(this.metadataService.createDefaultFilterStatement());
-      this.filterGroup.or.push(group);
+      // const group = this.metadataService.createDefaultFilterGroup();
+      this.filterGroup.statements.push(this.metadataService.createDefaultFilterStatement());
+      this.filterGroup.id = 'root';
+      //this.filterGroup.or.push(group);
     }
 
     console.log('Group: ', this.filterGroup);
+  }
+
+  updateFilterGroup(group: FilterGroup) {
+    console.log('[builder] filter group update: ', group);
   }
 
 }
