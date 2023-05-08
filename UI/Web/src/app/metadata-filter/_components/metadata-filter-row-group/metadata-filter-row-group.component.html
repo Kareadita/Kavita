@@ -1,33 +1,40 @@
+<form [formGroup]="formGroup">
+    <div class="row mb-2">
+        <div class="col-md-4">
+            <select class="form-select me-2" formControlName="comparison">
+                <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
+            </select>
+        </div>
 
-<!-- we don't need to worry about ands/ors/statements. We can just show statements and pass the and/or for the dropdown, so that it's always the same rendering
-    at the end/beginning we will process it into and/ors.
--->
+        <div class="col-md-1">
+            <button class="btn btn-icon" (click)="addGroup()">+</button>
+        </div>
+
+        <div class="col-md-1">
+            <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
+            <button class="btn btn-icon" (click)="addGroup()">+</button>
+        </div>
+    </div>
+</form>
+
 <ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">
-    AND
-    <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup.and }"></ng-container>
+    <ng-container *ngFor="let andGroup of filterGroup.and">
+        <app-metadata-filter-row-group [filterGroup]="andGroup" [groupPreset]="'and'" [nestedLevel]="nestedLevel + 1"></app-metadata-filter-row-group>
+    </ng-container>
 </ng-container>
 
 <ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
-    OR
-    <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup, statements: filterGroup.statements }"></ng-container>
+    <ng-container *ngFor="let orGroup of filterGroup.or">
+        <app-metadata-filter-row-group [filterGroup]="orGroup"  [groupPreset]="'or'" [nestedLevel]="nestedLevel + 1"></app-metadata-filter-row-group>
+    </ng-container>
 </ng-container>
 
 <ng-container *ngIf="filterGroup.statements && filterGroup.statements.length > 0">
-    STMT
     <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup, statements: filterGroup.statements }"></ng-container>
 </ng-container>
 
 <ng-template #statements let-group="group">
-    <div class="row mb-2" *ngFor="let filterStmt of group.statements let i = index">
-        <div class="col-md-1">
-            <button class="btn btn-icon" (click)="addFilter('and')" ngbTooltip="Add Row">
-                <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                <span class="visually-hidden">Add Row {{i + 1}}</span>
-            </button>
-            <button class="btn btn-icon" (click)="addFilter('or')">
-                OR
-            </button>
-        </div>
+    <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 10) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">
         <div class="col-md-10">
             <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)"></app-metadata-row-filter>
         </div>
@@ -39,3 +46,4 @@
         </div>
     </div>
 </ng-template>
+

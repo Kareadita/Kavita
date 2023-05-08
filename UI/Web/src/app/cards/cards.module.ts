@@ -5,7 +5,6 @@ import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-ch
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
 import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule, NgbOffcanvasModule } from '@ng-bootstrap/ng-bootstrap';
-import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxFileDropModule } from 'ngx-file-drop';
 import { CardItemComponent } from './card-item/card-item.component';
@@ -26,7 +25,7 @@ import { ListItemComponent } from './list-item/list-item.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
 import { DownloadIndicatorComponent } from './download-indicator/download-indicator.component';
-import { DynamicListPipe } from './dynamic-list.pipe';
+import { CardActionablesModule } from '../_single-module/card-actionables/card-actionables.module';
 
 
 
@@ -37,7 +36,6 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    CardActionablesComponent,
     CardDetailLayoutComponent,
     BulkOperationsComponent,
     BulkAddToCollectionComponent,
@@ -49,7 +47,6 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     ListItemComponent,
     SeriesInfoCardsComponent,
     DownloadIndicatorComponent,
-    DynamicListPipe,
   ],
   imports: [
     CommonModule,
@@ -62,6 +59,7 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     TypeaheadModule, // edit series modal
 
     MetadataFilterModule,
+    CardActionablesModule,
 
     NgbTooltipModule, // Card item
     NgbCollapseModule,
@@ -89,7 +87,6 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    CardActionablesComponent,
     CardDetailLayoutComponent,
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
@@ -102,9 +99,9 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     NgbOffcanvasModule,
 
     VirtualScrollerModule,
-    SeriesInfoCardsComponent
+    SeriesInfoCardsComponent,
 
-
+    CardActionablesModule
   ]
 })
 export class CardsModule { }

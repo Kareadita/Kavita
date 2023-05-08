@@ -10,6 +10,8 @@ import { FilterFieldPipe } from './_pipes/filter-field.pipe';
 import { MetadataFilterRowComponent } from './_components/metadata-filter-row/metadata-filter-row.component';
 import { MetadataBuilderComponent } from './_components/metadata-builder/metadata-builder.component';
 import { MetadataFilterRowGroupComponent } from './_components/metadata-filter-row-group/metadata-filter-row-group.component';
+import { CardsModule } from '../cards/cards.module';
+import { CardActionablesModule } from '../_single-module/card-actionables/card-actionables.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +31,7 @@ import { MetadataFilterRowGroupComponent } from './_components/metadata-filter-r
     NgbCollapseModule,
     SharedModule,
     TypeaheadModule,
+    CardActionablesModule
   ],
   exports: [
     MetadataFilterComponent

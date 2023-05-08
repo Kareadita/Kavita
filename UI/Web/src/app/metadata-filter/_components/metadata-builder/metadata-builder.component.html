@@ -1,10 +1,10 @@
-<div class="row mb-2">
+<!-- <div class="row mb-2">
     <select class="col-md-4 form-select  me-2" formControlName="comparison">
         <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
     </select>
-</div>
+</div> -->
 
-<app-metadata-filter-row-group [filterGroup]="filterGroup"></app-metadata-filter-row-group>
+
 <!-- <div class="row mb-2" *ngFor="let filterStmt of filterGroup; let i = index">
     
      <div class="col-md-1">
@@ -26,3 +26,14 @@
         </button>
     </div>
 </div> -->
+
+<ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
+    
+    <div class="container-fluid">
+        <app-metadata-filter-row-group [filterGroup]="filterGroup"></app-metadata-filter-row-group>
+    </div>
+</ng-container>
+
+<ng-template #mobileView>
+    This will be a custom drawer experience allowing no groups
+</ng-template>

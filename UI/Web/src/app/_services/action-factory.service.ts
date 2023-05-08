@@ -88,6 +88,8 @@ export enum Action {
    * Import some data into Kavita
    */
   Import = 18,
+  AddRuleGroup = 19,
+  RemoveRuleGroup = 20
 }
 
 export interface ActionItem<T> {
@@ -172,6 +174,14 @@ export class ActionFactoryService {
 
   getBookmarkActions(callback: (action: ActionItem<Series>, series: Series) => void) {
     return this.applyCallbackToList(this.bookmarkActions, callback);
+  }
+
+  getMetadataFilterActions(callback: (action: ActionItem<any>, data: any) => void) {
+    const actions = [
+      {title: 'Add Rule Group', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+      {title: 'Remove Rule Group', action: Action.RemoveRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+    ];
+    return this.applyCallbackToList(actions, callback);
   }
 
   dummyCallback(action: ActionItem<any>, data: any) {}

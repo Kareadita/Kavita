@@ -5,6 +5,7 @@ import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison'
 import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
+import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 
 @Component({
   selector: 'app-metadata-builder',
@@ -19,12 +20,12 @@ export class MetadataBuilderComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
+  protected readonly utilityService = inject(UtilityService);
   private onDestroy: Subject<void> = new Subject();
 
-  groupOptions: Array<{value: 'and' | 'or', title: string}> = [
-    {value: 'or', title: 'Match any of the following'},
-    {value: 'and', title: 'Match all of the following'},
-  ];
+  get Breakpoint() { return Breakpoint; }
+
+  
 
 
 
