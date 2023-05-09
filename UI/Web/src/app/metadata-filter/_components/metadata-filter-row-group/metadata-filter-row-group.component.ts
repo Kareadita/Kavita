@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { Subject } from 'rxjs';
 import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { FilterStatement } from 'src/app/_models/metadata/v2/filter-statement';
 import { Action, ActionFactoryService } from 'src/app/_services/action-factory.service';
@@ -12,7 +13,7 @@ import { MetadataService } from 'src/app/_services/metadata.service';
   styleUrls: ['./metadata-filter-row-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowGroupComponent {
+export class MetadataFilterRowGroupComponent implements OnDestroy {
 
   @Input() filterGroup!: FilterGroup;
   @Input() groupPreset: 'and' | 'or' = 'or';
@@ -23,6 +24,7 @@ export class MetadataFilterRowGroupComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   private readonly actionFactoryService = inject(ActionFactoryService);
+  private onDestroy: Subject<void> = new Subject();
 
   groupOptions: Array<{value: 'and' | 'or', title: string}> = [
     {value: 'or', title: 'Match any of the following'},
@@ -33,7 +35,12 @@ export class MetadataFilterRowGroupComponent {
   });
 
   actions: Array<ActionItem<any>> = this.actionFactoryService.getMetadataFilterActions(this.handleAction.bind(this));
-
+  
+  ngOnDestroy(): void {
+    this.onDestroy.next();
+    this.onDestroy.complete();
+  }
+  
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, null);
@@ -67,6 +74,7 @@ export class MetadataFilterRowGroupComponent {
 
   removeGroup() {
     // I'll need some context here
+    console.log('trying to remove group', this.filterGroup)
   }
 
   updateFilter(index: number, filterStmt: FilterStatement) {

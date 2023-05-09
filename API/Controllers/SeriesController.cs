@@ -66,8 +66,7 @@ public class SeriesController : BaseApiController
         if (series == null) return BadRequest("Could not get series for library");
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
-
-        //Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
         return Ok(series);
     }

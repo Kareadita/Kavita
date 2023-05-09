@@ -18,6 +18,7 @@ import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
+import { FilterGroup } from '../_models/metadata/v2/filter-group';
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +50,17 @@ export class SeriesService {
     const data = this.filterUtilitySerivce.createSeriesFilter(filter);
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response, this.paginatedResults);
+      })
+    );
+  }
+
+  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: FilterGroup) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/v2', filter, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response, this.paginatedResults);
       })

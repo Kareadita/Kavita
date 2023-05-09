@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -20,6 +20,10 @@ import { FilterUtilitiesService } from '../shared/_services/filter-utilities.ser
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
+import { FilterGroup } from '../_models/metadata/v2/filter-group';
+import { MetadataService } from '../_services/metadata.service';
+import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
+import { FilterField } from '../_models/metadata/v2/filter-field';
 
 @Component({
   selector: 'app-library-detail',
@@ -36,6 +40,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
+  filterV2: FilterGroup | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -50,6 +55,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     {title: 'Recommended', fragment: 'recomended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
+
+  metadataService = inject(MetadataService);
 
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
@@ -226,6 +233,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
+    this.filterV2 = data.filterV2;
 
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     this.loadPage();
@@ -239,11 +247,29 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     }
 
+    if (this.filterV2 == undefined) {
+      this.filterV2 = this.metadataService.createDefaultFilterGroup();
+      const stmt = this.metadataService.createDefaultFilterStatement();
+      stmt.comparison = FilterComparison.Contains;
+      stmt.field = FilterField.Libraries;
+      stmt.value = this.libraryId + '';
+      this.filterV2.statements.push(stmt)
+      this.cdRef.markForCheck();
+    }
+
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.cdRef.markForCheck();
     
-    this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    // this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    //   this.series = series.result; 
+    //   this.pagination = series.pagination;
+    //   this.loadingSeries = false;
+    //   this.cdRef.markForCheck();
+    //   window.scrollTo(0, 0);
+    // });
+
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
       this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;

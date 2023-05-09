@@ -137,7 +137,7 @@ public interface ISeriesRepository
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
-    Task<List<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -580,7 +580,7 @@ public class SeriesRepository : ISeriesRepository
             .ToListAsync();
     }
 
-    public async Task<List<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto)
+    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto)
     {
         var query = await CreateFilteredSearchQueryableV2(userId, filterDto, QueryContext.None);
 

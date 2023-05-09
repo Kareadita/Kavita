@@ -1,4 +1,5 @@
 import { MangaFormat } from "../manga-format";
+import { FilterGroup } from "./v2/filter-group";
 
 export interface FilterItem<T> {
     title: string;
@@ -87,6 +88,7 @@ export const mangaFormatFilters = [
 
 export interface FilterEvent {
   filter: SeriesFilter;
+  filterV2: FilterGroup;
   isFirst: boolean;
 }
 

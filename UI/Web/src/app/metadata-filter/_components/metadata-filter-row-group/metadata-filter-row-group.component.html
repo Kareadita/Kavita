@@ -1,7 +1,7 @@
 <form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}">
     <div class="row mb-2">
-        <div class="col-md-4">
-            <select class="form-select me-2" formControlName="comparison">
+        <div class="col-md-2">
+            <select class="form-select" formControlName="comparison">
                 <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
             </select>
         </div>
@@ -25,7 +25,7 @@
 
 <ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
     <ng-container *ngFor="let orGroup of filterGroup.or">
-        <app-metadata-filter-row-group [filterGroup]="orGroup"  [groupPreset]="'or'" 
+        <app-metadata-filter-row-group [filterGroup]="orGroup" [groupPreset]="'or'" 
             [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>

@@ -16,39 +16,14 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 export class MetadataBuilderComponent implements OnInit {
 
   @Input() filterGroup!: FilterGroup;
-  @Output() update: EventEmitter<FilterStatement[]> = new EventEmitter<FilterStatement[]>();
+  @Output() update: EventEmitter<FilterGroup> = new EventEmitter<FilterGroup>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
-  private onDestroy: Subject<void> = new Subject();
 
   get Breakpoint() { return Breakpoint; }
 
-  
-
-
-
-  //filterStatements: Array<FilterStatement> = [this.metadataService.createDefaultFilterStatement()];
-
-  
-
-  
-  
-  // updateFilter(index: number, filterStmt: FilterStatement) {
-  //   console.log('Filter at ', index, 'updated: ', filterStmt);
-  //   this.metadataService.updateFilter(this.filterStatements, index, filterStmt);
-  // }
-
-  // addFilter(place: 'and' | 'or') {
-  //   if (place === 'and') {
-  //     this.filterStatements.push(this.metadataService.createDefaultFilterStatement());
-  //   }
-  // }
-
-  // removeFilter(index: number) {
-  //   this.filterStatements.splice(index, 1);
-  // }
 
   ngOnInit() {
     console.log('Preset: ', this.filterGroup);
@@ -58,7 +33,8 @@ export class MetadataBuilderComponent implements OnInit {
       // const group = this.metadataService.createDefaultFilterGroup();
       this.filterGroup.statements.push(this.metadataService.createDefaultFilterStatement());
       this.filterGroup.id = 'root';
-      //this.filterGroup.or.push(group);
+      this.cdRef.markForCheck();
+      this.update.emit(this.filterGroup);
     }
 
     console.log('Group: ', this.filterGroup);
@@ -66,6 +42,9 @@ export class MetadataBuilderComponent implements OnInit {
 
   updateFilterGroup(group: FilterGroup) {
     console.log('[builder] filter group update: ', group);
+
+    this.update.emit(group);
+    
   }
 
 }
