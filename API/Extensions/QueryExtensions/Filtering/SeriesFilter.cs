@@ -352,13 +352,23 @@ public static class SeriesFilter
             case FilterComparison.LessThanEqual:
             case FilterComparison.Contains:
                 throw new KavitaException($"{comparison} not applicable for Series.Name");
+            case FilterComparison.BeginsWith:
+                return queryable.Where(s => EF.Functions.Like(s.Name, $"{queryString}%")
+                                            ||EF.Functions.Like(s.OriginalName, $"{queryString}%")
+                                            || EF.Functions.Like(s.LocalizedName, $"{queryString}%")
+                                            || EF.Functions.Like(s.SortName, $"{queryString}%"));
+            case FilterComparison.EndsWith:
+                return queryable.Where(s => EF.Functions.Like(s.Name, $"%{queryString}")
+                                            ||EF.Functions.Like(s.OriginalName, $"%{queryString}")
+                                            || EF.Functions.Like(s.LocalizedName, $"%{queryString}")
+                                            || EF.Functions.Like(s.SortName, $"%{queryString}"));
             case FilterComparison.Matches:
                 return queryable.Where(s => EF.Functions.Like(s.Name, $"%{queryString}%")
                                             ||EF.Functions.Like(s.OriginalName, $"%{queryString}%")
                                             || EF.Functions.Like(s.LocalizedName, $"%{queryString}%")
                                             || EF.Functions.Like(s.SortName, $"%{queryString}%"));
             default:
-                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
         }
     }
 

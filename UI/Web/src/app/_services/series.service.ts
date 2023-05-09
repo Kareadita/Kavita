@@ -19,6 +19,7 @@ import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
 import { FilterGroup } from '../_models/metadata/v2/filter-group';
+import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,7 @@ export class SeriesService {
     );
   }
 
-  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: FilterGroup) {
+  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 

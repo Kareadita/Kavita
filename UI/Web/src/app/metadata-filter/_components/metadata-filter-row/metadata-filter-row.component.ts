@@ -158,17 +158,10 @@ export class MetadataFilterRowComponent implements OnInit {
       tap(opts => this.formGroup.get('filterValue')?.setValue(opts[0].value))
     );
 
-
-    // this.validComprisons$.subscribe(v => console.log('Valid Comparisons: ', v));
-    // this.predicateType$.subscribe(v => console.log('Predicate Type: ', v));
-    // this.dropdownOptions$.subscribe(options => console.log('Dropdown Options: ', options));
-
-    
-
     this.formGroup.valueChanges.subscribe(_ => {
       console.log('Form change ');
       this.filterStatement.emit({
-        comparison: this.formGroup.get('comparison')?.value!,
+        comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
       });

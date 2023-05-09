@@ -878,7 +878,7 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking();
 
         var filterLibs = new List<int>();
-
+        // Can I just pass isAnd for the root query if it has statements?
         query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries, false);
 
         query = query
@@ -937,7 +937,7 @@ public class SeriesRepository : ISeriesRepository
         if (filterDto.Groups == null || !filterDto.Groups.Any())
         {
             // If there are no groups, return the original query
-            return query;
+            return ApplyLimit(query, filterDto.LimitTo);
         }
 
         //var filteredQuery = isAnd ? query : query.Where(b => false);
@@ -966,7 +966,12 @@ public class SeriesRepository : ISeriesRepository
             }
         }
 
-        return filteredQuery;
+        return ApplyLimit(filteredQuery, filterDto.LimitTo);
+    }
+
+    private static IQueryable<Series> ApplyLimit(IQueryable<Series> query, int limit)
+    {
+        return limit <= 0 ? query : query.Take(limit);
     }
 
     private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query, List<int> filterLibs,

@@ -24,6 +24,7 @@ import { FilterGroup } from '../_models/metadata/v2/filter-group';
 import { MetadataService } from '../_services/metadata.service';
 import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
 import { FilterField } from '../_models/metadata/v2/filter-field';
+import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 
 @Component({
   selector: 'app-library-detail',
@@ -269,7 +270,13 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     //   window.scrollTo(0, 0);
     // });
 
-    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
+    const dto: SeriesFilterV2 = {
+      groups: [this.filterV2],
+      limitTo: 0,
+    };
+
+    
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, dto).pipe(take(1)).subscribe(series => {
       this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;
