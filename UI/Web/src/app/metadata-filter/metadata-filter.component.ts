@@ -23,6 +23,7 @@ import { FilterSettings } from './filter-settings';
 import { inject } from '@angular/core';
 import { FilterStatement } from '../_models/metadata/v2/filter-statement';
 import { FilterGroup } from '../_models/metadata/v2/filter-group';
+import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 
 @Component({
   selector: 'app-metadata-filter',
@@ -78,12 +79,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   updateApplied: number = 0;
 
   fullyLoaded: boolean = false;
-  filterGroup: FilterGroup | undefined;
+  filterV2: SeriesFilterV2 | undefined;
 
   
   
-  handleFilters(filterGroup: FilterGroup) {
-    this.filterGroup = filterGroup;
+  handleFilters(filter: SeriesFilterV2) {
+    this.filterV2 = filter;
     
   }
 
@@ -644,7 +645,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
   apply() {
 
-    this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0, filterV2: this.filterGroup!});
+    this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
 
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();

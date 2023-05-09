@@ -41,7 +41,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
-  filterV2: FilterGroup | undefined = undefined;
+  filterV2: SeriesFilterV2 | undefined = undefined;
   onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -249,12 +249,21 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterV2 == undefined) {
-      this.filterV2 = this.metadataService.createDefaultFilterGroup();
+      const group = this.metadataService.createDefaultFilterGroup();
       const stmt = this.metadataService.createDefaultFilterStatement();
       stmt.comparison = FilterComparison.Contains;
       stmt.field = FilterField.Libraries;
       stmt.value = this.libraryId + '';
-      this.filterV2.statements.push(stmt);
+      group.statements.push(stmt);
+      this.filterV2 = {
+        groups: [group],
+        limitTo: 0,
+        sortOptions: {
+          isAscending: true,
+          sortField: SortField.SortName
+        }
+      };
+      
       this.cdRef.markForCheck();
     }
 
@@ -262,25 +271,18 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.cdRef.markForCheck();
     
-    // this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
-    //   this.series = series.result; 
-    //   this.pagination = series.pagination;
-    //   this.loadingSeries = false;
-    //   this.cdRef.markForCheck();
-    //   window.scrollTo(0, 0);
-    // });
-
-    const dto: SeriesFilterV2 = {
-      groups: [this.filterV2],
-      limitTo: 0,
-      sortOptions: {
-        isAscending: true,
-        sortField: SortField.SortName
-      }
-    };
+    // TODO: Move this into the builder so that it is responsible for complete packing/unpacking. 
+    // const dto: SeriesFilterV2 = {
+    //   groups: [this.filterV2],
+    //   limitTo: 0,
+    //   sortOptions: {
+    //     isAscending: true,
+    //     sortField: SortField.SortName
+    //   }
+    // };
 
     
-    this.seriesService.getSeriesForLibraryV2(undefined, undefined, dto).pipe(take(1)).subscribe(series => {
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
       this.series = series.result; 
       this.pagination = series.pagination;
       this.loadingSeries = false;
