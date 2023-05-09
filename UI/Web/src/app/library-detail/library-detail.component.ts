@@ -46,7 +46,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   refresh: EventEmitter<void> = new EventEmitter();
 
   jumpKeys: Array<JumpKey> = [];
@@ -142,9 +142,27 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
+
+    if (!this.filterSettings.presetsV2) {
+        const group = this.metadataService.createDefaultFilterGroup();
+        const stmt = this.metadataService.createDefaultFilterStatement();
+        stmt.comparison = FilterComparison.Contains;
+        stmt.field = FilterField.Libraries;
+        stmt.value = this.libraryId + '';
+        group.statements.push(stmt);
+        this.filterSettings.presetsV2 = {
+          groups: [group],
+          limitTo: 0,
+          sortOptions: {
+            isAscending: true,
+            sortField: SortField.SortName
+          }
+        };
+        this.filterV2 = this.filterSettings.presetsV2;
+    }
+
     // Setup filterActiveCheck to check filter against
-    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
-    this.filterActiveCheck.libraries = [this.libraryId];
+    this.filterActiveCheck = {...this.filterSettings.presetsV2};
 
     this.filterSettings.libraryDisabled = true;
     this.cdRef.markForCheck();
@@ -185,6 +203,25 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         this.refresh.emit();
       }
     });
+
+    if (this.filterV2 == undefined) {
+      const group = this.metadataService.createDefaultFilterGroup();
+      const stmt = this.metadataService.createDefaultFilterStatement();
+      stmt.comparison = FilterComparison.Contains;
+      stmt.field = FilterField.Libraries;
+      stmt.value = this.libraryId + '';
+      group.statements.push(stmt);
+      this.filterV2 = {
+        groups: [group],
+        limitTo: 0,
+        sortOptions: {
+          isAscending: true,
+          sortField: SortField.SortName
+        }
+      };
+      
+      this.cdRef.markForCheck();
+    }
   }
 
   ngOnDestroy() {
@@ -233,6 +270,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: FilterEvent) {
+    console.log('library detail, updateFilter occured: ', data.filterV2);
     this.filter = data.filter;
     this.filterV2 = data.filterV2;
 
@@ -241,47 +279,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   loadPage() {
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    if (this.filter == undefined) {
-      this.filter = this.filterUtilityService.createSeriesFilter();
-      this.filter.libraries.push(this.libraryId);
-      this.cdRef.markForCheck();
-    }
-
-    if (this.filterV2 == undefined) {
-      const group = this.metadataService.createDefaultFilterGroup();
-      const stmt = this.metadataService.createDefaultFilterStatement();
-      stmt.comparison = FilterComparison.Contains;
-      stmt.field = FilterField.Libraries;
-      stmt.value = this.libraryId + '';
-      group.statements.push(stmt);
-      this.filterV2 = {
-        groups: [group],
-        limitTo: 0,
-        sortOptions: {
-          isAscending: true,
-          sortField: SortField.SortName
-        }
-      };
-      
-      this.cdRef.markForCheck();
-    }
-
     this.loadingSeries = true;
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
+    this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
     this.cdRef.markForCheck();
-    
-    // TODO: Move this into the builder so that it is responsible for complete packing/unpacking. 
-    // const dto: SeriesFilterV2 = {
-    //   groups: [this.filterV2],
-    //   limitTo: 0,
-    //   sortOptions: {
-    //     isAscending: true,
-    //     sortField: SortField.SortName
-    //   }
-    // };
 
-    
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
       this.series = series.result; 
       this.pagination = series.pagination;

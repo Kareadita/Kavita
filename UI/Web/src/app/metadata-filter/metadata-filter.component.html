@@ -369,6 +369,6 @@
             </div>
         </div>
         
-        <app-metadata-builder (update)="handleFilters($event)"></app-metadata-builder>
+        <app-metadata-builder [filterGroup]="filterV2!.groups[0]" (update)="handleFilters($event)"></app-metadata-builder>
     </div>
 </ng-template>

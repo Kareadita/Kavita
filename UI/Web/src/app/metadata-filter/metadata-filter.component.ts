@@ -236,6 +236,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       }
     }
 
+    this.filterV2 = this.filterSettings.presetsV2;
+
     this.setupFormatTypeahead();
     this.cdRef.markForCheck();
 
