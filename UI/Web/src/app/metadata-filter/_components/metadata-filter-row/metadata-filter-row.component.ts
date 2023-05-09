@@ -26,6 +26,23 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Formats,
 ];
 
+const StringComparisons = [FilterComparison.Equal,
+  FilterComparison.NotEqual,
+  FilterComparison.BeginsWith,
+  FilterComparison.EndsWith,
+  FilterComparison.Matches];
+const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.IsInLast, FilterComparison.IsNotInLast];
+const NumberComparisons = [FilterComparison.Equal,
+  FilterComparison.NotEqual,
+  FilterComparison.LessThan,
+  FilterComparison.LessThanEqual,
+  FilterComparison.GreaterThan,
+  FilterComparison.GreaterThanEqual];
+const DropdownComparisons = [FilterComparison.Equal,
+  FilterComparison.NotEqual,
+  FilterComparison.Contains,
+  FilterComparison.NotContains];
+
 @Component({
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
@@ -165,47 +182,31 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
   }
 
   handleFieldChange(val: string) {
-    //console.log('Input changed: ', val);
     const inputVal = parseInt(val, 10) as FilterField;
 
     if (StringFields.includes(inputVal)) {
-      this.validComprisons$.next([FilterComparison.Equal,
-        FilterComparison.NotEqual,
-        FilterComparison.BeginsWith,
-        FilterComparison.EndsWith,
-        FilterComparison.Matches,
-        FilterComparison.NotContains]);
+      this.validComprisons$.next(StringComparisons);
 
       this.predicateType$.next(PredicateType.Text);
       this.formGroup.get('filterValue')?.setValue('');
+      return;
     } 
 
-    // Number based fields
-    else if (NumberFields.includes(inputVal)) {
-      let comps = [FilterComparison.Equal,
-        FilterComparison.NotEqual,
-        FilterComparison.LessThan,
-        FilterComparison.LessThanEqual,
-        FilterComparison.GreaterThan,
-        FilterComparison.GreaterThanEqual,];
-
+    if (NumberFields.includes(inputVal)) {
+      let comps = NumberComparisons;
       if (inputVal === FilterField.ReleaseYear) {
-        comps.push(...[FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.IsInLast, FilterComparison.IsNotInLast]);
+        comps.push(...DateComparisons);
       }
       this.validComprisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
       this.formGroup.get('filterValue')?.setValue('');
+      return;
     }
 
-    // Multi-select dropdown fields
-    else if (DropdownFields.includes(inputVal)) {
-      this.validComprisons$.next([FilterComparison.Equal,
-        FilterComparison.NotEqual,
-        FilterComparison.Contains,
-        FilterComparison.NotContains]);
+    if (DropdownFields.includes(inputVal)) {
+      this.validComprisons$.next(DropdownComparisons);
       this.predicateType$.next(PredicateType.Dropdown);
     }
-    
   }
 
 }
