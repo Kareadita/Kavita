@@ -39,7 +39,7 @@
         <div class="col-md-10">
             <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">
                 <div class="col-md-1 ms-2" #removeBtn>
-                    <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i > 0">
+                    <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i < (group.statements.length - 1) && group.statements.length > 1">
                         <i class="fa-solid fa-minus" aria-hidden="true"></i>
                         <span class="visually-hidden">Remove Row {{i}}</span>
                     </button>
