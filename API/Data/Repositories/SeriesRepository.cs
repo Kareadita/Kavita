@@ -812,7 +812,7 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-            //.HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // This has some nullable issue
+            //.HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // BUG: This has some nullable issue
 
             // This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
@@ -883,6 +883,7 @@ public class SeriesRepository : ISeriesRepository
 
         query = query
             .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
+            .WhereIf(filterLibs.Count > 0, s => filterLibs.Contains(s.LibraryId))
             .WhereIf(onlyParentSeries, s =>
             s.RelationOf.Count == 0 ||
             s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
