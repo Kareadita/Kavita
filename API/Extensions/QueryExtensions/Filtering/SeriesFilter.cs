@@ -329,6 +329,14 @@ public static class SeriesFilter
             case FilterComparison.LessThanEqual:
             case FilterComparison.Matches:
                 throw new KavitaException($"{comparison} not applicable for Series.CollectionTags");
+            case FilterComparison.NotContains:
+            case FilterComparison.NotEqual:
+            case FilterComparison.BeginsWith:
+            case FilterComparison.EndsWith:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
         }
@@ -346,12 +354,6 @@ public static class SeriesFilter
                                             || s.OriginalName.Equals(queryString)
                                             || s.LocalizedName.Equals(queryString)
                                             || s.SortName.Equals(queryString));
-            case FilterComparison.GreaterThan:
-            case FilterComparison.GreaterThanEqual:
-            case FilterComparison.LessThan:
-            case FilterComparison.LessThanEqual:
-            case FilterComparison.Contains:
-                throw new KavitaException($"{comparison} not applicable for Series.Name");
             case FilterComparison.BeginsWith:
                 return queryable.Where(s => EF.Functions.Like(s.Name, $"{queryString}%")
                                             ||EF.Functions.Like(s.OriginalName, $"{queryString}%")
@@ -367,6 +369,22 @@ public static class SeriesFilter
                                             ||EF.Functions.Like(s.OriginalName, $"%{queryString}%")
                                             || EF.Functions.Like(s.LocalizedName, $"%{queryString}%")
                                             || EF.Functions.Like(s.SortName, $"%{queryString}%"));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Name != queryString
+                                            || s.OriginalName != queryString
+                                            || s.LocalizedName != queryString
+                                            || s.SortName != queryString);
+            case FilterComparison.NotContains:
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Contains:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+                throw new KavitaException($"{comparison} not applicable for Series.Name");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
         }
