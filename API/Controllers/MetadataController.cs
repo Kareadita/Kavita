@@ -159,6 +159,7 @@ public class MetadataController : BaseApiController
                 IsoCode = c.IetfLanguageTag
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
+    
 
     /// <summary>
     /// Returns summary for the chapter
