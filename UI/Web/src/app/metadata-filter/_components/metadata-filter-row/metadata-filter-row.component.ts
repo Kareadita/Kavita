@@ -174,9 +174,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
         FilterComparison.BeginsWith,
         FilterComparison.EndsWith,
         FilterComparison.Matches,
-        FilterComparison.NotContains,
-        FilterComparison.BeginsWith,
-        FilterComparison.EndsWith]);
+        FilterComparison.NotContains]);
 
       this.predicateType$.next(PredicateType.Text);
       this.formGroup.get('filterValue')?.setValue('');

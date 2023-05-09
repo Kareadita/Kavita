@@ -37,14 +37,16 @@
 <ng-template #statements let-group="group">
     <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">
         <div class="col-md-10">
-            <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)"></app-metadata-row-filter>
+            <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">
+                <div class="col-md-1 ms-2" #removeBtn>
+                    <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i > 0">
+                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                        <span class="visually-hidden">Remove Row {{i}}</span>
+                    </button>
+                </div>
+            </app-metadata-row-filter>
         </div>
-        <div class="col-md-1">
-            <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i > 0">
-                <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                <span class="visually-hidden">Remove Row {{i}}</span>
-            </button>
-        </div>
+        
     </div>
 </ng-template>
 

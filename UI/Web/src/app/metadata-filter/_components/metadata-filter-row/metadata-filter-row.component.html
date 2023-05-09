@@ -1,7 +1,7 @@
 
 <form [formGroup]="formGroup">
     <div class="row g-0">
-        <div class="col-md-4 me-2">
+        <div class="col-md-3 me-2">
             <ng-container *ngIf="formGroup.get('input') as control">
                 <select class="form-select me-2" formControlName="input">
                     <option *ngFor="let field of allFields" [value]="field">{{field | filterField}}</option>
@@ -16,7 +16,6 @@
         </div>
 
         <div class="col-md-4">
-
             <ng-container *ngIf="predicateType$ | async as predicateType">
                 <ng-container [ngSwitch]="predicateType">
                     <ng-container *ngSwitchCase="PredicateType.Text">
@@ -33,5 +32,7 @@
                 </ng-container>
             </ng-container>
         </div>
+
+        <ng-content #removeBtn></ng-content>
     </div>
 </form>

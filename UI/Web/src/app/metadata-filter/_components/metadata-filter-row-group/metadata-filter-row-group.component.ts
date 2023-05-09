@@ -90,11 +90,12 @@ export class MetadataFilterRowGroupComponent implements OnDestroy {
   }
 
   addFilter() {
-    this.filterGroup.statements.push(this.metadataService.createDefaultFilterStatement());
+    this.filterGroup.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filterGroup.statements];
   }
 
   removeFilter(index: number, group: FilterGroup) {
-    group.statements.slice(index, 1);
+    group.statements = group.statements.slice(0, index).concat(group.statements.slice(index + 1))
+    this.cdRef.markForCheck();
   }
 
 
