@@ -30,12 +30,12 @@ export class MetadataBuilderComponent implements OnInit {
 
     if (!this.filterGroup) {
       this.filterGroup = this.metadataService.createDefaultFilterGroup();
-      // const group = this.metadataService.createDefaultFilterGroup();
       this.filterGroup.statements.push(this.metadataService.createDefaultFilterStatement());
-      this.filterGroup.id = 'root';
       this.cdRef.markForCheck();
       this.update.emit(this.filterGroup);
     }
+
+    this.filterGroup.id = 'root';
 
     console.log('Group: ', this.filterGroup);
   }

@@ -893,42 +893,9 @@ public class SeriesRepository : ISeriesRepository
             query = query.RestrictAgainstAgeRestriction(userRating);
         }
 
-
-        // If no sort options, default to using SortName
-        // filter.SortOptions ??= new SortOptions()
-        // {
-        //     IsAscending = true,
-        //     SortField = SortField.SortName
-        // };
-        //
-        // if (filter.SortOptions.IsAscending)
-        // {
-        //     query = filter.SortOptions.SortField switch
-        //     {
-        //         SortField.SortName => query.OrderBy(s => s.SortName.ToLower()),
-        //         SortField.CreatedDate => query.OrderBy(s => s.Created),
-        //         SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
-        //         SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
-        //         SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
-        //         SortField.ReleaseYear => query.OrderBy(s => s.Metadata.ReleaseYear),
-        //         _ => query
-        //     };
-        // }
-        // else
-        // {
-        //     query = filter.SortOptions.SortField switch
-        //     {
-        //         SortField.SortName => query.OrderByDescending(s => s.SortName.ToLower()),
-        //         SortField.CreatedDate => query.OrderByDescending(s => s.Created),
-        //         SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
-        //         SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
-        //         SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
-        //         SortField.ReleaseYear => query.OrderByDescending(s => s.Metadata.ReleaseYear),
-        //         _ => query
-        //     };
-        // }
-
-        return query.AsSplitQuery();
+        return ApplyLimit(query
+            .Sort(filter.SortOptions)
+            .AsSplitQuery(), filter.LimitTo);
     }
 
     public static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query,
@@ -937,7 +904,7 @@ public class SeriesRepository : ISeriesRepository
         if (filterDto.Groups == null || !filterDto.Groups.Any())
         {
             // If there are no groups, return the original query
-            return ApplyLimit(query, filterDto.LimitTo);
+            return query;
         }
 
         //var filteredQuery = isAnd ? query : query.Where(b => false);
@@ -966,7 +933,7 @@ public class SeriesRepository : ISeriesRepository
             }
         }
 
-        return ApplyLimit(filteredQuery, filterDto.LimitTo);
+        return filteredQuery;
     }
 
     private static IQueryable<Series> ApplyLimit(IQueryable<Series> query, int limit)
@@ -1087,41 +1054,10 @@ public class SeriesRepository : ISeriesRepository
                                                || EF.Functions.Like(s.LocalizedName!, $"%{filter.SeriesNameQuery}%"))
             .Where(s => userLibraries.Contains(s.LibraryId)
                         && formats.Contains(s.Format))
+            .Sort(filter.SortOptions)
             .AsNoTracking();
 
-        // If no sort options, default to using SortName
-        filter.SortOptions ??= new SortOptions()
-        {
-            IsAscending = true,
-            SortField = SortField.SortName
-        };
-
-        if (filter.SortOptions.IsAscending)
-        {
-            query = filter.SortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderBy(s => s.SortName!.ToLower()),
-                SortField.CreatedDate => query.OrderBy(s => s.Created),
-                SortField.LastModifiedDate => query.OrderBy(s => s.LastModified),
-                SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
-                SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
-                _ => query
-            };
-        }
-        else
-        {
-            query = filter.SortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderByDescending(s => s.SortName!.ToLower()),
-                SortField.CreatedDate => query.OrderByDescending(s => s.Created),
-                SortField.LastModifiedDate => query.OrderByDescending(s => s.LastModified),
-                SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
-                SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
-                _ => query
-            };
-        }
-
-        return query;
+        return query.AsSplitQuery();
     }
 
     public async Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId)

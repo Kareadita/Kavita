@@ -9,7 +9,7 @@ import { SeriesAddedEvent } from '../_models/events/series-added-event';
 import { Library } from '../_models/library';
 import { Pagination } from '../_models/pagination';
 import { Series } from '../_models/series';
-import { FilterEvent, SeriesFilter } from '../_models/metadata/series-filter';
+import { FilterEvent, SeriesFilter, SortField } from '../_models/metadata/series-filter';
 import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
 import { ActionService } from '../_services/action.service';
 import { LibraryService } from '../_services/library.service';
@@ -254,7 +254,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       stmt.comparison = FilterComparison.Contains;
       stmt.field = FilterField.Libraries;
       stmt.value = this.libraryId + '';
-      this.filterV2.statements.push(stmt)
+      this.filterV2.statements.push(stmt);
       this.cdRef.markForCheck();
     }
 
@@ -273,6 +273,10 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     const dto: SeriesFilterV2 = {
       groups: [this.filterV2],
       limitTo: 0,
+      sortOptions: {
+        isAscending: true,
+        sortField: SortField.SortName
+      }
     };
 
     
