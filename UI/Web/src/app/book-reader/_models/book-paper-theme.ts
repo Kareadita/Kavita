@@ -19,16 +19,13 @@ export const BookPaperTheme = `
     --drawer-bg-color: #F1E4D5;
     --drawer-text-color: black;
     --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(255 255 255 / 20%);
-    --drawer-pagination-border: 1px solid #8b0000;
 
 
     /* Accordion */
-    --accordion-header-text-color: #8b0000;
     --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
     --accordion-body-bg-color: #F1E4D5;
     --accordion-body-border-color: rgba(239, 239, 239, 0.125);
     --accordion-body-text-color: var(--body-text-color);
-    --accordion-header-collapsed-text-color: #8b0000;
     --accordion-header-collapsed-bg-color: #F1E4D5;
     --accordion-button-focus-border-color: unset;
     --accordion-button-focus-box-shadow: unset;
@@ -56,9 +53,9 @@ export const BookPaperTheme = `
       --input-bg-color: white;
       --input-bg-readonly-color: #F1E4D5;
       --input-focused-border-color: #ccc;
-      --input-text-color: #8b0000;
       --input-placeholder-color: black;
       --input-border-color: #ccc;
+      --input-text-color: black;
       --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
       /* Nav (Tabs) */
@@ -86,13 +83,11 @@ export const BookPaperTheme = `
 
 
     /* Reading Bar */
-    --br-actionbar-button-text-color: #8b0000;
     --br-actionbar-button-hover-border-color: #6c757d;
     --br-actionbar-bg-color: #F1E4D5;
 
     /* Drawer */
     --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
-    --drawer-pagination-border: 1px solid #8b0000;
 }
 
 .reader-container {
