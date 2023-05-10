@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { FilterStatement } from 'src/app/_models/metadata/v2/filter-statement';
 import { Action, ActionFactoryService } from 'src/app/_services/action-factory.service';
@@ -13,8 +13,9 @@ import { MetadataService } from 'src/app/_services/metadata.service';
   styleUrls: ['./metadata-filter-row-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowGroupComponent implements OnDestroy {
+export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
+  @Input() parentGroup!: FilterGroup;
   @Input() filterGroup!: FilterGroup;
   @Input() groupPreset: 'and' | 'or' = 'or';
   @Input() nestedLevel: number = 0;
@@ -35,6 +36,16 @@ export class MetadataFilterRowGroupComponent implements OnDestroy {
   });
 
   actions: Array<ActionItem<any>> = this.actionFactoryService.getMetadataFilterActions(this.handleAction.bind(this));
+
+  ngOnInit() {
+    this.formGroup.get('comparison')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+      // When comparison changes, we need to perform a swap of and/or (is this right or does parent need to do it? ) 
+      if (val === 'and') {
+        // Find group by id this.filterGroup.id and remove it from or and put in and
+        this.parentGroup.and.push()
+      }
+    });
+  }
   
   ngOnDestroy(): void {
     this.onDestroy.next();
