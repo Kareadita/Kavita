@@ -14,6 +14,7 @@ import { FontFamily, BookService } from '../../_services/book.service';
 import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
+import { BookPaperTheme } from '../../_models/book-paper-theme';
 
 /**
  * Used for book reader. Do not use for other components
@@ -53,6 +54,15 @@ export const bookColorThemes = [
     provider: ThemeProvider.System,
     selector: 'brtheme-white',
     content: BookWhiteTheme
+  },
+  {
+    name: 'Paper',
+    colorHash: '#F1E4D5',
+    isDarkTheme: false,
+    isDefault: false,
+    provider: ThemeProvider.System,
+    selector: 'brtheme-paper',
+    content: BookPaperTheme
   },
 ];
 
