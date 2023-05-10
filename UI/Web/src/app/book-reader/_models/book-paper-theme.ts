@@ -131,4 +131,13 @@ background-color: initial !important;
   background-color: var(--primary-color);
 }
 
+.reader-container.column-layout-2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  box-shadow: 0px 0px 34.38px 5px rgba(0, 0, 0, 0.43), 0px 0px 6.28px 2px rgba(0, 0, 0, 0.43), 0px 0px 15.7px 4px rgba(0, 0, 0, 0.43), 0px 0px 1.57px 0.3px rgba(0, 0, 0, 0.43);
+}
+
 `;
