@@ -189,12 +189,13 @@ public class ImageService : IImageService
     public async Task<string> DownloadFaviconAsync(string url)
     {
         // Parse the URL to get the domain (including subdomain)
-        var domain = new Uri(url).Host;
-
+        var uri = new Uri(url);
+        var domain = uri.Host;
+        var baseUrl = uri.Scheme + "://" + uri.Host;
         try
         {
             // Download the favicon.ico file using Flurl
-            var faviconStream = await url
+            var faviconStream = await baseUrl
                 .AppendPathSegment("favicon.ico")
                 .AllowHttpStatus("2xx")
                 .GetStreamAsync();
@@ -206,8 +207,6 @@ public class ImageService : IImageService
             using var icon = new Icon(faviconStream);
             using var bitmap = icon.ToBitmap();
             bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
-            //using var image = await SixLabors.ImageSharp.Image.LoadAsync(faviconStream);
-            //await image.SaveAsPngAsync(Path.Combine(_directoryService.FaviconDirectory, filename));
 
             _logger.LogDebug("Favicon.ico for {Domain} downloaded and saved successfully", domain);
             return filename;

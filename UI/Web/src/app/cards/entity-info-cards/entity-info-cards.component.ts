@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -9,6 +9,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
 import { SeriesService } from 'src/app/_services/series.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 @Component({
   selector: 'app-entity-info-cards',
@@ -40,6 +41,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   size: number = 0;
 
   private readonly onDestroy: Subject<void> = new Subject();
+  imageService = inject(ImageService);
 
   get LibraryType() {
     return LibraryType;
@@ -51,6 +53,10 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
   get AgeRating() {
     return AgeRating;
+  }
+
+  get WebLinks() {
+    return this.chapter.webLinks.split(',');
   }
 
   constructor(private utilityService: UtilityService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
