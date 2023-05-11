@@ -15,13 +15,16 @@
 #    useradd -o -u "$PUID" -g "$PGID" -d /kavita kavita
 #fi
 
+#Checks if the config file exists, and creates it if it does not
 if [ ! -f "/kavita/config/appsettings.json" ]; then
-    echo "Kavita configuration file does not exist, creating..."
-    echo '{
-  "TokenKey": "super secret unguessable key",
-  "Port": 5000,
-  "IpAddresses": ""
-}' >> /kavita/config/appsettings.json
+    echo "Kavita configuration file does not exist, copying from temp..."
+    cp /tmp/config/appsettings.json /kavita/config/appsettings.json
+    if [ -f "/kavita/config/appsettings.json" ]; then
+        echo "Copy completed successfully, starting app..."
+    else
+        echo "Copy failed, check folder permissions. Exiting..."
+        exit
+    fi
 fi
 
 chmod +x Kavita
