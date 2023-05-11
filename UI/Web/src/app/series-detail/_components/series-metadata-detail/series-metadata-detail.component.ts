@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../../shared/tag-badge/tag-badge.component';
@@ -9,6 +9,7 @@ import { ReadingList } from '../../../_models/reading-list';
 import { Series } from '../../../_models/series';
 import { SeriesMetadata } from '../../../_models/metadata/series-metadata';
 import { MetadataService } from '../../../_services/metadata.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 
 @Component({
@@ -30,6 +31,8 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   isCollapsed: boolean = true;
   hasExtendedProperites: boolean = false;
 
+  imageService = inject(ImageService);
+
   /**
    * Html representation of Series Summary
    */
@@ -45,6 +48,10 @@ export class SeriesMetadataDetailComponent implements OnChanges {
 
   get FilterQueryParam() {
     return FilterQueryParam;
+  }
+
+  get WebLinks() {
+    return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
   constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
