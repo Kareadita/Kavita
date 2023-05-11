@@ -202,18 +202,16 @@ public class ImageService : IImageService
 
             // Create the destination file path
             var filename = $"{domain}.png";
-            // Save the favicon.png file to the destination directory
-
             using var icon = new Icon(faviconStream);
             using var bitmap = icon.ToBitmap();
             bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
 
-            _logger.LogDebug("Favicon.ico for {Domain} downloaded and saved successfully", domain);
+            _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading favicon.ico for ${Domain}", domain);
+            _logger.LogError(ex, "Error downloading favicon.png for ${Domain}", domain);
             throw;
         }
     }

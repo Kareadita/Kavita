@@ -13748,6 +13748,11 @@
           "publicationStatus": {
             "$ref": "#/components/schemas/PublicationStatus"
           },
+          "webLinks": {
+            "type": "string",
+            "description": "A Comma-separated list of strings representing links from the series",
+            "nullable": true
+          },
           "languageLocked": {
             "type": "boolean"
           },
@@ -13946,6 +13951,11 @@
           },
           "publicationStatus": {
             "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "A comma-separated list of Urls",
+            "nullable": true
           },
           "languageLocked": {
             "type": "boolean"

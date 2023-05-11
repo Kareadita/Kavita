@@ -715,7 +715,11 @@ public class ProcessSeries : IProcessSeries
 
         if (!string.IsNullOrEmpty(comicInfo.Web))
         {
-            chapter.WebLinks = string.Join(",", comicInfo.Web.Split(",").Where(s => !string.IsNullOrEmpty(s)));
+            chapter.WebLinks = string.Join(",", comicInfo.Web
+                .Split(",")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Select(s => s.Trim())
+            );
         }
 
         if (comicInfo.Count > 0)

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../../shared/tag-badge/tag-badge.component';
@@ -17,7 +17,7 @@ import { MetadataService } from '../../../_services/metadata.service';
   styleUrls: ['./series-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
+export class SeriesMetadataDetailComponent implements OnChanges {
 
   @Input() seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
@@ -68,9 +68,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     }
     this.cdRef.markForCheck();
-  }
-
-  ngOnInit(): void {
   }
 
   toggleView() {

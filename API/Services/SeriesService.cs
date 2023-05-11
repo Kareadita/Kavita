@@ -120,6 +120,16 @@ public class SeriesService : ISeriesService
                 series.Metadata.LanguageLocked = true;
             }
 
+            if (!string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata?.WebLinks))
+            {
+                series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
+                    .Split(",")
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .Select(s => s.Trim())!
+                );
+            }
+
+
             series.Metadata.CollectionTags ??= new List<CollectionTag>();
             UpdateCollectionsList(updateSeriesMetadataDto.CollectionTags, series, allCollectionTags, (tag) =>
             {
