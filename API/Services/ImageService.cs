@@ -296,6 +296,11 @@ public class ImageService : IImageService
         return $"thumbnail{chapterId}";
     }
 
+    public static string GetWebLinkFormat(string url)
+    {
+        return $"{new Uri(url).Host}.png";
+    }
+
 
     public static string CreateMergedImage(List<string> coverImages, string dest)
     {

@@ -17,7 +17,7 @@ export class ImageService implements OnDestroy {
   public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
   public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
-  public errorWebLinkImage = 'assets/images/image-placeholder.dark-min.png';
+  public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -26,11 +26,11 @@ export class ImageService implements OnDestroy {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
-        this.errorWebLinkImage = 'assets/images/image-placeholder-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
-        this.errorWebLinkImage = 'assets/images/image-placeholder-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
       }
     });
 

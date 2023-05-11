@@ -173,10 +173,9 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
+
         // Check if the domain exists
-        var domain = new Uri(url).Host;
-        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, domain + ".png");
-        // TODO: We need a flag if in webp or not. Assume png
+        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url));
         if (!_directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
