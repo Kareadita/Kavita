@@ -17,6 +17,7 @@ FROM ubuntu:focal
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
+COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 RUN apt-get update \
