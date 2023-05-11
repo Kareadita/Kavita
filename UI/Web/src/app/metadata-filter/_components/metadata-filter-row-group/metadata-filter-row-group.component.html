@@ -1,9 +1,9 @@
-<form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}">
+<form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngIf="filterGroup.id !== 'root'">
     <div class="row mb-2">
         <div class="col-md-2">
             <select class="form-select" formControlName="comparison">
                 <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
-            </select>
+            </select>{{this.formGroup.get('comparison')?.value}}
         </div>
 
         <div class="col-md-2">
@@ -18,14 +18,14 @@
 
 <ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">
     <ng-container *ngFor="let andGroup of filterGroup.and">
-        <app-metadata-filter-row-group [filterGroup]="andGroup" [groupPreset]="'and'" 
+        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="andGroup" [groupPreset]="'and'" 
             [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>
 
 <ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
     <ng-container *ngFor="let orGroup of filterGroup.or">
-        <app-metadata-filter-row-group [filterGroup]="orGroup" [groupPreset]="'or'" 
+        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="orGroup" [groupPreset]="'or'" 
             [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>

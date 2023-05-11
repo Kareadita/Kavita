@@ -21,8 +21,6 @@ import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import { inject } from '@angular/core';
-import { FilterStatement } from '../_models/metadata/v2/filter-statement';
-import { FilterGroup } from '../_models/metadata/v2/filter-group';
 import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 
 @Component({
@@ -84,12 +82,11 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   
   
   handleFilters(filter: SeriesFilterV2) {
+    console.log('[metadata-filter] handleFilters');
     this.filterV2 = filter;
-    
   }
 
 
-  // TODO: This is the new way to do in Angular 14+. It lets you use services before constructor. Update all code to use this
   private readonly cdRef = inject(ChangeDetectorRef);
   private onDestroy: Subject<void> = new Subject();
 

@@ -149,9 +149,15 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         stmt.comparison = FilterComparison.Contains;
         stmt.field = FilterField.Libraries;
         stmt.value = this.libraryId + '';
+        group.id = 'or-1';
         group.statements.push(stmt);
+
+        const rootGroup = this.metadataService.createDefaultFilterGroup();
+        rootGroup.id = 'root';
+        rootGroup.or.push(group);
+
         this.filterSettings.presetsV2 = {
-          groups: [group],
+          groups: [rootGroup],
           limitTo: 0,
           sortOptions: {
             isAscending: true,

@@ -15,7 +15,7 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 })
 export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
-  @Input() parentGroup!: FilterGroup;
+  @Input() parentGroup: FilterGroup | undefined;
   @Input() filterGroup!: FilterGroup;
   @Input() groupPreset: 'and' | 'or' = 'or';
   @Input() nestedLevel: number = 0;
@@ -38,12 +38,25 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   actions: Array<ActionItem<any>> = this.actionFactoryService.getMetadataFilterActions(this.handleAction.bind(this));
 
   ngOnInit() {
+    console.log('setup group', this.filterGroup.id)
     this.formGroup.get('comparison')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
       // When comparison changes, we need to perform a swap of and/or (is this right or does parent need to do it? ) 
+      if (this.parentGroup == undefined) return;
+      //console.log('parentGroup: ', this.parentGroup);
+      //console.log('this: ', this.filterGroup);
+      
       if (val === 'and') {
-        // Find group by id this.filterGroup.id and remove it from or and put in and
-        this.parentGroup.and.push()
+        console.log('removing group from or -> and')
+        this.parentGroup.or = this.parentGroup.or.filter(g => g !== this.filterGroup);
+        this.parentGroup.and.push(this.filterGroup);
+      } else {
+        console.log('removing group from and -> or')
+        this.parentGroup.and = this.parentGroup.and.filter(g => g !== this.filterGroup);
+        this.parentGroup.or.push(this.filterGroup);
       }
+
+      console.log('updated parent: ', this.parentGroup);
+      console.log('comparsion: ', this.formGroup.get('comparison')?.value)
     });
   }
   

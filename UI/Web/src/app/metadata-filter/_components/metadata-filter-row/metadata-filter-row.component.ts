@@ -88,7 +88,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
         const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
         if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
-          console.log('using preset value for dropdown option')
+          //console.log('using preset value for dropdown option')
           return;
         }
 
@@ -98,7 +98,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
     );
 
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntil(this.onDestroy)).subscribe(_ => {
-      console.log('Form change ');
+      //console.log('Form change ');
       this.filterStatement.emit({
         comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
@@ -124,7 +124,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
   }
 
   getDropdownObservable() {
-    console.log('Dropdown recalc');
+    //console.log('Dropdown recalc');
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
       switch (filterField) {
         case FilterField.PublicationStatus:
