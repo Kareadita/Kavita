@@ -49,7 +49,7 @@ public class Program
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
         {
             Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
-            var rBytes = new byte[128];
+            var rBytes = new byte[256];
             RandomNumberGenerator.Create().GetBytes(rBytes);
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
