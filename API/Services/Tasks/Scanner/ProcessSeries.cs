@@ -36,7 +36,7 @@ public interface IProcessSeries
     void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo);
 }
 
 /// <summary>
