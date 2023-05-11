@@ -56,6 +56,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   }
 
   get WebLinks() {
+    if (this.chapter.webLinks === '') return [];
     return this.chapter.webLinks.split(',');
   }
 
