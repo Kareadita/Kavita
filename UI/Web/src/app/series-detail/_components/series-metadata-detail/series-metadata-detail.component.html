@@ -9,7 +9,11 @@
         </div>
         <div class="col-md-8">
             <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
-                <img [src]="imageService.getWebLinkImage(link)" width="24px" height="24px" />
+                <img width="24px" height="24px"  #img class="lazyload img-placeholder" 
+                    src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" 
+                    [attr.data-src]="imageService.getWebLinkImage(link)" 
+                    (error)="imageService.updateErroredWebLinkImage($event)" 
+                    aria-hidden="true">
             </a>
         </div>
     </div>

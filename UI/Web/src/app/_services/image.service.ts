@@ -14,9 +14,10 @@ export class ImageService implements OnDestroy {
   baseUrl = environment.apiUrl;
   apiKey: string = '';
   encodedKey: string = '';
-  public placeholderImage = 'assets/images/image-placeholder-min.png';
-  public errorImage = 'assets/images/error-placeholder2-min.png';
+  public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
+  public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
+  public errorWebLinkImage = 'assets/images/image-placeholder.dark-min.png';
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -25,9 +26,11 @@ export class ImageService implements OnDestroy {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
+        this.errorWebLinkImage = 'assets/images/image-placeholder-min.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
+        this.errorWebLinkImage = 'assets/images/image-placeholder-min.png';
       }
     });
 
@@ -101,6 +104,10 @@ export class ImageService implements OnDestroy {
 
   updateErroredImage(event: any) {
     event.target.src = this.placeholderImage;
+  }
+
+  updateErroredWebLinkImage(event: any) {
+    event.target.src = this.errorWebLinkImage;
   }
 
   /**
