@@ -708,12 +708,19 @@ public class ProcessSeries : IProcessSeries
             chapter.StoryArcNumber = comicInfo.StoryArcNumber;
         }
 
-
         if (comicInfo.AlternateCount > 0)
         {
             chapter.AlternateCount = comicInfo.AlternateCount;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Web))
+        {
+            chapter.WebLinks = string.Join(",", comicInfo.Web
+                .Split(",")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Select(s => s.Trim())
+            );
+        }
 
         if (comicInfo.Count > 0)
         {

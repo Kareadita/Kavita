@@ -26,9 +26,10 @@ enum TabID {
   General = 0,
   Metadata = 1,
   People = 2,
-  CoverImage = 3,
-  Related = 4,
-  Info = 5,
+  WebLinks = 3,
+  CoverImage = 4,
+  Related = 5,
+  Info = 6,
 }
 
 @Component({
@@ -49,7 +50,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
+  tabs = ['General', 'Metadata', 'People', 'Web Links', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
   activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
@@ -98,6 +99,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   get TabID(): typeof TabID {
     return TabID;
+  }
+
+  get WebLinks() {
+    return this.metadata?.webLinks.split(',') || [''];
   }
 
   getPersonsSettings(role: PersonRole) {
@@ -168,6 +173,11 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
         this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
+
+        this.WebLinks.forEach((link, index) => {
+          this.editSeriesForm.addControl('link' + index, new FormControl(link, [Validators.required]));
+        });
+
         this.cdRef.markForCheck();
 
         this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
@@ -474,6 +484,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   save() {
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
+    this.metadata.webLinks = Object.keys(this.editSeriesForm.controls)
+      .filter(key => key.startsWith('link'))
+      .map(key => this.editSeriesForm.get(key)?.value)
+      .filter(v => v !== null && v !== '')
+      .join(',');
+
+    
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
@@ -500,6 +517,12 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset});
     });
+  }
+
+  addWebLink() {
+    this.metadata.webLinks += ',';
+    this.editSeriesForm.addControl('link' + (this.WebLinks.length - 1), new FormControl('', [Validators.required]));
+    this.cdRef.markForCheck();
   }
 
   updateCollections(tags: CollectionTag[]) {

@@ -100,7 +100,10 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate"/>
     public int AvgHoursToRead { get; set; }
-
+    /// <summary>
+    /// Comma-separated link of urls to external services that have some relation to the Chapter
+    /// </summary>
+    public string WebLinks { get; set; } = string.Empty;
 
     /// <summary>
     /// All people attached at a Chapter level. Usually Comics will have different people per issue.
@@ -113,7 +116,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     public ICollection<Tag> Tags { get; set; } = new List<Tag>();
 
     public ICollection<AppUserProgress> UserProgress { get; set; }
-
 
 
     // Relationships

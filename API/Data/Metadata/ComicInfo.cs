@@ -38,6 +38,7 @@ public class ComicInfo
     /// <summary>
     /// This is the link to where the data was scraped from
     /// </summary>
+    /// <remarks>This can be comma-separated</remarks>
     public string Web { get; set; } = string.Empty;
     [System.ComponentModel.DefaultValueAttribute(0)]
     public int Day { get; set; } = 0;

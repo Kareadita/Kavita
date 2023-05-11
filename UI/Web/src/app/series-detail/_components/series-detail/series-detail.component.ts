@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked, inject } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -117,7 +117,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   downloadInProgress: boolean = false;
 
   itemSize: number = 10; // when 10 done, 16 loads
-
+  
   /**
    * Track by function for Volume to tell when to refresh card data
    */

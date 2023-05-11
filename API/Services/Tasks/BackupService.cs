@@ -120,6 +120,8 @@ public class BackupService : IBackupService
         await SendProgress(0.75F, "Copying themes");
 
         CopyThemesToBackupDirectory(tempDirectory);
+        await SendProgress(0.85F, "Copying favicons");
+        CopyFaviconsToBackupDirectory(tempDirectory);
 
         try
         {
@@ -139,6 +141,11 @@ public class BackupService : IBackupService
     {
         var files = GetLogFiles();
         _directoryService.CopyFilesToDirectory(files, _directoryService.FileSystem.Path.Join(tempDirectory, "logs"));
+    }
+
+    private void CopyFaviconsToBackupDirectory(string tempDirectory)
+    {
+        _directoryService.CopyDirectoryToDirectory(_directoryService.FaviconDirectory, tempDirectory);
     }
 
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)

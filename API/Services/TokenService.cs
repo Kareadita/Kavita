@@ -49,13 +49,12 @@ public class TokenService : ITokenService
 
         claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
-        var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
-
+        var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(14),
-            SigningCredentials = creds
+            SigningCredentials = credentials
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

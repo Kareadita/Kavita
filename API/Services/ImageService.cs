@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
+using Flurl;
+using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using NetVips;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
 using Image = NetVips.Image;
+using Size = SixLabors.ImageSharp.Size;
 
 namespace API.Services;
 
@@ -49,6 +57,7 @@ public interface IImageService
     Task<string> ConvertToWebP(string filePath, string outputPath);
 
     Task<bool> IsImage(string filePath);
+    Task<string> DownloadFaviconAsync(string url);
 }
 
 public class ImageService : IImageService
@@ -177,6 +186,36 @@ public class ImageService : IImageService
         return false;
     }
 
+    public async Task<string> DownloadFaviconAsync(string url)
+    {
+        // Parse the URL to get the domain (including subdomain)
+        var uri = new Uri(url);
+        var domain = uri.Host;
+        var baseUrl = uri.Scheme + "://" + uri.Host;
+        try
+        {
+            // Download the favicon.ico file using Flurl
+            var faviconStream = await baseUrl
+                .AppendPathSegment("favicon.ico")
+                .AllowHttpStatus("2xx")
+                .GetStreamAsync();
+
+            // Create the destination file path
+            var filename = $"{domain}.png";
+            using var icon = new Icon(faviconStream);
+            using var bitmap = icon.ToBitmap();
+            bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
+
+            _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
+            return filename;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.png for ${Domain}", domain);
+            throw;
+        }
+    }
+
 
     /// <inheritdoc />
     public string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = ThumbnailWidth)
@@ -255,6 +294,11 @@ public class ImageService : IImageService
     public static string GetThumbnailFormat(int chapterId)
     {
         return $"thumbnail{chapterId}";
+    }
+
+    public static string GetWebLinkFormat(string url)
+    {
+        return $"{new Uri(url).Host}.png";
     }
 
 
