@@ -114,6 +114,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Library>()
             .Property(b => b.ManageReadingLists)
             .HasDefaultValue(true);
+
+        builder.Entity<Chapter>()
+            .Property(b => b.WebLinks)
+            .HasDefaultValue(string.Empty);
     }
 
 

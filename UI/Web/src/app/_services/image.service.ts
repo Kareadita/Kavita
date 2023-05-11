@@ -91,6 +91,10 @@ export class ImageService implements OnDestroy {
     return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}`;
   }
 
+  getWebLinkImage(url: string) {
+    return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey}`;
+  }
+
   getCoverUploadImage(filename: string) {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }

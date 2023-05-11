@@ -1,10 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
+using Flurl;
+using Flurl.Http;
 using Microsoft.Extensions.Logging;
 using NetVips;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.PixelFormats;
 using Image = NetVips.Image;
+using Size = SixLabors.ImageSharp.Size;
 
 namespace API.Services;
 
@@ -49,6 +57,7 @@ public interface IImageService
     Task<string> ConvertToWebP(string filePath, string outputPath);
 
     Task<bool> IsImage(string filePath);
+    Task<string> DownloadFaviconAsync(string url);
 }
 
 public class ImageService : IImageService
@@ -175,6 +184,39 @@ public class ImageService : IImageService
         }
 
         return false;
+    }
+
+    public async Task<string> DownloadFaviconAsync(string url)
+    {
+        // Parse the URL to get the domain (including subdomain)
+        var domain = new Uri(url).Host;
+
+        try
+        {
+            // Download the favicon.ico file using Flurl
+            var faviconStream = await url
+                .AppendPathSegment("favicon.ico")
+                .AllowHttpStatus("2xx")
+                .GetStreamAsync();
+
+            // Create the destination file path
+            var filename = $"{domain}.png";
+            // Save the favicon.png file to the destination directory
+
+            using var icon = new Icon(faviconStream);
+            using var bitmap = icon.ToBitmap();
+            bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
+            //using var image = await SixLabors.ImageSharp.Image.LoadAsync(faviconStream);
+            //await image.SaveAsPngAsync(Path.Combine(_directoryService.FaviconDirectory, filename));
+
+            _logger.LogDebug("Favicon.ico for {Domain} downloaded and saved successfully", domain);
+            return filename;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.ico for ${Domain}", domain);
+            throw;
+        }
     }
 
 

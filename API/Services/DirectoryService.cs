@@ -22,6 +22,7 @@ public interface IDirectoryService
     string TempDirectory { get; }
     string ConfigDirectory { get; }
     string SiteThemeDirectory { get; }
+    string FaviconDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -75,6 +76,7 @@ public class DirectoryService : IDirectoryService
     public string ConfigDirectory { get; }
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
+    public string FaviconDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
@@ -98,6 +100,7 @@ public class DirectoryService : IDirectoryService
         ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
         BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
         SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
+        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicon");
 
         ExistOrCreate(SiteThemeDirectory);
         ExistOrCreate(CoverImageDirectory);
@@ -105,6 +108,7 @@ public class DirectoryService : IDirectoryService
         ExistOrCreate(LogDirectory);
         ExistOrCreate(TempDirectory);
         ExistOrCreate(BookmarkDirectory);
+        ExistOrCreate(FaviconDirectory);
     }
 
     /// <summary>

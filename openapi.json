@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.2.0"
+    "version": "0.7.2.3"
   },
   "servers": [
     {
@@ -2046,6 +2046,36 @@
             "name": "apiKey",
             "in": "query",
             "description": "API Key for user. Needed to authenticate request",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Image/web-link": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns the image associated with a web-link",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -10556,6 +10586,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
           "people": {
             "type": "array",
             "items": {
@@ -10710,6 +10745,11 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
           }
         },
         "additionalProperties": false,

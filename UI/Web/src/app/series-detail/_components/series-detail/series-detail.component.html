@@ -97,6 +97,7 @@
                 </div>
                 
                 <div class="col-auto ms-2">
+                    <img [src]="imageService.getWebLinkImage('http://google.com')"/>
                     <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
                         <span>
                             <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
