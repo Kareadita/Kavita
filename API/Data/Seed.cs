@@ -101,12 +101,11 @@ public static class Seed
             new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},
             new() {Key = ServerSettingKey.BookmarkDirectory, Value = directoryService.BookmarkDirectory},
             new() {Key = ServerSettingKey.EmailServiceUrl, Value = EmailService.DefaultApiUrl},
-            new() {Key = ServerSettingKey.ConvertBookmarkToWebP, Value = "false"},
             new() {Key = ServerSettingKey.TotalBackups, Value = "30"},
             new() {Key = ServerSettingKey.TotalLogs, Value = "30"},
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
-            new() {Key = ServerSettingKey.ConvertCoverToWebP, Value = "false"},
             new() {Key = ServerSettingKey.HostName, Value = string.Empty},
+            new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

@@ -222,15 +222,15 @@ public class UploadController : BaseApiController
 
     private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename, int thumbnailSize = 0)
     {
-        var convertToWebP = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP;
+        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (thumbnailSize > 0)
         {
             return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-                filename, convertToWebP, thumbnailSize);
+                filename, encodeFormat, thumbnailSize);
         }
 
         return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
-            filename, convertToWebP);
+            filename, encodeFormat);
     }
 
     /// <summary>

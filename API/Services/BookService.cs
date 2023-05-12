@@ -34,7 +34,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat);
     ComicInfo? GetComicInfo(string filePath);
     ParserInfo? ParseInfo(string filePath);
     /// <summary>
@@ -1064,13 +1064,13 @@ public class BookService : IBookService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
         if (Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, saveAsWebP);
+            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat);
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
@@ -1085,7 +1085,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
         }
         catch (Exception ex)
         {
@@ -1098,7 +1098,7 @@ public class BookService : IBookService
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
+    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         try
         {
@@ -1108,7 +1108,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
 
         }
         catch (Exception ex)

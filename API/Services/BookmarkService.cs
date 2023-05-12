@@ -82,7 +82,7 @@ public class BookmarkService : IBookmarkService
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var convertBookmarkToWebP =
-            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs == EncodeFormat.WEBP;
 
         if (!convertBookmarkToWebP) return;
 
@@ -137,7 +137,7 @@ public class BookmarkService : IBookmarkService
             _unitOfWork.UserRepository.Add(bookmark);
             await _unitOfWork.CommitAsync();
 
-            if (settings.ConvertBookmarkToWebP)
+            if (settings.EncodeMediaAs == EncodeFormat.WEBP)
             {
                 // Enqueue a task to convert the bookmark to webP
                 BackgroundJob.Enqueue(() => ConvertBookmarkToWebP(bookmark.Id));
