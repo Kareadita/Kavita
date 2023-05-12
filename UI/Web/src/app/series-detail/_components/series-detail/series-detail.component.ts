@@ -740,19 +740,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     });
   }
 
-  async promptToReview() {
-    // TODO: After a review has been set, we might just want to show an edit icon next to star rating which opens the review, instead of prompting each time.
-    const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
-    const config = new ConfirmConfig();
-    config.header = 'Confirm';
-    config.content = 'Do you want to write a review?';
-    config.buttons.push({text: 'No', type: 'secondary'});
-    config.buttons.push({text: 'Yes', type: 'primary'});
-    if (shouldPrompt && await this.confirmService.confirm('Do you want to write a review?', config)) {
-      this.openReviewModal();
-    }
-  }
-
   openReviewModal(force = false) {
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
     modalRef.componentInstance.series = this.series;
