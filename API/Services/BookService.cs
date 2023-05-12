@@ -1062,7 +1062,7 @@ public class BookService : IBookService
     /// <param name="fileFilePath"></param>
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
+    /// <param name="encodeFormat">When saving the file, use encoding</param>
     /// <returns></returns>
     public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {

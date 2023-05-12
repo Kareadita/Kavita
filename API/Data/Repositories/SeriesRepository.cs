@@ -132,7 +132,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
-    Task<IList<Series>> GetAllWithWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
+    Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -565,7 +565,7 @@ public class SeriesRepository : ISeriesRepository
     /// Returns custom images only
     /// </summary>
     /// <returns></returns>
-    public async Task<IList<Series>> GetAllWithWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
+    public async Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
         bool customOnly = true)
     {
         var extension = encodeFormat.GetExtension();

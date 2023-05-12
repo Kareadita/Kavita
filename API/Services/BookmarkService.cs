@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.SignalR;
 using Hangfire;
 using Microsoft.Extensions.Logging;
@@ -197,7 +198,7 @@ public class BookmarkService : IBookmarkService
     }
 
     /// <summary>
-    /// This is a long-running job that will convert all bookmarks into WebP. Do not invoke anyway except via Hangfire.
+    /// This is a long-running job that will convert all bookmarks into a format that is not PNG. Do not invoke anyway except via Hangfire.
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllBookmarkToEncoding()
@@ -216,7 +217,7 @@ public class BookmarkService : IBookmarkService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started));
         var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-            .Where(b => !b.FileName.EndsWith(".webp")).ToList();
+            .Where(b => !b.FileName.EndsWith(EncodeFormat.PNG.GetExtension())).ToList();
 
         var count = 1F;
         foreach (var bookmark in bookmarks)
@@ -233,7 +234,7 @@ public class BookmarkService : IBookmarkService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(1F, ProgressEventType.Ended));
 
-        _logger.LogInformation("[BookmarkService] Converted bookmarks to WebP");
+        _logger.LogInformation("[BookmarkService] Converted bookmarks to {Format}", encodeFormat);
     }
 
     /// <summary>
@@ -242,7 +243,6 @@ public class BookmarkService : IBookmarkService
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
     public async Task ConvertAllCoversToEncoding()
     {
-        _logger.LogInformation("[BookmarkService] Starting conversion of all covers to webp");
         var coverDirectory = _directoryService.CoverImageDirectory;
         var encodeFormat =
             (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
@@ -253,11 +253,12 @@ public class BookmarkService : IBookmarkService
             return;
         }
 
+        _logger.LogInformation("[BookmarkService] Starting conversion of all covers to {Format}", encodeFormat);
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
 
         var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat);
-        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithWithCoversInDifferentEncoding(encodeFormat);
+        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
 
         var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
         var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
@@ -338,7 +339,7 @@ public class BookmarkService : IBookmarkService
         }
 
         // Now null out all series and volumes that aren't webp or custom
-        var nonCustomOrConvertedVolumeCovers = await _unitOfWork.VolumeRepository.GetAllWithNonWebPCovers();
+        var nonCustomOrConvertedVolumeCovers = await _unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
         foreach (var volume in nonCustomOrConvertedVolumeCovers)
         {
             if (string.IsNullOrEmpty(volume.CoverImage)) continue;
@@ -347,7 +348,7 @@ public class BookmarkService : IBookmarkService
             await _unitOfWork.CommitAsync();
         }
 
-        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithWithCoversInDifferentEncoding(encodeFormat, false);
+        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, false);
         foreach (var series in nonCustomOrConvertedSeriesCovers)
         {
             if (string.IsNullOrEmpty(series.CoverImage)) continue;
@@ -359,7 +360,7 @@ public class BookmarkService : IBookmarkService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended));
 
-        _logger.LogInformation("[BookmarkService] Converted covers to WebP");
+        _logger.LogInformation("[BookmarkService] Converted covers to {Format}", encodeFormat);
     }
 
 
@@ -377,7 +378,7 @@ public class BookmarkService : IBookmarkService
         var fullTargetDirectory = fullSourcePath.Replace(new FileInfo(filename).Name, string.Empty);
 
         var newFilename = string.Empty;
-        _logger.LogDebug("Converting {Source} image into WebP at {Target}", fullSourcePath, fullTargetDirectory);
+        _logger.LogDebug("Converting {Source} image into {Encoding} at {Target}", fullSourcePath, encodeFormat, fullTargetDirectory);
 
         try
         {
@@ -392,7 +393,7 @@ public class BookmarkService : IBookmarkService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Could not convert image {FilePath}", filename);
+                _logger.LogError(ex, "Could not convert image {FilePath} to {Format}", filename, encodeFormat);
                 newFilename = filename;
             }
         }

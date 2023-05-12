@@ -336,7 +336,7 @@ public class ReadingListService : IReadingListService
         //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
         //
         // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
-        // // webp needs to be handled
+        // // webp/avif needs to be handled
         // return combinedFile;
     }
 

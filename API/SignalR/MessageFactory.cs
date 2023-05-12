@@ -484,7 +484,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ConvertBookmarksProgress,
-            Title = "Converting Bookmarks to WebP",
+            Title = "Converting Bookmarks",
             SubTitle = string.Empty,
             EventType = eventType,
             Progress = ProgressType.Determinate,
@@ -501,7 +501,7 @@ public static class MessageFactory
         return new SignalRMessage()
         {
             Name = ConvertCoversProgress,
-            Title = "Converting Covers to WebP",
+            Title = "Converting Covers",
             SubTitle = string.Empty,
             EventType = eventType,
             Progress = ProgressType.Determinate,

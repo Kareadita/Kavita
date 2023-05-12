@@ -31,7 +31,7 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-    Task CovertAllCoversToWebP();
+    Task CovertAllCoversToEncoding();
     Task CleanupDbEntries();
 
 }
@@ -182,7 +182,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    public async Task CovertAllCoversToWebP()
+    public async Task CovertAllCoversToEncoding()
     {
         await _bookmarkService.ConvertAllCoversToEncoding();
         _logger.LogInformation("[BookmarkService] Queuing tasks to update Series and Volume references via Cover Refresh");

@@ -126,7 +126,7 @@ public class ServerController : BaseApiController
     [HttpPost("convert-bookmarks")]
     public ActionResult ScheduleConvertBookmarks()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToEncoding", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true)) return Ok();
         BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToEncoding());
         return Ok();
@@ -139,9 +139,9 @@ public class ServerController : BaseApiController
     [HttpPost("convert-covers")]
     public ActionResult ScheduleConvertCovers()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToWebP());
+        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
         return Ok();
     }
 

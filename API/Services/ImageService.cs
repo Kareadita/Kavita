@@ -48,11 +48,11 @@ public interface IImageService
     /// <returns></returns>
     string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat);
     /// <summary>
-    /// Converts the passed image to webP and outputs it in the same directory
+    /// Converts the passed image to encoding and outputs it in the same directory
     /// </summary>
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
-    /// <returns>File of written webp image</returns>
+    /// <returns>File of written encoded image</returns>
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
 
     Task<bool> IsImage(string filePath);
