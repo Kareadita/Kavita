@@ -11451,6 +11451,15 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "EncodeFormat": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "FileDimensionDto": {
         "type": "object",
         "properties": {
@@ -14137,10 +14146,6 @@
             "description": "Total number of People in the instance",
             "format": "int32"
           },
-          "storeBookmarksAsWebP": {
-            "type": "boolean",
-            "description": "Is this instance storing bookmarks as WebP"
-          },
           "usersOnCardLayout": {
             "type": "integer",
             "description": "Number of users on this instance using Card Layout",
@@ -14236,9 +14241,8 @@
             "description": "Total reading hours of all users",
             "format": "int64"
           },
-          "storeCoversAsWebP": {
-            "type": "boolean",
-            "description": "Is the Server saving covers as WebP"
+          "encodeMediaAs": {
+            "$ref": "#/components/schemas/EncodeFormat"
           }
         },
         "additionalProperties": false,
@@ -14306,9 +14310,8 @@
             "description": "Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.",
             "nullable": true
           },
-          "convertBookmarkToWebP": {
-            "type": "boolean",
-            "description": "If the server should save bookmarks as WebP encoding"
+          "encodeMediaAs": {
+            "$ref": "#/components/schemas/EncodeFormat"
           },
           "totalBackups": {
             "type": "integer",
@@ -14323,10 +14326,6 @@
             "type": "integer",
             "description": "Total number of days worth of logs to keep at a given time.",
             "format": "int32"
-          },
-          "convertCoverToWebP": {
-            "type": "boolean",
-            "description": "If the server should save covers as WebP encoding"
           },
           "hostName": {
             "type": "string",

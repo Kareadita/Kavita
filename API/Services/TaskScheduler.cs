@@ -184,7 +184,7 @@ public class TaskScheduler : ITaskScheduler
 
     public async Task CovertAllCoversToWebP()
     {
-        await _bookmarkService.ConvertAllCoverToWebP();
+        await _bookmarkService.ConvertAllCoversToEncoding();
         _logger.LogInformation("[BookmarkService] Queuing tasks to update Series and Volume references via Cover Refresh");
         var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
         foreach (var lib in libraryIds)

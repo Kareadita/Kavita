@@ -53,7 +53,7 @@ public interface IImageService
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
     /// <returns>File of written webp image</returns>
-    Task<string> ConvertToWebP(string filePath, string outputPath);
+    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
 
     Task<bool> IsImage(string filePath);
     Task<string> DownloadFaviconAsync(string url);
@@ -166,11 +166,11 @@ public class ImageService : IImageService
         return filename;
     }
 
-    public Task<string> ConvertToWebP(string filePath, string outputPath)
+    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
     {
         var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
-        var outputFile = Path.Join(outputPath, fileName + ".webp");
+        var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
 
         using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
         sourceImage.WriteToFile(outputFile);

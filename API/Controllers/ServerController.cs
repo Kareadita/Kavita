@@ -128,7 +128,7 @@ public class ServerController : BaseApiController
     {
         if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
+        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToEncoding());
         return Ok();
     }
 

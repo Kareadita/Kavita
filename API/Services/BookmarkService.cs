@@ -20,8 +20,8 @@ public interface IBookmarkService
     Task<bool> RemoveBookmarkPage(AppUser userWithBookmarks, BookmarkDto bookmarkDto);
     Task<IEnumerable<string>> GetBookmarkFilesById(IEnumerable<int> bookmarkIds);
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    Task ConvertAllBookmarkToWebP();
-    Task ConvertAllCoverToWebP();
+    Task ConvertAllBookmarkToEncoding();
+    Task ConvertAllCoversToEncoding();
 }
 
 public class BookmarkService : IBookmarkService
@@ -77,21 +77,25 @@ public class BookmarkService : IBookmarkService
     /// This is a job that runs after a bookmark is saved
     /// </summary>
     /// <remarks>This must be public</remarks>
-    public async Task ConvertBookmarkToWebP(int bookmarkId)
+    public async Task ConvertBookmarkToEncoding(int bookmarkId)
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
-        var convertBookmarkToWebP =
-            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs == EncodeFormat.WEBP;
+        var encodeFormat =
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
-        if (!convertBookmarkToWebP) return;
+        if (encodeFormat == EncodeFormat.PNG)
+        {
+            _logger.LogError("Cannot convert media to PNG");
+            return;
+        }
 
         // Validate the bookmark still exists
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkAsync(bookmarkId);
         if (bookmark == null) return;
 
-        bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
-            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
+        bookmark.FileName = await SaveAsEncodingFormat(bookmarkDirectory, bookmark.FileName,
+            BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId), encodeFormat);
         _unitOfWork.UserRepository.Update(bookmark);
 
         await _unitOfWork.CommitAsync();
@@ -140,7 +144,7 @@ public class BookmarkService : IBookmarkService
             if (settings.EncodeMediaAs == EncodeFormat.WEBP)
             {
                 // Enqueue a task to convert the bookmark to webP
-                BackgroundJob.Enqueue(() => ConvertBookmarkToWebP(bookmark.Id));
+                BackgroundJob.Enqueue(() => ConvertBookmarkToEncoding(bookmark.Id));
             }
         }
         catch (Exception ex)
@@ -196,10 +200,18 @@ public class BookmarkService : IBookmarkService
     /// This is a long-running job that will convert all bookmarks into WebP. Do not invoke anyway except via Hangfire.
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    public async Task ConvertAllBookmarkToWebP()
+    public async Task ConvertAllBookmarkToEncoding()
     {
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
+        var encodeFormat =
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+
+        if (encodeFormat == EncodeFormat.PNG)
+        {
+            _logger.LogError("Cannot convert media to PNG");
+            return;
+        }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started));
@@ -209,8 +221,8 @@ public class BookmarkService : IBookmarkService
         var count = 1F;
         foreach (var bookmark in bookmarks)
         {
-            bookmark.FileName = await SaveAsWebP(bookmarkDirectory, bookmark.FileName,
-                BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId));
+            bookmark.FileName = await SaveAsEncodingFormat(bookmarkDirectory, bookmark.FileName,
+                BookmarkStem(bookmark.AppUserId, bookmark.SeriesId, bookmark.ChapterId), encodeFormat);
             _unitOfWork.UserRepository.Update(bookmark);
             await _unitOfWork.CommitAsync();
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -228,19 +240,28 @@ public class BookmarkService : IBookmarkService
     /// This is a long-running job that will convert all covers into WebP. Do not invoke anyway except via Hangfire.
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 2 * 60 * 60), AutomaticRetry(Attempts = 0)]
-    public async Task ConvertAllCoverToWebP()
+    public async Task ConvertAllCoversToEncoding()
     {
         _logger.LogInformation("[BookmarkService] Starting conversion of all covers to webp");
         var coverDirectory = _directoryService.CoverImageDirectory;
+        var encodeFormat =
+            (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+
+        if (encodeFormat == EncodeFormat.PNG)
+        {
+            _logger.LogError("Cannot convert media to PNG");
+            return;
+        }
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
-        var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithNonWebPCovers();
-        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithNonWebPCovers();
 
-        var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithNonWebPCovers();
-        var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithNonWebPCovers();
-        var collectionCovers = await _unitOfWork.CollectionTagRepository.GetAllWithNonWebPCovers();
+        var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat);
+        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithWithCoversInDifferentEncoding(encodeFormat);
+
+        var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
+        var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
+        var collectionCovers = await _unitOfWork.CollectionTagRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
 
         var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
                          libraryCovers.Count + collectionCovers.Count;
@@ -251,7 +272,7 @@ public class BookmarkService : IBookmarkService
         {
             if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
 
-            var newFile = await SaveAsWebP(coverDirectory, chapter.CoverImage, coverDirectory);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, chapter.CoverImage, coverDirectory, encodeFormat);
             chapter.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.ChapterRepository.Update(chapter);
             await _unitOfWork.CommitAsync();
@@ -265,7 +286,7 @@ public class BookmarkService : IBookmarkService
         {
             if (string.IsNullOrEmpty(series.CoverImage)) continue;
 
-            var newFile = await SaveAsWebP(coverDirectory, series.CoverImage, coverDirectory);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, series.CoverImage, coverDirectory, encodeFormat);
             series.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.SeriesRepository.Update(series);
             await _unitOfWork.CommitAsync();
@@ -279,7 +300,7 @@ public class BookmarkService : IBookmarkService
         {
             if (string.IsNullOrEmpty(library.CoverImage)) continue;
 
-            var newFile = await SaveAsWebP(coverDirectory, library.CoverImage, coverDirectory);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, library.CoverImage, coverDirectory, encodeFormat);
             library.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.LibraryRepository.Update(library);
             await _unitOfWork.CommitAsync();
@@ -293,7 +314,7 @@ public class BookmarkService : IBookmarkService
         {
             if (string.IsNullOrEmpty(readingList.CoverImage)) continue;
 
-            var newFile = await SaveAsWebP(coverDirectory, readingList.CoverImage, coverDirectory);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, readingList.CoverImage, coverDirectory, encodeFormat);
             readingList.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.ReadingListRepository.Update(readingList);
             await _unitOfWork.CommitAsync();
@@ -307,7 +328,7 @@ public class BookmarkService : IBookmarkService
         {
             if (string.IsNullOrEmpty(collection.CoverImage)) continue;
 
-            var newFile = await SaveAsWebP(coverDirectory, collection.CoverImage, coverDirectory);
+            var newFile = await SaveAsEncodingFormat(coverDirectory, collection.CoverImage, coverDirectory, encodeFormat);
             collection.CoverImage = Path.GetFileName(newFile);
             _unitOfWork.CollectionTagRepository.Update(collection);
             await _unitOfWork.CommitAsync();
@@ -326,7 +347,7 @@ public class BookmarkService : IBookmarkService
             await _unitOfWork.CommitAsync();
         }
 
-        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithNonWebPCovers(false);
+        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithWithCoversInDifferentEncoding(encodeFormat, false);
         foreach (var series in nonCustomOrConvertedSeriesCovers)
         {
             if (string.IsNullOrEmpty(series.CoverImage)) continue;
@@ -349,7 +370,7 @@ public class BookmarkService : IBookmarkService
     /// <param name="filename">The file to convert</param>
     /// <param name="targetFolder">Full path to where files should be stored or any stem</param>
     /// <returns></returns>
-    public async Task<string> SaveAsWebP(string imageDirectory, string filename, string targetFolder)
+    public async Task<string> SaveAsEncodingFormat(string imageDirectory, string filename, string targetFolder, EncodeFormat encodeFormat)
     {
         // This must be Public as it's used in via Hangfire as a background task
         var fullSourcePath = _directoryService.FileSystem.Path.Join(imageDirectory, filename);
@@ -360,11 +381,11 @@ public class BookmarkService : IBookmarkService
 
         try
         {
-            // Convert target file to webp then delete original target file and update bookmark
+            // Convert target file to format then delete original target file and update bookmark
 
             try
             {
-                var targetFile = await _imageService.ConvertToWebP(fullSourcePath, fullTargetDirectory);
+                var targetFile = await _imageService.ConvertToEncodingFormat(fullSourcePath, fullTargetDirectory, encodeFormat);
                 var targetName = new FileInfo(targetFile).Name;
                 newFilename = Path.Join(targetFolder, targetName);
                 _directoryService.DeleteFiles(new[] {fullSourcePath});
@@ -377,7 +398,7 @@ public class BookmarkService : IBookmarkService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Could not convert image to WebP");
+            _logger.LogError(ex, "Could not convert image to {Format}", encodeFormat);
         }
 
         return newFilename;
