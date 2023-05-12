@@ -104,6 +104,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// Comma-separated link of urls to external services that have some relation to the Chapter
     /// </summary>
     public string WebLinks { get; set; } = string.Empty;
+    public string ISBN { get; set; } = string.Empty;
 
     /// <summary>
     /// All people attached at a Chapter level. Usually Comics will have different people per issue.

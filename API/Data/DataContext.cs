@@ -121,6 +121,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
+
+        builder.Entity<Chapter>()
+            .Property(b => b.ISBN)
+            .HasDefaultValue(string.Empty);
     }
 
 

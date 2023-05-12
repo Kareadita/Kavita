@@ -722,6 +722,11 @@ public class ProcessSeries : IProcessSeries
             );
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Isbn))
+        {
+            chapter.ISBN = comicInfo.Isbn;
+        }
+
         if (comicInfo.Count > 0)
         {
             chapter.TotalCount = comicInfo.Count;
