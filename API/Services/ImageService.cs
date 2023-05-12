@@ -1,20 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
 using Image = NetVips.Image;
-using Rectangle = System.Drawing.Rectangle;
-using Size = SixLabors.ImageSharp.Size;
 
 namespace API.Services;
 
@@ -196,25 +191,46 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
         try
         {
+            var validIconRelations = new[]
+            {
+                "icon",
+                "apple-touch-icon",
+            };
+            var htmlContent = url.GetStringAsync().Result;
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlContent);
+            var pngLinks = htmlDocument.DocumentNode.Descendants("link")
+                .Where(link => validIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
+                .Select(link => link.GetAttributeValue("href", string.Empty))
+                .Where(href => href.EndsWith(".png") || href.EndsWith(".PNG"))
+                .ToList();
+
+            if (pngLinks == null)
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+            var correctSizeLink = pngLinks.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks.FirstOrDefault();
+            if (string.IsNullOrEmpty(correctSizeLink))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            var finalUrl = correctSizeLink;
+            if (!correctSizeLink.StartsWith(uri.Scheme))
+            {
+                finalUrl = Url.Combine(baseUrl, correctSizeLink);
+            }
+
+            _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
             // Download the favicon.ico file using Flurl
-            var faviconStream = await baseUrl
-                .AppendPathSegment("favicon.ico")
+            var faviconStream = await finalUrl
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
             // Create the destination file path
             var filename = $"{domain}.png";
-            // NOTE: This is Windows only. Non-windows will always fail
-            using var icon = new Icon(faviconStream);
-            using var bitmap = icon.ToBitmap();
-            bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
-
-            // this code doesn't work...yet
-            // using var bitmap = ExtractBitmap(faviconStream);
-            // if (bitmap == null) throw new KavitaException("Could not covert .ico");
-            // await bitmap.SaveAsPngAsync(Path.Combine(_directoryService.FaviconDirectory, filename));
-
-
+            using var image = Image.PngloadStream(faviconStream);
+            image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
@@ -224,63 +240,6 @@ public class ImageService : IImageService
             _logger.LogError(ex, "Error downloading favicon.png for ${Domain}", domain);
             throw;
         }
-    }
-
-    public static Image<Rgba32> ExtractBitmap(Stream stream)
-    {
-        var header = new byte[6];
-        stream.Read(header, 0, header.Length);
-
-        if (header[0] != 0 || header[1] != 0)
-        {
-            throw new NotSupportedException("Invalid ICO file format.");
-        }
-
-        var imageCount = BitConverter.ToUInt16(header, 4);
-
-        for (var i = 0; i < imageCount; i++)
-        {
-            var imageHeader = new byte[16];
-            stream.Read(imageHeader, 0, imageHeader.Length);
-
-            int width = imageHeader[0];
-            int height = imageHeader[1];
-            int colorCount = BitConverter.ToInt16(imageHeader, 6);
-            int bpp = BitConverter.ToInt16(imageHeader, 14);
-
-            if (width == 0 && height == 0 && colorCount == 0 && bpp == 0)
-            {
-                // This is a directory entry, skip it
-                continue;
-            }
-
-            if (bpp == 0)
-            {
-                bpp = 256;
-            }
-
-            var imageData = new byte[width * height * (bpp / 8)];
-            stream.Read(imageData, 0, imageData.Length);
-
-            // using var bitmap = new Bitmap(width, height);
-            // var bmpData = bitmap.LockBits(new Rectangle(0, 0, width, height),
-            //     ImageLockMode.WriteOnly, bitmap.PixelFormat);
-            //
-            // var ptr = bmpData.Scan0;
-            // System.Runtime.InteropServices.Marshal.Copy(imageData, 0, ptr, imageData.Length);
-            //
-            // bitmap.UnlockBits(bmpData);
-            using var memoryStream = new MemoryStream(imageData);
-            var format = SixLabors.ImageSharp.Image.DetectFormat(memoryStream);
-            var image = SixLabors.ImageSharp.Image.Load<Rgba32>(memoryStream);
-            //Image image = Image.NewFromMemory(imageData);
-
-            return image.Clone();
-
-            //return new Bitmap(bitmap);
-        }
-
-        return null;
     }
 
 
