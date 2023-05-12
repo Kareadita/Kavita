@@ -11,6 +11,7 @@ using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -21,6 +22,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using Nager.ArticleNumber;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
@@ -432,6 +434,14 @@ public class BookService : IBookService
                 LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages.FirstOrDefault())
             };
             ComicInfo.CleanComicInfo(info);
+
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => id.Scheme.Equals("ISBN")))
+            {
+                var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty);
+                if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn)) continue;
+                info.Isbn = isbn;
+                break;
+            }
 
             // Parse tags not exposed via Library
             foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)

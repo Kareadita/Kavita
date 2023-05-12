@@ -42,4 +42,5 @@ export interface Chapter {
      */
     volumeTitle?: string;
     webLinks: string;
+    isbn: string;
 }

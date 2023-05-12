@@ -51,6 +51,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   }
 
   get WebLinks() {
+    if (this.seriesMetadata?.webLinks === '') return [];
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 

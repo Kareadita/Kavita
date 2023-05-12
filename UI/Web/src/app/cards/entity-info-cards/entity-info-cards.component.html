@@ -85,5 +85,14 @@
                 </app-icon-and-title>
             </div>
         </ng-container>
+
+        <ng-container *ngIf="chapter.isbn.length > 0">
+            <div class="vr d-none d-lg-block m-2"></div>
+            <div class="col-auto">
+                <app-icon-and-title label="ISBN" [clickable]="false" fontClasses="fa-solid fa-barcode" title="ISBN">
+                    {{chapter.isbn}}
+                </app-icon-and-title>
+            </div>
+        </ng-container>
     </ng-container>
 </div>

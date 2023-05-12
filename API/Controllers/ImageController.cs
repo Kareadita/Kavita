@@ -173,6 +173,7 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
+        if (string.IsNullOrEmpty(url)) return BadRequest("Url cannot be null");
 
         // Check if the domain exists
         var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url));

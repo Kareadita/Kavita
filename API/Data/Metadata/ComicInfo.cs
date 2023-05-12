@@ -2,7 +2,9 @@
 using System.Linq;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services;
 using Kavita.Common.Extensions;
+using Nager.ArticleNumber;
 
 namespace API.Data.Metadata;
 
@@ -35,6 +37,17 @@ public class ComicInfo
     /// IETF BCP 47 Code to represent the language of the content
     /// </summary>
     public string LanguageISO { get; set; } = string.Empty;
+
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// ISBN for the underlying document
+    /// </summary>
+    /// <remarks>ComicInfo.xml will actually output a GTIN (Global Trade Item Number) and it is the responsibility of the Parser to extract the ISBN. EPub will return ISBN.</remarks>
+    public string Isbn { get; set; } = string.Empty;
+    /// <summary>
+    /// This is only for deserialization and used within <see cref="ArchiveService"/>. Use <see cref="Isbn"/> for the actual value.
+    /// </summary>
+    public string GTIN { get; set; } = string.Empty;
     /// <summary>
     /// This is the link to where the data was scraped from
     /// </summary>
@@ -138,6 +151,22 @@ public class ComicInfo
         info.Characters = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Characters);
         info.Translator = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.Translator);
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
+
+        // We need to convert GTIN to ISBN
+        if (!string.IsNullOrEmpty(info.GTIN) && ArticleNumberHelper.IsValidGtin(info.GTIN))
+        {
+            // This is likely a valid ISBN
+            if (info.GTIN[0] == '0')
+            {
+                var potentialISBN = info.GTIN.Substring(1, info.GTIN.Length - 1);
+                if (ArticleNumberHelper.IsValidIsbn13(potentialISBN))
+                {
+                    info.Isbn = potentialISBN;
+                }
+
+            }
+
+        }
     }
 
     /// <summary>

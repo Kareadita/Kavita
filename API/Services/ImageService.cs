@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Flurl.Http;
+using HtmlAgilityPack;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
 using Image = NetVips.Image;
-using Size = SixLabors.ImageSharp.Size;
 
 namespace API.Services;
 
@@ -194,17 +191,46 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
         try
         {
+            var validIconRelations = new[]
+            {
+                "icon",
+                "apple-touch-icon",
+            };
+            var htmlContent = url.GetStringAsync().Result;
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlContent);
+            var pngLinks = htmlDocument.DocumentNode.Descendants("link")
+                .Where(link => validIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
+                .Select(link => link.GetAttributeValue("href", string.Empty))
+                .Where(href => href.EndsWith(".png") || href.EndsWith(".PNG"))
+                .ToList();
+
+            if (pngLinks == null)
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+            var correctSizeLink = pngLinks.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks.FirstOrDefault();
+            if (string.IsNullOrEmpty(correctSizeLink))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            var finalUrl = correctSizeLink;
+            if (!correctSizeLink.StartsWith(uri.Scheme))
+            {
+                finalUrl = Url.Combine(baseUrl, correctSizeLink);
+            }
+
+            _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
             // Download the favicon.ico file using Flurl
-            var faviconStream = await baseUrl
-                .AppendPathSegment("favicon.ico")
-                .AllowHttpStatus("2xx")
+            var faviconStream = await finalUrl
+                .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
             // Create the destination file path
             var filename = $"{domain}.png";
-            using var icon = new Icon(faviconStream);
-            using var bitmap = icon.ToBitmap();
-            bitmap.Save(Path.Combine(_directoryService.FaviconDirectory, filename), ImageFormat.Png);
+            using var image = Image.PngloadStream(faviconStream);
+            image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
