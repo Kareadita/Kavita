@@ -38,7 +38,7 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   saveSettings() {
     const modelSettings = Object.assign({}, this.serverSettings);
-    modelSettings.encodeMediaAs = this.settingsForm.get('encodeMediaAs')?.value;
+    modelSettings.encodeMediaAs = parseInt(this.settingsForm.get('encodeMediaAs')?.value, 10);
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;

@@ -354,9 +354,9 @@ public class ImageService : IImageService
         return $"thumbnail{chapterId}";
     }
 
-    public static string GetWebLinkFormat(string url)
+    public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
-        return $"{new Uri(url).Host}.png";
+        return $"{new Uri(url).Host}{encodeFormat.GetExtension()}";
     }
 
 

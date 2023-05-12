@@ -163,13 +163,11 @@ public class ImageController : BaseApiController
     /// <summary>
     /// Returns the image associated with a web-link
     /// </summary>
-    /// <param name="chapterId"></param>
-    /// <param name="pageNum"></param>
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("web-link")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = new []{"url", "apiKey"})]
-    public async Task<ActionResult> GetBookmarkImage(string url, string apiKey)
+    public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
@@ -177,7 +175,7 @@ public class ImageController : BaseApiController
         var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
         // Check if the domain exists
-        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url));
+        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
         if (!_directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it

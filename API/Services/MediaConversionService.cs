@@ -79,7 +79,7 @@ public class MediaConversionService : IMediaConversionService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(0F, ProgressEventType.Started));
         var bookmarks = (await _unitOfWork.UserRepository.GetAllBookmarksAsync())
-            .Where(b => !b.FileName.EndsWith(EncodeFormat.PNG.GetExtension())).ToList();
+            .Where(b => !b.FileName.EndsWith(encodeFormat.GetExtension())).ToList();
 
         var count = 1F;
         foreach (var bookmark in bookmarks)
@@ -248,12 +248,13 @@ public class MediaConversionService : IMediaConversionService
         var count = 1F;
         foreach (var file in pngFavicons)
         {
-            //var destFile = file.Replace(_directoryService.FileSystem.FileInfo.New(file).Extension, encodeFormat.GetExtension());
-            await _imageService.ConvertToEncodingFormat(file, _directoryService.FaviconDirectory, encodeFormat);
+            await SaveAsEncodingFormat(_directoryService.FaviconDirectory, _directoryService.FileSystem.FileInfo.New(file).Name, _directoryService.FaviconDirectory,
+                encodeFormat);
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertBookmarksProgressEvent(count / pngFavicons.Count, ProgressEventType.Updated));
             count++;
         }
+
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertBookmarksProgressEvent(1F, ProgressEventType.Ended));
@@ -278,10 +279,15 @@ public class MediaConversionService : IMediaConversionService
         var newFilename = string.Empty;
         _logger.LogDebug("Converting {Source} image into {Encoding} at {Target}", fullSourcePath, encodeFormat, fullTargetDirectory);
 
+        if (!File.Exists(fullSourcePath))
+        {
+            _logger.LogError("Requested to convert {File} but it doesn't exist", fullSourcePath);
+            return newFilename;
+        }
+
         try
         {
-            // Convert target file to format then delete original target file and update bookmark
-
+            // Convert target file to format then delete original target file
             try
             {
                 var targetFile = await _imageService.ConvertToEncodingFormat(fullSourcePath, fullTargetDirectory, encodeFormat);
