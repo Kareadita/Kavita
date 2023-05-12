@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// v0.6.0 introduced a change in how Normalization works and hence every normalized field needs to be re-calculated

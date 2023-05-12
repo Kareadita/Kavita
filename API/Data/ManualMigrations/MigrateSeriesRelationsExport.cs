@@ -10,7 +10,7 @@ using Kavita.Common.EnvironmentInfo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 internal sealed class SeriesRelationMigrationOutput
 {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.ManualMigrations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Logging;

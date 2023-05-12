@@ -15,6 +15,7 @@ public interface ISettingsRepository
     Task<ServerSettingDto> GetSettingsDtoAsync();
     Task<ServerSetting> GetSettingAsync(ServerSettingKey key);
     Task<IEnumerable<ServerSetting>> GetSettingsAsync();
+    void Remove(ServerSetting setting);
 }
 public class SettingsRepository : ISettingsRepository
 {
@@ -30,6 +31,11 @@ public class SettingsRepository : ISettingsRepository
     public void Update(ServerSetting settings)
     {
         _context.Entry(settings).State = EntityState.Modified;
+    }
+
+    public void Remove(ServerSetting setting)
+    {
+        _context.Remove(setting);
     }
 
     public async Task<ServerSettingDto> GetSettingsDtoAsync()

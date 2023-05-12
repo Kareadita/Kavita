@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;

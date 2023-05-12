@@ -1,3 +1,5 @@
+import { EncodeFormat } from "./encode-format";
+
 export interface ServerSettings {
     cacheDirectory: string;
     taskScan: string;
@@ -10,8 +12,7 @@ export interface ServerSettings {
     baseUrl: string;
     bookmarksDirectory: string;
     emailServiceUrl: string;
-    convertBookmarkToWebP: boolean;
-    convertCoverToWebP: boolean;
+    encodeMediaAs: EncodeFormat;
     totalBackups: number;
     totalLogs: number;
     enableFolderWatching: boolean;

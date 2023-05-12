@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Services.Tasks;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// In v0.5.3, we removed Light and E-Ink themes. This migration will remove the themes from the DB and default anyone on
