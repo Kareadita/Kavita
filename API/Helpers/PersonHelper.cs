@@ -115,21 +115,21 @@ public static class PersonHelper
     /// For a given role and people dtos, update a series
     /// </summary>
     /// <param name="role"></param>
-    /// <param name="tags"></param>
+    /// <param name="people"></param>
     /// <param name="series"></param>
-    /// <param name="allTags"></param>
+    /// <param name="allPeople"></param>
     /// <param name="handleAdd">This will call with an existing or new tag, but the method does not update the series Metadata</param>
     /// <param name="onModified"></param>
-    public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? tags, Series series, IReadOnlyCollection<Person> allTags,
+    public static void UpdatePeopleList(PersonRole role, ICollection<PersonDto>? people, Series series, IReadOnlyCollection<Person> allPeople,
         Action<Person> handleAdd, Action onModified)
     {
-        if (tags == null) return;
+        if (people == null) return;
         var isModified = false;
         // I want a union of these 2 lists. Return only elements that are in both lists, but the list types are different
         var existingTags = series.Metadata.People.Where(p => p.Role == role).ToList();
         foreach (var existing in existingTags)
         {
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
+            if (people.SingleOrDefault(t => t.Id == existing.Id) == null) // This needs to check against role
             {
                 // Remove tag
                 series.Metadata.People.Remove(existing);
@@ -138,9 +138,9 @@ public static class PersonHelper
         }
 
         // At this point, all tags that aren't in dto have been removed.
-        foreach (var tag in tags)
+        foreach (var tag in people)
         {
-            var existingTag = allTags.SingleOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
+            var existingTag = allPeople.FirstOrDefault(t => t.Name == tag.Name && t.Role == tag.Role);
             if (existingTag != null)
             {
                 if (series.Metadata.People.Where(t => t.Role == tag.Role).All(t => t.Name != null && !t.Name.Equals(tag.Name)))
