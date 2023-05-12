@@ -175,7 +175,7 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
 
         this.WebLinks.forEach((link, index) => {
-          this.editSeriesForm.addControl('link' + index, new FormControl(link, [Validators.required]));
+          this.editSeriesForm.addControl('link' + index, new FormControl(link, []));
         });
 
         this.cdRef.markForCheck();
@@ -521,7 +521,16 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   addWebLink() {
     this.metadata.webLinks += ',';
-    this.editSeriesForm.addControl('link' + (this.WebLinks.length - 1), new FormControl('', [Validators.required]));
+    this.editSeriesForm.addControl('link' + (this.WebLinks.length - 1), new FormControl('', []));
+    this.cdRef.markForCheck();
+  }
+
+  removeWebLink(index: number) {
+    const tokens = this.metadata.webLinks.split(',');
+    const tokenToRemove = tokens[index];
+
+    this.metadata.webLinks = tokens.filter(t => t != tokenToRemove).join(',');
+    this.editSeriesForm.removeControl('link' + index, {emitEvent: true});
     this.cdRef.markForCheck();
   }
 
