@@ -81,6 +81,14 @@ public class ImageService : IImageService
         "apple-touch-icon-precomposed",
     };
 
+    /// <summary>
+    /// A mapping of urls that need to get the icon from another url, due to strangeness (like app.plex.tv loading a black icon)
+    /// </summary>
+    private static readonly IDictionary<string, string> FaviconUrlMapper = new Dictionary<string, string>
+    {
+        ["https://app.plex.tv"] = "https://plex.tv"
+    };
+
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
         _logger = logger;
@@ -195,6 +203,12 @@ public class ImageService : IImageService
         var uri = new Uri(url);
         var domain = uri.Host;
         var baseUrl = uri.Scheme + "://" + uri.Host;
+
+        if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
+        {
+            url = value;
+        }
+
         try
         {
             var htmlContent = url.GetStringAsync().Result;
