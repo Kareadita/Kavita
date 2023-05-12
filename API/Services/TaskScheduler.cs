@@ -50,9 +50,9 @@ public class TaskScheduler : ITaskScheduler
     private readonly IThemeService _themeService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
-    private readonly IBookmarkService _bookmarkService;
+    private readonly IMediaConversionService _mediaConversionService;
 
-    public static BackgroundJobServer Client => new BackgroundJobServer();
+    public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
@@ -73,7 +73,7 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IBookmarkService bookmarkService)
+        IMediaConversionService mediaConversionService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -87,7 +87,7 @@ public class TaskScheduler : ITaskScheduler
         _themeService = themeService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
-        _bookmarkService = bookmarkService;
+        _mediaConversionService = mediaConversionService;
     }
 
     public async Task ScheduleTasks()
@@ -182,10 +182,20 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
+    /// <summary>
+    /// Do not invoke this manually, always enqueue on a background thread
+    /// </summary>
     public async Task CovertAllCoversToEncoding()
     {
-        await _bookmarkService.ConvertAllCoversToEncoding();
-        _logger.LogInformation("[BookmarkService] Queuing tasks to update Series and Volume references via Cover Refresh");
+        var defaultParams = Array.Empty<object>();
+        if (MediaConversionService.ConversionMethods.Any(method =>
+                HasAlreadyEnqueuedTask(MediaConversionService.Name, method, defaultParams, DefaultQueue, true)))
+        {
+            return;
+        }
+
+        await _mediaConversionService.ConvertAllManagedMediaToEncodingFormat();
+        _logger.LogInformation("Queuing tasks to update Series and Volume references via Cover Refresh");
         var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
         foreach (var lib in libraryIds)
         {

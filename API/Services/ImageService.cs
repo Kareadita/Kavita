@@ -54,13 +54,13 @@ public interface IImageService
     /// <param name="outputPath">Where to output the file</param>
     /// <returns>File of written encoded image</returns>
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
-
     Task<bool> IsImage(string filePath);
     Task<string> DownloadFaviconAsync(string url);
 }
 
 public class ImageService : IImageService
 {
+    public const string Name = "BookmarkService";
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
@@ -258,7 +258,6 @@ public class ImageService : IImageService
             throw;
         }
     }
-
 
     /// <inheritdoc />
     public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)

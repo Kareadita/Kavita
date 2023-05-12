@@ -55,7 +55,7 @@ public class BookmarkServiceTests
     private BookmarkService Create(IDirectoryService ds)
     {
         return new BookmarkService(Substitute.For<ILogger<BookmarkService>>(), _unitOfWork, ds,
-            Substitute.For<IImageService>(), Substitute.For<IEventHub>());
+Substitute.For<IMediaConversionService>());
     }
 
     #region Setup
