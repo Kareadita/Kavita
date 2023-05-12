@@ -75,6 +75,12 @@ public class ImageService : IImageService
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
 
+    private static readonly string[] ValidIconRelations = {
+        "icon",
+        "apple-touch-icon",
+        "apple-touch-icon-precomposed",
+    };
+
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
     {
         _logger = logger;
@@ -191,16 +197,11 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
         try
         {
-            var validIconRelations = new[]
-            {
-                "icon",
-                "apple-touch-icon",
-            };
             var htmlContent = url.GetStringAsync().Result;
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
             var pngLinks = htmlDocument.DocumentNode.Descendants("link")
-                .Where(link => validIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
+                .Where(link => ValidIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
                 .Select(link => link.GetAttributeValue("href", string.Empty))
                 .Where(href => href.EndsWith(".png") || href.EndsWith(".PNG"))
                 .ToList();
