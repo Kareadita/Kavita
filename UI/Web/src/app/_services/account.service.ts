@@ -115,10 +115,10 @@ export class AccountService implements OnDestroy {
     this.currentUser = user;
     this.currentUserSource.next(user);
     
+    this.stopRefreshTokenTimer();
+
     if (this.currentUser !== undefined) {
       this.startRefreshTokenTimer();
-    } else {
-      this.stopRefreshTokenTimer();
     }
   }
 
@@ -264,7 +264,6 @@ export class AccountService implements OnDestroy {
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
-    
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
@@ -277,23 +276,23 @@ export class AccountService implements OnDestroy {
     }));
   }
 
+  /**
+   * Every 10 mins refresh the token
+   */
   private startRefreshTokenTimer() {
-    if (this.currentUser === null || this.currentUser === undefined) return;
-
-    if (this.refreshTokenTimeout !== undefined) {
+    if (this.currentUser === null || this.currentUser === undefined) {
       this.stopRefreshTokenTimer();
+      return;
     }
 
-    const jwtToken = JSON.parse(atob(this.currentUser.token.split('.')[1]));
-    // set a timeout to refresh the token 10 mins before it expires
-    const expires = new Date(jwtToken.exp * 1000);
-    const timeout = expires.getTime() - Date.now() - (60 * 10000);
-    this.refreshTokenTimeout = setTimeout(() => this.refreshToken().subscribe(() => {}), timeout);
+    this.stopRefreshTokenTimer();
+
+    this.refreshTokenTimeout = setInterval(() => this.refreshToken().subscribe(() => {}), (60 * 10_000));
   }
 
   private stopRefreshTokenTimer() {
     if (this.refreshTokenTimeout !== undefined) {
-      clearTimeout(this.refreshTokenTimeout);
+      clearInterval(this.refreshTokenTimeout);
     }
   }
 

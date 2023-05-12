@@ -4,7 +4,7 @@ using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// New role introduced in v0.6. Adds the role to all users.

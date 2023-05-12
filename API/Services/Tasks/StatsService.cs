@@ -34,7 +34,7 @@ public class StatsService : IStatsService
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
     private readonly IStatisticService _statisticService;
-    private const string ApiUrl = "https://stats.kavitareader.com";
+    private const string ApiUrl = "http://localhost:5003";
 
     public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context, IStatisticService statisticService)
     {
@@ -139,8 +139,7 @@ public class StatsService : IStatsService
             TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync(),
             TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
             UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
-            StoreBookmarksAsWebP = serverSettings.ConvertBookmarkToWebP,
-            StoreCoversAsWebP = serverSettings.ConvertCoverToWebP,
+            EncodeMediaAs = serverSettings.EncodeMediaAs,
             MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
             MaxVolumesInASeries = await MaxVolumesInASeries(),
             MaxChaptersInASeries = await MaxChaptersInASeries(),
@@ -292,14 +291,14 @@ public class StatsService : IStatsService
 
     private IEnumerable<FileFormatDto> AllFormats()
     {
-        // TODO: Rewrite this with new migration code in feature/basic-stats
+
         var results =  _context.MangaFile
             .AsNoTracking()
             .AsEnumerable()
             .Select(m => new FileFormatDto()
             {
                 Format = m.Format,
-                Extension = Path.GetExtension(m.FilePath)?.ToLowerInvariant()!
+                Extension = m.Extension
             })
             .DistinctBy(f => f.Extension)
             .ToList();

@@ -34,16 +34,10 @@ export class ManageTasksSettingsComponent implements OnInit {
   recurringTasks$: Observable<Array<Job>> = of([]);
   adhocTasks: Array<AdhocTask> = [
     {
-      name: 'Convert Bookmarks to WebP',
-      description: 'Runs a long-running task which will convert all bookmarks to WebP. This is slow (especially on ARM devices).',
-      api: this.serverService.convertBookmarks(),
-      successMessage: 'Conversion of Bookmarks has been queued'
-    },
-    {
-      name: 'Convert Covers to WebP',
-      description: 'Runs a long-running task which will convert all existing covers to WebP. This is slow (especially on ARM devices).',
-      api: this.serverService.convertCovers(),
-      successMessage: 'Conversion of Covers has been queued'
+      name: 'Convert Media to Target Encoding',
+      description: 'Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).',
+      api: this.serverService.convertMedia(),
+      successMessage: 'Conversion of Media to Target Encoding has been queued'
     },
     {
       name: 'Clear Cache',
@@ -144,12 +138,6 @@ export class ManageTasksSettingsComponent implements OnInit {
     });
   }
 
-  runAdhocConvert() {
-    this.serverService.convertBookmarks().subscribe(() => {
-      this.toastr.success('Conversion of Bookmarks has been queued.');
-    });
-  }
-
   runAdhoc(task: AdhocTask) {
     task.api.subscribe((data: any) => {
       if (task.successMessage.length > 0) {
@@ -159,6 +147,8 @@ export class ManageTasksSettingsComponent implements OnInit {
       if (task.successFunction) {
         task.successFunction(data);
       }
+    }, (err: any) => {
+      console.error('error: ', err);
     });
   }
 

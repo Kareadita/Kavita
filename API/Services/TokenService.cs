@@ -77,9 +77,9 @@ public class TokenService : ITokenService
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenContent = tokenHandler.ReadJwtToken(request.Token);
-            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
+            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
             if (string.IsNullOrEmpty(username)) return null;
-            var user = await _userManager.FindByIdAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
             if (user == null) return null; // This forces a logout
             var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
             if (!validated) return null;

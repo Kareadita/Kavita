@@ -5,6 +5,7 @@ using System.IO.Abstractions.TestingHelpers;
 using System.IO.Compression;
 using System.Linq;
 using API.Archive;
+using API.Entities.Enums;
 using API.Services;
 using Microsoft.Extensions.Logging;
 using NetVips;
@@ -178,7 +179,7 @@ public class ArchiveServiceTests
         _directoryService.ExistOrCreate(outputDir);
 
         var coverImagePath = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
-            Path.GetFileNameWithoutExtension(inputFile) + "_output", outputDir);
+            Path.GetFileNameWithoutExtension(inputFile) + "_output", outputDir, EncodeFormat.PNG);
         var actual = File.ReadAllBytes(Path.Join(outputDir, coverImagePath));
 
 
@@ -208,7 +209,7 @@ public class ArchiveServiceTests
 
         archiveService.Configure().CanOpen(Path.Join(testDirectory, inputFile)).Returns(ArchiveLibrary.SharpCompress);
         var coverOutputFile = archiveService.GetCoverImage(Path.Join(testDirectory, inputFile),
-            Path.GetFileNameWithoutExtension(inputFile), outputDir);
+            Path.GetFileNameWithoutExtension(inputFile), outputDir, EncodeFormat.PNG);
         var actualBytes = File.ReadAllBytes(Path.Join(outputDir, coverOutputFile));
         var expectedBytes = File.ReadAllBytes(Path.Join(testDirectory, expectedOutputFile));
         Assert.Equal(expectedBytes, actualBytes);
@@ -222,13 +223,14 @@ public class ArchiveServiceTests
     public void CanParseCoverImage(string inputFile)
     {
         var imageService = Substitute.For<IImageService>();
-        imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>()).Returns(x => "cover.jpg");
+        imageService.WriteCoverThumbnail(Arg.Any<Stream>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<EncodeFormat>())
+            .Returns(x => "cover.jpg");
         var archiveService = new ArchiveService(_logger, _directoryService, imageService, Substitute.For<IMediaErrorService>());
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Services/Test Data/ArchiveService/");
         var inputPath = Path.GetFullPath(Path.Join(testDirectory, inputFile));
         var outputPath = Path.Join(testDirectory, Path.GetFileNameWithoutExtension(inputFile) + "_output");
         new DirectoryInfo(outputPath).Create();
-        var expectedImage = archiveService.GetCoverImage(inputPath, inputFile, outputPath);
+        var expectedImage = archiveService.GetCoverImage(inputPath, inputFile, outputPath, EncodeFormat.PNG);
         Assert.Equal("cover.jpg", expectedImage);
         new DirectoryInfo(outputPath).Delete();
     }

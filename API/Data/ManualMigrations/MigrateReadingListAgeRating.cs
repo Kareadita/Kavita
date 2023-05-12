@@ -4,7 +4,7 @@ using API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// New role introduced in v0.6. Calculates the Age Rating on all Reading Lists

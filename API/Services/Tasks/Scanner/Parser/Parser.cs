@@ -14,7 +14,7 @@ public static class Parser
     private const int RegexTimeoutMs = 5000000; // 500 ms
     public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
 
-    public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif)";
+    public const string ImageFileExtensions = @"^(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)";
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
     private const string BookFileExtensions = @"\.epub|\.pdf";
     private const string XmlRegexExtensions = @"\.xml";

@@ -52,7 +52,7 @@ public interface ILibraryRepository
     Task<string?> GetLibraryCoverImageAsync(int libraryId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
-    Task<IList<Library>> GetAllWithNonWebPCovers();
+    Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -170,10 +170,7 @@ public class LibraryRepository : ILibraryRepository
             var c = sortChar;
             var isAlpha = char.IsLetter(sortChar);
             if (!isAlpha) c = '#';
-            if (!firstCharacterMap.ContainsKey(c))
-            {
-                firstCharacterMap[c] = 0;
-            }
+            firstCharacterMap.TryAdd(c, 0);
 
             firstCharacterMap[c] += 1;
         }
@@ -371,10 +368,11 @@ public class LibraryRepository : ILibraryRepository
         return dict;
     }
 
-    public async Task<IList<Library>> GetAllWithNonWebPCovers()
+    public async Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)
     {
+        var extension = encodeFormat.GetExtension();
         return await _context.Library
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .ToListAsync();
     }
 }

@@ -10,6 +10,7 @@ using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.ManualMigrations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -248,6 +249,9 @@ public class Startup
 
                     // v0.7.2
                     await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
+
+                    // v0.7.3
+                    await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);

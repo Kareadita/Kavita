@@ -43,7 +43,7 @@ internal class MockReadingItemService : IReadingItemService
         return 1;
     }
 
-    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, bool saveAsWebP)
+    public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat)
     {
         return string.Empty;
     }

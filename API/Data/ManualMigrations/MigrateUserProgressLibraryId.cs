@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// Introduced in v0.6.1.8 and v0.7, this adds library ids to all User Progress to allow for easier queries against progress

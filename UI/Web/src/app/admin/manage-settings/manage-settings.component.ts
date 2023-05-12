@@ -50,7 +50,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
-      this.settingsForm.addControl('convertBookmarkToWebP', new FormControl(this.serverSettings.convertBookmarkToWebP, []));
+      this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, []));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
 
       this.serverService.getServerInfo().subscribe(info => {
@@ -76,7 +76,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups);
     this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs);
     this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
-    this.settingsForm.get('convertBookmarkToWebP')?.setValue(this.serverSettings.convertBookmarkToWebP);
+    this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
     this.settingsForm.markAsPristine();
   }

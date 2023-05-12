@@ -7,6 +7,7 @@ using System.Linq;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Data.Metadata;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -20,7 +21,7 @@ public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
     int GetNumberOfPagesFromArchive(string archivePath);
-    string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format);
     bool IsValidArchive(string archivePath);
     ComicInfo? GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);
@@ -201,9 +202,9 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="fileName">File name to use based on context of entity.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
+    /// <param name="encodeFormat">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
         try
@@ -219,7 +220,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -230,7 +231,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -426,7 +427,7 @@ public class ArchiveService : IArchiveService
         {
             entry.WriteToDirectory(extractPath, new ExtractionOptions()
             {
-                ExtractFullPath = true, // Don't flatten, let the flatterner ensure correct order of nested folders
+                ExtractFullPath = true, // Don't flatten, let the flattener ensure correct order of nested folders
                 Overwrite = false
             });
         }

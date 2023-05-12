@@ -45,7 +45,7 @@ public interface IReadingListRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
-    Task<IList<ReadingList>> GetAllWithNonWebPCovers();
+    Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
     Task<int> RemoveReadingListsWithoutSeries();
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
@@ -110,10 +110,11 @@ public class ReadingListRepository : IReadingListRepository
             .AsEnumerable();
     }
 
-    public async Task<IList<ReadingList>> GetAllWithNonWebPCovers()
+    public async Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)
     {
+        var extension = encodeFormat.GetExtension();
         return await _context.ReadingList
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .ToListAsync();
     }
 
