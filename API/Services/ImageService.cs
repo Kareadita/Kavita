@@ -55,7 +55,7 @@ public interface IImageService
     /// <returns>File of written encoded image</returns>
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
-    Task<string> DownloadFaviconAsync(string url);
+    Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
 }
 
 public class ImageService : IImageService
@@ -199,12 +199,13 @@ public class ImageService : IImageService
         return false;
     }
 
-    public async Task<string> DownloadFaviconAsync(string url)
+    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
     {
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
         var domain = uri.Host;
         var baseUrl = uri.Scheme + "://" + uri.Host;
+
 
         if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
         {
@@ -245,9 +246,23 @@ public class ImageService : IImageService
                 .GetStreamAsync();
 
             // Create the destination file path
-            var filename = $"{domain}.png";
             using var image = Image.PngloadStream(faviconStream);
-            image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+            var filename = $"{domain}{encodeFormat.GetExtension()}";
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
