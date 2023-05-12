@@ -170,10 +170,7 @@ public class LibraryRepository : ILibraryRepository
             var c = sortChar;
             var isAlpha = char.IsLetter(sortChar);
             if (!isAlpha) c = '#';
-            if (!firstCharacterMap.ContainsKey(c))
-            {
-                firstCharacterMap[c] = 0;
-            }
+            firstCharacterMap.TryAdd(c, 0);
 
             firstCharacterMap[c] += 1;
         }
