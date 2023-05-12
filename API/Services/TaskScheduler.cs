@@ -68,6 +68,11 @@ public class TaskScheduler : ITaskScheduler
 
     private static readonly Random Rnd = new Random();
 
+    private static readonly RecurringJobOptions RecurringJobOptions = new RecurringJobOptions()
+    {
+        TimeZone = TimeZoneInfo.Local
+    };
+
 
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
@@ -100,28 +105,28 @@ public class TaskScheduler : ITaskScheduler
             var scanLibrarySetting = setting;
             _logger.LogDebug("Scheduling Scan Library Task for {Setting}", scanLibrarySetting);
             RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => _scannerService.ScanLibraries(false),
-                () => CronConverter.ConvertToCronNotation(scanLibrarySetting), TimeZoneInfo.Local);
+                () => CronConverter.ConvertToCronNotation(scanLibrarySetting), RecurringJobOptions);
         }
         else
         {
-            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false), Cron.Daily, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(ScanLibrariesTaskId, () => ScanLibraries(false), Cron.Daily, RecurringJobOptions);
         }
 
         setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskBackup)).Value;
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
         else
         {
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, TimeZoneInfo.Local);
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), Cron.Weekly, RecurringJobOptions);
         }
 
-        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, TimeZoneInfo.Local);
-        RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, TimeZoneInfo.Local);
-        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, TimeZoneInfo.Local);
-        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(), Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
+        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
     }
 
     #region StatsTasks
@@ -137,7 +142,7 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogDebug("Scheduling stat collection daily");
-        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate(ReportStatsTaskId, () => _statsService.Send(), Cron.Daily(Rnd.Next(0, 22)), RecurringJobOptions);
     }
 
     public void AnalyzeFilesForLibrary(int libraryId, bool forceUpdate = false)
@@ -210,8 +215,10 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        // Schedule update check between noon and 6pm local time
-        RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(12, 18)), TimeZoneInfo.Local);
+        RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(5, 23)), new RecurringJobOptions()
+        {
+            TimeZone = TimeZoneInfo.Local
+        });
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)

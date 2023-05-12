@@ -264,7 +264,6 @@ export class AccountService implements OnDestroy {
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
-    console.log('Refreshing auth token');
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',
      {token: this.currentUser.token, refreshToken: this.currentUser.refreshToken}).pipe(map(user => {
       if (this.currentUser) {
