@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Data.Metadata;
@@ -372,10 +373,7 @@ public class ArchiveService : IArchiveService
                     if (entry != null)
                     {
                         using var stream = entry.Open();
-                        var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo?) serializer.Deserialize(stream);
-                        ComicInfo.CleanComicInfo(info);
-                        return info;
+                        return Deserialize(stream);
                     }
 
                     break;
@@ -390,9 +388,7 @@ public class ArchiveService : IArchiveService
                     if (entry != null)
                     {
                         using var stream = entry.OpenEntryStream();
-                        var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo?) serializer.Deserialize(stream);
-                        ComicInfo.CleanComicInfo(info);
+                        var info = Deserialize(stream);
                         return info;
                     }
 
@@ -416,6 +412,28 @@ public class ArchiveService : IArchiveService
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Strips out empty tags before deserializing
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
+    private static ComicInfo? Deserialize(Stream stream)
+    {
+        var comicInfoXml = XDocument.Load(stream);
+        comicInfoXml.Descendants()
+            .Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value))
+            .Remove();
+
+        var serializer = new XmlSerializer(typeof(ComicInfo));
+        using var reader = comicInfoXml.Root?.CreateReader();
+        if (reader == null) return null;
+
+        var info  = (ComicInfo?) serializer.Deserialize(reader);
+        ComicInfo.CleanComicInfo(info);
+        return info;
+
     }
 
 
