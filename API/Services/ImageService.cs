@@ -80,7 +80,8 @@ public class ImageService : IImageService
     private static readonly string[] ValidIconRelations = {
         "icon",
         "apple-touch-icon",
-        "apple-touch-icon-precomposed"
+        "apple-touch-icon-precomposed",
+        "apple-touch-icon icon-precomposed" // ComicVine has it combined
     };
 
     /// <summary>
