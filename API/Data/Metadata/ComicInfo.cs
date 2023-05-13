@@ -153,7 +153,7 @@ public class ComicInfo
         info.CoverArtist = Services.Tasks.Scanner.Parser.Parser.CleanAuthor(info.CoverArtist);
 
         // We need to convert GTIN to ISBN
-        if (!string.IsNullOrEmpty(info.GTIN) && ArticleNumberHelper.IsValidGtin(info.GTIN))
+        if (!string.IsNullOrEmpty(info.GTIN))
         {
             // This is likely a valid ISBN
             if (info.GTIN[0] == '0')
@@ -163,9 +163,10 @@ public class ComicInfo
                 {
                     info.Isbn = potentialISBN;
                 }
-
+            } else if (ArticleNumberHelper.IsValidIsbn10(info.GTIN) || ArticleNumberHelper.IsValidIsbn13(info.GTIN))
+            {
+                info.Isbn = info.GTIN;
             }
-
         }
     }
 
