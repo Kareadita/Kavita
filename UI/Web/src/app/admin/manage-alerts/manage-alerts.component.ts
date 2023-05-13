@@ -4,6 +4,7 @@ import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-alerts',
@@ -26,6 +27,9 @@ export class ManageAlertsComponent implements OnInit {
 
   data: Array<KavitaMediaError> = [];
   isLoading = true;
+  formGroup = new FormGroup({
+    filter: new FormControl('', [])
+  });
   
 
   constructor() {}
@@ -71,5 +75,10 @@ export class ManageAlertsComponent implements OnInit {
 
   clear() {
     this.serverService.clearMediaAlerts().subscribe(_ => this.loadData());
+  }
+
+  filterList = (listItem: KavitaMediaError) => {
+    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
 }
