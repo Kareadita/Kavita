@@ -346,6 +346,8 @@ public class ProcessSeries : IProcessSeries
         }
 
 
+        #region People
+
         // Handle People
         foreach (var chapter in chapters)
         {
@@ -489,6 +491,8 @@ public class ProcessSeries : IProcessSeries
                         break;
                 }
             });
+
+        #endregion
 
     }
 

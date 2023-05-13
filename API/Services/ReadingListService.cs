@@ -496,12 +496,13 @@ public class ReadingListService : IReadingListService
                 }
 
                 readingList.Items = items;
+
+                if (!_unitOfWork.HasChanges()) continue;
+
                 await CalculateReadingListAgeRating(readingList);
-                if (_unitOfWork.HasChanges())
-                {
-                    await _unitOfWork.CommitAsync();
-                }
-                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await _unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
+                    user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
             }
         }
