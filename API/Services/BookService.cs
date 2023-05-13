@@ -437,6 +437,7 @@ public class BookService : IBookService
 
             foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => id.Scheme.Equals("ISBN")))
             {
+                if (string.IsNullOrEmpty(identifier.Identifier)) continue;
                 var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
                 if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
                 {
