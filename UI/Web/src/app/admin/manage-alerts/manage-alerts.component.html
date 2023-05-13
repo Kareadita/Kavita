@@ -2,14 +2,12 @@
 
 <form [formGroup]="formGroup">
     <div class="row g-0 mb-3">
-        <div class="col-md-10">
+        <div class="col-md-12">
             <label for="filter" class="visually-hidden">Filter</label>
             <div class="input-group">
                 <input id="filter" type="text" class="form-control" placeholder="Filter" formControlName="filter" />
+                <button class="btn btn-primary" type="button" (click)="clear()">Clear Alerts</button>
             </div>
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary mb-2" (click)="clear()">Clear Alerts</button>
         </div>
     </div>
 </form>
