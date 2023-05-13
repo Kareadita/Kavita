@@ -37,13 +37,13 @@
         </div>
     </form>
 
-    <ngb-accordion #a="ngbAccordion">
+    <ngb-accordion #a="ngbAccordion" [destroyOnHide]="false">
         <ngb-panel>
             <ng-template ngbPanelTitle>
-                Media Issues
+                Media Issues <span class="ms-1" *ngIf="alertCount > 0">({{alertCount}})</span>
             </ng-template>
             <ng-template ngbPanelContent>
-                <app-manage-alerts></app-manage-alerts>
+                <app-manage-alerts (alertCount)="alertCount = $event"></app-manage-alerts>
             </ng-template>
         </ngb-panel>
     </ngb-accordion>

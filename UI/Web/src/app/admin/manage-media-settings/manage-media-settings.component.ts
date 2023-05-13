@@ -18,6 +18,8 @@ export class ManageMediaSettingsComponent implements OnInit {
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
 
+  alertCount: number = 0;
+
   get EncodeFormats() { return EncodeFormats; }
   
   constructor(private settingsService: SettingsService, private toastr: ToastrService, private modalService: NgbModal, ) { }

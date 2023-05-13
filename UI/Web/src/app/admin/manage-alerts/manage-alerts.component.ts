@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output, QueryList, ViewChildren, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
@@ -13,6 +13,7 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 })
 export class ManageAlertsComponent implements OnInit {
 
+  @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
   private readonly serverService = inject(ServerService); 
   private readonly messageHub = inject(MessageHubService); 
@@ -63,8 +64,7 @@ export class ManageAlertsComponent implements OnInit {
     this.serverService.getMediaErrors().subscribe(d => {
       this.data = d;
       this.isLoading = false;
-      console.log(this.data)
-      console.log(this.isLoading)
+      this.alertCount.emit(d.length);
       this.cdRef.detectChanges();
     });
   }
