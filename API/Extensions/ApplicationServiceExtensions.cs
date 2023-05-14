@@ -22,9 +22,7 @@ public static class ApplicationServiceExtensions
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IFileSystem, FileSystem>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<ICacheHelper, CacheHelper>();
 
@@ -35,7 +33,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
-        services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
         services.AddScoped<IDownloadService, DownloadService>();
         services.AddScoped<IReaderService, ReaderService>();
@@ -59,11 +56,20 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
 
-        services.AddScoped<IPresenceTracker, PresenceTracker>();
+        services.AddScoped<IFileSystem, FileSystem>();
+        services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
+        services.AddScoped<IPresenceTracker, PresenceTracker>();
+
+        services.AddScoped<IImageService, ImageService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
+
+        services.AddEasyCaching(options =>
+        {
+            options.UseInMemory("favicon");
+        });
     }
 
     private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Entities.Enums;
 using API.Extensions;
+using EasyCaching.Core;
 using Flurl;
 using Flurl.Http;
 using HtmlAgilityPack;
@@ -63,10 +65,12 @@ public class ImageService : IImageService
     public const string Name = "BookmarkService";
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
+    private readonly IEasyCachingProviderFactory _cacheFactory;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
+
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -92,10 +96,11 @@ public class ImageService : IImageService
         ["https://app.plex.tv"] = "https://plex.tv"
     };
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
     {
         _logger = logger;
         _directoryService = directoryService;
+        _cacheFactory = cacheFactory;
     }
 
     public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
@@ -208,6 +213,15 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
 
 
+        var provider = _cacheFactory.GetCachingProvider("favicon");
+        var res = await provider.GetAsync<string>(baseUrl);
+        if (res.HasValue)
+        {
+            _logger.LogInformation("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", baseUrl);
+            throw new KavitaException($"Kavita has already tried to fetch from {baseUrl} and failed. Skipping duplicate check");
+        }
+
+        await provider.SetAsync(baseUrl, string.Empty, TimeSpan.FromDays(10));
         if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
         {
             url = value;
@@ -235,7 +249,13 @@ public class ImageService : IImageService
             }
 
             var finalUrl = correctSizeLink;
-            if (!correctSizeLink.StartsWith(uri.Scheme))
+
+            // If starts with //, it's coming usually from an offsite cdn
+            if (correctSizeLink.StartsWith("//"))
+            {
+                finalUrl = Url.Combine("https:", correctSizeLink);
+            }
+            else if (!correctSizeLink.StartsWith(uri.Scheme))
             {
                 finalUrl = Url.Combine(baseUrl, correctSizeLink);
             }
@@ -270,7 +290,7 @@ public class ImageService : IImageService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error downloading favicon.png for ${Domain}", domain);
+            _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
             throw;
         }
     }

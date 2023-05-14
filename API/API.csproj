@@ -56,6 +56,7 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.4.0-alpha.4" />
+    <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
     <PackageReference Include="ExCSS" Version="4.1.0" />
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
