@@ -138,7 +138,6 @@ public interface ISeriesRepository
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-    Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
 }
 
@@ -583,6 +582,7 @@ public class SeriesRepository : ISeriesRepository
                         && (!customOnly || c.CoverImage.StartsWith(prefix)))
             .ToListAsync();
     }
+
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto)
     {
