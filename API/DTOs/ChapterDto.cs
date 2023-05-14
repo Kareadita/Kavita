@@ -93,4 +93,13 @@ public class ChapterDto : IHasReadTimeEstimate, IEntityDate
     public int MaxHoursToRead { get; set; }
     /// <inheritdoc cref="IHasReadTimeEstimate.AvgHoursToRead"/>
     public int AvgHoursToRead { get; set; }
+    /// <summary>
+    /// Comma-separated link of urls to external services that have some relation to the Chapter
+    /// </summary>
+    public string WebLinks { get; set; }
+    /// <summary>
+    /// ISBN-13 (usually) of the Chapter
+    /// </summary>
+    /// <remarks>This is guaranteed to be Valid</remarks>
+    public string ISBN { get; set; }
 }

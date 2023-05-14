@@ -139,8 +139,7 @@ public class StatsService : IStatsService
             TotalGenres = await _unitOfWork.GenreRepository.GetCountAsync(),
             TotalPeople = await _unitOfWork.PersonRepository.GetCountAsync(),
             UsingSeriesRelationships = await GetIfUsingSeriesRelationship(),
-            StoreBookmarksAsWebP = serverSettings.ConvertBookmarkToWebP,
-            StoreCoversAsWebP = serverSettings.ConvertCoverToWebP,
+            EncodeMediaAs = serverSettings.EncodeMediaAs,
             MaxSeriesInALibrary = await MaxSeriesInAnyLibrary(),
             MaxVolumesInASeries = await MaxVolumesInASeries(),
             MaxChaptersInASeries = await MaxChaptersInASeries(),
@@ -292,14 +291,14 @@ public class StatsService : IStatsService
 
     private IEnumerable<FileFormatDto> AllFormats()
     {
-        // TODO: Rewrite this with new migration code in feature/basic-stats
+
         var results =  _context.MangaFile
             .AsNoTracking()
             .AsEnumerable()
             .Select(m => new FileFormatDto()
             {
                 Format = m.Format,
-                Extension = Path.GetExtension(m.FilePath)?.ToLowerInvariant()!
+                Extension = m.Extension
             })
             .DistinctBy(f => f.Extension)
             .ToList();

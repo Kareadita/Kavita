@@ -8,6 +8,7 @@ using API.DTOs.Jobs;
 using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
@@ -119,29 +120,22 @@ public class ServerController : BaseApiController
         return Ok(await _statsService.GetServerInfo());
     }
 
-    /// <summary>
-    /// Triggers the scheduling of the convert bookmarks job. Only one job will run at a time.
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("convert-bookmarks")]
-    public ActionResult ScheduleConvertBookmarks()
-    {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
-                TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
-        return Ok();
-    }
 
     /// <summary>
-    /// Triggers the scheduling of the convert covers job. Only one job will run at a time.
+    /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.
     /// </summary>
     /// <returns></returns>
-    [HttpPost("convert-covers")]
-    public ActionResult ScheduleConvertCovers()
+    [HttpPost("convert-media")]
+    public async Task<ActionResult> ScheduleConvertCovers()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
-                TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToWebP());
+        var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        if (encoding == EncodeFormat.PNG)
+        {
+            return BadRequest(
+                "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
+        }
+        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
         return Ok();
     }
 
@@ -156,7 +150,8 @@ public class ServerController : BaseApiController
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip", Path.GetFileName(zipPath), true);
+            return PhysicalFile(zipPath, "application/zip",
+                System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
         {

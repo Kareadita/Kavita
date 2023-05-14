@@ -11,60 +11,61 @@
             <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
                 
                 <li [ngbNavItem]="tabs[TabID.General]">
-                <a ngbNavLink>{{tabs[TabID.General]}}</a>
-                <ng-template ngbNavContent>
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="name" class="form-label">Name</label>
-                            <div class="input-group">
-                                <input id="name" class="form-control" formControlName="name" type="text" [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
-                                <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
-                                    <div class="invalid-feedback" *ngIf="errors.required">
-                                        This field is required
-                                    </div>
-                                </ng-container>
+                    <a ngbNavLink>{{tabs[TabID.General]}}</a>
+                    <ng-template ngbNavContent>
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="name" class="form-label">Name</label>
+                                <div class="input-group">
+                                    <input id="name" class="form-control" formControlName="name" type="text" [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
+                                    <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
+                                        <div class="invalid-feedback" *ngIf="errors.required">
+                                            This field is required
+                                        </div>
+                                    </ng-container>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="sort-name" class="form-label">Sort Name</label>
-                            <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
-                                [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
-                                <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
-                                <input id="sort-name" class="form-control" formControlName="sortName" type="text">
-                                <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
-                                    <div class="invalid-feedback" *ngIf="errors.required">
-                                        This field is required
-                                    </div>
-                                </ng-container>
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="sort-name" class="form-label">Sort Name</label>
+                                <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
+                                    [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
+                                    <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                                    <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
+                                        <div class="invalid-feedback" *ngIf="errors.required">
+                                            This field is required
+                                        </div>
+                                    </ng-container>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-0">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="localized-name" class="form-label">Localized Name</label>
-                            <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
-                                <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
-                                <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                        <div class="row g-0">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="localized-name" class="form-label">Localized Name</label>
+                                <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
+                                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row g-0" *ngIf="metadata">
-                        <div class="mb-3" style="width: 100%">
-                            <label for="summary" class="form-label">Summary</label>
-                            <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
-                                <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
-                                <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                        <div class="row g-0" *ngIf="metadata">
+                            <div class="mb-3" style="width: 100%">
+                                <label for="summary" class="form-label">Summary</label>
+                                <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
+                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
+                                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                </ng-template>
+                    </ng-template>
                 </li>
+
                 <li [ngbNavItem]="tabs[TabID.Metadata]" *ngIf="metadata">
                     <a ngbNavLink>{{tabs[TabID.Metadata]}}</a>
                     <ng-template ngbNavContent>
@@ -341,6 +342,31 @@
                             </div>
                         </div>
 
+                    </ng-template>
+                </li>
+
+                <li [ngbNavItem]="tabs[TabID.WebLinks]" *ngIf="metadata">
+                    <a ngbNavLink>{{tabs[TabID.WebLinks]}}</a>
+                    <ng-template ngbNavContent>
+                        <p>Here you can add many different links to external services.</p>
+                        <div class="row g-0 mb-3" *ngFor="let link of WebLinks; let i = index;">
+                            <div class="col-lg-8 col-md-12 pe-2">
+                                <div class="mb-3">
+                                    <label for="web-link--{{i}}" class="visually-hidden">Web Link</label>
+                                    <input type="text" class="form-control" formControlName="link{{i}}" attr.id="web-link--{{i}}">
+                                </div>
+                            </div>
+                            <div class="col-lg-2">
+                                <button class="btn btn-secondary me-1" (click)="addWebLink()">
+                                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                                    <span class="visually-hidden">Add Link</span>
+                                </button>
+                                <button class="btn btn-secondary" (click)="removeWebLink(i)">
+                                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                                    <span class="visually-hidden">Remove Link</span>
+                                </button>
+                            </div>
+                        </div>
                     </ng-template>
                 </li>
                 

@@ -36,7 +36,7 @@ public interface IProcessSeries
     void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo);
 }
 
 /// <summary>
@@ -230,7 +230,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP);
+        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
@@ -345,6 +345,8 @@ public class ProcessSeries : IProcessSeries
             });
         }
 
+
+        #region People
 
         // Handle People
         foreach (var chapter in chapters)
@@ -489,6 +491,8 @@ public class ProcessSeries : IProcessSeries
                         break;
                 }
             });
+
+        #endregion
 
     }
 
@@ -708,12 +712,24 @@ public class ProcessSeries : IProcessSeries
             chapter.StoryArcNumber = comicInfo.StoryArcNumber;
         }
 
-
         if (comicInfo.AlternateCount > 0)
         {
             chapter.AlternateCount = comicInfo.AlternateCount;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Web))
+        {
+            chapter.WebLinks = string.Join(",", comicInfo.Web
+                .Split(",")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Select(s => s.Trim())
+            );
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Isbn))
+        {
+            chapter.ISBN = comicInfo.Isbn;
+        }
 
         if (comicInfo.Count > 0)
         {

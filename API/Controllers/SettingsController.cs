@@ -214,7 +214,14 @@ public class SettingsController : BaseApiController
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
-                Configuration.BaseUrl = updateSettingsDto.BaseUrl;
+                try
+                {
+                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Could not set base url. Give this exception to majora2007");
+                }
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -231,15 +238,9 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.ConvertBookmarkToWebP && updateSettingsDto.ConvertBookmarkToWebP + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.EncodeMediaAs && updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
             {
-                setting.Value = updateSettingsDto.ConvertBookmarkToWebP + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.ConvertCoverToWebP && updateSettingsDto.ConvertCoverToWebP + string.Empty != setting.Value)
-            {
-                setting.Value = updateSettingsDto.ConvertCoverToWebP + string.Empty;
+                setting.Value = updateSettingsDto.EncodeMediaAs + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

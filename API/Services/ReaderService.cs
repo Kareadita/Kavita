@@ -236,7 +236,6 @@ public class ReaderService : IReaderService
 
         try
         {
-            // TODO: Rewrite this code to just pull user object with progress for that particular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -667,15 +666,15 @@ public class ReaderService : IReaderService
             _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
         try
         {
-            var saveAsWebp =
-                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+            var encodeFormat =
+                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
             if (!Directory.Exists(outputDirectory))
             {
                 var outputtedThumbnails = cachedImages
                     .Select((img, idx) =>
                         _directoryService.FileSystem.Path.Join(outputDirectory,
-                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, saveAsWebp)))
+                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, encodeFormat)))
                     .ToArray();
                 return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
             }

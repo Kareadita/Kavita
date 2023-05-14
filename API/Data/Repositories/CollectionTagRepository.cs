@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data.Misc;
 using API.DTOs.CollectionTags;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
@@ -34,7 +35,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<CollectionTag>> GetAllTagsAsync(CollectionTagIncludes includes = CollectionTagIncludes.None);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> TagExists(string title);
-    Task<IList<CollectionTag>> GetAllWithNonWebPCovers();
+    Task<IList<CollectionTag>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
 }
 public class CollectionTagRepository : ICollectionTagRepository
 {
@@ -108,10 +109,11 @@ public class CollectionTagRepository : ICollectionTagRepository
             .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized));
     }
 
-    public async Task<IList<CollectionTag>> GetAllWithNonWebPCovers()
+    public async Task<IList<CollectionTag>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)
     {
+        var extension = encodeFormat.GetExtension();
         return await _context.CollectionTag
-            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(".webp"))
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .ToListAsync();
     }
 

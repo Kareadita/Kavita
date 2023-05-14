@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked, inject } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -117,7 +117,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   downloadInProgress: boolean = false;
 
   itemSize: number = 10; // when 10 done, 16 loads
-
+  
   /**
    * Track by function for Volume to tell when to refresh card data
    */
@@ -738,19 +738,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         this.toastr.info('It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.');
       }
     });
-  }
-
-  async promptToReview() {
-    // TODO: After a review has been set, we might just want to show an edit icon next to star rating which opens the review, instead of prompting each time.
-    const shouldPrompt = this.isNullOrEmpty(this.series.userReview);
-    const config = new ConfirmConfig();
-    config.header = 'Confirm';
-    config.content = 'Do you want to write a review?';
-    config.buttons.push({text: 'No', type: 'secondary'});
-    config.buttons.push({text: 'Yes', type: 'primary'});
-    if (shouldPrompt && await this.confirmService.confirm('Do you want to write a review?', config)) {
-      this.openReviewModal();
-    }
   }
 
   openReviewModal(force = false) {

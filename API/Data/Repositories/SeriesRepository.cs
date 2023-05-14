@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
@@ -136,6 +137,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
+    Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
     Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams, FilterV2Dto filterDto);
 }
@@ -570,12 +572,14 @@ public class SeriesRepository : ISeriesRepository
     /// Returns custom images only
     /// </summary>
     /// <returns></returns>
-    public async Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true)
+    public async Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
+        bool customOnly = true)
     {
+        var extension = encodeFormat.GetExtension();
         var prefix = ImageService.GetSeriesFormat(0).Replace("0", string.Empty);
         return await _context.Series
             .Where(c => !string.IsNullOrEmpty(c.CoverImage)
-                        && !c.CoverImage.EndsWith(".webp")
+                        && !c.CoverImage.EndsWith(extension)
                         && (!customOnly || c.CoverImage.StartsWith(prefix)))
             .ToListAsync();
     }

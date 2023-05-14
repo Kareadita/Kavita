@@ -512,6 +512,7 @@ UI/Web/dist/
 /API/config/themes/
 /API/config/stats/
 /API/config/bookmarks/
+/API/config/favicons/
 /API/config/kavita.db
 /API/config/kavita.db-shm
 /API/config/kavita.db-wal

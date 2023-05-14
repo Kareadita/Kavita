@@ -336,7 +336,7 @@ public class ReadingListService : IReadingListService
         //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
         //
         // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
-        // // webp needs to be handled
+        // // webp/avif needs to be handled
         // return combinedFile;
     }
 
@@ -496,12 +496,13 @@ public class ReadingListService : IReadingListService
                 }
 
                 readingList.Items = items;
+
+                if (!_unitOfWork.HasChanges()) continue;
+
                 await CalculateReadingListAgeRating(readingList);
-                if (_unitOfWork.HasChanges())
-                {
-                    await _unitOfWork.CommitAsync();
-                }
-                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await _unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
+                    user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
             }
         }

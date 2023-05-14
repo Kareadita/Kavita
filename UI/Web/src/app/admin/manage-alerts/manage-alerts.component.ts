@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output, QueryList, ViewChildren, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-manage-alerts',
@@ -13,6 +14,7 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 })
 export class ManageAlertsComponent implements OnInit {
 
+  @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
   private readonly serverService = inject(ServerService); 
   private readonly messageHub = inject(MessageHubService); 
@@ -25,6 +27,9 @@ export class ManageAlertsComponent implements OnInit {
 
   data: Array<KavitaMediaError> = [];
   isLoading = true;
+  formGroup = new FormGroup({
+    filter: new FormControl('', [])
+  });
   
 
   constructor() {}
@@ -63,13 +68,17 @@ export class ManageAlertsComponent implements OnInit {
     this.serverService.getMediaErrors().subscribe(d => {
       this.data = d;
       this.isLoading = false;
-      console.log(this.data)
-      console.log(this.isLoading)
+      this.alertCount.emit(d.length);
       this.cdRef.detectChanges();
     });
   }
 
   clear() {
     this.serverService.clearMediaAlerts().subscribe(_ => this.loadData());
+  }
+
+  filterList = (listItem: KavitaMediaError) => {
+    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
+    return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
 }

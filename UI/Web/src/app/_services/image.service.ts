@@ -14,9 +14,10 @@ export class ImageService implements OnDestroy {
   baseUrl = environment.apiUrl;
   apiKey: string = '';
   encodedKey: string = '';
-  public placeholderImage = 'assets/images/image-placeholder-min.png';
-  public errorImage = 'assets/images/error-placeholder2-min.png';
+  public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
+  public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
+  public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
 
   private onDestroy: Subject<void> = new Subject();
 
@@ -25,9 +26,11 @@ export class ImageService implements OnDestroy {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
       }
     });
 
@@ -91,12 +94,20 @@ export class ImageService implements OnDestroy {
     return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}`;
   }
 
+  getWebLinkImage(url: string) {
+    return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey}`;
+  }
+
   getCoverUploadImage(filename: string) {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }
 
   updateErroredImage(event: any) {
     event.target.src = this.placeholderImage;
+  }
+
+  updateErroredWebLinkImage(event: any) {
+    event.target.src = this.errorWebLinkImage;
   }
 
   /**

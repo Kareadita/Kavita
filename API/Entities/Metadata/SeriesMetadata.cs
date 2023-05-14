@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
@@ -43,6 +44,11 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     public int MaxCount { get; set; } = 0;
     public PublicationStatus PublicationStatus { get; set; }
+    /// <summary>
+    /// A Comma-separated list of strings representing links from the series
+    /// </summary>
+    /// <remarks>This is not populated from Chapters of the Series</remarks>
+    public string WebLinks { get; set; } = string.Empty;
 
     // Locks
     public bool LanguageLocked { get; set; }

@@ -55,12 +55,8 @@ export class ServerService {
     return this.httpClient.get<Job[]>(this.baseUrl + 'server/jobs');
   }
 
-  convertBookmarks() {
-    return this.httpClient.post(this.baseUrl + 'server/convert-bookmarks', {});
-  }
-
-  convertCovers() {
-    return this.httpClient.post(this.baseUrl + 'server/convert-covers', {});
+  convertMedia() {
+    return this.httpClient.post(this.baseUrl + 'server/convert-media', {});
   }
 
   getMediaErrors() {

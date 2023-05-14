@@ -11,6 +11,7 @@ using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.Services.Tasks.Scanner.Parser;
 using Docnet.Core;
 using Docnet.Core.Converters;
@@ -21,6 +22,7 @@ using HtmlAgilityPack;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using Nager.ArticleNumber;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VersOne.Epub;
@@ -32,7 +34,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat);
     ComicInfo? GetComicInfo(string filePath);
     ParserInfo? ParseInfo(string filePath);
     /// <summary>
@@ -432,6 +434,19 @@ public class BookService : IBookService
                 LanguageISO = ValidateLanguage(epubBook.Schema.Package.Metadata.Languages.FirstOrDefault())
             };
             ComicInfo.CleanComicInfo(info);
+
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => id.Scheme.Equals("ISBN")))
+            {
+                if (string.IsNullOrEmpty(identifier.Identifier)) continue;
+                var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
+                if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                {
+                    _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+                    continue;
+                }
+                info.Isbn = isbn;
+                break;
+            }
 
             // Parse tags not exposed via Library
             foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
@@ -1052,15 +1067,15 @@ public class BookService : IBookService
     /// <param name="fileFilePath"></param>
     /// <param name="fileName">Name of the new file.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
+    /// <param name="encodeFormat">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
         if (Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, saveAsWebP);
+            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat);
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
@@ -1075,7 +1090,7 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
         }
         catch (Exception ex)
         {
@@ -1088,7 +1103,7 @@ public class BookService : IBookService
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, bool saveAsWebP)
+    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         try
         {
@@ -1098,7 +1113,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
 
         }
         catch (Exception ex)

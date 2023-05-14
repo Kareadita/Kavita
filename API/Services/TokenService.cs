@@ -49,13 +49,12 @@ public class TokenService : ITokenService
 
         claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
-        var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
-
+        var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(14),
-            SigningCredentials = creds
+            SigningCredentials = credentials
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -78,9 +77,9 @@ public class TokenService : ITokenService
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenContent = tokenHandler.ReadJwtToken(request.Token);
-            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.NameId)?.Value;
+            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
             if (string.IsNullOrEmpty(username)) return null;
-            var user = await _userManager.FindByIdAsync(username);
+            var user = await _userManager.FindByNameAsync(username);
             if (user == null) return null; // This forces a logout
             var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
             if (!validated) return null;
@@ -91,12 +90,12 @@ public class TokenService : ITokenService
                 Token = await CreateToken(user),
                 RefreshToken = await CreateRefreshToken(user)
             };
-        } catch (SecurityTokenExpiredException)
+        } catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
             return null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Handle other exceptions
             return null;

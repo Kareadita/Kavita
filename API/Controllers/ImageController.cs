@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -20,12 +21,14 @@ public class ImageController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
+    private readonly IImageService _imageService;
 
     /// <inheritdoc />
-    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService)
+    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
+        _imageService = imageService;
     }
 
     /// <summary>
@@ -152,6 +155,42 @@ public class ImageController : BaseApiController
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
         var file = new FileInfo(Path.Join(bookmarkDirectory, bookmark.FileName));
+        var format = Path.GetExtension(file.FullName);
+
+        return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
+    }
+
+    /// <summary>
+    /// Returns the image associated with a web-link
+    /// </summary>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
+    [HttpGet("web-link")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = new []{"url", "apiKey"})]
+    public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
+        if (string.IsNullOrEmpty(url)) return BadRequest("Url cannot be null");
+        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+
+        // Check if the domain exists
+        var domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
+        if (!_directoryService.FileSystem.File.Exists(domainFilePath))
+        {
+            // We need to request the favicon and save it
+            try
+            {
+                domainFilePath = _directoryService.FileSystem.Path.Join(_directoryService.FaviconDirectory,
+                    await _imageService.DownloadFaviconAsync(url, encodeFormat));
+            }
+            catch (Exception)
+            {
+                return BadRequest("There was an issue fetching favicon for domain");
+            }
+        }
+
+        var file = new FileInfo(domainFilePath);
         var format = Path.GetExtension(file.FullName);
 
         return PhysicalFile(file.FullName, MimeTypeMap.GetMimeType(format), Path.GetFileName(file.FullName));
