@@ -221,7 +221,7 @@ public class ImageService : IImageService
             var pngLinks = htmlDocument.DocumentNode.Descendants("link")
                 .Where(link => ValidIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
                 .Select(link => link.GetAttributeValue("href", string.Empty))
-                .Where(href => href.EndsWith(".png") || href.EndsWith(".PNG"))
+                .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
             if (pngLinks == null)

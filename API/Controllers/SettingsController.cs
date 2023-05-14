@@ -214,7 +214,14 @@ public class SettingsController : BaseApiController
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
-                Configuration.BaseUrl = updateSettingsDto.BaseUrl;
+                try
+                {
+                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Could not set base url. Give this exception to majora2007");
+                }
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
