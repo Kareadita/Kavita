@@ -197,6 +197,7 @@ public class MangaParserTests
     [InlineData("Esquire 6권 2021년 10월호", "Esquire")]
     [InlineData("Accel World: Vol 1", "Accel World")]
     [InlineData("Accel World Chapter 001 Volume 002", "Accel World")]
+    [InlineData("Bleach 001-003", "Bleach")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseSeries(filename));
@@ -281,6 +282,7 @@ public class MangaParserTests
     [InlineData("Манга 2 Глава", "2")]
     [InlineData("Манга Том 1 2 Глава", "2")]
     [InlineData("Accel World Chapter 001 Volume 002", "1")]
+    [InlineData("Bleach 001-003", "1-3")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, API.Services.Tasks.Scanner.Parser.Parser.ParseChapter(filename));

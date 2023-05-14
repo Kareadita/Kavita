@@ -55,6 +55,7 @@ export class DownloadService {
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
   public activeDownloads$ = this.downloadsSource.asObservable();
 
+
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService, 
     @Inject(SAVER) private save: Saver, private accountService: AccountService) { }
 
@@ -159,7 +160,7 @@ export class DownloadService {
     ).pipe(
       throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
       download((blob, filename) => {
-        this.save(blob, filename);
+        this.save(blob, decodeURIComponent(filename));
       }),
       tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
       finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -174,7 +175,7 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
               download((blob, filename) => {
-                this.save(blob, filename);
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -213,7 +214,7 @@ export class DownloadService {
         ).pipe(
           throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
           download((blob, filename) => {
-            this.save(blob, filename);
+            this.save(blob, decodeURIComponent(filename));
           }),
           tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
           finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -228,7 +229,7 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
               download((blob, filename) => {
-                this.save(blob, filename);
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))
@@ -248,7 +249,7 @@ export class DownloadService {
             ).pipe(
               throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
               download((blob, filename) => {
-                this.save(blob, filename);
+                this.save(blob, decodeURIComponent(filename));
               }),
               tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
               finalize(() => this.finalizeDownloadState(downloadType, subtitle))

@@ -90,12 +90,12 @@ public class TokenService : ITokenService
                 Token = await CreateToken(user),
                 RefreshToken = await CreateRefreshToken(user)
             };
-        } catch (SecurityTokenExpiredException)
+        } catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
             return null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Handle other exceptions
             return null;

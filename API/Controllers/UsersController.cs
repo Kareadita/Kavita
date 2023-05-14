@@ -33,6 +33,9 @@ public class UsersController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(username);
         _unitOfWork.UserRepository.Delete(user);
 
+        //(TODO: After updating a role or removing a user, delete their token)
+        // await _userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
+
         if (await _unitOfWork.CommitAsync()) return Ok();
 
         return BadRequest("Could not delete the user.");

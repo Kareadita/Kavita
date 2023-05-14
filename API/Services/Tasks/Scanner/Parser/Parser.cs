@@ -321,13 +321,9 @@ public static class Parser
         new Regex(
             @"(?<Series>.*)( ?- ?)Ch\.\d+-?\d*",
             MatchOptions, RegexTimeout),
-        // [BAA]_Darker_than_Black_Omake-1.zip
+        // [BAA]_Darker_than_Black_Omake-1, Bleach 001-002, Kodoja #001 (March 2016)
         new Regex(
-            @"^(?!Vol)(?<Series>.*)(-)\d+-?\d*", // This catches a lot of stuff ^(?!Vol)(?<Series>.*)( |_)(\d+)
-            MatchOptions, RegexTimeout),
-        // Kodoja #001 (March 2016)
-        new Regex(
-            @"(?<Series>.*)(\s|_|-)#",
+            @"^(?!Vol)(?!Chapter)(?<Series>.+?)(-|_|\s|#)\d+(-\d+)?",
             MatchOptions, RegexTimeout),
         // Baketeriya ch01-05.zip, Akiiro Bousou Biyori - 01.jpg, Beelzebub_172_RHS.zip, Cynthia the Mission 29.rar, A Compendium of Ghosts - 031 - The Third Story_ Part 12 (Digital) (Cobalt001)
         new Regex(

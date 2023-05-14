@@ -150,7 +150,8 @@ public class ServerController : BaseApiController
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip", Path.GetFileName(zipPath), true);
+            return PhysicalFile(zipPath, "application/zip",
+                System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
         {
