@@ -5,6 +5,7 @@ namespace API.DTOs.Settings;
 
 public class ServerSettingDto
 {
+
     public string CacheDirectory { get; set; } = default!;
     public string TaskScan { get; set; } = default!;
     /// <summary>
