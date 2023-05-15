@@ -435,7 +435,7 @@ public class BookService : IBookService
             };
             ComicInfo.CleanComicInfo(info);
 
-            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => id.Scheme.Equals("ISBN")))
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => !string.IsNullOrEmpty(id.Scheme) && id.Scheme.Equals("ISBN")))
             {
                 if (string.IsNullOrEmpty(identifier.Identifier)) continue;
                 var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
