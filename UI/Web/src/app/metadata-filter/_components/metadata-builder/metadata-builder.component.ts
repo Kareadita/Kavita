@@ -17,6 +17,8 @@ export class MetadataBuilderComponent implements OnInit {
   @Input() parentGroup!: FilterGroup;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 
+  groupPreset: 'and' | 'or' = 'or';
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
@@ -40,7 +42,7 @@ export class MetadataBuilderComponent implements OnInit {
           sortField: SortField.SortName
         }
       };
-      //this.update.emit(dto); // Do I need this here? 
+      //this.update.emit(dto); // Do I need this here?
     }
 
     this.filterGroup.id = 'root';
@@ -48,8 +50,25 @@ export class MetadataBuilderComponent implements OnInit {
     console.log('Group: ', this.filterGroup);
   }
 
+  updateFilterGrouping(event: {group: 'and' | 'or', filterGroup: FilterGroup}) {
+    const group = event.group;
+    const filterGroup = event.filterGroup;
+    if (group === 'and') {
+      console.log('removing group from or -> and')
+      this.filterGroup.or = this.parentGroup.or.filter(g => g !== filterGroup);
+      this.filterGroup.and.push(filterGroup);
+    } else if (group === 'or'){
+      console.log('removing group from and -> or')
+      this.filterGroup.and = this.parentGroup.and.filter(g => g !== filterGroup);
+      this.filterGroup.or.push(filterGroup);
+    }
+
+    this.groupPreset = group;
+    this.cdRef.markForCheck();
+  }
+
   updateFilterGroup(group: FilterGroup) {
-    //console.log('[builder] filter group update: ', group);
+    console.log('[builder] filter group update: ', group);
 
     const dto: SeriesFilterV2 = {
       groups: [group],
@@ -61,7 +80,6 @@ export class MetadataBuilderComponent implements OnInit {
     };
 
     this.update.emit(dto);
-    
   }
 
 }

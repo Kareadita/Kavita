@@ -18,7 +18,7 @@ enum PredicateType {
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary];
 const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
-const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating, 
+const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
     FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
@@ -60,17 +60,17 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
     'filterValue': new FormControl<string | number>('', []),
   });
-  validComprisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
+  validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   dropdownOptions$ = of<{value: number, title: string}[]>([]);
   allFields = allFields;
 
   private onDestroy: Subject<void> = new Subject();
-  
+
 
   get PredicateType() { return PredicateType };
 
-  constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService, 
+  constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService,
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
@@ -104,7 +104,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
       });
-      
+
     });
   }
 
@@ -185,26 +185,26 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
     const inputVal = parseInt(val, 10) as FilterField;
 
     if (StringFields.includes(inputVal)) {
-      this.validComprisons$.next(StringComparisons);
+      this.validComparisons$.next(StringComparisons);
 
       this.predicateType$.next(PredicateType.Text);
       this.formGroup.get('filterValue')?.setValue('');
       return;
-    } 
+    }
 
     if (NumberFields.includes(inputVal)) {
       let comps = NumberComparisons;
       if (inputVal === FilterField.ReleaseYear) {
         comps.push(...DateComparisons);
       }
-      this.validComprisons$.next(comps);
+      this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
       this.formGroup.get('filterValue')?.setValue('');
       return;
     }
 
     if (DropdownFields.includes(inputVal)) {
-      this.validComprisons$.next(DropdownComparisons);
+      this.validComparisons$.next(DropdownComparisons);
       this.predicateType$.next(PredicateType.Dropdown);
     }
   }

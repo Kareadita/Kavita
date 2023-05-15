@@ -21,6 +21,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   @Input() nestedLevel: number = 0;
 
   @Output() filterGroupUpdate = new EventEmitter<FilterGroup>();
+  @Output() filterGroupingUpdate = new EventEmitter<{group: 'and' | 'or', filterGroup: FilterGroup}>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
@@ -40,31 +41,33 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('setup group', this.filterGroup.id)
     this.formGroup.get('comparison')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-      // When comparison changes, we need to perform a swap of and/or (is this right or does parent need to do it? ) 
+      // When comparison changes, we need to perform a swap of and/or (is this right or does parent need to do it? )
       if (this.parentGroup == undefined) return;
-      //console.log('parentGroup: ', this.parentGroup);
-      //console.log('this: ', this.filterGroup);
-      
-      if (val === 'and') {
-        console.log('removing group from or -> and')
-        this.parentGroup.or = this.parentGroup.or.filter(g => g !== this.filterGroup);
-        this.parentGroup.and.push(this.filterGroup);
-      } else {
-        console.log('removing group from and -> or')
-        this.parentGroup.and = this.parentGroup.and.filter(g => g !== this.filterGroup);
-        this.parentGroup.or.push(this.filterGroup);
-      }
+      console.log('comparison: ', this.formGroup.get('comparison')?.value)
+      this.filterGroupingUpdate.emit(val);
 
-      console.log('updated parent: ', this.parentGroup);
-      console.log('comparsion: ', this.formGroup.get('comparison')?.value)
+      // if (val === 'and') {
+      //   console.log('removing group from or -> and')
+      //   this.parentGroup.or = this.parentGroup.or.filter(g => g !== this.filterGroup);
+      //   this.parentGroup.and.push(this.filterGroup);
+      // } else if (val === 'or'){
+      //   console.log('removing group from and -> or')
+      //   this.parentGroup.and = this.parentGroup.and.filter(g => g !== this.filterGroup);
+      //   this.parentGroup.or.push(this.filterGroup);
+      // }
+      //
+      // // The reason the UI doesn't update is that we are swapping the parent, hence the whole component is destroyed.
+      // console.log('updated parent: ', this.parentGroup);
+
+      this.cdRef.detectChanges();
     });
   }
-  
+
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
   }
-  
+
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
       action.callback(action, null);

@@ -8,10 +8,10 @@
                 </select>
             </ng-container>
         </div>
-        
+
         <div class="col-md-2 me-2">
             <select class="col-auto form-select" formControlName="comparison">
-                <option *ngFor="let comparison of validComprisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
+                <option *ngFor="let comparison of validComparisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
         </div>
 
