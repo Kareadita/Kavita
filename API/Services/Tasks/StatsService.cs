@@ -119,7 +119,7 @@ public class StatsService : IStatsService
             Os = RuntimeInformation.OSDescription,
             KavitaVersion = serverSettings.InstallVersion,
             DotnetVersion = Environment.Version.ToString(),
-            IsDocker = new OsInfo().IsDocker,
+            IsDocker = OsInfo.IsDocker,
             NumOfCores = Math.Max(Environment.ProcessorCount, 1),
             UsersWithEmulateComicBook = await _context.AppUserPreferences.CountAsync(p => p.EmulateBook),
             TotalReadingHours = await _statisticService.TimeSpentReadingForUsersAsync(ArraySegment<int>.Empty, ArraySegment<int>.Empty),
