@@ -855,7 +855,7 @@ public class BookService : IBookService
     /// <param name="mappings"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    private static string CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string key)
     {
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
@@ -865,6 +865,19 @@ public class BookService : IBookService
         {
             key = correctedKey;
         }
+
+        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile.FileName);
+        if (mappings.TryGetValue(key, out _))
+        {
+            return key;
+        }
+
+        var modifiedKey = RemovePathSegments(key, stepsBack);
+        if (mappings.TryGetValue(modifiedKey, out _))
+        {
+            return modifiedKey;
+        }
+
 
         return key;
     }
@@ -904,7 +917,7 @@ public class BookService : IBookService
         {
             if (navigationItem.NestedItems.Count == 0)
             {
-                CreateToCChapter(navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
+                CreateToCChapter(book, navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
                 continue;
             }
 
@@ -912,10 +925,8 @@ public class BookService : IBookService
 
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
-                //if (book.Content.NavigationHtmlFile.FileName.Contains(".."))
-                var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile.FileName);
                 var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
-                if (mappings.TryGetValue(key, out var mapping) || mappings.TryGetValue(RemovePathSegments(key, stepsBack), out mapping))
+                if (mappings.TryGetValue(key, out var mapping))
                 {
                     nestedChapters.Add(new BookChapterItem
                     {
@@ -927,7 +938,7 @@ public class BookService : IBookService
                 }
             }
 
-            CreateToCChapter(navigationItem, nestedChapters, chaptersList, mappings);
+            CreateToCChapter(book, navigationItem, nestedChapters, chaptersList, mappings);
         }
 
         if (chaptersList.Count != 0) return chaptersList;
@@ -1062,7 +1073,7 @@ public class BookService : IBookService
         throw new KavitaException("Could not find the appropriate html for that page");
     }
 
-    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+    private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
         ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
     {
         if (navigationItem.Link == null)
@@ -1081,7 +1092,7 @@ public class BookService : IBookService
         }
         else
         {
-            var groupKey = CleanContentKeys(navigationItem.Link.ContentFileName);
+            var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFileName);
             if (mappings.ContainsKey(groupKey))
             {
                 chaptersList.Add(new BookChapterItem
