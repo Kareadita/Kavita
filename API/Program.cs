@@ -165,16 +165,16 @@ public class Program
 
                 var env = hostingContext.HostingEnvironment;
 
-                config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
+                config.AddJsonFile("config/appsettings.json", optional: false, reloadOnChange: false)
                     .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
-                        optional: true, reloadOnChange: false);
+                        optional: false, reloadOnChange: false);
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
+                    if (new OsInfo().IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }
@@ -195,9 +195,6 @@ public class Program
                     }
                 });
 
-                    webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
             });
-
-
-
 }

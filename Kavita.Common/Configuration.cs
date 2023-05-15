@@ -10,6 +10,7 @@ public static class Configuration
 {
     public const string DefaultIpAddresses = "0.0.0.0,::";
     public const string DefaultBaseUrl = "/";
+    public const int DefaultHttpPort = 5000;
     public const string DefaultXFrameOptions = "SAMEORIGIN";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
@@ -307,7 +308,7 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public int Port { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string IpAddresses { get; set; }
+        public string IpAddresses { get; set; } = string.Empty;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string BaseUrl { get; set; }
     }
