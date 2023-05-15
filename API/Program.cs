@@ -195,9 +195,6 @@ public class Program
                     }
                 });
 
-                    webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
             });
-
-
-
 }

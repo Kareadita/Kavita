@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Account;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -29,14 +30,16 @@ public class TokenService : ITokenService
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly ILogger<TokenService> _logger;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly SymmetricSecurityKey _key;
     private const string RefreshTokenName = "RefreshToken";
 
-    public TokenService(IConfiguration config, UserManager<AppUser> userManager, ILogger<TokenService> logger)
+    public TokenService(IConfiguration config, UserManager<AppUser> userManager, ILogger<TokenService> logger, IUnitOfWork unitOfWork)
     {
 
         _userManager = userManager;
         _logger = logger;
+        _unitOfWork = unitOfWork;
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty));
     }
 
@@ -82,22 +85,26 @@ public class TokenService : ITokenService
             var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
             if (string.IsNullOrEmpty(username))
             {
-                _logger.LogDebug("[RefreshToken] Rejected as username was empty");
+                _logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
                 return null;
             }
             var user = await _userManager.FindByNameAsync(username);
             if (user == null)
             {
-                _logger.LogDebug("[RefreshToken] Rejected as user no longer exists");
+                _logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
                 return null;
             }
+
             var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
             if (!validated)
             {
-                _logger.LogDebug("[RefreshToken] Rejected as user token invalid");
+
+                _logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
                 return null;
             }
-            await _userManager.UpdateSecurityStampAsync(user);
+
+            user.UpdateLastActive();
+            await _unitOfWork.CommitAsync();
 
             return new TokenRequestDto()
             {
@@ -107,11 +114,13 @@ public class TokenService : ITokenService
         } catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
+            _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
         catch (Exception ex)
         {
             // Handle other exceptions
+            _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
     }

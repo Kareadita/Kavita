@@ -435,7 +435,7 @@ public class BookService : IBookService
             };
             ComicInfo.CleanComicInfo(info);
 
-            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => id.Scheme.Equals("ISBN")))
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => !string.IsNullOrEmpty(id.Scheme) && id.Scheme.Equals("ISBN")))
             {
                 if (string.IsNullOrEmpty(identifier.Identifier)) continue;
                 var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
@@ -494,7 +494,7 @@ public class BookService : IBookService
                         break;
                     case "title-type":
                         break;
-                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes
+                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes (3.3 update)
                         if (!metadataItem.Content.Equals("collection")) break;
                         var titleId = metadataItem.Refines.Replace("#", string.Empty);
                         var readingListElem = epubBook.Schema.Package.Metadata.MetaItems.FirstOrDefault(item =>
@@ -855,7 +855,7 @@ public class BookService : IBookService
     /// <param name="mappings"></param>
     /// <param name="key"></param>
     /// <returns></returns>
-    private static string CoalesceKey(EpubBookRef book, IDictionary<string, int> mappings, string key)
+    private static string CoalesceKey(EpubBookRef book, IReadOnlyDictionary<string, int> mappings, string key)
     {
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
@@ -865,6 +865,19 @@ public class BookService : IBookService
         {
             key = correctedKey;
         }
+
+        var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile.FileName);
+        if (mappings.TryGetValue(key, out _))
+        {
+            return key;
+        }
+
+        var modifiedKey = RemovePathSegments(key, stepsBack);
+        if (mappings.TryGetValue(modifiedKey, out _))
+        {
+            return modifiedKey;
+        }
+
 
         return key;
     }
@@ -904,7 +917,7 @@ public class BookService : IBookService
         {
             if (navigationItem.NestedItems.Count == 0)
             {
-                CreateToCChapter(navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
+                CreateToCChapter(book, navigationItem, Array.Empty<BookChapterItem>(), chaptersList, mappings);
                 continue;
             }
 
@@ -913,19 +926,19 @@ public class BookService : IBookService
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
                 var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
-                if (mappings.ContainsKey(key))
+                if (mappings.TryGetValue(key, out var mapping))
                 {
                     nestedChapters.Add(new BookChapterItem
                     {
                         Title = nestedChapter.Title,
-                        Page = mappings[key],
+                        Page = mapping,
                         Part = nestedChapter.Link.Anchor ?? string.Empty,
                         Children = new List<BookChapterItem>()
                     });
                 }
             }
 
-            CreateToCChapter(navigationItem, nestedChapters, chaptersList, mappings);
+            CreateToCChapter(book, navigationItem, nestedChapters, chaptersList, mappings);
         }
 
         if (chaptersList.Count != 0) return chaptersList;
@@ -962,6 +975,38 @@ public class BookService : IBookService
         }
 
         return chaptersList;
+    }
+
+    private static int CountParentDirectory(string path)
+    {
+        const string pattern = @"\.\./";
+        var matches = Regex.Matches(path, pattern);
+
+        return matches.Count;
+    }
+
+    /// <summary>
+    /// Removes paths segments from the beginning of a path. Returns original path if any issues.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="segmentsToRemove"></param>
+    /// <returns></returns>
+    private static string RemovePathSegments(string path, int segmentsToRemove)
+    {
+        if (segmentsToRemove <= 0)
+            return path;
+
+        var startIndex = 0;
+        for (var i = 0; i < segmentsToRemove; i++)
+        {
+            var slashIndex = path.IndexOf('/', startIndex);
+            if (slashIndex == -1)
+                return path; // Not enough segments to remove
+
+            startIndex = slashIndex + 1;
+        }
+
+        return path.Substring(startIndex);
     }
 
     /// <summary>
@@ -1028,7 +1073,7 @@ public class BookService : IBookService
         throw new KavitaException("Could not find the appropriate html for that page");
     }
 
-    private static void CreateToCChapter(EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
+    private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
         ICollection<BookChapterItem> chaptersList, IReadOnlyDictionary<string, int> mappings)
     {
         if (navigationItem.Link == null)
@@ -1047,7 +1092,7 @@ public class BookService : IBookService
         }
         else
         {
-            var groupKey = CleanContentKeys(navigationItem.Link.ContentFileName);
+            var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFileName);
             if (mappings.ContainsKey(groupKey))
             {
                 chaptersList.Add(new BookChapterItem

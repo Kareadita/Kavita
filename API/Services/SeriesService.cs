@@ -98,10 +98,10 @@ public class SeriesService : ISeriesService
             }
 
             // This shouldn't be needed post v0.5.3 release
-            if (string.IsNullOrEmpty(series.Metadata.Summary))
-            {
-                series.Metadata.Summary = string.Empty;
-            }
+            // if (string.IsNullOrEmpty(series.Metadata.Summary))
+            // {
+            //     series.Metadata.Summary = string.Empty;
+            // }
 
             if (string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata.Summary))
             {
@@ -120,7 +120,10 @@ public class SeriesService : ISeriesService
                 series.Metadata.LanguageLocked = true;
             }
 
-            if (!string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata?.WebLinks))
+            if (string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata?.WebLinks))
+            {
+                series.Metadata.WebLinks = string.Empty;
+            } else
             {
                 series.Metadata.WebLinks = string.Join(",", updateSeriesMetadataDto.SeriesMetadata?.WebLinks
                     .Split(",")

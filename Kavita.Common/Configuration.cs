@@ -10,6 +10,7 @@ public static class Configuration
 {
     public const string DefaultIpAddresses = "0.0.0.0,::";
     public const string DefaultBaseUrl = "/";
+    public const int DefaultHttpPort = 5000;
     public const string DefaultXFrameOptions = "SAMEORIGIN";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
