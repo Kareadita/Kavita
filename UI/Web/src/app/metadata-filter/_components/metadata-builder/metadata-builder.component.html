@@ -1,7 +1,12 @@
 
 <ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
     <div class="container-fluid">
-        <app-metadata-filter-row-group [groupPreset]="groupPreset" [filterGroup]="filterGroup" (filterGroupUpdate)="updateFilterGroup($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>
+        <app-metadata-filter-row-group 
+            [groupPreset]="groupPreset" 
+            [filterGroup]="filterGroup" 
+            (filterGroupUpdate)="updateFilterGroup($event)" 
+            (filterGroupingUpdate)="updateFilterGrouping($event)">
+        </app-metadata-filter-row-group>
     </div>
 </ng-container>
 

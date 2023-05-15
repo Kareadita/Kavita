@@ -3,7 +3,7 @@
         <div class="col-md-2">
             <select class="form-select" formControlName="comparison">
                 <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
-            </select>{{formGroup.get('comparison')?.value}}
+            </select>
         </div>
 
         <div class="col-md-2">

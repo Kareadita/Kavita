@@ -51,19 +51,21 @@ export class MetadataBuilderComponent implements OnInit {
   }
 
   updateFilterGrouping(event: {group: 'and' | 'or', filterGroup: FilterGroup}) {
+    console.log('[updateFilterGroup] event: ', event);
     const group = event.group;
-    const filterGroup = event.filterGroup;
+    const nestedGroup = event.filterGroup;
     if (group === 'and') {
       console.log('removing group from or -> and')
-      this.filterGroup.or = this.parentGroup.or.filter(g => g !== filterGroup);
-      this.filterGroup.and.push(filterGroup);
+      this.filterGroup.or = this.filterGroup.or.filter(g => g !== nestedGroup);
+      this.filterGroup.and.push(nestedGroup);
     } else if (group === 'or'){
       console.log('removing group from and -> or')
-      this.filterGroup.and = this.parentGroup.and.filter(g => g !== filterGroup);
-      this.filterGroup.or.push(filterGroup);
+      this.filterGroup.and = this.filterGroup.and.filter(g => g !== nestedGroup);
+      this.filterGroup.or.push(nestedGroup);
     }
 
     this.groupPreset = group;
+    console.log('updated filterGroup: ', this.filterGroup);
     this.cdRef.markForCheck();
   }
 

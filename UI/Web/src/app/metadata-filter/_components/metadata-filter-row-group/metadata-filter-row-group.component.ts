@@ -41,24 +41,9 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('setup group', this.filterGroup.id)
     this.formGroup.get('comparison')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
-      // When comparison changes, we need to perform a swap of and/or (is this right or does parent need to do it? )
-      if (this.parentGroup == undefined) return;
-      console.log('comparison: ', this.formGroup.get('comparison')?.value)
-      this.filterGroupingUpdate.emit(val);
-
-      // if (val === 'and') {
-      //   console.log('removing group from or -> and')
-      //   this.parentGroup.or = this.parentGroup.or.filter(g => g !== this.filterGroup);
-      //   this.parentGroup.and.push(this.filterGroup);
-      // } else if (val === 'or'){
-      //   console.log('removing group from and -> or')
-      //   this.parentGroup.and = this.parentGroup.and.filter(g => g !== this.filterGroup);
-      //   this.parentGroup.or.push(this.filterGroup);
-      // }
-      //
-      // // The reason the UI doesn't update is that we are swapping the parent, hence the whole component is destroyed.
-      // console.log('updated parent: ', this.parentGroup);
-
+      //if (this.parentGroup == undefined) return;
+      console.log('comparison change')
+      this.filterGroupingUpdate.emit({group: val, filterGroup: this.filterGroup});
       this.cdRef.detectChanges();
     });
   }
