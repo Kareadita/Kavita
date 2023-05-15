@@ -165,9 +165,9 @@ public class Program
 
                 var env = hostingContext.HostingEnvironment;
 
-                config.AddJsonFile("config/appsettings.json", optional: false, reloadOnChange: false)
+                config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
                     .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
-                        optional: false, reloadOnChange: false);
+                        optional: true, reloadOnChange: false);
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
