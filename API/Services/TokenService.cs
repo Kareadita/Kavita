@@ -108,11 +108,13 @@ public class TokenService : ITokenService
         } catch (SecurityTokenExpiredException ex)
         {
             // Handle expired token
+            _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
         catch (Exception ex)
         {
             // Handle other exceptions
+            _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
     }
