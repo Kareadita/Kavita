@@ -9,6 +9,7 @@ using API.DTOs.Account;
 using API.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using static System.Security.Claims.ClaimTypes;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
@@ -27,13 +28,15 @@ public interface ITokenService
 public class TokenService : ITokenService
 {
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<TokenService> _logger;
     private readonly SymmetricSecurityKey _key;
     private const string RefreshTokenName = "RefreshToken";
 
-    public TokenService(IConfiguration config, UserManager<AppUser> userManager)
+    public TokenService(IConfiguration config, UserManager<AppUser> userManager, ILogger<TokenService> logger)
     {
 
         _userManager = userManager;
+        _logger = logger;
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"] ?? string.Empty));
     }
 
@@ -46,7 +49,6 @@ public class TokenService : ITokenService
         };
 
         var roles = await _userManager.GetRolesAsync(user);
-
         claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -78,11 +80,23 @@ public class TokenService : ITokenService
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenContent = tokenHandler.ReadJwtToken(request.Token);
             var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
-            if (string.IsNullOrEmpty(username)) return null;
+            if (string.IsNullOrEmpty(username))
+            {
+                _logger.LogDebug("[RefreshToken] Rejected as username was empty");
+                return null;
+            }
             var user = await _userManager.FindByNameAsync(username);
-            if (user == null) return null; // This forces a logout
+            if (user == null)
+            {
+                _logger.LogDebug("[RefreshToken] Rejected as user no longer exists");
+                return null;
+            }
             var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
-            if (!validated) return null;
+            if (!validated)
+            {
+                _logger.LogDebug("[RefreshToken] Rejected as user token invalid");
+                return null;
+            }
             await _userManager.UpdateSecurityStampAsync(user);
 
             return new TokenRequestDto()

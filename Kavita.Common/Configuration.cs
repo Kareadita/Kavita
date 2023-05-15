@@ -307,7 +307,7 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public int Port { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string IpAddresses { get; set; } = DefaultIpAddresses;
+        public string IpAddresses { get; set; } = string.Empty;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string BaseUrl { get; set; } = DefaultBaseUrl;
     }
