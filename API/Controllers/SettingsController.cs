@@ -15,6 +15,7 @@ using API.Services.Tasks.Scanner;
 using AutoMapper;
 using Flurl.Http;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -183,6 +184,10 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
+                if (new OsInfo().IsDocker)
+                {
+                    break;
+                }
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
@@ -191,6 +196,10 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
+                if (new OsInfo().IsDocker)
+                {
+                    break;
+                }
                 // Validate IP addresses
                 foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
                 {

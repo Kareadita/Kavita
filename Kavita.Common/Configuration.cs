@@ -112,7 +112,7 @@ public static class Configuration
 
     private static void SetPort(string filePath, int port)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        if (new OsInfo().IsDocker)
         {
             return;
         }
@@ -134,7 +134,7 @@ public static class Configuration
     private static int GetPort(string filePath)
     {
         const int defaultPort = 5000;
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        if (new OsInfo().IsDocker)
         {
             return defaultPort;
         }
@@ -164,7 +164,7 @@ public static class Configuration
 
     private static void SetIpAddresses(string filePath, string ipAddresses)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        if (new OsInfo().IsDocker)
         {
             return;
         }
@@ -185,7 +185,7 @@ public static class Configuration
 
     private static string GetIpAddresses(string filePath)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        if (new OsInfo().IsDocker)
         {
             return string.Empty;
         }
@@ -275,7 +275,7 @@ public static class Configuration
     #region XFrameOrigins
     private static string GetXFrameOptions(string filePath)
     {
-        if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker)
+        if (new OsInfo().IsDocker)
         {
             return DefaultBaseUrl;
         }
@@ -307,8 +307,8 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public int Port { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string IpAddresses { get; set; }
+        public string IpAddresses { get; set; } = DefaultIpAddresses;
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string BaseUrl { get; set; }
+        public string BaseUrl { get; set; } = DefaultBaseUrl;
     }
 }

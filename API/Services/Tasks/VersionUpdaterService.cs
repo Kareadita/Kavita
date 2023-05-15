@@ -100,7 +100,7 @@ public class VersionUpdaterService : IVersionUpdaterService
             UpdateBody = _markdown.Transform(update.Body.Trim()),
             UpdateTitle = update.Name,
             UpdateUrl = update.Html_Url,
-            IsDocker = new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker,
+            IsDocker = new OsInfo().IsDocker,
             PublishDate = update.Published_At
         };
     }
