@@ -443,6 +443,9 @@ public class AccountController : BaseApiController
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
         }
 
+        // We might want to check if they had admin and no longer, if so:
+        // await _userManager.UpdateSecurityStampAsync(user); to force them to re-authenticate
+
 
         var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();
         List<Library> libraries;

@@ -494,7 +494,7 @@ public class BookService : IBookService
                         break;
                     case "title-type":
                         break;
-                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes
+                        // This is currently not possible until VersOne update's to allow EPUB 3 Title to have attributes (3.3 update)
                         if (!metadataItem.Content.Equals("collection")) break;
                         var titleId = metadataItem.Refines.Replace("#", string.Empty);
                         var readingListElem = epubBook.Schema.Package.Metadata.MetaItems.FirstOrDefault(item =>
