@@ -95,6 +95,7 @@ public class TokenService : ITokenService
             var validated = await _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, request.RefreshToken);
             if (!validated)
             {
+
                 _logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
                 return null;
             }

@@ -912,13 +912,15 @@ public class BookService : IBookService
 
             foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
             {
+                //if (book.Content.NavigationHtmlFile.FileName.Contains(".."))
+                var stepsBack = CountParentDirectory(book.Content.NavigationHtmlFile.FileName);
                 var key = CoalesceKey(book, mappings, nestedChapter.Link.ContentFileName);
-                if (mappings.ContainsKey(key))
+                if (mappings.TryGetValue(key, out var mapping) || mappings.TryGetValue(RemovePathSegments(key, stepsBack), out mapping))
                 {
                     nestedChapters.Add(new BookChapterItem
                     {
                         Title = nestedChapter.Title,
-                        Page = mappings[key],
+                        Page = mapping,
                         Part = nestedChapter.Link.Anchor ?? string.Empty,
                         Children = new List<BookChapterItem>()
                     });
@@ -962,6 +964,38 @@ public class BookService : IBookService
         }
 
         return chaptersList;
+    }
+
+    private static int CountParentDirectory(string path)
+    {
+        const string pattern = @"\.\./";
+        var matches = Regex.Matches(path, pattern);
+
+        return matches.Count;
+    }
+
+    /// <summary>
+    /// Removes paths segments from the beginning of a path. Returns original path if any issues.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="segmentsToRemove"></param>
+    /// <returns></returns>
+    private static string RemovePathSegments(string path, int segmentsToRemove)
+    {
+        if (segmentsToRemove <= 0)
+            return path;
+
+        var startIndex = 0;
+        for (var i = 0; i < segmentsToRemove; i++)
+        {
+            var slashIndex = path.IndexOf('/', startIndex);
+            if (slashIndex == -1)
+                return path; // Not enough segments to remove
+
+            startIndex = slashIndex + 1;
+        }
+
+        return path.Substring(startIndex);
     }
 
     /// <summary>
