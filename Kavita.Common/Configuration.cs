@@ -113,7 +113,7 @@ public static class Configuration
 
     private static void SetPort(string filePath, int port)
     {
-        if (new OsInfo().IsDocker)
+        if (OsInfo.IsDocker)
         {
             return;
         }
@@ -135,7 +135,7 @@ public static class Configuration
     private static int GetPort(string filePath)
     {
         const int defaultPort = 5000;
-        if (new OsInfo().IsDocker)
+        if (OsInfo.IsDocker)
         {
             return defaultPort;
         }
@@ -165,7 +165,7 @@ public static class Configuration
 
     private static void SetIpAddresses(string filePath, string ipAddresses)
     {
-        if (new OsInfo().IsDocker)
+        if (OsInfo.IsDocker)
         {
             return;
         }
@@ -186,7 +186,7 @@ public static class Configuration
 
     private static string GetIpAddresses(string filePath)
     {
-        if (new OsInfo().IsDocker)
+        if (OsInfo.IsDocker)
         {
             return string.Empty;
         }
@@ -276,7 +276,7 @@ public static class Configuration
     #region XFrameOrigins
     private static string GetXFrameOptions(string filePath)
     {
-        if (new OsInfo().IsDocker)
+        if (OsInfo.IsDocker)
         {
             return DefaultBaseUrl;
         }

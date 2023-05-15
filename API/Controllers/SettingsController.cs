@@ -184,7 +184,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
-                if (new OsInfo().IsDocker)
+                if (OsInfo.IsDocker)
                 {
                     break;
                 }
@@ -196,7 +196,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
-                if (new OsInfo().IsDocker)
+                if (OsInfo.IsDocker)
                 {
                     break;
                 }
