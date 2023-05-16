@@ -19,14 +19,14 @@
 <ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">
     <ng-container *ngFor="let andGroup of filterGroup.and">
         <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="andGroup" [groupPreset]="'and'"
-            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
+            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>
 
 <ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
     <ng-container *ngFor="let orGroup of filterGroup.or">
         <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="orGroup" [groupPreset]="'or'"
-            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)"></app-metadata-filter-row-group>
+            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>
     </ng-container>
 </ng-container>
 

@@ -7,6 +7,8 @@ import { Action, ActionFactoryService } from 'src/app/_services/action-factory.s
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 
+export type FilterGrouping = {group: 'and' | 'or', filterGroup: FilterGroup};
+
 @Component({
   selector: 'app-metadata-filter-row-group',
   templateUrl: './metadata-filter-row-group.component.html',
@@ -21,7 +23,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   @Input() nestedLevel: number = 0;
 
   @Output() filterGroupUpdate = new EventEmitter<FilterGroup>();
-  @Output() filterGroupingUpdate = new EventEmitter<{group: 'and' | 'or', filterGroup: FilterGroup}>();
+  @Output() filterGroupingUpdate = new EventEmitter<FilterGrouping>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
@@ -51,6 +53,11 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.onDestroy.next();
     this.onDestroy.complete();
+  }
+
+  updateFilterGrouping(event: FilterGrouping) {
+    this.filterGroupingUpdate.emit({group: event.group, filterGroup: event.filterGroup});
+    this.cdRef.detectChanges();
   }
 
   performAction(action: ActionItem<any>) {
