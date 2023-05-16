@@ -1,30 +1,38 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
-import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
-import { Library } from '../_models/library';
-import { Pagination } from '../_models/pagination';
-import { Series } from '../_models/series';
-import { FilterEvent, SeriesFilter, SortField } from '../_models/metadata/series-filter';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
-import { EVENTS, MessageHubService } from '../_services/message-hub.service';
-import { SeriesService } from '../_services/series.service';
-import { NavService } from '../_services/nav.service';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { FilterSettings } from '../metadata-filter/filter-settings';
-import { JumpKey } from '../_models/jumpbar/jump-key';
-import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
-import { FilterGroup } from '../_models/metadata/v2/filter-group';
-import { MetadataService } from '../_services/metadata.service';
-import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
-import { FilterField } from '../_models/metadata/v2/filter-field';
-import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {catchError, of, Subject, throwError} from 'rxjs';
+import {take, takeUntil} from 'rxjs/operators';
+import {BulkSelectionService} from '../cards/bulk-selection.service';
+import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
+import {SeriesAddedEvent} from '../_models/events/series-added-event';
+import {Library} from '../_models/library';
+import {Pagination} from '../_models/pagination';
+import {Series} from '../_models/series';
+import {FilterEvent, SeriesFilter, SortField} from '../_models/metadata/series-filter';
+import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {ActionService} from '../_services/action.service';
+import {LibraryService} from '../_services/library.service';
+import {EVENTS, MessageHubService} from '../_services/message-hub.service';
+import {SeriesService} from '../_services/series.service';
+import {NavService} from '../_services/nav.service';
+import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
+import {FilterSettings} from '../metadata-filter/filter-settings';
+import {JumpKey} from '../_models/jumpbar/jump-key';
+import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
+import {MetadataService} from '../_services/metadata.service';
+import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
+import {FilterField} from '../_models/metadata/v2/filter-field';
+import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
 
 @Component({
   selector: 'app-library-detail',
@@ -61,8 +69,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+    const selectedSeriesIndexes = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexes.includes(index + ''));
 
     switch (action.action) {
       case Action.AddToReadingList:
@@ -94,7 +102,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
           this.loadPage();
         });
-        
+
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
@@ -112,8 +120,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
-    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
+  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
+    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService,
     private readonly cdRef: ChangeDetectorRef) {
@@ -123,7 +131,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-
+    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
@@ -137,41 +145,79 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-    
+
+
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
 
-    if (!this.filterSettings.presetsV2) {
-        const group = this.metadataService.createDefaultFilterGroup();
-        const stmt = this.metadataService.createDefaultFilterStatement();
-        stmt.comparison = FilterComparison.Contains;
-        stmt.field = FilterField.Libraries;
-        stmt.value = this.libraryId + '';
-        group.id = 'or-1';
-        group.statements.push(stmt);
+    var filterName = this.route.snapshot.queryParamMap.get('filterName') || '';
+    if (filterName.trim() !== '') {
+      this.metadataService.getFilter(filterName)
+      //   .pipe(
+      //   catchError((err) => {
+      //
+      //   console.log('resume from error', err)
+      //
+      //
+      //   this.filterV2 = {
+      //     groups: [this.createRootGroup()],
+      //     limitTo: 0,
+      //     sortOptions: {
+      //       isAscending: true,
+      //       sortField: SortField.SortName
+      //     }
+      //   };
+      //   this.filterV2 = this.filterSettings.presetsV2;
+      //   this.filterActiveCheck = {...this.filterV2!};
+      //   // rewrite router
+      //   //window.history.replaceState(window.location.href, '', );
+      //   throwError(() => err);
+      // })
+      //   )
+        .subscribe((filter: SeriesFilterV2) => {
+          console.log('resume from filter setup')
 
-        const rootGroup = this.metadataService.createDefaultFilterGroup();
-        rootGroup.id = 'root';
-        rootGroup.or.push(group);
+          this.filterV2 = filter;
+          this.filterV2.groups[0].id = 'lib-1';
+          this.filterV2.groups[0].statements.push(this.metadataService.createDefaultFilterStatement(FilterField.Libraries, FilterComparison.Equal, this.libraryId + ''));
+          console.log(this.filterV2);
+          this.cdRef.markForCheck();
+        });
+    } else {
+      // default setup:
+      console.log('default setup')
 
-        this.filterSettings.presetsV2 = {
-          groups: [rootGroup],
-          limitTo: 0,
-          sortOptions: {
-            isAscending: true,
-            sortField: SortField.SortName
-          }
-        };
-        this.filterV2 = this.filterSettings.presetsV2;
+
+      this.filterSettings.presetsV2 = {
+        groups: [this.createRootGroup()],
+        limitTo: 0,
+        sortOptions: {
+          isAscending: true,
+          sortField: SortField.SortName
+        }
+      };
+      this.filterV2 = this.filterSettings.presetsV2;
+      this.filterActiveCheck = {...this.filterSettings.presetsV2};
     }
-
-    // Setup filterActiveCheck to check filter against
-    this.filterActiveCheck = {...this.filterSettings.presetsV2};
 
     this.filterSettings.libraryDisabled = true;
     this.cdRef.markForCheck();
+  }
+
+  createRootGroup() {
+    const group = this.metadataService.createDefaultFilterGroup();
+    const stmt = this.metadataService.createDefaultFilterStatement();
+    stmt.comparison = FilterComparison.Contains;
+    stmt.field = FilterField.Libraries;
+    stmt.value = this.libraryId + '';
+    group.id = 'or-1';
+    group.statements.push(stmt);
+
+    const rootGroup = this.metadataService.createDefaultFilterGroup();
+    rootGroup.id = 'root';
+    rootGroup.or.push(group);
+    return rootGroup;
   }
 
   ngOnInit(): void {
@@ -193,8 +239,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.cdRef.markForCheck();
           this.refresh.emit();
         });
-        
-        
+
+
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
@@ -225,7 +271,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           sortField: SortField.SortName
         }
       };
-      
+
       this.cdRef.markForCheck();
     }
   }
@@ -290,7 +336,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
 
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
-      this.series = series.result; 
+      this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;
       this.cdRef.markForCheck();

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import {finalize, of, ReplaySubject, switchMap} from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Genre } from '../_models/metadata/genre';
@@ -15,6 +15,9 @@ import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
 import { FilterField } from '../_models/metadata/v2/filter-field';
 import { FilterStatement } from '../_models/metadata/v2/filter-statement';
 import { FilterGroup } from '../_models/metadata/v2/filter-group';
+import {SiteTheme} from "../_models/preferences/site-theme";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {Router} from "@angular/router";
 
 @Injectable({
   providedIn: 'root'
@@ -23,10 +26,37 @@ export class MetadataService {
 
   baseUrl = environment.apiUrl;
 
+  private currentThemeSource = new ReplaySubject<SeriesFilterV2>(1);
+
   private ageRatingTypes: {[key: number]: string} | undefined = undefined;
   private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private router: Router) { }
+
+  applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
+    // First construct the DTO:
+    const group = this.createDefaultFilterGroup();
+    group.or = [this.createDefaultFilterGroup()];
+    group.or[0].statements = [this.createDefaultFilterStatement(filter, comparison, value + '')];
+
+    const dto: SeriesFilterV2 = {
+      groups: [group],
+      limitTo: 0,
+    }
+    // Creates a temp name for the filter
+    this.httpClient.post<string>(this.baseUrl + 'filter/create-temp', dto, TextResonse).pipe(map(name => {
+      dto.name = name;
+    }), switchMap((_) => {
+      let params: any = {};
+      params['filterName'] = dto.name;
+      return this.router.navigate(page, {queryParams: params});
+    })).subscribe();
+
+  }
+
+  getFilter(filterName: string) {
+    return this.httpClient.get<SeriesFilterV2>(this.baseUrl + 'filter?name=' + filterName);
+  }
 
   getAgeRating(ageRating: AgeRating) {
     if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {
@@ -112,11 +142,11 @@ export class MetadataService {
     };
   }
 
-  createDefaultFilterStatement() {
+  createDefaultFilterStatement(field: FilterField = FilterField.SeriesName, comparison = FilterComparison.Equal, value = '') {
     return {
-      comparison: FilterComparison.Equal,
-      field: FilterField.SeriesName,
-      value: ''
+      comparison: comparison,
+      field: field,
+      value: value
     };
   }
 
@@ -124,6 +154,6 @@ export class MetadataService {
     console.log('Filter at ', index, 'updated: ', filterStmt);
     arr[index].comparison = filterStmt.comparison;
     arr[index].field = filterStmt.field;
-    arr[index].value = filterStmt.value; 
+    arr[index].value = filterStmt.value;
   }
 }

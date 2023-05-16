@@ -69,6 +69,7 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory("favicon");
+            options.UseInMemory("filter");
         });
     }
 

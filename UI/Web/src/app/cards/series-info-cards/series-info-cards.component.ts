@@ -11,6 +11,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
+import {FilterField} from "../../_models/metadata/v2/filter-field";
 
 @Component({
   selector: 'app-series-info-cards',
@@ -28,7 +29,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
    * If this should make an API call to request readingTimeLeft
    */
   @Input() showReadingTimeLeft: boolean = true;
-  @Output() goTo: EventEmitter<{queryParamName: FilterQueryParam, filter: any}> = new EventEmitter();
+  @Output() goTo: EventEmitter<{queryParamName: FilterField, filter: any}> = new EventEmitter();
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
 
@@ -38,12 +39,12 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
     return MangaFormat;
   }
 
-  get FilterQueryParam() {
-    return FilterQueryParam;
+  get FilterField() {
+    return FilterField;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
-    private readerService: ReaderService, private readonly cdRef: ChangeDetectorRef, 
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
+    private readerService: ReaderService, private readonly cdRef: ChangeDetectorRef,
     private messageHub: MessageHubService, private accountService: AccountService) {
       // Listen for progress events and re-calculate getTimeLeft
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
@@ -78,7 +79,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
     this.onDestroy.complete();
   }
 
-  handleGoTo(queryParamName: FilterQueryParam, filter: any) {
+  handleGoTo(queryParamName: FilterField, filter: any) {
     this.goTo.emit({queryParamName, filter});
   }
 

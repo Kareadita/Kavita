@@ -1818,6 +1818,95 @@
         }
       }
     },
+    "/api/Filter": {
+      "get": {
+        "tags": [
+          "Filter"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Filter/create-temp": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Caches the filter in the backend and returns a temp string for retrieving.",
+        "description": "The cache line lives for only 1 hour",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Health": {
       "get": {
         "tags": [
@@ -15870,6 +15959,10 @@
     {
       "name": "Download",
       "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
     },
     {
       "name": "Image",
