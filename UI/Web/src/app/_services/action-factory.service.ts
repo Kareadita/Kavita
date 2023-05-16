@@ -178,7 +178,8 @@ export class ActionFactoryService {
 
   getMetadataFilterActions(callback: (action: ActionItem<any>, data: any) => void) {
     const actions = [
-      {title: 'Add Rule Group', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+      {title: 'Add Rule Group (AND)', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+      {title: 'Add Rule Group (OR)', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
       {title: 'Remove Rule Group', action: Action.RemoveRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
     ];
     return this.applyCallbackToList(actions, callback);

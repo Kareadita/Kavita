@@ -69,7 +69,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   handleAction(action: ActionItem<any>, data: any) {
     switch (action.action) {
       case(Action.AddRuleGroup):
-        this.addGroup();
+        this.addGroup(action.title === 'Add Rule Group (AND)' ? 'and' : 'or');
         break;
       case(Action.RemoveRuleGroup):
         this.removeGroup();
@@ -79,12 +79,14 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
     }
   }
 
-  addGroup() {
+  addGroup(groupType: 'and' | 'or') {
     const group = this.metadataService.createDefaultFilterGroup();
     group.statements.push(this.metadataService.createDefaultFilterStatement());
     group.id = this.formGroup.get('comparison')?.value + '-' + this.nestedLevel + 1;
 
-    if (this.formGroup.get('comparison')?.value === 'or') {
+
+    //if (this.formGroup.get('comparison')?.value === 'or') {
+    if (groupType === 'or') {
       this.filterGroup.or.push(group);
     } else {
       this.filterGroup.and.push(group);
@@ -93,7 +95,17 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
   removeGroup() {
     // I'll need some context here
-    console.log('trying to remove group', this.filterGroup)
+    if (!this.parentGroup || this.parentGroup.id === 'root') return;
+
+    console.log('trying to remove group:', this.filterGroup.id)
+    console.log('current group has comparison: ', this.groupPreset)
+
+    if (this.groupPreset === 'and') {
+      this.parentGroup.and = this.parentGroup.and.filter(f => f.id !== this.filterGroup.id);
+    } else {
+      this.parentGroup.or = this.parentGroup.or.filter(f => f.id !== this.filterGroup.id);
+    }
+    this.cdRef.markForCheck();
   }
 
   updateFilter(index: number, filterStmt: FilterStatement) {
