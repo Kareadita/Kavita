@@ -184,10 +184,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
-                if (OsInfo.IsDocker)
-                {
-                    break;
-                }
+                if (OsInfo.IsDocker) break;
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
@@ -196,10 +193,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
-                if (OsInfo.IsDocker)
-                {
-                    break;
-                }
+                if (OsInfo.IsDocker) break;
                 // Validate IP addresses
                 foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
                 {

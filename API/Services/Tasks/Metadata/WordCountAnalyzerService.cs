@@ -172,7 +172,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                         {
                             using var book = await EpubReader.OpenBookAsync(filePath, BookService.BookReaderOptions);
 
-                            var totalPages = book.Content.Html.Values;
+                            var totalPages = book.Content.Html.Local.Values;
                             foreach (var bookPage in totalPages)
                             {
                                 var progress = Math.Max(0F,
@@ -238,10 +238,10 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     }
 
 
-    private static async Task<int> GetWordCountFromHtml(EpubContentFileRef bookFile)
+    private static async Task<int> GetWordCountFromHtml(EpubLocalTextContentFileRef bookFile)
     {
         var doc = new HtmlDocument();
-        doc.LoadHtml(await bookFile.ReadContentAsTextAsync());
+        doc.LoadHtml(await bookFile.ReadContentAsync());
 
         var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
         if (textNodes == null) return 0;
