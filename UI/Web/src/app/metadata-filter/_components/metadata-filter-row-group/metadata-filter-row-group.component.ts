@@ -7,7 +7,12 @@ import { Action, ActionFactoryService } from 'src/app/_services/action-factory.s
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 
-export type FilterGrouping = {group: 'and' | 'or', filterGroup: FilterGroup};
+export enum ComparisonOption {
+  AND = 'and',
+  OR = 'or'
+}
+export type FilterGrouping = {group: ComparisonOption, filterGroup: FilterGroup};
+
 
 @Component({
   selector: 'app-metadata-filter-row-group',
@@ -19,7 +24,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
   @Input() parentGroup: FilterGroup | undefined;
   @Input() filterGroup!: FilterGroup;
-  @Input() groupPreset: 'and' | 'or' = 'or';
+  @Input() groupPreset: ComparisonOption = ComparisonOption.OR;
   @Input() nestedLevel: number = 0;
 
   @Output() filterGroupUpdate = new EventEmitter<FilterGroup>();
@@ -30,15 +35,17 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private onDestroy: Subject<void> = new Subject();
 
-  groupOptions: Array<{value: 'and' | 'or', title: string}> = [
-    {value: 'or', title: 'Match any of the following'},
-    {value: 'and', title: 'Match all of the following'},
+  groupOptions: Array<{value: ComparisonOption, title: string}> = [
+    {value: ComparisonOption.OR, title: 'Match any of the following'},
+    {value: ComparisonOption.AND, title: 'Match all of the following'},
   ];
   formGroup: FormGroup = new FormGroup({
-    'comparison': new FormControl<'or' | 'and'>(this.groupPreset || this.groupOptions[0].value, [])
+    'comparison': new FormControl<ComparisonOption>(this.groupPreset || this.groupOptions[0].value, [])
   });
 
   actions: Array<ActionItem<any>> = this.actionFactoryService.getMetadataFilterActions(this.handleAction.bind(this));
+
+  get ComparisonOption() { return ComparisonOption; }
 
   ngOnInit() {
     console.log('setup group', this.filterGroup.id)
@@ -69,7 +76,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   handleAction(action: ActionItem<any>, data: any) {
     switch (action.action) {
       case(Action.AddRuleGroup):
-        this.addGroup(action.title === 'Add Rule Group (AND)' ? 'and' : 'or');
+        this.addGroup(action.title === 'Add Rule Group (AND)' ? ComparisonOption.AND : ComparisonOption.OR);
         break;
       case(Action.RemoveRuleGroup):
         this.removeGroup();
@@ -86,7 +93,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
 
     //if (this.formGroup.get('comparison')?.value === 'or') {
-    if (groupType === 'or') {
+    if (groupType === ComparisonOption.OR) {
       this.filterGroup.or.push(group);
     } else {
       this.filterGroup.and.push(group);
@@ -100,7 +107,7 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
     console.log('trying to remove group:', this.filterGroup.id)
     console.log('current group has comparison: ', this.groupPreset)
 
-    if (this.groupPreset === 'and') {
+    if (this.groupPreset === ComparisonOption.AND) {
       this.parentGroup.and = this.parentGroup.and.filter(f => f.id !== this.filterGroup.id);
     } else {
       this.parentGroup.or = this.parentGroup.or.filter(f => f.id !== this.filterGroup.id);

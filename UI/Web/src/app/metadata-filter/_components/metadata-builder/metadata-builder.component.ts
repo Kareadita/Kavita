@@ -4,6 +4,7 @@ import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SeriesFilterV2 } from 'src/app/_models/metadata/v2/series-filter-v2';
 import { SortField } from 'src/app/_models/metadata/series-filter';
+import {ComparisonOption} from "../metadata-filter-row-group/metadata-filter-row-group.component";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -17,7 +18,7 @@ export class MetadataBuilderComponent implements OnInit {
   @Input() parentGroup!: FilterGroup;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 
-  groupPreset: 'and' | 'or' = 'or';
+  groupPreset: ComparisonOption = ComparisonOption.OR;
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
@@ -50,7 +51,7 @@ export class MetadataBuilderComponent implements OnInit {
     console.log('Group: ', this.filterGroup);
   }
 
-  updateFilterGrouping(event: {group: 'and' | 'or', filterGroup: FilterGroup}) {
+  updateFilterGrouping(event: {group: ComparisonOption, filterGroup: FilterGroup}) {
     console.log('[updateFilterGroup] event: ', event);
     const group = event.group;
     const nestedGroup = event.filterGroup;
