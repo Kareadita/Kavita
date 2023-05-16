@@ -22,6 +22,9 @@ export type FilterGrouping = {group: ComparisonOption, filterGroup: FilterGroup}
 })
 export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
 
+  /**
+   * Parent group that this filterGroup will belong to
+   */
   @Input() parentGroup: FilterGroup | undefined;
   @Input() filterGroup!: FilterGroup;
   @Input() groupPreset: ComparisonOption = ComparisonOption.OR;
@@ -86,13 +89,11 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
     }
   }
 
-  addGroup(groupType: 'and' | 'or') {
+  addGroup(groupType: ComparisonOption) {
     const group = this.metadataService.createDefaultFilterGroup();
     group.statements.push(this.metadataService.createDefaultFilterStatement());
-    group.id = this.formGroup.get('comparison')?.value + '-' + this.nestedLevel + 1;
+    group.id = groupType + '-' + (this.nestedLevel + 1);
 
-
-    //if (this.formGroup.get('comparison')?.value === 'or') {
     if (groupType === ComparisonOption.OR) {
       this.filterGroup.or.push(group);
     } else {
@@ -101,7 +102,6 @@ export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {
   }
 
   removeGroup() {
-    // I'll need some context here
     if (!this.parentGroup || this.parentGroup.id === 'root') return;
 
     console.log('trying to remove group:', this.filterGroup.id)
