@@ -184,7 +184,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
-                if (OsInfo.IsDocker) break;
+                if (OsInfo.IsDocker) continue;
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
@@ -193,7 +193,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
-                if (OsInfo.IsDocker) break;
+                if (OsInfo.IsDocker) continue;
                 // Validate IP addresses
                 foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
                 {
@@ -217,14 +217,7 @@ public class SettingsController : BaseApiController
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
-                try
-                {
-                    Configuration.BaseUrl = updateSettingsDto.BaseUrl;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Could not set base url. Give this exception to majora2007");
-                }
+                Configuration.BaseUrl = updateSettingsDto.BaseUrl;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
