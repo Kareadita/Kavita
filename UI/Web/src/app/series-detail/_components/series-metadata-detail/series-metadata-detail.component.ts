@@ -29,7 +29,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   @Input() series!: Series;
 
   isCollapsed: boolean = true;
-  hasExtendedProperites: boolean = false;
+  hasExtendedProperties: boolean = false;
 
   imageService = inject(ImageService);
 
@@ -55,20 +55,20 @@ export class SeriesMetadataDetailComponent implements OnChanges {
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
     private router: Router, public readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef) {
-    
+
   }
-  
+
   ngOnChanges(changes: SimpleChanges): void {
-    this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
-                                  this.seriesMetadata.editors.length > 0 || 
-                                  this.seriesMetadata.coverArtists.length > 0 || 
+    this.hasExtendedProperties = this.seriesMetadata.colorists.length > 0 ||
+                                  this.seriesMetadata.editors.length > 0 ||
+                                  this.seriesMetadata.coverArtists.length > 0 ||
                                   this.seriesMetadata.inkers.length > 0 ||
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
-                                  this.seriesMetadata.publishers.length > 0 || 
+                                  this.seriesMetadata.publishers.length > 0 ||
                                   this.seriesMetadata.translators.length > 0 ||
                                   this.seriesMetadata.tags.length > 0;
 
