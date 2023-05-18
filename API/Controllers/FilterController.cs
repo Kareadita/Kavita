@@ -22,10 +22,10 @@ public class FilterController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<FilterV2Dto>> GetFilter(string name)
+    public async Task<ActionResult<FilterV2Dto?>> GetFilter(string name)
     {
         var provider = _cacheFactory.GetCachingProvider("filter");
-        if (string.IsNullOrEmpty(name)) return BadRequest("Bad filter name");
+        if (string.IsNullOrEmpty(name)) return Ok(null);
         var filter = await provider.GetAsync<FilterV2Dto>(name);
         if (filter.HasValue)
         {
@@ -33,7 +33,7 @@ public class FilterController : BaseApiController
             return Ok(filter.Value);
         }
 
-        return BadRequest("Filter doesn't exist");
+        return Ok(null);
     }
 
     /// <summary>

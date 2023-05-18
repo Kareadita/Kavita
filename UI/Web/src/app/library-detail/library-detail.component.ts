@@ -151,55 +151,32 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
 
-    var filterName = this.route.snapshot.queryParamMap.get('filterName') || '';
-    if (filterName.trim() !== '') {
-      this.metadataService.getFilter(filterName)
-      //   .pipe(
-      //   catchError((err) => {
-      //
-      //   console.log('resume from error', err)
-      //
-      //
-      //   this.filterV2 = {
-      //     groups: [this.createRootGroup()],
-      //     limitTo: 0,
-      //     sortOptions: {
-      //       isAscending: true,
-      //       sortField: SortField.SortName
-      //     }
-      //   };
-      //   this.filterV2 = this.filterSettings.presetsV2;
-      //   this.filterActiveCheck = {...this.filterV2!};
-      //   // rewrite router
-      //   //window.history.replaceState(window.location.href, '', );
-      //   throwError(() => err);
-      // })
-      //   )
-        .subscribe((filter: SeriesFilterV2) => {
-          console.log('resume from filter setup')
-
+    const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
+    this.metadataService.getFilter(filterName)
+      .subscribe((filter: SeriesFilterV2 | null) => {
+        console.log('resume from filter setup')
+        if (filter) {
           this.filterV2 = filter;
-          this.filterV2.groups[0].id = 'lib-1';
-          this.filterV2.groups[0].statements.push(this.metadataService.createDefaultFilterStatement(FilterField.Libraries, FilterComparison.Equal, this.libraryId + ''));
-          console.log(this.filterV2);
-          this.cdRef.markForCheck();
-        });
-    } else {
-      // default setup:
-      console.log('default setup')
-
-
-      this.filterSettings.presetsV2 = {
-        groups: [this.createRootGroup()],
-        limitTo: 0,
-        sortOptions: {
-          isAscending: true,
-          sortField: SortField.SortName
+        } else {
+          this.filterV2 = {
+            groups: [this.createRootGroup()],
+            limitTo: 0,
+            sortOptions: {
+              isAscending: true,
+              sortField: SortField.SortName
+            }
+          };
+          // Update url without an id
+          //
+          // this.filterV2.groups[0].id = 'lib-1';
+          // this.filterV2.groups[0].statements.push(this.metadataService.createDefaultFilterStatement(FilterField.Libraries, FilterComparison.Equal, this.libraryId + ''));
         }
-      };
-      this.filterV2 = this.filterSettings.presetsV2;
-      this.filterActiveCheck = {...this.filterSettings.presetsV2};
-    }
+
+        this.filterSettings.presetsV2 = this.filterV2;
+        console.log(this.filterV2);
+        this.loadPage();
+        this.cdRef.markForCheck();
+      });
 
     this.filterSettings.libraryDisabled = true;
     this.cdRef.markForCheck();
@@ -255,25 +232,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
         this.refresh.emit();
       }
     });
-
-    if (this.filterV2 == undefined) {
-      const group = this.metadataService.createDefaultFilterGroup();
-      const stmt = this.metadataService.createDefaultFilterStatement();
-      stmt.comparison = FilterComparison.Contains;
-      stmt.field = FilterField.Libraries;
-      stmt.value = this.libraryId + '';
-      group.statements.push(stmt);
-      this.filterV2 = {
-        groups: [group],
-        limitTo: 0,
-        sortOptions: {
-          isAscending: true,
-          sortField: SortField.SortName
-        }
-      };
-
-      this.cdRef.markForCheck();
-    }
   }
 
   ngOnDestroy() {
@@ -322,7 +280,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   updateFilter(data: FilterEvent) {
-    console.log('library detail, updateFilter occured: ', data.filterV2);
+    console.log('library detail, updateFilter occurred: ', data);
+    if (data.filterV2 === undefined) return;
     this.filter = data.filter;
     this.filterV2 = data.filterV2;
 
