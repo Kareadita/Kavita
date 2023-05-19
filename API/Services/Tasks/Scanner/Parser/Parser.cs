@@ -1058,4 +1058,19 @@ public static class Parser
     {
         return string.IsNullOrEmpty(name) ? string.Empty : name.Replace('_', ' ');
     }
+
+    public static string? ExtractFilename(string fileUrl)
+    {
+        var matches = Parser.CssImageUrlRegex.Matches(fileUrl);
+        foreach (Match match in matches)
+        {
+            if (!match.Success) continue;
+
+            // NOTE: This is failing for //localhost:5000/api/book/29919/book-resources?file=OPS/images/tick1.jpg
+            var importFile = match.Groups["Filename"].Value;
+            if (!importFile.Contains("?")) return importFile;
+        }
+
+        return null;
+    }
 }

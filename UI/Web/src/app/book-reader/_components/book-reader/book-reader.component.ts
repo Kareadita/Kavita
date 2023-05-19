@@ -771,7 +771,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
-          console.log('Link clicked: ', e);
           if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
           const page = parseInt(e.target.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
