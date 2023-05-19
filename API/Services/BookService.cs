@@ -141,7 +141,6 @@ public class BookService : IBookService
                 var pageKey = mappings.Keys.FirstOrDefault(mKey => mKey.EndsWith(hrefParts[0]));
                 if (!string.IsNullOrEmpty(pageKey))
                 {
-                    // This key may have something like Text/, so let's
                     mappings.TryGetValue(pageKey, out currentPage);
                 }
 
@@ -262,7 +261,6 @@ public class BookService : IBookService
         {
             if (!match.Success) continue;
 
-            // NOTE: This is failing for //localhost:5000/api/book/29919/book-resources?file=OPS/images/tick1.jpg
             var importFile = match.Groups["Filename"].Value;
             var key = CleanContentKeys(importFile);
             if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) continue;
