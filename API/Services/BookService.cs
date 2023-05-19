@@ -127,7 +127,7 @@ public class BookService : IBookService
         var hrefParts = CleanContentKeys(anchor.GetAttributeValue("href", string.Empty))
             .Split("#");
         // Some keys get uri encoded when parsed, so replace any of those characters with original
-        var mappingKey = HttpUtility.UrlDecode(hrefParts[0]);
+        var mappingKey = Uri.UnescapeDataString(hrefParts[0]);
 
         if (!mappings.ContainsKey(mappingKey))
         {
@@ -136,6 +136,15 @@ public class BookService : IBookService
                 var part = hrefParts.Length > 1
                     ? hrefParts[1]
                     : anchor.GetAttributeValue("href", string.Empty);
+
+                // hrefParts[0] might not have path from mappings
+                var pageKey = mappings.Keys.FirstOrDefault(mKey => mKey.EndsWith(hrefParts[0]));
+                if (!string.IsNullOrEmpty(pageKey))
+                {
+                    mappings.TryGetValue(pageKey, out currentPage);
+                }
+
+
                 anchor.Attributes.Add("kavita-page", $"{currentPage}");
                 anchor.Attributes.Add("kavita-part", part);
                 anchor.Attributes.Remove("href");
@@ -186,9 +195,9 @@ public class BookService : IBookService
             {
                 key = prepend + key;
             }
-            if (!book.Content.AllFiles.Local.ContainsKey(key)) continue;
+            if (!book.Content.AllFiles.TryGetLocalFileRefByKey(key, out var bookFile)) continue;
 
-            var bookFile = book.Content.AllFiles.Local[key];
+            //var bookFile = book.Content.AllFiles.Local[key];
             var content = await bookFile.ReadContentAsBytesAsync();
             importBuilder.Append(Encoding.UTF8.GetString(content));
         }
@@ -227,7 +236,6 @@ public class BookService : IBookService
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        //foreach (Match match in Tasks.Scanner.Parser.Parser.CssImportUrlRegex().Matches(stylesheetHtml))
         foreach (Match match in Parser.CssImportUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
@@ -238,7 +246,6 @@ public class BookService : IBookService
 
     private static void EscapeFontFamilyReferences(ref string stylesheetHtml, string apiBase, string prepend)
     {
-        //foreach (Match match in Tasks.Scanner.Parser.Parser.FontSrcUrlRegex().Matches(stylesheetHtml))
         foreach (Match match in Parser.FontSrcUrlRegex.Matches(stylesheetHtml))
         {
             if (!match.Success) continue;
@@ -249,7 +256,6 @@ public class BookService : IBookService
 
     private static void EscapeCssImageReferences(ref string stylesheetHtml, string apiBase, EpubBookRef book)
     {
-        //var matches = Tasks.Scanner.Parser.Parser.CssImageUrlRegex().Matches(stylesheetHtml);
         var matches = Parser.CssImageUrlRegex.Matches(stylesheetHtml);
         foreach (Match match in matches)
         {
@@ -257,7 +263,7 @@ public class BookService : IBookService
 
             var importFile = match.Groups["Filename"].Value;
             var key = CleanContentKeys(importFile);
-            if (!book.Content.AllFiles.Local.ContainsKey(key)) continue;
+            if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) continue;
 
             stylesheetHtml = stylesheetHtml.Replace(importFile, apiBase + key);
         }
@@ -290,7 +296,7 @@ public class BookService : IBookService
             var imageFile = GetKeyForImage(book, image.Attributes[key].Value);
             image.Attributes.Remove(key);
             // UrlEncode here to transform ../ into an escaped version, which avoids blocking on nginx
-            image.Attributes.Add(key, $"{apiBase}" + HttpUtility.UrlEncode(imageFile));
+            image.Attributes.Add(key, $"{apiBase}" + Uri.EscapeDataString(imageFile));
 
             // Add a custom class that the reader uses to ensure images stay within reader
             parent.AddClass("kavita-scale-width-container");
@@ -307,9 +313,9 @@ public class BookService : IBookService
     /// <returns></returns>
     private static string GetKeyForImage(EpubBookRef book, string imageFile)
     {
-        if (book.Content.Images.Local.ContainsKey(imageFile)) return imageFile;
+        if (book.Content.Images.ContainsLocalFileRefWithKey(imageFile)) return imageFile;
 
-        var correctedKey = book.Content.Images.Local.Keys.SingleOrDefault(s => s.EndsWith(imageFile));
+        var correctedKey = book.Content.Images.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(imageFile));
         if (correctedKey != null)
         {
             imageFile = correctedKey;
@@ -318,12 +324,13 @@ public class BookService : IBookService
         {
             // There are cases where the key is defined static like OEBPS/Images/1-4.jpg but reference is ../Images/1-4.jpg
             correctedKey =
-                book.Content.Images.Local.Keys.SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
+                book.Content.Images.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(imageFile.Replace("..", string.Empty)));
             if (correctedKey != null)
             {
                 imageFile = correctedKey;
             }
         }
+
 
         return imageFile;
     }
@@ -342,6 +349,7 @@ public class BookService : IBookService
     }
 
     private static void RewriteAnchors(int page, HtmlDocument doc, Dictionary<string, int> mappings)
+
     {
         var anchors = doc.DocumentNode.SelectNodes("//a");
         if (anchors == null) return;
@@ -372,9 +380,9 @@ public class BookService : IBookService
                 var key = CleanContentKeys(styleLinks.Attributes["href"].Value);
                 // Some epubs are malformed the key in content.opf might be: content/resources/filelist_0_0.xml but the actual html links to resources/filelist_0_0.xml
                 // In this case, we will do a search for the key that ends with
-                if (!book.Content.Css.Local.ContainsKey(key))
+                if (!book.Content.Css.ContainsLocalFileRefWithKey(key))
                 {
-                    var correctedKey = book.Content.Css.Local.Keys.SingleOrDefault(s => s.EndsWith(key));
+                    var correctedKey = book.Content.Css.Local.Select(s => s.Key).SingleOrDefault(s => s.EndsWith(key));
                     if (correctedKey == null)
                     {
                         _logger.LogError("Epub is Malformed, key: {Key} is not matching OPF file", key);
@@ -386,7 +394,7 @@ public class BookService : IBookService
 
                 try
                 {
-                    var cssFile = book.Content.Css.Local[key];
+                    var cssFile = book.Content.Css.GetLocalFileRefByKey(key);
 
                     var styleContent = await ScopeStyles(await cssFile.ReadContentAsync(), apiBase,
                         cssFile.FilePath, book);
@@ -507,6 +515,7 @@ public class BookService : IBookService
                                 item.Property == "display-seq" && item.Refines == metadataItem.Refines);
                         if (count == null || count.Content == "0")
                         {
+                            // TODO: Rewrite this to use a StringBuilder
                             // Treat this as a Collection
                             info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") + readingListElem.Title.Replace(",", "_");
                         }
@@ -687,7 +696,9 @@ public class BookService : IBookService
         foreach (var contentFileRef in await book.GetReadingOrderAsync())
         {
             if (contentFileRef.ContentType != EpubContentType.XHTML_1_1) continue;
+            // Some keys are different than FilePath, so we add both to ease loookup
             dict.Add(contentFileRef.FilePath, pageCount); // FileName -> FilePath
+            dict.TryAdd(contentFileRef.Key, pageCount); // FileName -> FilePath
             pageCount += 1;
         }
 
@@ -861,7 +872,7 @@ public class BookService : IBookService
         if (mappings.ContainsKey(CleanContentKeys(key))) return key;
 
         // Fallback to searching for key (bad epub metadata)
-        var correctedKey = book.Content.Html.Local.Keys.FirstOrDefault(s => s.EndsWith(key));
+        var correctedKey = book.Content.Html.Local.Select(s => s.Key).FirstOrDefault(s => s.EndsWith(key));
         if (!string.IsNullOrEmpty(correctedKey))
         {
             key = correctedKey;
@@ -885,17 +896,18 @@ public class BookService : IBookService
 
     public static string CoalesceKeyForAnyFile(EpubBookRef book, string key)
     {
-        if (book.Content.AllFiles.Local.ContainsKey(key)) return key;
+        if (book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return key;
 
         var cleanedKey = CleanContentKeys(key);
-        if (book.Content.AllFiles.Local.ContainsKey(cleanedKey)) return cleanedKey;
+        if (book.Content.AllFiles.ContainsLocalFileRefWithKey(cleanedKey)) return cleanedKey;
 
+        // TODO: Figure this out
         // Fallback to searching for key (bad epub metadata)
-        var correctedKey = book.Content.AllFiles.Local.Keys.SingleOrDefault(s => s.EndsWith(key));
-        if (!string.IsNullOrEmpty(correctedKey))
-        {
-            key = correctedKey;
-        }
+        // var correctedKey = book.Content.AllFiles.Keys.SingleOrDefault(s => s.EndsWith(key));
+        // if (!string.IsNullOrEmpty(correctedKey))
+        // {
+        //     key = correctedKey;
+        // }
 
         return key;
     }
@@ -928,7 +940,7 @@ public class BookService : IBookService
 
                 foreach (var nestedChapter in navigationItem.NestedItems.Where(n => n.Link != null))
                 {
-                    var key = CoalesceKey(book, mappings, nestedChapter.Link?.ContentFileName);
+                    var key = CoalesceKey(book, mappings, nestedChapter.Link?.ContentFilePath);
                     if (mappings.TryGetValue(key, out var mapping))
                     {
                         nestedChapters.Add(new BookChapterItem
@@ -947,12 +959,15 @@ public class BookService : IBookService
 
         if (chaptersList.Count != 0) return chaptersList;
         // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
-        var tocPage = book.Content.Html.Local.Keys.FirstOrDefault(k => k.ToUpper().Contains("TOC"));
-        if (tocPage == null) return chaptersList;
+        var tocPage = book.Content.Html.Local.Select(s => s.Key).FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
+            k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
+        if (string.IsNullOrEmpty(tocPage)) return chaptersList;
 
         // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
+        if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
+        var content = await file.ReadContentAsync();
+
         var doc = new HtmlDocument();
-        var content = await book.Content.Html.Local[tocPage].ReadContentAsync();
         doc.LoadHtml(content);
         var anchors = doc.DocumentNode.SelectNodes("//a");
         if (anchors == null) return chaptersList;
@@ -1096,7 +1111,7 @@ public class BookService : IBookService
         }
         else
         {
-            var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFileName);
+            var groupKey = CoalesceKey(book, mappings, navigationItem.Link.ContentFilePath);
             if (mappings.ContainsKey(groupKey))
             {
                 chaptersList.Add(new BookChapterItem
@@ -1133,8 +1148,8 @@ public class BookService : IBookService
         {
             // Try to get the cover image from OPF file, if not set, try to parse it from all the files, then result to the first one.
             var coverImageContent = epubBook.Content.Cover
-                                    ?? epubBook.Content.Images.Local.Values.FirstOrDefault(file => Parser.IsCoverImage(file.FilePath)) // FileName -> FilePath
-                                    ?? epubBook.Content.Images.Local.Values.FirstOrDefault();
+                                    ?? epubBook.Content.Images.Local.FirstOrDefault(file => Parser.IsCoverImage(file.FilePath)) // FileName -> FilePath
+                                    ?? epubBook.Content.Images.Local.FirstOrDefault();
 
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
