@@ -951,12 +951,15 @@ public class BookService : IBookService
 
         if (chaptersList.Count != 0) return chaptersList;
         // Generate from TOC from links (any point past this, Kavita is generating as a TOC doesn't exist)
-        var tocPage = book.Content.Html.Local.Select(s => s.Key).FirstOrDefault(k => k.ToUpper().Contains("TOC"));
+        var tocPage = book.Content.Html.Local.Select(s => s.Key).FirstOrDefault(k => k.Equals("TOC.XHTML", StringComparison.InvariantCultureIgnoreCase) ||
+            k.Equals("NAVIGATION.XHTML", StringComparison.InvariantCultureIgnoreCase));
         if (string.IsNullOrEmpty(tocPage)) return chaptersList;
 
         // Find all anchor tags, for each anchor we get inner text, to lower then title case on UI. Get href and generate page content
+        if (!book.Content.Html.TryGetLocalFileRefByKey(tocPage, out var file)) return chaptersList;
+        var content = await file.ReadContentAsync();
+
         var doc = new HtmlDocument();
-        var content = await book.Content.Html.GetLocalFileRefByKey(tocPage).ReadContentAsync();
         doc.LoadHtml(content);
         var anchors = doc.DocumentNode.SelectNodes("//a");
         if (anchors == null) return chaptersList;
