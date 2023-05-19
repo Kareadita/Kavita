@@ -136,6 +136,16 @@ public class BookService : IBookService
                 var part = hrefParts.Length > 1
                     ? hrefParts[1]
                     : anchor.GetAttributeValue("href", string.Empty);
+
+                // hrefParts[0] might not have path from mappings
+                var pageKey = mappings.Keys.FirstOrDefault(mKey => mKey.EndsWith(hrefParts[0]));
+                if (!string.IsNullOrEmpty(pageKey))
+                {
+                    // This key may have something like Text/, so let's
+                    mappings.TryGetValue(pageKey, out currentPage);
+                }
+
+
                 anchor.Attributes.Add("kavita-page", $"{currentPage}");
                 anchor.Attributes.Add("kavita-part", part);
                 anchor.Attributes.Remove("href");
