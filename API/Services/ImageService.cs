@@ -95,6 +95,10 @@ public class ImageService : IImageService
     {
         ["https://app.plex.tv"] = "https://plex.tv"
     };
+    private static readonly IDictionary<string, string> FaviconDirectPngMapper = new Dictionary<string, string>
+    {
+        ["https://www.amazon.com"] = "https://upload.wikimedia.org/wikipedia/commons/d/de/Amazon_icon.png",
+    };
 
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
     {
@@ -238,11 +242,16 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            if (pngLinks == null)
+            var correctSizeLink = pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault();
+            if (correctSizeLink == null)
             {
-                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+                // See if there is a direct png we can download
+                if (!FaviconDirectPngMapper.TryGetValue(baseUrl, out correctSizeLink))
+                {
+                    throw new KavitaException($"Could not grab favicon from {baseUrl}");
+                }
             }
-            var correctSizeLink = pngLinks.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks.FirstOrDefault();
+
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
@@ -253,7 +262,7 @@ public class ImageService : IImageService
             // If starts with //, it's coming usually from an offsite cdn
             if (correctSizeLink.StartsWith("//"))
             {
-                finalUrl = Url.Combine("https:", correctSizeLink);
+                finalUrl = "https:" + correctSizeLink;
             }
             else if (!correctSizeLink.StartsWith(uri.Scheme))
             {
