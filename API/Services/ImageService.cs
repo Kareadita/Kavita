@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -94,10 +93,6 @@ public class ImageService : IImageService
     private static readonly IDictionary<string, string> FaviconUrlMapper = new Dictionary<string, string>
     {
         ["https://app.plex.tv"] = "https://plex.tv"
-    };
-    private static readonly IDictionary<string, string> FaviconDirectPngMapper = new Dictionary<string, string>
-    {
-        ["https://www.amazon.com"] = "https://upload.wikimedia.org/wikipedia/commons/d/de/Amazon_icon.png",
     };
 
     public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
@@ -242,15 +237,8 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            var correctSizeLink = pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault();
-            if (correctSizeLink == null)
-            {
-                // See if there is a direct png we can download
-                if (!FaviconDirectPngMapper.TryGetValue(baseUrl, out correctSizeLink))
-                {
-                    throw new KavitaException($"Could not grab favicon from {baseUrl}");
-                }
-            }
+            var correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault()) ??
+                                  FallbackToKavitaReaderFavicon(baseUrl);
 
             if (string.IsNullOrEmpty(correctSizeLink))
             {
@@ -302,6 +290,30 @@ public class ImageService : IImageService
             _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
             throw;
         }
+    }
+
+    private static string FallbackToKavitaReaderFavicon(string baseUrl)
+    {
+        var correctSizeLink = string.Empty;
+        var allOverrides = "https://kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
+        if (!string.IsNullOrEmpty(allOverrides))
+        {
+            var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
+            var externalFile = allOverrides
+                .Split("\n")
+                .FirstOrDefault(url =>
+                    cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
+                    cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
+                    ));
+            if (string.IsNullOrEmpty(externalFile))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            correctSizeLink = "https://kavitareader.com/assets/favicons/" + externalFile;
+        }
+
+        return correctSizeLink;
     }
 
     /// <inheritdoc />
