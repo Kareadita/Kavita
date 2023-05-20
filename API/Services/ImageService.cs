@@ -226,6 +226,8 @@ public class ImageService : IImageService
             url = value;
         }
 
+        var correctSizeLink = string.Empty;
+
         try
         {
             var htmlContent = url.GetStringAsync().Result;
@@ -237,9 +239,16 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            var correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault()) ??
-                                  FallbackToKavitaReaderFavicon(baseUrl);
+            correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.png for {Domain}, will try fallback methods", domain);
+        }
 
+        try
+        {
+            correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
@@ -284,8 +293,7 @@ public class ImageService : IImageService
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
-        }
-        catch (Exception ex)
+        }catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
             throw;
