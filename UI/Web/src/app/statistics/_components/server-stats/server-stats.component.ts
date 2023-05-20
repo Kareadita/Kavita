@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, HostListener, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import {BehaviorSubject, map, Observable, ReplaySubject, shareReplay, Subject, takeUntil} from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Series } from 'src/app/_models/series';
@@ -33,23 +33,23 @@ export class ServerStatsComponent implements OnDestroy {
     this.router.navigate(['library', series.libraryId, 'series', series.id]);
   }
 
-  breakpointSubject = new BehaviorSubject<Breakpoint>(1);
+  breakpointSubject = new ReplaySubject<Breakpoint>(1);
   breakpoint$: Observable<Breakpoint> = this.breakpointSubject.asObservable();
 
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
-  onResize() {  
+  onResize() {
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
   }
 
 
   get Breakpoint() { return Breakpoint; }
 
-  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService, 
+  constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
     private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService) {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
-      return '';      
+      return '';
     }
 
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
@@ -130,6 +130,6 @@ export class ServerStatsComponent implements OnDestroy {
     });
   }
 
-  
+
 
 }
