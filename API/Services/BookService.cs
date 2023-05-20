@@ -472,7 +472,10 @@ public class BookService : IBookService
                         break;
                     case "calibre:series":
                         info.Series = metadataItem.Content;
-                        info.SeriesSort = metadataItem.Content;
+                        if (string.IsNullOrEmpty(info.SeriesSort))
+                        {
+                            info.SeriesSort = metadataItem.Content;
+                        }
                         break;
                     case "calibre:series_index":
                         info.Volume = metadataItem.Content;
@@ -488,7 +491,10 @@ public class BookService : IBookService
                         break;
                     case "belongs-to-collection":
                         info.Series = metadataItem.Content;
-                        info.SeriesSort = metadataItem.Content;
+                        if (string.IsNullOrEmpty(info.SeriesSort))
+                        {
+                            info.SeriesSort = metadataItem.Content;
+                        }
                         break;
                     case "collection-type":
                         // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
@@ -504,31 +510,23 @@ public class BookService : IBookService
                         PopulatePerson(metadataItem, info, person);
                         break;
                     case "title-type":
-                        if (!metadataItem.Content.Equals("collection")) break;
-                        var titleId = metadataItem.Refines?.Replace("#", string.Empty);
-                        var readingListElem = epubBook.Schema.Package.Metadata.Titles
-                            .FirstOrDefault(item => item.Id == titleId);
-                        if (readingListElem == null) break;
+                        if (metadataItem.Content.Equals("collection"))
+                        {
+                            ExtractCollectionOrReadingList(metadataItem, epubBook, info);
+                        }
 
-                        var count = epubBook.Schema.Package.Metadata.MetaItems
-                            .FirstOrDefault(item =>
-                                item.Property == "display-seq" && item.Refines == metadataItem.Refines);
-                        if (count == null || count.Content == "0")
+                        if (metadataItem.Content.Equals("main"))
                         {
-                            // TODO: Rewrite this to use a StringBuilder
-                            // Treat this as a Collection
-                            info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") + readingListElem.Title.Replace(",", "_");
+                            ExtractSortTitle(metadataItem, epubBook, info);
                         }
-                        else
-                        {
-                            // Treat as a reading list
-                            info.AlternateSeries += (string.IsNullOrEmpty(info.AlternateSeries) ? string.Empty : ",") + readingListElem.Title.Replace(",", "_");
-                            info.AlternateNumber += (string.IsNullOrEmpty(info.AlternateNumber) ? string.Empty : ",") + count.Content;
-                        }
+
 
                         break;
                 }
             }
+
+            // Check if there is a SortTitle
+
 
             // Include regular Writer as well, for cases where there is no special tag
             info.Writer = string.Join(",",
@@ -554,6 +552,46 @@ public class BookService : IBookService
         }
 
         return null;
+    }
+
+    private static void ExtractSortTitle(EpubMetadataMeta metadataItem, EpubBookRef epubBook, ComicInfo info)
+    {
+        var titleId = metadataItem.Refines?.Replace("#", string.Empty);
+        var titleElem = epubBook.Schema.Package.Metadata.Titles
+            .FirstOrDefault(item => item.Id == titleId);
+        if (titleElem == null) return;
+
+        var sortTitleElem = epubBook.Schema.Package.Metadata.MetaItems
+            .FirstOrDefault(item =>
+                item.Property == "file-as" && item.Refines == metadataItem.Refines);
+        if (sortTitleElem == null || string.IsNullOrWhiteSpace(sortTitleElem.Content)) return;
+        info.SeriesSort = sortTitleElem.Content;
+    }
+
+    private static void ExtractCollectionOrReadingList(EpubMetadataMeta metadataItem, EpubBookRef epubBook, ComicInfo info)
+    {
+        var titleId = metadataItem.Refines?.Replace("#", string.Empty);
+        var readingListElem = epubBook.Schema.Package.Metadata.Titles
+            .FirstOrDefault(item => item.Id == titleId);
+        if (readingListElem == null) return;
+
+        var count = epubBook.Schema.Package.Metadata.MetaItems
+            .FirstOrDefault(item =>
+                item.Property == "display-seq" && item.Refines == metadataItem.Refines);
+        if (count == null || count.Content == "0")
+        {
+            // TODO: Rewrite this to use a StringBuilder
+            // Treat this as a Collection
+            info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") +
+                                readingListElem.Title.Replace(",", "_");
+        }
+        else
+        {
+            // Treat as a reading list
+            info.AlternateSeries += (string.IsNullOrEmpty(info.AlternateSeries) ? string.Empty : ",") +
+                                    readingListElem.Title.Replace(",", "_");
+            info.AlternateNumber += (string.IsNullOrEmpty(info.AlternateNumber) ? string.Empty : ",") + count.Content;
+        }
     }
 
     private static void PopulatePerson(EpubMetadataMeta metadataItem, ComicInfo info, EpubMetadataCreator person)

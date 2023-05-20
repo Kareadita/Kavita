@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -227,6 +226,8 @@ public class ImageService : IImageService
             url = value;
         }
 
+        var correctSizeLink = string.Empty;
+
         try
         {
             var htmlContent = url.GetStringAsync().Result;
@@ -238,11 +239,16 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            if (pngLinks == null)
-            {
-                throw new KavitaException($"Could not grab favicon from {baseUrl}");
-            }
-            var correctSizeLink = pngLinks.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks.FirstOrDefault();
+            correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.png for {Domain}, will try fallback methods", domain);
+        }
+
+        try
+        {
+            correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
@@ -253,7 +259,7 @@ public class ImageService : IImageService
             // If starts with //, it's coming usually from an offsite cdn
             if (correctSizeLink.StartsWith("//"))
             {
-                finalUrl = Url.Combine("https:", correctSizeLink);
+                finalUrl = "https:" + correctSizeLink;
             }
             else if (!correctSizeLink.StartsWith(uri.Scheme))
             {
@@ -287,12 +293,35 @@ public class ImageService : IImageService
 
             _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
             return filename;
-        }
-        catch (Exception ex)
+        }catch (Exception ex)
         {
             _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
             throw;
         }
+    }
+
+    private static string FallbackToKavitaReaderFavicon(string baseUrl)
+    {
+        var correctSizeLink = string.Empty;
+        var allOverrides = "https://kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
+        if (!string.IsNullOrEmpty(allOverrides))
+        {
+            var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
+            var externalFile = allOverrides
+                .Split("\n")
+                .FirstOrDefault(url =>
+                    cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
+                    cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
+                    ));
+            if (string.IsNullOrEmpty(externalFile))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            correctSizeLink = "https://kavitareader.com/assets/favicons/" + externalFile;
+        }
+
+        return correctSizeLink;
     }
 
     /// <inheritdoc />

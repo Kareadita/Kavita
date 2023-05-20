@@ -144,4 +144,14 @@ public static class Seed
         }
         await context.SaveChangesAsync();
     }
+
+    // /// <summary>
+    // /// Responsible to copy (not overwrite) a set of favicons that Kavita can't parse from websites.
+    // /// </summary>
+    // /// <param name="directoryService"></param>
+    // /// <returns></returns>
+    // public static Task SeedFavicons(IDirectoryService directoryService)
+    // {
+    //
+    // }
 }
