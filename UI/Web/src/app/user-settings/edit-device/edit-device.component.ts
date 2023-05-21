@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Device } from 'src/app/_models/device/device';
 import { DevicePlatform, devicePlatforms } from 'src/app/_models/device/device-platform';
 import { DeviceService } from 'src/app/_services/device.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-edit-device',
@@ -12,7 +13,7 @@ import { DeviceService } from 'src/app/_services/device.service';
   styleUrls: ['./edit-device.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
+export class EditDeviceComponent implements OnInit, OnChanges {
 
   @Input() device: Device | undefined;
 
@@ -22,19 +23,18 @@ export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
   settingsForm: FormGroup = new FormGroup({});
   devicePlatforms = devicePlatforms;
 
-  private readonly onDestroy = new Subject<void>();
 
-  constructor(public deviceService: DeviceService, private toastr: ToastrService, 
+  constructor(public deviceService: DeviceService, private toastr: ToastrService,
     private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    
+
     this.settingsForm.addControl('name', new FormControl(this.device?.name || '', [Validators.required]));
     this.settingsForm.addControl('email', new FormControl(this.device?.emailAddress || '', [Validators.required, Validators.email]));
     this.settingsForm.addControl('platform', new FormControl(this.device?.platform || DevicePlatform.Custom, [Validators.required]));
 
     // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
-    this.settingsForm.get('email')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(email => {
+    this.settingsForm.get('email')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(email => {
       if (this.settingsForm.get('platform')?.dirty) return;
       if (email === null || email === undefined || email === '') return;
       if (email.endsWith('@kindle.com')) this.settingsForm.get('platform')?.setValue(DevicePlatform.Kindle);
@@ -52,11 +52,6 @@ export class EditDeviceComponent implements OnInit, OnChanges, OnDestroy {
       this.cdRef.markForCheck();
       this.settingsForm.markAsPristine();
     }
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   addDevice() {

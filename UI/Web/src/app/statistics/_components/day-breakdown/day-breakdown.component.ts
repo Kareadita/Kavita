@@ -1,20 +1,20 @@
-import { Component, OnDestroy } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { LegendPosition } from '@swimlane/ngx-charts';
-import { Subject, map, takeUntil, Observable } from 'rxjs';
-import { DayOfWeek, StatisticsService } from 'src/app/_services/statistics.service';
-import { PieDataItem } from '../../_models/pie-data-item';
-import { StatCount } from '../../_models/stat-count';
-import { DayOfWeekPipe } from '../../_pipes/day-of-week.pipe';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {LegendPosition} from '@swimlane/ngx-charts';
+import {map, Observable} from 'rxjs';
+import {DayOfWeek, StatisticsService} from 'src/app/_services/statistics.service';
+import {PieDataItem} from '../../_models/pie-data-item';
+import {StatCount} from '../../_models/stat-count';
+import {DayOfWeekPipe} from '../../_pipes/day-of-week.pipe';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-day-breakdown',
   templateUrl: './day-breakdown.component.html',
-  styleUrls: ['./day-breakdown.component.scss']
+  styleUrls: ['./day-breakdown.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DayBreakdownComponent implements OnDestroy {
-
-  private readonly onDestroy = new Subject<void>();
+export class DayBreakdownComponent {
 
   view: [number, number] = [0,0];
   gradient: boolean = true;
@@ -37,13 +37,8 @@ export class DayBreakdownComponent implements OnDestroy {
           return {name: dayOfWeekPipe.transform(d.value), value: d.count};
         })
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
 }

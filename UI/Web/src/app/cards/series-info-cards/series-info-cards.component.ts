@@ -11,6 +11,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-series-info-cards',
@@ -18,9 +19,9 @@ import { ReaderService } from 'src/app/_services/reader.service';
   styleUrls: ['./series-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
+export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
   @Input() seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
   @Input() readingTimeLeft: HourEstimateRange | undefined;
@@ -32,8 +33,6 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
 
-  private readonly onDestroy = new Subject<void>();
-
   get MangaFormat() {
     return MangaFormat;
   }
@@ -42,16 +41,16 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
-    private readerService: ReaderService, private readonly cdRef: ChangeDetectorRef, 
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
+    private readerService: ReaderService, private readonly cdRef: ChangeDetectorRef,
     private messageHub: MessageHubService, private accountService: AccountService) {
       // Listen for progress events and re-calculate getTimeLeft
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
                                     map(evt => evt.payload as UserProgressUpdateEvent),
                                     debounceTime(500),
-                                    takeUntil(this.onDestroy))
+                                    takeUntilDestroyed())
         .subscribe(updateEvent => {
-          this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+          this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
             if (user === undefined || user.username !== updateEvent.username) return;
             if (updateEvent.seriesId !== this.series.id) return;
             this.getReadingTimeLeft();
@@ -73,10 +72,6 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   handleGoTo(queryParamName: FilterQueryParam, filter: any) {
     this.goTo.emit({queryParamName, filter});

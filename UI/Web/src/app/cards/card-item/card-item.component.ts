@@ -19,6 +19,7 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { BulkSelectionService } from '../bulk-selection.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-card-item',
@@ -26,7 +27,7 @@ import { BulkSelectionService } from '../bulk-selection.service';
   styleUrls: ['./card-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardItemComponent implements OnInit, OnDestroy {
+export class CardItemComponent implements OnInit {
 
   /**
    * Card item url. Will internally handle error and missing covers
@@ -120,12 +121,11 @@ export class CardItemComponent implements OnInit, OnDestroy {
     return MangaFormat;
   }
 
-  private readonly onDestroy = new Subject<void>();
 
   constructor(public imageService: ImageService, private libraryService: LibraryService,
     public utilityService: UtilityService, private downloadService: DownloadService,
     public bulkSelectionService: BulkSelectionService,
-    private messageHub: MessageHubService, private accountService: AccountService, 
+    private messageHub: MessageHubService, private accountService: AccountService,
     private scrollService: ScrollService, private readonly cdRef: ChangeDetectorRef,
     private actionFactoryService: ActionFactoryService) {}
 
@@ -143,7 +143,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
       }
 
       if (this.libraryId !== undefined && this.libraryId > 0) {
-        this.libraryService.getLibraryName(this.libraryId).pipe(takeUntil(this.onDestroy)).subscribe(name => {
+        this.libraryService.getLibraryName(this.libraryId).pipe(takeUntilDestroyed()).subscribe(name => {
           this.libraryName = name;
           this.cdRef.markForCheck();
         });
@@ -176,18 +176,18 @@ export class CardItemComponent implements OnInit, OnDestroy {
     }
 
     this.filterSendTo();
-    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
       this.user = user;
     });
 
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-    map(evt => evt.payload as UserProgressUpdateEvent), takeUntil(this.onDestroy)).subscribe(updateEvent => {
+    map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed()).subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
       if (this.utilityService.isSeries(this.entity) && updateEvent.seriesId !== this.entity.id) return;
 
-      // For volume or Series, we can't just take the event 
+      // For volume or Series, we can't just take the event
       if (this.utilityService.isChapter(this.entity)) {
         const c = this.utilityService.asChapter(this.entity);
         c.pagesRead = updateEvent.pagesRead;
@@ -212,7 +212,7 @@ export class CardItemComponent implements OnInit, OnDestroy {
       this.cdRef.detectChanges();
     });
 
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntil(this.onDestroy), map((events) => {
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(), map((events) => {
       if(this.utilityService.isSeries(this.entity)) return events.find(e => e.entityType === 'series' && e.subTitle === this.downloadService.downloadSubtitle('series', (this.entity as Series))) || null;
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
@@ -223,10 +223,6 @@ export class CardItemComponent implements OnInit, OnDestroy {
 
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   @HostListener('touchmove', ['$event'])
   onTouchMove(event: TouchEvent) {

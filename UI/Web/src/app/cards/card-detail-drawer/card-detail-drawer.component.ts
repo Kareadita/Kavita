@@ -24,9 +24,10 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
-  General = 0, 
+  General = 0,
   Metadata = 1,
   Cover = 2,
   Files = 3
@@ -38,13 +39,13 @@ enum TabID {
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailDrawerComponent implements OnInit, OnDestroy {
+export class CardDetailDrawerComponent implements OnInit {
 
   @Input() parentName = '';
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
   @Input() data!: Volume | Chapter;
-  
+
   /**
    * If this is a volume, this will be first chapter for said volume.
    */
@@ -63,7 +64,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
 
   actions: ActionItem<any>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
-  libraryType: LibraryType = LibraryType.Manga; 
+  libraryType: LibraryType = LibraryType.Manga;
 
 
   tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Info', disabled: false}];
@@ -74,8 +75,6 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
 
   download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
-  
-  private readonly onDestroy = new Subject<void>();
 
   get MangaFormat() {
     return MangaFormat;
@@ -97,16 +96,15 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     return TabID;
   }
 
-  constructor(public utilityService: UtilityService, 
-    public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService, 
-    private accountService: AccountService, private actionFactoryService: ActionFactoryService, 
+  constructor(public utilityService: UtilityService,
+    public imageService: ImageService, private uploadService: UploadService, private toastr: ToastrService,
+    private accountService: AccountService, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, private router: Router, private libraryService: LibraryService,
-    private seriesService: SeriesService, private readerService: ReaderService, public metadataService: MetadataService, 
-    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef,
-    private deviceSerivce: DeviceService) {
+    private seriesService: SeriesService, private readerService: ReaderService,
+    public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef) {
       this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntil(this.onDestroy), 
-        map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+        takeUntilDestroyed(),
+        map(user => (user && this.accountService.hasAdminRole(user)) || false),
         shareReplay()
       );
   }
@@ -133,7 +131,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
 
     this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this))
                                 .filter(item => item.action !== Action.Edit);
-    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});    
+    this.chapterActions.push({title: 'Read', action: Action.Read, callback: this.handleChapterActionCallback.bind(this), requiresAdmin: false, children: []});
     if (this.isChapter) {
       const chapter = this.utilityService.asChapter(this.data);
       this.chapterActions = this.actionFactoryService.filterSendToAction(this.chapterActions, chapter);
@@ -146,7 +144,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    
+
     var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
     this.chapters.forEach((c: Chapter) => {
       c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
@@ -157,10 +155,6 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   close() {
     this.activeOffcanvas.close();
@@ -193,7 +187,7 @@ export class CardDetailDrawerComponent implements OnInit, OnDestroy {
     if (this.seriesId === 0) {
       return;
     }
-    
+
     this.actionService.markChapterAsRead(this.libraryId, this.seriesId, chapter, () => { this.cdRef.markForCheck(); });
   }
 

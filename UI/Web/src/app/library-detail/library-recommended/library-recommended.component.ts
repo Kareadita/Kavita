@@ -5,6 +5,7 @@ import { Series } from 'src/app/_models/series';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { RecommendationService } from 'src/app/_services/recommendation.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-library-recommended',
@@ -12,7 +13,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   styleUrls: ['./library-recommended.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibraryRecommendedComponent implements OnInit, OnDestroy {
+export class LibraryRecommendedComponent implements OnInit {
 
   @Input() libraryId: number = 0;
 
@@ -26,43 +27,36 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
 
   all$!: Observable<any>;
 
-  private onDestroy: Subject<void> = new Subject();
-
-  constructor(private recommendationService: RecommendationService, private seriesService: SeriesService, 
+  constructor(private recommendationService: RecommendationService, private seriesService: SeriesService,
     private metadataService: MetadataService) { }
 
   ngOnInit(): void {
 
     this.quickReads$ = this.recommendationService.getQuickReads(this.libraryId, 0, 30)
-                      .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
 
     this.quickCatchups$ = this.recommendationService.getQuickCatchupReads(this.libraryId, 0, 30)
-                      .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
 
     this.highlyRated$ = this.recommendationService.getHighlyRated(this.libraryId, 0, 30)
-                      .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
-    
+                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+
     this.rediscover$ = this.recommendationService.getRediscover(this.libraryId, 0, 30)
-                      .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
 
     this.onDeck$ = this.seriesService.getOnDeck(this.libraryId, 0, 30)
-                        .pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+                        .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
 
     this.genre$ = this.metadataService.getAllGenres([this.libraryId]).pipe(
-                        takeUntil(this.onDestroy),
-                        map(genres => genres[Math.floor(Math.random() * genres.length)]), 
+                        takeUntilDestroyed(),
+                        map(genres => genres[Math.floor(Math.random() * genres.length)]),
                         shareReplay()
                   );
     this.genre$.subscribe(genre => {
-      this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id, 0, 30).pipe(takeUntil(this.onDestroy), map(p => p.result), shareReplay());
+      this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id, 0, 30).pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
     });
 
-    this.all$ = merge(this.quickReads$, this.quickCatchups$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntil(this.onDestroy));
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
+    this.all$ = merge(this.quickReads$, this.quickCatchups$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntilDestroyed());
   }
 
 
@@ -75,7 +69,7 @@ export class LibraryRecommendedComponent implements OnInit, OnDestroy {
     if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
       return;
     }
-    
+
     this.quickReads$ = this.quickReads$.pipe(filter(series => !series.includes(seriesObj)));
     this.quickCatchups$ = this.quickCatchups$.pipe(filter(series => !series.includes(seriesObj)));
   }

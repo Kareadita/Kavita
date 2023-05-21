@@ -9,6 +9,7 @@ import { LibraryType } from 'src/app/_models/library';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-list-item',
@@ -16,7 +17,7 @@ import { Action, ActionItem } from 'src/app/_services/action-factory.service';
   styleUrls: ['./list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ListItemComponent implements OnInit, OnDestroy {
+export class ListItemComponent implements OnInit {
 
   /**
    * Volume or Chapter to render
@@ -72,12 +73,10 @@ export class ListItemComponent implements OnInit, OnDestroy {
   actionInProgress: boolean = false;
   summary: string = '';
   isChapter: boolean = false;
-  
+
 
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
-
-  private readonly onDestroy = new Subject<void>();
 
   get Title() {
     if (this.isChapter) return (this.entity as Chapter).titleName;
@@ -85,7 +84,7 @@ export class ListItemComponent implements OnInit, OnDestroy {
   }
 
 
-  constructor(private utilityService: UtilityService, private downloadService: DownloadService, 
+  constructor(private utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
@@ -99,16 +98,11 @@ export class ListItemComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
 
 
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntil(this.onDestroy), map((events) => {
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(), map((events) => {
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
       return null;
     }));
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   performAction(action: ActionItem<any>) {

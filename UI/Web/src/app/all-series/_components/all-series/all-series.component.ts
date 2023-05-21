@@ -16,6 +16,7 @@ import { ActionService } from 'src/app/_services/action.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { MessageHubService, Message, EVENTS } from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 
@@ -25,14 +26,13 @@ import { SeriesService } from 'src/app/_services/series.service';
   styleUrls: ['./all-series.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AllSeriesComponent implements OnInit, OnDestroy {
+export class AllSeriesComponent implements OnInit {
 
   title: string = 'All Series';
   series: Series[] = [];
   loadingSeries = false;
   pagination!: Pagination;
   filter: SeriesFilter | undefined = undefined;
-  onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActiveCheck!: SeriesFilter;
@@ -69,7 +69,7 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
           this.loadPage();
           this.bulkSelectionService.deselectAll();
         });
-        
+
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
@@ -87,13 +87,13 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private router: Router, private seriesService: SeriesService, 
-    private titleService: Title, private actionService: ActionService, 
+  constructor(private router: Router, private seriesService: SeriesService,
+    private titleService: Title, private actionService: ActionService,
     public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, private route: ActivatedRoute, 
+    private utilityService: UtilityService, private route: ActivatedRoute,
     private filterUtilityService: FilterUtilitiesService, private jumpbarService: JumpbarService,
     private readonly cdRef: ChangeDetectorRef) {
-    
+
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
     this.title = this.route.snapshot.queryParamMap.get('title') || 'All Series';
@@ -106,15 +106,10 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(debounceTime(6000), takeUntil(this.onDestroy)).subscribe((event: Message<any>) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed()).subscribe((event: Message<any>) => {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
     });
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -130,11 +125,11 @@ export class AllSeriesComponent implements OnInit, OnDestroy {
       this.bulkSelectionService.isShiftDown = false;
     }
   }
-  
+
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    
+
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
     this.loadPage();
   }

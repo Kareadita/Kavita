@@ -9,10 +9,11 @@ import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
- * page 11 page 10. 
+ * page 11 page 10.
  */
 @Component({
   selector: 'app-double-reverse-renderer',
@@ -20,7 +21,7 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
   styleUrls: ['./double-reverse-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageRenderer {
+export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
@@ -57,52 +58,50 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
   /**
    * Determines if we should render a double page.
-   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
+   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image
    * and the next page is not a wide image (as only non-wides should be shown next to each other).
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
 
-  private readonly onDestroy = new Subject<void>();
+  get ReaderMode() {return ReaderMode;}
+  get FITTING_OPTION() {return FITTING_OPTION;}
+  get LayoutMode() {return LayoutMode;}
 
-  get ReaderMode() {return ReaderMode;} 
-  get FITTING_OPTION() {return FITTING_OPTION;} 
-  get LayoutMode() {return LayoutMode;} 
 
-  
 
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
+  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService,
     @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
       filter(_ => this.isValid()),
-      map(values => values.readerMode), 
+      map(values => values.readerMode),
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.darkenss$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'), 
+      map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
-      map(enabled => enabled ? 'book-shadow' : ''), 
+      map(enabled => enabled ? 'book-shadow' : ''),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''), 
+      map(showOverlay => showOverlay ? 'blur' : ''),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -114,21 +113,21 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map(() => this.shouldRenderDouble()),
       filter(() => this.isValid()),
       shareReplay()
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map(values => values.fitting),
       filter(_ => this.isValid()),
       shareReplay()
     );
 
     this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map((value) =>  {
         if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
@@ -141,7 +140,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
 
 
     this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(values => {
         this.layoutMode = values.layoutMode;
         this.pageSplit = values.pageSplit;
@@ -150,7 +149,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     ).subscribe(() => {});
 
     this.bookmark$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -163,11 +162,6 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   shouldRenderDouble() {
@@ -204,7 +198,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
   isValid() {
     return this.layoutMode === LayoutMode.DoubleReversed;
   }
-  
+
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
@@ -305,7 +299,7 @@ export class DoubleReverseRendererComponent implements OnInit, OnDestroy, ImageR
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 
     if (extraData !== undefined) {
-      console.log(message, extraData);  
+      console.log(message, extraData);
     } else {
       console.log(message);
     }

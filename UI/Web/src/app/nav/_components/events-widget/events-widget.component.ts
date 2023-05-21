@@ -13,6 +13,7 @@ import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event'
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-nav-events-toggle',
@@ -24,8 +25,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input() user!: User;
 
   isAdmin$: Observable<boolean> = of(false);
-
-  private readonly onDestroy = new Subject<void>();
 
   /**
    * Progress events (Event Type: 'started', 'ended', 'updated' that have progress property)
@@ -53,21 +52,19 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     return EVENTS;
   }
 
-  constructor(public messageHub: MessageHubService, private modalService: NgbModal, 
+  constructor(public messageHub: MessageHubService, private modalService: NgbModal,
     private accountService: AccountService, private confirmService: ConfirmService,
     private readonly cdRef: ChangeDetectorRef, public downloadService: DownloadService) {
     }
 
   ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
     this.progressEventsSource.complete();
     this.singleUpdateSource.complete();
     this.errorSource.complete();
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
@@ -86,8 +83,8 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     });
 
     this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntil(this.onDestroy), 
-      map(user => (user && this.accountService.hasAdminRole(user)) || false), 
+      takeUntilDestroyed(),
+      map(user => (user && this.accountService.hasAdminRole(user)) || false),
       shareReplay()
     );
   }
@@ -187,11 +184,11 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     let data = [];
     if (messageEvent.name === EVENTS.Info) {
       data = this.infoSource.getValue();
-      data = data.filter(m => m !== messageEvent); 
+      data = data.filter(m => m !== messageEvent);
       this.infoSource.next(data);
     } else {
       data = this.errorSource.getValue();
-      data = data.filter(m => m !== messageEvent); 
+      data = data.filter(m => m !== messageEvent);
       this.errorSource.next(data);
     }
     this.activeEvents = Math.max(this.activeEvents - 1, 0);

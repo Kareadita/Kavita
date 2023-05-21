@@ -23,6 +23,7 @@ import { forkJoin, Subject } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import { environment } from 'src/environments/environment';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -79,8 +80,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsEnabled: boolean = false;
   baseUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
-
-  private onDestroy = new Subject<void>();
 
   get AccordionPanelID() {
     return AccordionPanelID;
@@ -165,7 +164,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(mode => {
+    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(mode => {
       if (mode) {
         this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
         this.cdRef.markForCheck();
@@ -176,8 +175,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.observableHandles.forEach(o => o.unsubscribe());
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
 

@@ -11,6 +11,7 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { ServerStatistics } from '../../_models/server-statistics';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-server-stats',
@@ -18,7 +19,7 @@ import { GenericListModalComponent } from '../_modals/generic-list-modal/generic
   styleUrls: ['./server-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ServerStatsComponent implements OnDestroy {
+export class ServerStatsComponent {
 
   releaseYears$!: Observable<Array<PieDataItem>>;
   mostActiveUsers$!: Observable<Array<PieDataItem>>;
@@ -27,7 +28,6 @@ export class ServerStatsComponent implements OnDestroy {
   recentlyRead$!: Observable<Array<PieDataItem>>;
   stats$!: Observable<ServerStatistics>;
   seriesImage: (data: PieDataItem) => string;
-  private readonly onDestroy = new Subject<void>();
   openSeries = (data: PieDataItem) => {
     const series = data.extra as Series;
     this.router.navigate(['library', series.libraryId, 'series', series.id]);
@@ -54,14 +54,14 @@ export class ServerStatsComponent implements OnDestroy {
 
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
 
-    this.stats$ = this.statService.getServerStatistics().pipe(takeUntil(this.onDestroy), shareReplay());
-    this.releaseYears$ = this.statService.getTopYears().pipe(takeUntil(this.onDestroy));
+    this.stats$ = this.statService.getServerStatistics().pipe(takeUntilDestroyed(), shareReplay());
+    this.releaseYears$ = this.statService.getTopYears().pipe(takeUntilDestroyed());
     this.mostActiveUsers$ = this.stats$.pipe(
       map(d => d.mostActiveUsers),
       map(userCounts => userCounts.map(count => {
         return {name: count.value.username, value: count.count};
       })),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.mostActiveLibrary$ = this.stats$.pipe(
@@ -69,7 +69,7 @@ export class ServerStatsComponent implements OnDestroy {
       map(counts => counts.map(count => {
         return {name: count.value.name, value: count.count};
       })),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.mostActiveSeries$ = this.stats$.pipe(
@@ -77,7 +77,7 @@ export class ServerStatsComponent implements OnDestroy {
       map(counts => counts.map(count => {
         return {name: count.value.name, value: count.count, extra: count.value};
       })),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.recentlyRead$ = this.stats$.pipe(
@@ -85,13 +85,8 @@ export class ServerStatsComponent implements OnDestroy {
       map(counts => counts.map(count => {
         return {name: count.name, value: -1, extra: count};
       })),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   openGenreList() {

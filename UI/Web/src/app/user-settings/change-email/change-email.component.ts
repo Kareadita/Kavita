@@ -1,17 +1,19 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { Observable, of, Subject, takeUntil, shareReplay, map, tap, take } from 'rxjs';
-import { UpdateEmailResponse } from 'src/app/_models/auth/update-email-response';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {Observable, of, shareReplay, take} from 'rxjs';
+import {UpdateEmailResponse} from 'src/app/_models/auth/update-email-response';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
-  styleUrls: ['./change-email.component.scss']
+  styleUrls: ['./change-email.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ChangeEmailComponent implements OnInit, OnDestroy {
+export class ChangeEmailComponent implements OnInit {
 
   form: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -24,14 +26,12 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
 
   public get email() { return this.form.get('email'); }
 
-  private onDestroy = new Subject<void>();
-
   makeLink: (val: string) => string = (val: string) => {return this.emailLink};
 
   constructor(public accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {
       this.user = user;
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));
@@ -41,13 +41,6 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       });
     });
-
-    
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   resetForm() {
@@ -71,9 +64,9 @@ export class ChangeEmailComponent implements OnInit, OnDestroy {
       } else {
         this.toastr.success('The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs');
       }
-      
-      this.resetForm();
+
       this.isViewMode = true;
+      this.resetForm();
     }, err => {
       this.errors = err;
     })

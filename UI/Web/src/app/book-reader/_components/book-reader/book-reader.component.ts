@@ -28,6 +28,7 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 enum TabID {
@@ -453,7 +454,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(
         debounceTime(200),
-        takeUntil(this.onDestroy))
+        takeUntilDestroyed())
       .subscribe((event) => {
         if (this.isLoading) return;
 
@@ -509,9 +510,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnInit(): void {

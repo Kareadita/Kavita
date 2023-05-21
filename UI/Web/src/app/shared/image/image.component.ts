@@ -4,6 +4,7 @@ import { takeUntil } from 'rxjs/operators';
 import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * This is used for images with placeholder fallback.
@@ -14,7 +15,7 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImageComponent implements OnChanges, OnDestroy {
+export class ImageComponent implements OnChanges {
 
   /**
    * Source url to load image
@@ -55,10 +56,8 @@ export class ImageComponent implements OnChanges, OnDestroy {
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
 
-  private readonly onDestroy = new Subject<void>();
-
   constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService, private changeDetectionRef: ChangeDetectorRef) {
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe(res => {
+    this.hubService.messages$.pipe(takeUntilDestroyed()).subscribe(res => {
       if (!this.processEvents) return;
       if (res.event === EVENTS.CoverUpdate) {
         const updateEvent = res.payload as CoverUpdateEvent;
@@ -109,11 +108,6 @@ export class ImageComponent implements OnChanges, OnDestroy {
     if (this.background != '') {
       this.renderer.setStyle(this.imgElem.nativeElement, 'background', this.background);
     }
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
 }

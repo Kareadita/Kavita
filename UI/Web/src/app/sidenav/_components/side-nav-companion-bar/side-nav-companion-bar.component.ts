@@ -4,6 +4,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ToggleService } from 'src/app/_services/toggle.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -14,7 +15,7 @@ import { ToggleService } from 'src/app/_services/toggle.service';
   templateUrl: './side-nav-companion-bar.component.html',
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })
-export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
+export class SideNavCompanionBarComponent implements OnInit {
   /**
    * If the page should show a filter
    */
@@ -34,7 +35,7 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
    */
   @Input() filterActive: boolean = false;
 
-  @Input() extraDrawer!: TemplateRef<any>; 
+  @Input() extraDrawer!: TemplateRef<any>;
 
 
   @Output() filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -42,9 +43,7 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
   isFilterOpen = false;
   isExtrasOpen = false;
 
-  private onDestroy: Subject<void> = new Subject();
-
-  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService, 
+  constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService,
     private offcanvasService: NgbOffcanvas) {
   }
 
@@ -52,17 +51,12 @@ export class SideNavCompanionBarComponent implements OnInit, OnDestroy {
     this.isFilterOpen = this.filterOpenByDefault;
 
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
-    this.navService.sideNavCollapsed$.pipe(takeUntil(this.onDestroy)).subscribe(sideNavCollapsed => {
+    this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed()).subscribe(sideNavCollapsed => {
       if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
         this.isFilterOpen = false;
         this.filterOpen.emit(this.isFilterOpen);
       }
     });
-  }
-
-  ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
   }
 
   toggleFilter() {

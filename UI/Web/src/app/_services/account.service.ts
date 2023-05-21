@@ -14,19 +14,20 @@ import { UpdateEmailResponse } from '../_models/auth/update-email-response';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export enum Role {
   Admin = 'Admin',
   ChangePassword = 'Change Password',
   Bookmark = 'Bookmark',
   Download = 'Download',
-  ChangeRestriction = 'Change Restriction' 
+  ChangeRestriction = 'Change Restriction'
 }
 
 @Injectable({
   providedIn: 'root'
 })
-export class AccountService implements OnDestroy {
+export class AccountService {
 
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
@@ -42,21 +43,14 @@ export class AccountService implements OnDestroy {
    */
   private refreshTokenTimeout: ReturnType<typeof setTimeout> | undefined;
 
-  private readonly onDestroy = new Subject<void>();
-
-  constructor(private httpClient: HttpClient, private router: Router, 
+  constructor(private httpClient: HttpClient, private router: Router,
     private messageHub: MessageHubService, private themeService: ThemeService) {
-      messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate), 
+      messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
         map(evt => evt.payload as UserUpdateEvent),
-        filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),  
+        filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshToken()))
         .subscribe(() => {});
     }
-  
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   hasAdminRole(user: User) {
     return user && user.roles.includes(Role.Admin);
@@ -91,7 +85,7 @@ export class AccountService implements OnDestroy {
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
   }
 
@@ -114,7 +108,7 @@ export class AccountService implements OnDestroy {
 
     this.currentUser = user;
     this.currentUserSource.next(user);
-    
+
     this.stopRefreshTokenTimer();
 
     if (this.currentUser !== undefined) {
@@ -135,15 +129,15 @@ export class AccountService implements OnDestroy {
 
   /**
    * Registers the first admin on the account. Only used for that. All other registrations must occur through invite
-   * @param model 
-   * @returns 
+   * @param model
+   * @returns
    */
   register(model: {username: string, password: string, email: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/register', model).pipe(
       map((user: User) => {
         return user;
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
   }
 
@@ -177,8 +171,8 @@ export class AccountService implements OnDestroy {
 
   /**
    * Given a user id, returns a full url for setting up the user account
-   * @param userId 
-   * @returns 
+   * @param userId
+   * @returns
    */
   getInviteUrl(userId: number, withBaseUrl: boolean = true) {
     return this.httpClient.get<string>(this.baseUrl + 'account/invite-url?userId=' + userId + '&withBaseUrl=' + withBaseUrl, TextResonse);
@@ -214,7 +208,7 @@ export class AccountService implements OnDestroy {
 
   /**
    * This will get latest preferences for a user and cache them into user store
-   * @returns 
+   * @returns
    */
   getPreferences() {
     return this.httpClient.get<Preferences>(this.baseUrl + 'users/get-preferences').pipe(map(pref => {
@@ -223,7 +217,7 @@ export class AccountService implements OnDestroy {
         this.setCurrentUser(this.currentUser);
       }
       return pref;
-    }), takeUntil(this.onDestroy));
+    }), takeUntilDestroyed());
   }
 
   updatePreferences(userPreferences: Preferences) {
@@ -233,13 +227,13 @@ export class AccountService implements OnDestroy {
         this.setCurrentUser(this.currentUser);
       }
       return settings;
-    }), takeUntil(this.onDestroy));
+    }), takeUntilDestroyed());
   }
 
   getUserFromLocalStorage(): User | undefined {
 
     const userString = localStorage.getItem(this.userKey);
-    
+
     if (userString) {
       return JSON.parse(userString)
     };
@@ -254,7 +248,7 @@ export class AccountService implements OnDestroy {
         user.apiKey = key;
 
         localStorage.setItem(this.userKey, JSON.stringify(user));
-    
+
         this.currentUserSource.next(user);
         this.currentUser = user;
       }
@@ -270,7 +264,7 @@ export class AccountService implements OnDestroy {
         this.currentUser.token = user.token;
         this.currentUser.refreshToken = user.refreshToken;
       }
-      
+
       this.setCurrentUser(this.currentUser);
       return user;
     }));

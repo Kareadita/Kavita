@@ -15,6 +15,7 @@ import { BookBlackTheme } from '../../_models/book-black-theme';
 import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
 import { BookPaperTheme } from '../../_models/book-paper-theme';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * Used for book reader. Do not use for other components
@@ -74,7 +75,7 @@ const mobileBreakpointMarginOverride = 700;
   styleUrls: ['./reader-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReaderSettingsComponent implements OnInit, OnDestroy {
+export class ReaderSettingsComponent implements OnInit {
   /**
    * Outputs when clickToPaginate is changed
    */
@@ -136,9 +137,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
   themes: Array<BookTheme> = bookColorThemes;
 
 
-  private onDestroy: Subject<void> = new Subject();
-
-
   get BookPageLayoutMode(): typeof BookPageLayoutMode  {
     return BookPageLayoutMode;
   }
@@ -191,7 +189,7 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
         this.settingsForm.addControl('bookReaderFontFamily', new FormControl(this.user.preferences.bookReaderFontFamily, []));
-        this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(fontName => {
+        this.settingsForm.get('bookReaderFontFamily')!.valueChanges.pipe(takeUntilDestroyed()).subscribe(fontName => {
           const familyName = this.fontFamilies.filter(f => f.title === fontName)[0].family;
           if (familyName === 'default') {
             this.pageStyles['font-family'] = 'inherit';
@@ -203,24 +201,24 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
         });
 
         this.settingsForm.addControl('bookReaderFontSize', new FormControl(this.user.preferences.bookReaderFontSize, []));
-        this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+        this.settingsForm.get('bookReaderFontSize')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
           this.pageStyles['font-size'] = value + '%';
           this.styleUpdate.emit(this.pageStyles);
         });
 
         this.settingsForm.addControl('bookReaderTapToPaginate', new FormControl(this.user.preferences.bookReaderTapToPaginate, []));
-        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+        this.settingsForm.get('bookReaderTapToPaginate')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
           this.clickToPaginateChanged.emit(value);
         });
 
         this.settingsForm.addControl('bookReaderLineSpacing', new FormControl(this.user.preferences.bookReaderLineSpacing, []));
-        this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+        this.settingsForm.get('bookReaderLineSpacing')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
           this.pageStyles['line-height'] = value + '%';
           this.styleUpdate.emit(this.pageStyles);
         });
 
         this.settingsForm.addControl('bookReaderMargin', new FormControl(this.user.preferences.bookReaderMargin, []));
-        this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(value => {
+        this.settingsForm.get('bookReaderMargin')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(value => {
           this.pageStyles['margin-left'] = value + 'vw';
           this.pageStyles['margin-right'] = value + 'vw';
           this.styleUpdate.emit(this.pageStyles);
@@ -229,12 +227,12 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
 
         this.settingsForm.addControl('layoutMode', new FormControl(this.user.preferences.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
-        this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((layoutMode: BookPageLayoutMode) => {
+        this.settingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe((layoutMode: BookPageLayoutMode) => {
           this.layoutModeUpdate.emit(layoutMode);
         });
 
         this.settingsForm.addControl('bookReaderImmersiveMode', new FormControl(this.user.preferences.bookReaderImmersiveMode, []));
-        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((immersiveMode: boolean) => {
+        this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe((immersiveMode: boolean) => {
           if (immersiveMode) {
             this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
           }
@@ -260,12 +258,6 @@ export class ReaderSettingsComponent implements OnInit, OnDestroy {
 
     });
   }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
 
   resetSettings() {
     if (this.user) {

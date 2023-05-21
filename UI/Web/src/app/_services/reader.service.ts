@@ -19,6 +19,7 @@ import { TextResonse } from '../_types/text-response';
 import { AccountService } from './account.service';
 import { Subject, takeUntil } from 'rxjs';
 import { OnDestroy } from '@angular/core';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -26,29 +27,24 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 @Injectable({
   providedIn: 'root'
 })
-export class ReaderService implements OnDestroy {
+export class ReaderService {
 
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
-  private onDestroy: Subject<void> = new Subject();
 
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  constructor(private httpClient: HttpClient, private router: Router, 
+  constructor(private httpClient: HttpClient, private router: Router,
     private location: Location, private utilityService: UtilityService,
     private filterUtilitySerivce: FilterUtilitiesService, private accountService: AccountService) {
-      this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+      this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
         }
       });
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
     if (format === undefined) format = MangaFormat.ARCHIVE;

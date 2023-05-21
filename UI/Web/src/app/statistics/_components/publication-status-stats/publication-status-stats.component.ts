@@ -5,6 +5,7 @@ import { Observable, Subject, map, takeUntil, combineLatest, BehaviorSubject } f
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { PieDataItem } from '../../_models/pie-data-item';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-publication-status-stats',
@@ -12,13 +13,12 @@ import { PieDataItem } from '../../_models/pie-data-item';
   styleUrls: ['./publication-status-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PublicationStatusStatsComponent implements OnDestroy {
+export class PublicationStatusStatsComponent {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
   publicationStatues$!: Observable<Array<PieDataItem>>;
-  private readonly onDestroy = new Subject<void>();
-  
+
   currentSort = new BehaviorSubject<SortEvent<PieDataItem>>({column: 'value', direction: 'asc'});
   currentSort$: Observable<SortEvent<PieDataItem>> = this.currentSort.asObservable();
 
@@ -44,13 +44,8 @@ export class PublicationStatusStatsComponent implements OnDestroy {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : data;
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   onSort(evt: SortEvent<PieDataItem>) {

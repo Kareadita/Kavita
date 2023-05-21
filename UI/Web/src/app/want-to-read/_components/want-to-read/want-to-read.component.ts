@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
-import { Subject, take, debounceTime, takeUntil } from 'rxjs';
+import { take, debounceTime } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
@@ -19,6 +19,7 @@ import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -27,7 +28,7 @@ import { SeriesService } from 'src/app/_services/series.service';
   styleUrls: ['./want-to-read.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WantToReadComponent implements OnInit, OnDestroy, AfterContentChecked {
+export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -46,12 +47,11 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
 
-  private onDestroy: Subject<void> = new Subject<void>();
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
     switch (action.action) {
       case Action.RemoveFromWantToReadList:
@@ -62,7 +62,7 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
         break;
     }
   }
-  
+
   collectionTag: any;
   tagImage: any;
 
@@ -77,9 +77,9 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
     return 'calc(var(--vh)*100 - ' + totalHeight + 'px)';
   }
 
-  constructor(public imageService: ImageService, private router: Router, private route: ActivatedRoute, 
-    private seriesService: SeriesService, private titleService: Title, 
-    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService, 
+  constructor(public imageService: ImageService, private router: Router, private route: ActivatedRoute,
+    private seriesService: SeriesService, private titleService: Title,
+    public bulkSelectionService: BulkSelectionService, private actionService: ActionService, private messageHub: MessageHubService,
     private filterUtilityService: FilterUtilitiesService, private utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
     private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
     private jumpbarService: JumpbarService) {
@@ -91,25 +91,25 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
       this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
       this.cdRef.markForCheck();
 
-      this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
+      this.hubService.messages$.pipe(takeUntilDestroyed()).subscribe((event) => {
         if (event.event === EVENTS.SeriesRemoved) {
           const seriesRemoved = event.payload as SeriesRemovedEvent;
           if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
             this.loadPage();
             return;
           }
-  
+
           this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
           this.seriesPagination.totalItems--;
           this.cdRef.markForCheck();
           this.refresh.emit();
         }
       });
-      
+
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), debounceTime(2000)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(), debounceTime(2000)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         this.loadPage();
       }
@@ -118,11 +118,6 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
 
   ngAfterContentChecked(): void {
     this.scrollService.setScrollContainer(this.scrollingBlock);
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -150,7 +145,7 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.isLoading = true;
     this.cdRef.markForCheck();
-    
+
     this.seriesService.getWantToRead(undefined, undefined, this.filter).pipe(take(1)).subscribe(paginatedList => {
       this.series = paginatedList.result;
       this.seriesPagination = paginatedList.pagination;
@@ -163,7 +158,7 @@ export class WantToReadComponent implements OnInit, OnDestroy, AfterContentCheck
 
   updateFilter(data: FilterEvent) {
     this.filter = data.filter;
-    
+
     if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
     this.loadPage();
   }

@@ -10,6 +10,7 @@ import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SearchService } from 'src/app/_services/search.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
@@ -23,7 +24,7 @@ interface RelationControl {
   styleUrls: ['./edit-series-relation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditSeriesRelationComponent implements OnInit, OnDestroy {
+export class EditSeriesRelationComponent implements OnInit {
 
   @Input() series!: Series;
   /**
@@ -45,9 +46,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
   }
 
 
-  private onDestroy: Subject<void> = new Subject<void>();
-
-  constructor(private seriesService: SeriesService, private utilityService: UtilityService, 
+  constructor(private seriesService: SeriesService, private utilityService: UtilityService,
     public imageService: ImageService, private libraryService: LibraryService,  private searchService: SearchService,
     private readonly cdRef: ChangeDetectorRef) {}
 
@@ -74,12 +73,7 @@ export class EditSeriesRelationComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.save.pipe(takeUntil(this.onDestroy)).subscribe(() => this.saveState());
-  }
-
-  ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
+    this.save.pipe(takeUntilDestroyed()).subscribe(() => this.saveState());
   }
 
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {

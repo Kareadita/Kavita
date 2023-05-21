@@ -7,6 +7,7 @@ import { ReaderService } from '../../../_services/reader.service';
 import { PAGING_DIRECTION } from '../../_models/reader-enums';
 import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -110,7 +111,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * If the user has scrolled all the way to the bottom. This is used solely for continuous reading
    */
-   atBottom: boolean = false;   
+   atBottom: boolean = false;
    /**
    * If the user has scrolled all the way to the top. This is used solely for continuous reading
    */
@@ -149,10 +150,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return this.webtoonImageWidth > (innerWidth || document.body.clientWidth);
   }
 
-
-  private readonly onDestroy = new Subject<void>();
-
-  constructor(private readerService: ReaderService, private renderer: Renderer2, 
+  constructor(private readerService: ReaderService, private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
     private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) {
     // This will always exist at this point in time since this is used within manga reader
@@ -172,18 +170,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.intersectionObserver.disconnect();
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   /**
-   * Responsible for binding the scroll handler to the correct event. On non-fullscreen, body is correct. However, on fullscreen, we must use the reader as that is what 
+   * Responsible for binding the scroll handler to the correct event. On non-fullscreen, body is correct. However, on fullscreen, we must use the reader as that is what
    * gets promoted to fullscreen.
    */
   initScrollHandler() {
     console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
-    .pipe(debounceTime(20), takeUntil(this.onDestroy))
+    .pipe(debounceTime(20), takeUntilDestroyed())
     .subscribe((event) => this.handleScrollEvent(event));
   }
 
@@ -193,7 +189,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.recalculateImageWidth();
 
     if (this.goToPage) {
-      this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+      this.goToPage.pipe(takeUntilDestroyed()).subscribe(page => {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
         this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
@@ -209,11 +205,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.bookmarkPage) {
-      this.bookmarkPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+      this.bookmarkPage.pipe(takeUntilDestroyed()).subscribe(page => {
         const image = document.querySelector('img[id^="page-' + page + '"]');
         if (image) {
           this.renderer.addClass(image, 'bookmark-effect');
-          
+
           setTimeout(() => {
             this.renderer.removeClass(image, 'bookmark-effect');
           }, 1000);
@@ -222,7 +218,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.fullscreenToggled) {
-      this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
+      this.fullscreenToggled.pipe(takeUntilDestroyed()).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
         this.cdRef.markForCheck();
@@ -251,13 +247,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     return (offset
-      || document.body.scrollTop 
-      || document.documentElement.scrollTop 
+      || document.body.scrollTop
+      || document.documentElement.scrollTop
       || 0);
   }
 
   /**
-   * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely, 
+   * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely,
    * and calculate the direction the scrolling is occuring. This is not used for prefetching.
    * @param event Scroll Event
    */
@@ -279,7 +275,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (!this.isScrolling) {
       // Use offset of the image against the scroll container to test if the most of the image is visible on the screen. We can use this
-      // to mark the current page and separate the prefetching code. 
+      // to mark the current page and separate the prefetching code.
       const midlineImages = Array.from(document.querySelectorAll('img[id^="page-"]'))
       .filter(entry => this.shouldElementCountAsCurrentPage(entry));
 
@@ -336,7 +332,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2);
           this.cdRef.markForCheck();
         });
-      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) { 
+      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) {
         // This if statement will fire once we scroll into the spacer at all
         this.loadNextChapter.emit();
         this.cdRef.markForCheck();
@@ -345,12 +341,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
       if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
         this.atBottom = false;
-        this.atTop = true; 
+        this.atTop = true;
         this.cdRef.markForCheck();
 
         // Scroll user back to original location
         this.previousScrollHeightMinusTop = document.body.scrollHeight - document.body.scrollTop;
-        
+
         const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
         requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
       } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
@@ -362,7 +358,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * 
+   *
    * @returns Height, Width
    */
   getInnerDimensions() {
@@ -377,10 +373,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
-   * Is any part of the element visible in the scrollport. Does not take into account 
-   * style properites, just scroll port visibility. 
-   * @param elem 
-   * @returns 
+   * Is any part of the element visible in the scrollport. Does not take into account
+   * style properites, just scroll port visibility.
+   * @param elem
+   * @returns
    */
   isElementVisible(elem: Element) {
     if (elem === null || elem === undefined) { return false; }
@@ -391,8 +387,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     const [innerHeight, innerWidth] = this.getInnerDimensions();
 
-    return (rect.bottom >= 0 && 
-            rect.right >= 0 && 
+    return (rect.bottom >= 0 &&
+            rect.right >= 0 &&
             rect.top <= (innerHeight || document.body.clientHeight) &&
             rect.left <= (innerWidth || document.body.clientWidth)
           );
@@ -400,7 +396,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Is any part of the element visible in the scrollport and is it above the midline trigger.
-   * The midline trigger does not mean it is half of the screen. It may be top 25%. 
+   * The midline trigger does not mean it is half of the screen. It may be top 25%.
    * @param elem HTML Element
    * @returns If above midline
    */
@@ -412,8 +408,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     const [innerHeight, innerWidth] = this.getInnerDimensions();
 
 
-    if (rect.bottom >= 0 && 
-            rect.right >= 0 && 
+    if (rect.bottom >= 0 &&
+            rect.right >= 0 &&
             rect.top <= (innerHeight || document.body.clientHeight) &&
             rect.left <= (innerWidth || document.body.clientWidth)
           ) {
@@ -444,7 +440,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Callback for an image onLoad. At this point the image is already rendered in DOM (may not be visible)
    * This will be used to scroll to current page for intial load
-   * @param event 
+   * @param event
    */
   onImageLoad(event: any) {
     const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
@@ -468,13 +464,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
           this.debugLog('[Image Load] ! Loaded current page !', this.pageNum);
           this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
           // There needs to be a bit of time before we scroll
-          if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) { 
+          if (this.currentPageElem && !this.isElementVisible(this.currentPageElem)) {
             this.scrollToCurrentPage();
           } else {
             this.initFinished = true;
             this.cdRef.markForCheck();
           }
-          
+
           this.allImagesLoaded = true;
           this.cdRef.markForCheck();
       });
@@ -530,7 +526,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.currentPageElem = document.querySelector('img#page-' + this.pageNum);
     if (!this.currentPageElem) { return; }
     this.debugLog('[GoToPage] Scrolling to page', this.pageNum);
-    
+
     // Update prevScrollPosition, so the next scroll event properly calculates direction
     this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;
     this.isScrolling = true;
@@ -553,7 +549,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.debugLog('\t[PREFETCH] Prefetching ', page);
-    
+
     const data = this.webtoonImages.value.concat({src: this.urlProvider(page), page});
 
     data.sort((a: WebtoonImage, b: WebtoonImage) => {
@@ -582,9 +578,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Finds the ranges of indecies to load from backend. totalPages - 1 is due to backend will automatically return last page for any page number
-   * above totalPages. Webtoon reader might ask for that which results in duplicate last pages. 
-   * @param pageNum 
-   * @returns 
+   * above totalPages. Webtoon reader might ask for that which results in duplicate last pages.
+   * @param pageNum
+   * @returns
    */
   calculatePrefetchIndecies(pageNum: number = -1) {
     if (pageNum == -1) {
@@ -646,7 +642,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     if (this.debugLogFilter.filter(str => message.replace('\t', '').startsWith(str)).length > 0) return;
     if (extraData !== undefined) {
-      console.log(message, extraData);  
+      console.log(message, extraData);
     } else {
       console.log(message);
     }

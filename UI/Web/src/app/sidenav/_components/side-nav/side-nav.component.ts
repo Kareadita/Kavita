@@ -14,6 +14,7 @@ import { Action, ActionFactoryService, ActionItem } from '../../../_services/act
 import { ActionService } from '../../../_services/action.service';
 import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-side-nav',
@@ -21,7 +22,7 @@ import { NavService } from '../../../_services/nav.service';
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SideNavComponent implements OnInit, OnDestroy {
+export class SideNavComponent implements OnInit {
 
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
@@ -32,18 +33,16 @@ export class SideNavComponent implements OnInit, OnDestroy {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
-  private onDestroy: Subject<void> = new Subject();
-
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService, 
+    private actionFactoryService: ActionFactoryService, private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService) {
 
       this.router.events.pipe(
-        filter(event => event instanceof NavigationEnd), 
-        takeUntil(this.onDestroy),
+        filter(event => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
         map(evt => evt as NavigationEnd),
         filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet))
       .subscribe((evt: NavigationEnd) => {
@@ -68,17 +67,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = [...libraries];
         this.cdRef.markForCheck();
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   handleAction(action: ActionItem<Library>, library: Library) {

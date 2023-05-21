@@ -9,6 +9,7 @@ import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * Renders 2 pages except on last page, and before a wide image
@@ -19,8 +20,8 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
   styleUrls: ['./double-no-cover-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
-  
+export class DoubleNoCoverRendererComponent implements OnInit {
+
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   @Input() bookmark$!: Observable<number>;
@@ -47,60 +48,58 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
    */
   currentImage = new Image();
    /**
-    * Used solely for LayoutMode.Double rendering. 
+    * Used solely for LayoutMode.Double rendering.
     * @remarks Used for rendering to screen.
     */
   currentImage2 = new Image();
 
   /**
    * Determines if we should render a double page.
-   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image 
+   * The general gist is if we are on double layout mode, the current page (first page) is not a cover image or a wide image
    * and the next page is not a wide image (as only non-wides should be shown next to each other).
    * @remarks This will always fail if the window's width is greater than the height
   */
   shouldRenderDouble$!: Observable<boolean>;
 
 
-  private readonly onDestroy = new Subject<void>();
+  get ReaderMode() {return ReaderMode;}
+  get FITTING_OPTION() {return FITTING_OPTION;}
+  get LayoutMode() {return LayoutMode;}
 
-  get ReaderMode() {return ReaderMode;} 
-  get FITTING_OPTION() {return FITTING_OPTION;} 
-  get LayoutMode() {return LayoutMode;} 
 
-  
 
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
+  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService,
     @Inject(DOCUMENT) private document: Document, public readerService: ReaderService) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
-      map(values => values.readerMode), 
+      map(values => values.readerMode),
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.darkenss$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'), 
+      map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
-      map(enabled => enabled ? 'book-shadow' : ''), 
+      map(enabled => enabled ? 'book-shadow' : ''),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''), 
+      map(showOverlay => showOverlay ? 'blur' : ''),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -114,20 +113,20 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
     ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map((_) => this.shouldRenderDouble()),
       filter(_ => this.isValid()),
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map(values => values.fitting),
       filter(_ => this.isValid()),
       shareReplay()
     );
 
     this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map((value) =>  {
         if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
@@ -139,7 +138,7 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
 
 
     this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(values => {
         this.layoutMode = values.layoutMode;
         this.pageSplit = values.pageSplit;
@@ -148,7 +147,7 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
     ).subscribe(() => {});
 
     this.bookmark$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -156,16 +155,11 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
 
         const image2 = this.document.querySelector('#image-2');
         if (image2 != null) elements.push(image2);
-  
+
         this.mangaReaderService.applyBookmarkEffect(elements);
       }),
       filter(_ => this.isValid()),
     ).subscribe(() => {});
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   shouldRenderDouble() {
@@ -202,11 +196,11 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
   isValid() {
     return this.layoutMode === LayoutMode.DoubleNoCover;
   }
-  
+
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-    
+
     // First load, switching from double manga -> double, this is 0 and thus not rendering
     if (!this.shouldRenderDouble() && (this.currentImage.height || img[0].height) > 0) {
       this.imageHeight.emit(this.currentImage.height || img[0].height);
@@ -297,7 +291,7 @@ export class DoubleNoCoverRendererComponent implements OnInit, OnDestroy {
     if (!(this.debugMode & DEBUG_MODES.Logs)) return;
 
     if (extraData !== undefined) {
-      console.log(message, extraData);  
+      console.log(message, extraData);
     } else {
       console.log(message);
     }

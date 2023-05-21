@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from 'src/app/_services/nav.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -10,7 +11,7 @@ import { NavService } from 'src/app/_services/nav.service';
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SideNavItemComponent implements OnInit, OnDestroy {
+export class SideNavItemComponent implements OnInit {
   /**
    * Icon to display next to item. ie) 'fa-home'
    */
@@ -34,32 +35,26 @@ export class SideNavItemComponent implements OnInit, OnDestroy {
 
 
   highlighted = false;
-  private onDestroy: Subject<void> = new Subject();
-   
+
   constructor(public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
     router.events
-      .pipe(filter(event => event instanceof NavigationEnd), 
-            takeUntil(this.onDestroy),
+      .pipe(filter(event => event instanceof NavigationEnd),
+            takeUntilDestroyed(),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
-        this.updateHightlight(evt.url.split('?')[0]);
-        
+        this.updateHighlight(evt.url.split('?')[0]);
+
       });
   }
 
   ngOnInit(): void {
     setTimeout(() => {
-      this.updateHightlight(this.router.url.split('?')[0]);
+      this.updateHighlight(this.router.url.split('?')[0]);
     }, 100);
-    
+
   }
 
-  ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
-  }
-
-  updateHightlight(page: string) {
+  updateHighlight(page: string) {
     if (this.link === undefined) {
       this.highlighted = false;
       this.cdRef.markForCheck();

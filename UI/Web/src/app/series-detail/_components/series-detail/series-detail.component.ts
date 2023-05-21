@@ -42,6 +42,7 @@ import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ReviewSeriesModalComponent } from '../../_modals/review-series-modal/review-series-modal.component';
 import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 interface RelatedSeris {
   series: Series;
@@ -68,7 +69,7 @@ interface StoryLineItem {
   styleUrls: ['./series-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChecked {
+export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
@@ -117,7 +118,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
   downloadInProgress: boolean = false;
 
   itemSize: number = 10; // when 10 done, 16 loads
-  
+
   /**
    * Track by function for Volume to tell when to refresh card data
    */
@@ -206,9 +207,6 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         break;
     }
   }
-
-  private onDestroy: Subject<void> = new Subject();
-
 
   get LibraryType() {
     return LibraryType;
@@ -301,7 +299,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
       return;
     }
 
-    this.messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
         if (seriesRemovedEvent.seriesId === this.seriesId) {
@@ -322,16 +320,11 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     this.changeDetectionRef.markForCheck();
     this.loadSeries(this.seriesId);
 
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe((val: PageLayoutMode | null) => {
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe((val: PageLayoutMode | null) => {
       if (val == null) return;
       this.renderMode = val;
       this.changeDetectionRef.markForCheck();
     });
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   @HostListener('document:keydown.shift', ['$event'])
@@ -543,7 +536,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
         if (detail == null) return;
         this.unreadCount = detail.unreadCount;
         this.totalCount = detail.totalCount;
-        
+
         this.hasSpecials = detail.specials.length > 0;
         this.specials = detail.specials;
 
@@ -792,7 +785,7 @@ export class SeriesDetailComponent implements OnInit, OnDestroy, AfterContentChe
     } else {
       this.actionService.addMultipleSeriesToWantToReadList([this.series.id]);
     }
-   
+
     this.isWantToRead = !this.isWantToRead;
     this.changeDetectionRef.markForCheck();
   }

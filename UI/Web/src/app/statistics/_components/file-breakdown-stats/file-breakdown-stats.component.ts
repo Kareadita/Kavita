@@ -2,18 +2,16 @@ import { ChangeDetectionStrategy, Component, OnDestroy, QueryList, ViewChildren 
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, shareReplay } from 'rxjs';
-import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
 import { PieDataItem } from '../../_models/pie-data-item';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export interface StackedBarChartDataItem {
   name: string,
   series: Array<PieDataItem>;
 }
-
-const mangaFormatPipe = new MangaFormatPipe();
 
 @Component({
   selector: 'app-file-breakdown-stats',
@@ -21,7 +19,7 @@ const mangaFormatPipe = new MangaFormatPipe();
   styleUrls: ['./file-breakdown-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FileBreakdownStatsComponent implements OnDestroy {
+export class FileBreakdownStatsComponent {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
 
@@ -29,8 +27,7 @@ export class FileBreakdownStatsComponent implements OnDestroy {
   files$!: Observable<Array<FileExtension>>;
   vizData$!: Observable<Array<StackedBarChartDataItem>>;
   vizData2$!: Observable<Array<PieDataItem>>;
-  private readonly onDestroy = new Subject<void>();
-  
+
   currentSort = new BehaviorSubject<SortEvent<FileExtension>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<FileExtension>> = this.currentSort.asObservable();
 
@@ -48,7 +45,7 @@ export class FileBreakdownStatsComponent implements OnDestroy {
 
 
   constructor(private statService: StatisticsService) {
-    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntil(this.onDestroy), shareReplay());
+    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(), shareReplay());
 
     this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
       map(([sortConfig, data]) => {
@@ -61,18 +58,13 @@ export class FileBreakdownStatsComponent implements OnDestroy {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : fileBreakdown;
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
 
-    this.vizData2$ = this.files$.pipe(takeUntil(this.onDestroy), map(data => data.map(d => {
+    this.vizData2$ = this.files$.pipe(takeUntilDestroyed(), map(data => data.map(d => {
       return {name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize};
     })));
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   onSort(evt: SortEvent<FileExtension>) {

@@ -7,6 +7,7 @@ import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
 
@@ -16,18 +17,17 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
   styleUrls: ['./canvas-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy, ImageRenderer {
+export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 
   @Input() readerSettings$!: Observable<ReaderSetting>;
   @Input() image$!: Observable<HTMLImageElement | null>;
   @Input() bookmark$!: Observable<number>;
   @Input() showClickOverlay$!: Observable<boolean>;
-  @Input() imageFit$!: Observable<FITTING_OPTION>; 
+  @Input() imageFit$!: Observable<FITTING_OPTION>;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
-  private readonly onDestroy = new Subject<void>();
 
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
@@ -47,13 +47,13 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    */
   imageFitClass$!: Observable<string>;
   renderWithCanvas: boolean = false;
-  
+
 
 
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
-    this.readerSettings$.pipe(takeUntil(this.onDestroy), tap((value: ReaderSetting) => {
+    this.readerSettings$.pipe(takeUntilDestroyed(), tap((value: ReaderSetting) => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
       this.layoutMode = value.layoutMode;
@@ -65,19 +65,19 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     })).subscribe(() => {});
 
     this.darkenss$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'), 
+      map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       map((values: ReaderSetting) => values.fitting),
       map(fit => {
         if (fit === FITTING_OPTION.WIDTH) return fit; // || this.layoutMode === LayoutMode.Single (so that we can check the wide stuff)
         if (this.canvasImage === null) return fit;
 
-        // Would this ever execute given that we perform splitting only in this renderer? 
+        // Would this ever execute given that we perform splitting only in this renderer?
         if (
           this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src)) &&
           this.mangaReaderService.shouldRenderAsFitSplit(this.pageSplit)
@@ -92,7 +92,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
 
     this.bookmark$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(),
       tap(_ => {
         if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
         if (!this.canvas) return;
@@ -103,8 +103,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     ).subscribe(() => {});
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''), 
-      takeUntil(this.onDestroy)
+      map(showOverlay => showOverlay ? 'blur' : ''),
+      takeUntilDestroyed()
     );
   }
 
@@ -114,10 +114,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     }
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   reset() {
     this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
@@ -126,7 +122,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
   updateSplitPage() {
     if (this.canvasImage == null) return;
     const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
-    
+
     if (!needsSplitting || this.mangaReaderService.isNoSplit(this.pageSplit)) {
       this.currentImageSplitPart = SPLIT_PAGE_PART.NO_SPLIT;
       return needsSplitting;
@@ -171,8 +167,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
 
   /**
    * This renderer does not render when splitting is not needed
-   * @param img 
-   * @returns 
+   * @param img
+   * @returns
    */
   renderPage(img: Array<HTMLImageElement | null>) {
     this.renderWithCanvas = false;
@@ -184,7 +180,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.layoutMode !== LayoutMode.Single || !ValidSplits.includes(this.pageSplit)) {
       return;
     }
-    
+
     const needsSplitting = this.updateSplitPage();
     if (!needsSplitting) return;
 
@@ -236,8 +232,6 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, OnDestroy
    setCanvasSize() {
     if (this.canvasImage == null) return;
     if (!this.ctx || !this.canvas) { return; }
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     const isSafari = [
       'iPad Simulator',
       'iPhone Simulator',

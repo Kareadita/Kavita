@@ -14,6 +14,7 @@ import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 enum TabID {
@@ -28,7 +29,7 @@ enum TabID {
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditCollectionTagsComponent implements OnInit, OnDestroy {
+export class EditCollectionTagsComponent implements OnInit {
 
   @Input() tag!: CollectionTag;
   series: Array<Series> = [];
@@ -43,8 +44,6 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
   imageUrls: Array<string> = [];
   selectedCover: string = '';
 
-  private readonly onDestroy = new Subject<void>();
-
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
   }
@@ -57,7 +56,7 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
     return TabID;
   }
 
-  constructor(public modal: NgbActiveModal, private seriesService: SeriesService, 
+  constructor(public modal: NgbActiveModal, private seriesService: SeriesService,
     private collectionService: CollectionTagService, private toastr: ToastrService,
     private confirmSerivce: ConfirmService, private libraryService: LibraryService,
     private imageService: ImageService, private uploadService: UploadService,
@@ -76,7 +75,7 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
     });
 
     this.collectionTagForm.get('title')?.valueChanges.pipe(
-      debounceTime(100), 
+      debounceTime(100),
       distinctUntilChanged(),
       switchMap(name => this.collectionService.tagNameExists(name)),
       tap(exists => {
@@ -84,20 +83,15 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
         if (!exists || isExistingName) {
           this.collectionTagForm.get('title')?.setErrors(null);
         } else {
-          this.collectionTagForm.get('title')?.setErrors({duplicateName: true})  
+          this.collectionTagForm.get('title')?.setErrors({duplicateName: true})
         }
         this.cdRef.markForCheck();
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed()
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));
     this.loadSeries();
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   onPageChange(pageNum: number) {
@@ -153,7 +147,7 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
     const unselectedIds = this.selections.unselected().map(s => s.id);
     const tag = this.collectionTagForm.value;
     tag.id = this.tag.id;
-    
+
     if (unselectedIds.length == this.series.length && !await this.confirmSerivce.confirm('Warning! No series are selected, saving will delete the tag. Are you sure you want to continue?')) {
       return;
     }
@@ -162,11 +156,11 @@ export class EditCollectionTagsComponent implements OnInit, OnDestroy {
       this.collectionService.updateTag(tag),
       this.collectionService.updateSeriesForTag(tag, this.selections.unselected().map(s => s.id))
     ];
-    
+
     if (selectedIndex > 0) {
       apis.push(this.uploadService.updateCollectionCoverImage(this.tag.id, this.selectedCover));
     }
-  
+
     forkJoin(apis).subscribe(() => {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
       this.toastr.success('Tag updated');
