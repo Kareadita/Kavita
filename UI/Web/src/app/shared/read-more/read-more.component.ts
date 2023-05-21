@@ -10,7 +10,7 @@ export class ReadMoreComponent implements OnChanges {
   /**
    * String to apply readmore on
    */
-  @Input() text!: string;
+  @Input({required: true}) text!: string;
   /**
    * Max length before apply read more. Defaults to 250 characters.
    */

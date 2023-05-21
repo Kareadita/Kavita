@@ -19,9 +19,9 @@ import { ImageService } from 'src/app/_services/image.service';
 })
 export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
-  @Input() entity!: Volume | Chapter;
+  @Input({required: true}) entity!: Volume | Chapter;
   /**
-   * This will pull extra information 
+   * This will pull extra information
    */
   @Input() includeMetadata: boolean = false;
 
@@ -84,19 +84,19 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       });
     }
-    
+
     this.totalPages = this.chapter.pages;
     if (!this.isChapter) {
       this.totalPages = this.utilityService.asVolume(this.entity).pages;
     }
-      
+
     this.totalWordCount = this.chapter.wordCount;
     if (!this.isChapter) {
       this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
     }
 
-      
-        
+
+
     if (this.isChapter) {
       this.readingTime.minHours = this.chapter.minHoursToRead;
       this.readingTime.maxHours = this.chapter.maxHoursToRead;

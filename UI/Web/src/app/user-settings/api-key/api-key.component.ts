@@ -1,17 +1,25 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { AccountService } from 'src/app/_services/account.service';
-import { Clipboard } from '@angular/cdk/clipboard';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef, inject,
+  Input,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {AccountService} from 'src/app/_services/account.service';
+import {Clipboard} from '@angular/cdk/clipboard';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-api-key',
   templateUrl: './api-key.component.html',
-  styleUrls: ['./api-key.component.scss']
+  styleUrls: ['./api-key.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ApiKeyComponent implements OnInit, OnDestroy {
+export class ApiKeyComponent implements OnInit {
 
   @Input() title: string = 'API Key';
   @Input() showRefresh: boolean = true;
@@ -19,13 +27,14 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
   @Input() tooltipText: string = '';
   @ViewChild('apiKey') inputElem!: ElementRef;
   key: string = '';
-  private readonly onDestroy = new Subject<void>();
-  
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard) { }
+
+  constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard,
+              private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       let key = '';
       if (user) {
         key = user.apiKey;
@@ -35,19 +44,16 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
 
       if (this.transform != undefined) {
         this.key = this.transform(key);
+        this.cdRef.markForCheck();
       }
     });
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   async copy() {
     this.inputElem.nativeElement.select();
     this.clipboard.copy(this.inputElem.nativeElement.value);
     this.inputElem.nativeElement.setSelectionRange(0, 0);
+    this.cdRef.markForCheck();
   }
 
   async refresh() {
@@ -56,6 +62,7 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
     }
     this.accountService.resetApiKey().subscribe(newKey => {
       this.key = newKey;
+      this.cdRef.markForCheck();
       this.toastr.success('API Key reset');
     });
   }
@@ -63,6 +70,7 @@ export class ApiKeyComponent implements OnInit, OnDestroy {
   selectAll() {
     if (this.inputElem) {
       this.inputElem.nativeElement.setSelectionRange(0, this.key.length);
+      this.cdRef.markForCheck();
     }
   }
 

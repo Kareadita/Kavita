@@ -1,10 +1,22 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output, QueryList, ViewChildren, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  QueryList,
+  ViewChildren,
+  inject,
+  DestroyRef
+} from '@angular/core';
 import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { FormControl, FormGroup } from '@angular/forms';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-alerts',
@@ -16,12 +28,12 @@ export class ManageAlertsComponent implements OnInit {
 
   @Output() alertCount = new EventEmitter<number>();
   @ViewChildren(SortableHeader<KavitaMediaError>) headers!: QueryList<SortableHeader<KavitaMediaError>>;
-  private readonly serverService = inject(ServerService); 
-  private readonly messageHub = inject(MessageHubService); 
-  private readonly cdRef = inject(ChangeDetectorRef); 
-  private readonly onDestroy = new Subject<void>();
+  private readonly serverService = inject(ServerService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
-  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntil(this.onDestroy), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
+  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<KavitaMediaError>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<KavitaMediaError>> = this.currentSort.asObservable();
 
@@ -30,7 +42,7 @@ export class ManageAlertsComponent implements OnInit {
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
-  
+
 
   constructor() {}
 

@@ -15,7 +15,7 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 })
 export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 
-  @Input() title!: string;
+  @Input({required: true}) title!: string;
   /**
    * Series Ids to add to Collection Tag
    */
@@ -33,14 +33,14 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
 
-  constructor(private modal: NgbActiveModal, private collectionService: CollectionTagService, 
+  constructor(private modal: NgbActiveModal, private collectionService: CollectionTagService,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
 
     this.listForm.addControl('title', new FormControl(this.title, []));
     this.listForm.addControl('filterQuery', new FormControl('', []));
-    
+
     this.loading = true;
     this.cdRef.markForCheck();
     this.collectionService.allTags().subscribe(tags => {
@@ -77,7 +77,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
       this.toastr.success('Series added to ' + tag.title + ' collection');
       this.modal.close();
     });
-    
+
   }
 
   filterList = (listItem: ReadingList) => {

@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -10,6 +18,7 @@ import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
 import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-library',
@@ -17,7 +26,7 @@ import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hu
   styleUrls: ['./manage-library.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ManageLibraryComponent implements OnInit, OnDestroy {
+export class ManageLibraryComponent implements OnInit {
 
   libraries: Library[] = [];
   loading = false;
@@ -26,10 +35,9 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
    */
   deletionInProgress: boolean = false;
   libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
+  private readonly destroyRef = inject(DestroyRef);
 
-  private readonly onDestroy = new Subject<void>();
-
-  constructor(private modalService: NgbModal, private libraryService: LibraryService, 
+  constructor(private modalService: NgbModal, private libraryService: LibraryService,
     private toastr: ToastrService, private confirmService: ConfirmService,
     private hubService: MessageHubService, private readonly cdRef: ChangeDetectorRef) { }
 
@@ -37,10 +45,10 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
     this.getLibraries();
 
     // when a progress event comes in, show it on the UI next to library
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy), 
-      filter(event => event.event === EVENTS.ScanSeries || event.event === EVENTS.NotificationProgress), 
-      distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) => 
-        this.hasMessageChanged(prev, curr))) 
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef),
+      filter(event => event.event === EVENTS.ScanSeries || event.event === EVENTS.NotificationProgress),
+      distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) =>
+        this.hasMessageChanged(prev, curr)))
       .subscribe((event: Message<ScanSeriesEvent | NotificationProgressEvent>) => {
         let libId = 0;
         if (event.event === EVENTS.ScanSeries) {
@@ -60,11 +68,6 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
           }
         });
     });
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   hasMessageChanged(prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) {
@@ -91,7 +94,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
   editLibrary(library: Library) {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
     modalRef.componentInstance.library = library;
-    modalRef.closed.pipe(takeUntil(this.onDestroy)).subscribe(refresh => {
+    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();
       }
@@ -100,7 +103,7 @@ export class ManageLibraryComponent implements OnInit, OnDestroy {
 
   addLibrary() {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
-    modalRef.closed.pipe(takeUntil(this.onDestroy)).subscribe(refresh => {
+    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();
       }

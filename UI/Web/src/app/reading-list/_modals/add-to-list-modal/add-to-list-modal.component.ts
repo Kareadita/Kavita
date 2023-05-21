@@ -20,7 +20,7 @@ export enum ADD_FLOW {
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
 
-  @Input() title!: string;
+  @Input({required: true}) title!: string;
   /**
    * Only used in Series flow
    */
@@ -49,7 +49,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
   /**
    * Determines which Input is required and which API is used to associate to the Reading List
    */
-  @Input() type!: ADD_FLOW;
+  @Input({required: true}) type!: ADD_FLOW;
 
   /**
    * All existing reading lists sorted by recent use date
@@ -71,14 +71,14 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
     this.listForm.addControl('title', new FormControl(this.title, []));
     this.listForm.addControl('filterQuery', new FormControl('', []));
-    
+
     this.loading = true;
     this.readingListService.getReadingLists(false, true).subscribe(lists => {
       this.lists = lists.result;
       this.loading = false;
     });
 
-    
+
   }
 
   ngAfterViewInit() {
@@ -130,6 +130,6 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
         this.modal.close();
       });
     }
-    
+
   }
 }

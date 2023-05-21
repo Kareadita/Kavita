@@ -11,7 +11,7 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class ResetPasswordModalComponent {
 
-  @Input() member!: Member;
+  @Input({required: true}) member!: Member;
   errorMessage = '';
   resetPasswordForm: FormGroup = new FormGroup({
     password: new FormControl('', [Validators.required]),

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -20,6 +29,7 @@ import { FilterUtilitiesService } from '../shared/_services/filter-utilities.ser
 import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-library-detail',
@@ -27,7 +37,7 @@ import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
   styleUrls: ['./library-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibraryDetailComponent implements OnInit, OnDestroy {
+export class LibraryDetailComponent implements OnInit {
 
   libraryId!: number;
   libraryName = '';
@@ -36,7 +46,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
-  onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
@@ -47,14 +56,14 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'Library', fragment: '', icon: 'fa-landmark'},
-    {title: 'Recommended', fragment: 'recomended', icon: 'fa-award'},
+    {title: 'Recommended', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-
+  private readonly destroyRef = inject(DestroyRef);
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
     switch (action.action) {
       case Action.AddToReadingList:
@@ -86,7 +95,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.bulkSelectionService.deselectAll();
           this.loadPage();
         });
-        
+
         break;
       case Action.MarkAsUnread:
         this.actionService.markMultipleSeriesAsUnread(selectedSeries, () => {
@@ -104,8 +113,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService, 
-    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService, 
+  constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
+    private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
     private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService,
     private readonly cdRef: ChangeDetectorRef) {
@@ -130,7 +139,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
 
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-    
+
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
@@ -143,7 +152,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
@@ -161,8 +170,8 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
           this.cdRef.markForCheck();
           this.refresh.emit();
         });
-        
-        
+
+
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
@@ -179,10 +188,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
@@ -242,9 +247,9 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     this.loadingSeries = true;
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.cdRef.markForCheck();
-    
+
     this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
-      this.series = series.result; 
+      this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;
       this.cdRef.markForCheck();

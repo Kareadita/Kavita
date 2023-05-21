@@ -1,4 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  Inject,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  RendererStyleFlags2,
+  ViewChild
+} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -28,6 +42,7 @@ import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 enum TabID {
@@ -260,7 +275,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
-  private readonly onDestroy = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
   /**
@@ -453,7 +468,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(
         debounceTime(200),
-        takeUntil(this.onDestroy))
+        takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (this.isLoading) return;
 
@@ -509,9 +524,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnInit(): void {

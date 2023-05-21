@@ -12,7 +12,7 @@ import { ImageService } from 'src/app/_services/image.service';
 })
 export class ReadingListItemComponent {
 
-  @Input() item!: ReadingListItem;
+  @Input({required: true}) item!: ReadingListItem;
   @Input() position: number = 0;
   @Input() libraryTypes: {[key: number]: LibraryType} = {};
   /**

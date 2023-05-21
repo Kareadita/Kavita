@@ -10,9 +10,9 @@ import { BookChapterItem } from '../../_models/book-chapter-item';
 })
 export class TableOfContentsComponent implements OnDestroy {
 
-  @Input() chapterId!: number;
-  @Input() pageNum!: number;
-  @Input() currentPageAnchor!: string;
+  @Input({required: true}) chapterId!: number;
+  @Input({required: true}) pageNum!: number;
+  @Input({required: true}) currentPageAnchor!: string;
   @Input() chapters:Array<BookChapterItem> = [];
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
