@@ -19,11 +19,11 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
 
-  @Input() readerSettings$!: Observable<ReaderSetting>;
-  @Input() image$!: Observable<HTMLImageElement | null>;
-  @Input() bookmark$!: Observable<number>;
-  @Input() showClickOverlay$!: Observable<boolean>;
-  @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
+  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
+  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
+  @Input({required: true}) bookmark$!: Observable<number>;
+  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
+  @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 

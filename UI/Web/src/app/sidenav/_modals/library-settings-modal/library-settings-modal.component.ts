@@ -35,7 +35,7 @@ enum StepID {
 })
 export class LibrarySettingsModalComponent implements OnInit {
 
-  @Input() library!: Library;
+  @Input({required: true}) library!: Library;
 
   active = TabID.General;
   imageUrls: Array<string> = [];

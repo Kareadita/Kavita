@@ -41,7 +41,7 @@ enum TabID {
 })
 export class EditSeriesModalComponent implements OnInit {
 
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   /**

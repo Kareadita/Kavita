@@ -31,7 +31,7 @@ enum TabID {
 })
 export class EditCollectionTagsComponent implements OnInit {
 
-  @Input() tag!: CollectionTag;
+  @Input({required: true}) tag!: CollectionTag;
   series: Array<Series> = [];
   selections!: SelectionModel<Series>;
   isLoading: boolean = true;

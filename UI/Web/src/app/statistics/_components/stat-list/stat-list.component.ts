@@ -23,7 +23,7 @@ export class StatListComponent {
    * Optional data to put in tooltip
    */
   @Input() description: string = '';
-  @Input() data$!: Observable<PieDataItem[]>;
+  @Input({required: true}) data$!: Observable<PieDataItem[]>;
   @Input() image: ((data: PieDataItem) => string) | undefined = undefined;
   /**
    * Optional callback handler when an item is clicked
@@ -31,7 +31,7 @@ export class StatListComponent {
   @Input() handleClick: ((data: PieDataItem) => void) | undefined = undefined;
 
   doClick(item: PieDataItem) {
-    if (!this.handleClick) return; 
+    if (!this.handleClick) return;
     this.handleClick(item);
   }
 

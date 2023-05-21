@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy
 import { Subject, takeUntil } from 'rxjs';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-bulk-operations',
@@ -9,16 +10,14 @@ import { BulkSelectionService } from '../bulk-selection.service';
   styleUrls: ['./bulk-operations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BulkOperationsComponent implements OnInit, OnDestroy {
+export class BulkOperationsComponent implements OnInit {
 
-  @Input() actionCallback!: (action: ActionItem<any>, data: any) => void;
+  @Input({required: true}) actionCallback!: (action: ActionItem<any>, data: any) => void;
 
   topOffset: number = 56;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];
-
-  private onDestory: Subject<void> = new Subject();
 
   get Action() {
     return Action;
@@ -28,18 +27,13 @@ export class BulkOperationsComponent implements OnInit, OnDestroy {
     private actionFactoryService: ActionFactoryService) { }
 
   ngOnInit(): void {
-    this.bulkSelectionService.actions$.pipe(takeUntil(this.onDestory)).subscribe(actions => {
+    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed()).subscribe(actions => {
       // We need to do a recursive callback apply
       this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this));
       this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);
       this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();
     });
-  }
-
-  ngOnDestroy(): void {
-    this.onDestory.next();
-    this.onDestory.complete();
   }
 
   handleActionCallback(action: ActionItem<any>, data: any) {

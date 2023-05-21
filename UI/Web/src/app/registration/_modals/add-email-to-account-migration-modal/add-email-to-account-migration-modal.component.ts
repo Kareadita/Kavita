@@ -13,8 +13,8 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class AddEmailToAccountMigrationModalComponent implements OnInit {
 
-  @Input() username!: string;
-  @Input() password!: string;
+  @Input({required: true}) username!: string;
+  @Input({required: true}) password!: string;
 
   isSaving: boolean = false;
   registerForm: FormGroup = new FormGroup({});
@@ -22,7 +22,7 @@ export class AddEmailToAccountMigrationModalComponent implements OnInit {
   emailLinkUrl: SafeUrl | undefined;
   error: string = '';
 
-  constructor(private accountService: AccountService, private modal: NgbActiveModal, 
+  constructor(private accountService: AccountService, private modal: NgbActiveModal,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) {
   }
 

@@ -22,7 +22,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
-  @Input() user!: User;
+  @Input({required: true}) user!: User;
 
   isAdmin$: Observable<boolean> = of(false);
 

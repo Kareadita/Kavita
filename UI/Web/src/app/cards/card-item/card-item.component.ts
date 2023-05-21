@@ -60,7 +60,7 @@ export class CardItemComponent implements OnInit {
   /**
    * This is the entity we are representing. It will be returned if an action is executed.
    */
-  @Input() entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem;
+  @Input({required: true}) entity!: Series | Volume | Chapter | CollectionTag | PageBookmark | RecentlyAddedItem;
   /**
    * If the entity is selected or not.
    */

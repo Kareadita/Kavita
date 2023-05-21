@@ -24,7 +24,7 @@ enum TabID {
 })
 export class EditReadingListModalComponent implements OnInit {
 
-  @Input() readingList!: ReadingList;
+  @Input({required: true}) readingList!: ReadingList;
   reviewGroup!: FormGroup;
 
   coverImageIndex: number = 0;

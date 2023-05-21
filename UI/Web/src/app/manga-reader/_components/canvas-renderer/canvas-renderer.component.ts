@@ -19,10 +19,10 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 
-  @Input() readerSettings$!: Observable<ReaderSetting>;
-  @Input() image$!: Observable<HTMLImageElement | null>;
-  @Input() bookmark$!: Observable<number>;
-  @Input() showClickOverlay$!: Observable<boolean>;
+  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
+  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
+  @Input({required: true}) bookmark$!: Observable<number>;
+  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 

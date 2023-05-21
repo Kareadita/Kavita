@@ -22,12 +22,12 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
 
-  @Input() readerSettings$!: Observable<ReaderSetting>;
-  @Input() image$!: Observable<HTMLImageElement | null>;
-  @Input() bookmark$!: Observable<number>;
-  @Input() showClickOverlay$!: Observable<boolean>;
-  @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
-  @Input() getPage!: (pageNum: number) => HTMLImageElement;
+  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
+  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
+  @Input({required: true}) bookmark$!: Observable<number>;
+  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
+  @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
+  @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
 
   debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
@@ -35,7 +35,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
   layoutClass$!: Observable<string>;
-  darkenss$: Observable<string> = of('brightness(100%)');
+  darkness$: Observable<string> = of('brightness(100%)');
   emulateBookClass$: Observable<string> = of('');
   layoutMode: LayoutMode = LayoutMode.Single;
   pageSplit: PageSplitOption = PageSplitOption.FitSplit;
@@ -79,7 +79,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
       takeUntilDestroyed()
     );
 
-    this.darkenss$ = this.readerSettings$.pipe(
+    this.darkness$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
       takeUntilDestroyed()

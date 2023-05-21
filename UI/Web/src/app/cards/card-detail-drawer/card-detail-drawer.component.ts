@@ -44,7 +44,7 @@ export class CardDetailDrawerComponent implements OnInit {
   @Input() parentName = '';
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
-  @Input() data!: Volume | Chapter;
+  @Input({required: true}) data!: Volume | Chapter;
 
   /**
    * If this is a volume, this will be first chapter for said volume.

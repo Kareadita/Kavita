@@ -153,7 +153,7 @@ export class TypeaheadComponent implements OnInit {
   /**
    * Settings for the typeahead
    */
-  @Input() settings!: TypeaheadSettings<any>;
+  @Input({required: true}) settings!: TypeaheadSettings<any>;
   /**
    * When true, will reset field to no selections. When false, will reset to saved data
    */

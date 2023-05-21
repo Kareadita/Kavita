@@ -22,7 +22,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
   @Input({required: true}) series!: Series;
-  @Input() seriesMetadata!: SeriesMetadata;
+  @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
   @Input() readingTimeLeft: HourEstimateRange | undefined;
   /**

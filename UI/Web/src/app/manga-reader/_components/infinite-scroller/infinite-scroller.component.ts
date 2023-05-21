@@ -59,7 +59,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Method to generate the src for Image loading
    */
-  @Input() urlProvider!: (page: number) => string;
+  @Input({required: true}) urlProvider!: (page: number) => string;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();

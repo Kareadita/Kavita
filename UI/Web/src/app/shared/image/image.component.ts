@@ -20,7 +20,7 @@ export class ImageComponent implements OnChanges {
   /**
    * Source url to load image
    */
-  @Input() imageUrl!: string;
+  @Input({required: true}) imageUrl!: string;
   /**
    * Width of the image. If not defined, will not be applied
    */

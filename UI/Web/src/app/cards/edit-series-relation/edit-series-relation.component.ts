@@ -26,9 +26,9 @@ interface RelationControl {
 })
 export class EditSeriesRelationComponent implements OnInit {
 
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
   /**
-   * This will tell the component to save based on it's internal state
+   * This will tell the component to save based on its internal state
    */
   @Input() save: EventEmitter<void> = new EventEmitter();
 

@@ -40,7 +40,7 @@ export class MetadataFilterComponent implements OnInit {
    */
   @Input() filteringDisabled: boolean = false;
 
-  @Input() filterSettings!: FilterSettings;
+  @Input({required: true}) filterSettings!: FilterSettings;
 
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 

@@ -18,11 +18,11 @@ import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() data!: Series;
+  @Input({required: true}) data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
   /**
-   * If the entity is selected or not. 
+   * If the entity is selected or not.
    */
   @Input() selected: boolean = false;
   /**
@@ -51,7 +51,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
-              private modalService: NgbModal, private imageService: ImageService, 
+              private modalService: NgbModal, private imageService: ImageService,
               private actionFactoryService: ActionFactoryService,
               private actionService: ActionService) {}
 
@@ -157,7 +157,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.data.pagesRead = 0;
         this.cdRef.markForCheck();
       }
-      
+
       this.dataChanged.emit(series);
     });
   }
