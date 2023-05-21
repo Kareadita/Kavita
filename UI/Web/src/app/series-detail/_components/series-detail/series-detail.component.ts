@@ -1,5 +1,18 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, Inject, ChangeDetectionStrategy, ChangeDetectorRef, AfterContentChecked, inject } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  Inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  AfterContentChecked,
+  inject,
+  DestroyRef
+} from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -73,6 +86,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * Series Id. Set at load before UI renders
@@ -299,7 +313,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    this.messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
         if (seriesRemovedEvent.seriesId === this.seriesId) {
@@ -320,7 +334,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.changeDetectionRef.markForCheck();
     this.loadSeries(this.seriesId);
 
-    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe((val: PageLayoutMode | null) => {
+    this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
       if (val == null) return;
       this.renderMode = val;
       this.changeDetectionRef.markForCheck();

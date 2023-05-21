@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { Subject } from 'rxjs';
@@ -27,6 +35,7 @@ export class ManageLibraryComponent implements OnInit {
    */
   deletionInProgress: boolean = false;
   libraryTrackBy = (index: number, item: Library) => `${item.name}_${item.lastScanned}_${item.type}_${item.folders.length}`;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private modalService: NgbModal, private libraryService: LibraryService,
     private toastr: ToastrService, private confirmService: ConfirmService,
@@ -36,7 +45,7 @@ export class ManageLibraryComponent implements OnInit {
     this.getLibraries();
 
     // when a progress event comes in, show it on the UI next to library
-    this.hubService.messages$.pipe(takeUntilDestroyed(),
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef),
       filter(event => event.event === EVENTS.ScanSeries || event.event === EVENTS.NotificationProgress),
       distinctUntilChanged((prev: Message<ScanSeriesEvent | NotificationProgressEvent>, curr: Message<ScanSeriesEvent | NotificationProgressEvent>) =>
         this.hasMessageChanged(prev, curr)))
@@ -85,7 +94,7 @@ export class ManageLibraryComponent implements OnInit {
   editLibrary(library: Library) {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
     modalRef.componentInstance.library = library;
-    modalRef.closed.pipe(takeUntilDestroyed()).subscribe(refresh => {
+    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();
       }
@@ -94,7 +103,7 @@ export class ManageLibraryComponent implements OnInit {
 
   addLibrary() {
     const modalRef = this.modalService.open(LibrarySettingsModalComponent, {  size: 'xl' });
-    modalRef.closed.pipe(takeUntilDestroyed()).subscribe(refresh => {
+    modalRef.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(refresh => {
       if (refresh) {
         this.getLibraries();
       }

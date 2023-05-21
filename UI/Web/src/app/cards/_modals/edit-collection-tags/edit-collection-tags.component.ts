@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -43,6 +52,7 @@ export class EditCollectionTagsComponent implements OnInit {
   active = TabID.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
+  private readonly destroyRef = inject(DestroyRef);
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
@@ -87,7 +97,7 @@ export class EditCollectionTagsComponent implements OnInit {
         }
         this.cdRef.markForCheck();
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getCollectionCoverImage(this.tag.id)));

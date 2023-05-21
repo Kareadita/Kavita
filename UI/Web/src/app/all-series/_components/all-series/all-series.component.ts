@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -38,6 +47,7 @@ export class AllSeriesComponent implements OnInit {
   filterActiveCheck!: SeriesFilter;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
+  private readonly destroyRef = inject(DestroyRef);
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -106,7 +116,7 @@ export class AllSeriesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed()).subscribe((event: Message<any>) => {
+    this.hubService.messages$.pipe(debounceTime(6000), takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<any>) => {
       if (event.event !== EVENTS.SeriesAdded) return;
       this.loadPage();
     });

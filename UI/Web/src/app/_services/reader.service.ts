@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -29,6 +29,7 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 })
 export class ReaderService {
 
+  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
 
@@ -37,8 +38,8 @@ export class ReaderService {
 
   constructor(private httpClient: HttpClient, private router: Router,
     private location: Location, private utilityService: UtilityService,
-    private filterUtilitySerivce: FilterUtilitiesService, private accountService: AccountService) {
-      this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
+    private filterUtilityService: FilterUtilitiesService, private accountService: AccountService) {
+      this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
         }
@@ -73,7 +74,7 @@ export class ReaderService {
   getAllBookmarks(filter: SeriesFilter | undefined) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, undefined, undefined);
-    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
+    const data = this.filterUtilityService.createSeriesFilter(filter);
 
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', data);
   }

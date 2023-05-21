@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -44,13 +53,14 @@ export class DashboardComponent implements OnInit {
    * We use this Replay subject to slow the amount of times we reload the UI
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
     private titleService: Title, public imageService: ImageService,
     private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
 
-      this.messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(res => {
+      this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
@@ -72,12 +82,12 @@ export class DashboardComponent implements OnInit {
       });
 
       this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
         map(user => (user && this.accountService.hasAdminRole(user)) || false),
         shareReplay()
       );
 
-      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntilDestroyed()).subscribe(() => {
+      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.loadRecentlyUpdated();
         this.loadRecentlyAddedSeries();
         this.cdRef.markForCheck();
@@ -121,7 +131,7 @@ export class DashboardComponent implements OnInit {
     if (this.libraryId > 0) {
       api = this.seriesService.getOnDeck(this.libraryId, 1, 30);
     }
-    api.pipe(takeUntilDestroyed()).subscribe((updatedSeries) => {
+    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
       this.inProgress = updatedSeries.result;
       this.cdRef.markForCheck();
     });
@@ -132,7 +142,7 @@ export class DashboardComponent implements OnInit {
     if (this.libraryId > 0) {
       api = this.seriesService.getRecentlyAdded(this.libraryId, 1, 30);
     }
-    api.pipe(takeUntilDestroyed()).subscribe((updatedSeries) => {
+    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
       this.recentlyAddedSeries = updatedSeries.result;
       this.cdRef.markForCheck();
     });
@@ -144,7 +154,7 @@ export class DashboardComponent implements OnInit {
     if (this.libraryId > 0) {
       api = this.seriesService.getRecentlyUpdatedSeries();
     }
-    api.pipe(takeUntilDestroyed()).subscribe(updatedSeries => {
+    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(updatedSeries => {
       this.recentlyUpdatedSeries = updatedSeries.filter(group => {
         if (this.libraryId === 0) return true;
         return group.libraryId === this.libraryId;

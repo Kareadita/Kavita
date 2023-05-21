@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { filter, map, merge, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { Genre } from 'src/app/_models/metadata/genre';
 import { Series } from 'src/app/_models/series';
@@ -16,6 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class LibraryRecommendedComponent implements OnInit {
 
   @Input() libraryId: number = 0;
+  private readonly destroyRef = inject(DestroyRef);
 
   quickReads$!: Observable<Series[]>;
   quickCatchups$!: Observable<Series[]>;
@@ -33,30 +43,30 @@ export class LibraryRecommendedComponent implements OnInit {
   ngOnInit(): void {
 
     this.quickReads$ = this.recommendationService.getQuickReads(this.libraryId, 0, 30)
-                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
 
     this.quickCatchups$ = this.recommendationService.getQuickCatchupReads(this.libraryId, 0, 30)
-                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
 
     this.highlyRated$ = this.recommendationService.getHighlyRated(this.libraryId, 0, 30)
-                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
 
     this.rediscover$ = this.recommendationService.getRediscover(this.libraryId, 0, 30)
-                      .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+                      .pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
 
     this.onDeck$ = this.seriesService.getOnDeck(this.libraryId, 0, 30)
-                        .pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+                        .pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
 
     this.genre$ = this.metadataService.getAllGenres([this.libraryId]).pipe(
-                        takeUntilDestroyed(),
+                        takeUntilDestroyed(this.destroyRef),
                         map(genres => genres[Math.floor(Math.random() * genres.length)]),
                         shareReplay()
                   );
     this.genre$.subscribe(genre => {
-      this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id, 0, 30).pipe(takeUntilDestroyed(), map(p => p.result), shareReplay());
+      this.moreIn$ = this.recommendationService.getMoreIn(this.libraryId, genre.id, 0, 30).pipe(takeUntilDestroyed(this.destroyRef), map(p => p.result), shareReplay());
     });
 
-    this.all$ = merge(this.quickReads$, this.quickCatchups$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntilDestroyed());
+    this.all$ = merge(this.quickReads$, this.quickCatchups$, this.highlyRated$, this.rediscover$, this.onDeck$, this.genre$).pipe(takeUntilDestroyed(this.destroyRef));
   }
 
 

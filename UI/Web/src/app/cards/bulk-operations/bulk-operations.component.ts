@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
@@ -18,6 +27,7 @@ export class BulkOperationsComponent implements OnInit {
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];
+  private readonly destroyRef = inject(DestroyRef);
 
   get Action() {
     return Action;
@@ -27,7 +37,7 @@ export class BulkOperationsComponent implements OnInit {
     private actionFactoryService: ActionFactoryService) { }
 
   ngOnInit(): void {
-    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed()).subscribe(actions => {
+    this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {
       // We need to do a recursive callback apply
       this.actions = this.actionFactoryService.applyCallbackToList(actions, this.actionCallback.bind(this));
       this.hasMarkAsRead = this.actionFactoryService.hasAction(this.actions, Action.MarkAsRead);

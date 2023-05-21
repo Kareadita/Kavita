@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subject } from 'rxjs';
@@ -24,6 +32,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class SideNavComponent implements OnInit {
 
+  private readonly destroyRef = inject(DestroyRef);
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
   readingListActions = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
@@ -42,7 +51,7 @@ export class SideNavComponent implements OnInit {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
         map(evt => evt as NavigationEnd),
         filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet))
       .subscribe((evt: NavigationEnd) => {
@@ -67,7 +76,7 @@ export class SideNavComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.messageHub.messages$.pipe(takeUntilDestroyed(), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = [...libraries];
         this.cdRef.markForCheck();

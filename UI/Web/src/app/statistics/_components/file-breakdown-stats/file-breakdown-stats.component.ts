@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, QueryList, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, shareReplay } from 'rxjs';
@@ -31,6 +39,8 @@ export class FileBreakdownStatsComponent {
   currentSort = new BehaviorSubject<SortEvent<FileExtension>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<FileExtension>> = this.currentSort.asObservable();
 
+  private readonly destroyRef = inject(DestroyRef);
+
   view: [number, number] = [700, 400];
   gradient: boolean = true;
   showLegend: boolean = true;
@@ -45,7 +55,7 @@ export class FileBreakdownStatsComponent {
 
 
   constructor(private statService: StatisticsService) {
-    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(), shareReplay());
+    this.rawData$ = this.statService.getFileBreakdown().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
 
     this.files$ = combineLatest([this.currentSort$, this.rawData$]).pipe(
       map(([sortConfig, data]) => {
@@ -58,11 +68,11 @@ export class FileBreakdownStatsComponent {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : fileBreakdown;
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
 
-    this.vizData2$ = this.files$.pipe(takeUntilDestroyed(), map(data => data.map(d => {
+    this.vizData2$ = this.files$.pipe(takeUntilDestroyed(this.destroyRef), map(data => data.map(d => {
       return {name: d.extension || 'Not Categorized', value: d.totalFiles, extra: d.totalSize};
     })));
   }

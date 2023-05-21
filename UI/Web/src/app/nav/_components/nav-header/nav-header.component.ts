@@ -1,5 +1,15 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  inject,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
@@ -28,6 +38,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class NavHeaderComponent implements OnInit {
 
   @ViewChild('search') searchViewRef!: any;
+  private readonly destroyRef = inject(DestroyRef);
 
   isLoading = false;
   debounceTime = 300;
@@ -57,7 +68,7 @@ export class NavHeaderComponent implements OnInit {
     }
 
   ngOnInit(): void {
-    this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntilDestroyed(), tap((scrollContainer) => {
+    this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap((scrollContainer) => {
       if (scrollContainer === 'body' || scrollContainer === undefined) {
         this.scrollElem = this.document.body;
         fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(this.document.body));
@@ -104,7 +115,7 @@ export class NavHeaderComponent implements OnInit {
       this.searchTerm = val.trim();
       this.cdRef.markForCheck();
 
-      this.searchService.search(val.trim()).pipe(takeUntilDestroyed()).subscribe(results => {
+      this.searchService.search(val.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {LegendPosition} from '@swimlane/ngx-charts';
 import {map, Observable} from 'rxjs';
@@ -28,6 +28,7 @@ export class DayBreakdownComponent {
 
   formControl: FormControl = new FormControl(true, []);
   dayBreakdown$!: Observable<Array<PieDataItem>>;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private statService: StatisticsService) {
     const dayOfWeekPipe = new DayOfWeekPipe();
@@ -37,7 +38,7 @@ export class DayBreakdownComponent {
           return {name: dayOfWeekPipe.transform(d.value), value: d.count};
         })
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 

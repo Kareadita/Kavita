@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -33,6 +41,7 @@ export class AllCollectionsComponent implements OnInit {
 
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private collectionService: CollectionTagService, private router: Router,
     private actionFactoryService: ActionFactoryService, private modalService: NgbModal,
@@ -47,7 +56,7 @@ export class AllCollectionsComponent implements OnInit {
     this.loadPage();
     this.collectionTagActions = this.actionFactoryService.getCollectionTagActions(this.handleCollectionActionCallback.bind(this));
     this.cdRef.markForCheck();
-    this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(), map(user => {
+    this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(user => {
       if (!user) return false;
       return this.accountService.hasAdminRole(user);
     }));

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnDestroy, OnInit} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
@@ -34,6 +34,7 @@ export class ReadingActivityComponent implements OnInit {
   users$: Observable<Member[]> | undefined;
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private statService: StatisticsService, private memberService: MemberService) {
     this.data$ = this.formGroup.valueChanges.pipe(
@@ -56,7 +57,7 @@ export class ReadingActivityComponent implements OnInit {
           return {name: format, value: 0, series: gList[format].series}
         });
       }),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       shareReplay(),
     );
 
@@ -64,7 +65,7 @@ export class ReadingActivityComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntilDestroyed(), shareReplay());
+    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntilDestroyed(this.destroyRef), shareReplay());
     this.formGroup.get('users')?.setValue(this.userId, {emitValue: true});
 
     if (!this.isAdmin) {

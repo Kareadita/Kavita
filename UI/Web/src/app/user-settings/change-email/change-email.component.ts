@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
 import {Observable, of, shareReplay, take} from 'rxjs';
@@ -23,6 +23,7 @@ export class ChangeEmailComponent implements OnInit {
   isViewMode: boolean = true;
   emailLink: string = '';
   emailConfirmed: boolean = true;
+  private readonly destroyRef = inject(DestroyRef);
 
   public get email() { return this.form.get('email'); }
 
@@ -31,7 +32,7 @@ export class ChangeEmailComponent implements OnInit {
   constructor(public accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
       this.user = user;
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
@@ -47,14 +56,14 @@ export class LibraryDetailComponent implements OnInit {
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'Library', fragment: '', icon: 'fa-landmark'},
-    {title: 'Recommended', fragment: 'recomended', icon: 'fa-award'},
+    {title: 'Recommended', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-
+  private readonly destroyRef = inject(DestroyRef);
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexies = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexies.includes(index + ''));
+    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
     switch (action.action) {
       case Action.AddToReadingList:
@@ -143,7 +152,7 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(takeUntilDestroyed()).subscribe((event) => {
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;

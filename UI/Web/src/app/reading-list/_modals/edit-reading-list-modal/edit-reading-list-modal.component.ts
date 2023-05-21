@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -25,6 +34,7 @@ enum TabID {
 export class EditReadingListModalComponent implements OnInit {
 
   @Input({required: true}) readingList!: ReadingList;
+  private readonly destroyRef = inject(DestroyRef);
   reviewGroup!: FormGroup;
 
   coverImageIndex: number = 0;
@@ -69,7 +79,7 @@ export class EditReadingListModalComponent implements OnInit {
         }
         this.cdRef.markForCheck();
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -36,6 +45,7 @@ enum StepID {
 export class LibrarySettingsModalComponent implements OnInit {
 
   @Input({required: true}) library!: Library;
+  private readonly destroyRef = inject(DestroyRef);
 
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -99,7 +109,7 @@ export class LibrarySettingsModalComponent implements OnInit {
         }
         this.cdRef.markForCheck();
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
 

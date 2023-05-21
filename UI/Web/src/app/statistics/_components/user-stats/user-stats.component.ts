@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { UserReadStatistics } from 'src/app/statistics/_models/user-read-statistics';
@@ -24,11 +32,12 @@ export class UserStatsComponent implements OnInit {
   readSeries$!: Observable<ReadHistoryEvent[]>;
   isAdmin$: Observable<boolean>;
   percentageRead$!: Observable<PieDataItem[]>;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private readonly cdRef: ChangeDetectorRef, private statService: StatisticsService,
     private filterService: FilterUtilitiesService, private accountService: AccountService, private memberService: MemberService,
     private libraryService: LibraryService) {
-      this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(), map(u => {
+      this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
         if (!u) return false;
         return this.accountService.hasAdminRole(u);
       }));
@@ -42,14 +51,14 @@ export class UserStatsComponent implements OnInit {
       this.userId = me.id;
       this.cdRef.markForCheck();
 
-      this.userStats$ = this.statService.getUserStatistics(this.userId).pipe(takeUntilDestroyed(), shareReplay());
+      this.userStats$ = this.statService.getUserStatistics(this.userId).pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
       this.readSeries$ = this.statService.getReadingHistory(this.userId).pipe(
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       );
 
       const pipe = new PercentPipe('en-US');
       this.libraryService.getLibraryNames().subscribe(names => {
-        this.percentageRead$ = this.userStats$.pipe(takeUntilDestroyed(), map(d => d.percentReadPerLibrary.map(l => {
+        this.percentageRead$ = this.userStats$.pipe(takeUntilDestroyed(this.destroyRef), map(d => d.percentReadPerLibrary.map(l => {
           return {name: names[l.count], value: parseFloat((pipe.transform(l.value, '1.1-1') || '0').replace('%', ''))};
         }).sort((a: PieDataItem, b: PieDataItem) => b.value - a.value)));
       })

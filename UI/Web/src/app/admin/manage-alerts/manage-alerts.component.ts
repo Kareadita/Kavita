@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnInit, Output, QueryList, ViewChildren, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  QueryList,
+  ViewChildren,
+  inject,
+  DestroyRef
+} from '@angular/core';
 import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
@@ -20,8 +31,9 @@ export class ManageAlertsComponent implements OnInit {
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
-  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
+  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<KavitaMediaError>>({column: 'extension', direction: 'asc'});
   currentSort$: Observable<SortEvent<KavitaMediaError>> = this.currentSort.asObservable();
 

@@ -1,5 +1,20 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer2,
+  SimpleChanges
+} from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -67,6 +82,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+  private readonly destroyRef = inject(DestroyRef);
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -179,7 +195,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initScrollHandler() {
     console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
-    .pipe(debounceTime(20), takeUntilDestroyed())
+    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));
   }
 
@@ -189,7 +205,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.recalculateImageWidth();
 
     if (this.goToPage) {
-      this.goToPage.pipe(takeUntilDestroyed()).subscribe(page => {
+      this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
         this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
@@ -205,7 +221,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.bookmarkPage) {
-      this.bookmarkPage.pipe(takeUntilDestroyed()).subscribe(page => {
+      this.bookmarkPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const image = document.querySelector('img[id^="page-' + page + '"]');
         if (image) {
           this.renderer.addClass(image, 'bookmark-effect');
@@ -218,7 +234,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.fullscreenToggled) {
-      this.fullscreenToggled.pipe(takeUntilDestroyed()).subscribe(isFullscreen => {
+      this.fullscreenToggled.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
         this.cdRef.markForCheck();

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -40,6 +50,7 @@ export class EditSeriesRelationComponent implements OnInit {
   libraryNames: {[key:number]: string} = {};
 
   focusTypeahead = new EventEmitter();
+  private readonly destroyRef = inject(DestroyRef);
 
   get RelationKind() {
     return RelationKind;
@@ -73,7 +84,7 @@ export class EditSeriesRelationComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.save.pipe(takeUntilDestroyed()).subscribe(() => this.saveState());
+    this.save.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.saveState());
   }
 
   setupRelationRows(relations: Array<Series>, kind: RelationKind) {

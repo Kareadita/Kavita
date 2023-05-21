@@ -1,5 +1,16 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -26,6 +37,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  private readonly destroyRef = inject(DestroyRef);
 
   imageFitClass$!: Observable<string>;
   imageContainerHeight$!: Observable<string>;
@@ -51,14 +63,14 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       map(values => values.readerMode),
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
       map(enabled => enabled ? 'book-shadow' : ''),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.imageContainerHeight$ = this.readerSettings$.pipe(
@@ -75,11 +87,11 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
         return 'calc(100vh)'
       }),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.pageNum$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -89,17 +101,17 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
     this.darkness$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
       map(showOverlay => showOverlay ? 'blur' : ''),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       filter(_ => this.isValid()),
     );
 
     this.readerSettings$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(values => {
         this.layoutMode = values.layoutMode;
         this.pageSplit = values.pageSplit;
@@ -108,7 +120,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
     ).subscribe(() => {});
 
     this.bookmark$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -133,7 +145,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       }),
       shareReplay(),
       filter(_ => this.isValid()),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
     );
   }
 

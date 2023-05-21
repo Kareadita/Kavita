@@ -1,4 +1,14 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef
+} from '@angular/core';
 import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, takeUntil } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -43,6 +53,8 @@ export class SideNavCompanionBarComponent implements OnInit {
   isFilterOpen = false;
   isExtrasOpen = false;
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(private navService: NavService, private utilityService: UtilityService, public toggleService: ToggleService,
     private offcanvasService: NgbOffcanvas) {
   }
@@ -51,7 +63,7 @@ export class SideNavCompanionBarComponent implements OnInit {
     this.isFilterOpen = this.filterOpenByDefault;
 
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
-    this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed()).subscribe(sideNavCollapsed => {
+    this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sideNavCollapsed => {
       if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {
         this.isFilterOpen = false;
         this.filterOpen.emit(this.isFilterOpen);

@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnDestroy, Renderer2, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  Renderer2,
+  ViewChild
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
@@ -55,9 +66,10 @@ export class ImageComponent implements OnChanges {
    @Input() processEvents: boolean = true;
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(public imageService: ImageService, private renderer: Renderer2, private hubService: MessageHubService, private changeDetectionRef: ChangeDetectorRef) {
-    this.hubService.messages$.pipe(takeUntilDestroyed()).subscribe(res => {
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents) return;
       if (res.event === EVENTS.CoverUpdate) {
         const updateEvent = res.payload as CoverUpdateEvent;

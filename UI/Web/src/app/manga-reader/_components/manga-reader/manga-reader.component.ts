@@ -1,4 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, SimpleChanges, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Inject,
+  OnDestroy,
+  OnInit,
+  SimpleChanges,
+  ViewChild
+} from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
@@ -99,7 +113,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(DoubleRendererComponent, { static: false }) doubleRenderer!: DoubleRendererComponent;
   @ViewChild(DoubleReverseRendererComponent, { static: false }) doubleReverseRenderer!: DoubleReverseRendererComponent;
   @ViewChild(DoubleNoCoverRendererComponent, { static: false }) doubleNoCoverRenderer!: DoubleNoCoverRendererComponent;
-
+  private readonly destroyRef = inject(DestroyRef);
 
   libraryId!: number;
   seriesId!: number;
@@ -493,7 +507,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // We need a mergeMap when page changes
       this.readerSettings$ = merge(this.generalSettingsForm.valueChanges, this.pagingDirection$, this.readerMode$).pipe(
         map(_ => this.createReaderSettingsUpdate()),
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
       );
 
       this.updateForm();
@@ -504,7 +518,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.pagingDirection = dir;
           this.cdRef.markForCheck();
         }),
-        takeUntilDestroyed()
+        takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
       this.readerMode$.pipe(
@@ -513,11 +527,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           this.readerMode = mode;
           this.cdRef.markForCheck();
         }),
-        takeUntilDestroyed()
+        takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
 
 
-      this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+      this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
 
         const changeOccurred = parseInt(val, 10) !== this.layoutMode;
         this.layoutMode = parseInt(val, 10);
@@ -543,7 +557,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed()).subscribe((changes: SimpleChanges) => {
+      this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((changes: SimpleChanges) => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
 
@@ -569,7 +583,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntilDestroyed()).subscribe(evt => {
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef)).subscribe(evt => {
       if (this.readerMode === ReaderMode.Webtoon) return;
       if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
         this.rightPaginationOffset = (this.readingArea.nativeElement.scrollLeft) * -1;
@@ -580,12 +594,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200), takeUntilDestroyed()).subscribe((event: MouseEvent | any) => {
+    fromEvent(this.readingArea.nativeElement, 'click').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
       if (event.detail > 1) return;
       this.toggleMenu();
     });
 
-    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed()).subscribe((event: MouseEvent | any) => {
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
       this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
       this.prevScrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
       this.hasScrolledX = true;

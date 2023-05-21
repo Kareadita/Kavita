@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
@@ -45,6 +56,7 @@ export class MetadataFilterComponent implements OnInit {
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
+  private readonly destroyRef = inject(DestroyRef);
 
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
@@ -97,7 +109,7 @@ export class MetadataFilterComponent implements OnInit {
     }
 
     if (this.filterOpen) {
-      this.filterOpen.pipe(takeUntilDestroyed()).subscribe(openState => {
+      this.filterOpen.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(openState => {
         this.filteringCollapsed = !openState;
         this.toggleService.set(!this.filteringCollapsed);
         this.cdRef.markForCheck();
@@ -124,7 +136,7 @@ export class MetadataFilterComponent implements OnInit {
       max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)])
     });
 
-    this.readProgressGroup.valueChanges.pipe(takeUntilDestroyed()).subscribe(changes => {
+    this.readProgressGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
@@ -146,7 +158,7 @@ export class MetadataFilterComponent implements OnInit {
       this.cdRef.markForCheck();
     });
 
-    this.sortGroup.valueChanges.pipe(takeUntilDestroyed()).subscribe(changes => {
+    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
       if (this.filter.sortOptions == null) {
         this.filter.sortOptions = {
           isAscending: this.isAscendingSort,
@@ -160,7 +172,7 @@ export class MetadataFilterComponent implements OnInit {
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
       distinctUntilChanged(),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     )
     .subscribe(changes => {
       this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
@@ -169,7 +181,7 @@ export class MetadataFilterComponent implements OnInit {
 
     this.releaseYearRange.valueChanges.pipe(
       distinctUntilChanged(),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     )
     .subscribe(changes => {
       this.filter.releaseYearRange = {min: this.releaseYearRange.get('min')?.value, max: this.releaseYearRange.get('max')?.value};

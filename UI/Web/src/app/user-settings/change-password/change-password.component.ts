@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, of, shareReplay, Subject, take, takeUntil } from 'rxjs';
@@ -20,7 +28,8 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   observableHandles: Array<any> = [];
   passwordsMatch = false;
   resetPasswordErrors: string[] = [];
-   isViewMode: boolean = true;
+  isViewMode: boolean = true;
+  private readonly destroyRef = inject(DestroyRef);
 
   public get password() { return this.passwordChangeForm.get('password'); }
   public get confirmPassword() { return this.passwordChangeForm.get('confirmPassword'); }
@@ -30,12 +39,12 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
       this.user = user;
       this.cdRef.markForCheck();
     });
 
-    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), map(user => {
+    this.hasChangePasswordAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
       return user !== undefined && (this.accountService.hasAdminRole(user) || this.accountService.hasChangePasswordRole(user));
     }));
     this.cdRef.markForCheck();

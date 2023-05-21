@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, OnDestroy } from '@angular/core';
+import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
 import { of, ReplaySubject, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -29,6 +29,7 @@ export enum Role {
 })
 export class AccountService {
 
+  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public lastLoginKey = 'kavita-lastlogin';
@@ -85,7 +86,7 @@ export class AccountService {
           this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 
@@ -137,7 +138,7 @@ export class AccountService {
       map((user: User) => {
         return user;
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 
@@ -217,7 +218,7 @@ export class AccountService {
         this.setCurrentUser(this.currentUser);
       }
       return pref;
-    }), takeUntilDestroyed());
+    }), takeUntilDestroyed(this.destroyRef));
   }
 
   updatePreferences(userPreferences: Preferences) {
@@ -227,7 +228,7 @@ export class AccountService {
         this.setCurrentUser(this.currentUser);
       }
       return settings;
-    }), takeUntilDestroyed());
+    }), takeUntilDestroyed(this.destroyRef));
   }
 
   getUserFromLocalStorage(): User | undefined {

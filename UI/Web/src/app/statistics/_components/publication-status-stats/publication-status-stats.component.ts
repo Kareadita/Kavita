@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, QueryList, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, map, takeUntil, combineLatest, BehaviorSubject } from 'rxjs';
@@ -32,6 +40,8 @@ export class PublicationStatusStatsComponent {
     domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
   };
 
+  private readonly destroyRef = inject(DestroyRef);
+
   formControl: FormControl = new FormControl(true, []);
 
 
@@ -44,7 +54,7 @@ export class PublicationStatusStatsComponent {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : data;
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 

@@ -1,4 +1,19 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
@@ -25,7 +40,7 @@ export class GroupedTypeaheadComponent implements OnInit {
    * Initial value of the search model
    */
   @Input() initialValue: string = '';
-  @Input() grouppedData: SearchResultGroup = new SearchResultGroup();
+  @Input() groupedData: SearchResultGroup = new SearchResultGroup();
   /**
    * Placeholder for the input
    */
@@ -63,6 +78,7 @@ export class GroupedTypeaheadComponent implements OnInit {
   @ContentChild('readingListTemplate') readingListTemplate!: TemplateRef<any>;
   @ContentChild('fileTemplate') fileTemplate!: TemplateRef<any>;
   @ContentChild('chapterTemplate') chapterTemplate!: TemplateRef<any>;
+  private readonly destroyRef = inject(DestroyRef);
 
 
   hasFocus: boolean = false;
@@ -76,9 +92,9 @@ export class GroupedTypeaheadComponent implements OnInit {
   }
 
   get hasData() {
-    return !(this.noResultsTemplate != undefined && !this.grouppedData.persons.length && !this.grouppedData.collections.length
-      && !this.grouppedData.series.length && !this.grouppedData.persons.length && !this.grouppedData.tags.length && !this.grouppedData.genres.length && !this.grouppedData.libraries.length
-      && !this.grouppedData.files.length && !this.grouppedData.chapters.length);
+    return !(this.noResultsTemplate != undefined && !this.groupedData.persons.length && !this.groupedData.collections.length
+      && !this.groupedData.series.length && !this.groupedData.persons.length && !this.groupedData.tags.length && !this.groupedData.genres.length && !this.groupedData.libraries.length
+      && !this.groupedData.files.length && !this.groupedData.chapters.length);
   }
 
 
@@ -108,7 +124,7 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.typeaheadForm.addControl('typeahead', new FormControl(this.initialValue, []));
     this.cdRef.markForCheck();
 
-    this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntilDestroyed()).subscribe(change => {
+    this.typeaheadForm.valueChanges.pipe(debounceTime(this.debounceTime), takeUntilDestroyed(this.destroyRef)).subscribe(change => {
       const value = this.typeaheadForm.get('typeahead')?.value;
 
       if (value != undefined && value != '' && !this.hasFocus) {

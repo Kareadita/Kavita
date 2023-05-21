@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take, takeUntil } from 'rxjs/operators';
@@ -80,6 +88,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsEnabled: boolean = false;
   baseUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
+  private readonly destroyRef = inject(DestroyRef);
 
   get AccordionPanelID() {
     return AccordionPanelID;
@@ -164,7 +173,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(mode => {
+    this.settingsForm.get('bookReaderImmersiveMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(mode => {
       if (mode) {
         this.settingsForm.get('bookReaderTapToPaginate')?.setValue(true);
         this.cdRef.markForCheck();

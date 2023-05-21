@@ -1,4 +1,16 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, takeUntil } from 'rxjs';
@@ -19,6 +31,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
 
   @Output() deviceAdded: EventEmitter<void> = new EventEmitter();
   @Output() deviceUpdated: EventEmitter<Device> = new EventEmitter();
+  private readonly destroyRef = inject(DestroyRef);
 
   settingsForm: FormGroup = new FormGroup({});
   devicePlatforms = devicePlatforms;
@@ -34,7 +47,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
     this.settingsForm.addControl('platform', new FormControl(this.device?.platform || DevicePlatform.Custom, [Validators.required]));
 
     // If user has filled in email and the platform hasn't been explicitly updated, try to update it for them
-    this.settingsForm.get('email')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(email => {
+    this.settingsForm.get('email')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(email => {
       if (this.settingsForm.get('platform')?.dirty) return;
       if (email === null || email === undefined || email === '') return;
       if (email.endsWith('@kindle.com')) this.settingsForm.get('platform')?.setValue(DevicePlatform.Kindle);

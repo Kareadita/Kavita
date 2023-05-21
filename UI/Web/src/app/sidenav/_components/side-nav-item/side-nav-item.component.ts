@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map, Subject, takeUntil } from 'rxjs';
 import { NavService } from 'src/app/_services/nav.service';
@@ -32,6 +41,7 @@ export class SideNavItemComponent implements OnInit {
   @Input() external: boolean = false;
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
+  private readonly destroyRef = inject(DestroyRef);
 
 
   highlighted = false;
@@ -39,7 +49,7 @@ export class SideNavItemComponent implements OnInit {
   constructor(public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef) {
     router.events
       .pipe(filter(event => event instanceof NavigationEnd),
-            takeUntilDestroyed(),
+            takeUntilDestroyed(this.destroyRef),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
         this.updateHighlight(evt.url.split('?')[0]);

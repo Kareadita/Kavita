@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbActiveOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -45,6 +54,7 @@ export class CardDetailDrawerComponent implements OnInit {
   @Input() seriesId: number = 0;
   @Input() libraryId: number = 0;
   @Input({required: true}) data!: Volume | Chapter;
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * If this is a volume, this will be first chapter for said volume.
@@ -103,7 +113,7 @@ export class CardDetailDrawerComponent implements OnInit {
     private seriesService: SeriesService, private readerService: ReaderService,
     public activeOffcanvas: NgbActiveOffcanvas, private downloadService: DownloadService, private readonly cdRef: ChangeDetectorRef) {
       this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
         map(user => (user && this.accountService.hasAdminRole(user)) || false),
         shareReplay()
       );

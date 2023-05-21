@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Observable, Subject, takeUntil, switchMap, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -19,6 +27,7 @@ export class TopReadersComponent implements OnInit {
   timePeriods = TimePeriods;
 
   users$: Observable<TopUserRead[]>;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private statsService: StatisticsService, private readonly cdRef: ChangeDetectorRef) {
     this.formGroup = new FormGroup({
@@ -27,7 +36,7 @@ export class TopReadersComponent implements OnInit {
 
     this.users$ = this.formGroup.valueChanges.pipe(
       switchMap(_ => this.statsService.getTopUsers(this.formGroup.get('days')?.value as number)),
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       shareReplay(),
     );
   }

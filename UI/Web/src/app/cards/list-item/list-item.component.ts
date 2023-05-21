@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
@@ -60,7 +70,7 @@ export class ListItemComponent implements OnInit {
   */
   @Input() includeVolume: boolean = false;
   /**
-   * Show's the title if avaible on entity
+   * Show's the title if available on entity
    */
   @Input() showTitle: boolean = true;
   /**
@@ -69,6 +79,7 @@ export class ListItemComponent implements OnInit {
   @Input() blur: boolean = false;
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   actionInProgress: boolean = false;
   summary: string = '';
@@ -98,7 +109,7 @@ export class ListItemComponent implements OnInit {
     this.cdRef.markForCheck();
 
 
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(), map((events) => {
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
       return null;
@@ -107,7 +118,7 @@ export class ListItemComponent implements OnInit {
 
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
-      if (this.downloadInProgress === true) {
+      if (this.downloadInProgress) {
         this.toastr.info('Download is already in progress. Please wait.');
         return;
       }

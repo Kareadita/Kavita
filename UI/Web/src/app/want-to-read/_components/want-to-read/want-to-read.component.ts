@@ -1,5 +1,17 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Inject,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { take, debounceTime } from 'rxjs';
@@ -32,6 +44,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   @ViewChild('scrollingBlock') scrollingBlock: ElementRef<HTMLDivElement> | undefined;
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
+  private readonly destroyRef = inject(DestroyRef);
 
   isLoading: boolean = true;
   series: Array<Series> = [];
@@ -91,7 +104,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
       this.cdRef.markForCheck();
 
-      this.hubService.messages$.pipe(takeUntilDestroyed()).subscribe((event) => {
+      this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
         if (event.event === EVENTS.SeriesRemoved) {
           const seriesRemoved = event.payload as SeriesRemovedEvent;
           if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
@@ -109,7 +122,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntilDestroyed(), debounceTime(2000)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(2000)).subscribe(event => {
       if (event.event === EVENTS.SeriesRemoved) {
         this.loadPage();
       }

@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -11,7 +11,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   providedIn: 'root'
 })
 export class ImageService {
-
+  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   apiKey: string = '';
   encodedKey: string = '';
@@ -21,7 +21,7 @@ export class ImageService {
   public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
 
   constructor(private accountService: AccountService, private themeService: ThemeService) {
-    this.themeService.currentTheme$.pipe(takeUntilDestroyed()).subscribe(theme => {
+    this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(theme => {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
@@ -33,7 +33,7 @@ export class ImageService {
       }
     });
 
-    this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.apiKey = user.apiKey;
         this.encodedKey = encodeURIComponent(this.apiKey);

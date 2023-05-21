@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil } from 'rxjs';
@@ -16,6 +25,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class MangaFormatStatsComponent {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
+  private readonly destroyRef = inject(DestroyRef);
 
   formats$!: Observable<Array<PieDataItem>>;
 
@@ -44,7 +54,7 @@ export class MangaFormatStatsComponent {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : data;
       }),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 

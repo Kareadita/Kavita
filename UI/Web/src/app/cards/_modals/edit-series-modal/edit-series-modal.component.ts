@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
@@ -57,7 +66,7 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-
+  private readonly destroyRef = inject(DestroyRef);
 
   // Typeaheads
   ageRatingSettings: TypeaheadSettings<AgeRatingDto> = new TypeaheadSettings();
@@ -122,7 +131,7 @@ export class EditSeriesModalComponent implements OnInit {
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
-    this.libraryService.getLibraryNames().pipe(takeUntilDestroyed()).subscribe(names => {
+    this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
 
@@ -179,41 +188,41 @@ export class EditSeriesModalComponent implements OnInit {
 
         this.cdRef.markForCheck();
 
-        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.nameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.sortNameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.localizedNameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.summaryLocked = true;
           this.metadata.summary = val;
           this.cdRef.markForCheck();
         });
 
 
-        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.ageRating = parseInt(val + '', 10);
           this.metadata.ageRatingLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.publicationStatus = parseInt(val + '', 10);
           this.metadata.publicationStatusLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.releaseYear = parseInt(val + '', 10);
           this.metadata.releaseYearLocked = true;
           this.cdRef.markForCheck();

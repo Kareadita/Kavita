@@ -1,4 +1,17 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { filter, map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -25,6 +38,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('content') canvas: ElementRef | undefined;
   private ctx!: CanvasRenderingContext2D;
@@ -53,7 +67,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   constructor(private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService, private readerService: ReaderService) { }
 
   ngOnInit(): void {
-    this.readerSettings$.pipe(takeUntilDestroyed(), tap((value: ReaderSetting) => {
+    this.readerSettings$.pipe(takeUntilDestroyed(this.destroyRef), tap((value: ReaderSetting) => {
       this.fit = value.fitting;
       this.pageSplit = value.pageSplit;
       this.layoutMode = value.layoutMode;
@@ -67,11 +81,11 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
     this.darkenss$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       map((values: ReaderSetting) => values.fitting),
       map(fit => {
         if (fit === FITTING_OPTION.WIDTH) return fit; // || this.layoutMode === LayoutMode.Single (so that we can check the wide stuff)
@@ -92,7 +106,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
 
     this.bookmark$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
         if (!this.canvas) return;
@@ -104,7 +118,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
       map(showOverlay => showOverlay ? 'blur' : ''),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 

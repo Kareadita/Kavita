@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { debounceTime, filter, map, Subject, takeUntil } from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
@@ -32,6 +43,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
   @Output() goTo: EventEmitter<{queryParamName: FilterQueryParam, filter: any}> = new EventEmitter();
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
+  private readonly destroyRef = inject(DestroyRef);
 
   get MangaFormat() {
     return MangaFormat;
@@ -48,9 +60,9 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
                                     map(evt => evt.payload as UserProgressUpdateEvent),
                                     debounceTime(500),
-                                    takeUntilDestroyed())
+                                    takeUntilDestroyed(this.destroyRef))
         .subscribe(updateEvent => {
-          this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
+          this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
             if (user === undefined || user.username !== updateEvent.username) return;
             if (updateEvent.seriesId !== this.series.id) return;
             this.getReadingTimeLeft();

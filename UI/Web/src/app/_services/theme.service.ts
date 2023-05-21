@@ -1,6 +1,15 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
+import {
+  DestroyRef,
+  inject,
+  Inject,
+  Injectable,
+  OnDestroy,
+  Renderer2,
+  RendererFactory2,
+  SecurityContext
+} from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
@@ -18,6 +27,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class ThemeService {
 
+  private readonly destroyRef = inject(DestroyRef);
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';
 
@@ -42,7 +52,7 @@ export class ThemeService {
 
     this.getThemes();
 
-    messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(message => {
+    messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
       if (message.event !== EVENTS.NotificationProgress) return;
       const notificationEvent = (message.payload as NotificationProgressEvent);

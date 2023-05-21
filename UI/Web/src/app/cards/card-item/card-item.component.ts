@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
@@ -116,6 +127,7 @@ export class CardItemComponent implements OnInit {
   selectionInProgress: boolean = false;
 
   private user: User | undefined;
+  private readonly destroyRef = inject(DestroyRef);
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -136,14 +148,14 @@ export class CardItemComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.suppressLibraryLink === false) {
+    if (!this.suppressLibraryLink) {
       if (this.entity !== undefined && this.entity.hasOwnProperty('libraryId')) {
         this.libraryId = (this.entity as Series).libraryId;
         this.cdRef.markForCheck();
       }
 
       if (this.libraryId !== undefined && this.libraryId > 0) {
-        this.libraryService.getLibraryName(this.libraryId).pipe(takeUntilDestroyed()).subscribe(name => {
+        this.libraryService.getLibraryName(this.libraryId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(name => {
           this.libraryName = name;
           this.cdRef.markForCheck();
         });
@@ -176,12 +188,12 @@ export class CardItemComponent implements OnInit {
     }
 
     this.filterSendTo();
-    this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       this.user = user;
     });
 
     this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
-    map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed()).subscribe(updateEvent => {
+    map(evt => evt.payload as UserProgressUpdateEvent), takeUntilDestroyed(this.destroyRef)).subscribe(updateEvent => {
       if (this.user === undefined || this.user.username !== updateEvent.username) return;
       if (this.utilityService.isChapter(this.entity) && updateEvent.chapterId !== this.entity.id) return;
       if (this.utilityService.isVolume(this.entity) && updateEvent.volumeId !== this.entity.id) return;
@@ -212,7 +224,7 @@ export class CardItemComponent implements OnInit {
       this.cdRef.detectChanges();
     });
 
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(), map((events) => {
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       if(this.utilityService.isSeries(this.entity)) return events.find(e => e.entityType === 'series' && e.subTitle === this.downloadService.downloadSubtitle('series', (this.entity as Series))) || null;
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;

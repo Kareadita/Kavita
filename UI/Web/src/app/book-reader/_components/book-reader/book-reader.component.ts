@@ -1,4 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, Inject, OnDestroy, OnInit, Renderer2, RendererStyleFlags2, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  Inject,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+  RendererStyleFlags2,
+  ViewChild
+} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -261,7 +275,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
-  private readonly onDestroy = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   @ViewChild('bookContainer', {static: false}) bookContainerElemRef!: ElementRef<HTMLDivElement>;
   /**
@@ -454,7 +468,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(this.reader.nativeElement, 'scroll')
       .pipe(
         debounceTime(200),
-        takeUntilDestroyed())
+        takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (this.isLoading) return;
 

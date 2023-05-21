@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
-  ElementRef,
+  Component, DestroyRef,
+  ElementRef, inject,
   Input,
   OnInit,
   ViewChild
@@ -27,13 +27,14 @@ export class ApiKeyComponent implements OnInit {
   @Input() tooltipText: string = '';
   @ViewChild('apiKey') inputElem!: ElementRef;
   key: string = '';
+  private readonly destroyRef = inject(DestroyRef);
 
 
   constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard,
               private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed()).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       let key = '';
       if (user) {
         key = user.apiKey;

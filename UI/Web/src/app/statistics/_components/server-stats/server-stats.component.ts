@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy } from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import {BehaviorSubject, map, Observable, ReplaySubject, shareReplay, Subject, takeUntil} from 'rxjs';
@@ -36,6 +36,8 @@ export class ServerStatsComponent {
   breakpointSubject = new ReplaySubject<Breakpoint>(1);
   breakpoint$: Observable<Breakpoint> = this.breakpointSubject.asObservable();
 
+  private readonly destroyRef = inject(DestroyRef);
+
   @HostListener('window:resize', ['$event'])
   @HostListener('window:orientationchange', ['$event'])
   onResize() {
@@ -54,14 +56,14 @@ export class ServerStatsComponent {
 
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
 
-    this.stats$ = this.statService.getServerStatistics().pipe(takeUntilDestroyed(), shareReplay());
-    this.releaseYears$ = this.statService.getTopYears().pipe(takeUntilDestroyed());
+    this.stats$ = this.statService.getServerStatistics().pipe(takeUntilDestroyed(this.destroyRef), shareReplay());
+    this.releaseYears$ = this.statService.getTopYears().pipe(takeUntilDestroyed(this.destroyRef));
     this.mostActiveUsers$ = this.stats$.pipe(
       map(d => d.mostActiveUsers),
       map(userCounts => userCounts.map(count => {
         return {name: count.value.username, value: count.count};
       })),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.mostActiveLibrary$ = this.stats$.pipe(
@@ -69,7 +71,7 @@ export class ServerStatsComponent {
       map(counts => counts.map(count => {
         return {name: count.value.name, value: count.count};
       })),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.mostActiveSeries$ = this.stats$.pipe(
@@ -77,7 +79,7 @@ export class ServerStatsComponent {
       map(counts => counts.map(count => {
         return {name: count.value.name, value: count.count, extra: count.value};
       })),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.recentlyRead$ = this.stats$.pipe(
@@ -85,7 +87,7 @@ export class ServerStatsComponent {
       map(counts => counts.map(count => {
         return {name: count.name, value: -1, extra: count};
       })),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
   }
 

@@ -1,5 +1,16 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { Observable, of, Subject, map, takeUntil, tap, zip, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -29,6 +40,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
   @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
   @Input({required: true}) getPage!: (pageNum: number) => HTMLImageElement;
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  private readonly destroyRef = inject(DestroyRef);
 
   debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
   imageFitClass$!: Observable<string>;
@@ -76,30 +88,30 @@ export class DoubleNoCoverRendererComponent implements OnInit {
       map(values => values.readerMode),
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.darkness$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
       map(enabled => enabled ? 'book-shadow' : ''),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
       map(showOverlay => showOverlay ? 'blur' : ''),
       filter(_ => this.isValid()),
-      takeUntilDestroyed()
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.pageNum$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
@@ -113,20 +125,20 @@ export class DoubleNoCoverRendererComponent implements OnInit {
     ).subscribe(() => {});
 
     this.shouldRenderDouble$ = this.pageNum$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       map((_) => this.shouldRenderDouble()),
       filter(_ => this.isValid()),
     );
 
     this.imageFitClass$ = this.readerSettings$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       map(values => values.fitting),
       filter(_ => this.isValid()),
       shareReplay()
     );
 
     this.layoutClass$ = combineLatest([this.shouldRenderDouble$, this.readerSettings$]).pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       map((value) =>  {
         if (value[0] && value[1].fitting === FITTING_OPTION.WIDTH) return 'fit-to-width-double-offset';
         if (value[0] && value[1].fitting === FITTING_OPTION.HEIGHT) return 'fit-to-height-double-offset';
@@ -138,7 +150,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
 
 
     this.readerSettings$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(values => {
         this.layoutMode = values.layoutMode;
         this.pageSplit = values.pageSplit;
@@ -147,7 +159,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
     ).subscribe(() => {});
 
     this.bookmark$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');

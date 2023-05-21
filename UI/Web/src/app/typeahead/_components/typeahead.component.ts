@@ -1,6 +1,24 @@
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener, Inject, Input, OnDestroy, OnInit, Output, Renderer2, RendererStyleFlags2, TemplateRef, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer2,
+  RendererStyleFlags2,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Observable, ReplaySubject, Subject } from 'rxjs';
 import { auditTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
@@ -174,6 +192,7 @@ export class TypeaheadComponent implements OnInit {
   @Output() newItemAdded = new EventEmitter<any[] | any>();
   @Output() onUnlock = new EventEmitter<void>();
   @Output() lockedChange = new EventEmitter<boolean>();
+  private readonly destroyRef = inject(DestroyRef);
 
 
   @ViewChild('input') inputElem!: ElementRef<HTMLInputElement>;
@@ -193,13 +212,13 @@ export class TypeaheadComponent implements OnInit {
   constructor(private renderer2: Renderer2, @Inject(DOCUMENT) private document: Document, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.reset.pipe(takeUntilDestroyed()).subscribe((resetToEmpty: boolean) => {
+    this.reset.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((resetToEmpty: boolean) => {
       this.clearSelections(resetToEmpty);
       this.init();
     });
 
     if (this.focus) {
-      this.focus.pipe(takeUntilDestroyed()).subscribe((id: string) => {
+      this.focus.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((id: string) => {
         if (this.settings.id !== id) return;
         this.onInputFocus();
       });
@@ -252,7 +271,7 @@ export class TypeaheadComponent implements OnInit {
 
         switchMap((val: string) => {
           this.isLoadingOptions = true;
-          return this.settings.fetchFn(val.trim()).pipe(takeUntilDestroyed(), map((items: any[]) => items.filter(item => this.filterSelected(item))));
+          return this.settings.fetchFn(val.trim()).pipe(takeUntilDestroyed(this.destroyRef), map((items: any[]) => items.filter(item => this.filterSelected(item))));
         }),
         tap((filteredOptions: any[]) => {
           this.isLoadingOptions = false;
@@ -266,7 +285,7 @@ export class TypeaheadComponent implements OnInit {
 
         }),
         shareReplay(),
-        takeUntilDestroyed()
+        takeUntilDestroyed(this.destroyRef)
       );
 
 

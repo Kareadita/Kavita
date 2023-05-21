@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, of, Subject, takeUntil, shareReplay, map, take } from 'rxjs';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
@@ -21,20 +29,21 @@ export class ChangeAgeRestrictionComponent implements OnInit {
   selectedRestriction!: AgeRestriction;
   originalRestriction!: AgeRestriction;
   reset: EventEmitter<AgeRestriction> = new EventEmitter();
+  private readonly destroyRef = inject(DestroyRef);
 
   get AgeRating() { return AgeRating; }
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), take(1)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), take(1)).subscribe(user => {
       if (!user) return;
       this.user = user;
       this.originalRestriction = this.user.ageRestriction;
       this.cdRef.markForCheck();
     });
 
-    this.hasChangeAgeRestrictionAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(), shareReplay(), map(user => {
+    this.hasChangeAgeRestrictionAbility = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay(), map(user => {
       return user !== undefined && (!this.accountService.hasAdminRole(user) && this.accountService.hasChangeAgeRestrictionRole(user));
     }));
     this.cdRef.markForCheck();

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
@@ -23,6 +32,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input({required: true}) user!: User;
+  private readonly destroyRef = inject(DestroyRef);
 
   isAdmin$: Observable<boolean> = of(false);
 
@@ -64,7 +74,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntilDestroyed()).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
@@ -83,7 +93,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     });
 
     this.isAdmin$ = this.accountService.currentUser$.pipe(
-      takeUntilDestroyed(),
+      takeUntilDestroyed(this.destroyRef),
       map(user => (user && this.accountService.hasAdminRole(user)) || false),
       shareReplay()
     );
