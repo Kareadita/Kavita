@@ -478,10 +478,9 @@ public class ReaderService : IReaderService
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
-         if (progress.Count == 0)
+         if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
              return volumes.OrderBy(v => double.Parse(v.Number + string.Empty), _chapterSortComparer).First().Chapters
@@ -523,12 +522,13 @@ public class ReaderService : IReaderService
             return lastChapter;
         }
 
-        // If the last chapter didn't fit, then we need the next chapter without any progress
-        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead == 0);
+        // If the last chapter didn't fit, then we need the next chapter without full progress
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages);
         if (firstChapterWithoutProgress != null)
         {
             return firstChapterWithoutProgress;
         }
+
 
         // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
         var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);

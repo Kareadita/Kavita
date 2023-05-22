@@ -1986,6 +1986,107 @@ public class ReaderServiceTests
         Assert.Equal(4, nextChapter.VolumeId);
     }
 
+
+    /// <summary>
+    /// Volume 1-10 are fully read (single volumes),
+    /// Special 1 is fully read
+    /// Chapters 56-90 are read
+    /// Chapter 91 has partial progress on
+    /// </summary>
+    [Fact]
+    public async Task GetContinuePoint_ShouldReturnLastLooseChapter()
+    {
+        await ResetDb();
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("22").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("51").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("52").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("91").WithPages(2).Build())
+                .WithChapter(new ChapterBuilder("Special").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 1,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 2,
+            SeriesId = 1,
+            VolumeId = 1
+        }, 1);
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 3,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 4,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 5,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        // Chapter 91 has partial progress, hence it should resume there
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 6,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        // Special is fully read
+        await _readerService.SaveReadingProgress(new ProgressDto()
+        {
+            PageNum = 1,
+            ChapterId = 7,
+            SeriesId = 1,
+            VolumeId = 2
+        }, 1);
+
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("91", nextChapter.Range);
+    }
+
+
     #endregion
 
     #region MarkChaptersUntilAsRead
