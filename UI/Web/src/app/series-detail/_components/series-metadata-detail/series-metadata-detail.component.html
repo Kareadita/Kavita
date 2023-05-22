@@ -10,8 +10,7 @@
         <div class="col-md-8">
             <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
                 <img width="24px" height="24px"  #img class="lazyload img-placeholder"
-                     alt=""
-                    src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                    [src]="imageService.errorWebLinkImage"
                     [attr.data-src]="imageService.getWebLinkImage(link)"
                     (error)="imageService.updateErroredWebLinkImage($event)"
                     aria-hidden="true">

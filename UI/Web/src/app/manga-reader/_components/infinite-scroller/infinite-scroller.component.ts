@@ -1,5 +1,20 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, Renderer2, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  Renderer2,
+  SimpleChanges
+} from '@angular/core';
 import { BehaviorSubject, fromEvent, ReplaySubject, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ScrollService } from 'src/app/_services/scroll.service';
@@ -7,6 +22,7 @@ import { ReaderService } from '../../../_services/reader.service';
 import { PAGING_DIRECTION } from '../../_models/reader-enums';
 import { WebtoonImage } from '../../_models/webtoon-image';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -58,7 +74,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Method to generate the src for Image loading
    */
-  @Input() urlProvider!: (page: number) => string;
+  @Input({required: true}) urlProvider!: (page: number) => string;
   @Output() pageNumberChange: EventEmitter<number> = new EventEmitter<number>();
   @Output() loadNextChapter: EventEmitter<void> = new EventEmitter<void>();
   @Output() loadPrevChapter: EventEmitter<void> = new EventEmitter<void>();
@@ -66,6 +82,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
+  private readonly destroyRef = inject(DestroyRef);
 
   readerElemRef!: ElementRef<HTMLDivElement>;
 
@@ -149,9 +166,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     return this.webtoonImageWidth > (innerWidth || document.body.clientWidth);
   }
 
-
-  private readonly onDestroy = new Subject<void>();
-
   constructor(private readerService: ReaderService, private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document, private scrollService: ScrollService,
     private readonly cdRef: ChangeDetectorRef, private mangaReaderService: ManagaReaderService) {
@@ -172,8 +186,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.intersectionObserver.disconnect();
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   /**
@@ -183,7 +195,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   initScrollHandler() {
     console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
-    .pipe(debounceTime(20), takeUntil(this.onDestroy))
+    .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));
   }
 
@@ -193,7 +205,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     this.recalculateImageWidth();
 
     if (this.goToPage) {
-      this.goToPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+      this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
         this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
@@ -209,7 +221,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.bookmarkPage) {
-      this.bookmarkPage.pipe(takeUntil(this.onDestroy)).subscribe(page => {
+      this.bookmarkPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const image = document.querySelector('img[id^="page-' + page + '"]');
         if (image) {
           this.renderer.addClass(image, 'bookmark-effect');
@@ -222,7 +234,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.fullscreenToggled) {
-      this.fullscreenToggled.pipe(takeUntil(this.onDestroy)).subscribe(isFullscreen => {
+      this.fullscreenToggled.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(isFullscreen => {
         this.debugLog('[FullScreen] Fullscreen mode: ', isFullscreen);
         this.isFullscreenMode = isFullscreen;
         this.cdRef.markForCheck();
@@ -378,7 +390,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Is any part of the element visible in the scrollport. Does not take into account
-   * style properites, just scroll port visibility.
+   * style properties, just scroll port visibility.
    * @param elem
    * @returns
    */

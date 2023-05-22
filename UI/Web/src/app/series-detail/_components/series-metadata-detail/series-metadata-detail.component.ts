@@ -30,13 +30,13 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 })
 export class SeriesMetadataDetailComponent implements OnChanges {
 
-  @Input() seriesMetadata!: SeriesMetadata;
+  @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
   /**
    * Reading lists with a connection to the Series
    */
   @Input() readingLists: Array<ReadingList> = [];
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
 
   isCollapsed: boolean = true;
   hasExtendedProperties: boolean = false;

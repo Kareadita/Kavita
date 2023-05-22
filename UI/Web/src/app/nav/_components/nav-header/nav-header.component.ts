@@ -1,5 +1,15 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  ElementRef,
+  inject,
+  Inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
@@ -17,6 +27,7 @@ import { ImageService } from 'src/app/_services/image.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SearchService } from 'src/app/_services/search.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-nav-header',
@@ -24,9 +35,10 @@ import { SearchService } from 'src/app/_services/search.service';
   styleUrls: ['./nav-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NavHeaderComponent implements OnInit, OnDestroy {
+export class NavHeaderComponent implements OnInit {
 
   @ViewChild('search') searchViewRef!: any;
+  private readonly destroyRef = inject(DestroyRef);
 
   isLoading = false;
   debounceTime = 300;
@@ -48,7 +60,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
   backToTopNeeded = false;
   searchFocused: boolean = false;
   scrollElem: HTMLElement;
-  private readonly onDestroy = new Subject<void>();
 
   constructor(public accountService: AccountService, private router: Router, public navService: NavService,
     public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
@@ -57,7 +68,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     }
 
   ngOnInit(): void {
-    this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntil(this.onDestroy), tap((scrollContainer) => {
+    this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap((scrollContainer) => {
       if (scrollContainer === 'body' || scrollContainer === undefined) {
         this.scrollElem = this.document.body;
         fromEvent(this.document.body, 'scroll').pipe(debounceTime(20)).subscribe(() => this.checkBackToTopNeeded(this.document.body));
@@ -86,11 +97,6 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
   logout() {
     this.accountService.logout();
     this.navService.hideNavBar();
@@ -109,7 +115,7 @@ export class NavHeaderComponent implements OnInit, OnDestroy {
       this.searchTerm = val.trim();
       this.cdRef.markForCheck();
 
-      this.searchService.search(val.trim()).pipe(takeUntil(this.onDestroy)).subscribe(results => {
+      this.searchService.search(val.trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(results => {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();

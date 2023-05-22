@@ -1,5 +1,16 @@
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -9,6 +20,7 @@ import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_series/managa-reader.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-single-renderer',
@@ -16,21 +28,22 @@ import { ManagaReaderService } from '../../_series/managa-reader.service';
   styleUrls: ['./single-renderer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer {
+export class SingleRendererComponent implements OnInit, ImageRenderer {
 
-  @Input() readerSettings$!: Observable<ReaderSetting>;
-  @Input() image$!: Observable<HTMLImageElement | null>;
-  @Input() bookmark$!: Observable<number>;
-  @Input() showClickOverlay$!: Observable<boolean>;
-  @Input() pageNum$!: Observable<{pageNum: number, maxPages: number}>;
+  @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
+  @Input({required: true}) image$!: Observable<HTMLImageElement | null>;
+  @Input({required: true}) bookmark$!: Observable<number>;
+  @Input({required: true}) showClickOverlay$!: Observable<boolean>;
+  @Input({required: true}) pageNum$!: Observable<{pageNum: number, maxPages: number}>;
 
   @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  private readonly destroyRef = inject(DestroyRef);
 
   imageFitClass$!: Observable<string>;
   imageContainerHeight$!: Observable<string>;
   showClickOverlayClass$!: Observable<string>;
   readerModeClass$!: Observable<string>;
-  darkenss$: Observable<string> = of('brightness(100%)');
+  darkness$: Observable<string> = of('brightness(100%)');
   emulateBookClass$!: Observable<string>;
   currentImage!: HTMLImageElement;
   layoutMode: LayoutMode = LayoutMode.Single;
@@ -39,31 +52,29 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
   pageNum: number = 0;
   maxPages: number = 1;
 
-  private readonly onDestroy = new Subject<void>();
+  get ReaderMode() {return ReaderMode;}
+  get LayoutMode() {return LayoutMode;}
 
-  get ReaderMode() {return ReaderMode;} 
-  get LayoutMode() {return LayoutMode;} 
-
-  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService, 
+  constructor(private readonly cdRef: ChangeDetectorRef, public mangaReaderService: ManagaReaderService,
     @Inject(DOCUMENT) private document: Document) { }
 
   ngOnInit(): void {
     this.readerModeClass$ = this.readerSettings$.pipe(
-      map(values => values.readerMode), 
+      map(values => values.readerMode),
       map(mode => mode === ReaderMode.LeftRight || mode === ReaderMode.UpDown ? '' : 'd-none'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.emulateBookClass$ = this.readerSettings$.pipe(
       map(data => data.emulateBook),
-      map(enabled => enabled ? 'book-shadow' : ''), 
+      map(enabled => enabled ? 'book-shadow' : ''),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.imageContainerHeight$ = this.readerSettings$.pipe(
-      map(values => values.fitting), 
+      map(values => values.fitting),
       map(mode => {
         if ( mode !== FITTING_OPTION.HEIGHT) return '';
 
@@ -76,31 +87,31 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
         return 'calc(100vh)'
       }),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.pageNum$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(this.destroyRef),
       tap(pageInfo => {
         this.pageNum = pageInfo.pageNum;
         this.maxPages = pageInfo.maxPages;
       }),
     ).subscribe(() => {});
 
-    this.darkenss$ = this.readerSettings$.pipe(
-      map(values => 'brightness(' + values.darkness + '%)'), 
+    this.darkness$ = this.readerSettings$.pipe(
+      map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
 
     this.showClickOverlayClass$ = this.showClickOverlay$.pipe(
-      map(showOverlay => showOverlay ? 'blur' : ''), 
-      takeUntil(this.onDestroy),
+      map(showOverlay => showOverlay ? 'blur' : ''),
+      takeUntilDestroyed(this.destroyRef),
       filter(_ => this.isValid()),
     );
 
     this.readerSettings$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(this.destroyRef),
       tap(values => {
         this.layoutMode = values.layoutMode;
         this.pageSplit = values.pageSplit;
@@ -109,7 +120,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     ).subscribe(() => {});
 
     this.bookmark$.pipe(
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         const elements = [];
         const image1 = this.document.querySelector('#image-1');
@@ -134,7 +145,7 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
       }),
       shareReplay(),
       filter(_ => this.isValid()),
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(this.destroyRef),
     );
   }
 
@@ -142,15 +153,10 @@ export class SingleRendererComponent implements OnInit, OnDestroy, ImageRenderer
     return this.layoutMode === LayoutMode.Single;
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-  
   renderPage(img: Array<HTMLImageElement | null>): void {
     if (img === null || img.length === 0 || img[0] === null) return;
     if (!this.isValid()) return;
-    
+
     this.currentImage = img[0];
     this.cdRef.markForCheck();
     this.imageHeight.emit(this.currentImage.height);

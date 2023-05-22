@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
@@ -20,8 +31,8 @@ import { LibraryService } from '../_services/library.service';
 import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
-import { inject } from '@angular/core';
 import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-metadata-filter',
@@ -29,7 +40,7 @@ import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
   styleUrls: ['./metadata-filter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterComponent implements OnInit, OnDestroy {
+export class MetadataFilterComponent implements OnInit {
 
   /**
    * This toggles the opening/collapsing of the metadata filter code
@@ -41,11 +52,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
    */
   @Input() filteringDisabled: boolean = false;
 
-  @Input() filterSettings!: FilterSettings;
+  @Input({required: true}) filterSettings!: FilterSettings;
 
   @Output() applyFilter: EventEmitter<FilterEvent> = new EventEmitter();
 
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
+  private readonly destroyRef = inject(DestroyRef);
 
 
   formatSettings: TypeaheadSettings<FilterItem<MangaFormat>> = new TypeaheadSettings();
@@ -60,7 +72,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   resetTypeaheads: ReplaySubject<boolean> = new ReplaySubject(1);
 
    /**
-   * Controls the visiblity of extended controls that sit below the main header.
+   * Controls the visibility of extended controls that sit below the main header.
    */
   filteringCollapsed: boolean = true;
 
@@ -79,8 +91,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
   fullyLoaded: boolean = false;
   filterV2: SeriesFilterV2 | undefined;
 
-  
-  
+
+
   handleFilters(filter: SeriesFilterV2) {
     console.log('[metadata-filter] handleFilters');
     this.filterV2 = filter;
@@ -98,7 +110,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     return SortField;
   }
 
-  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private utilityService: UtilityService, 
+  constructor(private libraryService: LibraryService, private metadataService: MetadataService, private utilityService: UtilityService,
     private collectionTagService: CollectionTagService, public toggleService: ToggleService,
     private filterUtilitySerivce: FilterUtilitiesService) {
   }
@@ -110,13 +122,13 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }
 
     if (this.filterOpen) {
-      this.filterOpen.pipe(takeUntil(this.onDestroy)).subscribe(openState => {
+      this.filterOpen.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(openState => {
         this.filteringCollapsed = !openState;
         this.toggleService.set(!this.filteringCollapsed);
         this.cdRef.markForCheck();
       });
     }
-    
+
     this.filter = this.filterUtilitySerivce.createSeriesFilter();
     this.readProgressGroup = new FormGroup({
       read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
@@ -137,7 +149,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)])
     });
 
-    this.readProgressGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
+    this.readProgressGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
       this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
       this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
       this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
@@ -159,7 +171,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.sortGroup.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(changes => {
+    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
       if (this.filter.sortOptions == null) {
         this.filter.sortOptions = {
           isAscending: this.isAscendingSort,
@@ -172,8 +184,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
       map(val => (val || '').trim()),
-      distinctUntilChanged(), 
-      takeUntil(this.onDestroy)
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
     )
     .subscribe(changes => {
       this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
@@ -181,8 +193,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     });
 
     this.releaseYearRange.valueChanges.pipe(
-      distinctUntilChanged(), 
-      takeUntil(this.onDestroy)
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
     )
     .subscribe(changes => {
       this.filter.releaseYearRange = {min: this.releaseYearRange.get('min')?.value, max: this.releaseYearRange.get('max')?.value};
@@ -199,11 +211,6 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
@@ -214,7 +221,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
       this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets.readStatus.notRead);
       this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets.readStatus.inProgress);
-      
+
       if (this.filterSettings.presets.sortOptions) {
         this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
         this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending;
@@ -261,7 +268,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.formatSettings.id = 'format';
     this.formatSettings.unique = true;
     this.formatSettings.addIfNonExisting = false;
-    this.formatSettings.fetchFn = (filter: string) => of(mangaFormatFilters).pipe(map(items => this.formatSettings.compareFn(items, filter))); 
+    this.formatSettings.fetchFn = (filter: string) => of(mangaFormatFilters).pipe(map(items => this.formatSettings.compareFn(items, filter)));
     this.formatSettings.compareFn = (options: FilterItem<MangaFormat>[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
@@ -284,7 +291,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.librarySettings.addIfNonExisting = false;
     this.librarySettings.fetchFn = (filter: string) => {
       return this.libraryService.getLibraries()
-      .pipe(map(items => this.librarySettings.compareFn(items, filter))); 
+      .pipe(map(items => this.librarySettings.compareFn(items, filter)));
     };
     this.librarySettings.compareFn = (options: Library[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.name, filter));
@@ -311,7 +318,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.genreSettings.addIfNonExisting = false;
     this.genreSettings.fetchFn = (filter: string) => {
       return this.metadataService.getAllGenres(this.filter.libraries)
-      .pipe(map(items => this.genreSettings.compareFn(items, filter))); 
+      .pipe(map(items => this.genreSettings.compareFn(items, filter)));
     };
     this.genreSettings.compareFn = (options: Genre[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
@@ -337,12 +344,12 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.ageRatingSettings.unique = true;
     this.ageRatingSettings.addIfNonExisting = false;
     this.ageRatingSettings.fetchFn = (filter: string) => this.metadataService.getAllAgeRatings(this.filter.libraries)
-      .pipe(map(items => this.ageRatingSettings.compareFn(items, filter))); 
-    
+      .pipe(map(items => this.ageRatingSettings.compareFn(items, filter)));
+
     this.ageRatingSettings.compareFn = (options: AgeRatingDto[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
-    
+
 
     this.ageRatingSettings.selectionCompareFn = (a: AgeRatingDto, b: AgeRatingDto) => {
       return a.title == b.title;
@@ -365,8 +372,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     this.publicationStatusSettings.unique = true;
     this.publicationStatusSettings.addIfNonExisting = false;
     this.publicationStatusSettings.fetchFn = (filter: string) => this.metadataService.getAllPublicationStatus(this.filter.libraries)
-      .pipe(map(items => this.publicationStatusSettings.compareFn(items, filter))); 
-    
+      .pipe(map(items => this.publicationStatusSettings.compareFn(items, filter)));
+
     this.publicationStatusSettings.compareFn = (options: PublicationStatusDto[], filter: string) => {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
@@ -395,8 +402,8 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
     this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllTags(this.filter.libraries)
-      .pipe(map(items => this.tagsSettings.compareFn(items, filter))); 
-    
+      .pipe(map(items => this.tagsSettings.compareFn(items, filter)));
+
     this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
       return a.id == b.id;
     }
@@ -421,7 +428,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
       return options.filter(m => this.utilityService.filter(m.title, filter));
     }
     this.languageSettings.fetchFn = (filter: string) => this.metadataService.getAllLanguages(this.filter.libraries)
-          .pipe(map(items => this.languageSettings.compareFn(items, filter))); 
+          .pipe(map(items => this.languageSettings.compareFn(items, filter)));
 
     this.languageSettings.selectionCompareFn = (a: Language, b: Language) => {
       return a.isoCode == b.isoCode;
@@ -474,7 +481,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
         return true;
       }));
     }
-    
+
     this.peopleSettings[role] = personSettings;
     return of(true);
 
@@ -485,7 +492,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
 
     return forkJoin([
       this.updateFromPreset('writers', this.filter.writers, this.filterSettings.presets?.writers, PersonRole.Writer),
-      this.updateFromPreset('character', this.filter.character, this.filterSettings.presets?.character, PersonRole.Character),  
+      this.updateFromPreset('character', this.filter.character, this.filterSettings.presets?.character, PersonRole.Character),
       this.updateFromPreset('colorist', this.filter.colorist, this.filterSettings.presets?.colorist, PersonRole.Colorist),
       this.updateFromPreset('cover-artist', this.filter.coverArtist, this.filterSettings.presets?.coverArtist, PersonRole.CoverArtist),
       this.updateFromPreset('editor', this.filter.editor, this.filterSettings.presets?.editor, PersonRole.Editor),
@@ -499,7 +506,7 @@ export class MetadataFilterComponent implements OnInit, OnDestroy {
     }));
   }
 
-  fetchPeople(role: PersonRole, filter: string) { 
+  fetchPeople(role: PersonRole, filter: string) {
     return this.metadataService.getAllPeople(this.filter.libraries).pipe(map(people => {
       return people.filter(p => p.role == role && this.utilityService.filter(p.name, filter));
     }));

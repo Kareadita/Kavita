@@ -13,8 +13,8 @@ import { AccountService } from 'src/app/_services/account.service';
 })
 export class EditUserComponent implements OnInit {
 
-  @Input() member!: Member;
-  
+  @Input({required: true}) member!: Member;
+
   selectedRoles: Array<string> = [];
   selectedLibraries: Array<number> = [];
   selectedRestriction!: AgeRestriction;

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -11,6 +20,7 @@ import { Library, LibraryType } from 'src/app/_models/library';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   General = 'General',
@@ -32,9 +42,10 @@ enum StepID {
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
+export class LibrarySettingsModalComponent implements OnInit {
 
-  @Input() library!: Library;
+  @Input({required: true}) library!: Library;
+  private readonly destroyRef = inject(DestroyRef);
 
   active = TabID.General;
   imageUrls: Array<string> = [];
@@ -54,17 +65,16 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
   selectedFolders: string[] = [];
   madeChanges = false;
   libraryTypes: string[] = []
-  
+
   isAddLibrary = false;
   setupStep = StepID.General;
-  private readonly onDestroy = new Subject<void>();
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
   get StepID() { return StepID; }
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
-    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService, 
+    private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
     private libraryService: LibraryService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
     private imageService: ImageService) { }
 
@@ -87,7 +97,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
     }
 
     this.libraryForm.get('name')?.valueChanges.pipe(
-      debounceTime(100), 
+      debounceTime(100),
       distinctUntilChanged(),
       switchMap(name => this.libraryService.libraryNameExists(name)),
       tap(exists => {
@@ -95,22 +105,16 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
         if (!exists || isExistingName) {
           this.libraryForm.get('name')?.setErrors(null);
         } else {
-          this.libraryForm.get('name')?.setErrors({duplicateName: true})  
+          this.libraryForm.get('name')?.setErrors({duplicateName: true})
         }
         this.cdRef.markForCheck();
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
 
     this.setValues();
   }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-  
 
   setValues() {
     if (this.library !== undefined) {
@@ -159,7 +163,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
       model.type = parseInt(model.type, 10);
 
       if (model.type !== this.library.type) {
-        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to 
+        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to
         series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?`)) return;
       }
 
@@ -221,7 +225,7 @@ export class LibrarySettingsModalComponent implements OnInit, OnDestroy {
 
   isNextDisabled() {
     switch (this.setupStep) {
-      case StepID.General: 
+      case StepID.General:
         return this.libraryForm.get('name')?.invalid || this.libraryForm.get('type')?.invalid;
       case StepID.Folder:
         return this.selectedFolders.length === 0;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnDestroy, OnInit} from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
@@ -7,6 +7,7 @@ import { MemberService } from 'src/app/_services/member.service';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { TimePeriods } from '../top-readers/top-readers.component';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 const mangaFormatPipe = new MangaFormatPipe();
@@ -17,7 +18,7 @@ const mangaFormatPipe = new MangaFormatPipe();
   styleUrls: ['./reading-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReadingActivityComponent implements OnInit, OnDestroy {
+export class ReadingActivityComponent implements OnInit {
   /**
    * Only show for one user
    */
@@ -33,10 +34,10 @@ export class ReadingActivityComponent implements OnInit, OnDestroy {
   users$: Observable<Member[]> | undefined;
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
-  private readonly onDestroy = new Subject<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private statService: StatisticsService, private memberService: MemberService) {
-    this.data$ = this.formGroup.valueChanges.pipe(      
+    this.data$ = this.formGroup.valueChanges.pipe(
       switchMap(_ => this.statService.getReadCountByDay(this.formGroup.get('users')!.value, this.formGroup.get('days')!.value)),
       map(data => {
         const gList = data.reduce((formats, entry) => {
@@ -56,26 +57,20 @@ export class ReadingActivityComponent implements OnInit, OnDestroy {
           return {name: format, value: 0, series: gList[format].series}
         });
       }),
-      takeUntil(this.onDestroy),
+      takeUntilDestroyed(this.destroyRef),
       shareReplay(),
     );
-    
+
     this.data$.subscribe();
   }
 
   ngOnInit(): void {
-    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntil(this.onDestroy), shareReplay());
+    this.users$ = (this.isAdmin ? this.memberService.getMembers() : of([])).pipe(filter(_ => this.isAdmin), takeUntilDestroyed(this.destroyRef), shareReplay());
     this.formGroup.get('users')?.setValue(this.userId, {emitValue: true});
 
     if (!this.isAdmin) {
       this.formGroup.get('users')?.disable();
     }
   }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
 }
 

@@ -116,7 +116,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   ngOnChanges(): void {
     this.jumpBarKeysToRender = [...this.jumpBarKeys];
     this.resizeJumpBar();
-    
+
     // Don't resume jump key when there is a custom sort order, as it won't work
     if (!this.hasCustomSort()) {
       if (!this.hasResumedJumpKey && this.jumpBarKeysToRender.length > 0) {
@@ -124,7 +124,7 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
         if (resumeKey === '') return;
         const keys = this.jumpBarKeysToRender.filter(k => k.key === resumeKey);
         if (keys.length < 1) return;
-  
+
         this.hasResumedJumpKey = true;
         setTimeout(() => this.scrollTo(keys[0]), 100);
       }

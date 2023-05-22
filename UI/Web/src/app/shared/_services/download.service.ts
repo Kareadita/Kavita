@@ -29,7 +29,7 @@ export interface DownloadEvent {
   /**
    * Progress of the download itself
    */
-  progress: number; 
+  progress: number;
 }
 
 /**
@@ -37,7 +37,7 @@ export interface DownloadEvent {
  */
 export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs';
 /**
- * Valid entities for downloading. Undefined exclusively for logs. 
+ * Valid entities for downloading. Undefined exclusively for logs.
  */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefined;
 
@@ -56,14 +56,14 @@ export class DownloadService {
   public activeDownloads$ = this.downloadsSource.asObservable();
 
 
-  constructor(private httpClient: HttpClient, private confirmService: ConfirmService, 
+  constructor(private httpClient: HttpClient, private confirmService: ConfirmService,
     @Inject(SAVER) private save: Saver, private accountService: AccountService) { }
 
   /**
    * Returns the entity subtitle (for the event widget) for a given entity
-   * @param downloadEntityType 
-   * @param downloadEntity 
-   * @returns 
+   * @param downloadEntityType
+   * @param downloadEntity
+   * @returns
    */
    downloadSubtitle(downloadEntityType: DownloadEntityType, downloadEntity: DownloadEntity | undefined) {
     switch (downloadEntityType) {
@@ -82,13 +82,13 @@ export class DownloadService {
 
   /**
    * Downloads the entity to the user's system. This handles everything around downloads. This will prompt the user based on size checks and UserPreferences.PromptForDownload.
-   * This will perform the download at a global level, if you need a handle to the download in question, use downloadService.activeDownloads$ and perform a filter on it. 
-   * @param entityType 
-   * @param entity 
+   * This will perform the download at a global level, if you need a handle to the download in question, use downloadService.activeDownloads$ and perform a filter on it.
+   * @param entityType
+   * @param entity
    * @param callback Optional callback. Returns the download or undefined (if the download is complete).
    */
   download(entityType: DownloadEntityType, entity: DownloadEntity, callback?: (d: Download | undefined) => void) {
-    let sizeCheckCall: Observable<number>; 
+    let sizeCheckCall: Observable<number>;
     let downloadCall: Observable<Download>;
     switch (entityType) {
       case 'series':
@@ -155,10 +155,10 @@ export class DownloadService {
   private downloadLogs() {
     const downloadType = 'logs';
     const subtitle = this.downloadSubtitle(downloadType, undefined);
-    return this.httpClient.get(this.baseUrl + 'server/logs', 
+    return this.httpClient.get(this.baseUrl + 'server/logs',
       {observe: 'events', responseType: 'blob', reportProgress: true}
     ).pipe(
-      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+      throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
       download((blob, filename) => {
         this.save(blob, decodeURIComponent(filename));
       }),
@@ -170,10 +170,10 @@ export class DownloadService {
   private downloadSeries(series: Series) {
     const downloadType = 'series';
     const subtitle = this.downloadSubtitle(downloadType, series);
-    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id, 
+    return this.httpClient.get(this.baseUrl + 'download/series?seriesId=' + series.id,
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),
@@ -209,11 +209,12 @@ export class DownloadService {
   private downloadChapter(chapter: Chapter) {
     const downloadType = 'chapter';
     const subtitle = this.downloadSubtitle(downloadType, chapter);
-    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id, 
+    return this.httpClient.get(this.baseUrl + 'download/chapter?chapterId=' + chapter.id,
                 {observe: 'events', responseType: 'blob', reportProgress: true}
         ).pipe(
-          throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+          throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
           download((blob, filename) => {
+            console.log('saving: ', filename)
             this.save(blob, decodeURIComponent(filename));
           }),
           tap((d) => this.updateDownloadState(d, downloadType, subtitle)),
@@ -224,10 +225,10 @@ export class DownloadService {
   private downloadVolume(volume: Volume): Observable<Download> {
     const downloadType = 'volume';
     const subtitle = this.downloadSubtitle(downloadType, volume);
-    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id, 
+    return this.httpClient.get(this.baseUrl + 'download/volume?volumeId=' + volume.id,
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),
@@ -244,10 +245,10 @@ export class DownloadService {
     const downloadType = 'bookmark';
     const subtitle = this.downloadSubtitle(downloadType, bookmarks);
 
-    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks}, 
+    return this.httpClient.post(this.baseUrl + 'download/bookmarks', {bookmarks},
                       {observe: 'events', responseType: 'blob', reportProgress: true}
             ).pipe(
-              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }), 
+              throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
               download((blob, filename) => {
                 this.save(blob, decodeURIComponent(filename));
               }),

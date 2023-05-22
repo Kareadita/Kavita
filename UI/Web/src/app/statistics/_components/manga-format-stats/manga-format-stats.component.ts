@@ -1,10 +1,20 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, QueryList, ViewChildren } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewChildren
+} from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LegendPosition } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { PieDataItem } from '../../_models/pie-data-item';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manga-format-stats',
@@ -12,13 +22,13 @@ import { PieDataItem } from '../../_models/pie-data-item';
   styleUrls: ['./manga-format-stats.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MangaFormatStatsComponent implements OnInit, OnDestroy {
+export class MangaFormatStatsComponent {
 
   @ViewChildren(SortableHeader<PieDataItem>) headers!: QueryList<SortableHeader<PieDataItem>>;
+  private readonly destroyRef = inject(DestroyRef);
 
   formats$!: Observable<Array<PieDataItem>>;
-  private readonly onDestroy = new Subject<void>();
-  
+
   currentSort = new BehaviorSubject<SortEvent<PieDataItem>>({column: 'value', direction: 'asc'});
   currentSort$: Observable<SortEvent<PieDataItem>> = this.currentSort.asObservable();
 
@@ -44,18 +54,8 @@ export class MangaFormatStatsComponent implements OnInit, OnDestroy {
           return sortConfig.direction === 'asc' ? res : -res;
         }) : data;
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
-  }
-
-  ngOnInit(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   onSort(evt: SortEvent<PieDataItem>) {

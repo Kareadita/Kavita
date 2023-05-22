@@ -1,38 +1,39 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component,
+  Component, DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   OnDestroy,
   OnInit
 } from '@angular/core';
-import {Title} from '@angular/platform-browser';
-import {ActivatedRoute, Router} from '@angular/router';
-import {catchError, of, Subject, throwError} from 'rxjs';
-import {take, takeUntil} from 'rxjs/operators';
-import {BulkSelectionService} from '../cards/bulk-selection.service';
-import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
-import {SeriesAddedEvent} from '../_models/events/series-added-event';
-import {Library} from '../_models/library';
-import {Pagination} from '../_models/pagination';
-import {Series} from '../_models/series';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { BulkSelectionService } from '../cards/bulk-selection.service';
+import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
+import { SeriesAddedEvent } from '../_models/events/series-added-event';
+import { Library } from '../_models/library';
+import { Pagination } from '../_models/pagination';
+import { Series } from '../_models/series';
 import {FilterEvent, SeriesFilter, SortField} from '../_models/metadata/series-filter';
-import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
-import {ActionService} from '../_services/action.service';
-import {LibraryService} from '../_services/library.service';
-import {EVENTS, MessageHubService} from '../_services/message-hub.service';
-import {SeriesService} from '../_services/series.service';
-import {NavService} from '../_services/nav.service';
-import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
-import {FilterSettings} from '../metadata-filter/filter-settings';
-import {JumpKey} from '../_models/jumpbar/jump-key';
-import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
-import {MetadataService} from '../_services/metadata.service';
-import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
-import {FilterField} from '../_models/metadata/v2/filter-field';
-import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
+import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import { ActionService } from '../_services/action.service';
+import { LibraryService } from '../_services/library.service';
+import { EVENTS, MessageHubService } from '../_services/message-hub.service';
+import { SeriesService } from '../_services/series.service';
+import { NavService } from '../_services/nav.service';
+import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
+import { FilterSettings } from '../metadata-filter/filter-settings';
+import { JumpKey } from '../_models/jumpbar/jump-key';
+import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {MetadataService} from "../_services/metadata.service";
+import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../_models/metadata/v2/filter-field";
 
 @Component({
   selector: 'app-library-detail',
@@ -40,7 +41,7 @@ import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
   styleUrls: ['./library-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LibraryDetailComponent implements OnInit, OnDestroy {
+export class LibraryDetailComponent implements OnInit {
 
   libraryId!: number;
   libraryName = '';
@@ -50,7 +51,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   actions: ActionItem<Library>[] = [];
   filter: SeriesFilter | undefined = undefined;
   filterV2: SeriesFilterV2 | undefined = undefined;
-  onDestroy: Subject<void> = new Subject<void>();
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
@@ -61,16 +61,16 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
 
   tabs: Array<{title: string, fragment: string, icon: string}> = [
     {title: 'Library', fragment: '', icon: 'fa-landmark'},
-    {title: 'Recommended', fragment: 'recomended', icon: 'fa-award'},
+    {title: 'Recommended', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
-
+  private readonly destroyRef = inject(DestroyRef);
   metadataService = inject(MetadataService);
 
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    const selectedSeriesIndexes = this.bulkSelectionService.getSelectedCardsForSource('series');
-    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndexes.includes(index + ''));
+    const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
+    const selectedSeries = this.series.filter((series, index: number) => selectedSeriesIndices.includes(index + ''));
 
     switch (action.action) {
       case Action.AddToReadingList:
@@ -145,7 +145,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-
+    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
@@ -198,7 +198,7 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.hubService.messages$.pipe(takeUntil(this.onDestroy)).subscribe((event) => {
+    this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
@@ -234,10 +234,6 @@ export class LibraryDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {

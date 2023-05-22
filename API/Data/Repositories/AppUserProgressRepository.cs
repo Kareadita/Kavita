@@ -26,6 +26,7 @@ public interface IAppUserProgressRepository
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
     Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId);
+    Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
 }
 
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -127,6 +128,13 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)
             .ProjectTo<ProgressDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId)
+    {
+        return await _context.AppUserProgresses
+            .Where(p => p.SeriesId == seriesId && p.AppUserId == userId && p.PagesRead > 0)
+            .AnyAsync();
     }
 
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)

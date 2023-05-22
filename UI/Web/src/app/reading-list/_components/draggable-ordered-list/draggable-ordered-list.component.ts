@@ -54,7 +54,7 @@ export class DraggableOrderedListComponent {
   }
 
   updateIndex(previousIndex: number, item: any) {
-    // get the new value of the input 
+    // get the new value of the input
     var inputElem = <HTMLInputElement>document.querySelector('#reorder-' + previousIndex);
     const newIndex = parseInt(inputElem.value, 10);
     if (previousIndex === newIndex)  return;

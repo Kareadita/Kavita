@@ -12,7 +12,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 })
 export class ReviewSeriesModalComponent implements OnInit {
 
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
   reviewGroup!: FormGroup;
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
