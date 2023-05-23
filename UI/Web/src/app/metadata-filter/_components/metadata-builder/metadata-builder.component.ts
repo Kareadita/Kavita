@@ -14,7 +14,8 @@ import {ComparisonOption} from "../metadata-filter-row-group/metadata-filter-row
 })
 export class MetadataBuilderComponent implements OnInit {
 
-  @Input() filterGroup!: FilterGroup;
+  @Input() urlString: string = '';
+  @Input({required: true}) filterGroup!: SeriesFilterV2;
   @Input() parentGroup!: FilterGroup;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 
@@ -30,6 +31,8 @@ export class MetadataBuilderComponent implements OnInit {
   ngOnInit() {
     //console.log('Preset: ', this.filterGroup);
 
+    // The big problem is that first level group isn't behaving like nested and thus the controls are slightly weird and building is too
+    // we need a way to streamline or have the hack later down. This needs the DTO because this controls sort and limit as well
     if (!this.filterGroup) {
       console.log('builder had no preset')
       this.filterGroup = this.metadataService.createDefaultFilterGroup();

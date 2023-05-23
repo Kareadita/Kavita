@@ -1,7 +1,25 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, ElementRef, EventEmitter, HostListener,
-   Inject, Input, OnChanges, OnDestroy, OnInit, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  inject,
+  Inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef,
+  TrackByFunction,
+  ViewChild
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
 import { Subject } from 'rxjs';
@@ -22,7 +40,7 @@ import { ScrollService } from 'src/app/_services/scroll.service';
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
+export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   @Input() header: string = '';
   @Input() isLoading: boolean = false;
@@ -67,7 +85,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
   updateApplied: number = 0;
   hasResumedJumpKey: boolean = false;
 
-  private onDestory: Subject<void> = new Subject();
 
   get Breakpoint() {
     return Breakpoint;
@@ -136,12 +153,6 @@ export class CardDetailLayoutComponent implements OnInit, OnDestroy, OnChanges {
       //   setTimeout(() => this.virtualScroller.scrollToIndex(scrollPosition, true, 0, 1000), 100);
       // }
     }
-  }
-
-
-  ngOnDestroy() {
-    this.onDestory.next();
-    this.onDestory.complete();
   }
 
   hasCustomSort() {

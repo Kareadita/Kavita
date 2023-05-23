@@ -18,6 +18,7 @@ import { FilterGroup } from '../_models/metadata/v2/filter-group';
 import {SiteTheme} from "../_models/preferences/site-theme";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {Router} from "@angular/router";
+import {SortField} from "../_models/metadata/series-filter";
 
 @Injectable({
   providedIn: 'root'
@@ -132,6 +133,26 @@ export class MetadataService {
 
   getChapterSummary(chapterId: number) {
     return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
+  }
+
+  createDefaultFilterDto(): SeriesFilterV2 {
+    return {
+      groups: [this.createRootGroup()],
+      limitTo: 0,
+      sortOptions: {
+        isAscending: true,
+        sortField: SortField.SortName
+      }
+    };
+  }
+
+  createRootGroup() {
+    const group = this.createDefaultFilterGroup();
+
+    const rootGroup = this.createDefaultFilterGroup();
+    rootGroup.id = 'root';
+    rootGroup.or.push(group);
+    return rootGroup;
   }
 
   createDefaultFilterGroup(): FilterGroup {

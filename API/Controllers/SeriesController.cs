@@ -38,6 +38,14 @@ public class SeriesController : BaseApiController
         _seriesService = seriesService;
     }
 
+    /// <summary>
+    /// Gets series with the applied Filter
+    /// </summary>
+    /// <remarks>This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2</remarks>
+    /// <param name="libraryId"></param>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
     {

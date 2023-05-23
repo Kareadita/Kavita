@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import {of, Subject} from 'rxjs';
 import { debounceTime, take, takeUntil } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
@@ -65,7 +65,8 @@ export class LibraryDetailComponent implements OnInit {
   ];
   active = this.tabs[0];
   private readonly destroyRef = inject(DestroyRef);
-  metadataService = inject(MetadataService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
@@ -123,8 +124,7 @@ export class LibraryDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService,
-    private readonly cdRef: ChangeDetectorRef) {
+    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
@@ -149,51 +149,59 @@ export class LibraryDetailComponent implements OnInit {
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
+    this.filterSettings.presetsV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
     if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
 
     const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
-    this.metadataService.getFilter(filterName)
-      .subscribe((filter: SeriesFilterV2 | null) => {
-        console.log('resume from filter setup')
-        if (filter) {
-          this.filterV2 = filter;
-        } else {
-          this.filterV2 = {
-            groups: [this.createRootGroup()],
-            limitTo: 0,
-            sortOptions: {
-              isAscending: true,
-              sortField: SortField.SortName
-            }
-          };
-          // Update url without an id
-          //
-          // this.filterV2.groups[0].id = 'lib-1';
-          // this.filterV2.groups[0].statements.push(this.metadataService.createDefaultFilterStatement(FilterField.Libraries, FilterComparison.Equal, this.libraryId + ''));
-        }
 
-        this.filterSettings.presetsV2 = this.filterV2;
-        console.log(this.filterV2);
-        this.loadPage();
-        this.cdRef.markForCheck();
-      });
+    if (filterName === '') {
+      this.filterV2 = this.createRootGroup();
+      this.filterSettings.presetsV2 = this.filterV2;
+      this.loadPage();
+    } else {
+      this.metadataService.getFilter(filterName)
+        .subscribe((filter: SeriesFilterV2 | null) => {
+          console.log('resume from filter setup')
+          if (filter) {
+            this.filterV2 = filter;
+          } else {
+            this.filterV2 = this.createRootGroup();
+            // Update url without an id
+
+          }
+
+          this.filterSettings.presetsV2 = this.filterV2;
+          console.log(this.filterV2);
+          this.loadPage();
+        });
+    }
+
 
     this.filterSettings.libraryDisabled = true;
     this.cdRef.markForCheck();
   }
 
   createRootGroup() {
-    const group = this.metadataService.createDefaultFilterGroup();
+
     const stmt = this.metadataService.createDefaultFilterStatement();
     stmt.comparison = FilterComparison.Contains;
     stmt.field = FilterField.Libraries;
     stmt.value = this.libraryId + '';
-    group.id = 'or-1';
-    group.statements.push(stmt);
+    const rootGroup = this.metadataService.createDefaultFilterDto();
+    rootGroup.groups[0].id = 'or-1';
+    rootGroup.groups[0].statements.push(stmt);
 
-    const rootGroup = this.metadataService.createDefaultFilterGroup();
-    rootGroup.id = 'root';
-    rootGroup.or.push(group);
+    // const group = this.metadataService.createDefaultFilterGroup();
+    // const stmt = this.metadataService.createDefaultFilterStatement();
+    // stmt.comparison = FilterComparison.Contains;
+    // stmt.field = FilterField.Libraries;
+    // stmt.value = this.libraryId + '';
+    // group.id = 'or-1';
+    // group.statements.push(stmt);
+    //
+    // const rootGroup = this.metadataService.createDefaultFilterGroup();
+    // rootGroup.id = 'root';
+    // rootGroup.or.push(group);
     return rootGroup;
   }
 
@@ -281,7 +289,12 @@ export class LibraryDetailComponent implements OnInit {
     this.filter = data.filter;
     this.filterV2 = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    if (!data.isFirst) {
+      const url = this.filterUtilityService.encodeSeriesFilter(this.filterV2);
+      window.history.replaceState(window.location.href, '', url);
+    }
+
+
     this.loadPage();
   }
 
@@ -290,7 +303,8 @@ export class LibraryDetailComponent implements OnInit {
     this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
     this.cdRef.markForCheck();
 
-    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2).pipe(take(1)).subscribe(series => {
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2)
+      .subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;

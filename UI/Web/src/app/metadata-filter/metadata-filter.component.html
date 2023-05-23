@@ -21,7 +21,7 @@
     <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
     <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
       <div class="row justify-content-center g-0">
-         <app-metadata-builder  [filterGroup]="filterV2!.groups[0]" (update)="handleFilters($event)"></app-metadata-builder>
+         <app-metadata-builder  [filterGroup]="filterV2" (update)="handleFilters($event)"></app-metadata-builder>
 
           <div class="col-md-2 me-3">
               <form [formGroup]="sortGroup">

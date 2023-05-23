@@ -5,6 +5,8 @@ import { SeriesFilter, SortField } from 'src/app/_models/metadata/series-filter'
 import { SeriesService } from 'src/app/_services/series.service';
 import {MetadataService} from "../../_services/metadata.service";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
+import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
+import {FilterGroup} from "../../_models/metadata/v2/filter-group";
 
 /**
  * Used to pass state between the filter and the url
@@ -306,6 +308,53 @@ export class FilterUtilitiesService {
 
 
     return [filter, false]; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
+  }
+
+  encodeSeriesFilter(filter: SeriesFilterV2) {
+    const encodedGroups = this.encodeFilterGroups(filter.groups);
+    const encodedSortOptions = filter.sortOptions ? `sortOptions=${filter.sortOptions}` : '';
+    const encodedLimitTo = `limitTo=${filter.limitTo}`;
+
+    return `name=${encodeURIComponent(filter.name || '')}&groups=${encodedGroups}&${encodedSortOptions}&${encodedLimitTo}`;
+  }
+
+
+  encodeFilterGroups(groups: Array<FilterGroup>): string {
+    return groups.map(group => {
+      const encodedAnd = this.encodeFilterGroups(group.and);
+      const encodedOr = this.encodeFilterGroups(group.or);
+      const encodedStatements = this.encodeFilterStatements(group.statements);
+
+      return `groupid=${encodeURIComponent(group.id || '')}&and=${encodedAnd}&or=${encodedOr}&statements=${encodedStatements}`;
+      }).join(',');
+  }
+
+  encodeFilterStatements(statements: Array<FilterStatement>) {
+    return statements.map(statement => {
+      const encodedComparison = `comparison=${statement.comparison}`;
+      const encodedField = `field=${statement.field}`;
+      const encodedValue = `value=${encodeURIComponent(statement.value)}`;
+
+      return `${encodedComparison}&${encodedField}&${encodedValue}`;
+    }).join(',');
+  }
+
+  filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
+    const filter =  this.metadataService.createDefaultFilterDto();
+    let anyChanged = false;
+
+    console.log('query params: ', snapshot.queryParams);
+
+    // const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
+    // if (format !== undefined && format !== null) {
+    //   filter.formats = [...filter.formats, ...format.split(',').map(item => parseInt(item, 10))];
+    //   anyChanged = true;
+    // }
+
+
+
+
+    return filter; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
   }
 
 
