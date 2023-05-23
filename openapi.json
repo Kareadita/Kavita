@@ -6270,10 +6270,13 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets series with the applied Filter",
+        "description": "This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6298,6 +6301,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {

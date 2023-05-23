@@ -15,7 +15,7 @@ import {ComparisonOption} from "../metadata-filter-row-group/metadata-filter-row
 export class MetadataBuilderComponent implements OnInit {
 
   @Input() urlString: string = '';
-  @Input({required: true}) filterGroup!: SeriesFilterV2;
+  @Input({required: true}) filterGroup!: FilterGroup;
   @Input() parentGroup!: FilterGroup;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 

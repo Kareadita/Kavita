@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <app-metadata-filter-row-group
             [groupPreset]="groupPreset"
-            [filterGroup]="filterGroup.groups[0]"
+            [filterGroup]="filterGroup"
             (filterGroupUpdate)="updateFilterGroup($event)"
             (filterGroupingUpdate)="updateFilterGrouping($event)">
         </app-metadata-filter-row-group>

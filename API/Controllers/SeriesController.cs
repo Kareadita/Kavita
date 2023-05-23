@@ -70,6 +70,8 @@ public class SeriesController : BaseApiController
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
+        //TODO: We might want something like libraryId as source so that I don't have to muck with the groups
+
         // Apply progress/rating information (I can't work out how to do this in initial query)
         if (series == null) return BadRequest("Could not get series for library");
 
