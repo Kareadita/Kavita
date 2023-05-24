@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
+using API.DTOs;
 using API.DTOs.Scrobbling;
 using API.SignalR;
 using Flurl.Http;
@@ -25,6 +28,7 @@ public interface IScrobblingService
     Task CheckExternalAccessTokens();
     Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
     Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
+    Task ScrobbleReadingUpdate(int userId, int seriesId);
 }
 
 public class ScrobblingService : IScrobblingService
@@ -142,6 +146,62 @@ public class ScrobblingService : IScrobblingService
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
         throw new NotImplementedException();
+    }
+
+    public async Task ScrobbleReadingUpdate(int userId, int seriesId)
+    {
+        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
+        if (string.IsNullOrEmpty(token) || HasTokenExpired(token))
+        {
+            throw new KavitaException("AniList Credentials have expired or not set");
+        }
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        if (series == null) throw new KavitaException("Series not found");
+
+
+
+        var data = new ScrobbleDto()
+        {
+            SeriesName = series.Name,
+            ScrobbleEvent = ScrobbleEvent.ChapterRead,
+            AccessToken = token,
+            AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            VolumeNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
+            ChapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
+        };
+
+        try
+        {
+            var response = await (ApiUrl + "/api/scrobbling/anilist/update")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", "TODO")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(30))
+                .PostJsonAsync(data);
+
+            if (response.StatusCode != StatusCodes.Status200OK)
+            {
+                _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+        }
+        throw new NotImplementedException();
+    }
+
+    public Task ProcessUpdatesSinceLastSync()
+    {
+        // We need to store last scrobble information in the DB so we can pull all new progress events since last scrobble
+        return Task.CompletedTask;
     }
 
     private static int ExtractAniListId(string webLinks)

@@ -12,6 +12,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
@@ -46,6 +47,7 @@ public class ReaderService : IReaderService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IScrobblingService _scrobblingService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -58,13 +60,14 @@ public class ReaderService : IReaderService
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService)
+        IDirectoryService directoryService, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _scrobblingService = scrobblingService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -274,6 +277,8 @@ public class ReaderService : IReaderService
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
                 return true;
             }
         }
