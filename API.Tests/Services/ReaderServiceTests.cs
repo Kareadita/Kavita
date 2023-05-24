@@ -14,6 +14,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
@@ -52,7 +53,8 @@ public class ReaderServiceTests
         _unitOfWork = new UnitOfWork(_context, mapper, null);
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IScrobblingService>());
     }
 
     #region Setup
@@ -146,8 +148,8 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-        Assert.Equal(0, await _readerService.CapPageToChapter(1, -1));
-        Assert.Equal(1, await _readerService.CapPageToChapter(1, 10));
+        Assert.Equal(0, (await _readerService.CapPageToChapter(1, -1)).Item1);
+        Assert.Equal(1, (await _readerService.CapPageToChapter(1, 10)).Item1);
     }
 
     #endregion
