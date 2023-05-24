@@ -16,7 +16,9 @@
               This feature is only available for Kavita Plus Subscribers
             </ng-container>
             <ng-template #showToken>
-              <ng-container *ngIf="token && token.length > 0; else noToken">Token Set</ng-container>
+              <ng-container *ngIf="token && token.length > 0; else noToken">
+                <img class="me-2" width="32px" height="32px" src="assets/images/ExternalServices/AniList.png" alt="Anilist Icon"> Token Set
+              </ng-container>
               <ng-template #noToken>No Token Set</ng-template>
             </ng-template>
           </span>

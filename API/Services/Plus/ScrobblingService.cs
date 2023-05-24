@@ -39,6 +39,7 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
 
     private const string ApiUrl = "http://localhost:5020";
+    private const int TimeOutSecs = 30;
 
     public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService, IEventHub eventHub, ILogger<ScrobblingService> logger)
     {
@@ -129,7 +130,7 @@ public class ScrobblingService : IScrobblingService
                 .WithHeader("x-license-key", "TODO")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -145,7 +146,6 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
-        throw new NotImplementedException();
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -164,6 +164,7 @@ public class ScrobblingService : IScrobblingService
         var data = new ScrobbleDto()
         {
             SeriesName = series.Name,
+            LocalizedSeriesName = series.LocalizedName,
             ScrobbleEvent = ScrobbleEvent.ChapterRead,
             AccessToken = token,
             AniListId = ExtractAniListId(series.Metadata.WebLinks),
@@ -179,7 +180,7 @@ public class ScrobblingService : IScrobblingService
                 .WithHeader("x-license-key", "TODO")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(30))
+                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -195,7 +196,6 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
-        throw new NotImplementedException();
     }
 
     public Task ProcessUpdatesSinceLastSync()

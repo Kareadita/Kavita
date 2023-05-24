@@ -23,6 +23,7 @@ public class ScrobbleDto
     public string AccessToken { get; set; }
 
     public string SeriesName { get; set; }
+    public string LocalizedSeriesName { get; set; }
     /// <summary>
     /// Optional AniListId if present on Kavita's WebLinks
     /// </summary>
