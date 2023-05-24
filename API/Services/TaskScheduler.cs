@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using Hangfire;
@@ -51,6 +52,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
+    private readonly IScrobblingService _scrobblingService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -62,6 +64,7 @@ public class TaskScheduler : ITaskScheduler
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
+    public const string CheckScrobblingTokens = "check-scrobbling-tokens";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
@@ -78,7 +81,7 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IMediaConversionService mediaConversionService)
+        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -93,6 +96,7 @@ public class TaskScheduler : ITaskScheduler
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
+        _scrobblingService = scrobblingService;
     }
 
     public async Task ScheduleTasks()
@@ -127,6 +131,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
+
+        // KavitaPlus based (needs license check)
+        RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
+
     }
 
     #region StatsTasks

@@ -2,6 +2,7 @@
 using API.Data;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
@@ -60,8 +61,10 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
-
         services.AddScoped<IImageService, ImageService>();
+
+
+        services.AddScoped<IScrobblingService, ScrobblingService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

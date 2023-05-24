@@ -23,6 +23,7 @@ public interface ITokenService
     Task<string> CreateToken(AppUser user);
     Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
+    bool HasTokenExpired(string token);
 }
 
 
@@ -123,5 +124,12 @@ public class TokenService : ITokenService
             _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
+    }
+
+    public bool HasTokenExpired(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenContent = tokenHandler.ReadJwtToken(token);
+        return tokenContent.ValidTo <= DateTime.UtcNow;
     }
 }

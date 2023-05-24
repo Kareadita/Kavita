@@ -258,11 +258,11 @@ export class AccountService {
   }
 
   updateAniListToken(token: string) {
-    return this.httpClient.post(this.baseUrl + 'account/update-anilist-token', {token});
+    return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
   }
 
   getAniListToken() {
-    return this.httpClient.get<string>(this.baseUrl + 'account/anilist-token', TextResonse);
+    return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
   }
 
   private refreshToken() {
