@@ -14,7 +14,9 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Plus;
 using API.SignalR;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -36,13 +38,16 @@ public class SeriesService : ISeriesService
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
+    private readonly IScrobblingService _scrobblingService;
 
-    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, ILogger<SeriesService> logger)
+    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
+        _scrobblingService = scrobblingService;
     }
 
     /// <summary>
@@ -304,7 +309,13 @@ public class SeriesService : ISeriesService
 
             _unitOfWork.UserRepository.Update(user);
 
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync()) return true;
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+            {
+                BackgroundJob.Enqueue(() =>
+                    _scrobblingService.ScrobbleRatingUpdate(user.Id, updateSeriesRatingDto.SeriesId,
+                        userRating.Rating));
+                return true;
+            }
         }
         catch (Exception ex)
         {

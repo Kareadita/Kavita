@@ -65,6 +65,7 @@ public static class ApplicationServiceExtensions
 
 
         services.AddScoped<IScrobblingService, ScrobblingService>();
+        services.AddScoped<ILicenseService, LicenseService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
@@ -72,6 +73,7 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory("favicon");
+            options.UseInMemory("license");
         });
     }
 

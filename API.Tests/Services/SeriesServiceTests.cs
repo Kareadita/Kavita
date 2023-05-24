@@ -14,6 +14,7 @@ using API.Entities.Metadata;
 using API.Extensions;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using API.Tests.Helpers;
 using Microsoft.Extensions.Logging;
@@ -29,7 +30,8 @@ public class SeriesServiceTests : AbstractDbTest
     public SeriesServiceTests() : base()
     {
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
-            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>());
+            Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
+            Substitute.For<IScrobblingService>());
     }
     #region Setup
 
