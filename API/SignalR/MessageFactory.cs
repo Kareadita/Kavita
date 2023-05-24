@@ -524,9 +524,9 @@ public static class MessageFactory
         {
             Name = ScrobblingKeyExpired,
             Title = "Scrobbling Key Expired",
-            SubTitle = provider.ToString() + " expired. Please re-generate on User Account page.",
-            EventType = ProgressEventType.Single,
+            SubTitle = provider + " expired. Please re-generate on User Account page.",
             Progress = ProgressType.None,
+            EventType = ProgressEventType.Single,
         };
     }
 }

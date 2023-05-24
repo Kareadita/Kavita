@@ -8,13 +8,13 @@ namespace API.Services.Plus;
 
 public enum ScrobbleProvider
 {
-    None = 0,
     AniList = 1
 }
 
 public interface IScrobblingService
 {
     Task CheckExternalAccessTokens();
+    Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
 }
 
 public class ScrobblingService : IScrobblingService
@@ -46,5 +46,24 @@ public class ScrobblingService : IScrobblingService
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
         }
+    }
+
+    public async Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (user == null) return false;
+
+        var token = provider switch
+        {
+            ScrobbleProvider.AniList => user.AniListAccessToken,
+            _ => string.Empty
+        };
+
+        if (string.IsNullOrEmpty(user.AniListAccessToken) ||
+            !_tokenService.HasTokenExpired(user.AniListAccessToken)) return false;
+
+        await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
+            MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
+        return true;
     }
 }

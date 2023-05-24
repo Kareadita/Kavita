@@ -1,10 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {User} from "../../_models/user";
-import {shareReplay, take} from "rxjs";
-import {AccountService} from "../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
   selector: 'app-anilist-key',
@@ -18,16 +16,25 @@ export class AnilistKeyComponent implements OnInit {
   token: string = '';
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
+  validLicense = false;
 
 
-  constructor(private accountService: AccountService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('aniListToken', new FormControl('', [Validators.required]));
-    this.accountService.getAniListToken().subscribe(token => {
-      this.token = token;
-      this.formGroup.get('aniListToken')?.setValue(token);
+    this.accountService.hasValidLicense().subscribe(res => {
+      this.validLicense = res;
       this.cdRef.markForCheck();
+
+      if (this.validLicense) {
+        this.scrobblingService.getAniListToken().subscribe(token => {
+          this.token = token;
+          this.formGroup.get('aniListToken')?.setValue(token);
+          this.cdRef.markForCheck();
+        });
+        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {})
+      }
     });
   }
 
@@ -38,7 +45,7 @@ export class AnilistKeyComponent implements OnInit {
   }
 
   saveForm() {
-    this.accountService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(() => {
+    this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(() => {
       this.toastr.success('AniList Token has been updated');
       this.token = this.formGroup.get('aniListToken')!.value;
       this.resetForm();

@@ -77,6 +77,11 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
+  hasValidLicense() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/valid-license', TextResonse)
+      .pipe(map(res => res === "true"));
+  }
+
   login(model: {username: string, password: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {

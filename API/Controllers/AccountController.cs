@@ -952,6 +952,12 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
+    [HttpGet("valid-license")]
+    public ActionResult<bool> HasValidLicense()
+    {
+        return Ok(true);
+    }
+
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {
         var result = await _userManager.ConfirmEmailAsync(user, token);

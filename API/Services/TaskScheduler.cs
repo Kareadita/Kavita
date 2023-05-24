@@ -134,6 +134,9 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus based (needs license check)
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+
+
 
     }
 

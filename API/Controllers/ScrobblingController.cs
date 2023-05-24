@@ -2,6 +2,7 @@
 using API.Data;
 using API.DTOs.Account;
 using API.Extensions;
+using API.Services.Plus;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -10,10 +11,12 @@ namespace API.Controllers;
 public class ScrobblingController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IScrobblingService _scrobblingService;
 
-    public ScrobblingController(IUnitOfWork unitOfWork)
+    public ScrobblingController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
+        _scrobblingService = scrobblingService;
     }
 
     [HttpGet("anilist-token")]
@@ -40,5 +43,11 @@ public class ScrobblingController : BaseApiController
         await _unitOfWork.CommitAsync();
 
         return Ok();
+    }
+
+    [HttpGet("token-expired")]
+    public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
+    {
+        return Ok(await _scrobblingService.HasTokenExpired(User.GetUserId(), provider));
     }
 }

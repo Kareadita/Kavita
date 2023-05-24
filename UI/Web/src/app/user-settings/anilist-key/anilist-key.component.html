@@ -4,7 +4,7 @@
       <div class="container-fluid row mb-2">
         <div class="col-10 col-sm-11"><h4 id="anilist-token-header">AniList Token</h4></div>
         <div class="col-1 text-end">
-          <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+          <button class="btn btn-primary btn-sm" [disabled]="!validLicense" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
         </div>
       </div>
     </div>
@@ -12,8 +12,13 @@
     <ng-container *ngIf="isViewMode">
       <div class="container-fluid row">
           <span class="col-12">
-            <ng-container *ngIf="token && token.length > 0; else noToken">Token Set</ng-container>
-            <ng-template #noToken>No Token Set</ng-template>
+            <ng-container *ngIf="!validLicense; else showToken">
+              This feature is only available for Kavita Plus Subscribers
+            </ng-container>
+            <ng-template #showToken>
+              <ng-container *ngIf="token && token.length > 0; else noToken">Token Set</ng-container>
+              <ng-template #noToken>No Token Set</ng-template>
+            </ng-template>
           </span>
       </div>
     </ng-container>
@@ -35,7 +40,5 @@
 
 
   </div>
-
-
 </div>
 

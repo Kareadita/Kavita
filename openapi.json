@@ -815,6 +815,35 @@
         }
       }
     },
+    "/api/Account/valid-license": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
@@ -6095,6 +6124,44 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/token-expired": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ScrobbleProvider"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -13259,6 +13326,13 @@
         },
         "additionalProperties": false,
         "description": "DTO for requesting a folder to be scanned"
+      },
+      "ScrobbleProvider": {
+        "enum": [
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "SearchResultDto": {
         "type": "object",
