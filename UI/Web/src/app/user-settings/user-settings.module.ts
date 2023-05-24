@@ -18,6 +18,7 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 
 
 @NgModule({
@@ -33,6 +34,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ChangeEmailComponent,
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
+    AnilistKeyComponent,
   ],
   imports: [
     CommonModule,

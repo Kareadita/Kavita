@@ -257,6 +257,14 @@ export class AccountService {
     }));
   }
 
+  updateAniListToken(token: string) {
+    return this.httpClient.post(this.baseUrl + 'account/update-anilist-token', {token});
+  }
+
+  getAniListToken() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/anilist-token', TextResonse);
+  }
+
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.post<{token: string, refreshToken: string}>(this.baseUrl + 'account/refresh-token',

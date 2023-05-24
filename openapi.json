@@ -815,6 +815,49 @@
         }
       }
     },
+    "/api/Account/anilist-token": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/update-anilist-token": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
@@ -9678,6 +9721,16 @@
         },
         "additionalProperties": false
       },
+      "AniListUpdateDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AppRole": {
         "type": "object",
         "properties": {
@@ -9862,6 +9915,11 @@
           "ageRestrictionIncludeUnknowns": {
             "type": "boolean",
             "description": "If an age rating restriction is applied to the account, if Unknowns should be allowed for the user. Defaults to false."
+          },
+          "aniListAccessToken": {
+            "type": "string",
+            "description": "The JWT for the user's AniList account. Expires after a year.",
+            "nullable": true
           },
           "rowVersion": {
             "type": "integer",
