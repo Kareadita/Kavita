@@ -501,7 +501,8 @@ public class ReaderService : IReaderService
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).SelectMany(v => v.Chapters).ToList());
+        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default)
+                                             .SelectMany(v => v.Chapters.OrderBy(c => double.Parse(c.Number))).ToList());
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
