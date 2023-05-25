@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.ManualMigrations;
@@ -148,7 +149,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
             .Select(p => p.chapter.Number)
             .ToListAsync();
-        return list.Max(int.Parse);
+        return list.Max(d => (int) Math.Floor(float.Parse(d)));
     }
 
     public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
