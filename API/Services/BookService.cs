@@ -231,7 +231,16 @@ public class BookService : IBookService
             }
             styleRule.Text = $"{CssScopeClass} " + styleRule.Text;
         }
-        return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+
+        try
+        {
+            return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue escaping css, likely due to an unsupported css rule");
+        }
+        return RemoveWhiteSpaceFromStylesheets($"{CssScopeClass} {styleContent}");
     }
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
@@ -396,7 +405,8 @@ public class BookService : IBookService
                 {
                     var cssFile = book.Content.Css.GetLocalFileRefByKey(key);
 
-                    var styleContent = await ScopeStyles(await cssFile.ReadContentAsync(), apiBase,
+                    var stylesheetHtml = await cssFile.ReadContentAsync();
+                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase,
                         cssFile.FilePath, book);
                     if (styleContent != null)
                     {
@@ -1263,6 +1273,13 @@ public class BookService : IBookService
         body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Parser.RegexTimeout);
         body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Parser.RegexTimeout);
         body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Parser.RegexTimeout);
+
+        // Handle <!-- which some books use (but shouldn't)
+        body = Regex.Replace(body, "<!--.*?-->", string.Empty, RegexOptions.None, Parser.RegexTimeout);
+
+        // Handle /* */
+        body = Regex.Replace(body, @"/\*.*?\*/", string.Empty, RegexOptions.None, Parser.RegexTimeout);
+
         try
         {
             body = body.Replace(";}", "}");
