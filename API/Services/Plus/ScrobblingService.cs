@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Scrobbling;
+using API.Entities;
 using API.SignalR;
 using Flurl.Http;
 using Kavita.Common;
@@ -29,6 +30,8 @@ public interface IScrobblingService
     Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
     Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
+    Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
+    Task ProcessUpdatesSinceLastSync();
 }
 
 public class ScrobblingService : IScrobblingService
@@ -138,39 +141,17 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
 
-        var data = new ScrobbleDto()
+        var evt = new ScrobbleEvent()
         {
-            SeriesName = series.Name,
-            Rating = rating,
-            ScrobbleEvent = ScrobbleEvent.ScoreUpdated,
-            AccessToken = token,
-            AniListId = ExtractAniListId(series.Metadata.WebLinks)
+            SeriesId = series.Id,
+            LibraryId = series.LibraryId,
+            ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+            AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            AppUserId = userId,
+            Format = MediaFormat.Manga,
         };
-
-        try
-        {
-            var response = await (ApiUrl + "/api/scrobbling/anilist/update")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", "TODO")
-                .WithHeader("x-kavita-version", BuildInfo.Version)
-                .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
-                .PostJsonAsync(data);
-
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
-            }
-        }
-        catch (HttpRequestException e)
-        {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
-        }
+        _unitOfWork.ScrobbleEventRepository.Attach(evt);
+        await _unitOfWork.CommitAsync();
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -184,19 +165,47 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
 
-
-
-        var data = new ScrobbleDto()
+        var evt = new ScrobbleEvent()
         {
-            SeriesName = series.Name,
-            LocalizedSeriesName = series.LocalizedName,
-            ScrobbleEvent = ScrobbleEvent.ChapterRead,
-            AccessToken = token,
+            SeriesId = series.Id,
+            LibraryId = series.LibraryId,
+            ScrobbleEventType = ScrobbleEventType.ChapterRead,
             AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            AppUserId = userId,
             VolumeNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
             ChapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
+            Format = MediaFormat.Manga,
         };
+        _unitOfWork.ScrobbleEventRepository.Attach(evt);
+        await _unitOfWork.CommitAsync();
+    }
 
+    public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
+    {
+        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
+        {
+            throw new KavitaException("AniList Credentials have expired or not set");
+        }
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        if (series == null) throw new KavitaException("Series not found");
+
+        var evt = new ScrobbleEvent()
+        {
+            SeriesId = series.Id,
+            LibraryId = series.LibraryId,
+            ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
+            AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            AppUserId = userId,
+            Format = MediaFormat.Manga,
+        };
+        _unitOfWork.ScrobbleEventRepository.Attach(evt);
+        await _unitOfWork.CommitAsync();
+    }
+
+    private async Task PostScrobbleUpdate(ScrobbleDto data)
+    {
         try
         {
             var response = await (ApiUrl + "/api/scrobbling/anilist/update")
@@ -213,20 +222,48 @@ public class ScrobblingService : IScrobblingService
                 _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
             }
         }
-        catch (HttpRequestException e)
-        {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
-        }
         catch (Exception e)
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
     }
 
-    public Task ProcessUpdatesSinceLastSync()
+    public async Task ProcessUpdatesSinceLastSync()
     {
-        // We need to store last scrobble information in the DB so we can pull all new progress events since last scrobble
-        return Task.CompletedTask;
+        var readEvents = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ChapterRead);
+        var addToWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.AddWantToRead);
+        var removeWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead);
+        var ratingEvents = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ScoreUpdated);
+
+
+        foreach (var readEvent in readEvents)
+        {
+            await PostScrobbleUpdate(new ScrobbleDto()
+            {
+                Format = readEvent.Format,
+                AniListId = readEvent.AniListId,
+                ScrobbleEventType = readEvent.ScrobbleEventType,
+                ChapterNumber = readEvent.ChapterNumber,
+                VolumeNumber = readEvent.VolumeNumber,
+                AccessToken = readEvent.AppUser.AniListAccessToken,
+                SeriesName = readEvent.Series.Name,
+                LocalizedSeriesName = readEvent.Series.LocalizedName
+            });
+            _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
+        }
+
+        var decisions = addToWantToRead
+            .GroupBy(item => new { item.SeriesId, item.AppUserId })
+            .Select(group => new
+            {
+                SeriesId = group.Key.SeriesId,
+                UserId = group.Key.AppUserId,
+                ScrobbleEvent = group.First().ScrobbleEventType,
+                Decision = group.Count() - removeWantToRead
+                    .Count(removeItem => removeItem.SeriesId == group.Key.SeriesId && removeItem.AppUserId == group.Key.AppUserId)
+            });
+
+        return;
     }
 
     private static int ExtractAniListId(string webLinks)

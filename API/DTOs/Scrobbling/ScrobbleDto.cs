@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel;
+using API.Entities.Enums;
 
 namespace API.DTOs.Scrobbling;
 
-public enum ScrobbleEvent
+public enum ScrobbleEventType
 {
     [Description("Chapter Read")]
     ChapterRead = 0,
@@ -12,6 +13,14 @@ public enum ScrobbleEvent
     RemoveWantToRead = 2,
     [Description("Score Updated")]
     ScoreUpdated = 3
+}
+
+public enum MediaFormat
+{
+    Manga = 1,
+    Comic = 2,
+    LightNovel = 3,
+    Book = 4
 }
 
 
@@ -24,17 +33,18 @@ public class ScrobbleDto
 
     public string SeriesName { get; set; }
     public string LocalizedSeriesName { get; set; }
+    public MediaFormat Format { get; set; }
     /// <summary>
     /// Optional AniListId if present on Kavita's WebLinks
     /// </summary>
-    public int AniListId { get; set; } = 0;
+    public int? AniListId { get; set; } = 0;
 
-    public ScrobbleEvent ScrobbleEvent { get; set; }
+    public ScrobbleEventType ScrobbleEventType { get; set; }
     /// <summary>
     /// Number of chapters read
     /// </summary>
     /// <remarks>If completed series, this can consider the Series Read (AniList)</remarks>
-    public int ChapterNumber { get; set; }
+    public int? ChapterNumber { get; set; }
     /// <summary>
     /// Number of Volumes read
     /// </summary>

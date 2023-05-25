@@ -345,6 +345,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
             return Ok();
         }
 
@@ -370,6 +371,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
             return Ok();
         }
 
@@ -399,6 +401,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
             return Ok();
         }
 
@@ -428,6 +431,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
             return Ok();
         }
 
@@ -454,6 +458,10 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
+            }
             return Ok();
         }
 
@@ -480,6 +488,10 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
+            }
             return Ok();
         }
 

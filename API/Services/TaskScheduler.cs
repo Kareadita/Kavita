@@ -65,6 +65,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
     public const string CheckScrobblingTokens = "check-scrobbling-tokens";
+    public const string ProcessScrobblingEvents = "process-scrobbling-events";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
@@ -135,6 +136,9 @@ public class TaskScheduler : ITaskScheduler
         // KavitaPlus based (needs license check)
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+
+        // KavitaPlus Scrobbling
+        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), Cron.Hourly, RecurringJobOptions);
 
 
 
