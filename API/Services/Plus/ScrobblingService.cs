@@ -74,18 +74,43 @@ public class ScrobblingService : IScrobblingService
     {
         var token = await GetTokenForProvider(userId, provider);
 
-        if (HasTokenExpired(token)) return false;
+        if (await HasTokenExpired(token, provider))
+        {
+            // NOTE: Should this side effect be here?
+            await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
+                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), userId);
+            return true;
+        }
 
-        // NOTE: Should this side effect be here?
-        await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
-            MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), userId);
-        return true;
+        return false;
     }
 
-    private bool HasTokenExpired(string token)
+    private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
     {
         if (string.IsNullOrEmpty(token) ||
             !_tokenService.HasTokenExpired(token)) return false;
+
+        try
+        {
+            var response = await (ApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", "TODO")
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
+                .GetStringAsync();
+
+            return bool.Parse(response);
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+        }
 
         return true;
     }
@@ -105,7 +130,7 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
     {
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (string.IsNullOrEmpty(token) || HasTokenExpired(token))
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -151,7 +176,7 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
     {
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (string.IsNullOrEmpty(token) || HasTokenExpired(token))
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }

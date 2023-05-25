@@ -2,7 +2,7 @@
   <div class="card-body">
     <div class="card-title">
       <div class="container-fluid row mb-2">
-        <div class="col-10 col-sm-11"><h4 id="anilist-token-header">AniList Token</h4></div>
+        <div class="col-10 col-sm-11"><h4 id="anilist-token-header">Scrobbling Token</h4></div>
         <div class="col-1 text-end">
           <button class="btn btn-primary btn-sm" [disabled]="!validLicense" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
         </div>
@@ -17,7 +17,10 @@
             </ng-container>
             <ng-template #showToken>
               <ng-container *ngIf="token && token.length > 0; else noToken">
-                <img class="me-2" width="32px" height="32px" src="assets/images/ExternalServices/AniList.png" alt="Anilist Icon"> Token Set
+                <img class="me-2" width="32px" height="32px" src="assets/images/ExternalServices/AniList.png" alt="AniList" ngbTooltip="AniList"> Token Set
+                <i class="error fa-solid fa-exclamation-circle" ngbTooltip="Token Expired" *ngIf="tokenExpired">
+                  <span class="visually-hidden">Token Expired</span>
+                </i>
               </ng-container>
               <ng-template #noToken>No Token Set</ng-template>
             </ng-template>

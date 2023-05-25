@@ -17,6 +17,7 @@ export class AnilistKeyComponent implements OnInit {
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
   validLicense = false;
+  tokenExpired: boolean = false;
 
 
   constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
@@ -33,7 +34,10 @@ export class AnilistKeyComponent implements OnInit {
           this.formGroup.get('aniListToken')?.setValue(token);
           this.cdRef.markForCheck();
         });
-        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {})
+        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+          this.tokenExpired = hasExpired;
+          this.cdRef.markForCheck();
+        })
       }
     });
   }
