@@ -133,6 +133,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
     {
+        // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
@@ -157,6 +158,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
     {
+        // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
@@ -183,6 +185,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
     {
+        // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
@@ -231,6 +234,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ProcessUpdatesSinceLastSync()
     {
+        // TODO: License check
         var readEvents = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ChapterRead);
         var addToWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.AddWantToRead);
         var removeWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead);
