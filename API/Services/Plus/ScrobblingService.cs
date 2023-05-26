@@ -11,6 +11,7 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.SignalR;
 using Flurl.Http;
+using Hangfire.Storage.SQLite.Entities;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -252,18 +253,50 @@ public class ScrobblingService : IScrobblingService
             _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
         }
 
+        foreach (var ratingEvent in ratingEvents)
+        {
+            await PostScrobbleUpdate(new ScrobbleDto()
+            {
+                Format = ratingEvent.Format,
+                AniListId = ratingEvent.AniListId,
+                ScrobbleEventType = ratingEvent.ScrobbleEventType,
+                AccessToken = ratingEvent.AppUser.AniListAccessToken,
+                SeriesName = ratingEvent.Series.Name,
+                LocalizedSeriesName = ratingEvent.Series.LocalizedName,
+                Rating = ratingEvent.Rating
+            });
+            _unitOfWork.ScrobbleEventRepository.Remove(ratingEvent);
+        }
+
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
             {
                 SeriesId = group.Key.SeriesId,
                 UserId = group.Key.AppUserId,
-                ScrobbleEvent = group.First().ScrobbleEventType,
+                Event = group.First(),
                 Decision = group.Count() - removeWantToRead
                     .Count(removeItem => removeItem.SeriesId == group.Key.SeriesId && removeItem.AppUserId == group.Key.AppUserId)
-            });
+            })
+            .Where(d => d.Decision > 0);
 
-        return;
+        foreach (var decision in decisions)
+        {
+            await PostScrobbleUpdate(new ScrobbleDto()
+            {
+                Format = decision.Event.Format,
+                AniListId = decision.Event.AniListId,
+                ScrobbleEventType = decision.Event.ScrobbleEventType,
+                ChapterNumber = decision.Event.ChapterNumber,
+                VolumeNumber = decision.Event.VolumeNumber,
+                AccessToken = decision.Event.AppUser.AniListAccessToken,
+                SeriesName = decision.Event.Series.Name,
+                LocalizedSeriesName = decision.Event.Series.LocalizedName
+            });
+            _unitOfWork.ScrobbleEventRepository.Remove(decision.Event);
+        }
+
+        await _unitOfWork.CommitAsync();
     }
 
     private static int ExtractAniListId(string webLinks)
