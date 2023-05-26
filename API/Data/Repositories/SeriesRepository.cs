@@ -348,11 +348,11 @@ public class SeriesRepository : ISeriesRepository
 
         result.Series = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => (EF.Functions.Like(s.Name, $"%{searchQuery}%")
+            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                          || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
                          || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
                          || (EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%"))
-                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison)))
+                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
             .OrderBy(s => s.SortName!.ToLower())
@@ -430,7 +430,9 @@ public class SeriesRepository : ISeriesRepository
 
         result.Chapters = await _context.Chapter
             .Include(c => c.Files)
-            .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%"))
+            .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
             .Take(maxRecords)

@@ -47,12 +47,12 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   refresh: EventEmitter<void> = new EventEmitter();
 
   private onDestroy: Subject<void> = new Subject<void>();
-  
-  constructor(private readerService: ReaderService, private seriesService: SeriesService, 
+
+  constructor(private readerService: ReaderService, private seriesService: SeriesService,
     private downloadService: DownloadService, private toastr: ToastrService,
-    private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService, 
+    private confirmService: ConfirmService, public bulkSelectionService: BulkSelectionService,
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef, 
+    private router: Router, private readonly cdRef: ChangeDetectorRef,
     private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
     private jumpbarService: JumpbarService) {
       this.filterSettings.ageRatingDisabled = true;
