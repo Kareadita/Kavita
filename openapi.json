@@ -12137,6 +12137,10 @@
             "type": "boolean",
             "description": "Should this library create reading lists from Metadata"
           },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -12229,6 +12233,10 @@
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
+          },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
           },
           "folders": {
             "type": "array",
@@ -14444,6 +14452,11 @@
             "description": "Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.",
             "nullable": true
           },
+          "licenseKey": {
+            "type": "string",
+            "description": "KavitaPlus License",
+            "nullable": true
+          },
           "encodeMediaAs": {
             "$ref": "#/components/schemas/EncodeFormat"
           },
@@ -14865,6 +14878,7 @@
       },
       "UpdateLibraryDto": {
         "required": [
+          "allowScrobbling",
           "folders",
           "folderWatching",
           "id",
@@ -14911,6 +14925,9 @@
             "type": "boolean"
           },
           "manageReadingLists": {
+            "type": "boolean"
+          },
+          "allowScrobbling": {
             "type": "boolean"
           }
         },

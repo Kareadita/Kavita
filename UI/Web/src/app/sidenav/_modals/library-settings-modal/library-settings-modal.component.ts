@@ -59,6 +59,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
   });
 
@@ -127,6 +128,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
       this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
+      this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       this.cdRef.markForCheck();

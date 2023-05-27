@@ -49,6 +49,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerStatistics> ServerStatistics { get; set; } = null!;
     public DbSet<MediaError> MediaError { get; set; } = null!;
     public DbSet<ScrobbleEvent> ScrobbleEvent { get; set; } = null!;
+    public DbSet<SyncHistory> SyncHistory { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -114,6 +115,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
         builder.Entity<Library>()
             .Property(b => b.ManageReadingLists)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.AllowScrobbling)
             .HasDefaultValue(true);
 
         builder.Entity<Chapter>()

@@ -371,6 +371,7 @@ public class LibraryController : BaseApiController
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
+        library.AllowScrobbling = dto.AllowScrobbling;
 
 
         _unitOfWork.LibraryRepository.Update(library);

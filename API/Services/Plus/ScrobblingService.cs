@@ -10,6 +10,7 @@ using API.DTOs;
 using API.DTOs.Filtering;
 using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
@@ -238,12 +239,14 @@ public class ScrobblingService : IScrobblingService
 
     private async Task PostScrobbleUpdate(ScrobbleDto data)
     {
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (ApiUrl + "/api/scrobbling/anilist/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", "TODO")
+                .WithHeader("x-license-key", serverSetting.LicenseKey)
+                .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
