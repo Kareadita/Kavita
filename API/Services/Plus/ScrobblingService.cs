@@ -47,8 +47,6 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
 
-    private const string ApiUrl = "http://localhost:5020";
-    private const int TimeOutSecs = 30;
 
     public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
         IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService)
@@ -59,7 +57,7 @@ public class ScrobblingService : IScrobblingService
         _logger = logger;
         _licenseService = licenseService;
 
-        FlurlHttp.ConfigureClient(ApiUrl, cli =>
+        FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
@@ -103,13 +101,13 @@ public class ScrobblingService : IScrobblingService
 
         try
         {
-            var response = await (ApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", "TODO")
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .GetStringAsync();
 
             return bool.Parse(response);
@@ -242,14 +240,14 @@ public class ScrobblingService : IScrobblingService
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
-            var response = await (ApiUrl + "/api/scrobbling/anilist/update")
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/anilist/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", serverSetting.LicenseKey)
                 .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
-                .WithTimeout(TimeSpan.FromSeconds(TimeOutSecs))
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(data);
 
             if (response.StatusCode != StatusCodes.Status200OK)

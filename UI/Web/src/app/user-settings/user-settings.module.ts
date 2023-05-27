@@ -19,6 +19,7 @@ import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-a
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
+import { UserLicenseComponent } from './user-license/user-license.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
+    UserLicenseComponent,
   ],
   imports: [
     CommonModule,

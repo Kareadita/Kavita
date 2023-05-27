@@ -6,11 +6,30 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ScrobbleEvent : Migration
+    public partial class LicenseAndScrobble : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "AllowScrobbling",
+                table: "Library",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "AniListAccessToken",
+                table: "AspNetUsers",
+                type: "TEXT",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "License",
+                table: "AspNetUsers",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "ScrobbleEvent",
                 columns: table => new
@@ -54,6 +73,18 @@ namespace API.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "SyncHistory",
+                columns: table => new
+                {
+                    Key = table.Column<int>(type: "INTEGER", nullable: false),
+                    Value = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SyncHistory", x => x.Key);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ScrobbleEvent_AppUserId",
                 table: "ScrobbleEvent",
@@ -75,6 +106,21 @@ namespace API.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ScrobbleEvent");
+
+            migrationBuilder.DropTable(
+                name: "SyncHistory");
+
+            migrationBuilder.DropColumn(
+                name: "AllowScrobbling",
+                table: "Library");
+
+            migrationBuilder.DropColumn(
+                name: "AniListAccessToken",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "License",
+                table: "AspNetUsers");
         }
     }
 }

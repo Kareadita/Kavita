@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Middleware.RateLimit;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using Hangfire;
@@ -44,6 +45,7 @@ public class AccountController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
+    private readonly ILicenseService _licenseService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -51,7 +53,8 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IEventHub eventHub)
+        IEmailService emailService, IEventHub eventHub,
+        ILicenseService licenseService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -62,6 +65,7 @@ public class AccountController : BaseApiController
         _accountService = accountService;
         _emailService = emailService;
         _eventHub = eventHub;
+        _licenseService = licenseService;
     }
 
     /// <summary>
@@ -953,9 +957,39 @@ public class AccountController : BaseApiController
     }
 
     [HttpGet("valid-license")]
-    public ActionResult<bool> HasValidLicense()
+    public async Task<ActionResult<bool>> HasValidLicense()
     {
-        return Ok(true);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+        return Ok(_licenseService.IsLicenseValid(user.License));
+    }
+
+    /// <summary>
+    /// Only the user can get their own license. An admin cannot peep at user's license keys
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("license")]
+    public async Task<ActionResult<string>> GetLicense()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        return Ok(user?.License);
+    }
+
+    /// <summary>
+    /// Updates user's license. Returns true if updated and valid
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("license")]
+    public async Task<ActionResult<string>> UpdateLicense(UpdateLicenseDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+        if (user == null) return Unauthorized();
+
+        var encrypted = await _licenseService.EncryptLicense(dto.License);
+        user.License = encrypted;
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        return Ok(_licenseService.IsLicenseValid(encrypted));
     }
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)

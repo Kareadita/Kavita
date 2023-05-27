@@ -91,6 +91,9 @@ namespace API.Data.Migrations
                     b.Property<DateTime>("LastActiveUtc")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("License")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
@@ -620,7 +623,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("AllowScrobbling")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");

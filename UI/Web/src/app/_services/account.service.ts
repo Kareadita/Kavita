@@ -82,6 +82,15 @@ export class AccountService {
       .pipe(map(res => res === "true"));
   }
 
+  getUserLicense() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/license', TextResonse);
+  }
+
+  updateUserLicense(license: string) {
+  return this.httpClient.post<string>(this.baseUrl + 'account/license', {license: license}, TextResonse)
+    .pipe(map(res => res === "true"));
+  }
+
   login(model: {username: string, password: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230524002251_AniListToken")]
-    partial class AniListToken
+    [Migration("20230527215722_LicenseAndScrobble")]
+    partial class LicenseAndScrobble
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -92,6 +92,9 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("LastActiveUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("License")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
@@ -622,6 +625,11 @@ namespace API.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AllowScrobbling")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<string>("CoverImage")
                         .HasColumnType("TEXT");
 
@@ -1005,6 +1013,62 @@ namespace API.Data.Migrations
                     b.ToTable("ReadingListItem");
                 });
 
+            modelBuilder.Entity("API.Entities.ScrobbleEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AniListId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ChapterNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Format")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float?>("Rating")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("ScrobbleEventType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("VolumeNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("LibraryId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("ScrobbleEvent");
+                });
+
             modelBuilder.Entity("API.Entities.Series", b =>
                 {
                     b.Property<int>("Id")
@@ -1195,6 +1259,19 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SiteTheme");
+                });
+
+            modelBuilder.Entity("API.Entities.SyncHistory", b =>
+                {
+                    b.Property<int>("Key")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("SyncHistory");
                 });
 
             modelBuilder.Entity("API.Entities.Tag", b =>
@@ -1532,13 +1609,15 @@ namespace API.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("API.Entities.Series", null)
+                    b.HasOne("API.Entities.Series", "Series")
                         .WithMany("Ratings")
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AppUser");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserRole", b =>
@@ -1678,6 +1757,33 @@ namespace API.Data.Migrations
                     b.Navigation("Series");
 
                     b.Navigation("Volume");
+                });
+
+            modelBuilder.Entity("API.Entities.ScrobbleEvent", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Library", "Library")
+                        .WithMany()
+                        .HasForeignKey("LibraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Library");
+
+                    b.Navigation("Series");
                 });
 
             modelBuilder.Entity("API.Entities.Series", b =>

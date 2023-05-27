@@ -12,7 +12,22 @@
                   <app-change-email></app-change-email>
                   <app-change-password></app-change-password>
                   <app-change-age-restriction></app-change-age-restriction>
-                  <app-anilist-key></app-anilist-key>
+                  <div class="mt-2" ngbAccordion>
+                    <div ngbAccordionItem>
+                      <h2 ngbAccordionHeader>
+                        <button ngbAccordionButton>KavitaPlus</button>
+                      </h2>
+                      <div ngbAccordionCollapse>
+                        <div ngbAccordionBody>
+                          <ng-template>
+                            <app-user-license></app-user-license>
+                            <app-anilist-key></app-anilist-key>
+                          </ng-template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
               </ng-container>
               <ng-container *ngIf="tab.fragment === FragmentID.Prefernces">
                 <p>

@@ -844,6 +844,83 @@
         }
       }
     },
+    "/api/Account/license": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Only the user can get their own license. An admin cannot peep at user's license keys",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Updates user's license. Returns true if updated and valid",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
@@ -10000,6 +10077,11 @@
             "description": "The JWT for the user's AniList account. Expires after a year.",
             "nullable": true
           },
+          "license": {
+            "type": "string",
+            "description": "KavitaPlus License Key",
+            "nullable": true
+          },
           "rowVersion": {
             "type": "integer",
             "format": "int32",
@@ -14945,6 +15027,16 @@
             "items": {
               "$ref": "#/components/schemas/LibraryDto"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLicenseDto": {
+        "type": "object",
+        "properties": {
+          "license": {
+            "type": "string",
             "nullable": true
           }
         },
