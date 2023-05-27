@@ -168,7 +168,7 @@
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.chapter.isSpecial" [entity]="item.chapter" [title]="item.chapter.title" (click)="openChapter(item.chapter)"
                                         [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
                                         [read]="item.chapter.pagesRead" [total]="item.chapter.pages" [actions]="chapterActions"
-                                        [count]="item.volume.chapters[0].files.length"
+                                        [count]="item.chapter.files.length"
                                         (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, storyChapters.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                                     </ng-template>

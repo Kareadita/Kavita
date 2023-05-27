@@ -112,8 +112,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
       this.changeDetectionRef.markForCheck();
     }
 
-    console.log('filterSettings: ', this.filterSettings)
-
     if (this.pagination === undefined) {
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
       this.changeDetectionRef.markForCheck();
