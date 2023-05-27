@@ -269,6 +269,11 @@ public class ScrobblingService : IScrobblingService
     public async Task CreateEventsFromExistingHistory()
     {
         // TODO: We need a table to store when the last time this ran, so that we don't trigger twice and all of this is already done
+        var lastSync = await _unitOfWork.SyncHistoryRepository.GetSyncTime(SyncKey.Scrobble);
+        if (lastSync >= DateTime.UtcNow)
+        {
+            _logger.LogDebug("Nothing to sync");
+        }
         foreach (var user in (await _unitOfWork.UserRepository.GetAllUsersAsync()))
         {
             if (!(await _licenseService.IsLicenseValid("TODO: License here"))) continue;
@@ -303,6 +308,8 @@ public class ScrobblingService : IScrobblingService
 
         }
 
+        // Update SyncHistory saying we've processed all rows
+        await _unitOfWork.SyncHistoryRepository.Update(SyncKey.Scrobble);
 
     }
 
