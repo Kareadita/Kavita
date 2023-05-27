@@ -139,6 +139,14 @@ public class ServerController : BaseApiController
         return Ok();
     }
 
+    [HttpPost("sync-scrobble")]
+    public ActionResult RunScrobbleGeneration()
+    {
+        BackgroundJob.Enqueue(() => _taskScheduler.TurnOnScrobbling());
+
+        return Ok();
+    }
+
     /// <summary>
     /// Downloads all the log files via a zip
     /// </summary>

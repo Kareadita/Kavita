@@ -134,6 +134,7 @@ public interface ISeriesRepository
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
+    Task<IList<Series>> GetWantToReadForUserAsync(int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1584,6 +1585,18 @@ public class SeriesRepository : ISeriesRepository
         var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
 
         return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<IList<Series>> GetWantToReadForUserAsync(int userId)
+    {
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        return await _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

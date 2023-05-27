@@ -149,7 +149,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
             .Select(p => p.chapter.Number)
             .ToListAsync();
-        return list.Max(d => (int) Math.Floor(float.Parse(d)));
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(float.Parse(d)));
     }
 
     public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
@@ -161,8 +161,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
             .Select(p => p.chapter.Volume.Number)
             .ToListAsync();
-
-        return list.Max();
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
 
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)

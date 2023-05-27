@@ -13,6 +13,7 @@ public interface IScrobbleEventRepository
     void Attach(ScrobbleEvent evt);
     void Remove(ScrobbleEvent evt);
     Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type);
+    Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType);
 }
 
 public class ScrobbleEventRepository : IScrobbleEventRepository
@@ -48,5 +49,11 @@ public class ScrobbleEventRepository : IScrobbleEventRepository
                 .ThenByDescending(e => e.VolumeNumber)
                 .FirstOrDefault())
             .ToListAsync();
+    }
+
+    public async Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType)
+    {
+        return await _context.ScrobbleEvent.AnyAsync(e =>
+            e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType);
     }
 }

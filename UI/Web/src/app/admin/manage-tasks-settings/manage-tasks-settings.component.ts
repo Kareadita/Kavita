@@ -40,6 +40,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'Conversion of Media to Target Encoding has been queued'
     },
     {
+      name: 'Sync Scrobbling',
+      description: 'Runs a long-running task which will sync previous history to Upstream Scrobble Providers. Only needs to be ran once.',
+      api: this.serverService.syncScrobble(),
+      successMessage: 'Scrobble Sync has been queued'
+    },
+    {
       name: 'Clear Cache',
       description: 'Clears cached files for reading. Useful when you\'ve just updated a file that you were previously reading within the last 24 hours.',
       api: this.serverService.clearCache(),

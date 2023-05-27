@@ -63,6 +63,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser();
+    Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -230,6 +231,13 @@ public class UserRepository : IUserRepository
         return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole))
             .OrderBy(u => u.Created)
             .First();
+    }
+
+    public async Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId)
+    {
+        return await _context.AppUserRating
+            .Where(u => u.AppUserId == userId && u.Rating > 0)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

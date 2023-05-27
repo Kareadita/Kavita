@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Filtering;
 using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
 using Hangfire.Storage.SQLite.Entities;
@@ -33,6 +35,7 @@ public interface IScrobblingService
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
     Task ProcessUpdatesSinceLastSync();
+    Task CreateEventsFromExistingHistory();
 }
 
 public class ScrobblingService : IScrobblingService
@@ -41,16 +44,19 @@ public class ScrobblingService : IScrobblingService
     private readonly ITokenService _tokenService;
     private readonly IEventHub _eventHub;
     private readonly ILogger<ScrobblingService> _logger;
+    private readonly ILicenseService _licenseService;
 
     private const string ApiUrl = "http://localhost:5020";
     private const int TimeOutSecs = 30;
 
-    public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService, IEventHub eventHub, ILogger<ScrobblingService> logger)
+    public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
+        IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
         _eventHub = eventHub;
         _logger = logger;
+        _licenseService = licenseService;
 
         FlurlHttp.ConfigureClient(ApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -143,6 +149,10 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
 
+        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+            ScrobbleEventType.ScoreUpdated);
+        if (existing) return;
+
         var evt = new ScrobbleEvent()
         {
             SeriesId = series.Id,
@@ -168,19 +178,33 @@ public class ScrobblingService : IScrobblingService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
 
-        var evt = new ScrobbleEvent()
+        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+            ScrobbleEventType.ChapterRead);
+        if (existing) return;
+
+        try
         {
-            SeriesId = series.Id,
-            LibraryId = series.LibraryId,
-            ScrobbleEventType = ScrobbleEventType.ChapterRead,
-            AniListId = ExtractAniListId(series.Metadata.WebLinks),
-            AppUserId = userId,
-            VolumeNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
-            ChapterNumber = await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
-            Format = MediaFormat.Manga,
-        };
-        _unitOfWork.ScrobbleEventRepository.Attach(evt);
-        await _unitOfWork.CommitAsync();
+            var evt = new ScrobbleEvent()
+            {
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
+                ScrobbleEventType = ScrobbleEventType.ChapterRead,
+                AniListId = ExtractAniListId(series.Metadata.WebLinks),
+                AppUserId = userId,
+                VolumeNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
+                ChapterNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
+                Format = MediaFormat.Manga,
+            };
+            _unitOfWork.ScrobbleEventRepository.Attach(evt);
+            await _unitOfWork.CommitAsync();
+            _logger.LogDebug("Scrobbling Record on {SeriesName} with Userid {UserId} ", series.Name, userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue when saving scrobble read event");
+        }
     }
 
     public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
@@ -194,6 +218,10 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
+
+        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+            onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
+        if (existing) return;
 
         var evt = new ScrobbleEvent()
         {
@@ -230,6 +258,49 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
+    }
+
+    /// <summary>
+    /// This will back fill events from existing progress history, ratings, and want to read
+    /// </summary>
+    public async Task CreateEventsFromExistingHistory()
+    {
+        // TODO: We need a table to store when the last time this ran, so that we don't trigger twice and all of this is already done
+        foreach (var user in (await _unitOfWork.UserRepository.GetAllUsersAsync()))
+        {
+            if (!(await _licenseService.IsLicenseValid("TODO: License here"))) continue;
+
+            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
+            foreach (var wtr in wantToRead)
+            {
+                await ScrobbleWantToReadUpdate(user.Id, wtr.Id, true);
+            }
+
+            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(user.Id);
+            foreach (var rating in ratings)
+            {
+                await ScrobbleRatingUpdate(user.Id, rating.SeriesId, rating.Rating);
+            }
+
+            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id,
+                new UserParams() {}, new FilterDto()
+                {
+                    ReadStatus = new ReadStatus()
+                    {
+                        Read = true,
+                        InProgress = true,
+                        NotRead = false
+                    }
+                });
+
+            foreach (var series in seriesWithProgress)
+            {
+                await ScrobbleReadingUpdate(user.Id, series.Id);
+            }
+
+        }
+
+
     }
 
     public async Task ProcessUpdatesSinceLastSync()

@@ -34,6 +34,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     Task CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    void TurnOnScrobbling();
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -304,6 +305,11 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
+    }
+
+    public void TurnOnScrobbling()
+    {
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory());
     }
 
     public void CleanupChapters(int[] chapterIds)
