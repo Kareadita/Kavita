@@ -12,9 +12,9 @@
     <ng-container *ngIf="isViewMode">
       <div class="container-fluid row">
           <span class="col-12">
-              <ng-container *ngIf="token && token.length > 0; else noToken">
+              <ng-container *ngIf="licenseKey && licenseKey.length > 0; else noToken">
                 <span>*********</span>
-                <i class="error fa-solid fa-exclamation-circle" ngbTooltip="Token Expired" *ngIf="!hasValidLicense">
+                <i class="error fa-solid fa-exclamation-circle ms-1" ngbTooltip="License Invalid" *ngIf="!hasValidLicense">
                   <span class="visually-hidden">License Not Valid</span>
                 </i>
               </ng-container>

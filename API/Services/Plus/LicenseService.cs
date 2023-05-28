@@ -110,15 +110,10 @@ public class LicenseService : ILicenseService
                 {
                     License = license,
                     InstallId = serverSetting.InstallId
-                });
+                })
+                .ReceiveString();
 
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
-                return string.Empty;
-            }
-
-            return response.ResponseMessage.ReasonPhrase;
+            return response;
         }
         catch (Exception e)
         {

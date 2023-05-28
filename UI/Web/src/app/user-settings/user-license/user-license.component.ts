@@ -14,7 +14,6 @@ export class UserLicenseComponent implements OnInit {
 
   @Input({required: true}) hasValidLicense: boolean = false;
   formGroup: FormGroup = new FormGroup({});
-  token: string = '';
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
   licenseKey: string = '';
@@ -27,13 +26,8 @@ export class UserLicenseComponent implements OnInit {
 
     this.accountService.getUserLicense().subscribe(res => {
       this.licenseKey = res;
+      this.cdRef.markForCheck();
     })
-
-
-    // this.accountService.hasValidLicense().subscribe(res => {
-    //   this.validLicense = res;
-    //   this.cdRef.markForCheck();
-    // });
   }
 
 
