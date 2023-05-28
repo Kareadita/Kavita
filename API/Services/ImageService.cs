@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Entities.Enums;
 using API.Extensions;
 using EasyCaching.Core;
@@ -212,7 +213,7 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
 
 
-        var provider = _cacheFactory.GetCachingProvider("favicon");
+        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon);
         var res = await provider.GetAsync<string>(baseUrl);
         if (res.HasValue)
         {
