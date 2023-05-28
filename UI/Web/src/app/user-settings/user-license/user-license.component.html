@@ -14,7 +14,7 @@
           <span class="col-12">
               <ng-container *ngIf="token && token.length > 0; else noToken">
                 <span>*********</span>
-                <i class="error fa-solid fa-exclamation-circle" ngbTooltip="Token Expired" *ngIf="!validLicense">
+                <i class="error fa-solid fa-exclamation-circle" ngbTooltip="Token Expired" *ngIf="!hasValidLicense">
                   <span class="visually-hidden">License Not Valid</span>
                 </i>
               </ng-container>

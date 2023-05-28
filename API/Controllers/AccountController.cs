@@ -959,9 +959,7 @@ public class AccountController : BaseApiController
     [HttpGet("valid-license")]
     public async Task<ActionResult<bool>> HasValidLicense()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
-        return Ok(_licenseService.IsLicenseValid(user.License));
+        return Ok(await _licenseService.HasActiveLicense(User.GetUserId()));
     }
 
     /// <summary>
@@ -989,7 +987,7 @@ public class AccountController : BaseApiController
         user.License = encrypted;
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
-        return Ok(_licenseService.IsLicenseValid(encrypted));
+        return Ok(await _licenseService.HasActiveLicense(user.Id));
     }
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)

@@ -20,6 +20,7 @@ import { RestrictionSelectorComponent } from './restriction-selector/restriction
 import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import { UserLicenseComponent } from './user-license/user-license.component';
+import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
 
 
 @NgModule({
@@ -37,6 +38,7 @@ import { UserLicenseComponent } from './user-license/user-license.component';
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
     UserLicenseComponent,
+    UserKavitaPlusComponent,
   ],
   imports: [
     CommonModule,
@@ -50,7 +52,7 @@ import { UserLicenseComponent } from './user-license/user-license.component';
     ColorPickerModule, // User prefernces background color
 
     StatisticsModule,
-    
+
     PipeModule,
     SidenavModule,
 

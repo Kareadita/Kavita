@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
@@ -11,11 +11,12 @@ import {ToastrService} from "ngx-toastr";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserLicenseComponent implements OnInit {
+
+  @Input({required: true}) hasValidLicense: boolean = false;
   formGroup: FormGroup = new FormGroup({});
   token: string = '';
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
-  validLicense = false;
   licenseKey: string = '';
 
 
@@ -29,10 +30,10 @@ export class UserLicenseComponent implements OnInit {
     })
 
 
-    this.accountService.hasValidLicense().subscribe(res => {
-      this.validLicense = res;
-      this.cdRef.markForCheck();
-    });
+    // this.accountService.hasValidLicense().subscribe(res => {
+    //   this.validLicense = res;
+    //   this.cdRef.markForCheck();
+    // });
   }
 
 
@@ -43,8 +44,8 @@ export class UserLicenseComponent implements OnInit {
 
   saveForm() {
     this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value).subscribe(isValid => {
-      this.validLicense = isValid;
-      if (!this.validLicense) {
+      this.hasValidLicense = isValid;
+      if (!this.hasValidLicense) {
         this.toastr.info("License Key saved, but it is not valid. Please ensure you inputted it correctly or it's an active subscription");
       } else {
         this.toastr.success('KavitaPlus unlocked');

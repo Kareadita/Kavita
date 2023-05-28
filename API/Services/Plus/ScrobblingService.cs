@@ -286,7 +286,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var user in (await _unitOfWork.UserRepository.GetAllUsersAsync()))
         {
-            if (!(await _licenseService.IsLicenseValid("TODO: License here"))) continue;
+            if (!(await _licenseService.HasActiveLicense(user.Id))) continue;
 
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
             foreach (var wtr in wantToRead)
@@ -326,6 +326,10 @@ public class ScrobblingService : IScrobblingService
 
     }
 
+    /// <summary>
+    /// This is a task that is ran on a fixed schedule (every few hours or every day) that clears out the scrobble event table
+    /// and offloads the data to the API server which performs the syncing to the providers.
+    /// </summary>
     public async Task ProcessUpdatesSinceLastSync()
     {
         // TODO: License check
