@@ -18,6 +18,7 @@ public interface ILicenseService
     Task<bool> HasActiveLicense(int userId);
 
     Task<string> EncryptLicense(string license);
+    Task ValidateAllLicenses();
 }
 
 public class LicenseService : ILicenseService
@@ -25,6 +26,8 @@ public class LicenseService : ILicenseService
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LicenseService> _logger;
+    private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
+    public const string Cron = "0 */4 * * *";
 
 
     public LicenseService(IEasyCachingProviderFactory cachingProviderFactory, IUnitOfWork unitOfWork, ILogger<LicenseService> logger)
@@ -47,7 +50,7 @@ public class LicenseService : ILicenseService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return false;
         var result = await IsLicenseValid(user.License);
-        await provider.SetAsync($"{userId}", result, TimeSpan.FromHours(8));
+        await provider.SetAsync($"{userId}", result, _licenseCacheTimeout);
         return result;
 
     }
@@ -120,6 +123,28 @@ public class LicenseService : ILicenseService
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
             return string.Empty;
         }
-        return string.Empty;
+    }
+
+    /// <summary>
+    /// Checks all licenses and updates cache
+    /// </summary>
+    /// <remarks>Expected to be called at startup and on reoccuring basis</remarks>
+    public async Task ValidateAllLicenses()
+    {
+        _logger.LogInformation("Validating user's KavitaPlus Licenses");
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+        await provider.FlushAsync();
+
+        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
+        foreach (var user in users)
+        {
+            var isValid = await IsLicenseValid(user.License);
+            if (isValid)
+            {
+                await provider.SetAsync($"{user.Id}", true, _licenseCacheTimeout);
+            }
+        }
+
+        _logger.LogInformation("Validating user's KavitaPlus Licenses - Complete");
     }
 }

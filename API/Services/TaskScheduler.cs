@@ -54,6 +54,7 @@ public class TaskScheduler : ITaskScheduler
     private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILicenseService _licenseService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -67,6 +68,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ReportStatsTaskId = "report-stats";
     public const string CheckScrobblingTokens = "check-scrobbling-tokens";
     public const string ProcessScrobblingEvents = "process-scrobbling-events";
+    public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
@@ -83,7 +85,7 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService)
+        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -99,6 +101,7 @@ public class TaskScheduler : ITaskScheduler
         _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
         _scrobblingService = scrobblingService;
+        _licenseService = licenseService;
     }
 
     public async Task ScheduleTasks()
@@ -137,6 +140,8 @@ public class TaskScheduler : ITaskScheduler
         // KavitaPlus based (needs license check)
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateAllLicenses(), LicenseService.Cron, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _licenseService.ValidateAllLicenses());
 
         // KavitaPlus Scrobbling
         RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), Cron.Hourly, RecurringJobOptions);
