@@ -4,15 +4,12 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject } from 'rxjs';
-import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, take, tap} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
-import { ReadingList } from 'src/app/_models/reading-list';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
@@ -23,6 +20,7 @@ import { ActionService } from '../../../_services/action.service';
 import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {switchMap} from "rxjs";
 
 @Component({
   selector: 'app-side-nav',
@@ -33,17 +31,20 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class SideNavComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
+  readonly accountService = inject(AccountService);
+
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
   readingListActions = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
-
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
 
-  constructor(public accountService: AccountService, private libraryService: LibraryService,
+
+
+  constructor(private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,

@@ -2,6 +2,6 @@
 
 public class UpdateLicenseDto
 {
-    public string License { get; set; }
-    public string InstallId { get; set; }
+    public required string License { get; set; }
+    public required string InstallId { get; set; }
 }

@@ -51,7 +51,7 @@ public class ServerSettingDto
     /// <summary>
     /// KavitaPlus License
     /// </summary>
-    public string LicenseKey { get; set; } = default!;
+    public string LicenseKey { get; set; } = default!; // TODO: I might need to remove this
     /// <summary>
     /// The format that should be used when saving media for Kavita
     /// </summary>

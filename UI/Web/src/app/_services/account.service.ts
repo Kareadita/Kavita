@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import {DestroyRef, inject, Injectable } from '@angular/core';
 import { of, ReplaySubject } from 'rxjs';
-import { filter, map, switchMap } from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
@@ -38,6 +38,9 @@ export class AccountService {
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
   currentUser$ = this.currentUserSource.asObservable();
+
+  private hasValidLicenseSource = new ReplaySubject<boolean>(1);
+  hasValidLicense$ = this.hasValidLicenseSource.asObservable();
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -79,7 +82,10 @@ export class AccountService {
 
   hasValidLicense() {
     return this.httpClient.get<string>(this.baseUrl + 'account/valid-license', TextResonse)
-      .pipe(map(res => res === "true"));
+      .pipe(
+        map(res => res === "true"),
+        tap(res => this.hasValidLicenseSource.next(res))
+      );
   }
 
   updateUserLicense(license: string) {
@@ -119,6 +125,8 @@ export class AccountService {
 
     this.currentUser = user;
     this.currentUserSource.next(user);
+
+    this.hasValidLicense().subscribe();
 
     this.stopRefreshTokenTimer();
 

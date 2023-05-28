@@ -109,6 +109,13 @@ public class Startup
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
+            options.CacheProfiles.Add(ResponseCacheProfiles.LicenseCache,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromHours(4).Seconds,
+                    Location = ResponseCacheLocation.Client,
+                    NoStore = false
+                });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
         {

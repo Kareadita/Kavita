@@ -16,7 +16,7 @@ namespace API.Services.Plus;
 
 public interface ILicenseService
 {
-    Task<bool> HasActiveLicense(int userId);
+    Task<bool> HasActiveLicense(int userId, bool forceCheck = false);
 
     Task<string> EncryptLicense(string license);
     Task ValidateAllLicenses();
@@ -45,11 +45,15 @@ public class LicenseService : ILicenseService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    public async Task<bool> HasActiveLicense(int userId)
+    public async Task<bool> HasActiveLicense(int userId, bool forceCheck = false)
     {
         var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        var cacheValue = await provider.GetAsync<bool>($"{userId}");
-        if (cacheValue.HasValue) return cacheValue.Value;
+        if (!forceCheck)
+        {
+            var cacheValue = await provider.GetAsync<bool>($"{userId}");
+            if (cacheValue.HasValue) return cacheValue.Value;
+        }
+
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return false;
@@ -74,7 +78,7 @@ public class LicenseService : ILicenseService
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", serverSetting.LicenseKey)
+                .WithHeader("x-license-key", license)
                 .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
@@ -108,7 +112,7 @@ public class LicenseService : ILicenseService
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/encrypt")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", serverSetting.LicenseKey)
+                .WithHeader("x-license-key", license)
                 .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
@@ -120,7 +124,7 @@ public class LicenseService : ILicenseService
                 })
                 .ReceiveString();
 
-            return response;
+            return response.Trim('"');
         }
         catch (Exception e)
         {

@@ -83,7 +83,7 @@ public class ScrobblingService : IScrobblingService
     {
         var token = await GetTokenForProvider(userId, provider);
 
-        if (await HasTokenExpired(token, provider))
+        if (await HasTokenExpired(userId, token, provider))
         {
             // NOTE: Should this side effect be here?
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
@@ -94,17 +94,20 @@ public class ScrobblingService : IScrobblingService
         return false;
     }
 
-    private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
+    private async Task<bool> HasTokenExpired(int userId, string token, ScrobbleProvider provider)
     {
         if (string.IsNullOrEmpty(token) ||
             !_tokenService.HasTokenExpired(token)) return false;
+
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        if (string.IsNullOrEmpty(user?.License)) return true;
 
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", "TODO")
+                .WithHeader("x-license-key", user.License)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -140,7 +143,7 @@ public class ScrobblingService : IScrobblingService
     {
         // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -171,7 +174,7 @@ public class ScrobblingService : IScrobblingService
     {
         // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -214,7 +217,7 @@ public class ScrobblingService : IScrobblingService
     {
         // TODO: License check
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -241,7 +244,7 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync();
     }
 
-    private async Task PostScrobbleUpdate(ScrobbleDto data)
+    private async Task PostScrobbleUpdate(ScrobbleDto data, string license)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
@@ -249,7 +252,7 @@ public class ScrobblingService : IScrobblingService
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/anilist/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", serverSetting.LicenseKey)
+                .WithHeader("x-license-key", license)
                 .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
@@ -352,7 +355,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesName = readEvent.Series.Name,
                 LocalizedSeriesName = readEvent.Series.LocalizedName,
                 StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
-            });
+            }, readEvent.AppUser.License);
             _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
         }
 
@@ -367,7 +370,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesName = ratingEvent.Series.Name,
                 LocalizedSeriesName = ratingEvent.Series.LocalizedName,
                 Rating = ratingEvent.Rating
-            });
+            }, ratingEvent.AppUser.License);
             _unitOfWork.ScrobbleEventRepository.Remove(ratingEvent);
         }
 
@@ -395,7 +398,7 @@ public class ScrobblingService : IScrobblingService
                 AccessToken = decision.Event.AppUser.AniListAccessToken,
                 SeriesName = decision.Event.Series.Name,
                 LocalizedSeriesName = decision.Event.Series.LocalizedName
-            });
+            }, (await _unitOfWork.UserRepository.GetUserByIdAsync(decision.UserId))!.License);
             _unitOfWork.ScrobbleEventRepository.Remove(decision.Event);
         }
 

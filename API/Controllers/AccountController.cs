@@ -969,6 +969,7 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("valid-license")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense()
     {
         return Ok(await _licenseService.HasActiveLicense(User.GetUserId()));
@@ -994,7 +995,7 @@ public class AccountController : BaseApiController
             await _licenseService.AddLicenseToUser(user, dto.License);
         }
 
-        return Ok(await _licenseService.HasActiveLicense(user.Id));
+        return Ok(await _licenseService.HasActiveLicense(user.Id, true));
     }
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
