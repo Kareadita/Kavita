@@ -70,7 +70,6 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
-            options.UseInMemory(EasyCacheProfiles.RevokedJwt);
         });
     }
 

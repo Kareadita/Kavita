@@ -373,8 +373,6 @@ public class Startup
             await next();
         });
 
-        app.UseMiddleware<JwtRevocationMiddleware>();
-
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace API.Middleware;
 
 /// <summary>
-/// Responsible for maintaining an in-memory
+/// Responsible for maintaining an in-memory. Not in use
 /// </summary>
 public class JwtRevocationMiddleware
 {

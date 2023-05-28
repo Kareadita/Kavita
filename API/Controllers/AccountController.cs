@@ -193,7 +193,7 @@ public class AccountController : BaseApiController
 
         if (result.IsLockedOut) // result.IsLockedOut
         {
-            await LockUserAccount(user);
+            await _userManager.UpdateSecurityStampAsync(user);
             return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
         }
 
@@ -228,24 +228,6 @@ public class AccountController : BaseApiController
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
 
         return Ok(dto);
-    }
-
-    private async Task LockUserAccount(AppUser user)
-    {
-        // Invalidate the user token
-        await _userManager.UpdateSecurityStampAsync(user);
-        // Fetch the JWT for this user and invalidate it
-        var jwt = await _tokenService.GetJwtFromUser(user);
-        if (!string.IsNullOrEmpty(jwt))
-        {
-            _logger.LogInformation("Invalidating {UserName}'s JWT due to being locked out", user.UserName);
-            await _cacheFactory.GetCachingProvider(EasyCacheProfiles.RevokedJwt).SetAsync(jwt, string.Empty, TimeSpan.FromMinutes(10));
-        }
-
-        if (!await _userManager.IsLockedOutAsync(user))
-        {
-            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.Now.AddMinutes(1));
-        }
     }
 
     /// <summary>
