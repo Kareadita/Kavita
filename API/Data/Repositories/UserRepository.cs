@@ -237,6 +237,7 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserRating
             .Where(u => u.AppUserId == userId && u.Rating > 0)
+            .Include(u => u.Series)
             .ToListAsync();
     }
 

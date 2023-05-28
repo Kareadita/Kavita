@@ -147,6 +147,8 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        if (library is not {AllowScrobbling: true}) return;
 
         var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -176,6 +178,8 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        if (library is not {AllowScrobbling: true}) return;
 
         var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -217,6 +221,8 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
         if (series == null) throw new KavitaException("Series not found");
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        if (library is not {AllowScrobbling: true}) return;
 
         var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
@@ -271,7 +277,13 @@ public class ScrobblingService : IScrobblingService
         if (lastSync >= DateTime.UtcNow)
         {
             _logger.LogDebug("Nothing to sync");
+            return;
         }
+
+        var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
+            .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
+
+
         foreach (var user in (await _unitOfWork.UserRepository.GetAllUsersAsync()))
         {
             if (!(await _licenseService.IsLicenseValid("TODO: License here"))) continue;
@@ -279,12 +291,14 @@ public class ScrobblingService : IScrobblingService
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
             foreach (var wtr in wantToRead)
             {
+                if (!libAllowsScrobbling[wtr.LibraryId]) continue;
                 await ScrobbleWantToReadUpdate(user.Id, wtr.Id, true);
             }
 
             var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(user.Id);
             foreach (var rating in ratings)
             {
+                if (!libAllowsScrobbling[rating.Series.LibraryId]) continue;
                 await ScrobbleRatingUpdate(user.Id, rating.SeriesId, rating.Rating);
             }
 
@@ -296,7 +310,8 @@ public class ScrobblingService : IScrobblingService
                         Read = true,
                         InProgress = true,
                         NotRead = false
-                    }
+                    },
+                    Libraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList()
                 });
 
             foreach (var series in seriesWithProgress)
