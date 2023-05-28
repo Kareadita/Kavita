@@ -160,6 +160,10 @@
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number !== 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
                                         [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
                                         [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions"
+<<<<<<< HEAD
+=======
+                                        [count]="item.volume.chapters[0].files.length"
+>>>>>>> 5a95911483f810d72ee6830149d62edc1ab96a8a
                                         (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                                     </ng-container>
@@ -310,6 +314,18 @@
                 </virtual-scroller>
               </ng-template>
             </li>
+
+
+
+
+
+            <div class="progress-banner" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
+
+                                        [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions"
+                                        [count]="item.volume.chapters[0].files.length"
+                                        (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)"
+                                        [read]="item.chapter.pagesRead" [total]="item.chapter.pages" [actions]="chapterActions"
+                                    [seriesName]="series.name" [entity]="volume"
 
             <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
                 <a ngbNavLink>Related</a>

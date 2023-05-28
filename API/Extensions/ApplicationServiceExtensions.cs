@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
@@ -72,7 +73,7 @@ public static class ApplicationServiceExtensions
 
         services.AddEasyCaching(options =>
         {
-            options.UseInMemory("favicon");
+            options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory("license");
         });
     }

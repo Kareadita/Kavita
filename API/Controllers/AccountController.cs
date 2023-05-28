@@ -19,6 +19,7 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
+using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -45,6 +46,7 @@ public class AccountController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
+    private readonly IEasyCachingProviderFactory _cacheFactory;
     private readonly ILicenseService _licenseService;
 
     /// <inheritdoc />
@@ -54,6 +56,7 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
+        IEasyCachingProviderFactory cacheFactory,
         ILicenseService licenseService)
     {
         _userManager = userManager;
@@ -65,6 +68,7 @@ public class AccountController : BaseApiController
         _accountService = accountService;
         _emailService = emailService;
         _eventHub = eventHub;
+        _cacheFactory = cacheFactory;
         _licenseService = licenseService;
     }
 
@@ -193,6 +197,7 @@ public class AccountController : BaseApiController
 
         if (result.IsLockedOut)
         {
+            await _userManager.UpdateSecurityStampAsync(user);
             return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
         }
 
