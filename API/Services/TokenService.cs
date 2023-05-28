@@ -23,6 +23,7 @@ public interface ITokenService
     Task<string> CreateToken(AppUser user);
     Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
+    Task<string> GetJwtFromUser(AppUser user);
 }
 
 
@@ -123,5 +124,12 @@ public class TokenService : ITokenService
             _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
+    }
+
+    public async Task<string> GetJwtFromUser(AppUser user)
+    {
+        var userClaims = await _userManager.GetClaimsAsync(user);
+        var jwtClaim = userClaims.FirstOrDefault(claim => claim.Type == "jwt");
+        return jwtClaim?.Value;
     }
 }
