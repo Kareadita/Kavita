@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
+using API.DTOs.License;
 using EasyCaching.Core;
 using Flurl.Http;
 using Kavita.Common;
@@ -13,7 +14,7 @@ namespace API.Services.Plus;
 
 public interface ILicenseService
 {
-    Task<bool> IsLicenseValid(string license);
+    Task<bool> HasActiveLicense(int userId);
 
     Task<string> EncryptLicense(string license);
 }
@@ -66,7 +67,8 @@ public class LicenseService : ILicenseService
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new UpdateLicenseDto()
                 {
-                    License = license
+                    License = license,
+                    InstallId = serverSetting.InstallId
                 });
 
             if (response.StatusCode != StatusCodes.Status200OK)
@@ -103,9 +105,10 @@ public class LicenseService : ILicenseService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new UpdateLicenseDto()
+                .PostJsonAsync(new EncryptLicenseDto()
                 {
-                    License = license
+                    License = license,
+                    InstallId = serverSetting.InstallId
                 });
 
             if (response.StatusCode != StatusCodes.Status200OK)

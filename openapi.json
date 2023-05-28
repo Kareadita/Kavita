@@ -15038,6 +15038,10 @@
           "license": {
             "type": "string",
             "nullable": true
+          },
+          "installId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
