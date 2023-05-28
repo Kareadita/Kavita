@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Account;
 using API.DTOs.License;
@@ -40,7 +41,7 @@ public class LicenseService : ILicenseService
     /// <returns></returns>
     public async Task<bool> HasActiveLicense(int userId)
     {
-        var provider = _cachingProviderFactory.GetCachingProvider("licenseValid");
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         var cacheValue = await provider.GetAsync<bool>($"{userId}");
         if (cacheValue.HasValue) return cacheValue.Value;
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);

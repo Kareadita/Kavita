@@ -74,7 +74,7 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
-            options.UseInMemory("license");
+            options.UseInMemory(EasyCacheProfiles.License);
         });
     }
 
