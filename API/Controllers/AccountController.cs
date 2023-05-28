@@ -981,17 +981,23 @@ public class AccountController : BaseApiController
     /// <summary>
     /// Updates user's license. Returns true if updated and valid
     /// </summary>
+    /// <remarks>Caches the result</remarks>
     /// <returns></returns>
     [HttpPost("license")]
-    public async Task<ActionResult<string>> UpdateLicense(UpdateLicenseDto dto)
+    public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
-        var encrypted = await _licenseService.EncryptLicense(dto.License);
-        user.License = encrypted;
-        _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
+        if (string.IsNullOrEmpty(dto.License))
+        {
+            await _licenseService.RemoveLicenseFromUser(user);
+        }
+        else
+        {
+            await _licenseService.AddLicenseToUser(user, dto.License);
+        }
+
         return Ok(await _licenseService.HasActiveLicense(user.Id));
     }
 
