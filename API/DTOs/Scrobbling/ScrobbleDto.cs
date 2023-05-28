@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using API.Entities.Enums;
 
 namespace API.DTOs.Scrobbling;
@@ -54,5 +55,9 @@ public class ScrobbleDto
     /// Rating for the Series
     /// </summary>
     public float? Rating { get; set; }
+    /// <summary>
+    /// The date that the series was started reading. Will be null for non ReadingProgress events
+    /// </summary>
+    public DateTime StartedReadingDateUtc { get; set; }
 
 }

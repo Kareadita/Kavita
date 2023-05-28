@@ -346,7 +346,8 @@ public class ScrobblingService : IScrobblingService
                 VolumeNumber = readEvent.VolumeNumber,
                 AccessToken = readEvent.AppUser.AniListAccessToken,
                 SeriesName = readEvent.Series.Name,
-                LocalizedSeriesName = readEvent.Series.LocalizedName
+                LocalizedSeriesName = readEvent.Series.LocalizedName,
+                StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
             });
             _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
         }
