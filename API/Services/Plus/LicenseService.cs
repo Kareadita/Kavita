@@ -71,7 +71,7 @@ public class LicenseService : ILicenseService
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/valid")
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", serverSetting.LicenseKey)
@@ -83,21 +83,15 @@ public class LicenseService : ILicenseService
                 {
                     License = license,
                     InstallId = serverSetting.InstallId
-                });
-
-            if (response.StatusCode != StatusCodes.Status200OK)
-            {
-                _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
-                return false;
-            }
+                })
+                .ReceiveString();
+            return bool.Parse(response);
         }
         catch (Exception e)
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
             return false;
         }
-
-        return true;
     }
 
     /// <summary>

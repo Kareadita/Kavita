@@ -820,6 +820,7 @@
         "tags": [
           "Account"
         ],
+        "summary": "Checks if the user's license is valid or not",
         "responses": {
           "200": {
             "description": "Success",
@@ -15536,6 +15537,9 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
+          },
+          "hasLicense": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

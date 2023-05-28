@@ -16,18 +16,18 @@ export class UserLicenseComponent implements OnInit {
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
-  licenseKey: string = '';
+  hasLicense: boolean = false;
 
 
   constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
-
-    this.accountService.getUserLicense().subscribe(res => {
-      this.licenseKey = res;
-      this.cdRef.markForCheck();
-    })
+    this.accountService.currentUser$.subscribe(user => {
+      if (user) {
+        this.hasLicense = user.hasLicense;
+      }
+    });
   }
 
 
@@ -44,7 +44,7 @@ export class UserLicenseComponent implements OnInit {
       } else {
         this.toastr.success('KavitaPlus unlocked');
       }
-      this.licenseKey = this.formGroup.get('licenseKey')!.value;
+      this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
       this.resetForm();
       this.isViewMode = true;
     }, err => {

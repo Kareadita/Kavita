@@ -1,7 +1,7 @@
 import { AgeRestriction } from './metadata/age-restriction';
 import { Preferences } from './preferences/preferences';
 
-// This interface is only used for login and storing/retreiving JWT from local storage
+// This interface is only used for login and storing/retrieving JWT from local storage
 export interface User {
     username: string;
     token: string;
@@ -11,4 +11,5 @@ export interface User {
     apiKey: string;
     email: string;
     ageRestriction: AgeRestriction;
+    hasLicense: boolean;
 }

@@ -159,7 +159,8 @@ public class AccountController : BaseApiController
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+                HasLicense = !string.IsNullOrEmpty(user.License)
             };
         }
         catch (Exception ex)
@@ -703,7 +704,8 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 
@@ -857,7 +859,8 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 
@@ -961,22 +964,15 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
+    /// <summary>
+    /// Checks if the user's license is valid or not
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("valid-license")]
     public async Task<ActionResult<bool>> HasValidLicense()
     {
         return Ok(await _licenseService.HasActiveLicense(User.GetUserId()));
     }
-
-    /// <summary>
-    /// Only the user can get their own license. An admin cannot peep at user's license keys
-    /// </summary>
-    /// <returns></returns>
-    // [HttpGet("license")]
-    // public async Task<ActionResult<string>> GetLicense()
-    // {
-    //     var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-    //     return Ok(user?.License);
-    // }
 
     /// <summary>
     /// Updates user's license. Returns true if updated and valid

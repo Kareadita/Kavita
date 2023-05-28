@@ -134,7 +134,11 @@ public class AutoMapperProfiles : Profile
                 {
                     AgeRating = src.AgeRestriction,
                     IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
-                }));
+                }))
+            .ForMember(dest => dest.HasLicense,
+                opt =>
+                    opt.MapFrom(src => !string.IsNullOrEmpty(src.License)));
+
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
