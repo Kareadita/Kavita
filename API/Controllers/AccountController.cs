@@ -971,12 +971,12 @@ public class AccountController : BaseApiController
     /// Only the user can get their own license. An admin cannot peep at user's license keys
     /// </summary>
     /// <returns></returns>
-    [HttpGet("license")]
-    public async Task<ActionResult<string>> GetLicense()
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        return Ok(user?.License);
-    }
+    // [HttpGet("license")]
+    // public async Task<ActionResult<string>> GetLicense()
+    // {
+    //     var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+    //     return Ok(user?.License);
+    // }
 
     /// <summary>
     /// Updates user's license. Returns true if updated and valid

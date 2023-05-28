@@ -845,39 +845,12 @@
       }
     },
     "/api/Account/license": {
-      "get": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Only the user can get their own license. An admin cannot peep at user's license keys",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      },
       "post": {
         "tags": [
           "Account"
         ],
         "summary": "Updates user's license. Returns true if updated and valid",
+        "description": "Caches the result",
         "requestBody": {
           "content": {
             "application/json": {
@@ -903,17 +876,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "type": "boolean"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "boolean"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "boolean"
                 }
               }
             }

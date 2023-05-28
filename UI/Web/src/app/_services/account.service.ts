@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
-import { of, ReplaySubject, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import {DestroyRef, inject, Injectable } from '@angular/core';
+import { of, ReplaySubject } from 'rxjs';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
@@ -82,10 +82,6 @@ export class AccountService {
       .pipe(map(res => res === "true"));
   }
 
-  getUserLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'account/license', TextResonse);
-  }
-
   updateUserLicense(license: string) {
   return this.httpClient.post<string>(this.baseUrl + 'account/license', {license: license}, TextResonse)
     .pipe(map(res => res === "true"));
@@ -136,9 +132,9 @@ export class AccountService {
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
+    this.messageHub.stopHubConnection();
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
-    this.messageHub.stopHubConnection();
   }
 
 
@@ -187,6 +183,7 @@ export class AccountService {
   /**
    * Given a user id, returns a full url for setting up the user account
    * @param userId
+   * @param withBaseUrl Should base url be included in invite url
    * @returns
    */
   getInviteUrl(userId: number, withBaseUrl: boolean = true) {
@@ -227,7 +224,7 @@ export class AccountService {
    */
   getPreferences() {
     return this.httpClient.get<Preferences>(this.baseUrl + 'users/get-preferences').pipe(map(pref => {
-      if (this.currentUser !== undefined || this.currentUser != null) {
+      if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = pref;
         this.setCurrentUser(this.currentUser);
       }
@@ -237,7 +234,7 @@ export class AccountService {
 
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
-      if (this.currentUser !== undefined || this.currentUser != null) {
+      if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
       }
@@ -251,7 +248,7 @@ export class AccountService {
 
     if (userString) {
       return JSON.parse(userString)
-    };
+    }
 
     return undefined;
   }
