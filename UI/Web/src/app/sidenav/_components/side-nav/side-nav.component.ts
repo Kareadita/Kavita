@@ -31,7 +31,6 @@ import {switchMap} from "rxjs";
 export class SideNavComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
-  readonly accountService = inject(AccountService);
 
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
@@ -41,28 +40,23 @@ export class SideNavComponent implements OnInit {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
-
-
-
   constructor(private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private ngbModal: NgbModal, private imageService: ImageService) {
+    private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
         map(evt => evt as NavigationEnd),
-        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet))
-      .subscribe((evt: NavigationEnd) => {
-        // Collapse side nav on mobile
-        this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
-          if (!collapsed) {
-            this.navService.toggleSideNav();
-            this.cdRef.markForCheck();
-          }
-        });
+        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
+        switchMap(() => this.navService.sideNavCollapsed$),
+        take(1),
+        filter(collapsed => !collapsed)
+      ).subscribe(() => {
+        this.navService.toggleSideNav();
+        this.cdRef.markForCheck();
       });
   }
 
@@ -85,16 +79,16 @@ export class SideNavComponent implements OnInit {
     });
   }
 
-  handleAction(action: ActionItem<Library>, library: Library) {
+  async handleAction(action: ActionItem<Library>, library: Library) {
     switch (action.action) {
       case(Action.Scan):
-        this.actionService.scanLibrary(library);
+        await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetadata(library);
+        await this.actionService.refreshMetadata(library);
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFiles(library);
+        await this.actionService.analyzeFiles(library);
         break;
       case (Action.Edit):
         this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
@@ -105,7 +99,7 @@ export class SideNavComponent implements OnInit {
   }
 
   importCbl() {
-    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+    this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {

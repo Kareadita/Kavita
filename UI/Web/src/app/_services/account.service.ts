@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import {DestroyRef, inject, Injectable } from '@angular/core';
 import { of, ReplaySubject } from 'rxjs';
-import {filter, map, shareReplay, startWith, switchMap, tap} from 'rxjs/operators';
+import {filter, map, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
@@ -40,7 +40,16 @@ export class AccountService {
   currentUser$ = this.currentUserSource.asObservable();
 
   private hasValidLicenseSource = new ReplaySubject<boolean>(1);
+  /**
+   * Does the user have an active license
+   */
   hasValidLicense$ = this.hasValidLicenseSource.asObservable();
+
+  private hasServerLicenseSource = new ReplaySubject<boolean>(1);
+  /**
+   * Does the server have an active license
+   */
+  hasServerLicense$ = this.hasServerLicenseSource.asObservable();
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -54,6 +63,8 @@ export class AccountService {
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshToken()))
         .subscribe(() => {});
+
+      this.hasServerLicense().subscribe();
     }
 
   hasAdminRole(user: User) {
@@ -80,8 +91,19 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
+  hasServerLicense() {
+    return this.httpClient.get<string>(this.baseUrl + 'license/server-has-license', TextResonse)
+      .pipe(
+        map(res => res === "true"),
+        tap(res => {
+          console.log('server license: ', res)
+          this.hasServerLicenseSource.next(res)
+        })
+      );
+  }
+
   hasValidLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'account/valid-license', TextResonse)
+    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license', TextResonse)
       .pipe(
         map(res => res === "true"),
         tap(res => this.hasValidLicenseSource.next(res))
@@ -89,7 +111,7 @@ export class AccountService {
   }
 
   updateUserLicense(license: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'account/license', {license: license}, TextResonse)
+  return this.httpClient.post<string>(this.baseUrl + 'license', {license: license}, TextResonse)
     .pipe(map(res => res === "true"));
   }
 
@@ -125,6 +147,10 @@ export class AccountService {
 
     this.currentUser = user;
     this.currentUserSource.next(user);
+
+    if (user) {
+      this.messageHub.createHubConnection(user, this.hasAdminRole(user));
+    }
 
     this.hasValidLicense().subscribe();
 

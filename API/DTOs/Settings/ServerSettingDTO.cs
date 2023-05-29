@@ -49,10 +49,6 @@ public class ServerSettingDto
     /// </summary>
     public string InstallId { get; set; } = default!;
     /// <summary>
-    /// KavitaPlus License
-    /// </summary>
-    public string LicenseKey { get; set; } = default!; // TODO: I might need to remove this
-    /// <summary>
     /// The format that should be used when saving media for Kavita
     /// </summary>
     /// <example>This includes things like: Covers, Bookmarks, Favicons</example>

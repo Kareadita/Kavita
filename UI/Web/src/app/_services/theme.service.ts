@@ -5,14 +5,13 @@ import {
   inject,
   Inject,
   Injectable,
-  OnDestroy,
   Renderer2,
   RendererFactory2,
   SecurityContext
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
-import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
+import { map, ReplaySubject, take } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../shared/confirm.service';
 import { NotificationProgressEvent } from '../_models/events/notification-progress-event';
@@ -47,10 +46,10 @@ export class ThemeService {
 
 
   constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) private document: Document, private httpClient: HttpClient,
-  messageHub: MessageHubService, private domSantizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
+  messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
-    this.getThemes();
+    this.getThemes().subscribe();
 
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
@@ -172,12 +171,12 @@ export class ThemeService {
           }
 
           const tileColor = this.getTileColor();
-          if (themeColor) {
+          if (tileColor) {
             this.document.querySelector('meta[name="msapplication-TileColor"]')?.setAttribute('content', themeColor);
           }
 
           const colorScheme = this.getColorScheme();
-          if (themeColor) {
+          if (colorScheme) {
             this.document.querySelector('body')?.setAttribute('theme', colorScheme);
           }
 
@@ -201,7 +200,7 @@ export class ThemeService {
 
   private fetchThemeContent(themeId: number) {
     return this.httpClient.get<string>(this.baseUrl + 'theme/download-content?themeId=' + themeId, TextResonse).pipe(map(encodedCss => {
-      return this.domSantizer.sanitize(SecurityContext.STYLE, encodedCss);
+      return this.domSanitizer.sanitize(SecurityContext.STYLE, encodedCss);
     }));
   }
 

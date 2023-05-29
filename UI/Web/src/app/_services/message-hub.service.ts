@@ -114,9 +114,7 @@ export class MessageHubService {
 
   isAdmin: boolean = false;
 
-  constructor(private toastr: ToastrService, private router: Router) {
-
-  }
+  constructor() {}
 
   /**
    * Tests that an event is of the type passed

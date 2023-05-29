@@ -10,10 +10,10 @@ import {AccountService} from "../../_services/account.service";
 export class UserKavitaPlusComponent implements OnInit {
 
   hasValidLicense = false;
-  private readonly accountService = inject(AccountService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
-
+  constructor(private accountService: AccountService) {
+  }
 
   ngOnInit() {
     this.accountService.hasValidLicense().subscribe(res => {

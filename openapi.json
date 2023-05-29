@@ -815,86 +815,6 @@
         }
       }
     },
-    "/api/Account/valid-license": {
-      "get": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Checks if the user's license is valid or not",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/license": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Updates user's license. Returns true if updated and valid",
-        "description": "Caches the result",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLicenseDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLicenseDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLicenseDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
@@ -2706,6 +2626,116 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LibraryType"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/server-has-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "If the Admin has a license, then some features of Kavita server are unlocked for all users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/valid-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Checks if the user's license is valid or not",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License": {
+      "post": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Updates user's license. Returns true if updated and valid",
+        "description": "Caches the result",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -14506,11 +14536,6 @@
           "installId": {
             "type": "string",
             "description": "Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.",
-            "nullable": true
-          },
-          "licenseKey": {
-            "type": "string",
-            "description": "KavitaPlus License",
             "nullable": true
           },
           "encodeMediaAs": {

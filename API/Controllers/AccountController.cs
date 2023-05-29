@@ -964,39 +964,7 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
-    /// <summary>
-    /// Checks if the user's license is valid or not
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("valid-license")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
-    public async Task<ActionResult<bool>> HasValidLicense()
-    {
-        return Ok(await _licenseService.HasActiveLicense(User.GetUserId()));
-    }
 
-    /// <summary>
-    /// Updates user's license. Returns true if updated and valid
-    /// </summary>
-    /// <remarks>Caches the result</remarks>
-    /// <returns></returns>
-    [HttpPost("license")]
-    public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
-
-        if (string.IsNullOrEmpty(dto.License))
-        {
-            await _licenseService.RemoveLicenseFromUser(user);
-        }
-        else
-        {
-            await _licenseService.AddLicenseToUser(user, dto.License);
-        }
-
-        return Ok(await _licenseService.HasActiveLicense(user.Id, true));
-    }
 
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {
