@@ -519,6 +519,14 @@ public class ReadingListService : IReadingListService
         {
             _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
         }
+        // ensure that both arrays are the same length
+        if (arcNumbers.Length < arcs.Length)
+        {
+            Array.Resize(ref arcNumbers, arcs.Length);
+        } else if (arcs.Length < arcNumbers.Length)
+        {
+            Array.Resize(ref arcs, arcNumbers.Length);
+        }
 
         var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
