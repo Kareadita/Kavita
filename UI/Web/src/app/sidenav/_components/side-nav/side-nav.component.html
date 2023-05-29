@@ -1,5 +1,5 @@
 <ng-container>
-    <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden': (navService.sideNavVisibility$ | async) === false}"  *ngIf="accountService.currentUser$ | async as user">
+    <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden': (navService.sideNavVisibility$ | async) === false, 'no-donate': (accountService.hasServerLicense$ | async) === true}"  *ngIf="accountService.currentUser$ | async as user">
         <!-- <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
             <ng-container actions>
                 Todo: This will be customize dashboard/side nav controls
@@ -34,6 +34,6 @@
     <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
     <div class="bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
         'hidden': (navService.sideNavVisibility$ | async) === false || (accountService.hasServerLicense$ | async) === true}">
-      <app-side-nav-item [ngClass]="'donate'" icon="fa-heart" [title]="((accountService.hasServerLicense$ | async) === true) + ''" link="https://opencollective.com/kavita" [external]="true"></app-side-nav-item>
+      <app-side-nav-item *ngIf="(accountService.hasServerLicense$ | async) === false" [ngClass]="'donate'" icon="fa-heart" title="Donate" link="https://opencollective.com/kavita" [external]="true"></app-side-nav-item>
     </div>
 </ng-container>
