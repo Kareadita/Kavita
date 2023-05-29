@@ -226,27 +226,6 @@ public class Startup
 
                     logger.LogInformation("Running Migrations");
 
-                    // Only run this if we are upgrading
-                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-                    await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
-
-                    // only needed for v0.5.4 and v0.6.0
-                    await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.6.0
-                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
-                    await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
-
-                    // v0.6.2 or v0.7
-                    await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
-
-                    // v0.6.8 or v0.7
-                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
-                    await MigrateToUtcDates.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7
-                    await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
-
                     // v0.7.2
                     await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
 
