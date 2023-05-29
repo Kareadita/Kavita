@@ -537,7 +537,7 @@ public class ReadingListService : IReadingListService
                 arcNumbers[i] = int.MaxValue.ToString();
             }
             if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
-            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
+            data.Add(new Tuple<string, string>(arcs[i].Trim(), arcNumbers[i]));
         }
 
         return data;
