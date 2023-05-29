@@ -47,6 +47,9 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
 
+    private const string AniListWeblinkWebsite = "https://anilist.co/";
+    private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+
 
     public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
         IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService)
@@ -162,7 +165,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
             Format = MediaFormat.Manga,
         };
@@ -195,7 +198,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                AniListId = ExtractAniListId(series.Metadata.WebLinks),
+                AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
@@ -236,7 +239,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
-            AniListId = ExtractAniListId(series.Metadata.WebLinks),
+            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
             Format = MediaFormat.Manga,
         };
@@ -351,7 +354,7 @@ public class ScrobblingService : IScrobblingService
                 ScrobbleEventType = readEvent.ScrobbleEventType,
                 ChapterNumber = readEvent.ChapterNumber,
                 VolumeNumber = readEvent.VolumeNumber,
-                AccessToken = readEvent.AppUser.AniListAccessToken,
+                AniListToken = readEvent.AppUser.AniListAccessToken,
                 SeriesName = readEvent.Series.Name,
                 LocalizedSeriesName = readEvent.Series.LocalizedName,
                 StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
@@ -366,7 +369,7 @@ public class ScrobblingService : IScrobblingService
                 Format = ratingEvent.Format,
                 AniListId = ratingEvent.AniListId,
                 ScrobbleEventType = ratingEvent.ScrobbleEventType,
-                AccessToken = ratingEvent.AppUser.AniListAccessToken,
+                AniListToken = ratingEvent.AppUser.AniListAccessToken,
                 SeriesName = ratingEvent.Series.Name,
                 LocalizedSeriesName = ratingEvent.Series.LocalizedName,
                 Rating = ratingEvent.Rating
@@ -395,7 +398,7 @@ public class ScrobblingService : IScrobblingService
                 ScrobbleEventType = decision.Event.ScrobbleEventType,
                 ChapterNumber = decision.Event.ChapterNumber,
                 VolumeNumber = decision.Event.VolumeNumber,
-                AccessToken = decision.Event.AppUser.AniListAccessToken,
+                AniListToken = decision.Event.AppUser.AniListAccessToken,
                 SeriesName = decision.Event.Series.Name,
                 LocalizedSeriesName = decision.Event.Series.LocalizedName
             }, (await _unitOfWork.UserRepository.GetUserByIdAsync(decision.UserId))!.License);
@@ -405,15 +408,15 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync();
     }
 
-    private static int ExtractAniListId(string webLinks)
+    private static int? ExtractId(string webLinks, string website)
     {
         foreach (var webLink in webLinks.Split(","))
         {
-            if (!webLink.StartsWith("https://anilist.co/")) continue;
-            var tokens = webLink.Split("https://anilist.co/")[1].Split("/");
+            if (!webLink.StartsWith(website)) continue;
+            var tokens = webLink.Split(website)[1].Split("/");
             return int.Parse(tokens[1]);
         }
 
-        return 0;
+        return null;
     }
 }

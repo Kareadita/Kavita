@@ -30,7 +30,7 @@ public class ScrobbleDto
     /// <summary>
     /// User's access token to allow us to talk on their behalf
     /// </summary>
-    public string AccessToken { get; set; }
+    public string AniListToken { get; set; }
 
     public string SeriesName { get; set; }
     public string LocalizedSeriesName { get; set; }
@@ -39,6 +39,8 @@ public class ScrobbleDto
     /// Optional AniListId if present on Kavita's WebLinks
     /// </summary>
     public int? AniListId { get; set; } = 0;
+    public int? MALId { get; set; } = 0;
+    public string BakaUpdatesId { get; set; } = string.Empty;
 
     public ScrobbleEventType ScrobbleEventType { get; set; }
     /// <summary>
