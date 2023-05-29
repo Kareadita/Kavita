@@ -8,6 +8,7 @@ import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
 import { DOCUMENT } from '@angular/common';
 import { Observable } from 'rxjs';
+import {ThemeService} from "./_services/theme.service";
 
 @Component({
   selector: 'app-root',
@@ -21,7 +22,7 @@ export class AppComponent implements OnInit {
   constructor(private accountService: AccountService, public navService: NavService,
     private libraryService: LibraryService,
     private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
-    @Inject(DOCUMENT) private document: Document) {
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
 
     // Setup default rating config
     ratingConfig.max = 5;
@@ -60,6 +61,9 @@ export class AppComponent implements OnInit {
     this.accountService.setCurrentUser(user);
 
     if (user) {
+      // Bootstrap anything that's needed
+      this.accountService.hasServerLicense().subscribe();
+      this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay()).subscribe();
     }
   }

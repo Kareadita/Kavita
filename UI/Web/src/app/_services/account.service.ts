@@ -63,8 +63,6 @@ export class AccountService {
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshToken()))
         .subscribe(() => {});
-
-      this.hasServerLicense().subscribe();
     }
 
   hasAdminRole(user: User) {

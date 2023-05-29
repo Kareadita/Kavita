@@ -49,8 +49,6 @@ export class ThemeService {
   messageHub: MessageHubService, private domSanitizer: DomSanitizer, private confirmService: ConfirmService, private toastr: ToastrService) {
     this.renderer = rendererFactory.createRenderer(null, null);
 
-    this.getThemes().subscribe();
-
     messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
       if (message.event !== EVENTS.NotificationProgress) return;
