@@ -513,8 +513,8 @@ public class ReadingListService : IReadingListService
         var data = new List<Tuple<string, string>>();
         if (string.IsNullOrEmpty(storyArc)) return data;
 
-        var arcs = storyArc.Split(",");
-        var arcNumbers = storyArcNumbers.Split(",");
+        var arcs = storyArc.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var arcNumbers = storyArcNumbers.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
         {
             _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
@@ -537,7 +537,7 @@ public class ReadingListService : IReadingListService
                 arcNumbers[i] = int.MaxValue.ToString();
             }
             if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
-            data.Add(new Tuple<string, string>(arcs[i].Trim(), arcNumbers[i]));
+            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
         }
 
         return data;
