@@ -247,6 +247,31 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync();
     }
 
+    private async Task<int> GetRateLimit(string license, string aniListToken)
+    {
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        try
+        {
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
+                .WithHeader("Accept", "application/json")
+                .WithHeader("User-Agent", "Kavita")
+                .WithHeader("x-license-key", license)
+                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-kavita-version", BuildInfo.Version)
+                .WithHeader("Content-Type", "application/json")
+                .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
+                .GetStringAsync();
+
+            return int.Parse(response);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+        }
+
+        return 0;
+    }
+
     private async Task PostScrobbleUpdate(ScrobbleDto data, string license)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -340,7 +365,9 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     public async Task ProcessUpdatesSinceLastSync()
     {
-        // TODO: License check
+        // Check how many scrobbles we have available then only do those.
+        var userRateLimits = new Dictionary<int, int>();
+
         var readEvents = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ChapterRead);
         var addToWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.AddWantToRead);
         var removeWantToRead = await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead);
@@ -351,6 +378,8 @@ public class ScrobblingService : IScrobblingService
         {
             try
             {
+                var count = await SetAndCheckRateLimit(userRateLimits, readEvent.AppUser);
+                if (count == 0) continue;
                 await PostScrobbleUpdate(new ScrobbleDto()
                 {
                     Format = readEvent.Format,
@@ -364,6 +393,7 @@ public class ScrobblingService : IScrobblingService
                     StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
                 }, readEvent.AppUser.License);
                 _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
+                userRateLimits[readEvent.AppUserId] = count - 1;
             }
             catch (Exception ex)
             {
@@ -375,6 +405,8 @@ public class ScrobblingService : IScrobblingService
         {
             try
             {
+                var count = await SetAndCheckRateLimit(userRateLimits, ratingEvent.AppUser);
+                if (count == 0) continue;
                 await PostScrobbleUpdate(new ScrobbleDto()
                 {
                     Format = ratingEvent.Format,
@@ -386,6 +418,7 @@ public class ScrobblingService : IScrobblingService
                     Rating = ratingEvent.Rating
                 }, ratingEvent.AppUser.License);
                 _unitOfWork.ScrobbleEventRepository.Remove(ratingEvent);
+                userRateLimits[ratingEvent.AppUserId] = count - 1;
             }
             catch (Exception ex)
             {
@@ -409,6 +442,8 @@ public class ScrobblingService : IScrobblingService
         {
             try
             {
+                var count = await SetAndCheckRateLimit(userRateLimits, decision.Event.AppUser);
+                if (count == 0) continue;
                 await PostScrobbleUpdate(new ScrobbleDto()
                 {
                     Format = decision.Event.Format,
@@ -421,6 +456,7 @@ public class ScrobblingService : IScrobblingService
                     LocalizedSeriesName = decision.Event.Series.LocalizedName
                 }, (await _unitOfWork.UserRepository.GetUserByIdAsync(decision.UserId))!.License);
                 _unitOfWork.ScrobbleEventRepository.Remove(decision.Event);
+                userRateLimits[decision.Event.AppUserId] = count - 1;
             }
             catch (Exception ex)
             {
@@ -441,5 +477,22 @@ public class ScrobblingService : IScrobblingService
         }
 
         return 0;
+    }
+
+    private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user)
+    {
+        if (!userRateLimits.ContainsKey(user.Id))
+        {
+            userRateLimits.Add(user.Id,
+                await GetRateLimit(user.License, user.AniListAccessToken));
+        }
+
+        userRateLimits.TryGetValue(user.Id, out var count);
+        if (count == 0)
+        {
+            _logger.LogInformation("User {UserName} is out of rate for Scrobbling", user.UserName);
+        }
+
+        return count;
     }
 }
