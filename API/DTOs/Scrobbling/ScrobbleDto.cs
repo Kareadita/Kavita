@@ -31,7 +31,6 @@ public class ScrobbleDto
     /// User's access token to allow us to talk on their behalf
     /// </summary>
     public string AniListToken { get; set; }
-
     public string SeriesName { get; set; }
     public string LocalizedSeriesName { get; set; }
     public MediaFormat Format { get; set; }

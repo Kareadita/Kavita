@@ -265,11 +265,13 @@ public class ScrobblingService : IScrobblingService
             if (response.StatusCode != StatusCodes.Status200OK)
             {
                 _logger.LogError("KavitaPlus API did not respond successfully. {Content}", response);
+                throw new KavitaException("KavitaPlus API did not respond successfully");
             }
         }
         catch (Exception e)
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            throw;
         }
     }
 
@@ -347,34 +349,48 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var readEvent in readEvents)
         {
-            await PostScrobbleUpdate(new ScrobbleDto()
+            try
             {
-                Format = readEvent.Format,
-                AniListId = readEvent.AniListId,
-                ScrobbleEventType = readEvent.ScrobbleEventType,
-                ChapterNumber = readEvent.ChapterNumber,
-                VolumeNumber = readEvent.VolumeNumber,
-                AniListToken = readEvent.AppUser.AniListAccessToken,
-                SeriesName = readEvent.Series.Name,
-                LocalizedSeriesName = readEvent.Series.LocalizedName,
-                StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
-            }, readEvent.AppUser.License);
-            _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
+                await PostScrobbleUpdate(new ScrobbleDto()
+                {
+                    Format = readEvent.Format,
+                    AniListId = readEvent.AniListId,
+                    ScrobbleEventType = readEvent.ScrobbleEventType,
+                    ChapterNumber = readEvent.ChapterNumber,
+                    VolumeNumber = readEvent.VolumeNumber,
+                    AniListToken = readEvent.AppUser.AniListAccessToken,
+                    SeriesName = readEvent.Series.Name,
+                    LocalizedSeriesName = readEvent.Series.LocalizedName,
+                    StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
+                }, readEvent.AppUser.License);
+                _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception pushing scrobble event to API");
+            }
         }
 
         foreach (var ratingEvent in ratingEvents)
         {
-            await PostScrobbleUpdate(new ScrobbleDto()
+            try
             {
-                Format = ratingEvent.Format,
-                AniListId = ratingEvent.AniListId,
-                ScrobbleEventType = ratingEvent.ScrobbleEventType,
-                AniListToken = ratingEvent.AppUser.AniListAccessToken,
-                SeriesName = ratingEvent.Series.Name,
-                LocalizedSeriesName = ratingEvent.Series.LocalizedName,
-                Rating = ratingEvent.Rating
-            }, ratingEvent.AppUser.License);
-            _unitOfWork.ScrobbleEventRepository.Remove(ratingEvent);
+                await PostScrobbleUpdate(new ScrobbleDto()
+                {
+                    Format = ratingEvent.Format,
+                    AniListId = ratingEvent.AniListId,
+                    ScrobbleEventType = ratingEvent.ScrobbleEventType,
+                    AniListToken = ratingEvent.AppUser.AniListAccessToken,
+                    SeriesName = ratingEvent.Series.Name,
+                    LocalizedSeriesName = ratingEvent.Series.LocalizedName,
+                    Rating = ratingEvent.Rating
+                }, ratingEvent.AppUser.License);
+                _unitOfWork.ScrobbleEventRepository.Remove(ratingEvent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an exception pushing scrobble event to API");
+            }
         }
 
         var decisions = addToWantToRead
@@ -391,18 +407,25 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var decision in decisions)
         {
-            await PostScrobbleUpdate(new ScrobbleDto()
+            try
             {
-                Format = decision.Event.Format,
-                AniListId = decision.Event.AniListId,
-                ScrobbleEventType = decision.Event.ScrobbleEventType,
-                ChapterNumber = decision.Event.ChapterNumber,
-                VolumeNumber = decision.Event.VolumeNumber,
-                AniListToken = decision.Event.AppUser.AniListAccessToken,
-                SeriesName = decision.Event.Series.Name,
-                LocalizedSeriesName = decision.Event.Series.LocalizedName
-            }, (await _unitOfWork.UserRepository.GetUserByIdAsync(decision.UserId))!.License);
-            _unitOfWork.ScrobbleEventRepository.Remove(decision.Event);
+                await PostScrobbleUpdate(new ScrobbleDto()
+                {
+                    Format = decision.Event.Format,
+                    AniListId = decision.Event.AniListId,
+                    ScrobbleEventType = decision.Event.ScrobbleEventType,
+                    ChapterNumber = decision.Event.ChapterNumber,
+                    VolumeNumber = decision.Event.VolumeNumber,
+                    AniListToken = decision.Event.AppUser.AniListAccessToken,
+                    SeriesName = decision.Event.Series.Name,
+                    LocalizedSeriesName = decision.Event.Series.LocalizedName
+                }, (await _unitOfWork.UserRepository.GetUserByIdAsync(decision.UserId))!.License);
+                _unitOfWork.ScrobbleEventRepository.Remove(decision.Event);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue pushing scrobble event to API");
+            }
         }
 
         await _unitOfWork.CommitAsync();
@@ -417,6 +440,6 @@ public class ScrobblingService : IScrobblingService
             return int.Parse(tokens[1]);
         }
 
-        return null;
+        return 0;
     }
 }
