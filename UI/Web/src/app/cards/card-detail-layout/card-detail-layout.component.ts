@@ -7,7 +7,7 @@ import {
   ContentChild,
   ElementRef,
   EventEmitter,
-  HostListener,
+  HostListener, inject,
   Inject,
   Input,
   OnChanges,
@@ -76,7 +76,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
-  filter!: SeriesFilter;
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
+  filter: SeriesFilter = this.filterUtilityService.createSeriesFilter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
@@ -86,12 +87,9 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     return Breakpoint;
   }
 
-  constructor(private filterUtilitySerivce: FilterUtilitiesService, public utilityService: UtilityService,
-    @Inject(DOCUMENT) private document: Document, private changeDetectionRef: ChangeDetectorRef,
+  constructor(public utilityService: UtilityService,
+    @Inject(DOCUMENT) private document: Document, private cdRef: ChangeDetectorRef,
     private jumpbarService: JumpbarService, private router: Router, private scrollService: ScrollService) {
-    this.filter = this.filterUtilitySerivce.createSeriesFilter();
-    this.changeDetectionRef.markForCheck();
-
   }
 
   @HostListener('window:resize', ['$event'])
@@ -99,7 +97,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   resizeJumpBar() {
     const currentSize = (this.document.querySelector('.viewport-container')?.getBoundingClientRect().height || 10) - 30;
     this.jumpBarKeysToRender = this.jumpbarService.generateJumpBar(this.jumpBarKeys, currentSize);
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
@@ -109,17 +107,17 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     }
 
     if (this.pagination === undefined) {
       this.pagination = {currentPage: 1, itemsPerPage: this.items.length, totalItems: this.items.length, totalPages: 1};
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     }
 
     if (this.refresh) {
       this.refresh.subscribe(() => {
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
         this.virtualScroller.refresh();
       });
     }
@@ -152,7 +150,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions !== null || this.filterSettings?.presets?.sortOptions !== undefined;
+    return this.filter.sortOptions || this.filterSettings?.presets?.sortOptions;
   }
 
   performAction(action: ActionItem<any>) {
@@ -164,7 +162,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
-    this.changeDetectionRef.markForCheck();
+    this.filter = event.filter;
+    this.cdRef.markForCheck();
   }
 
 
@@ -172,7 +171,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     if (this.hasCustomSort()) return;
 
     let targetIndex = 0;
-    for(var i = 0; i < this.jumpBarKeys.length; i++) {
+    for(let i = 0; i < this.jumpBarKeys.length; i++) {
       if (this.jumpBarKeys[i].key === jumpKey.key) break;
       targetIndex += this.jumpBarKeys[i].size;
     }
@@ -181,7 +180,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     this.jumpbarService.saveResumeKey(this.router.url, jumpKey.key);
     // TODO: This doesn't work, we need the offset from virtual scroller
     this.jumpbarService.saveScrollOffset(this.router.url, this.scrollService.scrollPosition);
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
   }
 
   tryToSaveJumpKey(item: any) {
