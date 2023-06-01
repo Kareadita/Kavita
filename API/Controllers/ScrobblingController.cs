@@ -60,8 +60,9 @@ public class ScrobblingController : BaseApiController
     }
 
     [HttpGet("clear-errors")]
-    public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> ClearScrobbleErrors()
+    public async Task<ActionResult> ClearScrobbleErrors()
     {
-        return Ok(await _unitOfWork.ScrobbleRepository.ClearScrobbleErrors());
+        await _unitOfWork.ScrobbleRepository.ClearScrobbleErrors();
+        return Ok();
     }
 }

@@ -309,14 +309,16 @@ public class ScrobblingService : IScrobblingService
                 } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
-                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                    if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                     {
-                        Comment = "Unknown Series",
-                        Details = data.SeriesName,
-                        LibraryId = evt.LibraryId,
-                        SeriesId = evt.SeriesId
-                    });
-
+                        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                        {
+                            Comment = "Unknown Series",
+                            Details = data.SeriesName,
+                            LibraryId = evt.LibraryId,
+                            SeriesId = evt.SeriesId
+                        });
+                    }
                 }
 
                 _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);

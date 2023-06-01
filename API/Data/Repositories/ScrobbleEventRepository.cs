@@ -19,6 +19,7 @@ public interface IScrobbleRepository
     Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors();
     Task ClearScrobbleErrors();
+    Task<bool> HasErrorForSeries(int seriesId);
 }
 
 /// <summary>
@@ -83,5 +84,10 @@ public class ScrobbleRepository : IScrobbleRepository
     {
         _context.ScrobbleError.RemoveRange(_context.ScrobbleError);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> HasErrorForSeries(int seriesId)
+    {
+        return await _context.ScrobbleError.AnyAsync(n => n.SeriesId == seriesId);
     }
 }
