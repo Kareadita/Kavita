@@ -1,0 +1,47 @@
+<p>This table contains issues found during scrobbling. This list is non-managed.
+    You can clear it at any time and wait for the next scroble upload to see. If there is an unknown series, you are best correcting the
+series name or localized series name or adding a weblink for the providers.</p>
+
+<form [formGroup]="formGroup">
+    <div class="row g-0 mb-3">
+        <div class="col-md-12">
+            <label for="filter" class="visually-hidden">Filter</label>
+            <div class="input-group">
+                <input id="filter" type="text" class="form-control" placeholder="Filter" formControlName="filter" />
+                <button class="btn btn-primary" type="button" (click)="clear()">Clear Alerts</button>
+            </div>
+        </div>
+    </div>
+</form>
+<table class="table table-light table-hover table-sm table-hover">
+    <thead #header>
+    <tr>
+        <th scope="col" sortable="seriesId" (sort)="onSort($event)">
+            Series
+        </th>
+        <th scope="col" sortable="created" (sort)="onSort($event)">
+            Created
+        </th>
+        <th scope="col" sortable="comment" (sort)="onSort($event)">
+            Comment
+        </th>
+    </tr>
+    </thead>
+    <tbody #container>
+    <tr *ngIf="isLoading"><td colspan="4" style="text-align: center;"><app-loading [loading]="isLoading"></app-loading></td></tr>
+    <ng-container *ngIf="data | filter: filterList as filteredData">
+        <tr *ngIf="filteredData.length === 0 && !isLoading"><td colspan="4" style="text-align: center;">No issues</td></tr>
+        <tr *ngFor="let item of filteredData; index as i">
+            <td>
+                <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
+            </td>
+            <td>
+                {{item.created | date:'shortDate'}}
+            </td>
+            <td>
+                {{item.comment}}
+            </td>
+        </tr>
+    </ng-container>
+    </tbody>
+</table>

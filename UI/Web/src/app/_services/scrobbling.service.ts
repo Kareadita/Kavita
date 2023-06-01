@@ -15,6 +15,7 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobbleError} from "../_models/scrobble-error";
 
 export enum ScrobbleProvider {
   AniList= 1
@@ -46,5 +47,11 @@ export class ScrobblingService {
   }
 
 
+  getScrobbleErrors() {
+    return this.httpClient.get<Array<ScrobbleError>>(this.baseUrl + 'scrobbling/scrobble-errors');
+  }
 
+  clearScrobbleErrors() {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/clear-errors', {});
+  }
 }

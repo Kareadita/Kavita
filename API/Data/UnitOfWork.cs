@@ -26,7 +26,7 @@ public interface IUnitOfWork
     IMangaFileRepository MangaFileRepository { get; }
     IDeviceRepository DeviceRepository { get; }
     IMediaErrorRepository MediaErrorRepository { get; }
-    IScrobbleEventRepository ScrobbleEventRepository { get; }
+    IScrobbleRepository ScrobbleRepository { get; }
     ISyncHistoryRepository SyncHistoryRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
@@ -66,7 +66,7 @@ public class UnitOfWork : IUnitOfWork
     public IMangaFileRepository MangaFileRepository => new MangaFileRepository(_context);
     public IDeviceRepository DeviceRepository => new DeviceRepository(_context, _mapper);
     public IMediaErrorRepository MediaErrorRepository => new MediaErrorRepository(_context, _mapper);
-    public IScrobbleEventRepository ScrobbleEventRepository => new ScrobbleEventRepository(_context, _mapper);
+    public IScrobbleRepository ScrobbleRepository => new ScrobbleRepository(_context, _mapper);
     public ISyncHistoryRepository SyncHistoryRepository => new SyncHistoryRepository(_context, _mapper);
 
     /// <summary>

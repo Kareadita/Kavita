@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
+using API.DTOs.Scrobbling;
 using API.Extensions;
 using API.Services.Plus;
 using Microsoft.AspNetCore.Mvc;
@@ -49,5 +51,17 @@ public class ScrobblingController : BaseApiController
     public async Task<ActionResult<bool>> HasTokenExpired(ScrobbleProvider provider)
     {
         return Ok(await _scrobblingService.HasTokenExpired(User.GetUserId(), provider));
+    }
+
+    [HttpGet("scrobble-errors")]
+    public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
+    {
+        return Ok(await _unitOfWork.ScrobbleRepository.GetScrobbleErrors());
+    }
+
+    [HttpGet("clear-errors")]
+    public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> ClearScrobbleErrors()
+    {
+        return Ok(await _unitOfWork.ScrobbleRepository.ClearScrobbleErrors());
     }
 }

@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ServerStatistics> ServerStatistics { get; set; } = null!;
     public DbSet<MediaError> MediaError { get; set; } = null!;
     public DbSet<ScrobbleEvent> ScrobbleEvent { get; set; } = null!;
+    public DbSet<ScrobbleError> ScrobbleError { get; set; } = null!;
     public DbSet<SyncHistory> SyncHistory { get; set; } = null!;
 
 

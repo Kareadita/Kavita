@@ -1,5 +1,6 @@
 ﻿using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Entities.Scrobble;
 
 namespace API.Helpers.Builders;
 

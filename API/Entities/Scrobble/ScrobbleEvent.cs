@@ -2,7 +2,7 @@
 using API.DTOs.Scrobbling;
 using API.Entities.Interfaces;
 
-namespace API.Entities;
+namespace API.Entities.Scrobble;
 
 /// <summary>
 /// Represents an event that would need to be sent to the API layer. These rows will be processed and deleted.

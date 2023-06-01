@@ -19,9 +19,10 @@ export class ManageMediaSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
 
   alertCount: number = 0;
+  scrobbleCount: number = 0;
 
   get EncodeFormats() { return EncodeFormats; }
-  
+
   constructor(private settingsService: SettingsService, private toastr: ToastrService, private modalService: NgbModal, ) { }
 
   ngOnInit(): void {

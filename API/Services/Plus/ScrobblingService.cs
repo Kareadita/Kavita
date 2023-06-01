@@ -11,6 +11,7 @@ using API.DTOs.Filtering;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Scrobble;
 using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
@@ -48,7 +49,7 @@ public class ScrobblingService : IScrobblingService
     private const string AniListWeblinkWebsite = "https://anilist.co/";
     private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
 
-    private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min
+    private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
     private static readonly IList<ScrobbleProvider> BookProviders = new List<ScrobbleProvider>()
     {
@@ -166,7 +167,7 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
-        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+        var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
         if (existing) return;
 
@@ -179,7 +180,7 @@ public class ScrobblingService : IScrobblingService
             AppUserId = userId,
             Format = MediaFormat.Manga,
         };
-        _unitOfWork.ScrobbleEventRepository.Attach(evt);
+        _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
     }
 
@@ -197,7 +198,7 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
-        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+        var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             ScrobbleEventType.ChapterRead);
         if (existing) return;
 
@@ -216,7 +217,7 @@ public class ScrobblingService : IScrobblingService
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
                 Format = MediaFormat.Manga,
             };
-            _unitOfWork.ScrobbleEventRepository.Attach(evt);
+            _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
             _logger.LogDebug("Scrobbling Record on {SeriesName} with Userid {UserId} ", series.Name, userId);
         }
@@ -240,7 +241,7 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
-        var existing = await _unitOfWork.ScrobbleEventRepository.Exists(userId, series.Id,
+        var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
         if (existing) return;
 
@@ -253,7 +254,7 @@ public class ScrobblingService : IScrobblingService
             AppUserId = userId,
             Format = MediaFormat.Manga,
         };
-        _unitOfWork.ScrobbleEventRepository.Attach(evt);
+        _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
     }
 
@@ -282,7 +283,7 @@ public class ScrobblingService : IScrobblingService
         return 0;
     }
 
-    private async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license)
+    private async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
@@ -301,6 +302,23 @@ public class ScrobblingService : IScrobblingService
             if (!response.Successful)
             {
                 // Might want to log this under ScrobbleError
+                if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
+                {
+                    _logger.LogError("Hit Too many requests, sleeping to regain requests");
+                    await Task.Delay(TimeSpan.FromMinutes(1));
+                } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
+                {
+                    // Log the Series name and Id in ScrobbleErrors
+                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                    {
+                        Comment = "Unknown Series",
+                        Details = data.SeriesName,
+                        LibraryId = evt.LibraryId,
+                        SeriesId = evt.SeriesId
+                    });
+
+                }
+
                 _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);
                 throw new KavitaException($"Scrobbling failed due to {response.ErrorMessage}: {data.SeriesName}");
             }
@@ -310,6 +328,10 @@ public class ScrobblingService : IScrobblingService
         catch (FlurlHttpException  ex)
         {
             _logger.LogError("Scrobbling to KavitaPlus API failed due to error: {ErrorMessage}", ex.Message);
+            if (ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
+            {
+                throw new KavitaException("Bad payload from Scrobble Provider");
+            }
             throw;
         }
     }
@@ -390,16 +412,16 @@ public class ScrobblingService : IScrobblingService
             .Select(l => l.Id)
             .ToImmutableHashSet();
 
-        var readEvents = (await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ChapterRead))
+        var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .ToList();
-        var addToWantToRead = (await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.AddWantToRead))
+        var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .ToList();
-        var removeWantToRead = (await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead))
+        var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .ToList();
-        var ratingEvents = (await _unitOfWork.ScrobbleEventRepository.GetByEvent(ScrobbleEventType.ScoreUpdated))
+        var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .ToList();
         var decisions = addToWantToRead
@@ -430,83 +452,99 @@ public class ScrobblingService : IScrobblingService
 
         var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count;
 
-        progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, readEvent => new ScrobbleDto()
+        try
         {
-            Format = readEvent.Format,
-            AniListId = readEvent.AniListId,
-            ScrobbleEventType = readEvent.ScrobbleEventType,
-            ChapterNumber = readEvent.ChapterNumber,
-            VolumeNumber = readEvent.VolumeNumber,
-            AniListToken = readEvent.AppUser.AniListAccessToken,
-            SeriesName = readEvent.Series.Name,
-            LocalizedSeriesName = readEvent.Series.LocalizedName,
-            StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
-        });
+            progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, readEvent => new ScrobbleDto()
+            {
+                Format = readEvent.Format,
+                AniListId = readEvent.AniListId,
+                ScrobbleEventType = readEvent.ScrobbleEventType,
+                ChapterNumber = readEvent.ChapterNumber,
+                VolumeNumber = readEvent.VolumeNumber,
+                AniListToken = readEvent.AppUser.AniListAccessToken,
+                SeriesName = readEvent.Series.Name,
+                LocalizedSeriesName = readEvent.Series.LocalizedName,
+                StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
+            });
 
-        progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, ratingEvent => new ScrobbleDto()
+            progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, ratingEvent => new ScrobbleDto()
+            {
+                Format = ratingEvent.Format,
+                AniListId = ratingEvent.AniListId,
+                ScrobbleEventType = ratingEvent.ScrobbleEventType,
+                AniListToken = ratingEvent.AppUser.AniListAccessToken,
+                SeriesName = ratingEvent.Series.Name,
+                LocalizedSeriesName = ratingEvent.Series.LocalizedName,
+                Rating = ratingEvent.Rating
+            });
+
+            progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, decision => new ScrobbleDto()
+            {
+                Format = decision.Format,
+                AniListId = decision.AniListId,
+                ScrobbleEventType = decision.ScrobbleEventType,
+                ChapterNumber = decision.ChapterNumber,
+                VolumeNumber = decision.VolumeNumber,
+                AniListToken = decision.AppUser.AniListAccessToken,
+                SeriesName = decision.Series.Name,
+                LocalizedSeriesName = decision.Series.LocalizedName
+            });
+        }
+        catch (FlurlHttpException)
         {
-            Format = ratingEvent.Format,
-            AniListId = ratingEvent.AniListId,
-            ScrobbleEventType = ratingEvent.ScrobbleEventType,
-            AniListToken = ratingEvent.AppUser.AniListAccessToken,
-            SeriesName = ratingEvent.Series.Name,
-            LocalizedSeriesName = ratingEvent.Series.LocalizedName,
-            Rating = ratingEvent.Rating
-        });
+            _logger.LogError("KavitaPlus API or a Scrobble service may be experiencing an outage. Stopping sending data");
+            return;
+        }
 
-        progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, decision => new ScrobbleDto()
-        {
-            Format = decision.Format,
-            AniListId = decision.AniListId,
-            ScrobbleEventType = decision.ScrobbleEventType,
-            ChapterNumber = decision.ChapterNumber,
-            VolumeNumber = decision.VolumeNumber,
-            AniListToken = decision.AppUser.AniListAccessToken,
-            SeriesName = decision.Series.Name,
-            LocalizedSeriesName = decision.Series.LocalizedName
-        });
 
-        await SaveToDb(progressCounter);
+        await SaveToDb(progressCounter, true);
+        _logger.LogInformation("Scrobbling Events is complete");
     }
 
     private async Task<int> ProcessEvents(IEnumerable<ScrobbleEvent> events, IDictionary<int, int> userRateLimits,
         int usersToScrobble, int progressCounter, int totalProgress, Func<ScrobbleEvent, ScrobbleDto> createEvent)
     {
-        foreach (var readEvent in events)
+        foreach (var evt in events)
         {
             _logger.LogDebug("Processing Reading Events: {Count} / {Total}", progressCounter, totalProgress);
             progressCounter++;
             // Check if this media item can even be processed for this user
-            if (!DoesUserHaveProviderAndValid(readEvent)) continue;
-            var count = await SetAndCheckRateLimit(userRateLimits, readEvent.AppUser);
+            if (!DoesUserHaveProviderAndValid(evt)) continue;
+            var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser);
             if (count == 0)
             {
                 if (usersToScrobble == 1) break;
                 continue;
             }
+
             try
             {
-                var data = createEvent(readEvent);
-                userRateLimits[readEvent.AppUserId] = await PostScrobbleUpdate(data, readEvent.AppUser.License);
-                _unitOfWork.ScrobbleEventRepository.Remove(readEvent);
-
-                await SaveToDb(progressCounter);
+                var data = createEvent(evt);
+                userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, evt.AppUser.License, evt);
+                _unitOfWork.ScrobbleRepository.Remove(evt);
+            }
+            catch (FlurlHttpException)
+            {
+                // If a flurl exception occured, the API is likely down. Kill processing
+                throw;
             }
             catch (Exception)
             {
                 /* Swallow as it's already been handled in PostScrobbleUpdate */
             }
+            await SaveToDb(progressCounter);
             // We can use count to determine how long to sleep based on rate gain. It might be specific to AniList, but we can model others
-            Thread.Sleep(ScrobbleSleepTime + ((count < 50) ? ScrobbleSleepTime : 0));
+            var delay = count > 10 ? TimeSpan.FromMilliseconds(ScrobbleSleepTime) : TimeSpan.FromSeconds(60);
+            await Task.Delay(delay);
         }
 
-        await SaveToDb(progressCounter);
+        await SaveToDb(progressCounter, true);
         return progressCounter;
     }
 
-    private async Task SaveToDb(int progressCounter)
+    private async Task SaveToDb(int progressCounter, bool force = false)
     {
-        if (progressCounter % 5 == 0)
+        if (!force || progressCounter % 5 == 0)
         {
             _logger.LogDebug("Saving Progress");
             await _unitOfWork.CommitAsync();
