@@ -420,6 +420,8 @@ public class ScrobblingService : IScrobblingService
             progressCounter++;
             try
             {
+                // Check if this media item can even be processed for this user
+                if (!DoesUserHaveProviderAndValid(readEvent)) continue;
                 var count = await SetAndCheckRateLimit(userRateLimits, readEvent.AppUser);
                 if (count == 0)
                 {
@@ -459,6 +461,7 @@ public class ScrobblingService : IScrobblingService
             progressCounter++;
             try
             {
+                if (!DoesUserHaveProviderAndValid(ratingEvent)) continue;
                 var count = await SetAndCheckRateLimit(userRateLimits, ratingEvent.AppUser);
                 if (count == 0)
                 {
@@ -495,6 +498,7 @@ public class ScrobblingService : IScrobblingService
             progressCounter++;
             try
             {
+                if (!DoesUserHaveProviderAndValid(decision.Event)) continue;
                 var count = await SetAndCheckRateLimit(userRateLimits, decision.Event.AppUser);
                 if (count == 0)
                 {
@@ -528,6 +532,36 @@ public class ScrobblingService : IScrobblingService
         }
 
         await _unitOfWork.CommitAsync();
+    }
+
+    private static bool DoesUserHaveProviderAndValid(ScrobbleEvent readEvent)
+    {
+        var userProviders = GetUserProviders(readEvent.AppUser);
+        if (readEvent.Series.Library.Type == LibraryType.Manga && MangaProviders.Intersect(userProviders).Any())
+        {
+            return true;
+        }
+
+        if (readEvent.Series.Library.Type == LibraryType.Comic &&
+            ComicProviders.Intersect(userProviders).Any())
+        {
+            return true;
+        }
+
+        if (readEvent.Series.Library.Type == LibraryType.Book &&
+            BookProviders.Intersect(userProviders).Any())
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static IList<ScrobbleProvider> GetUserProviders(AppUser appUser)
+    {
+        var providers = new List<ScrobbleProvider>();
+        if (!string.IsNullOrEmpty(appUser.AniListAccessToken)) providers.Add(ScrobbleProvider.AniList);
+        return providers;
     }
 
     private static int? ExtractId(string webLinks, string website)

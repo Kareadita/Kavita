@@ -41,6 +41,7 @@ public class ScrobbleEventRepository : IScrobbleEventRepository
     {
         return await _context.ScrobbleEvent
             .Include(s => s.Series)
+            .ThenInclude(s => s.Library)
             .Include(s => s.AppUser)
             .Where(s => s.ScrobbleEventType == type)
             .AsSplitQuery()
