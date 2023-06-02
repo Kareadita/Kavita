@@ -33,9 +33,10 @@ export class UserLoginComponent implements OnInit {
    * Used for first time the page loads to ensure no flashing
    */
   isLoaded: boolean = false;
+  isSubmitting = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal, 
+    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal,
     private readonly cdRef: ChangeDetectorRef) {
       this.navService.showNavBar();
       this.navService.hideSideNav();
@@ -53,7 +54,7 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl('/libraries');
       }
     });
-    
+
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
@@ -79,6 +80,8 @@ export class UserLoginComponent implements OnInit {
 
   login() {
     const model = this.loginForm.getRawValue();
+    this.isSubmitting = true;
+    this.cdRef.markForCheck();
     this.accountService.login(model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
@@ -92,6 +95,8 @@ export class UserLoginComponent implements OnInit {
       } else {
         this.router.navigateByUrl('/libraries');
       }
+      this.isSubmitting = false;
+      this.cdRef.markForCheck();
     }, err => {
       if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
         const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
@@ -101,6 +106,8 @@ export class UserLoginComponent implements OnInit {
       } else {
         this.toastr.error(err.error);
       }
+      this.isSubmitting = false;
+      this.cdRef.markForCheck();
     });
   }
 }
