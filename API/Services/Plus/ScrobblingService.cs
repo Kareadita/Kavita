@@ -162,7 +162,7 @@ public class ScrobblingService : IScrobblingService
             throw new KavitaException("AniList Credentials have expired or not set");
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
@@ -178,10 +178,21 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
-            Format = MediaFormat.Manga,
+            Format = GetFormat(series.Library.Type),
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
+    }
+
+    private static MediaFormat GetFormat(LibraryType libraryType)
+    {
+        return libraryType switch
+        {
+            LibraryType.Manga => MediaFormat.Manga,
+            LibraryType.Comic => MediaFormat.Comic,
+            LibraryType.Book => MediaFormat.LightNovel,
+            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)
+        };
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -193,7 +204,7 @@ public class ScrobblingService : IScrobblingService
             throw new KavitaException("AniList Credentials have expired or not set");
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
@@ -215,7 +226,7 @@ public class ScrobblingService : IScrobblingService
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
                 ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
-                Format = MediaFormat.Manga,
+                Format = GetFormat(series.Library.Type),
             };
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
@@ -236,7 +247,7 @@ public class ScrobblingService : IScrobblingService
             throw new KavitaException("AniList Credentials have expired or not set");
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
@@ -252,7 +263,7 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
-            Format = MediaFormat.Manga,
+            Format = GetFormat(series.Library.Type),
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();

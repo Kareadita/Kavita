@@ -6285,6 +6285,18 @@
         }
       }
     },
+    "/api/Scrobbling/clear-errors": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Search/series-for-mangafile": {
       "get": {
         "tags": [
