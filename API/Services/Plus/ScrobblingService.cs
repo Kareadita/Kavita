@@ -477,7 +477,7 @@ public class ScrobblingService : IScrobblingService
                 AniListToken = readEvent.AppUser.AniListAccessToken,
                 SeriesName = readEvent.Series.Name,
                 LocalizedSeriesName = readEvent.Series.LocalizedName,
-                StartedReadingDateUtc = readEvent.CreatedUtc // I might want to derive this at the series level
+                StartedReadingDateUtc = readEvent.CreatedUtc
             });
 
             progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, ratingEvent => new ScrobbleDto()
