@@ -9,6 +9,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
