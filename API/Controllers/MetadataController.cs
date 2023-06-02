@@ -35,7 +35,7 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
             return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, userId));
@@ -56,7 +56,7 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
             return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, userId));
@@ -74,7 +74,7 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
             return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, userId));
@@ -92,7 +92,7 @@ public class MetadataController : BaseApiController
     [HttpGet("age-ratings")]
     public async Task<ActionResult<IList<AgeRatingDto>>> GetAllAgeRatings(string? libraryIds)
     {
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
             return Ok(await _unitOfWork.LibraryRepository.GetAllAgeRatingsDtosForLibrariesAsync(ids));
@@ -115,7 +115,7 @@ public class MetadataController : BaseApiController
     [HttpGet("publication-status")]
     public ActionResult<IList<AgeRatingDto>> GetAllPublicationStatus(string? libraryIds)
     {
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
             return Ok(_unitOfWork.LibraryRepository.GetAllPublicationStatusesDtosForLibrariesAsync(ids));
@@ -138,7 +138,7 @@ public class MetadataController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
-        var ids = libraryIds?.Split(",").Select(int.Parse).ToList();
+        var ids = libraryIds?.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids is {Count: > 0})
         {
             return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));

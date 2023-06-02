@@ -195,7 +195,7 @@ public class SettingsController : BaseApiController
             {
                 if (OsInfo.IsDocker) continue;
                 // Validate IP addresses
-                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
                         return BadRequest($"IP Address '{ipAddress}' is invalid");
