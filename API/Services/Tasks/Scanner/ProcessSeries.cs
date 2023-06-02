@@ -323,7 +323,7 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
                 var normalizedName = Parser.Parser.Normalize(collection);
                 if (!_collectionTags.TryGetValue(normalizedName, out var tag))
