@@ -335,9 +335,8 @@ public class LibraryController : BaseApiController
     [HttpGet("name-exists")]
     public async Task<ActionResult<bool>> IsLibraryNameValid(string name)
     {
-        var trimmed = name.Trim();
-        if (string.IsNullOrEmpty(trimmed)) return Ok(true);
-        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(trimmed));
+        if (string.IsNullOrWhiteSpace(name)) return Ok(true);
+        return Ok(await _unitOfWork.LibraryRepository.LibraryExists(name.Trim()));
     }
 
     /// <summary>
