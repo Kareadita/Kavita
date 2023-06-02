@@ -180,7 +180,7 @@ public class Program
                     }
                     else
                     {
-                        foreach (var ipAddress in ipAddresses.Split(','))
+                        foreach (var ipAddress in ipAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                         {
                             try
                             {

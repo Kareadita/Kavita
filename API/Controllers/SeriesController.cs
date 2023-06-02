@@ -65,16 +65,9 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        try
-        {
-            return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId));
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "There was an issue fetching {SeriesId}", seriesId);
-            throw new KavitaException("This series does not exist");
-        }
-
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        if (series == null) return NoContent();
+        return Ok(series);
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -115,13 +108,16 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId));
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId);
+        if (vol == null) return NoContent();
+        return Ok(vol);
     }
 
     [HttpGet("chapter")]
     public async Task<ActionResult<ChapterDto>> GetChapter(int chapterId)
     {
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
+        if (chapter == null) return NoContent();
         return Ok(await _unitOfWork.ChapterRepository.AddChapterModifiers(User.GetUserId(), chapter));
     }
 

@@ -66,7 +66,7 @@ public class ReaderController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId);
-        if (chapter == null) return BadRequest("There was an issue finding pdf file for reading");
+        if (chapter == null) return NoContent();
 
         // Validate the user has access to the PDF
         var series = await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapter.Id,
@@ -105,7 +105,7 @@ public class ReaderController : BaseApiController
         if (page < 0) page = 0;
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+        if (chapter == null) return NoContent();
 
         try
         {
@@ -129,7 +129,7 @@ public class ReaderController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
-        if (chapter == null) return BadRequest("There was an issue extracting images from chapter");
+        if (chapter == null) return NoContent();
         var images = _cacheService.GetCachedPages(chapterId);
 
         var path = await _readerService.GetThumbnail(chapter, pageNum, images);
@@ -152,7 +152,7 @@ public class ReaderController : BaseApiController
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId == 0) return BadRequest();
+        if (userId == 0) return Unauthorized();
 
         var totalPages = await _cacheService.CacheBookmarkForSeries(userId, seriesId);
         if (page > totalPages)
@@ -189,7 +189,7 @@ public class ReaderController : BaseApiController
     {
         if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return BadRequest("Could not find Chapter");
+        if (chapter == null) return NoContent();
         return Ok(_cacheService.GetCachedFileDimensions(_cacheService.GetCachePath(chapterId)));
     }
 
@@ -207,7 +207,7 @@ public class ReaderController : BaseApiController
     {
         if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return BadRequest("Could not find Chapter");
+        if (chapter == null) return NoContent();
 
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest("Please perform a scan on this series or library and try again");

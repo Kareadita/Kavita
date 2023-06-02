@@ -513,23 +513,24 @@ public class ReadingListService : IReadingListService
         var data = new List<Tuple<string, string>>();
         if (string.IsNullOrEmpty(storyArc)) return data;
 
-        var arcs = storyArc.Split(",");
-        var arcNumbers = storyArcNumbers.Split(",");
+        var arcs = storyArc.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var arcNumbers = storyArcNumbers.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
         {
-            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
+            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
         }
 
-        var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
+        var maxPairs = Math.Max(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
-            // When there is a mismatch on arcs and arc numbers, then we should default to a high number
-            if (string.IsNullOrEmpty(arcNumbers[i]) && !string.IsNullOrEmpty(arcs[i]))
+            var arcNumber = int.MaxValue.ToString();
+            if (arcNumbers.Length > i)
             {
-                arcNumbers[i] = int.MaxValue.ToString();
+                arcNumber = arcNumbers[i];
             }
-            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
-            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
+
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, out _)) continue;
+            data.Add(new Tuple<string, string>(arcs[i], arcNumber));
         }
 
         return data;
