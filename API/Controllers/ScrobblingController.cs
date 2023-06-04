@@ -5,6 +5,7 @@ using API.DTOs.Account;
 using API.DTOs.Scrobbling;
 using API.Extensions;
 using API.Services.Plus;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -40,9 +41,15 @@ public class ScrobblingController : BaseApiController
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user == null) return Unauthorized();
 
+        var isNewToken = string.IsNullOrEmpty(user.AniListAccessToken);
         user.AniListAccessToken = dto.Token;
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+
+        if (isNewToken)
+        {
+            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(user.Id));
+        }
 
         return Ok();
     }

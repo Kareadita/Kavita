@@ -4,6 +4,7 @@ using API.Data;
 using API.DTOs.Account;
 using API.Extensions;
 using API.Services.Plus;
+using API.SignalR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -14,13 +15,15 @@ public class LicenseController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LicenseController> _logger;
     private readonly ILicenseService _licenseService;
+    private readonly IEventHub _eventHub;
 
     public LicenseController(IUnitOfWork unitOfWork, ILogger<LicenseController> logger,
-        ILicenseService licenseService)
+        ILicenseService licenseService, IEventHub eventHub)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _licenseService = licenseService;
+        _eventHub = eventHub;
     }
 
     /// <summary>
@@ -65,6 +68,10 @@ public class LicenseController : BaseApiController
         {
             await _licenseService.AddLicenseToUser(user, dto.License);
         }
+
+        // Send an event to the user so their account updates
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
+            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
 
         return Ok(await _licenseService.HasActiveLicense(user.Id, true));
     }

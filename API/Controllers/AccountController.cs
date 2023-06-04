@@ -231,7 +231,27 @@ public class AccountController : BaseApiController
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+        dto.HasLicense = !string.IsNullOrEmpty(user.License);
 
+        return Ok(dto);
+    }
+
+    /// <summary>
+    /// Returns an up-to-date user account
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("refresh-account")]
+    public async Task<ActionResult<UserDto>> RefreshAccount()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        if (user == null) return Unauthorized();
+
+        var dto = _mapper.Map<UserDto>(user);
+        dto.Token = await _tokenService.CreateToken(user);
+        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
+            .Value;
+        dto.HasLicense = !string.IsNullOrEmpty(user.License);
         return Ok(dto);
     }
 

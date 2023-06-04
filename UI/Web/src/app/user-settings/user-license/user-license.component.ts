@@ -26,6 +26,8 @@ export class UserLicenseComponent implements OnInit {
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.hasLicense = user.hasLicense;
+        console.log('has license: ', user);
+        this.cdRef.markForCheck();
       }
     });
   }
@@ -40,13 +42,14 @@ export class UserLicenseComponent implements OnInit {
     this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value).subscribe(isValid => {
       this.hasValidLicense = isValid;
       if (!this.hasValidLicense) {
-        this.toastr.info("License Key saved, but it is not valid. Please ensure you inputted it correctly or it's an active subscription");
+        this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription");
       } else {
-        this.toastr.success('KavitaPlus unlocked');
+        this.toastr.success('KavitaPlus unlocked. Please reauthenticate to get full benefits.');
       }
       this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
       this.resetForm();
       this.isViewMode = true;
+      this.cdRef.markForCheck();
     }, err => {
 
     });
@@ -56,4 +59,12 @@ export class UserLicenseComponent implements OnInit {
     this.isViewMode = !this.isViewMode;
     this.resetForm();
   }
+
+  validateLicense() {
+    this.accountService.hasValidLicense().subscribe(res => {
+      this.hasValidLicense = res;
+      this.cdRef.markForCheck();
+    });
+  }
+
 }

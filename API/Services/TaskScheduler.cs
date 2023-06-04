@@ -34,7 +34,6 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     Task CovertAllCoversToEncoding();
     Task CleanupDbEntries();
-    void TurnOnScrobbling();
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -143,11 +142,8 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateAllLicenses(), LicenseService.Cron, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _licenseService.ValidateAllLicenses());
 
-        // KavitaPlus Scrobbling
-        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), Cron.Hourly, RecurringJobOptions);
-
-
-
+        // KavitaPlus Scrobbling (every 4 hours)
+        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
     }
 
     #region StatsTasks
@@ -312,9 +308,9 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
     }
 
-    public void TurnOnScrobbling()
+    public void TurnOnScrobbling(int userId = 0)
     {
-        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory());
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(userId));
     }
 
     public void CleanupChapters(int[] chapterIds)
@@ -378,11 +374,6 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogInformation("Enqueuing analyze files scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
-    }
-
-    public void BackupDatabase()
-    {
-        BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
     }
 
     /// <summary>

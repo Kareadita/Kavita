@@ -27,10 +27,6 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/clear-cache', {});
   }
 
-  syncScrobble() {
-    return this.httpClient.post(this.baseUrl + 'server/sync-scrobble', {});
-  }
-
   cleanupWantToRead() {
     return this.httpClient.post(this.baseUrl + 'server/cleanup-want-to-read', {});
   }

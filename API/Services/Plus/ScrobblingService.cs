@@ -35,7 +35,7 @@ public interface IScrobblingService
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
     Task ProcessUpdatesSinceLastSync();
-    Task CreateEventsFromExistingHistory();
+    Task CreateEventsFromExistingHistory(int userId = 0);
 }
 
 public class ScrobblingService : IScrobblingService
@@ -350,23 +350,17 @@ public class ScrobblingService : IScrobblingService
     }
 
     /// <summary>
-    /// This will back fill events from existing progress history, ratings, and want to read
+    /// This will back fill events from existing progress history, ratings, and want to read for users that have a valid license
     /// </summary>
-    public async Task CreateEventsFromExistingHistory()
+    /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
+    public async Task CreateEventsFromExistingHistory(int userId = 0)
     {
-        // TODO: We need a table to store when the last time this ran, so that we don't trigger twice and all of this is already done
-        var lastSync = await _unitOfWork.SyncHistoryRepository.GetSyncTime(SyncKey.Scrobble);
-        if (lastSync >= DateTime.UtcNow)
-        {
-            _logger.LogDebug("Nothing to sync");
-            return;
-        }
-
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
-
-        foreach (var user in (await _unitOfWork.UserRepository.GetAllUsersAsync()))
+        var users = (await _unitOfWork.UserRepository.GetAllUsersAsync())
+            .Where(l => userId == 0 || userId == l.Id);
+        foreach (var user in users)
         {
             if (!(await _licenseService.HasActiveLicense(user.Id))) continue;
 
@@ -404,7 +398,7 @@ public class ScrobblingService : IScrobblingService
         }
 
         // Update SyncHistory saying we've processed all rows
-        await _unitOfWork.SyncHistoryRepository.Update(SyncKey.Scrobble);
+        //await _unitOfWork.SyncHistoryRepository.Update(SyncKey.Scrobble); // TODO: Remove this migration and table
 
     }
 

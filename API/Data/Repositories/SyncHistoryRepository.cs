@@ -37,7 +37,6 @@ public class SyncHistoryRepository : ISyncHistoryRepository
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public async Task Update(SyncKey key)
     {
         var s = await _context.SyncHistory.Where(s => s.Key == key).FirstOrDefaultAsync();

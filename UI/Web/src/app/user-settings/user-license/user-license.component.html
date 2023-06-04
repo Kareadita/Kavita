@@ -2,12 +2,15 @@
   <div class="card-body">
     <div class="card-title">
       <div class="container-fluid row mb-2">
-        <div class="col-10 col-sm-11"><h4 id="license-key-header">KavitaPlus License</h4></div>
-        <div class="col-1 text-end">
-          <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+        <div class="col-10 col-sm-10">
+            <h4 id="license-key-header">KavitaPlus License</h4>
         </div>
+      <div class="col-2 text-end">
+          <button class="btn btn-secondary btn-sm me-1" (click)="validateLicense()">Check</button>
+          <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
       </div>
     </div>
+</div>
 
     <ng-container *ngIf="isViewMode">
       <div class="container-fluid row">

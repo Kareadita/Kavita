@@ -60,8 +60,9 @@ export class AccountService {
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
         map(evt => evt.payload as UserUpdateEvent),
+        tap(u => console.log('user update: ', u)),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
-        switchMap(() => this.refreshToken()))
+        switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
     }
 
@@ -307,6 +308,20 @@ export class AccountService {
   getAniListToken() {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
   }
+
+  private refreshAccount() {
+    console.log('Refreshing account');
+    if (this.currentUser === null || this.currentUser === undefined) return of();
+    return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
+      if (user) {
+        this.currentUser = {...user};
+      }
+
+      this.setCurrentUser(this.currentUser);
+      return user;
+    }));
+  }
+
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();

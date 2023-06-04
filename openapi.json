@@ -160,6 +160,36 @@
         }
       }
     },
+    "/api/Account/refresh-account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns an up-to-date user account",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Account/refresh-token": {
       "post": {
         "tags": [
@@ -7744,18 +7774,6 @@
         }
       }
     },
-    "/api/Server/sync-scrobble": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Server/logs": {
       "get": {
         "tags": [
@@ -15113,10 +15131,6 @@
         "type": "object",
         "properties": {
           "license": {
-            "type": "string",
-            "nullable": true
-          },
-          "installId": {
             "type": "string",
             "nullable": true
           }

@@ -83,7 +83,7 @@ public class LicenseService : ILicenseService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new UpdateLicenseDto()
+                .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
                     InstallId = serverSetting.InstallId
