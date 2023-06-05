@@ -345,7 +345,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(result);
 
-        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))!
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(3, ratings.First().Rating);
@@ -782,7 +782,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         var series = CreateSeriesMock();
 
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, true);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.Same("1", firstChapter.Range);
     }
 
@@ -791,7 +791,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         var series = CreateSeriesMock();
 
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.Same("1", firstChapter.Range);
     }
 
@@ -810,8 +810,33 @@ public class SeriesServiceTests : AbstractDbTest
             new ChapterBuilder("1.2").WithFiles(files).WithPages(1).Build(),
         };
 
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, false);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
         Assert.Same("1.1", firstChapter.Range);
+    }
+
+    [Fact]
+    public void GetFirstChapterForMetadata_NonBook_ShouldReturnChapter1_WhenFirstVolumeIs3()
+    {
+        var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("1").WithPages(1).WithFile(file).Build())
+                .WithChapter(new ChapterBuilder("2").WithPages(1).WithFile(file).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("21").WithPages(1).WithFile(file).Build())
+                .WithChapter(new ChapterBuilder("22").WithPages(1).WithFile(file).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("3")
+                .WithChapter(new ChapterBuilder("31").WithPages(1).WithFile(file).Build())
+                .WithChapter(new ChapterBuilder("32").WithPages(1).WithFile(file).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
+
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
+        Assert.Same("1", firstChapter.Range);
     }
 
     #endregion

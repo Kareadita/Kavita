@@ -157,19 +157,19 @@ public class ReadingListService : IReadingListService
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
 
-        if (NumberHelper.IsValidMonth(dto.StartingMonth))
+        if (NumberHelper.IsValidMonth(dto.StartingMonth) || dto.StartingMonth == 0)
         {
             readingList.StartingMonth = dto.StartingMonth;
         }
-        if (NumberHelper.IsValidYear(dto.StartingYear))
+        if (NumberHelper.IsValidYear(dto.StartingYear) || dto.StartingYear == 0)
         {
             readingList.StartingYear = dto.StartingYear;
         }
-        if (NumberHelper.IsValidMonth(dto.EndingMonth))
+        if (NumberHelper.IsValidMonth(dto.EndingMonth) || dto.EndingMonth == 0)
         {
             readingList.EndingMonth = dto.EndingMonth;
         }
-        if (NumberHelper.IsValidYear(dto.EndingYear))
+        if (NumberHelper.IsValidYear(dto.EndingYear) || dto.EndingYear == 0)
         {
             readingList.EndingYear = dto.EndingYear;
         }
