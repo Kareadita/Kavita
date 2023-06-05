@@ -88,7 +88,7 @@
           <ng-container *ngIf="readingList.startingYear > 0">{{readingList.startingYear}}</ng-container>
           —
           <ng-container *ngIf="readingList.endingYear > 0">
-            <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth}}</ng-container>
+            <ng-container *ngIf="readingList.endingMonth > 0">{{readingList.endingMonth | date:'MMM'}}</ng-container>
             <ng-container *ngIf="readingList.endingMonth > 0 && readingList.endingYear > 0">, </ng-container>
             <ng-container *ngIf="readingList.endingYear > 0">{{readingList.endingYear}}</ng-container>
           </ng-container>
