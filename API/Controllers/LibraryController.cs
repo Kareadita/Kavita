@@ -50,22 +50,28 @@ public class LibraryController : BaseApiController
     /// <summary>
     /// Creates a new Library. Upon library creation, adds new library to all Admin accounts.
     /// </summary>
-    /// <param name="createLibraryDto"></param>
+    /// <param name="dto"></param>
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("create")]
-    public async Task<ActionResult> AddLibrary(CreateLibraryDto createLibraryDto)
+    public async Task<ActionResult> AddLibrary(UpdateLibraryDto dto)
     {
-        if (await _unitOfWork.LibraryRepository.LibraryExists(createLibraryDto.Name))
+        if (await _unitOfWork.LibraryRepository.LibraryExists(dto.Name))
         {
             return BadRequest("Library name already exists. Please choose a unique name to the server.");
         }
 
         var library = new Library
         {
-            Name = createLibraryDto.Name,
-            Type = createLibraryDto.Type,
-            Folders = createLibraryDto.Folders.Select(x => new FolderPath {Path = x}).ToList()
+            Name = dto.Name,
+            Type = dto.Type,
+            Folders = dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList(),
+            FolderWatching = dto.FolderWatching,
+            IncludeInDashboard = dto.IncludeInDashboard,
+            IncludeInRecommended = dto.IncludeInRecommended,
+            IncludeInSearch = dto.IncludeInSearch,
+            ManageCollections = dto.ManageCollections,
+            ManageReadingLists = dto.ManageReadingLists,
         };
 
         _unitOfWork.LibraryRepository.Add(library);
@@ -359,7 +365,7 @@ public class LibraryController : BaseApiController
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
         library.Name = newName;
-        library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).ToList();
+        library.Folders = dto.Folders.Select(s => new FolderPath() {Path = s}).Distinct().ToList();
 
         var typeUpdate = library.Type != dto.Type;
         var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
