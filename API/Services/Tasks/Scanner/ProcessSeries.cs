@@ -266,8 +266,7 @@ public class ProcessSeries : IProcessSeries
     public void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
-        var isBook = library.Type == LibraryType.Book;
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;

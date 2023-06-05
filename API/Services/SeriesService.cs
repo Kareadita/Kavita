@@ -48,14 +48,25 @@ public class SeriesService : ISeriesService
     /// <summary>
     /// Returns the first chapter for a series to extract metadata from (ie Summary, etc)
     /// </summary>
-    /// <param name="series"></param>
-    /// <param name="isBookLibrary"></param>
+    /// <param name="series">The full series with all volumes and chapters on it</param>
     /// <returns></returns>
-    public static Chapter? GetFirstChapterForMetadata(Series series, bool isBookLibrary)
+    public static Chapter? GetFirstChapterForMetadata(Series series)
     {
-        return series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default)
+        var sortedVolumes = series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default);
+        var minVolumeNumber = sortedVolumes
+            .Where(v => v.Number != 0)
+            .MinBy(v => v.Number);
+
+        var minChapter =  series.Volumes
             .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default))
             .FirstOrDefault();
+
+        if (minVolumeNumber != null && minChapter != null && float.Parse(minChapter.Number) > minVolumeNumber.Number)
+        {
+            return minVolumeNumber.Chapters.MinBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
+        }
+
+        return minChapter;
     }
 
     public async Task<bool> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)

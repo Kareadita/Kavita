@@ -49,7 +49,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
-    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService, 
+    public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef) {}
 
@@ -65,7 +65,7 @@ export class ReadingListDetailComponent implements OnInit {
     this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     forkJoin([
-      this.libraryService.getLibraries(), 
+      this.libraryService.getLibraries(),
       this.readingListService.getReadingList(this.listId)
     ]).subscribe(results => {
       const libraries = results[0];
@@ -90,7 +90,7 @@ export class ReadingListDetailComponent implements OnInit {
         if (user) {
           this.isAdmin = this.accountService.hasAdminRole(user);
           this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
-          
+
           this.actions = this.actionFactoryService.getReadingListActions(this.handleReadingListActionCallback.bind(this))
             .filter(action => this.readingListService.actionListFilter(action, readingList, this.isAdmin));
           this.cdRef.markForCheck();
@@ -123,18 +123,20 @@ export class ReadingListDetailComponent implements OnInit {
     this.router.navigate(this.readerService.getNavigationArray(item.libraryId, item.seriesId, item.chapterId, item.seriesFormat), {queryParams: params});
   }
 
-  handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
+  async handleReadingListActionCallback(action: ActionItem<ReadingList>, readingList: ReadingList) {
     switch(action.action) {
       case Action.Delete:
-        this.deleteList(readingList);
+        await this.deleteList(readingList);
         break;
       case Action.Edit:
         this.actionService.editReadingList(readingList, (readingList: ReadingList) => {
           // Reload information around list
-          this.readingList = readingList;
-          this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
-          this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
-          this.cdRef.markForCheck();
+          this.readingListService.getReadingList(this.listId).subscribe(rl => {
+            this.readingList = rl;
+            this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
+            this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
+            this.cdRef.markForCheck();
+          })
         });
         break;
     }
@@ -181,7 +183,7 @@ export class ReadingListDetailComponent implements OnInit {
     if (!this.readingList) return;
     const firstItem = this.items[0];
     this.router.navigate(
-      this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat), 
+      this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat),
       {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
   }
 
@@ -198,7 +200,7 @@ export class ReadingListDetailComponent implements OnInit {
     }
 
     this.router.navigate(
-      this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat), 
+      this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
       {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
   }
 
