@@ -2129,17 +2129,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             }
           }
@@ -11187,31 +11187,6 @@
           "emailAddress": {
             "minLength": 1,
             "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CreateLibraryDto": {
-        "required": [
-          "folders",
-          "name",
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/LibraryType"
-          },
-          "folders": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "additionalProperties": false
