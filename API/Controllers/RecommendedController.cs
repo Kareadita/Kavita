@@ -16,6 +16,17 @@ public class RecommendedController : BaseApiController
         _unitOfWork = unitOfWork;
     }
 
+    /// <summary>
+    /// For KavitaPlus users, this will return recommendations on the server.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("recommendations")]
+    public ActionResult GetRecommendations(int seriesId)
+    {
+        return Ok();
+    }
+
 
     /// <summary>
     /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.

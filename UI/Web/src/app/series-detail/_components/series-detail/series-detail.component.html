@@ -324,6 +324,19 @@
           </virtual-scroller>
         </ng-template>
       </li>
+
+      <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations && user?.hasLicense">
+          <a ngbNavLink>Recommendations</a>
+          <ng-template ngbNavContent>
+              <virtual-scroller #scroll [items]="recommendations" [parentScroll]="scrollingBlock">
+                  <div class="card-container row g-0" #container>
+                      <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentiy">
+                          <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId"></app-series-card>
+                      </ng-container>
+                  </div>
+              </virtual-scroller>
+          </ng-template>
+      </li>
     </ul>
     <div [ngbNavOutlet]="nav"></div>
   </ng-container>

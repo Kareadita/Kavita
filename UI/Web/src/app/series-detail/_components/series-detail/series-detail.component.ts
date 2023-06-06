@@ -67,7 +67,8 @@ enum TabID {
   Specials = 1,
   Storyline = 2,
   Volumes = 3,
-  Chapters = 4
+  Chapters = 4,
+  Recommendations = 5
 }
 
 interface StoryLineItem {
@@ -115,8 +116,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = TabID.Storyline;
-  hasNonSpecialVolumeChapters = false;
-  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -154,9 +153,18 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   hasRelations: boolean = false;
   /**
+   * Are there recommendations
+   */
+  hasRecommendations: boolean = false;
+
+  /**
    * Related Series. Sorted by backend
    */
   relations: Array<RelatedSeris> = [];
+  /**
+   * Recommended Series
+   */
+  recommendations: Array<Series> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
     {value: 'Storyline', text: 'Storyline'},
@@ -281,11 +289,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService, private messageHub: MessageHubService,
-              private readingListService: ReadingListService, public navService: NavService,
+              private messageHub: MessageHubService, private readingListService: ReadingListService,
+              public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
               private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService,
-              private deviceSerivce: DeviceService
+              private deviceService: DeviceService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -463,7 +471,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.SendTo):
         {
           const device = (action._extra!.data as Device);
-          this.deviceSerivce.sendTo([chapter.id], device.id).subscribe(() => {
+          this.deviceService.sendTo([chapter.id], device.id).subscribe(() => {
             this.toastr.success('File emailed to ' + device.name);
           });
           break;
@@ -517,6 +525,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
+        this.recommendations = recommendations;
+        this.changeDetectionRef.markForCheck();
+      });
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relations = [

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.2.28"
+    "version": "0.7.2.31"
   },
   "servers": [
     {
@@ -5848,6 +5848,30 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Recommended/recommendations": {
+      "get": {
+        "tags": [
+          "Recommended"
+        ],
+        "summary": "For KavitaPlus users, this will return recommendations on the server.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
