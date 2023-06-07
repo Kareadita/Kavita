@@ -27,7 +27,7 @@
                                             <i class="fa fa-arrow-down" title="Descending"></i>
                                         </ng-template>
                                     </button>
-    
+
                                     <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="sortingOption">
                                         <option *ngFor="let opt of sortingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
@@ -40,10 +40,10 @@
                                     <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
                                         <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.Cards" class="btn-check" id="layout-mode-default" autocomplete="off">
                                         <label class="btn btn-outline-primary" for="layout-mode-default">Card</label>
-                                    
+
                                         <input type="radio" formControlName="renderMode" [value]="PageLayoutMode.List" class="btn-check" id="layout-mode-col1" autocomplete="off">
                                         <label class="btn btn-outline-primary" for="layout-mode-col1">List</label>
-                                    
+
                                     </div>
                                 </div>
                             </div>
@@ -52,7 +52,7 @@
                 </div>
             </ng-template>
 
-        
+
     </app-side-nav-companion-bar>
 </div>
 
@@ -63,7 +63,7 @@
                 <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed" fillStyle="filled">{{unreadCount}}</app-tag-badge>
             </div>
             <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
-            <div class="progress-banner" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial"> 
+            <div class="progress-banner" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
                 <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
             </div>
             <div class="under-image" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
@@ -95,7 +95,7 @@
                       </div>
 
                 </div>
-                
+
                 <div class="col-auto ms-2">
                     <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
                         <span>
@@ -128,7 +128,7 @@
                     </button>
                 </div>
                 <div class="col-auto ms-2">
-                    <ngb-rating class="rating-star" [(rate)]="series.userRating" (rateChange)="updateRating($event)" (click)="promptToReview()" [resettable]="false">
+                    <ngb-rating class="rating-star" [(rate)]="series.userRating" (rateChange)="updateRating($event)" [resettable]="false">
                         <ng-template let-fill="fill" let-index="index">
                             <span class="star" [class.filled]="(index < series.userRating) && series.userRating > 0">&#9733;</span>
                           </ng-template>
@@ -159,14 +159,15 @@
                                     <ng-container *ngIf="!item.isChapter; else chapterCardItem">
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="item.volume.number !== 0" [entity]="item.volume" [title]="item.volume.name" (click)="openVolume(item.volume)"
                                         [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
-                                        [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions" 
-                                        (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)" 
+                                        [read]="item.volume.pagesRead" [total]="item.volume.pages" [actions]="volumeActions"
+                                        [count]="item.volume.chapters[0].files.length"
+                                        (selection)="bulkSelectionService.handleCardSelection('volume', scroll.viewPortInfo.startIndexWithBuffer + idx, volumes.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('volume', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
                                     </ng-container>
                                     <ng-template #chapterCardItem>
                                         <app-card-item class="col-auto mt-2 mb-2" *ngIf="!item.chapter.isSpecial" [entity]="item.chapter" [title]="item.chapter.title" (click)="openChapter(item.chapter)"
                                         [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
-                                        [read]="item.chapter.pagesRead" [total]="item.chapter.pages" [actions]="chapterActions" 
+                                        [read]="item.chapter.pagesRead" [total]="item.chapter.pages" [actions]="chapterActions"
                                         [count]="item.chapter.files.length"
                                         (selection)="bulkSelectionService.handleCardSelection('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx, storyChapters.length, $event)"
                                         [selected]="bulkSelectionService.isCardSelected('chapter', scroll.viewPortInfo.startIndexWithBuffer + idx)" [allowSelection]="true"></app-card-item>
@@ -223,7 +224,7 @@
                         <ng-template #volumeListLayout>
                                 <ng-container *ngFor="let volume of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
                                     <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
-                                    [seriesName]="series.name" [entity]="volume" 
+                                    [seriesName]="series.name" [entity]="volume"
                                     [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                     [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)"
                                     [blur]="user?.preferences?.blurUnreadSummaries || false">
@@ -310,7 +311,7 @@
                 </virtual-scroller>
               </ng-template>
             </li>
-            
+
             <li [ngbNavItem]="TabID.Related" *ngIf="hasRelations">
                 <a ngbNavLink>Related</a>
                 <ng-template ngbNavContent>

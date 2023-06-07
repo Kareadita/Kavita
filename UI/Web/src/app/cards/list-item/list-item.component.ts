@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { map, Observable, Subject, takeUntil } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
@@ -9,6 +19,7 @@ import { LibraryType } from 'src/app/_models/library';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-list-item',
@@ -16,12 +27,12 @@ import { Action, ActionItem } from 'src/app/_services/action-factory.service';
   styleUrls: ['./list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ListItemComponent implements OnInit, OnDestroy {
+export class ListItemComponent implements OnInit {
 
   /**
    * Volume or Chapter to render
    */
-  @Input() entity!: Volume | Chapter;
+  @Input({required: true}) entity!: Volume | Chapter;
   /**
    * Image to show
    */
@@ -59,7 +70,7 @@ export class ListItemComponent implements OnInit, OnDestroy {
   */
   @Input() includeVolume: boolean = false;
   /**
-   * Show's the title if avaible on entity
+   * Show's the title if available on entity
    */
   @Input() showTitle: boolean = true;
   /**
@@ -68,16 +79,15 @@ export class ListItemComponent implements OnInit, OnDestroy {
   @Input() blur: boolean = false;
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
+  private readonly destroyRef = inject(DestroyRef);
 
   actionInProgress: boolean = false;
   summary: string = '';
   isChapter: boolean = false;
-  
+
 
   download$: Observable<DownloadEvent | null> | null = null;
   downloadInProgress: boolean = false;
-
-  private readonly onDestroy = new Subject<void>();
 
   get Title() {
     if (this.isChapter) return (this.entity as Chapter).titleName;
@@ -85,7 +95,7 @@ export class ListItemComponent implements OnInit, OnDestroy {
   }
 
 
-  constructor(private utilityService: UtilityService, private downloadService: DownloadService, 
+  constructor(private utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
@@ -99,21 +109,16 @@ export class ListItemComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
 
 
-    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntil(this.onDestroy), map((events) => {
+    this.download$ = this.downloadService.activeDownloads$.pipe(takeUntilDestroyed(this.destroyRef), map((events) => {
       if(this.utilityService.isVolume(this.entity)) return events.find(e => e.entityType === 'volume' && e.subTitle === this.downloadService.downloadSubtitle('volume', (this.entity as Volume))) || null;
       if(this.utilityService.isChapter(this.entity)) return events.find(e => e.entityType === 'chapter' && e.subTitle === this.downloadService.downloadSubtitle('chapter', (this.entity as Chapter))) || null;
       return null;
     }));
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
-      if (this.downloadInProgress === true) {
+      if (this.downloadInProgress) {
         this.toastr.info('Download is already in progress. Please wait.');
         return;
       }

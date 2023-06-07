@@ -98,9 +98,10 @@ public class BookController : BaseApiController
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
         var key = BookService.CoalesceKeyForAnyFile(book, file);
-        if (!book.Content.AllFiles.ContainsKey(key)) return BadRequest("File was not found in book");
 
-        var bookFile = book.Content.AllFiles[key];
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest("File was not found in book");
+
+        var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
         var content = await bookFile.ReadContentAsBytesAsync();
 
         var contentType = BookService.GetContentType(bookFile.ContentType);

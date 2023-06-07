@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using API.Data.ManualMigrations;
 using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
@@ -79,7 +80,7 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None);
-    Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId);
+    Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata);
     Task<IList<Series>> GetSeriesByIdsAsync(IList<int> seriesIds);
     Task<int[]> GetChapterIdsForSeriesAsync(IList<int> seriesIds);
@@ -132,7 +133,7 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
 
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
-    Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true);
+    Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -347,11 +348,11 @@ public class SeriesRepository : ISeriesRepository
 
         result.Series = _context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => (EF.Functions.Like(s.Name, $"%{searchQuery}%")
+            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
                          || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
                          || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
                          || (EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%"))
-                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison)))
+                         || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
             .RestrictAgainstAgeRestriction(userRating)
             .Include(s => s.Library)
             .OrderBy(s => s.SortName!.ToLower())
@@ -429,7 +430,9 @@ public class SeriesRepository : ISeriesRepository
 
         result.Chapters = await _context.Chapter
             .Include(c => c.Files)
-            .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%"))
+            .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
+                        || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
+                )
             .Where(c => c.Files.All(f => fileIds.Contains(f.Id)))
             .AsSplitQuery()
             .Take(maxRecords)
@@ -439,11 +442,13 @@ public class SeriesRepository : ISeriesRepository
         return result;
     }
 
-    public async Task<SeriesDto> GetSeriesDtoByIdAsync(int seriesId, int userId)
+    public async Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId)
     {
         var series = await _context.Series.Where(x => x.Id == seriesId)
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-            .SingleAsync();
+            .SingleOrDefaultAsync();
+
+        if (series == null) return null;
 
         var seriesList = new List<SeriesDto>() {series};
         await AddSeriesModifiers(userId, seriesList);
@@ -565,12 +570,14 @@ public class SeriesRepository : ISeriesRepository
     /// Returns custom images only
     /// </summary>
     /// <returns></returns>
-    public async Task<IList<Series>> GetAllWithNonWebPCovers(bool customOnly = true)
+    public async Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
+        bool customOnly = true)
     {
+        var extension = encodeFormat.GetExtension();
         var prefix = ImageService.GetSeriesFormat(0).Replace("0", string.Empty);
         return await _context.Series
             .Where(c => !string.IsNullOrEmpty(c.CoverImage)
-                        && !c.CoverImage.EndsWith(".webp")
+                        && !c.CoverImage.EndsWith(extension)
                         && (!customOnly || c.CoverImage.StartsWith(prefix)))
             .ToListAsync();
     }

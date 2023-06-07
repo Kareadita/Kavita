@@ -41,4 +41,6 @@ export interface Chapter {
      * 'Volume number'. Only available for SeriesDetail
      */
     volumeTitle?: string;
+    webLinks: string;
+    isbn: string;
 }

@@ -12,7 +12,7 @@ import { UpdateVersionEvent } from 'src/app/_models/events/update-version-event'
 })
 export class UpdateNotificationModalComponent {
 
-  @Input() updateData!: UpdateVersionEvent;
+  @Input({required: true}) updateData!: UpdateVersionEvent;
 
   constructor(public modal: NgbActiveModal) { }
 

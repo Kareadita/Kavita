@@ -9,7 +9,7 @@ import { Person } from '../../_models/metadata/person';
 })
 export class PersonBadgeComponent {
 
-  @Input() person!: Person;
+  @Input({required: true}) person!: Person;
 
   constructor() { }
 }

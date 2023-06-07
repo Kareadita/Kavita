@@ -1,47 +1,44 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { ThemeService } from './theme.service';
 import { RecentlyAddedItem } from '../_models/recently-added-item';
 import { AccountService } from './account.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
 })
-export class ImageService implements OnDestroy {
-
+export class ImageService {
+  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   apiKey: string = '';
   encodedKey: string = '';
-  public placeholderImage = 'assets/images/image-placeholder-min.png';
-  public errorImage = 'assets/images/error-placeholder2-min.png';
+  public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
+  public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
-
-  private onDestroy: Subject<void> = new Subject();
+  public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
 
   constructor(private accountService: AccountService, private themeService: ThemeService) {
-    this.themeService.currentTheme$.pipe(takeUntil(this.onDestroy)).subscribe(theme => {
+    this.themeService.currentTheme$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(theme => {
       if (this.themeService.isDarkTheme()) {
         this.placeholderImage = 'assets/images/image-placeholder.dark-min.png';
         this.errorImage = 'assets/images/error-placeholder2.dark-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-white-32x32.png';
       } else {
         this.placeholderImage = 'assets/images/image-placeholder-min.png';
         this.errorImage = 'assets/images/error-placeholder2-min.png';
+        this.errorWebLinkImage = 'assets/images/broken-black-32x32.png';
       }
     });
 
-    this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
       if (user) {
         this.apiKey = user.apiKey;
         this.encodedKey = encodeURIComponent(this.apiKey);
       }
     });
-  }
-
-  ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
   }
 
   getRecentlyAddedItem(item: RecentlyAddedItem) {
@@ -53,8 +50,8 @@ export class ImageService implements OnDestroy {
 
   /**
    * Returns the entity type from a cover image url. Undefied if not applicable
-   * @param url 
-   * @returns 
+   * @param url
+   * @returns
    */
   getEntityTypeFromUrl(url: string) {
     if (url.indexOf('?') < 0) return undefined;
@@ -91,12 +88,20 @@ export class ImageService implements OnDestroy {
     return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}`;
   }
 
+  getWebLinkImage(url: string) {
+    return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey}`;
+  }
+
   getCoverUploadImage(filename: string) {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
   }
 
   updateErroredImage(event: any) {
     event.target.src = this.placeholderImage;
+  }
+
+  updateErroredWebLinkImage(event: any) {
+    event.target.src = this.errorWebLinkImage;
   }
 
   /**

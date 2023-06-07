@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
@@ -19,6 +19,7 @@ import { TextResonse } from '../_types/text-response';
 import { AccountService } from './account.service';
 import { Subject, takeUntil } from 'rxjs';
 import { OnDestroy } from '@angular/core';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -26,29 +27,25 @@ export const CHAPTER_ID_NOT_FETCHED = -2;
 @Injectable({
   providedIn: 'root'
 })
-export class ReaderService implements OnDestroy {
+export class ReaderService {
 
+  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   encodedKey: string = '';
-  private onDestroy: Subject<void> = new Subject();
 
   // Override background color for reader and restore it onDestroy
   private originalBodyColor!: string;
 
-  constructor(private httpClient: HttpClient, private router: Router, 
+  constructor(private httpClient: HttpClient, private router: Router,
     private location: Location, private utilityService: UtilityService,
-    private filterUtilitySerivce: FilterUtilitiesService, private accountService: AccountService) {
-      this.accountService.currentUser$.pipe(takeUntil(this.onDestroy)).subscribe(user => {
+    private filterUtilityService: FilterUtilitiesService, private accountService: AccountService) {
+      this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
         if (user) {
           this.encodedKey = encodeURIComponent(user.apiKey);
         }
       });
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   getNavigationArray(libraryId: number, seriesId: number, chapterId: number, format: MangaFormat) {
     if (format === undefined) format = MangaFormat.ARCHIVE;
@@ -77,7 +74,7 @@ export class ReaderService implements OnDestroy {
   getAllBookmarks(filter: SeriesFilter | undefined) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, undefined, undefined);
-    const data = this.filterUtilitySerivce.createSeriesFilter(filter);
+    const data = this.filterUtilityService.createSeriesFilter(filter);
 
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', data);
   }

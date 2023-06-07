@@ -15,6 +15,7 @@ using API.Services.Tasks.Scanner;
 using AutoMapper;
 using Flurl.Http;
 using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.AspNetCore.Authorization;
@@ -183,6 +184,7 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
+                if (OsInfo.IsDocker) continue;
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
@@ -191,8 +193,9 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
+                if (OsInfo.IsDocker) continue;
                 // Validate IP addresses
-                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(','))
+                foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
                         return BadRequest($"IP Address '{ipAddress}' is invalid");
@@ -231,15 +234,9 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.ConvertBookmarkToWebP && updateSettingsDto.ConvertBookmarkToWebP + string.Empty != setting.Value)
+            if (setting.Key == ServerSettingKey.EncodeMediaAs && updateSettingsDto.EncodeMediaAs + string.Empty != setting.Value)
             {
-                setting.Value = updateSettingsDto.ConvertBookmarkToWebP + string.Empty;
-                _unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.ConvertCoverToWebP && updateSettingsDto.ConvertCoverToWebP + string.Empty != setting.Value)
-            {
-                setting.Value = updateSettingsDto.ConvertCoverToWebP + string.Empty;
+                setting.Value = updateSettingsDto.EncodeMediaAs + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

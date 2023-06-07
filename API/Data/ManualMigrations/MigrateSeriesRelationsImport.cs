@@ -8,7 +8,7 @@ using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// Introduced in v0.6.1.2 and v0.7, this imports to a temp file the existing series relationships. It is a 3 part migration.

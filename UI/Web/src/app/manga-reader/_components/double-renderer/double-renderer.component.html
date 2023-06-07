@@ -1,18 +1,18 @@
 <ng-container *ngIf="isValid()">
-    <div class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}} {{emulateBookClass$ | async}}" 
-        [style.filter]="(darkenss$ | async)  ?? '' | safeStyle"
+    <div class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}} {{emulateBookClass$ | async}}"
+        [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
         [ngClass]="{'center-double': (shouldRenderDouble$ | async)}">
         <ng-container *ngIf="currentImage">
-            <img alt=" " 
-                #image [src]="currentImage.src" 
-                id="image-1" 
+            <img alt=" "
+                #image [src]="currentImage.src"
+                id="image-1"
                 class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"
             >
         </ng-container>
         <ng-container *ngIf="shouldRenderDouble$ | async">
-            <img alt=" " [src]="currentImage2.src" 
-            id="image-2" 
-            class="image-2 {{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}"> 
+            <img alt=" " [src]="currentImage2.src"
+            id="image-2"
+            class="image-2 {{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}">
         </ng-container>
     </div>
 </ng-container>

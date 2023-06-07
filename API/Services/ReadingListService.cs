@@ -157,19 +157,19 @@ public class ReadingListService : IReadingListService
         readingList.CoverImageLocked = dto.CoverImageLocked;
 
 
-        if (NumberHelper.IsValidMonth(dto.StartingMonth))
+        if (NumberHelper.IsValidMonth(dto.StartingMonth) || dto.StartingMonth == 0)
         {
             readingList.StartingMonth = dto.StartingMonth;
         }
-        if (NumberHelper.IsValidYear(dto.StartingYear))
+        if (NumberHelper.IsValidYear(dto.StartingYear) || dto.StartingYear == 0)
         {
             readingList.StartingYear = dto.StartingYear;
         }
-        if (NumberHelper.IsValidMonth(dto.EndingMonth))
+        if (NumberHelper.IsValidMonth(dto.EndingMonth) || dto.EndingMonth == 0)
         {
             readingList.EndingMonth = dto.EndingMonth;
         }
-        if (NumberHelper.IsValidYear(dto.EndingYear))
+        if (NumberHelper.IsValidYear(dto.EndingYear) || dto.EndingYear == 0)
         {
             readingList.EndingYear = dto.EndingYear;
         }
@@ -336,7 +336,7 @@ public class ReadingListService : IReadingListService
         //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
         //
         // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
-        // // webp needs to be handled
+        // // webp/avif needs to be handled
         // return combinedFile;
     }
 
@@ -496,12 +496,13 @@ public class ReadingListService : IReadingListService
                 }
 
                 readingList.Items = items;
+
+                if (!_unitOfWork.HasChanges()) continue;
+
                 await CalculateReadingListAgeRating(readingList);
-                if (_unitOfWork.HasChanges())
-                {
-                    await _unitOfWork.CommitAsync();
-                }
-                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1, user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
+                await _unitOfWork.CommitAsync(); // TODO: See if we can avoid this extra commit by reworking bottom logic
+                await CalculateStartAndEndDates(await _unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(arcPair.Item1,
+                    user.Id, ReadingListIncludes.Items | ReadingListIncludes.ItemChapter));
                 await _unitOfWork.CommitAsync();
             }
         }
@@ -512,23 +513,24 @@ public class ReadingListService : IReadingListService
         var data = new List<Tuple<string, string>>();
         if (string.IsNullOrEmpty(storyArc)) return data;
 
-        var arcs = storyArc.Split(",");
-        var arcNumbers = storyArcNumbers.Split(",");
+        var arcs = storyArc.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        var arcNumbers = storyArcNumbers.Split(",", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         if (arcNumbers.Count(s => !string.IsNullOrEmpty(s)) != arcs.Length)
         {
-            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}. Def", filename);
+            _logger.LogWarning("There is a mismatch on StoryArc and StoryArcNumber for {FileName}", filename);
         }
 
-        var maxPairs = Math.Min(arcs.Length, arcNumbers.Length);
+        var maxPairs = Math.Max(arcs.Length, arcNumbers.Length);
         for (var i = 0; i < maxPairs; i++)
         {
-            // When there is a mismatch on arcs and arc numbers, then we should default to a high number
-            if (string.IsNullOrEmpty(arcNumbers[i]) && !string.IsNullOrEmpty(arcs[i]))
+            var arcNumber = int.MaxValue.ToString();
+            if (arcNumbers.Length > i)
             {
-                arcNumbers[i] = int.MaxValue.ToString();
+                arcNumber = arcNumbers[i];
             }
-            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumbers[i], out _)) continue;
-            data.Add(new Tuple<string, string>(arcs[i], arcNumbers[i]));
+
+            if (string.IsNullOrEmpty(arcs[i]) || !int.TryParse(arcNumber, out _)) continue;
+            data.Add(new Tuple<string, string>(arcs[i], arcNumber));
         }
 
         return data;

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -9,6 +9,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
 import { SeriesService } from 'src/app/_services/series.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 @Component({
   selector: 'app-entity-info-cards',
@@ -18,9 +19,9 @@ import { SeriesService } from 'src/app/_services/series.service';
 })
 export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
-  @Input() entity!: Volume | Chapter;
+  @Input({required: true}) entity!: Volume | Chapter;
   /**
-   * This will pull extra information 
+   * This will pull extra information
    */
   @Input() includeMetadata: boolean = false;
 
@@ -40,6 +41,7 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   size: number = 0;
 
   private readonly onDestroy: Subject<void> = new Subject();
+  imageService = inject(ImageService);
 
   get LibraryType() {
     return LibraryType;
@@ -51,6 +53,11 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
 
   get AgeRating() {
     return AgeRating;
+  }
+
+  get WebLinks() {
+    if (this.chapter.webLinks === '') return [];
+    return this.chapter.webLinks.split(',');
   }
 
   constructor(private utilityService: UtilityService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
@@ -77,19 +84,19 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
         this.cdRef.markForCheck();
       });
     }
-    
+
     this.totalPages = this.chapter.pages;
     if (!this.isChapter) {
       this.totalPages = this.utilityService.asVolume(this.entity).pages;
     }
-      
+
     this.totalWordCount = this.chapter.wordCount;
     if (!this.isChapter) {
       this.totalWordCount = this.utilityService.asVolume(this.entity).chapters.map(c => c.wordCount).reduce((sum, d) => sum + d);
     }
 
-      
-        
+
+
     if (this.isChapter) {
       this.readingTime.minHours = this.chapter.minHoursToRead;
       this.readingTime.maxHours = this.chapter.maxHoursToRead;

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.2.0"
+    "version": "0.7.2.28"
   },
   "servers": [
     {
@@ -2058,6 +2058,36 @@
         }
       }
     },
+    "/api/Image/web-link": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "summary": "Returns the image associated with a web-link",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Image/cover-upload": {
       "get": {
         "tags": [
@@ -2099,17 +2129,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateLibraryDto"
+                "$ref": "#/components/schemas/UpdateLibraryDto"
               }
             }
           }
@@ -7460,25 +7490,12 @@
         }
       }
     },
-    "/api/Server/convert-bookmarks": {
+    "/api/Server/convert-media": {
       "post": {
         "tags": [
           "Server"
         ],
-        "summary": "Triggers the scheduling of the convert bookmarks job. Only one job will run at a time.",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Server/convert-covers": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Triggers the scheduling of the convert covers job. Only one job will run at a time.",
+        "summary": "Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.",
         "responses": {
           "200": {
             "description": "Success"
@@ -7634,6 +7651,58 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Server/media-errors": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Server/clear-media-alerts": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Deletes all media errors",
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -10504,6 +10573,15 @@
             "type": "integer",
             "format": "int32"
           },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
           "people": {
             "type": "array",
             "items": {
@@ -10658,6 +10736,16 @@
           "avgHoursToRead": {
             "type": "integer",
             "format": "int32"
+          },
+          "webLinks": {
+            "type": "string",
+            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "description": "ISBN-13 (usually) of the Chapter",
+            "nullable": true
           }
         },
         "additionalProperties": false,
@@ -11103,31 +11191,6 @@
         },
         "additionalProperties": false
       },
-      "CreateLibraryDto": {
-        "required": [
-          "folders",
-          "name",
-          "type"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "type": {
-            "$ref": "#/components/schemas/LibraryType"
-          },
-          "folders": {
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
       "CreateReadingListDto": {
         "type": "object",
         "properties": {
@@ -11349,6 +11412,15 @@
         },
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+      },
+      "EncodeFormat": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "FileDimensionDto": {
         "type": "object",
@@ -12230,6 +12302,40 @@
         },
         "additionalProperties": false,
         "description": "This is used for bulk updating a set of volume and or chapters in one go"
+      },
+      "MediaErrorDto": {
+        "type": "object",
+        "properties": {
+          "extension": {
+            "type": "string",
+            "description": "Format Type (RAR, ZIP, 7Zip, Epub, PDF)",
+            "nullable": true
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Full Filepath to the file that has some issue",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "description": "Developer defined string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "description": "Exception message",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "MemberDto": {
         "type": "object",
@@ -13622,6 +13728,11 @@
           "publicationStatus": {
             "$ref": "#/components/schemas/PublicationStatus"
           },
+          "webLinks": {
+            "type": "string",
+            "description": "A Comma-separated list of strings representing links from the series",
+            "nullable": true
+          },
           "languageLocked": {
             "type": "boolean"
           },
@@ -13821,6 +13932,11 @@
           "publicationStatus": {
             "$ref": "#/components/schemas/PublicationStatus"
           },
+          "webLinks": {
+            "type": "string",
+            "description": "A comma-separated list of Urls",
+            "nullable": true
+          },
           "languageLocked": {
             "type": "boolean"
           },
@@ -13992,10 +14108,6 @@
             "description": "Total number of People in the instance",
             "format": "int32"
           },
-          "storeBookmarksAsWebP": {
-            "type": "boolean",
-            "description": "Is this instance storing bookmarks as WebP"
-          },
           "usersOnCardLayout": {
             "type": "integer",
             "description": "Number of users on this instance using Card Layout",
@@ -14091,9 +14203,8 @@
             "description": "Total reading hours of all users",
             "format": "int64"
           },
-          "storeCoversAsWebP": {
-            "type": "boolean",
-            "description": "Is the Server saving covers as WebP"
+          "encodeMediaAs": {
+            "$ref": "#/components/schemas/EncodeFormat"
           }
         },
         "additionalProperties": false,
@@ -14161,9 +14272,8 @@
             "description": "Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.",
             "nullable": true
           },
-          "convertBookmarkToWebP": {
-            "type": "boolean",
-            "description": "If the server should save bookmarks as WebP encoding"
+          "encodeMediaAs": {
+            "$ref": "#/components/schemas/EncodeFormat"
           },
           "totalBackups": {
             "type": "integer",
@@ -14178,10 +14288,6 @@
             "type": "integer",
             "description": "Total number of days worth of logs to keep at a given time.",
             "format": "int32"
-          },
-          "convertCoverToWebP": {
-            "type": "boolean",
-            "description": "If the server should save covers as WebP encoding"
           },
           "hostName": {
             "type": "string",

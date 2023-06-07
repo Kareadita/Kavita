@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Jobs;
+using API.DTOs.MediaErrors;
 using API.DTOs.Stats;
 using API.DTOs.Update;
+using API.Entities.Enums;
 using API.Extensions;
+using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
 using Hangfire;
@@ -14,7 +18,6 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -23,7 +26,6 @@ namespace API.Controllers;
 [Authorize(Policy = "RequireAdminRole")]
 public class ServerController : BaseApiController
 {
-    private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<ServerController> _logger;
     private readonly IBackupService _backupService;
     private readonly IArchiveService _archiveService;
@@ -34,13 +36,13 @@ public class ServerController : BaseApiController
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ServerController(IHostApplicationLifetime applicationLifetime, ILogger<ServerController> logger,
+    public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler)
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
     {
-        _applicationLifetime = applicationLifetime;
         _logger = logger;
         _backupService = backupService;
         _archiveService = archiveService;
@@ -51,6 +53,7 @@ public class ServerController : BaseApiController
         _scannerService = scannerService;
         _accountService = accountService;
         _taskScheduler = taskScheduler;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -117,29 +120,22 @@ public class ServerController : BaseApiController
         return Ok(await _statsService.GetServerInfo());
     }
 
-    /// <summary>
-    /// Triggers the scheduling of the convert bookmarks job. Only one job will run at a time.
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost("convert-bookmarks")]
-    public ActionResult ScheduleConvertBookmarks()
-    {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
-                TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _bookmarkService.ConvertAllBookmarkToWebP());
-        return Ok();
-    }
 
     /// <summary>
-    /// Triggers the scheduling of the convert covers job. Only one job will run at a time.
+    /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.
     /// </summary>
     /// <returns></returns>
-    [HttpPost("convert-covers")]
-    public ActionResult ScheduleConvertCovers()
+    [HttpPost("convert-media")]
+    public async Task<ActionResult> ScheduleConvertCovers()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
-                TaskScheduler.DefaultQueue, true)) return Ok();
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToWebP());
+        var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        if (encoding == EncodeFormat.PNG)
+        {
+            return BadRequest(
+                "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
+        }
+        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
         return Ok();
     }
 
@@ -154,7 +150,8 @@ public class ServerController : BaseApiController
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip", Path.GetFileName(zipPath), true);
+            return PhysicalFile(zipPath, "application/zip",
+                System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
         {
@@ -211,6 +208,29 @@ public class ServerController : BaseApiController
                 });
 
         return Ok(recurringJobs);
+    }
+
+    /// <summary>
+    /// Returns a list of issues found during scanning or reading in which files may have corruption or bad metadata (structural metadata)
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("media-errors")]
+    public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
+    {
+        return Ok(_unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
+    }
+
+    /// <summary>
+    /// Deletes all media errors
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("clear-media-alerts")]
+    public async Task<ActionResult> ClearMediaErrors()
+    {
+        await _unitOfWork.MediaErrorRepository.DeleteAll();
+        return Ok();
     }
 
 

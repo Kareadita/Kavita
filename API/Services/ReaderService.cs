@@ -236,7 +236,6 @@ public class ReaderService : IReaderService
 
         try
         {
-            // TODO: Rewrite this code to just pull user object with progress for that particular appuserprogress, else create it
             var userProgress =
                 await _unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
 
@@ -479,10 +478,9 @@ public class ReaderService : IReaderService
     /// <returns></returns>
     public async Task<ChapterDto> GetContinuePoint(int seriesId, int userId)
     {
-        var progress = (await _unitOfWork.AppUserProgressRepository.GetUserProgressForSeriesAsync(seriesId, userId)).ToList();
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
 
-         if (progress.Count == 0)
+         if (!await _unitOfWork.AppUserProgressRepository.AnyUserProgressForSeriesAsync(seriesId, userId))
          {
              // I think i need a way to sort volumes last
              return volumes.OrderBy(v => double.Parse(v.Number + string.Empty), _chapterSortComparer).First().Chapters
@@ -503,7 +501,8 @@ public class ReaderService : IReaderService
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
         // Order with volume 0 last so we prefer the natural order
-        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).SelectMany(v => v.Chapters).ToList());
+        return FindNextReadingChapter(volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default)
+                                             .SelectMany(v => v.Chapters.OrderBy(c => double.Parse(c.Number))).ToList());
     }
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
@@ -524,12 +523,13 @@ public class ReaderService : IReaderService
             return lastChapter;
         }
 
-        // If the last chapter didn't fit, then we need the next chapter without any progress
-        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead == 0);
+        // If the last chapter didn't fit, then we need the next chapter without full progress
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages);
         if (firstChapterWithoutProgress != null)
         {
             return firstChapterWithoutProgress;
         }
+
 
         // chaptersWithProgress are all read, then we need to get the next chapter that doesn't have progress
         var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
@@ -667,15 +667,15 @@ public class ReaderService : IReaderService
             _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, ImageService.GetThumbnailFormat(chapter.Id));
         try
         {
-            var saveAsWebp =
-                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertBookmarkToWebP;
+            var encodeFormat =
+                (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
             if (!Directory.Exists(outputDirectory))
             {
                 var outputtedThumbnails = cachedImages
                     .Select((img, idx) =>
                         _directoryService.FileSystem.Path.Join(outputDirectory,
-                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, saveAsWebp)))
+                            _imageService.WriteCoverThumbnail(img, $"{idx}", outputDirectory, encodeFormat)))
                     .ToArray();
                 return CacheService.GetPageFromFiles(outputtedThumbnails, pageNum);
             }

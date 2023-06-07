@@ -85,11 +85,6 @@ public class ServerInfoDto
     /// <remarks>Introduced in v0.5.4</remarks>
     public int TotalPeople { get; set; }
     /// <summary>
-    /// Is this instance storing bookmarks as WebP
-    /// </summary>
-    /// <remarks>Introduced in v0.5.4</remarks>
-    public bool StoreBookmarksAsWebP { get; set; }
-    /// <summary>
     /// Number of users on this instance using Card Layout
     /// </summary>
     /// <remarks>Introduced in v0.5.4</remarks>
@@ -175,8 +170,8 @@ public class ServerInfoDto
     /// <remarks>Introduced in v0.7.0</remarks>
     public long TotalReadingHours { get; set; }
     /// <summary>
-    /// Is the Server saving covers as WebP
+    /// The encoding the server is using to save media
     /// </summary>
-    /// <remarks>Added in v0.7.0</remarks>
-    public bool StoreCoversAsWebP { get; set; }
+    /// <remarks>Added in v0.7.3</remarks>
+    public EncodeFormat EncodeMediaAs { get; set; }
 }

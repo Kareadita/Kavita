@@ -117,7 +117,7 @@ public class DownloadController : BaseApiController
     private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
-        return PhysicalFile(zipFile, contentType, fileDownloadName, true);
+        return PhysicalFile(zipFile, contentType, Uri.EscapeDataString(fileDownloadName), true);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public class DownloadController : BaseApiController
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.DownloadProgressEvent(User.GetUsername(),
                     Path.GetFileNameWithoutExtension(downloadName), 1F, "ended"));
-            return PhysicalFile(filePath, DefaultContentType, downloadName, true);
+            return PhysicalFile(filePath, DefaultContentType, Uri.EscapeDataString(downloadName), true);
         }
         catch (Exception ex)
         {
@@ -220,7 +220,7 @@ public class DownloadController : BaseApiController
             MessageFactory.DownloadProgressEvent(username, Path.GetFileNameWithoutExtension(filename), 1F));
 
 
-        return PhysicalFile(filePath, DefaultContentType, filename, true);
+        return PhysicalFile(filePath, DefaultContentType, System.Web.HttpUtility.UrlEncode(filename), true);
     }
 
 }

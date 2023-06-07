@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.ManualMigrations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Logging;
@@ -49,7 +50,7 @@ public class Program
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != Environments.Development)
         {
             Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
-            var rBytes = new byte[128];
+            var rBytes = new byte[256];
             RandomNumberGenerator.Create().GetBytes(rBytes);
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
@@ -173,13 +174,13 @@ public class Program
                 webBuilder.UseKestrel((opts) =>
                 {
                     var ipAddresses = Configuration.IpAddresses;
-                    if (new OsInfo(Array.Empty<IOsVersionAdapter>()).IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
+                    if (OsInfo.IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
                     {
                         opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
                     }
                     else
                     {
-                        foreach (var ipAddress in ipAddresses.Split(','))
+                        foreach (var ipAddress in ipAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                         {
                             try
                             {
@@ -194,9 +195,6 @@ public class Program
                     }
                 });
 
-                    webBuilder.UseStartup<Startup>();
+                webBuilder.UseStartup<Startup>();
             });
-
-
-
 }

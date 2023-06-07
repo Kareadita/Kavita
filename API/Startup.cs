@@ -10,6 +10,7 @@ using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.ManualMigrations;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
@@ -225,29 +226,11 @@ public class Startup
 
                     logger.LogInformation("Running Migrations");
 
-                    // Only run this if we are upgrading
-                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-                    await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
-
-                    // only needed for v0.5.4 and v0.6.0
-                    await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.6.0
-                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
-                    await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
-
-                    // v0.6.2 or v0.7
-                    await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
-
-                    // v0.6.8 or v0.7
-                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
-                    await MigrateToUtcDates.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7
-                    await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
-
                     // v0.7.2
                     await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
+
+                    // v0.7.3
+                    await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
 
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
@@ -411,7 +394,9 @@ public class Startup
         }
         catch (Exception ex)
         {
-            if ((ex.Message.Contains("Permission denied") || ex.Message.Contains("UnauthorizedAccessException")) && baseUrl.Equals(Configuration.DefaultBaseUrl) && new OsInfo().IsDocker)
+            if ((ex.Message.Contains("Permission denied")
+                 || ex.Message.Contains("UnauthorizedAccessException"))
+                && baseUrl.Equals(Configuration.DefaultBaseUrl) && OsInfo.IsDocker)
             {
                 // Swallow the exception as the install is non-root and Docker
                 return;

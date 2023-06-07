@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { TagBadgeCursor } from '../../../shared/tag-badge/tag-badge.component';
@@ -9,6 +9,7 @@ import { ReadingList } from '../../../_models/reading-list';
 import { Series } from '../../../_models/series';
 import { SeriesMetadata } from '../../../_models/metadata/series-metadata';
 import { MetadataService } from '../../../_services/metadata.service';
+import { ImageService } from 'src/app/_services/image.service';
 
 
 @Component({
@@ -17,18 +18,20 @@ import { MetadataService } from '../../../_services/metadata.service';
   styleUrls: ['./series-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
+export class SeriesMetadataDetailComponent implements OnChanges {
 
-  @Input() seriesMetadata!: SeriesMetadata;
+  @Input({required: true}) seriesMetadata!: SeriesMetadata;
   @Input() hasReadingProgress: boolean = false;
   /**
    * Reading lists with a connection to the Series
    */
   @Input() readingLists: Array<ReadingList> = [];
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
 
   isCollapsed: boolean = true;
-  hasExtendedProperites: boolean = false;
+  hasExtendedProperties: boolean = false;
+
+  imageService = inject(ImageService);
 
   /**
    * Html representation of Series Summary
@@ -47,20 +50,25 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService, 
+  get WebLinks() {
+    if (this.seriesMetadata?.webLinks === '') return [];
+    return this.seriesMetadata?.webLinks.split(',') || [];
+  }
+
+  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
     private router: Router, public readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef) {
-    
+
   }
-  
+
   ngOnChanges(changes: SimpleChanges): void {
-    this.hasExtendedProperites = this.seriesMetadata.colorists.length > 0 || 
-                                  this.seriesMetadata.editors.length > 0 || 
-                                  this.seriesMetadata.coverArtists.length > 0 || 
+    this.hasExtendedProperties = this.seriesMetadata.colorists.length > 0 ||
+                                  this.seriesMetadata.editors.length > 0 ||
+                                  this.seriesMetadata.coverArtists.length > 0 ||
                                   this.seriesMetadata.inkers.length > 0 ||
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
-                                  this.seriesMetadata.publishers.length > 0 || 
+                                  this.seriesMetadata.publishers.length > 0 ||
                                   this.seriesMetadata.translators.length > 0 ||
                                   this.seriesMetadata.tags.length > 0;
 
@@ -68,9 +76,6 @@ export class SeriesMetadataDetailComponent implements OnInit, OnChanges {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     }
     this.cdRef.markForCheck();
-  }
-
-  ngOnInit(): void {
   }
 
   toggleView() {

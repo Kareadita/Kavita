@@ -313,6 +313,8 @@ public class ScannerService : IScannerService
             MessageFactory.ScanSeriesEvent(library.Id, seriesId, series.Name));
 
         await _metadataService.RemoveAbandonedMetadataKeys();
+        BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
+        BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
         BackgroundJob.Enqueue(() => _directoryService.ClearDirectory(_directoryService.TempDirectory));
     }

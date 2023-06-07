@@ -1,6 +1,15 @@
 import { DOCUMENT } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable, OnDestroy, Renderer2, RendererFactory2, SecurityContext } from '@angular/core';
+import {
+  DestroyRef,
+  inject,
+  Inject,
+  Injectable,
+  OnDestroy,
+  Renderer2,
+  RendererFactory2,
+  SecurityContext
+} from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ToastrService } from 'ngx-toastr';
 import { map, ReplaySubject, Subject, takeUntil, take } from 'rxjs';
@@ -10,13 +19,15 @@ import { NotificationProgressEvent } from '../_models/events/notification-progre
 import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
 import { TextResonse } from '../_types/text-response';
 import { EVENTS, MessageHubService } from './message-hub.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService implements OnDestroy {
+export class ThemeService {
 
+  private readonly destroyRef = inject(DestroyRef);
   public defaultTheme: string = 'dark';
   public defaultBookTheme: string = 'Dark';
 
@@ -25,13 +36,12 @@ export class ThemeService implements OnDestroy {
 
   private themesSource = new ReplaySubject<SiteTheme[]>(1);
   public themes$ = this.themesSource.asObservable();
-  
+
   /**
    * Maintain a cache of themes. SignalR will inform us if we need to refresh cache
    */
   private themeCache: Array<SiteTheme> = [];
 
-  private readonly onDestroy = new Subject<void>();
   private renderer: Renderer2;
   private baseUrl = environment.apiUrl;
 
@@ -42,7 +52,7 @@ export class ThemeService implements OnDestroy {
 
     this.getThemes();
 
-    messageHub.messages$.pipe(takeUntil(this.onDestroy)).subscribe(message => {
+    messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
 
       if (message.event !== EVENTS.NotificationProgress) return;
       const notificationEvent = (message.payload as NotificationProgressEvent);
@@ -56,31 +66,26 @@ export class ThemeService implements OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
   getColorScheme() {
     return getComputedStyle(this.document.body).getPropertyValue('--color-scheme').trim();
   }
-  
+
     /**
      * --theme-color from theme. Updates the meta tag
-     * @returns 
+     * @returns
      */
     getThemeColor() {
       return getComputedStyle(this.document.body).getPropertyValue('--theme-color').trim();
     }
-  
+
     /**
      * --msapplication-TileColor from theme. Updates the meta tag
-     * @returns 
+     * @returns
      */
     getTileColor() {
       return getComputedStyle(this.document.body).getPropertyValue('--title-color').trim();
     }
-  
+
   getCssVariable(variable: string) {
     return getComputedStyle(this.document.body).getPropertyValue(variable).trim();
   }

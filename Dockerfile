@@ -17,6 +17,7 @@ FROM ubuntu:focal
 
 COPY --from=copytask /Kavita /kavita
 COPY --from=copytask /files/wwwroot /kavita/wwwroot
+COPY API/config/appsettings.json /tmp/config/appsettings.json
 
 #Installs program dependencies
 RUN apt-get update \
@@ -30,6 +31,8 @@ EXPOSE 5000
 WORKDIR /kavita
 
 HEALTHCHECK --interval=30s --timeout=15s --start-period=30s --retries=3 CMD curl --fail http://localhost:5000/api/health || exit 1
+
+ENV DOTNET_RUNNING_IN_CONTAINER=true
 
 ENTRYPOINT [ "/bin/bash" ]
 CMD ["/entrypoint.sh"]

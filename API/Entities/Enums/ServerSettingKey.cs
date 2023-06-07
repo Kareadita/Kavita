@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 
 namespace API.Entities.Enums;
 
@@ -82,6 +83,7 @@ public enum ServerSettingKey
     /// <summary>
     /// If Kavita should save bookmarks as WebP images
     /// </summary>
+    [Obsolete("Use EncodeMediaAs instead")]
     [Description("ConvertBookmarkToWebP")]
     ConvertBookmarkToWebP = 14,
     /// <summary>
@@ -102,6 +104,7 @@ public enum ServerSettingKey
     /// <summary>
     /// If Kavita should save covers as WebP images
     /// </summary>
+    [Obsolete("Use EncodeMediaAs instead")]
     [Description("ConvertCoverToWebP")]
     ConvertCoverToWebP = 19,
     /// <summary>
@@ -114,4 +117,11 @@ public enum ServerSettingKey
     /// </summary>
     [Description("IpAddresses")]
     IpAddresses = 21,
+    /// <summary>
+    /// Encode all media as PNG/WebP/AVIF/etc.
+    /// </summary>
+    /// <remarks>As of v0.7.3 this replaced ConvertCoverToWebP and ConvertBookmarkToWebP</remarks>
+    [Description("EncodeMediaAs")]
+    EncodeMediaAs = 22,
+
 }

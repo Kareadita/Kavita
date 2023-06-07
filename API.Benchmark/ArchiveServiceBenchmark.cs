@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using API.Services;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Order;
+using EasyCaching.Core;
+using NSubstitute;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Formats.Webp;
@@ -30,8 +32,8 @@ public class ArchiveServiceBenchmark
     public ArchiveServiceBenchmark()
     {
         _directoryService = new DirectoryService(null, new FileSystem());
-        _imageService = new ImageService(null, _directoryService);
-        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService);
+        _imageService = new ImageService(null, _directoryService, Substitute.For<IEasyCachingProviderFactory>());
+        _archiveService = new ArchiveService(new NullLogger<ArchiveService>(), _directoryService, _imageService, Substitute.For<IMediaErrorService>());
     }
 
     [Benchmark(Baseline = true)]

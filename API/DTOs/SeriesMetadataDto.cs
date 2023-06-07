@@ -58,6 +58,10 @@ public class SeriesMetadataDto
     /// Publication status of the Series
     /// </summary>
     public PublicationStatus PublicationStatus { get; set; }
+    /// <summary>
+    /// A comma-separated list of Urls
+    /// </summary>
+    public string WebLinks { get; set; }
 
     public bool LanguageLocked { get; set; }
     public bool SummaryLocked { get; set; }

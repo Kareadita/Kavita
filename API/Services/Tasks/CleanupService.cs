@@ -58,14 +58,14 @@ public class CleanupService : ICleanupService
     [AutomaticRetry(Attempts = 3, LogEvents = false, OnAttemptsExceeded = AttemptsExceededAction.Fail)]
     public async Task Cleanup()
     {
-        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToWebP", Array.Empty<object>(),
+        if (TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllCoverToEncoding", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true) ||
-            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToWebP", Array.Empty<object>(),
+            TaskScheduler.HasAlreadyEnqueuedTask(BookmarkService.Name, "ConvertAllBookmarkToEncoding", Array.Empty<object>(),
                 TaskScheduler.DefaultQueue, true))
         {
-            _logger.LogInformation("Cleanup put on hold as a conversion to WebP in progress");
+            _logger.LogInformation("Cleanup put on hold as a media conversion in progress");
             await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a conversion to WebP in progress"));
+                MessageFactory.ErrorEvent("Cleanup", "Cleanup put on hold as a media conversion in progress"));
             return;
         }
 

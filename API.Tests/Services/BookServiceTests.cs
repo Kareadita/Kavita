@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.IO.Abstractions;
 using API.Services;
+using EasyCaching.Core;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -15,7 +16,9 @@ public class BookServiceTests
     public BookServiceTests()
     {
         var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
-        _bookService = new BookService(_logger, directoryService, new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService));
+        _bookService = new BookService(_logger, directoryService,
+            new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService, Substitute.For<IEasyCachingProviderFactory>())
+            , Substitute.For<IMediaErrorService>());
     }
 
     [Theory]

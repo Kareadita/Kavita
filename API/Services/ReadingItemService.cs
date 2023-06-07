@@ -9,7 +9,7 @@ public interface IReadingItemService
 {
     ComicInfo? GetComicInfo(string filePath);
     int GetNumberOfPages(string filePath, MangaFormat format);
-    string GetCoverImage(string filePath, string fileName, MangaFormat format, bool saveAsWebP);
+    string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat);
     void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1);
     ParserInfo? ParseFile(string path, string rootPath, LibraryType type);
 }
@@ -89,6 +89,7 @@ public class ReadingItemService : IReadingItemService
 
         }
 
+        // This is first time ComicInfo is called
         info.ComicInfo = GetComicInfo(path);
         if (info.ComicInfo == null) return info;
 
@@ -160,7 +161,7 @@ public class ReadingItemService : IReadingItemService
         }
     }
 
-    public string GetCoverImage(string filePath, string fileName, MangaFormat format, bool saveAsWebP)
+    public string GetCoverImage(string filePath, string fileName, MangaFormat format, EncodeFormat encodeFormat)
     {
         if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(fileName))
         {
@@ -170,10 +171,10 @@ public class ReadingItemService : IReadingItemService
 
         return format switch
         {
-            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
-            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
-            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
-            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, saveAsWebP),
+            MangaFormat.Epub => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat),
+            MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat),
+            MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat),
+            MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat),
             _ => string.Empty
         };
     }

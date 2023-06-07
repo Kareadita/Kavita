@@ -36,7 +36,7 @@ public interface IProcessSeries
     void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo);
 }
 
 /// <summary>
@@ -230,7 +230,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).ConvertCoverToWebP);
+        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
@@ -266,8 +266,7 @@ public class ProcessSeries : IProcessSeries
     public void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
-        var isBook = library.Type == LibraryType.Book;
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;
@@ -323,7 +322,7 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
                 var normalizedName = Parser.Parser.Normalize(collection);
                 if (!_collectionTags.TryGetValue(normalizedName, out var tag))
@@ -345,6 +344,8 @@ public class ProcessSeries : IProcessSeries
             });
         }
 
+
+        #region People
 
         // Handle People
         foreach (var chapter in chapters)
@@ -489,6 +490,8 @@ public class ProcessSeries : IProcessSeries
                         break;
                 }
             });
+
+        #endregion
 
     }
 
@@ -657,19 +660,13 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? info)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo)
     {
+        if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
             _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
 
-        var comicInfo = info;
-        if (info == null)
-        {
-            comicInfo = _readingItemService.GetComicInfo(firstFile.FilePath);
-        }
-
-        if (comicInfo == null) return;
         _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
         chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
@@ -714,12 +711,24 @@ public class ProcessSeries : IProcessSeries
             chapter.StoryArcNumber = comicInfo.StoryArcNumber;
         }
 
-
         if (comicInfo.AlternateCount > 0)
         {
             chapter.AlternateCount = comicInfo.AlternateCount;
         }
 
+        if (!string.IsNullOrEmpty(comicInfo.Web))
+        {
+            chapter.WebLinks = string.Join(",", comicInfo.Web
+                .Split(",")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Select(s => s.Trim())
+            );
+        }
+
+        if (!string.IsNullOrEmpty(comicInfo.Isbn))
+        {
+            chapter.ISBN = comicInfo.Isbn;
+        }
 
         if (comicInfo.Count > 0)
         {
@@ -807,11 +816,15 @@ public class ProcessSeries : IProcessSeries
     private static IList<string> GetTagValues(string comicInfoTagSeparatedByComma)
     {
         // TODO: Move this to an extension and test it
-        if (!string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
+        if (string.IsNullOrEmpty(comicInfoTagSeparatedByComma))
         {
-            return comicInfoTagSeparatedByComma.Split(",").Select(s => s.Trim()).DistinctBy(Parser.Parser.Normalize).ToList();
+            return ImmutableList<string>.Empty;
         }
-        return ImmutableList<string>.Empty;
+
+        return comicInfoTagSeparatedByComma.Split(",")
+            .Select(s => s.Trim())
+            .DistinctBy(Parser.Parser.Normalize)
+            .ToList();
     }
 
     /// <summary>

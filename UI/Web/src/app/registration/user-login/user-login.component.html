@@ -1,14 +1,14 @@
 <app-splash-container>
     <ng-container title><h2>Login</h2></ng-container>
     <ng-container body>
-        <ng-container *ngIf="isLoaded"> 
+        <ng-container *ngIf="isLoaded">
             <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
                 <div class="card-text">
                     <div class="mb-3">
                         <label for="username" class="form-label visually-hidden">Username</label>
                         <input class="form-control custom-input" formControlName="username" id="username" type="text" autofocus placeholder="Username">
                     </div>
-                    
+
                     <div class="mb-2">
                         <label for="password" class="form-label visually-hidden">Password</label>
                         <input class="form-control custom-input" formControlName="password" name="password"
@@ -23,9 +23,9 @@
                     <div class="mb-3">
                         <a routerLink="/registration/reset-password" style="color: white">Forgot Password?</a>
                     </div>
-                    
+
                     <div>
-                        <button class="btn btn-secondary alt" type="submit">Submit</button>
+                        <button class="btn btn-secondary alt" type="submit" [disabled]="isSubmitting">Submit</button>
                     </div>
                 </div>
             </form>

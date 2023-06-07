@@ -1,29 +1,18 @@
 <div class="container-fluid">
-    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
+    <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined" class="mb-2">
 
         <div class="row g-0">
-            <p>WebP can drastically reduce space requirements for files. WebP is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">Can I Use</a>.</p>
-            <div *ngIf="settingsForm.dirty" class="alert alert-danger" role="alert">You must trigger the conversion to WebP task in Tasks Tab.</div>
+            <p>WebP/AVIF can drastically reduce space requirements for files. WebP/AVIF is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">Can I Use WebP</a> or <a href="https://caniuse.com/?search=avif" target="_blank" rel="noopener noreferrer">Can I Use AVIF</a>.
+            <b>You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.</b></p>
+            <div *ngIf="settingsForm.dirty" class="alert alert-danger" role="alert">You must trigger the media conversion task in Tasks Tab.</div>
             <div class="col-md-6 col-sm-12 mb-3">
-                <label for="bookmark-webp" class="form-label me-1" aria-describedby="settings-convertBookmarkToWebP-help">Save Bookmarks as WebP</label>
-                <i class="fa fa-info-circle" placement="right" [ngbTooltip]="convertBookmarkToWebPTooltip" role="button" tabindex="0"></i>
-                <ng-template #convertBookmarkToWebPTooltip>When saving bookmarks, convert them to WebP.</ng-template>
-                <span class="visually-hidden" id="settings-convertBookmarkToWebP-help"><ng-container [ngTemplateOutlet]="convertBookmarkToWebPTooltip"></ng-container></span>
-                <div class="form-check form-switch">
-                    <input id="bookmark-webp" type="checkbox" class="form-check-input" formControlName="convertBookmarkToWebP" role="switch">
-                    <label for="bookmark-webp" class="form-check-label" aria-describedby="settings-convertBookmarkToWebP-help">{{settingsForm.get('convertBookmarkToWebP')?.value ? 'WebP' : 'Original' }}</label>
-                </div>
-            </div>
-
-            <div class="col-md-6 col-sm-12 mb-3">
-                <label for="cover-webp" class="form-label me-1" aria-describedby="settings-convertCoverToWebP-help">Save Covers as WebP</label>
-                <i class="fa fa-info-circle" placement="right" [ngbTooltip]="convertCoverToWebPTooltip" role="button" tabindex="0"></i>
-                <ng-template #convertCoverToWebPTooltip>When generating covers, convert them to WebP.</ng-template>
-                <span class="visually-hidden" id="settings-convertCoverToWebP-help"><ng-container [ngTemplateOutlet]="convertBookmarkToWebPTooltip"></ng-container></span>
-                <div class="form-check form-switch">
-                    <input id="cover-webp" type="checkbox" class="form-check-input" formControlName="convertCoverToWebP" role="switch">
-                    <label for="cover-webp" class="form-check-label" aria-describedby="settings-convertCoverToWebP-help">{{settingsForm.get('convertCoverToWebP')?.value ? 'WebP' : 'Original' }}</label>
-                </div>
+                <label for="settings-media-encodeMediaAs" class="form-label me-1">Save Media As</label>
+                <i class="fa fa-info-circle" placement="right" [ngbTooltip]="encodeMediaAsTooltip" role="button" tabindex="0"></i>
+                <ng-template #encodeMediaAsTooltip>All media Kavita manages (covers, bookmarks, favicons) will be encoded as this type.</ng-template>
+                <span class="visually-hidden" id="settings-media-encodeMediaAs-help"><ng-container [ngTemplateOutlet]="encodeMediaAsTooltip"></ng-container></span>
+                <select class="form-select" aria-describedby="settings-media-encodeMediaAs-help" formControlName="encodeMediaAs" id="settings-media-encodeMediaAs">
+                    <option *ngFor="let format of EncodeFormats" [value]="format.value">{{format.title}}</option>
+                </select>
             </div>
         </div>
 
@@ -48,6 +37,14 @@
         </div>
     </form>
 
-    <!-- Accordion with Issues from Media anaysis -->
-
+    <ngb-accordion #a="ngbAccordion" [destroyOnHide]="false">
+        <ngb-panel>
+            <ng-template ngbPanelTitle>
+                Media Issues <span class="ms-1" *ngIf="alertCount > 0">({{alertCount}})</span>
+            </ng-template>
+            <ng-template ngbPanelContent>
+                <app-manage-alerts (alertCount)="alertCount = $event"></app-manage-alerts>
+            </ng-template>
+        </ngb-panel>
+    </ngb-accordion>
 </div>

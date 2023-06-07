@@ -18,6 +18,7 @@ using API.Middleware.RateLimit;
 using API.Services;
 using API.SignalR;
 using AutoMapper;
+using EasyCaching.Core;
 using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -44,6 +45,7 @@ public class AccountController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
+    private readonly IEasyCachingProviderFactory _cacheFactory;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -51,7 +53,8 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IEventHub eventHub)
+        IEmailService emailService, IEventHub eventHub,
+        IEasyCachingProviderFactory cacheFactory)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -62,6 +65,7 @@ public class AccountController : BaseApiController
         _accountService = accountService;
         _emailService = emailService;
         _eventHub = eventHub;
+        _cacheFactory = cacheFactory;
     }
 
     /// <summary>
@@ -187,8 +191,9 @@ public class AccountController : BaseApiController
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
 
-        if (result.IsLockedOut)
+        if (result.IsLockedOut) // result.IsLockedOut
         {
+            await _userManager.UpdateSecurityStampAsync(user);
             return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
         }
 
@@ -442,6 +447,9 @@ public class AccountController : BaseApiController
             roleResult = await _userManager.AddToRolesAsync(user, roles);
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
         }
+
+        // We might want to check if they had admin and no longer, if so:
+        // await _userManager.UpdateSecurityStampAsync(user); to force them to re-authenticate
 
 
         var allLibraries = (await _unitOfWork.LibraryRepository.GetLibrariesAsync()).ToList();

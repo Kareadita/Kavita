@@ -1,7 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
+using API.Entities.Enums;
+using API.Extensions;
+using EasyCaching.Core;
+using Flurl;
+using Flurl.Http;
+using HtmlAgilityPack;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 using NetVips;
 using Image = NetVips.Image;
@@ -11,54 +20,57 @@ namespace API.Services;
 public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
-    string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat);
 
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
     /// </summary>
     /// <param name="encodedImage">base64 encoded image</param>
     /// <param name="fileName"></param>
-    /// <param name="saveAsWebP">Convert and save as webp</param>
+    /// <param name="encodeFormat">Convert and save as encoding format</param>
     /// <param name="thumbnailWidth">Width of thumbnail</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = 320);
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = 320);
     /// <summary>
     /// Writes out a thumbnail by stream input
     /// </summary>
     /// <param name="stream"></param>
     /// <param name="fileName"></param>
     /// <param name="outputDirectory"></param>
-    /// <param name="saveAsWebP"></param>
+    /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat);
     /// <summary>
     /// Writes out a thumbnail by file path input
     /// </summary>
     /// <param name="sourceFile"></param>
     /// <param name="fileName"></param>
     /// <param name="outputDirectory"></param>
-    /// <param name="saveAsWebP"></param>
+    /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat);
     /// <summary>
-    /// Converts the passed image to webP and outputs it in the same directory
+    /// Converts the passed image to encoding and outputs it in the same directory
     /// </summary>
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
-    /// <returns>File of written webp image</returns>
-    Task<string> ConvertToWebP(string filePath, string outputPath);
-
+    /// <returns>File of written encoded image</returns>
+    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
+    Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat);
 }
 
 public class ImageService : IImageService
 {
+    public const string Name = "BookmarkService";
     private readonly ILogger<ImageService> _logger;
     private readonly IDirectoryService _directoryService;
+    private readonly IEasyCachingProviderFactory _cacheFactory;
     public const string ChapterCoverImageRegex = @"v\d+_c\d+";
     public const string SeriesCoverImageRegex = @"series\d+";
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
+
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -69,10 +81,26 @@ public class ImageService : IImageService
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
 
-    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService)
+    private static readonly string[] ValidIconRelations = {
+        "icon",
+        "apple-touch-icon",
+        "apple-touch-icon-precomposed",
+        "apple-touch-icon icon-precomposed" // ComicVine has it combined
+    };
+
+    /// <summary>
+    /// A mapping of urls that need to get the icon from another url, due to strangeness (like app.plex.tv loading a black icon)
+    /// </summary>
+    private static readonly IDictionary<string, string> FaviconUrlMapper = new Dictionary<string, string>
+    {
+        ["https://app.plex.tv"] = "https://plex.tv"
+    };
+
+    public ImageService(ILogger<ImageService> logger, IDirectoryService directoryService, IEasyCachingProviderFactory cacheFactory)
     {
         _logger = logger;
         _directoryService = directoryService;
+        _cacheFactory = cacheFactory;
     }
 
     public void ExtractImages(string? fileFilePath, string targetDirectory, int fileCount = 1)
@@ -90,14 +118,14 @@ public class ImageService : IImageService
         }
     }
 
-    public string GetCoverImage(string path, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
             using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
-            var filename = fileName + (saveAsWebP ? ".webp" : ".png");
+            var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
         }
@@ -116,12 +144,12 @@ public class ImageService : IImageService
     /// <param name="stream">Stream to write to disk. Ensure this is rewinded.</param>
     /// <param name="fileName">filename to save as without extension</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="saveAsWebP">Export the file as webP otherwise will default to png</param>
+    /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
-        var filename = fileName + (saveAsWebP ? ".webp" : ".png");
+        var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
         {
@@ -131,10 +159,10 @@ public class ImageService : IImageService
         return filename;
     }
 
-    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth);
-        var filename = fileName + (saveAsWebP ? ".webp" : ".png");
+        var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
         {
@@ -144,11 +172,11 @@ public class ImageService : IImageService
         return filename;
     }
 
-    public Task<string> ConvertToWebP(string filePath, string outputPath)
+    public Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat)
     {
         var file = _directoryService.FileSystem.FileInfo.New(filePath);
         var fileName = file.Name.Replace(file.Extension, string.Empty);
-        var outputFile = Path.Join(outputPath, fileName + ".webp");
+        var outputFile = Path.Join(outputPath, fileName + encodeFormat.GetExtension());
 
         using var sourceImage = Image.NewFromFile(filePath, false, Enums.Access.SequentialUnbuffered);
         sourceImage.WriteToFile(outputFile);
@@ -177,14 +205,133 @@ public class ImageService : IImageService
         return false;
     }
 
+    public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat)
+    {
+        // Parse the URL to get the domain (including subdomain)
+        var uri = new Uri(url);
+        var domain = uri.Host;
+        var baseUrl = uri.Scheme + "://" + uri.Host;
+
+
+        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon);
+        var res = await provider.GetAsync<string>(baseUrl);
+        if (res.HasValue)
+        {
+            _logger.LogInformation("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", baseUrl);
+            throw new KavitaException($"Kavita has already tried to fetch from {baseUrl} and failed. Skipping duplicate check");
+        }
+
+        await provider.SetAsync(baseUrl, string.Empty, TimeSpan.FromDays(10));
+        if (FaviconUrlMapper.TryGetValue(baseUrl, out var value))
+        {
+            url = value;
+        }
+
+        var correctSizeLink = string.Empty;
+
+        try
+        {
+            var htmlContent = url.GetStringAsync().Result;
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlContent);
+            var pngLinks = htmlDocument.DocumentNode.Descendants("link")
+                .Where(link => ValidIconRelations.Contains(link.GetAttributeValue("rel", string.Empty)))
+                .Select(link => link.GetAttributeValue("href", string.Empty))
+                .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
+                .ToList();
+
+            correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.png for {Domain}, will try fallback methods", domain);
+        }
+
+        try
+        {
+            correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+            if (string.IsNullOrEmpty(correctSizeLink))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            var finalUrl = correctSizeLink;
+
+            // If starts with //, it's coming usually from an offsite cdn
+            if (correctSizeLink.StartsWith("//"))
+            {
+                finalUrl = "https:" + correctSizeLink;
+            }
+            else if (!correctSizeLink.StartsWith(uri.Scheme))
+            {
+                finalUrl = Url.Combine(baseUrl, correctSizeLink);
+            }
+
+            _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
+            // Download the favicon.ico file using Flurl
+            var faviconStream = await finalUrl
+                .AllowHttpStatus("2xx,304")
+                .GetStreamAsync();
+
+            // Create the destination file path
+            using var image = Image.PngloadStream(faviconStream);
+            var filename = $"{domain}{encodeFormat.GetExtension()}";
+            switch (encodeFormat)
+            {
+                case EncodeFormat.PNG:
+                    image.Pngsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.WEBP:
+                    image.Webpsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                case EncodeFormat.AVIF:
+                    image.Heifsave(Path.Combine(_directoryService.FaviconDirectory, filename));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(encodeFormat), encodeFormat, null);
+            }
+
+
+            _logger.LogDebug("Favicon.png for {Domain} downloaded and saved successfully", domain);
+            return filename;
+        }catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading favicon.png for {Domain}", domain);
+            throw;
+        }
+    }
+
+    private static string FallbackToKavitaReaderFavicon(string baseUrl)
+    {
+        var correctSizeLink = string.Empty;
+        var allOverrides = "https://kavitareader.com/assets/favicons/urls.txt".GetStringAsync().Result;
+        if (!string.IsNullOrEmpty(allOverrides))
+        {
+            var cleanedBaseUrl = baseUrl.Replace("https://", string.Empty);
+            var externalFile = allOverrides
+                .Split("\n")
+                .FirstOrDefault(url =>
+                    cleanedBaseUrl.Equals(url.Replace(".png", string.Empty)) ||
+                    cleanedBaseUrl.Replace("www.", string.Empty).Equals(url.Replace(".png", string.Empty)
+                    ));
+            if (string.IsNullOrEmpty(externalFile))
+            {
+                throw new KavitaException($"Could not grab favicon from {baseUrl}");
+            }
+
+            correctSizeLink = "https://kavitareader.com/assets/favicons/" + externalFile;
+        }
+
+        return correctSizeLink;
+    }
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, bool saveAsWebP = false, int thumbnailWidth = ThumbnailWidth)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
     {
         try
         {
             using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
-            fileName += (saveAsWebP ? ".webp" : ".png");
+            fileName += encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, fileName));
             return fileName;
         }
@@ -244,6 +391,7 @@ public class ImageService : IImageService
     /// <returns></returns>
     public static string GetReadingListFormat(int readingListId)
     {
+        // ReSharper disable once StringLiteralTypo
         return $"readinglist{readingListId}";
     }
 
@@ -255,6 +403,11 @@ public class ImageService : IImageService
     public static string GetThumbnailFormat(int chapterId)
     {
         return $"thumbnail{chapterId}";
+    }
+
+    public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
+    {
+        return $"{new Uri(url).Host}{encodeFormat.GetExtension()}";
     }
 
 

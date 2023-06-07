@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
@@ -21,14 +30,16 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   General = 0,
   Metadata = 1,
   People = 2,
-  CoverImage = 3,
-  Related = 4,
-  Info = 5,
+  WebLinks = 3,
+  CoverImage = 4,
+  Related = 5,
+  Info = 6,
 }
 
 @Component({
@@ -37,9 +48,9 @@ enum TabID {
   styleUrls: ['./edit-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditSeriesModalComponent implements OnInit, OnDestroy {
+export class EditSeriesModalComponent implements OnInit {
 
-  @Input() series!: Series;
+  @Input({required: true}) series!: Series;
   seriesVolumes: any[] = [];
   isLoadingVolumes = false;
   /**
@@ -49,15 +60,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
 
   isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Metadata', 'People', 'Cover Image', 'Related', 'Info'];
+  tabs = ['General', 'Metadata', 'People', 'Web Links', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
   activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  private readonly onDestroy = new Subject<void>();
-  
-
+  private readonly destroyRef = inject(DestroyRef);
 
   // Typeaheads
   ageRatingSettings: TypeaheadSettings<AgeRatingDto> = new TypeaheadSettings();
@@ -100,6 +109,10 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     return TabID;
   }
 
+  get WebLinks() {
+    return this.metadata?.webLinks.split(',') || [''];
+  }
+
   getPersonsSettings(role: PersonRole) {
     return this.peopleSettings[role];
   }
@@ -112,16 +125,16 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
               private libraryService: LibraryService,
               private collectionService: CollectionTagService,
               private uploadService: UploadService,
-              private metadataService: MetadataService, 
+              private metadataService: MetadataService,
               private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
-    this.libraryService.getLibraryNames().pipe(takeUntil(this.onDestroy)).subscribe(names => {
+    this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
-    
+
     this.initSeries = Object.assign({}, this.series);
 
     this.editSeriesForm = this.fb.group({
@@ -168,43 +181,48 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
         this.editSeriesForm.get('publicationStatus')?.patchValue(this.metadata.publicationStatus);
         this.editSeriesForm.get('language')?.patchValue(this.metadata.language);
         this.editSeriesForm.get('releaseYear')?.patchValue(this.metadata.releaseYear);
+
+        this.WebLinks.forEach((link, index) => {
+          this.editSeriesForm.addControl('link' + index, new FormControl(link, []));
+        });
+
         this.cdRef.markForCheck();
 
-        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('name')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.nameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('sortName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.sortNameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('localizedName')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.series.localizedNameLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('summary')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.summaryLocked = true;
           this.metadata.summary = val;
           this.cdRef.markForCheck();
         });
 
 
-        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('ageRating')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.ageRating = parseInt(val + '', 10);
           this.metadata.ageRatingLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('publicationStatus')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.publicationStatus = parseInt(val + '', 10);
           this.metadata.publicationStatusLocked = true;
           this.cdRef.markForCheck();
         });
 
-        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntil(this.onDestroy)).subscribe(val => {
+        this.editSeriesForm.get('releaseYear')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
           this.metadata.releaseYear = parseInt(val + '', 10);
           this.metadata.releaseYearLocked = true;
           this.cdRef.markForCheck();
@@ -247,10 +265,6 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   setupTypeaheads() {
     forkJoin([
@@ -474,6 +488,13 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
   save() {
     const model = this.editSeriesForm.value;
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
+    this.metadata.webLinks = Object.keys(this.editSeriesForm.controls)
+      .filter(key => key.startsWith('link'))
+      .map(key => this.editSeriesForm.get(key)?.value)
+      .filter(v => v !== null && v !== '')
+      .join(',');
+
+
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata, this.collectionTags)
@@ -500,6 +521,21 @@ export class EditSeriesModalComponent implements OnInit, OnDestroy {
     forkJoin(apis).subscribe(results => {
       this.modal.close({success: true, series: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset});
     });
+  }
+
+  addWebLink() {
+    this.metadata.webLinks += ',';
+    this.editSeriesForm.addControl('link' + (this.WebLinks.length - 1), new FormControl('', []));
+    this.cdRef.markForCheck();
+  }
+
+  removeWebLink(index: number) {
+    const tokens = this.metadata.webLinks.split(',');
+    const tokenToRemove = tokens[index];
+
+    this.metadata.webLinks = tokens.filter(t => t != tokenToRemove).join(',');
+    this.editSeriesForm.removeControl('link' + index, {emitEvent: true});
+    this.cdRef.markForCheck();
   }
 
   updateCollections(tags: CollectionTag[]) {

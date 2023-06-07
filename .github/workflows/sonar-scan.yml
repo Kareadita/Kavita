@@ -156,11 +156,11 @@ jobs:
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: '14'
+          node-version: '16'
       - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm ci
+          npm install --legacy-peer-deps
 
           echo 'Building UI'
           npm run prod
@@ -280,12 +280,12 @@ jobs:
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: '14'
+          node-version: '16'
       - run: |
 
           cd UI/Web || exit
           echo 'Installing web dependencies'
-          npm install
+          npm ci
 
           echo 'Building UI'
           npm run prod

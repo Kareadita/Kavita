@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
@@ -22,9 +23,7 @@ public static class ApplicationServiceExtensions
         services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IFileSystem, FileSystem>();
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<ICacheHelper, CacheHelper>();
 
@@ -35,7 +34,6 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IBackupService, BackupService>();
         services.AddScoped<ICleanupService, CleanupService>();
         services.AddScoped<IBookService, BookService>();
-        services.AddScoped<IImageService, ImageService>();
         services.AddScoped<IVersionUpdaterService, VersionUpdaterService>();
         services.AddScoped<IDownloadService, DownloadService>();
         services.AddScoped<IReaderService, ReaderService>();
@@ -49,6 +47,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IReadingListService, ReadingListService>();
         services.AddScoped<IDeviceService, DeviceService>();
         services.AddScoped<IStatisticService, StatisticService>();
+        services.AddScoped<IMediaErrorService, MediaErrorService>();
+        services.AddScoped<IMediaConversionService, MediaConversionService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
@@ -57,11 +57,20 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ITachiyomiService, TachiyomiService>();
         services.AddScoped<ICollectionTagService, CollectionTagService>();
 
-        services.AddScoped<IPresenceTracker, PresenceTracker>();
+        services.AddScoped<IFileSystem, FileSystem>();
+        services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
+        services.AddScoped<IPresenceTracker, PresenceTracker>();
+
+        services.AddScoped<IImageService, ImageService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
+
+        services.AddEasyCaching(options =>
+        {
+            options.UseInMemory(EasyCacheProfiles.Favicon);
+        });
     }
 
     private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)

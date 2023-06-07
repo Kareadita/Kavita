@@ -7,11 +7,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.5" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0" />
         <PackageReference Include="Moq" Version="4.18.4" />
         <PackageReference Include="NSubstitute" Version="4.4.0" />
-        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="19.2.11" />
-        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.11" />
+        <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="19.2.29" />
+        <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.29" />
         <PackageReference Include="xunit" Version="2.4.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

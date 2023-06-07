@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using API.Archive;
 using API.Data.Metadata;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -20,7 +22,7 @@ public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
     int GetNumberOfPagesFromArchive(string archivePath);
-    string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false);
+    string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format);
     bool IsValidArchive(string archivePath);
     ComicInfo? GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);
@@ -44,13 +46,16 @@ public class ArchiveService : IArchiveService
     private readonly ILogger<ArchiveService> _logger;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly IMediaErrorService _mediaErrorService;
     private const string ComicInfoFilename = "ComicInfo.xml";
 
-    public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService, IImageService imageService)
+    public ArchiveService(ILogger<ArchiveService> logger, IDirectoryService directoryService,
+        IImageService imageService, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _imageService = imageService;
+        _mediaErrorService = mediaErrorService;
     }
 
     /// <summary>
@@ -120,6 +125,8 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetNumberOfPagesFromArchive] There was an exception when reading archive stream: {ArchivePath}. Defaulting to 0 pages", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
             return 0;
         }
     }
@@ -196,9 +203,9 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="fileName">File name to use based on context of entity.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="saveAsWebP">When saving the file, use WebP encoding instead of PNG</param>
+    /// <param name="encodeFormat">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, bool saveAsWebP = false)
+    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
         if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
         try
@@ -214,7 +221,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -225,7 +232,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, saveAsWebP);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -238,6 +245,8 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
         }
 
         return string.Empty;
@@ -364,10 +373,7 @@ public class ArchiveService : IArchiveService
                     if (entry != null)
                     {
                         using var stream = entry.Open();
-                        var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo?) serializer.Deserialize(stream);
-                        ComicInfo.CleanComicInfo(info);
-                        return info;
+                        return Deserialize(stream);
                     }
 
                     break;
@@ -382,9 +388,7 @@ public class ArchiveService : IArchiveService
                     if (entry != null)
                     {
                         using var stream = entry.OpenEntryStream();
-                        var serializer = new XmlSerializer(typeof(ComicInfo));
-                        var info = (ComicInfo?) serializer.Deserialize(stream);
-                        ComicInfo.CleanComicInfo(info);
+                        var info = Deserialize(stream);
                         return info;
                     }
 
@@ -403,9 +407,33 @@ public class ArchiveService : IArchiveService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[GetComicInfo] There was an exception when reading archive stream: {Filepath}", archivePath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Strips out empty tags before deserializing
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
+    private static ComicInfo? Deserialize(Stream stream)
+    {
+        var comicInfoXml = XDocument.Load(stream);
+        comicInfoXml.Descendants()
+            .Where(e => e.IsEmpty || string.IsNullOrWhiteSpace(e.Value))
+            .Remove();
+
+        var serializer = new XmlSerializer(typeof(ComicInfo));
+        using var reader = comicInfoXml.Root?.CreateReader();
+        if (reader == null) return null;
+
+        var info  = (ComicInfo?) serializer.Deserialize(reader);
+        ComicInfo.CleanComicInfo(info);
+        return info;
+
     }
 
 
@@ -417,7 +445,7 @@ public class ArchiveService : IArchiveService
         {
             entry.WriteToDirectory(extractPath, new ExtractionOptions()
             {
-                ExtractFullPath = true, // Don't flatten, let the flatterner ensure correct order of nested folders
+                ExtractFullPath = true, // Don't flatten, let the flattener ensure correct order of nested folders
                 Overwrite = false
             });
         }
@@ -485,9 +513,11 @@ public class ArchiveService : IArchiveService
             }
 
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogWarning(e, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+            _logger.LogWarning(ex, "[ExtractArchive] There was a problem extracting {ArchivePath} to {ExtractPath}",archivePath, extractPath);
+            _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
+                "This archive cannot be read or not supported", ex);
             throw new KavitaException(
                 $"There was an error when extracting {archivePath}. Check the file exists, has read permissions or the server OS can support all path characters.");
         }

@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnDestroy,
+  OnInit
+} from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -9,6 +18,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { UploadService } from 'src/app/_services/upload.service';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum TabID {
   General = 'General',
@@ -21,9 +31,10 @@ enum TabID {
   styleUrls: ['./edit-reading-list-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditReadingListModalComponent implements OnInit, OnDestroy {
+export class EditReadingListModalComponent implements OnInit {
 
-  @Input() readingList!: ReadingList;
+  @Input({required: true}) readingList!: ReadingList;
+  private readonly destroyRef = inject(DestroyRef);
   reviewGroup!: FormGroup;
 
   coverImageIndex: number = 0;
@@ -35,13 +46,11 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
   imageUrls: Array<string> = [];
   active = TabID.General;
 
-  private readonly onDestroy = new Subject<void>();
-
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
 
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
-    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService, 
+  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
+    public utilityService: UtilityService, private uploadService: UploadService, private toastr: ToastrService,
     private imageService: ImageService, private readonly cdRef: ChangeDetectorRef, public accountService: AccountService) { }
 
   ngOnInit(): void {
@@ -58,7 +67,7 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
     this.coverImageLocked = this.readingList.coverImageLocked;
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
-      debounceTime(100), 
+      debounceTime(100),
       distinctUntilChanged(),
       switchMap(name => this.readingListService.nameExists(name)),
       tap(exists => {
@@ -66,11 +75,11 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
         if (!exists || isExistingName) {
           this.reviewGroup.get('title')?.setErrors(null);
         } else {
-          this.reviewGroup.get('title')?.setErrors({duplicateName: true})  
+          this.reviewGroup.get('title')?.setErrors({duplicateName: true})
         }
         this.cdRef.markForCheck();
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
     this.imageUrls.push(this.imageService.randomize(this.imageService.getReadingListCoverImage(this.readingList.id)));
@@ -81,11 +90,6 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
     } else {
       this.imageUrls.push(...(this.readingList.items).map(rli => this.imageService.getChapterCoverImage(rli.chapterId)));
     }
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   close() {
@@ -101,11 +105,11 @@ export class EditReadingListModalComponent implements OnInit, OnDestroy {
     model.endingMonth = model.endingMonth || 0;
     model.endingYear = model.endingYear || 0;
     const apis = [this.readingListService.update(model)];
-    
+
     if (this.selectedCover !== '') {
       apis.push(this.uploadService.updateReadingListCoverImage(this.readingList.id, this.selectedCover))
     }
-  
+
     forkJoin(apis).subscribe(results => {
       this.readingList.title = model.title;
       this.readingList.summary = model.summary;

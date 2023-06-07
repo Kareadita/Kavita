@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace API.Data;
+namespace API.Data.ManualMigrations;
 
 /// <summary>
 /// v0.7 introduced UTC dates and GMT+1 users would sometimes have dates stored as '0000-12-31 23:00:00'.
