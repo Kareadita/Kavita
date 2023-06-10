@@ -403,7 +403,7 @@ public class ScrobblingService : IScrobblingService
         var progressCounter = 0;
 
         var librariesWithScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
-            .ToList()
+            .AsEnumerable()
             .Where(l => l.AllowScrobbling)
             .Select(l => l.Id)
             .ToImmutableHashSet();

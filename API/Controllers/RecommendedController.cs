@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.Extensions;
@@ -29,6 +30,7 @@ public class RecommendedController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("recommendations")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecommendations(int seriesId)
     {
         var userId = User.GetUserId();
