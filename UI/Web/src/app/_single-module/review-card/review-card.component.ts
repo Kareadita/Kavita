@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, Input} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {SharedModule} from "../../shared/shared.module";
+import {UserReview} from "./user-review";
 
 @Component({
   selector: 'app-review-card',
@@ -10,5 +11,7 @@ import {SharedModule} from "../../shared/shared.module";
   styleUrls: ['./review-card.component.scss']
 })
 export class ReviewCardComponent {
+
+  @Input({required: true}) review!: UserReview;
 
 }
