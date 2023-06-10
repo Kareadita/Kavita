@@ -11,6 +11,9 @@ trim_trailing_whitespace = true
 [*.ts]
 quote_type = single
 
+[*.scss]
+indent_size = 4
+
 [*.md]
 max_line_length = off
 trim_trailing_whitespace = false

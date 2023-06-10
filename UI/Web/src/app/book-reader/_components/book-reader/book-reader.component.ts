@@ -474,6 +474,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.handleScrollEvent();
     });
+
+    // TODO: In order to allow people to highlight content under pagination overlays, apply pointer-events: none while
+    // a highlight operation is in effect
   }
 
   handleScrollEvent() {
