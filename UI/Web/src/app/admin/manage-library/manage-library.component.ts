@@ -4,13 +4,11 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { LibrarySettingsModalComponent } from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
@@ -85,7 +83,7 @@ export class ManageLibraryComponent implements OnInit {
     this.loading = true;
     this.cdRef.markForCheck();
     this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
-      this.libraries = libraries;
+      this.libraries = [...libraries];
       this.loading = false;
       this.cdRef.markForCheck();
     });
@@ -111,13 +109,13 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   async deleteLibrary(library: Library) {
-    if (await this.confirmService.confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
+    if (await this.confirmService.confirm('Are you sure you want to delete the ' + library.name + ' library? You cannot undo this action.')) {
       this.deletionInProgress = true;
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
         this.cdRef.markForCheck();
         this.getLibraries();
-        this.toastr.success('Library has been removed');
+        this.toastr.success('Library ' + library.name + ' has been removed');
       });
     }
   }

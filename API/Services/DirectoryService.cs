@@ -518,7 +518,9 @@ public class DirectoryService : IDirectoryService
             {
                 Name = d.Name,
                 FullPath = d.FullName,
-            }).ToImmutableList();
+            })
+            .OrderBy(s => s.Name)
+            .ToImmutableList();
 
         return dirs;
     }

@@ -95,33 +95,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.BookReaderWritingStyle)
             .HasDefaultValue(WritingStyle.Horizontal);
 
-
-        builder.Entity<Library>()
-            .Property(b => b.FolderWatching)
-            .HasDefaultValue(true);
-        builder.Entity<Library>()
-            .Property(b => b.IncludeInDashboard)
-            .HasDefaultValue(true);
-        builder.Entity<Library>()
-            .Property(b => b.IncludeInRecommended)
-            .HasDefaultValue(true);
-        builder.Entity<Library>()
-            .Property(b => b.IncludeInSearch)
-            .HasDefaultValue(true);
-        builder.Entity<Library>()
-            .Property(b => b.ManageCollections)
-            .HasDefaultValue(true);
-        builder.Entity<Library>()
-            .Property(b => b.ManageReadingLists)
-            .HasDefaultValue(true);
-
         builder.Entity<Chapter>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
-
+            
         builder.Entity<Chapter>()
             .Property(b => b.ISBN)
             .HasDefaultValue(string.Empty);

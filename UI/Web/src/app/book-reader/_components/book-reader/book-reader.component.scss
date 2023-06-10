@@ -336,7 +336,6 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 20vw;
     z-index: 3;
-    cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -345,6 +344,10 @@ $action-bar-height: 38px;
 
     &.immersive {
         top: 0px;
+    }
+
+    &:hover {
+        cursor: pointer;
     }
 }
 
@@ -355,7 +358,6 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 18%;
     z-index: 3;
-    cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -364,6 +366,9 @@ $action-bar-height: 38px;
 
     &.immersive {
         top: 0px;
+    }
+    &:hover {
+      cursor: pointer;
     }
 }
 
@@ -376,7 +381,6 @@ $action-bar-height: 38px;
     border-color: transparent;
     border: none !important;
     z-index: 3;
-    cursor: pointer;
     opacity: 0;
     outline: none;
 
@@ -384,6 +388,9 @@ $action-bar-height: 38px;
         top: 0px;
     }
 
+    &:hover {
+      cursor: pointer;
+    }
 }
 
 
