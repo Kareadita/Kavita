@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
@@ -112,7 +114,7 @@ public class LibraryController : BaseApiController
             }));
         }
 
-        if (!Directory.Exists(path)) return BadRequest("This is not a valid path");
+        if (!Directory.Exists(path)) return Ok(_directoryService.ListDirectory(Path.GetDirectoryName(path)));
 
         return Ok(_directoryService.ListDirectory(path));
     }

@@ -15,6 +15,9 @@ indent_size = 2
 quote_type = single
 indent_size = 2
 
+[*.scss]
+indent_size = 4
+
 [*.md]
 max_line_length = off
 trim_trailing_whitespace = false

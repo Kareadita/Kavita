@@ -80,28 +80,34 @@ export const BookPaperTheme = `
       --nav-link-active-text-color: white;
       --nav-link-text-color: white;
 
-
-
     /* Reading Bar */
     --br-actionbar-button-hover-border-color: #6c757d;
     --br-actionbar-bg-color: #F1E4D5;
 
     /* Drawer */
     --drawer-pagination-horizontal-rule: inset 0 -1px 0 rgb(0 0 0 / 13%);
+
+    /* Custom variables */
+    --theme-bg-color: #fff3c9;
 }
 
 .reader-container {
   color: black !important;
-  background-color: #fff3c9 !important;
+  background-color: var(--theme-bg-color) !important;
   background: url("/assets/images/paper-bg.png");
 }
 
 .book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
-  color: black !important;
+  color: var(--bs-body-color) !important;
 }
 
 .book-content code {
   color: #e83e8c !important;
+}
+
+// KDB has a reboot style so for lighter themes, this is needed
+.book-content kbd {
+  background-color: transparent;
 }
 
 .book-content :link, .book-content a {
@@ -115,7 +121,7 @@ background-color: initial !important;
 }
 
 
-.book-content *:not(code), .book-content *:not(a) {
+.book-content *:not(code), .book-content *:not(a), .book-content *:not(kbd) {
     //background-color: #F1E4D5;
     box-shadow: none;
     text-shadow: none;
