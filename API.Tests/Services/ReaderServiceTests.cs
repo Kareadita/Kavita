@@ -19,6 +19,8 @@ using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
 using AutoMapper;
+using Hangfire;
+using Hangfire.InMemory;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -181,7 +183,7 @@ public class ReaderServiceTests
         await _context.SaveChangesAsync();
 
 
-
+        JobStorage.Current = new InMemoryStorage();
         var successful = await _readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,
@@ -219,8 +221,7 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
+        JobStorage.Current = new InMemoryStorage();
         var successful = await _readerService.SaveReadingProgress(new ProgressDto()
         {
             ChapterId = 1,

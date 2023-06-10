@@ -17,6 +17,7 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
+using Hangfire.InMemory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;

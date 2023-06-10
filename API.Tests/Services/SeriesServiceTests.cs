@@ -17,6 +17,8 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using API.Tests.Helpers;
+using Hangfire;
+using Hangfire.InMemory;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -336,6 +338,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings);
 
+        JobStorage.Current = new InMemoryStorage();
         var result = await _seriesService.UpdateRating(user, new UpdateSeriesRatingDto()
         {
             SeriesId = 1,
@@ -381,6 +384,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(result);
 
+        JobStorage.Current = new InMemoryStorage();
         var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
             .Ratings;
         Assert.NotEmpty(ratings);
@@ -434,6 +438,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         Assert.True(result);
 
+        JobStorage.Current = new InMemoryStorage();
         var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
             .Ratings;
         Assert.NotEmpty(ratings);
