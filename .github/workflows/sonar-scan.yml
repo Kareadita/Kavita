@@ -97,15 +97,6 @@ jobs:
         with:
             dotnet-version: 7.0.x
 
-      - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
-
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
       - name: Bump versions
         uses: SiqiLu/dotnet-bump-version@2.0.0
         with:
@@ -363,7 +354,7 @@ jobs:
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
 
   canary:
-      name: Build Nightly Docker if Canary push
+      name: Build Canary Docker if Canary push
       needs: [ build, version ]
       runs-on: ubuntu-latest
       permissions:
@@ -380,7 +371,7 @@ jobs:
           - name: Check Out Repo
             uses: actions/checkout@v3
             with:
-                ref: develop
+                ref: canary
 
           - name: NodeJS to Compile WebUI
             uses: actions/setup-node@v2.1.5
