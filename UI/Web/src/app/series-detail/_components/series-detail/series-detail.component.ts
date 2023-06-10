@@ -111,7 +111,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
-  bulkActions: ActionItem<any>[] = [];
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
@@ -130,8 +129,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesImage: string = '';
   downloadInProgress: boolean = false;
 
-  itemSize: number = 10; // when 10 done, 16 loads
-
   /**
    * Track by function for Volume to tell when to refresh card data
    */
@@ -140,7 +137,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
-  trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackByRelatedSeriesIdentify = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
     if (item.isChapter) {
       return this.trackByChapterIdentity(index, item!.chapter!)
@@ -527,6 +525,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
       this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
         this.recommendations = recommendations;
+        this.hasRecommendations = this.recommendations.length > 0;
         this.changeDetectionRef.markForCheck();
       });
 

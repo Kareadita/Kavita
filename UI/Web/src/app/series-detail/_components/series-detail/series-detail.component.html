@@ -317,22 +317,21 @@
         <ng-template ngbNavContent>
           <virtual-scroller #scroll [items]="relations" [parentScroll]="scrollingBlock">
             <div class="card-container row g-0" #container>
-              <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentiy">
+              <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentify">
                 <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId" [relation]="item.relation"></app-series-card>
               </ng-container>
             </div>
           </virtual-scroller>
         </ng-template>
       </li>
-      {{hasRecommendations && user?.hasLicense}}
 
       <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations && user?.hasLicense">
           <a ngbNavLink>Recommendations</a>
           <ng-template ngbNavContent>
               <virtual-scroller #scroll [items]="recommendations" [parentScroll]="scrollingBlock">
                   <div class="card-container row g-0" #container>
-                      <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackByRelatedSeriesIdentiy">
-                          <app-series-card class="col-auto mt-2 mb-2" [data]="item.series" [libraryId]="item.series.libraryId"></app-series-card>
+                      <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackBySeriesIdentify">
+                          <app-series-card class="col-auto mt-2 mb-2" [data]="item" [libraryId]="item.libraryId"></app-series-card>
                       </ng-container>
                   </div>
               </virtual-scroller>
