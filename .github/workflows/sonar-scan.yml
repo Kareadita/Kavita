@@ -361,3 +361,97 @@ jobs:
             details: '${{ steps.parse-body.outputs.BODY }}'
             text: <@&939225192553644133> A new stable build has been released.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
+
+  canary:
+      name: Build Nightly Docker if Canary push
+      needs: [ build, version ]
+      runs-on: ubuntu-latest
+      permissions:
+          packages: write
+          contents: read
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/canary' }}
+      steps:
+          - name: Find Current Pull Request
+            uses: jwalton/gh-find-current-pr@v1.0.2
+            id: findPr
+            with:
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Check Out Repo
+            uses: actions/checkout@v3
+            with:
+                ref: develop
+
+          - name: NodeJS to Compile WebUI
+            uses: actions/setup-node@v2.1.5
+            with:
+                node-version: '16'
+          - run: |
+                cd UI/Web || exit
+                echo 'Installing web dependencies'
+                npm install --legacy-peer-deps
+
+                echo 'Building UI'
+                npm run prod
+
+                echo 'Copying back to Kavita wwwroot'
+                rsync -a dist/ ../../API/wwwroot/
+
+                cd ../ || exit
+
+          - name: Get csproj Version
+            uses: naminodarie/get-net-sdk-project-versions-action@v1
+            id: get-version
+            with:
+                proj-path: Kavita.Common/Kavita.Common.csproj
+
+          - name: Parse Version
+            run: |
+                version='${{steps.get-version.outputs.assembly-version}}'
+                echo "::set-output name=VERSION::$version"
+            id: parse-version
+
+          - name: Echo csproj version
+            run: echo "${{steps.get-version.outputs.assembly-version}}"
+
+          - name: Compile dotnet app
+            uses: actions/setup-dotnet@v3
+            with:
+                dotnet-version: 7.0.x
+
+          - name: Install Swashbuckle CLI
+            run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+
+          - run: ./monorepo-build.sh
+
+          - name: Login to Docker Hub
+            uses: docker/login-action@v2
+            with:
+                username: ${{ secrets.DOCKER_HUB_USERNAME }}
+                password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+          - name: Login to GitHub Container Registry
+            uses: docker/login-action@v2
+            with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Set up QEMU
+            uses: docker/setup-qemu-action@v1
+
+          - name: Set up Docker Buildx
+            id: buildx
+            uses: docker/setup-buildx-action@v1
+
+          - name: Build and push
+            id: docker_build
+            uses: docker/build-push-action@v2
+            with:
+                context: .
+                platforms: linux/amd64,linux/arm/v7,linux/arm64
+                push: true
+                tags: kizaing/kavita:canary, kizaing/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
+
+          - name: Image digest
+            run: echo ${{ steps.docker_build.outputs.digest }}
