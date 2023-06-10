@@ -22,6 +22,7 @@ public interface ILicenseService
     Task ValidateAllLicenses();
     Task RemoveLicenseFromUser(AppUser user);
     Task AddLicenseToUser(AppUser user, string license);
+    Task<bool> DefaultUserHasLicense();
 }
 
 public class LicenseService : ILicenseService
@@ -184,5 +185,12 @@ public class LicenseService : ILicenseService
         {
             throw new KavitaException("Could not remove user's License", ex);
         }
+    }
+
+    public async Task<bool> DefaultUserHasLicense()
+    {
+        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
+        if (defaultAdminUser == null) return false;
+        return await HasActiveLicense(defaultAdminUser.Id);
     }
 }

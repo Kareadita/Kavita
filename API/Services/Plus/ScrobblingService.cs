@@ -46,8 +46,8 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
 
-    private const string AniListWeblinkWebsite = "https://anilist.co/";
-    private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+    public const string AniListWeblinkWebsite = "https://anilist.co/";
+    public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
 
     private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
@@ -178,21 +178,10 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
-            Format = GetFormat(series.Library.Type),
+            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
-    }
-
-    private static MediaFormat GetFormat(LibraryType libraryType)
-    {
-        return libraryType switch
-        {
-            LibraryType.Manga => MediaFormat.Manga,
-            LibraryType.Comic => MediaFormat.Comic,
-            LibraryType.Book => MediaFormat.LightNovel,
-            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)
-        };
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -226,7 +215,7 @@ public class ScrobblingService : IScrobblingService
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
                 ChapterNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId),
-                Format = GetFormat(series.Library.Type),
+                Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             };
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
@@ -263,7 +252,7 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
-            Format = GetFormat(series.Library.Type),
+            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
@@ -588,7 +577,13 @@ public class ScrobblingService : IScrobblingService
         return providers;
     }
 
-    private static int? ExtractId(string webLinks, string website)
+    /// <summary>
+    /// Extract an Id from a given weblink
+    /// </summary>
+    /// <param name="webLinks"></param>
+    /// <param name="website"></param>
+    /// <returns></returns>
+    public static int? ExtractId(string webLinks, string website)
     {
         foreach (var webLink in webLinks.Split(","))
         {

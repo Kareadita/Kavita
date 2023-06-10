@@ -191,7 +191,7 @@ export class SeriesService {
   }
 
   getRecommendationsForSeries(seriesId: number) {
-    return this.httpClient.get<Array<Series>>(this.baseUrl + 'recommendation?seriesId=' + seriesId);
+    return this.httpClient.get<Array<Series>>(this.baseUrl + 'recommended/recommendations?seriesId=' + seriesId);
   }
 
   updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,

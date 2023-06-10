@@ -324,6 +324,7 @@
           </virtual-scroller>
         </ng-template>
       </li>
+      {{hasRecommendations && user?.hasLicense}}
 
       <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations && user?.hasLicense">
           <a ngbNavLink>Recommendations</a>

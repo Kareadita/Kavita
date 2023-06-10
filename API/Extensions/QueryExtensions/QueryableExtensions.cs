@@ -81,6 +81,25 @@ public static class QueryableExtensions
             .Select(lib => lib.Id);
     }
 
+    /// <summary>
+    /// Returns all libraries for a given user and library type
+    /// </summary>
+    /// <param name="library"></param>
+    /// <param name="userId"></param>
+    /// <param name="queryContext"></param>
+    /// <returns></returns>
+    public static IQueryable<int> GetUserLibrariesByType(this IQueryable<Library> library, int userId, LibraryType type, QueryContext queryContext = QueryContext.None)
+    {
+        return library
+            .Include(l => l.AppUsers)
+            .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
+            .Where(lib => lib.Type == type)
+            .IsRestricted(queryContext)
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Select(lib => lib.Id);
+    }
+
     public static IEnumerable<DateTime> Range(this DateTime startDate, int numberOfDays) =>
         Enumerable.Range(0, numberOfDays).Select(e => startDate.AddDays(e));
 
