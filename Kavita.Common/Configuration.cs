@@ -12,7 +12,7 @@ public static class Configuration
     public const string DefaultBaseUrl = "/";
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
-    public const string KavitaPlusApiUrl = "http://localhost:5020";
+    public const string KavitaPlusApiUrl = "https://plus.kavitareader.com"; // "http://localhost:5020";
     public const string DefaultXFrameOptions = "SAMEORIGIN";
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
