@@ -80,6 +80,10 @@ export enum EVENTS {
     * A user is sending files to their device
     */
   SendingToDevice = 'SendingToDevice',
+  /**
+   * A scrobbling token has expired
+   */
+  ScrobblingKeyExpired = 'ScrobblingKeyExpired',
 }
 
 export interface Message<T> {
@@ -110,9 +114,7 @@ export class MessageHubService {
 
   isAdmin: boolean = false;
 
-  constructor(private toastr: ToastrService, private router: Router) {
-
-  }
+  constructor() {}
 
   /**
    * Tests that an event is of the type passed
@@ -262,6 +264,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SendingToDevice, resp => {
       this.messagesSource.next({
         event: EVENTS.SendingToDevice,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ScrobblingKeyExpired, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ScrobblingKeyExpired,
         payload: resp.body
       });
     });

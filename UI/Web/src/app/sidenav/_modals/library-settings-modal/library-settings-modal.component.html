@@ -11,9 +11,9 @@
 </div>
 <form [formGroup]="libraryForm">
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" 
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
             orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-        
+
             <li [ngbNavItem]="TabID.General">
                 <a ngbNavLink>{{TabID.General}}</a>
                 <ng-template ngbNavContent>
@@ -39,7 +39,7 @@
                         </select>
                     </div>
                     <div *ngIf="!isAddLibrary">
-                        Last Scanned: 
+                        Last Scanned:
                         <span *ngIf="library.lastScanned === '0001-01-01T00:00:00'; else activeDate">Never</span>
                         <ng-template #activeDate>
                             {{library.lastScanned | date: 'short'}}
@@ -79,7 +79,7 @@
                 <ng-template ngbNavContent>
                     <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">Custom library image icons are optional</p>
                     <p>Library image should not be large. Aim for a small file, 32x32 pixels in size. Kavita does not perform validation on size.</p>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" 
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls"
                             [showReset]="false"
                             [showApplyButton]="true"
                             (applyCover)="applyCoverImage($event)"
@@ -119,7 +119,22 @@
                             </p>
                         </div>
                     </div>
-                    
+
+                  <div class="row">
+                    <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                      <div class="mb-3 mt-1">
+                        <div class="form-check form-switch">
+                          <input type="checkbox" id="scrobbling" role="switch" formControlName="allowScrobbling" class="form-check-input">
+                          <label class="form-check-label" for="scrobbling">Allow Scrobbling</label>
+                        </div>
+                      </div>
+                      <p class="accent">
+                        Should Kavita scrobble reading events, want to read status, and ratings to configured providers.
+                          This will only occur for those with an active KavitaPlus Subscription.
+                      </p>
+                    </div>
+                  </div>
+
                     <div class="row">
                         <div class="col-md-12 col-sm-12 pe-2 mb-2">
                             <div class="mb-3 mt-1">
@@ -183,7 +198,7 @@
     <button type="button" class="btn btn-light" (click)="forceScan()" position="above" ngbTooltip="This will force a scan on the library, treating like a fresh scan">Force Scan</button>
     <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
     <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-    
+
     <ng-container *ngIf="isAddLibrary && setupStep !== 3; else editLibraryButton">
         <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">Next</button>
     </ng-container>

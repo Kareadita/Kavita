@@ -8,12 +8,14 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.Settings;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Scrobble;
 using API.Helpers.Converters;
 using AutoMapper;
 
@@ -134,7 +136,11 @@ public class AutoMapperProfiles : Profile
                 {
                     AgeRating = src.AgeRestriction,
                     IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
-                }));
+                }))
+            .ForMember(dest => dest.HasLicense,
+                opt =>
+                    opt.MapFrom(src => !string.IsNullOrEmpty(src.License)));
+
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
@@ -152,6 +158,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
+        CreateMap<ScrobbleError, ScrobbleErrorDto>();
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,

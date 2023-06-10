@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -35,12 +36,14 @@ public class ReaderController : BaseApiController
     private readonly IBookmarkService _bookmarkService;
     private readonly IAccountService _accountService;
     private readonly IEventHub _eventHub;
+    private readonly IScrobblingService _scrobblingService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
         IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
         IReaderService readerService, IBookmarkService bookmarkService,
-        IAccountService accountService, IEventHub eventHub)
+        IAccountService accountService, IEventHub eventHub,
+        IScrobblingService scrobblingService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -49,6 +52,7 @@ public class ReaderController : BaseApiController
         _bookmarkService = bookmarkService;
         _accountService = accountService;
         _eventHub = eventHub;
+        _scrobblingService = scrobblingService;
     }
 
     /// <summary>
@@ -302,6 +306,7 @@ public class ReaderController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
+        BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
         return Ok();
     }
 
@@ -320,6 +325,7 @@ public class ReaderController : BaseApiController
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
 
+        BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
         return Ok();
     }
 
@@ -339,6 +345,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
             return Ok();
         }
 
@@ -364,6 +371,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
             return Ok();
         }
 
@@ -393,6 +401,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
             return Ok();
         }
 
@@ -422,6 +431,7 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
             return Ok();
         }
 
@@ -448,6 +458,10 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
+            }
             return Ok();
         }
 
@@ -474,6 +488,10 @@ public class ReaderController : BaseApiController
 
         if (await _unitOfWork.CommitAsync())
         {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
+            }
             return Ok();
         }
 

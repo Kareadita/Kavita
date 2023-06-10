@@ -13,4 +13,5 @@ public class UserDto
     public UserPreferencesDto? Preferences { get; set; }
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public string KavitaVersion { get; set; }
+    public bool HasLicense { get; set; }
 }

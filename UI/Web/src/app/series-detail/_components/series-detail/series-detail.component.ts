@@ -67,7 +67,8 @@ enum TabID {
   Specials = 1,
   Storyline = 2,
   Volumes = 3,
-  Chapters = 4
+  Chapters = 4,
+  Recommendations = 5
 }
 
 interface StoryLineItem {
@@ -110,13 +111,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesActions: ActionItem<Series>[] = [];
   volumeActions: ActionItem<Volume>[] = [];
   chapterActions: ActionItem<Chapter>[] = [];
-  bulkActions: ActionItem<any>[] = [];
 
   hasSpecials = false;
   specials: Array<Chapter> = [];
   activeTabId = TabID.Storyline;
-  hasNonSpecialVolumeChapters = false;
-  hasNonSpecialNonVolumeChapters = false;
 
   userReview: string = '';
   libraryType: LibraryType = LibraryType.Manga;
@@ -131,8 +129,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   seriesImage: string = '';
   downloadInProgress: boolean = false;
 
-  itemSize: number = 10; // when 10 done, 16 loads
-
   /**
    * Track by function for Volume to tell when to refresh card data
    */
@@ -141,7 +137,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
-  trackByRelatedSeriesIdentiy = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackByRelatedSeriesIdentify = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
     if (item.isChapter) {
       return this.trackByChapterIdentity(index, item!.chapter!)
@@ -154,9 +151,18 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    */
   hasRelations: boolean = false;
   /**
+   * Are there recommendations
+   */
+  hasRecommendations: boolean = false;
+
+  /**
    * Related Series. Sorted by backend
    */
   relations: Array<RelatedSeris> = [];
+  /**
+   * Recommended Series
+   */
+  recommendations: Array<Series> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
     {value: 'Storyline', text: 'Storyline'},
@@ -281,11 +287,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               private actionFactoryService: ActionFactoryService, private libraryService: LibraryService,
               private confirmService: ConfirmService, private titleService: Title,
               private downloadService: DownloadService, private actionService: ActionService,
-              public imageSerivce: ImageService, private messageHub: MessageHubService,
-              private readingListService: ReadingListService, public navService: NavService,
+              private messageHub: MessageHubService, private readingListService: ReadingListService,
+              public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
               private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService,
-              private deviceSerivce: DeviceService
+              private deviceService: DeviceService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -463,7 +469,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case (Action.SendTo):
         {
           const device = (action._extra!.data as Device);
-          this.deviceSerivce.sendTo([chapter.id], device.id).subscribe(() => {
+          this.deviceService.sendTo([chapter.id], device.id).subscribe(() => {
             this.toastr.success('File emailed to ' + device.name);
           });
           break;
@@ -517,6 +523,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
+      this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
+        this.recommendations = recommendations;
+        this.hasRecommendations = this.recommendations.length > 0;
+        this.changeDetectionRef.markForCheck();
+      });
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relations = [

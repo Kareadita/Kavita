@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.1"
+    "version": "0.7.3.2"
   },
   "servers": [
     {
@@ -136,6 +136,36 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account/refresh-account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns an up-to-date user account",
         "responses": {
           "200": {
             "description": "Success",
@@ -2626,6 +2656,116 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/LibraryType"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/server-has-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "If the Admin has a license, then some features of Kavita server are unlocked for all users",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/valid-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Checks if the user's license is valid or not",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License": {
+      "post": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Updates user's license. Returns true if updated and valid",
+        "description": "Caches the result",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
                 }
               }
             }
@@ -5712,6 +5852,56 @@
         }
       }
     },
+    "/api/Recommended/recommendations": {
+      "get": {
+        "tags": [
+          "Recommended"
+        ],
+        "summary": "For KavitaPlus users, this will return recommendations on the server.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [
@@ -6052,6 +6242,137 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/anilist-token": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/update-anilist-token": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/token-expired": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ScrobbleProvider"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/scrobble-errors": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/clear-errors": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -9678,6 +9999,16 @@
         },
         "additionalProperties": false
       },
+      "AniListUpdateDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AppRole": {
         "type": "object",
         "properties": {
@@ -9862,6 +10193,16 @@
           "ageRestrictionIncludeUnknowns": {
             "type": "boolean",
             "description": "If an age rating restriction is applied to the account, if Unknowns should be allowed for the user. Defaults to false."
+          },
+          "aniListAccessToken": {
+            "type": "string",
+            "description": "The JWT for the user's AniList account. Expires after a year.",
+            "nullable": true
+          },
+          "license": {
+            "type": "string",
+            "description": "KavitaPlus License Key",
+            "nullable": true
           },
           "rowVersion": {
             "type": "integer",
@@ -10128,6 +10469,9 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
           },
           "appUserId": {
             "type": "integer",
@@ -11972,6 +12316,10 @@
             "type": "boolean",
             "description": "Should this library create reading lists from Metadata"
           },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
+          },
           "created": {
             "type": "string",
             "format": "date-time"
@@ -12064,6 +12412,10 @@
           "includeInSearch": {
             "type": "boolean",
             "description": "Include library series in Search"
+          },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
           },
           "folders": {
             "type": "array",
@@ -13176,6 +13528,41 @@
         },
         "additionalProperties": false,
         "description": "DTO for requesting a folder to be scanned"
+      },
+      "ScrobbleErrorDto": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Developer defined string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "description": "List of providers that could not",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleProvider": {
+        "enum": [
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "SearchResultDto": {
         "type": "object",
@@ -14693,6 +15080,7 @@
       },
       "UpdateLibraryDto": {
         "required": [
+          "allowScrobbling",
           "folders",
           "folderWatching",
           "id",
@@ -14740,6 +15128,9 @@
           },
           "manageReadingLists": {
             "type": "boolean"
+          },
+          "allowScrobbling": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -14756,6 +15147,16 @@
             "items": {
               "$ref": "#/components/schemas/LibraryDto"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLicenseDto": {
+        "type": "object",
+        "properties": {
+          "license": {
+            "type": "string",
             "nullable": true
           }
         },
@@ -15278,6 +15679,9 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
+          },
+          "hasLicense": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

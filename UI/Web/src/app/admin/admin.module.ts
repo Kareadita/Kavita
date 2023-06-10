@@ -26,6 +26,7 @@ import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
+import {ManageScrobbleErrorsComponent} from "./manage-scrobble-errors/manage-scrobble-errors.component";
 
 
 
@@ -50,24 +51,25 @@ import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
     ManageLogsComponent,
     ManageAlertsComponent,
   ],
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    ReactiveFormsModule,
-    FormsModule,
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbTypeaheadModule, // Directory Picker
-    NgbDropdownModule,
-    NgbAccordionModule,
-    SharedModule,
-    PipeModule,
-    SidenavModule,
-    UserSettingsModule, // API-key componet
-    VirtualScrollerModule,
+    imports: [
+        CommonModule,
+        AdminRoutingModule,
+        ReactiveFormsModule,
+        FormsModule,
+        NgbNavModule,
+        NgbTooltipModule,
+        NgbTypeaheadModule, // Directory Picker
+        NgbDropdownModule,
+        NgbAccordionModule,
+        SharedModule,
+        PipeModule,
+        SidenavModule,
+        UserSettingsModule, // API-key componet
+        VirtualScrollerModule,
 
-    StatisticsModule
-  ],
+        StatisticsModule,
+        ManageScrobbleErrorsComponent
+    ],
   providers: []
 })
 export class AdminModule { }

@@ -12,6 +12,7 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.SignalR;
 using Hangfire;
@@ -27,7 +28,7 @@ public interface IReaderService
     Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters);
     Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
-    Task<int> CapPageToChapter(int chapterId, int page);
+    Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page);
     int CapPageToChapter(Chapter chapter, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
@@ -46,6 +47,7 @@ public class ReaderService : IReaderService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IScrobblingService _scrobblingService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -58,13 +60,14 @@ public class ReaderService : IReaderService
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService)
+        IDirectoryService directoryService, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _scrobblingService = scrobblingService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -232,7 +235,9 @@ public class ReaderService : IReaderService
     public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId)
     {
         // Don't let user save past total pages.
-        progressDto.PageNum = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
+        var pageInfo = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
+        progressDto.PageNum = pageInfo.Item1;
+        var totalPages = pageInfo.Item2;
 
         try
         {
@@ -274,6 +279,13 @@ public class ReaderService : IReaderService
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+
+                if (progressDto.PageNum >= totalPages)
+                {
+                    // Inform Scrobble service that a chapter is read
+                    BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
+                }
+
                 return true;
             }
         }
@@ -296,7 +308,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterId"></param>
     /// <param name="page"></param>
     /// <returns></returns>
-    public async Task<int> CapPageToChapter(int chapterId, int page)
+    public async Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page)
     {
         if (page < 0)
         {
@@ -309,7 +321,7 @@ public class ReaderService : IReaderService
             page = totalPages;
         }
 
-        return page;
+        return Tuple.Create(page, totalPages);
     }
 
     public int CapPageToChapter(Chapter chapter, int page)

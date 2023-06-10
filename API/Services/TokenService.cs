@@ -24,6 +24,7 @@ public interface ITokenService
     Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
     Task<string> GetJwtFromUser(AppUser user);
+    bool HasTokenExpired(string token);
 }
 
 
@@ -131,5 +132,12 @@ public class TokenService : ITokenService
         var userClaims = await _userManager.GetClaimsAsync(user);
         var jwtClaim = userClaims.FirstOrDefault(claim => claim.Type == "jwt");
         return jwtClaim?.Value;
+    }
+
+    public bool HasTokenExpired(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenContent = tokenHandler.ReadJwtToken(token);
+        return tokenContent.ValidTo <= DateTime.UtcNow;
     }
 }

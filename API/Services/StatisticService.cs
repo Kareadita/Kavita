@@ -345,10 +345,6 @@ public class StatisticService : IStatisticService
             .WhereIf(days > 0, x => x.appUserProgresses.LastModified >= DateTime.Now.AddDays(days * -1));
 
 
-        // .Where(p => p.chapter.AvgHoursToRead > 0)
-        // .SumAsync(p =>
-        //     p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))))
-
         var results = await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.LastModified.Date,

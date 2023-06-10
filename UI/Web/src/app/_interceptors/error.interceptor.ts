@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -13,7 +13,6 @@ import { AccountService } from '../_services/account.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-
   constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
 
 
@@ -38,7 +37,7 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.handleServerException(error);
             break;
           default:
-            // Don't throw multiple Something undexpected went wrong
+            // Don't throw multiple Something unexpected went wrong
             if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
               this.toastr.error('Something unexpected went wrong.');
             }
@@ -50,7 +49,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleValidationError(error: any) {
-    // This 400 can also be a bad request 
+    // This 400 can also be a bad request
     if (Array.isArray(error.error)) {
       const modalStateErrors: any[] = [];
       if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
@@ -82,8 +81,8 @@ export class ErrorInterceptor implements HttpInterceptor {
       console.error('error:', error);
       if (error.statusText === 'Bad Request') {
         if (error.error instanceof Blob) {
-          this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);         
-          return; 
+          this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);
+          return;
         }
         this.toastr.error(error.error, error.status + ' Error');
       } else {
@@ -93,7 +92,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleNotFound(error: any) {
-    this.toastr.error('That url does not exist.'); 
+    this.toastr.error('That url does not exist.');
   }
 
   private handleServerException(error: any) {
@@ -121,9 +120,8 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (location.href.includes('/registration/confirm-email?token=')) {
       return;
     }
-    // NOTE: Signin has error.error or error.statusText available. 
+    // NOTE: Signin has error.error or error.statusText available.
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
     this.accountService.logout();
-    this.router.navigateByUrl('/login');
   }
 }

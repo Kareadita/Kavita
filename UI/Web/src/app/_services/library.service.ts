@@ -24,12 +24,13 @@ export class LibraryService {
     if (this.libraryNames != undefined) {
       return of(this.libraryNames);
     }
-    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(l => {
+
+    return this.httpClient.get<Library[]>(this.baseUrl + 'library').pipe(map(libraries => {
       this.libraryNames = {};
-      l.forEach(lib => {
+      libraries.forEach(lib => {
         if (this.libraryNames !== undefined) {
           this.libraryNames[lib.id] = lib.name;
-        }        
+        }
       });
       return this.libraryNames;
     }));
@@ -44,7 +45,7 @@ export class LibraryService {
       l.forEach(lib => {
         if (this.libraryNames !== undefined) {
           this.libraryNames[lib.id] = lib.name;
-        }        
+        }
       });
       return this.libraryNames[libraryId];
     }));

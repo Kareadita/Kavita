@@ -4,15 +4,12 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject } from 'rxjs';
-import { filter, map, shareReplay, take, takeUntil } from 'rxjs/operators';
+import {filter, map, shareReplay, startWith, take, tap} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
-import { ReadingList } from 'src/app/_models/reading-list';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { Breakpoint, UtilityService } from '../../../shared/_services/utility.service';
@@ -23,6 +20,7 @@ import { ActionService } from '../../../_services/action.service';
 import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {switchMap} from "rxjs";
 
 @Component({
   selector: 'app-side-nav',
@@ -33,35 +31,32 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 export class SideNavComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
+
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
   readingListActions = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
-
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
 
-
-  constructor(public accountService: AccountService, private libraryService: LibraryService,
+  constructor(private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionFactoryService: ActionFactoryService, private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
-    private ngbModal: NgbModal, private imageService: ImageService) {
+    private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
         takeUntilDestroyed(this.destroyRef),
         map(evt => evt as NavigationEnd),
-        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet))
-      .subscribe((evt: NavigationEnd) => {
-        // Collapse side nav on mobile
-        this.navService.sideNavCollapsed$.pipe(take(1)).subscribe(collapsed => {
-          if (!collapsed) {
-            this.navService.toggleSideNav();
-            this.cdRef.markForCheck();
-          }
-        });
+        filter(() => this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet),
+        switchMap(() => this.navService.sideNavCollapsed$),
+        take(1),
+        filter(collapsed => !collapsed)
+      ).subscribe(() => {
+        this.navService.toggleSideNav();
+        this.cdRef.markForCheck();
       });
   }
 
@@ -84,16 +79,16 @@ export class SideNavComponent implements OnInit {
     });
   }
 
-  handleAction(action: ActionItem<Library>, library: Library) {
+  async handleAction(action: ActionItem<Library>, library: Library) {
     switch (action.action) {
       case(Action.Scan):
-        this.actionService.scanLibrary(library);
+        await this.actionService.scanLibrary(library);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetadata(library);
+        await this.actionService.refreshMetadata(library);
         break;
       case (Action.AnalyzeFiles):
-        this.actionService.analyzeFiles(library);
+        await this.actionService.analyzeFiles(library);
         break;
       case (Action.Edit):
         this.actionService.editLibrary(library, () => window.scrollTo(0, 0));
@@ -104,7 +99,7 @@ export class SideNavComponent implements OnInit {
   }
 
   importCbl() {
-    const ref = this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+    this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using Hangfire;
@@ -51,6 +52,8 @@ public class TaskScheduler : ITaskScheduler
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
+    private readonly IScrobblingService _scrobblingService;
+    private readonly ILicenseService _licenseService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
@@ -62,6 +65,9 @@ public class TaskScheduler : ITaskScheduler
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
+    public const string CheckScrobblingTokens = "check-scrobbling-tokens";
+    public const string ProcessScrobblingEvents = "process-scrobbling-events";
+    public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
@@ -78,7 +84,7 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IMediaConversionService mediaConversionService)
+        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -93,6 +99,8 @@ public class TaskScheduler : ITaskScheduler
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
+        _scrobblingService = scrobblingService;
+        _licenseService = licenseService;
     }
 
     public async Task ScheduleTasks()
@@ -127,6 +135,15 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
+
+        // KavitaPlus based (needs license check)
+        RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateAllLicenses(), LicenseService.Cron, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _licenseService.ValidateAllLicenses());
+
+        // KavitaPlus Scrobbling (every 4 hours)
+        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
     }
 
     #region StatsTasks
@@ -291,6 +308,11 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
     }
 
+    public void TurnOnScrobbling(int userId = 0)
+    {
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(userId));
+    }
+
     public void CleanupChapters(int[] chapterIds)
     {
         BackgroundJob.Enqueue(() => _cacheService.CleanupChapters(chapterIds));
@@ -352,11 +374,6 @@ public class TaskScheduler : ITaskScheduler
 
         _logger.LogInformation("Enqueuing analyze files scan for: {SeriesId}", seriesId);
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
-    }
-
-    public void BackupDatabase()
-    {
-        BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
     }
 
     /// <summary>

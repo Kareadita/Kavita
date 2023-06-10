@@ -60,9 +60,11 @@ public interface IUserRepository
     Task<AppUser?> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
+    Task<bool> HasAccessToSeries(int userId, int seriesId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser();
+    Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -205,7 +207,22 @@ public class UserRepository : IUserRepository
         return await _context.Library
             .Include(l => l.AppUsers)
             .AsSplitQuery()
-            .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
+            .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId) && library.Id == libraryId);
+    }
+
+    /// <summary>
+    /// Does the user have library and age restriction access to a given series
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> HasAccessToSeries(int userId, int seriesId)
+    {
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.Series
+            .Include(s => s.Library)
+            .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .AsSplitQuery()
+            .AnyAsync(s => s.Id == seriesId);
     }
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None)
@@ -230,6 +247,14 @@ public class UserRepository : IUserRepository
         return (await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole))
             .OrderBy(u => u.Created)
             .First();
+    }
+
+    public async Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId)
+    {
+        return await _context.AppUserRating
+            .Where(u => u.AppUserId == userId && u.Rating > 0)
+            .Include(u => u.Series)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

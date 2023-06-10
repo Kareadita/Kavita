@@ -18,6 +18,9 @@ import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 import { StatisticsModule } from '../statistics/statistics.module';
+import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
+import { UserLicenseComponent } from './user-license/user-license.component';
+import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
 
 
 @NgModule({
@@ -33,6 +36,9 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ChangeEmailComponent,
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
+    AnilistKeyComponent,
+    UserLicenseComponent,
+    UserKavitaPlusComponent,
   ],
   imports: [
     CommonModule,
@@ -46,7 +52,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ColorPickerModule, // User prefernces background color
 
     StatisticsModule,
-    
+
     PipeModule,
     SidenavModule,
 

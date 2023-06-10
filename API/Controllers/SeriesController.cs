@@ -29,7 +29,8 @@ public class SeriesController : BaseApiController
     private readonly ISeriesService _seriesService;
 
 
-    public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, ISeriesService seriesService)
+    public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
+        ISeriesService seriesService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;

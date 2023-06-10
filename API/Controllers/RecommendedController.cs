@@ -1,8 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs;
 using API.Extensions;
 using API.Helpers;
+using API.Services.Plus;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -10,10 +13,37 @@ namespace API.Controllers;
 public class RecommendedController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IRecommendationService _recommendationService;
+    private readonly ILicenseService _licenseService;
 
-    public RecommendedController(IUnitOfWork unitOfWork)
+    public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
+        ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
+        _recommendationService = recommendationService;
+        _licenseService = licenseService;
+    }
+
+    /// <summary>
+    /// For KavitaPlus users, this will return recommendations on the server.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("recommendations")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecommendations(int seriesId)
+    {
+        var userId = User.GetUserId();
+        if (!await _licenseService.DefaultUserHasLicense() || !await _licenseService.HasActiveLicense(userId))
+        {
+            return Ok(new List<SeriesDto>());
+        }
+
+        if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
+        {
+            return BadRequest("User does not have access to this Series");
+        }
+        return Ok(await _recommendationService.GetRecommendationsForSeries(userId, seriesId));
     }
 
 

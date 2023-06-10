@@ -3,6 +3,7 @@ using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
@@ -49,6 +50,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
@@ -61,8 +63,11 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
-
         services.AddScoped<IImageService, ImageService>();
+
+
+        services.AddScoped<IScrobblingService, ScrobblingService>();
+        services.AddScoped<ILicenseService, LicenseService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
@@ -70,6 +75,7 @@ public static class ApplicationServiceExtensions
         services.AddEasyCaching(options =>
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
+            options.UseInMemory(EasyCacheProfiles.License);
         });
     }
 

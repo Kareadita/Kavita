@@ -7,6 +7,8 @@ using API.DTOs.Filtering;
 using API.DTOs.WantToRead;
 using API.Extensions;
 using API.Helpers;
+using API.Services.Plus;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -18,10 +20,12 @@ namespace API.Controllers;
 public class WantToReadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IScrobblingService _scrobblingService;
 
-    public WantToReadController(IUnitOfWork unitOfWork)
+    public WantToReadController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
+        _scrobblingService = scrobblingService;
     }
 
     /// <summary>
@@ -72,7 +76,14 @@ public class WantToReadController : BaseApiController
         }
 
         if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync()) return Ok();
+        if (await _unitOfWork.CommitAsync())
+        {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleWantToReadUpdate(user.Id, sId, true));
+            }
+            return Ok();
+        }
 
         return BadRequest("There was an issue updating Read List");
     }
@@ -92,7 +103,15 @@ public class WantToReadController : BaseApiController
         user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
 
         if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync()) return Ok();
+        if (await _unitOfWork.CommitAsync())
+        {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleWantToReadUpdate(user.Id, sId, false));
+            }
+
+            return Ok();
+        }
 
         return BadRequest("There was an issue updating Read List");
     }

@@ -190,6 +190,10 @@ export class SeriesService {
     return this.httpClient.get<RelatedSeries>(this.baseUrl + 'series/all-related?seriesId=' + seriesId);
   }
 
+  getRecommendationsForSeries(seriesId: number) {
+    return this.httpClient.get<Array<Series>>(this.baseUrl + 'recommended/recommendations?seriesId=' + seriesId);
+  }
+
   updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,
     contains: Array<number>, others: Array<number>, prequels: Array<number>,
     sequels: Array<number>, sideStories: Array<number>, spinOffs: Array<number>,

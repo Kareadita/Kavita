@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Middleware.RateLimit;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
@@ -46,6 +47,7 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly IEasyCachingProviderFactory _cacheFactory;
+    private readonly ILicenseService _licenseService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -54,7 +56,8 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        IEasyCachingProviderFactory cacheFactory)
+        IEasyCachingProviderFactory cacheFactory,
+        ILicenseService licenseService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -66,6 +69,7 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _cacheFactory = cacheFactory;
+        _licenseService = licenseService;
     }
 
     /// <summary>
@@ -155,7 +159,8 @@ public class AccountController : BaseApiController
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+                HasLicense = !string.IsNullOrEmpty(user.License)
             };
         }
         catch (Exception ex)
@@ -191,7 +196,7 @@ public class AccountController : BaseApiController
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
 
-        if (result.IsLockedOut) // result.IsLockedOut
+        if (result.IsLockedOut)
         {
             await _userManager.UpdateSecurityStampAsync(user);
             return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
@@ -226,7 +231,27 @@ public class AccountController : BaseApiController
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
+        dto.HasLicense = !string.IsNullOrEmpty(user.License);
 
+        return Ok(dto);
+    }
+
+    /// <summary>
+    /// Returns an up-to-date user account
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("refresh-account")]
+    public async Task<ActionResult<UserDto>> RefreshAccount()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        if (user == null) return Unauthorized();
+
+        var dto = _mapper.Map<UserDto>(user);
+        dto.Token = await _tokenService.CreateToken(user);
+        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
+            .Value;
+        dto.HasLicense = !string.IsNullOrEmpty(user.License);
         return Ok(dto);
     }
 
@@ -699,7 +724,8 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 
@@ -853,7 +879,8 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
+            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 
@@ -957,6 +984,8 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
+
+
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {
         var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -973,6 +1002,5 @@ public class AccountController : BaseApiController
         }
 
         return false;
-
     }
 }

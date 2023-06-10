@@ -12,6 +12,23 @@
                   <app-change-email></app-change-email>
                   <app-change-password></app-change-password>
                   <app-change-age-restriction></app-change-age-restriction>
+                  <div class="mt-2" ngbAccordion>
+                    <div ngbAccordionItem>
+                      <h2 ngbAccordionHeader>
+                        <button ngbAccordionButton>KavitaPlus</button>
+                      </h2>
+                      <div ngbAccordionCollapse>
+                        <div ngbAccordionBody>
+                          <ng-template>
+                            <p>KavitaPlus is a premium subscription service which unlocks optional features for your Kavita instance, like scrobbling, recommendations, etc.
+                            Some features are unlocked when the admin has a subscription, while others require individual users. You can find more here.</p>
+                            <app-user-kavitaplus></app-user-kavitaplus>
+                          </ng-template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
               </ng-container>
               <ng-container *ngIf="tab.fragment === FragmentID.Prefernces">
                 <p>

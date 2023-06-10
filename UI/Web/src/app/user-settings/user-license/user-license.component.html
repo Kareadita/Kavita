@@ -1,0 +1,44 @@
+<div class="card mt-2">
+  <div class="card-body">
+    <div class="card-title">
+      <div class="container-fluid row mb-2">
+        <div class="col-10 col-sm-10">
+            <h4 id="license-key-header">KavitaPlus License</h4>
+        </div>
+      <div class="col-2 text-end">
+          <button class="btn btn-secondary btn-sm me-1" (click)="validateLicense()">Check</button>
+          <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+      </div>
+    </div>
+</div>
+
+    <ng-container *ngIf="isViewMode">
+      <div class="container-fluid row">
+          <span class="col-12">
+              <ng-container *ngIf="hasLicense; else noToken">
+                <span>*********</span>
+                <i class="error fa-solid fa-exclamation-circle ms-1" ngbTooltip="License Invalid" *ngIf="!hasValidLicense">
+                  <span class="visually-hidden">License Not Valid</span>
+                </i>
+              </ng-container>
+              <ng-template #noToken>No license key</ng-template>
+          </span>
+      </div>
+    </ng-container>
+
+    <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+      <form [formGroup]="formGroup">
+        <div class="form-group mb-3">
+          <label for="license-key">License Key</label>
+          <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"/>
+        </div>
+      </form>
+      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+        <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" (click)="saveForm()">Save</button>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+

@@ -52,6 +52,16 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
 
+    /// <summary>
+    /// The JWT for the user's AniList account. Expires after a year.
+    /// </summary>
+    /// <remarks>Requires KavitaPlus Subscription</remarks>
+    public string? AniListAccessToken { get; set; }
+    /// <summary>
+    /// KavitaPlus License Key
+    /// </summary>
+    public string? License { get; set; }
+
 
     /// <inheritdoc />
     [ConcurrencyCheck]
