@@ -12,6 +12,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Services;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
