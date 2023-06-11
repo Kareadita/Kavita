@@ -34,6 +34,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     Task CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    Task ScrobbleUpdates(int userId);
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -271,6 +272,16 @@ public class TaskScheduler : ITaskScheduler
     public async Task CleanupDbEntries()
     {
         await _cleanupService.CleanupDbEntries();
+    }
+
+    /// <summary>
+    /// TODO: Remove this for Release
+    /// </summary>
+    /// <returns></returns>
+    public async Task ScrobbleUpdates(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense(userId)) return;
+        BackgroundJob.Enqueue(() => _scrobblingService.ProcessUpdatesSinceLastSync());
     }
 
     /// <summary>

@@ -7867,6 +7867,19 @@
         }
       }
     },
+    "/api/Server/scrobble-updates": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Checks for updates, if no updates that are > current version installed, returns null",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Server/changelog": {
       "get": {
         "tags": [

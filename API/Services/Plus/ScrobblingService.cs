@@ -15,6 +15,7 @@ using API.Entities.Scrobble;
 using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -34,6 +35,8 @@ public interface IScrobblingService
     Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
 }
@@ -396,6 +399,8 @@ public class ScrobblingService : IScrobblingService
     /// This is a task that is ran on a fixed schedule (every few hours or every day) that clears out the scrobble event table
     /// and offloads the data to the API server which performs the syncing to the providers.
     /// </summary>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ProcessUpdatesSinceLastSync()
     {
         // Check how many scrobbles we have available then only do those.

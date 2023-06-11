@@ -34,6 +34,12 @@ export class ManageTasksSettingsComponent implements OnInit {
   recurringTasks$: Observable<Array<Job>> = of([]);
   adhocTasks: Array<AdhocTask> = [
     {
+      name: 'Scrobble Updates',
+      description: 'Triggers Process of Scrobble Updates - debug only',
+      api: this.serverService.scrobbleUpdates(),
+      successMessage: 'Scrobbling has been queued'
+    },
+    {
       name: 'Convert Media to Target Encoding',
       description: 'Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).',
       api: this.serverService.convertMedia(),

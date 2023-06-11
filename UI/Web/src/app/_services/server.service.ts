@@ -58,6 +58,9 @@ export class ServerService {
   convertMedia() {
     return this.httpClient.post(this.baseUrl + 'server/convert-media', {});
   }
+  scrobbleUpdates() {
+    return this.httpClient.post(this.baseUrl + 'server/scrobble-updates', {});
+  }
 
   getMediaErrors() {
     return this.httpClient.get<Array<KavitaMediaError>>(this.baseUrl + 'server/media-errors', {});
