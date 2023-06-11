@@ -11,6 +11,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { SeriesDetailComponent } from './_components/series-detail/series-detail.component';
 import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
+import {CarouselModule} from "../carousel/carousel.module";
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import {ReviewCardComponent} from "../_single-module/review-card/review-card.com
         SharedSideNavCardsModule,
 
         SeriesDetailRoutingModule,
-        ReviewCardComponent
+        ReviewCardComponent,
+        CarouselModule
     ]
 })
 export class SeriesDetailModule { }

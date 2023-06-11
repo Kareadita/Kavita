@@ -28,7 +28,7 @@ export interface Series {
      */
     userRating: number;
     /**
-     * The user's review
+     * The user's review (TODO: Remove this field)
      */
     userReview: string;
     libraryId: number;

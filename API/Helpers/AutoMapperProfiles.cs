@@ -10,6 +10,7 @@ using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
 using API.DTOs.Scrobbling;
 using API.DTOs.Search;
+using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.Theme;
 using API.Entities;
@@ -37,6 +38,16 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
         CreateMap<MediaError, MediaErrorDto>();
+        CreateMap<AppUserRating, UserReviewDto>()
+            .ForMember(dest => dest.LibraryId,
+                opt =>
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Body,
+                opt =>
+                    opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.UserId,
+                opt =>
+                    opt.MapFrom(src => src.AppUserId));
 
         CreateMap<AppUserProgress, ProgressDto>()
             .ForMember(dest => dest.PageNum,

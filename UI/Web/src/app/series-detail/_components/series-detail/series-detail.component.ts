@@ -209,14 +209,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       case Action.AddToReadingList:
         this.actionService.addMultipleToReadingList(seriesId, selectedVolumeIds, chapters, (success) => {
           if (success) this.bulkSelectionService.deselectAll();
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         });
         break;
       case Action.MarkAsRead:
         this.actionService.markMultipleAsRead(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.bulkSelectionService.deselectAll();
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         });
 
         break;
@@ -224,7 +224,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.actionService.markMultipleAsUnread(seriesId, selectedVolumeIds, chapters,  () => {
           this.setContinuePoint();
           this.bulkSelectionService.deselectAll();
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         });
         break;
     }
@@ -292,7 +292,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               private messageHub: MessageHubService, private readingListService: ReadingListService,
               public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
-              private changeDetectionRef: ChangeDetectorRef, private scrollService: ScrollService,
+              private cdRef: ChangeDetectorRef, private scrollService: ScrollService,
               private deviceService: DeviceService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
@@ -303,7 +303,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.hasDownloadingRole = this.accountService.hasDownloadRole(user);
         this.renderMode = user.preferences.globalPageLayoutMode;
         this.pageExtrasGroup.get('renderMode')?.setValue(this.renderMode);
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       }
     });
   }
@@ -339,13 +339,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.seriesId = parseInt(routeId, 10);
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
       if (val == null) return;
       this.renderMode = val;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
   }
 
@@ -365,11 +365,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   onNavChange(event: NgbNavChangeEvent) {
     this.bulkSelectionService.deselectAll();
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
     switch(action.action) {
       case(Action.MarkAsRead):
         this.actionService.markSeriesAsRead(series, (series: Series) => {
@@ -484,7 +484,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   async deleteSeries(series: Series) {
     await this.actionService.deleteSeries(series, (result: boolean) => {
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
       if (result) {
         this.router.navigate(['library', this.libraryId]);
       }
@@ -494,17 +494,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   loadSeries(seriesId: number) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
 
     this.seriesService.isWantToRead(seriesId).subscribe(isWantToRead => {
       this.isWantToRead = isWantToRead;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
 
     this.readingListService.getReadingListsForSeries(seriesId).subscribe(lists => {
       this.readingLists = lists;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
     this.setContinuePoint();
 
@@ -515,7 +515,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      this.createHTML();
+      //this.createHTML();
+      this.loadReviews();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -528,7 +529,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
         this.recommendations = recommendations;
         this.hasRecommendations = this.recommendations.length > 0;
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       });
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
@@ -549,10 +550,10 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         ];
         if (this.relations.length > 0) {
           this.hasRelations = true;
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         } else {
           this.hasRelations = false;
-          this.changeDetectionRef.markForCheck();
+          this.cdRef.markForCheck();
         }
       });
 
@@ -583,7 +584,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
         this.updateSelectedTab();
         this.isLoading = false;
-        this.changeDetectionRef.markForCheck();
+        this.cdRef.markForCheck();
       });
     }, err => {
       this.router.navigateByUrl('/libraries');
@@ -618,31 +619,21 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  createHTML() {
-    this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
-    if (this.userReview != '') {
-      this.reviews.push({
-        score: 0,
-        body: this.userReview,
-        seriesId: this.series.id,
-        libraryId: this.series.libraryId
-      })
-    }
-    this.changeDetectionRef.markForCheck();
-  }
-
   loadReviews() {
-
+    this.seriesService.getReviews(this.series.id).subscribe(reviews => {
+      this.reviews = reviews;
+      this.cdRef.markForCheck();
+    })
   }
 
   setContinuePoint() {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {
       this.hasReadingProgress = hasProgress;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
     this.readerService.getCurrentChapter(this.seriesId).subscribe(chapter => {
       this.currentlyReadingChapter = chapter;
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
   }
 
@@ -704,7 +695,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     this.seriesService.updateRating(this.series?.id, rating, this.series?.userReview).subscribe(() => {
       this.series.userRating = rating;
-      this.createHTML();
+      //this.createHTML();
+      this.loadReviews();
     });
   }
 
@@ -760,7 +752,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (closeResult.success) {
         this.seriesService.getSeries(this.seriesId).subscribe(s => {
           this.series = s;
-          this.changeDetectionRef.detectChanges();
+          this.cdRef.detectChanges();
         });
 
         this.loadSeries(this.seriesId);
@@ -777,9 +769,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, review: string, rating: number}) => {
       if (closeResult.success && this.series !== undefined) {
-        this.series.userReview = closeResult.review;
+        //this.series.userReview = closeResult.review;
         this.series.userRating = closeResult.rating;
-        this.createHTML();
+        //this.createHTML();
         this.loadReviews();
       }
     });
@@ -803,7 +795,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       } else {
         this.downloadInProgress = false;
       }
-      this.changeDetectionRef.markForCheck();
+      this.cdRef.markForCheck();
     });
   }
 
@@ -827,6 +819,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
 
     this.isWantToRead = !this.isWantToRead;
-    this.changeDetectionRef.markForCheck();
+    this.cdRef.markForCheck();
   }
 }

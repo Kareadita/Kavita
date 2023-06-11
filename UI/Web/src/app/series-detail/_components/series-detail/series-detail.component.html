@@ -136,14 +136,17 @@
           <button *ngIf="series.userRating || series.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="bottom" ngbTooltip="Edit Review" aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
         </div>
       </div>
-      <div class="row g-0" [ngClass]="{'mt-1': reviews.length > 0}">
-        <div class="col-auto" *ngFor="let review of reviews">
-          <app-review-card [review]="review"></app-review-card>
-        </div>
-      </div>
       <div *ngIf="seriesMetadata" class="mt-2">
         <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series" [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
       </div>
+    </div>
+    <!-- TODO: Make this a carousel so looks better on mobile -->
+    <div class="row mt-4" *ngIf="reviews.length > 0">
+      <app-carousel-reel [items]="reviews" title="User Reviews" [clickableTitle]="false" >
+        <ng-template #carouselItem let-item let-position="idx">
+          <app-review-card [review]="item"></app-review-card>
+        </ng-template>
+      </app-carousel-reel>
     </div>
   </div>
 

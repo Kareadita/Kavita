@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Reader;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -44,6 +45,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
+    Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
@@ -273,6 +275,16 @@ public class UserRepository : IUserRepository
         return await _context.AppUserRating
             .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId)
+    {
+        return await _context.AppUserRating
+            .Include(r => r.AppUser)
+            .Where(r => r.SeriesId == seriesId)
+            .AsSplitQuery()
+            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     public async Task<AppUserPreferences?> GetPreferencesAsync(string username)

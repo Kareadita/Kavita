@@ -6246,6 +6246,56 @@
         }
       }
     },
+    "/api/Review": {
+      "get": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Fetches reviews from the server for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Scrobbling/anilist-token": {
       "get": {
         "tags": [
@@ -6332,6 +6382,8 @@
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Returns all scrobbling errors for the instance",
+        "description": "Requires admin",
         "responses": {
           "200": {
             "description": "Success",
@@ -6366,10 +6418,11 @@
       }
     },
     "/api/Scrobbling/clear-errors": {
-      "get": {
+      "post": {
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Clears the scrobbling errors table",
         "responses": {
           "200": {
             "description": "Success"
@@ -15884,6 +15937,43 @@
           }
         },
         "additionalProperties": false
+      },
+      "UserReviewDto": {
+        "type": "object",
+        "properties": {
+          "tagline": {
+            "type": "string",
+            "description": "A tagline for the review",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "description": "The main review",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "The series this is for",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "The library this series belongs in",
+            "format": "int32"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "The user who wrote this",
+            "format": "int32"
+          },
+          "score": {
+            "type": "integer",
+            "description": "How many upvotes this review has gotten",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a User Review for a given Series"
       },
       "Volume": {
         "type": "object",

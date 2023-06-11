@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Account;
@@ -6,6 +7,7 @@ using API.DTOs.Scrobbling;
 using API.Extensions;
 using API.Services.Plus;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -60,13 +62,24 @@ public class ScrobblingController : BaseApiController
         return Ok(await _scrobblingService.HasTokenExpired(User.GetUserId(), provider));
     }
 
+    /// <summary>
+    /// Returns all scrobbling errors for the instance
+    /// </summary>
+    /// <remarks>Requires admin</remarks>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("scrobble-errors")]
     public async Task<ActionResult<IEnumerable<ScrobbleErrorDto>>> GetScrobbleErrors()
     {
         return Ok(await _unitOfWork.ScrobbleRepository.GetScrobbleErrors());
     }
 
-    [HttpGet("clear-errors")]
+    /// <summary>
+    /// Clears the scrobbling errors table
+    /// </summary>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpPost("clear-errors")]
     public async Task<ActionResult> ClearScrobbleErrors()
     {
         await _unitOfWork.ScrobbleRepository.ClearScrobbleErrors();
