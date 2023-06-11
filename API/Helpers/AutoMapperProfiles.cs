@@ -45,9 +45,9 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Body,
                 opt =>
                     opt.MapFrom(src => src.Review))
-            .ForMember(dest => dest.UserId,
+            .ForMember(dest => dest.Username,
                 opt =>
-                    opt.MapFrom(src => src.AppUserId));
+                    opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<AppUserProgress, ProgressDto>()
             .ForMember(dest => dest.PageNum,

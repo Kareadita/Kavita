@@ -6294,6 +6294,54 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Updates the review for a given series",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/Scrobbling/anilist-token": {
@@ -6917,7 +6965,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Update the user rating for the given series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -14043,11 +14093,6 @@
             "description": "Rating from logged in user. Calculated at API-time.",
             "format": "int32"
           },
-          "userReview": {
-            "type": "string",
-            "description": "Review from logged in user. Calculated at API-time.",
-            "nullable": true
-          },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
           },
@@ -15625,11 +15670,6 @@
           "userRating": {
             "type": "integer",
             "format": "int32"
-          },
-          "userReview": {
-            "maxLength": 1000,
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15663,6 +15703,28 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserReviewDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagline": {
+            "maxLength": 120,
+            "minLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "maxLength": 1000,
+            "minLength": 20,
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15961,10 +16023,10 @@
             "description": "The library this series belongs in",
             "format": "int32"
           },
-          "userId": {
-            "type": "integer",
+          "username": {
+            "type": "string",
             "description": "The user who wrote this",
-            "format": "int32"
+            "nullable": true
           },
           "score": {
             "type": "integer",

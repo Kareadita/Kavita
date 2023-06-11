@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { SeriesDetailRoutingModule } from './series-detail-routing.module';
 import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SeriesMetadataDetailComponent } from './_components/series-metadata-detail/series-metadata-detail.component';
-import { ReviewSeriesModalComponent } from './_modals/review-series-modal/review-series-modal.component';
+import { ReviewSeriesModalComponent } from '../_single-module/review-series-modal/review-series-modal.component';
 import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { PipeModule } from '../pipe/pipe.module';
@@ -17,12 +17,11 @@ import {CarouselModule} from "../carousel/carousel.module";
 @NgModule({
   declarations: [
     SeriesDetailComponent,
-    ReviewSeriesModalComponent,
     SeriesMetadataDetailComponent,
   ],
     imports: [
         CommonModule,
-        ReactiveFormsModule, // Review Series Modal
+        ReactiveFormsModule,
 
         NgbCollapseModule, // Series Metadata
         NgbNavModule,

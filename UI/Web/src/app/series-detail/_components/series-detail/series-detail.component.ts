@@ -53,7 +53,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
-import { ReviewSeriesModalComponent } from '../../_modals/review-series-modal/review-series-modal.component';
+import { ReviewSeriesModalComponent } from '../../../_single-module/review-series-modal/review-series-modal.component';
 import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
@@ -693,10 +693,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       return;
     }
 
-    this.seriesService.updateRating(this.series?.id, rating, this.series?.userReview).subscribe(() => {
+    this.seriesService.updateRating(this.series?.id, rating).subscribe(() => {
       this.series.userRating = rating;
-      //this.createHTML();
-      this.loadReviews();
     });
   }
 
@@ -765,13 +763,23 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openReviewModal(force = false) {
+    // TODO: When we have external reviews, we might have a username collision. We should ensure external usernames have some special character
+    const userReview = this.reviews.filter(r => r.username === this.user?.username);
+
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
+    if (userReview.length > 0) {
+      modalRef.componentInstance.review = userReview[0];
+    } else {
+      modalRef.componentInstance.review = {
+        seriesId: this.series.id,
+        tagline: '',
+        body: ''
+      };
+    }
     modalRef.componentInstance.series = this.series;
     modalRef.closed.subscribe((closeResult: {success: boolean, review: string, rating: number}) => {
       if (closeResult.success && this.series !== undefined) {
-        //this.series.userReview = closeResult.review;
         this.series.userRating = closeResult.rating;
-        //this.createHTML();
         this.loadReviews();
       }
     });

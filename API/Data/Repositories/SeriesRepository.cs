@@ -612,7 +612,6 @@ public class SeriesRepository : ISeriesRepository
             if (rating != null)
             {
                 s.UserRating = rating.Rating;
-                s.UserReview = rating.Review;
             }
 
             if (userProgress.Count > 0)

@@ -29,8 +29,7 @@ public class UserReviewDto
     /// <summary>
     /// The user who wrote this
     /// </summary>
-    /// <remarks>This is 0 if from an external system</remarks>
-    public int UserId { get; set; } = 0;
+    public string Username { get; set; }
 
     /// <summary>
     /// How many upvotes this review has gotten

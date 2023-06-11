@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {NgbActiveModal, NgbRating} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {PipeModule} from "../../pipe/pipe.module";
 import {UserReview} from "../review-card/user-review";
@@ -8,7 +8,7 @@ import {UserReview} from "../review-card/user-review";
 @Component({
   selector: 'app-review-card-modal',
   standalone: true,
-  imports: [CommonModule, NgbRating, ReactiveFormsModule, PipeModule],
+  imports: [CommonModule, ReactiveFormsModule, PipeModule],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -16,6 +16,9 @@ import {UserReview} from "../review-card/user-review";
 export class ReviewCardModalComponent {
 
   @Input({required: true}) review!: UserReview;
+
+
+
 
   constructor(private modal: NgbActiveModal) {
   }

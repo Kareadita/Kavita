@@ -1,8 +1,7 @@
 <div class="card mb-3" style="max-width: 320px;" (click)="showModal()">
   <div class="row g-0">
     <div class="col-md-2">
-<!--      <img src="" class="img-fluid rounded-start" alt="...">-->
-      <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image" aria-hidden="true"></i>
+      <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image d-none d-sm-block" aria-hidden="true"></i>
     </div>
     <div class="col-md-10">
       <div class="card-body">
@@ -10,7 +9,18 @@
         <p class="card-text">
           <app-read-more [text]="review.body || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>
-        <p class="card-text"><small class="text-muted">{{review.score}} votes</small></p>
+        <p class="card-text">
+          <small class="text-muted">{{review.score}} votes</small>
+          <!-- upvote button -->
+
+          <span *ngIf="isMyReview">
+            <i class="fa-solid fa-star" aria-hidden="true"></i>
+            <span class="visually-hidden">This is your review</span>
+          </span>
+        </p>
+        <p class="card-text">
+          Rating here?
+        </p>
       </div>
     </div>
   </div>

@@ -1,26 +1,31 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { Series } from 'src/app/_models/series';
 import { SeriesService } from 'src/app/_services/series.service';
+import {UserReview} from "../review-card/user-review";
+import {CommonModule} from "@angular/common";
+import {PipeModule} from "../../pipe/pipe.module";
 
 @Component({
   selector: 'app-review-series-modal',
+  standalone: true,
+  imports: [CommonModule, NgbRating, ReactiveFormsModule, PipeModule],
   templateUrl: './review-series-modal.component.html',
   styleUrls: ['./review-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReviewSeriesModalComponent implements OnInit {
 
-  @Input({required: true}) series!: Series;
+  @Input({required: true}) review!: UserReview;
   reviewGroup!: FormGroup;
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({
-      review: new FormControl(this.series.userReview, []),
-      rating: new FormControl(this.series.userRating, [])
+      tagline: new FormControl(this.review.tagline || '', [Validators.min(20), Validators.max(120)]),
+      reviewBody: new FormControl(this.review.body, [Validators.min(20)]),
     });
     this.cdRef.markForCheck();
   }
@@ -29,15 +34,10 @@ export class ReviewSeriesModalComponent implements OnInit {
     this.modal.close({success: false, review: null});
   }
 
-  clearRating() {
-    this.reviewGroup.get('rating')?.setValue(0);
-    this.cdRef.markForCheck();
-  }
-
   save() {
     const model = this.reviewGroup.value;
-    this.seriesService.updateRating(this.series?.id, model.rating, model.review).subscribe(() => {
-      this.modal.close({success: true, review: model.review, rating: model.rating});
+    this.seriesService.updateReview(this.review.seriesId, model.tagline, model.reviewBody).subscribe((updatedReview) => {
+      this.modal.close({success: true, review: updatedReview});
     });
   }
 }
