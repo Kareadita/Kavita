@@ -199,6 +199,9 @@ $action-bar-height: 38px;
         overflow: auto;
     }
 
+    &.pointer {
+        cursor: pointer;
+    }
 }
 
 .book-content {
@@ -339,8 +342,8 @@ $action-bar-height: 38px;
         top: 0px;
     }
 
-    &:hover {
-        cursor: pointer;
+    &.no-pointer-events {
+        pointer-events: none;
     }
 }
 
@@ -360,8 +363,9 @@ $action-bar-height: 38px;
     &.immersive {
         top: 0px;
     }
-    &:hover {
-      cursor: pointer;
+
+    &.no-pointer-events {
+        pointer-events: none;
     }
 }
 
@@ -381,8 +385,8 @@ $action-bar-height: 38px;
         top: 0px;
     }
 
-    &:hover {
-      cursor: pointer;
+    &.no-pointer-events {
+        pointer-events: none;
     }
 }
 

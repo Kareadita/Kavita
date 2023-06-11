@@ -17,7 +17,7 @@ import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@a
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of } from 'rxjs';
-import { catchError, debounceTime, take } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -292,6 +292,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
+  pointer: boolean = false;
+
   /**
    * Used to refresh the Personal PoC
    */
@@ -497,8 +499,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.handleScrollEvent();
     });
 
-    // TODO: In order to allow people to highlight content under pagination overlays, apply pointer-events: none while
-    // a highlight operation is in effect
+    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        map(this.mapMousePositionToPointerCursor.bind(this)),
+        distinctUntilChanged())
+      .subscribe((pointer) => {
+        this.changeCursor(pointer);
+    });
   }
 
   handleScrollEvent() {
@@ -823,6 +831,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
+          e.stopPropagation();
           let targetElem = e.target;
           if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
             // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
@@ -1568,7 +1577,44 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
+  private mapMousePositionToPointerCursor(event: MouseEvent): boolean {
+    if (!this.isLoading && this.clickToPaginate) {
+      if (event.clientX <= window.innerWidth * 0.2 || event.clientX >= window.innerWidth * 0.8) {
+        return true;
+      } else {
+        return false;
+      }
+    }
 
+    return false;
+  }
+
+  private changeCursor(pointer: boolean) {
+    this.pointer = pointer;
+    this.cdRef.markForCheck();
+  }
+
+  handleReaderClick(event: MouseEvent) {
+    if (this.clickToPaginate) {
+      const mouseOffset = 5;
+      const probablyHighlighting =
+        Math.abs(this.mousePosition.x - event.clientX) > mouseOffset ||
+        Math.abs(this.mousePosition.y - event.clientY) > mouseOffset;
+      if (event.clientX <= window.innerWidth * 0.2) {
+        if (!probablyHighlighting) {
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+        }
+      } else if (event.clientX >= window.innerWidth * 0.8) {
+        if (!probablyHighlighting) {
+          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
+        }
+      } else {
+        this.toggleMenu(event);
+      }
+    } else {
+      this.toggleMenu(event);
+    }
+  }
 
   toggleMenu(event: MouseEvent) {
     const targetElement = (event.target as Element);
@@ -1581,8 +1627,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (
-      Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
-      Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
+      Math.abs(this.mousePosition.x - event.clientX) <= mouseOffset &&
+      Math.abs(this.mousePosition.y - event.clientY) <= mouseOffset
     ) {
       this.actionBarVisible = !this.actionBarVisible;
       this.cdRef.markForCheck();
@@ -1590,8 +1636,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   mouseDown($event: MouseEvent) {
-    this.mousePosition.x = $event.screenX;
-    this.mousePosition.y = $event.screenY;
+    this.mousePosition.x = $event.clientX;
+    this.mousePosition.y = $event.clientY;
   }
 
   refreshPersonalToC() {
