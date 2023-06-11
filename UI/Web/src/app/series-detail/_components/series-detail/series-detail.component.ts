@@ -56,6 +56,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ReviewSeriesModalComponent } from '../../_modals/review-series-modal/review-series-modal.component';
 import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {UserReview} from "../../../_single-module/review-card/user-review";
 
 interface RelatedSeris {
   series: Series;
@@ -117,6 +118,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   activeTabId = TabID.Storyline;
 
   userReview: string = '';
+  reviews: Array<UserReview> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
   readingLists: Array<ReadingList> = [];
@@ -618,7 +620,19 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   createHTML() {
     this.userReview = (this.series.userReview === null ? '' : this.series.userReview).replace(/\n/g, '<br>');
+    if (this.userReview != '') {
+      this.reviews.push({
+        score: 0,
+        body: this.userReview,
+        seriesId: this.series.id,
+        libraryId: this.series.libraryId
+      })
+    }
     this.changeDetectionRef.markForCheck();
+  }
+
+  loadReviews() {
+
   }
 
   setContinuePoint() {
@@ -766,6 +780,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         this.series.userReview = closeResult.review;
         this.series.userRating = closeResult.rating;
         this.createHTML();
+        this.loadReviews();
       }
     });
   }

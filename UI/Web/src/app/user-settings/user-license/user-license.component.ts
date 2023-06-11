@@ -26,7 +26,6 @@ export class UserLicenseComponent implements OnInit {
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.hasLicense = user.hasLicense;
-        console.log('has license: ', user);
         this.cdRef.markForCheck();
       }
     });

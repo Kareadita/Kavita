@@ -19,6 +19,10 @@ export class ReadMoreComponent implements OnChanges {
    * If the field is collapsed and blur true, text will not be readable
    */
   @Input() blur: boolean = false;
+  /**
+   * If the read more toggle is visible
+   */
+  @Input() showToggle: boolean = true;
 
   currentText!: string;
   hideToggle: boolean = true;

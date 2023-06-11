@@ -1,15 +1,16 @@
-<div class="card mb-3" style="max-width: 540px;">
+<div class="card mb-3" style="max-width: 320px;" (click)="showModal()">
   <div class="row g-0">
-    <div class="col-md-4">
-      <img src="" class="img-fluid rounded-start" alt="...">
+    <div class="col-md-2">
+<!--      <img src="" class="img-fluid rounded-start" alt="...">-->
+      <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image" aria-hidden="true"></i>
     </div>
-    <div class="col-md-8">
+    <div class="col-md-10">
       <div class="card-body">
-        <h5 class="card-title" *nfIf="review.tagline && review.tagline.length > 0">{{review.tagline}}</h5>
+        <h5 class="card-title" *ngIf="review.tagline && review.tagline.length > 0" [innerHTML]="review.tagline | safeHtml"></h5>
         <p class="card-text">
-          This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.
+          <app-read-more [text]="review.body || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>
-        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+        <p class="card-text"><small class="text-muted">{{review.score}} votes</small></p>
       </div>
     </div>
   </div>
