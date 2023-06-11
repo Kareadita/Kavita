@@ -179,6 +179,7 @@ public class ScrobblingService : IScrobblingService
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
