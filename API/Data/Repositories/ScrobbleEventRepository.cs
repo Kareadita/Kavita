@@ -26,6 +26,7 @@ public interface IScrobbleRepository
     Task ClearScrobbleErrors();
     Task<bool> HasErrorForSeries(int seriesId);
     Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType);
+    Task<IEnumerable<ScrobbleEventDto>> GetUserEvents(int userId);
 }
 
 /// <summary>
@@ -121,5 +122,13 @@ public class ScrobbleRepository : IScrobbleRepository
     {
         return await _context.ScrobbleEvent.FirstOrDefaultAsync(e =>
             e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType);
+    }
+    public async Task<IEnumerable<ScrobbleEventDto>> GetUserEvents(int userId)
+    {
+        return await _context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId)
+            .OrderBy(e => e.LastModifiedUtc)
+            .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 }

@@ -38,6 +38,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
         CreateMap<MediaError, MediaErrorDto>();
+        CreateMap<ScrobbleEvent, ScrobbleEventDto>();
         CreateMap<AppUserRating, UserReviewDto>()
             .ForMember(dest => dest.LibraryId,
                 opt =>

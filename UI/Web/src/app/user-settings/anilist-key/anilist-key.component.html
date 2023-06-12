@@ -29,6 +29,8 @@
     </ng-container>
 
     <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+      <p>First time users should click on "Generate" below to allow KavitaPlus to talk with Anilist.
+        Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.</p>
       <form [formGroup]="formGroup">
         <div class="form-group mb-3">
           <label for="anilist-token">AniList Token Goes Here</label>

@@ -7971,7 +7971,7 @@
       }
     },
     "/api/Server/scrobble-updates": {
-      "get": {
+      "post": {
         "tags": [
           "Server"
         ],
