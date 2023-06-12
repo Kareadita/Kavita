@@ -1629,7 +1629,7 @@ public class SeriesRepository : ISeriesRepository
             .Where(s => libraryIds.Contains(s.Library.Id))
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
 
     }
 
