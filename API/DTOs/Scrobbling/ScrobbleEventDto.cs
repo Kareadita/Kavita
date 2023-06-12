@@ -2,12 +2,11 @@
 
 namespace API.DTOs.Scrobbling;
 
-/// <summary>
-///
-/// </summary>
 public class ScrobbleEventDto
 {
+    public string SeriesName { get; set; }
     public int SeriesId { get; set; }
+    public int LibraryId { get; set; }
     public bool IsProcessed { get; set; }
     public int? VolumeNumber { get; set; }
     public int? ChapterNumber { get; set; }

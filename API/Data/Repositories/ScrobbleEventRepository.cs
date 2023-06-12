@@ -127,7 +127,9 @@ public class ScrobbleRepository : IScrobbleRepository
     {
         return await _context.ScrobbleEvent
             .Where(e => e.AppUserId == userId)
+            .Include(e => e.Series)
             .OrderBy(e => e.LastModifiedUtc)
+            .AsSplitQuery()
             .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

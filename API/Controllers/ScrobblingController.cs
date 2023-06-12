@@ -85,4 +85,15 @@ public class ScrobblingController : BaseApiController
         await _unitOfWork.ScrobbleRepository.ClearScrobbleErrors();
         return Ok();
     }
+
+    /// <summary>
+    /// Returns the scrobbling history for the user
+    /// </summary>
+    /// <remarks>User must have a valid license</remarks>
+    /// <returns></returns>
+    [HttpGet("scrobble-events")]
+    public async Task<ActionResult<IEnumerable<ScrobbleEventDto>>> GetScrobblingEvents()
+    {
+        return Ok(await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId()));
+    }
 }

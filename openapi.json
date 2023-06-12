@@ -6478,6 +6478,46 @@
         }
       }
     },
+    "/api/Scrobbling/scrobble-events": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns the scrobbling history for the user",
+        "description": "User must have a valid license",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Search/series-for-mangafile": {
       "get": {
         "tags": [
@@ -13672,6 +13712,60 @@
           }
         },
         "additionalProperties": false
+      },
+      "ScrobbleEventDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isProcessed": {
+            "type": "boolean"
+          },
+          "volumeNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "chapterNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "processDateUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "scrobbleEventType": {
+            "$ref": "#/components/schemas/ScrobbleEventType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleEventType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
       },
       "ScrobbleProvider": {
         "enum": [

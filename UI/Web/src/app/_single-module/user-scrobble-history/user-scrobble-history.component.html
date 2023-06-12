@@ -1,0 +1,48 @@
+<ng-container *ngIf="events$ | async as events">
+    <table class="table table-light table-striped table-hover table-sm scrollable">
+      <thead>
+      <tr>
+        <th scope="col">
+          Type
+        </th>
+        <th scope="col" >
+          Series
+        </th>
+        <th scope="col">
+          Data
+        </th>
+        <th scope="col">
+          Is Processed
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let item of events; let idx = index;">
+        <td>
+          {{item.scrobbleEventType | scrobbleEventType}}
+        </td>
+        <td id="scrobble-history--{{idx}}">
+          <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+        </td>
+        <td>
+          <ng-container [ngSwitch]="item.scrobbleEventType">
+            <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
+              Volume {{item.volumeNumber}} Chapter {{item.chapterNumber}}
+            </ng-container>
+            <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
+              Rating {{item.rating}}
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              Not Applicable
+            </ng-container>
+          </ng-container>
+        </td>
+        <td>
+          <i class="fa-regular fa-circle icon" aria-hidden="true" *ngIf="!item.isProcessed"></i>
+          <i class="fa-solid fa-check-circle icon" aria-hidden="true" *ngIf="item.isProcessed"></i>
+          <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">{{item.isProcessed ? 'Processed' : 'Not Processed'}}</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+</ng-container>

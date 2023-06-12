@@ -20,7 +20,7 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, filter, Observable, shareReplay} from "rxjs";
 import {ScrobblingService} from "../../_services/scrobbling.service";
-import {ScrobbleError} from "../../_models/scrobble-error";
+import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
 import {TableModule} from "../../_single-module/table/table.module";
 
 @Component({
