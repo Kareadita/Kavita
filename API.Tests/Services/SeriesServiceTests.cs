@@ -343,7 +343,6 @@ public class SeriesServiceTests : AbstractDbTest
         {
             SeriesId = 1,
             UserRating = 3,
-            UserReview = "Average"
         });
 
         Assert.True(result);
@@ -379,7 +378,6 @@ public class SeriesServiceTests : AbstractDbTest
         {
             SeriesId = 1,
             UserRating = 3,
-            UserReview = "Average"
         });
 
         Assert.True(result);
@@ -397,7 +395,6 @@ public class SeriesServiceTests : AbstractDbTest
         {
             SeriesId = 1,
             UserRating = 5,
-            UserReview = "Average"
         });
 
         Assert.True(result2);
@@ -433,13 +430,13 @@ public class SeriesServiceTests : AbstractDbTest
         {
             SeriesId = 1,
             UserRating = 10,
-            UserReview = "Average"
         });
 
         Assert.True(result);
 
         JobStorage.Current = new InMemoryStorage();
-        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Ratings))
+        var ratings = (await _unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007",
+                AppUserIncludes.Ratings))
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(5, ratings.First().Rating);
@@ -469,7 +466,6 @@ public class SeriesServiceTests : AbstractDbTest
         {
             SeriesId = 2,
             UserRating = 5,
-            UserReview = "Average"
         });
 
         Assert.False(result);

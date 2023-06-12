@@ -68,6 +68,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ReportStatsTaskId = "report-stats";
     public const string CheckScrobblingTokens = "check-scrobbling-tokens";
     public const string ProcessScrobblingEvents = "process-scrobbling-events";
+    public const string ProcessProcessedScrobblingEvents = "process-processed-scrobbling-events";
     public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
@@ -145,6 +146,7 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEvents, () => _scrobblingService.ClearProcessedEvents(), Cron.Daily, RecurringJobOptions);
     }
 
     #region StatsTasks

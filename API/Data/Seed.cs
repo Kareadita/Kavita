@@ -134,26 +134,6 @@ public static class Seed
 
     }
 
-    public static async Task SeedSyncHistory(DataContext context, IDirectoryService directoryService)
-    {
-        await context.Database.EnsureCreatedAsync();
-
-        foreach (var syncKey in Enum.GetValues<SyncKey>())
-        {
-            var existing = context.SyncHistory.FirstOrDefault(s => s.Key == syncKey);
-            if (existing == null)
-            {
-                await context.SyncHistory.AddAsync(new SyncHistory()
-                {
-                    Key = syncKey,
-                    Value = DateTime.MinValue
-                });
-            }
-        }
-
-        await context.SaveChangesAsync();
-    }
-
     public static async Task SeedUserApiKeys(DataContext context)
     {
         await context.Database.EnsureCreatedAsync();

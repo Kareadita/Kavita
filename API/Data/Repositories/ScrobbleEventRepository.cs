@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Scrobble;
+using API.Extensions.QueryExtensions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +17,15 @@ public interface IScrobbleRepository
     void Attach(ScrobbleEvent evt);
     void Attach(ScrobbleError error);
     void Remove(ScrobbleEvent evt);
-    Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type);
+    void Remove(IList<ScrobbleEvent> evts);
+    void Update(ScrobbleEvent evt);
+    Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false);
+    Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo);
     Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors();
     Task ClearScrobbleErrors();
     Task<bool> HasErrorForSeries(int seriesId);
+    Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType);
 }
 
 /// <summary>
@@ -51,18 +57,38 @@ public class ScrobbleRepository : IScrobbleRepository
         _context.ScrobbleEvent.Remove(evt);
     }
 
-    public async Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type)
+    public void Remove(IList<ScrobbleEvent> evts)
+    {
+        _context.ScrobbleEvent.RemoveRange(evts);
+    }
+
+    public void Update(ScrobbleEvent evt)
+    {
+        _context.Entry(evt).State = EntityState.Modified;
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false)
     {
         return await _context.ScrobbleEvent
             .Include(s => s.Series)
             .ThenInclude(s => s.Library)
             .Include(s => s.AppUser)
             .Where(s => s.ScrobbleEventType == type)
+            .Where(s => s.IsProcessed == isProcessed)
             .AsSplitQuery()
             .GroupBy(s => s.SeriesId)
             .Select(g => g.OrderByDescending(e => e.ChapterNumber)
                 .ThenByDescending(e => e.VolumeNumber)
                 .FirstOrDefault())
+            .ToListAsync();
+    }
+
+    public async Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo)
+    {
+        var date = DateTime.UtcNow.Subtract(TimeSpan.FromDays(daysAgo));
+        return await _context.ScrobbleEvent
+            .Where(s => s.IsProcessed)
+            .Where(s => s.ProcessDateUtc != null && s.ProcessDateUtc < date)
             .ToListAsync();
     }
 
@@ -89,5 +115,11 @@ public class ScrobbleRepository : IScrobbleRepository
     public async Task<bool> HasErrorForSeries(int seriesId)
     {
         return await _context.ScrobbleError.AnyAsync(n => n.SeriesId == seriesId);
+    }
+
+    public async Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType)
+    {
+        return await _context.ScrobbleEvent.FirstOrDefaultAsync(e =>
+            e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType);
     }
 }

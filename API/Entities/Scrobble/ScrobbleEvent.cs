@@ -29,6 +29,14 @@ public class ScrobbleEvent : IEntityDate
     /// Depends on the ScrobbleEvent if filled in
     /// </summary>
     public int? VolumeNumber { get; set; }
+    /// <summary>
+    /// Has this event been processed and pushed to Provider
+    /// </summary>
+    public bool IsProcessed { get; set; }
+    /// <summary>
+    /// The date this was processed
+    /// </summary>
+    public DateTime? ProcessDateUtc { get; set; }
 
     public required int SeriesId { get; set; }
     public Series Series { get; set; }
