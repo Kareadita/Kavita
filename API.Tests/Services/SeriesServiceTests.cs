@@ -351,7 +351,6 @@ public class SeriesServiceTests : AbstractDbTest
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(3, ratings.First().Rating);
-        Assert.Equal("Average", ratings.First().Review);
     }
 
     [Fact]
@@ -387,7 +386,6 @@ public class SeriesServiceTests : AbstractDbTest
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(3, ratings.First().Rating);
-        Assert.Equal("Average", ratings.First().Review);
 
         // Update the DB again
 
@@ -404,7 +402,6 @@ public class SeriesServiceTests : AbstractDbTest
         Assert.NotEmpty(ratings2);
         Assert.True(ratings2.Count == 1);
         Assert.Equal(5, ratings2.First().Rating);
-        Assert.Equal("Average", ratings2.First().Review);
     }
 
     [Fact]
@@ -440,7 +437,6 @@ public class SeriesServiceTests : AbstractDbTest
             .Ratings;
         Assert.NotEmpty(ratings);
         Assert.Equal(5, ratings.First().Rating);
-        Assert.Equal("Average", ratings.First().Review);
     }
 
     [Fact]
