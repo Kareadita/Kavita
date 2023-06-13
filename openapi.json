@@ -2699,6 +2699,16 @@
           "License"
         ],
         "summary": "Checks if the user's license is valid or not",
+        "parameters": [
+          {
+            "name": "forceCheck",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",

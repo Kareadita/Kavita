@@ -75,10 +75,10 @@
         <div class="col-auto">
           <div class="btn-group">
             <button type="button" class="btn btn-primary" (click)="read()">
-                          <span>
-                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                            <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
-                          </span>
+              <span>
+                <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+              </span>
             </button>
             <div class="btn-group" ngbDropdown role="group" display="dynamic" aria-label="Read options">
               <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
@@ -136,7 +136,7 @@
       </div>
     </div>
 
-    <div class="row mt-4">
+    <div class="row pt-4">
       <app-carousel-reel [items]="reviews" title="User Reviews" iconClasses="fa-solid fa-pen" [clickableTitle]="true" (sectionClick)="openReviewModal()">
         <ng-template #carouselItem let-item let-position="idx">
           <app-review-card [review]="item"></app-review-card>

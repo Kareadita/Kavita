@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit, Output
+} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
@@ -13,6 +22,8 @@ import {ToastrService} from "ngx-toastr";
 export class UserLicenseComponent implements OnInit {
 
   @Input({required: true}) hasValidLicense: boolean = false;
+  @Output() validate: EventEmitter<void> = new EventEmitter<void>();
+
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
@@ -60,10 +71,8 @@ export class UserLicenseComponent implements OnInit {
   }
 
   validateLicense() {
-    this.accountService.hasValidLicense().subscribe(res => {
-      this.hasValidLicense = res;
-      this.cdRef.markForCheck();
-    });
+    this.validate.emit();
+
   }
 
 }
