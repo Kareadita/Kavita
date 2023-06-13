@@ -1,45 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
-using API.DTOs;
-using API.DTOs.Scrobbling;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Helpers;
+using API.Services.Plus;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
-namespace API.Services.Plus;
+namespace API.Services;
 
-public class PlusSeriesDto
+internal class MediaReviewDto
 {
-    public int? AniListId { get; set; }
-    public string SeriesName { get; set; }
-    public string? AltSeriesName { get; set; }
-    public MediaFormat MediaFormat { get; set; }
-}
-
-internal record MediaRecommendationDto
-{
+    public string Body { get; set; }
+    public string Tagline { get; set; }
     public int Rating { get; set; }
-    public IEnumerable<string> RecommendationNames { get; set; } = null!;
+    public int TotalVotes { get; set; }
+    /// <summary>
+    /// The media's overall Score
+    /// </summary>
+    public int Score { get; set; }
+    public string SiteUrl { get; set; }
 }
 
-public interface IRecommendationService
+public interface IReviewService
 {
-    Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
+    Task<IEnumerable<UserReviewDto>> GetReviewsForSeries(int userId, int seriesId);
 }
 
-public class RecommendationService : IRecommendationService
+public class ReviewService : IReviewService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<RecommendationService> _logger;
+    private readonly ILogger<ReviewService> _logger;
 
-    public RecommendationService(IUnitOfWork unitOfWork, ILogger<RecommendationService> logger)
+
+    public ReviewService(IUnitOfWork unitOfWork, ILogger<ReviewService> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -48,35 +49,30 @@ public class RecommendationService : IRecommendationService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
+    public async Task<IEnumerable<UserReviewDto>> GetReviewsForSeries(int userId, int seriesId)
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library);
-        var seriesRecs = new List<SeriesDto>();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null || series == null) return seriesRecs;
-        var recs = await GetRecommendations(user.License, series);
-        foreach (var rec in recs)
+        if (user == null || series == null) return new List<UserReviewDto>();
+        return (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
         {
-            // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames,
-                series.Library.Type);
-            if (seriesForRec == null) continue;
-            seriesRecs.Add(seriesForRec);
-        }
-
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
-        return seriesRecs;
+            Body = r.Body,
+            Tagline = r.Tagline,
+            Score = r.Score,
+            Username = "external",
+            LibraryId = series.LibraryId,
+            SeriesId = series.Id
+        });
     }
 
-
-    private async Task<IEnumerable<MediaRecommendationDto>> GetRecommendations(string license, Series series)
+    private async Task<IEnumerable<MediaReviewDto>> GetReviews(string license, Series series)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
-            return await (Configuration.KavitaPlusApiUrl + "/api/recommendation")
+            return await (Configuration.KavitaPlusApiUrl + "/api/review")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
@@ -92,7 +88,7 @@ public class RecommendationService : IRecommendationService
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite)
                 })
-                .ReceiveJson<IEnumerable<MediaRecommendationDto>>();
+                .ReceiveJson<IEnumerable<MediaReviewDto>>();
 
         }
         catch (Exception e)
@@ -100,6 +96,6 @@ public class RecommendationService : IRecommendationService
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
         }
 
-        return new List<MediaRecommendationDto>();
+        return new List<MediaReviewDto>();
     }
 }

@@ -6,6 +6,7 @@ using API.Data.Repositories;
 using API.DTOs.SeriesDetail;
 using API.Extensions;
 using API.Helpers.Builders;
+using API.Services;
 using API.Services.Plus;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +20,16 @@ public class ReviewController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILicenseService _licenseService;
     private readonly IMapper _mapper;
+    private readonly IReviewService _reviewService;
 
     public ReviewController(ILogger<ReviewController> logger, IUnitOfWork unitOfWork, ILicenseService licenseService,
-        IMapper mapper)
+        IMapper mapper, IReviewService reviewService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _licenseService = licenseService;
         _mapper = mapper;
+        _reviewService = reviewService;
     }
 
 
@@ -43,7 +46,12 @@ public class ReviewController : BaseApiController
             return Ok(userRatings);
         }
 
-        // TODO: Fetch external reviews and splice them in
+        // Fetch external reviews and splice them in
+        var externalReviews = await _reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
+        foreach (var r in externalReviews)
+        {
+            userRatings.Add(r);
+        }
         return Ok(userRatings);
     }
 

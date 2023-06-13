@@ -10,16 +10,13 @@
           <app-read-more [text]="review.body || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>
         <p class="card-text">
-          <small class="text-muted">{{review.score}} votes</small>
+<!--          <small class="text-muted">{{review.score}} votes</small>-->
           <!-- upvote button -->
 
           <span *ngIf="isMyReview">
-            <i class="fa-solid fa-star" aria-hidden="true"></i>
+            <i class="fa-solid fa-star" aria-hidden="true" title="This is your review"></i>
             <span class="visually-hidden">This is your review</span>
           </span>
-        </p>
-        <p class="card-text">
-          Rating here?
         </p>
       </div>
     </div>

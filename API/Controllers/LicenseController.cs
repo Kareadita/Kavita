@@ -44,9 +44,9 @@ public class LicenseController : BaseApiController
     /// <returns></returns>
     [HttpGet("valid-license")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
-    public async Task<ActionResult<bool>> HasValidLicense()
+    public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await _licenseService.HasActiveLicense(User.GetUserId()));
+        return Ok(await _licenseService.HasActiveLicense(User.GetUserId(), forceCheck));
     }
 
     /// <summary>
