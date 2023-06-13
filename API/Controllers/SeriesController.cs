@@ -128,6 +128,11 @@ public class SeriesController : BaseApiController
     }
 
 
+    /// <summary>
+    /// Update the user rating for the given series
+    /// </summary>
+    /// <param name="updateSeriesRatingDto"></param>
+    /// <returns></returns>
     [HttpPost("update-rating")]
     public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
     {
@@ -434,5 +439,7 @@ public class SeriesController : BaseApiController
 
         return BadRequest("There was an issue updating relationships");
     }
+
+
 
 }

@@ -75,39 +75,35 @@
         <div class="col-auto">
           <div class="btn-group">
             <button type="button" class="btn btn-primary" (click)="read()">
-                          <span>
-                            <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
-                            <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
-                          </span>
+              <span>
+                <i class="fa {{showBook ? 'fa-book-open' : 'fa-book'}}" aria-hidden="true"></i>
+                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}}</span>
+              </span>
             </button>
             <div class="btn-group" ngbDropdown role="group" display="dynamic" aria-label="Read options">
               <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
               <div class="dropdown-menu" ngbDropdownMenu>
                 <button ngbDropdownItem (click)="read(true)">
-                              <span>
-                                <i class="fa fa-glasses" aria-hidden="true"></i>
-                                <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}} Incognito</span>
-                              </span>
+                  <span>
+                    <i class="fa fa-glasses" aria-hidden="true"></i>
+                    <span class="read-btn--text">&nbsp;{{(hasReadingProgress) ? 'Continue' : 'Read'}} Incognito</span>
+                  </span>
                 </button>
-
               </div>
             </div>
           </div>
-
         </div>
 
         <div class="col-auto ms-2">
           <button class="btn btn-secondary" (click)="toggleWantToRead()" title="{{isWantToRead ? 'Remove from' : 'Add to'}} Want to Read">
-                        <span>
-                            <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
-                        </span>
+            <span>
+                <i class="{{isWantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+            </span>
           </button>
         </div>
         <div class="col-auto ms-2" *ngIf="isAdmin">
           <button class="btn btn-secondary" (click)="openEditSeriesModal()"  title="Edit Series information">
-                        <span>
-                            <i class="fa fa-pen" aria-hidden="true"></i>
-                        </span>
+            <span><i class="fa fa-pen" aria-hidden="true"></i></span>
           </button>
         </div>
         <div class="col-auto ms-2 d-none d-sm-block">
@@ -133,16 +129,19 @@
               <span class="star" [class.filled]="(index < series.userRating) && series.userRating > 0">&#9733;</span>
             </ng-template>
           </ngb-rating>
-          <button *ngIf="series.userRating || series.userReview" class="btn btn-sm btn-icon" (click)="openReviewModal(true)" placement="bottom" ngbTooltip="Edit Review" aria-label="Edit Review"><i class="fa fa-pen" aria-hidden="true"></i></button>
         </div>
-      </div>
-      <div class="row g-0">
-        <!-- TODO: This will be the first of reviews section. Reviews will show your plus other peoples reviews in media cards like Plex does and this will be below metadata. NOTE: We need to clean the reviews in case any html is in there.-->
-        <app-read-more class="user-review {{userReview ? 'mt-1' : ''}}" [text]="series.userReview || ''" [maxLength]="250"></app-read-more>
       </div>
       <div *ngIf="seriesMetadata" class="mt-2">
         <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series" [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
       </div>
+    </div>
+
+    <div class="row pt-4">
+      <app-carousel-reel [items]="reviews" title="User Reviews" iconClasses="fa-solid fa-pen" [clickableTitle]="true" (sectionClick)="openReviewModal()">
+        <ng-template #carouselItem let-item let-position="idx">
+          <app-review-card [review]="item"></app-review-card>
+        </ng-template>
+      </app-carousel-reel>
     </div>
   </div>
 
@@ -302,9 +301,6 @@
                   <ng-container title>
                     {{chapter.title || chapter.range}}
                   </ng-container>
-                  <!-- <ng-container title>
-                      <app-entity-title [libraryType]="libraryType" [entity]="chapter" [seriesName]="series.name" [includeVolume]="true" [prioritizeTitleName]="true"></app-entity-title>
-                  </ng-container> -->
                 </app-list-item>
               </ng-container>
             </ng-template>

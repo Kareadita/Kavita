@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using Serilog.Filters;
 using Serilog.Formatting.Display;
 
 namespace API.Logging;

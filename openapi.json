@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.2"
+    "version": "0.7.3.3"
   },
   "servers": [
     {
@@ -2699,6 +2699,16 @@
           "License"
         ],
         "summary": "Checks if the user's license is valid or not",
+        "parameters": [
+          {
+            "name": "forceCheck",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -6246,6 +6256,104 @@
         }
       }
     },
+    "/api/Review": {
+      "get": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Fetches reviews from the server for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Updates the review for a given series",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Scrobbling/anilist-token": {
       "get": {
         "tags": [
@@ -6332,6 +6440,8 @@
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Returns all scrobbling errors for the instance",
+        "description": "Requires admin",
         "responses": {
           "200": {
             "description": "Success",
@@ -6366,13 +6476,54 @@
       }
     },
     "/api/Scrobbling/clear-errors": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Clears the scrobbling errors table",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/scrobble-events": {
       "get": {
         "tags": [
           "Scrobbling"
         ],
+        "summary": "Returns the scrobbling history for the user",
+        "description": "User must have a valid license",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -6864,7 +7015,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Update the user rating for the given series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7863,6 +8016,19 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Server/scrobble-updates": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Checks for updates, if no updates that are > current version installed, returns null",
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -13557,6 +13723,60 @@
         },
         "additionalProperties": false
       },
+      "ScrobbleEventDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isProcessed": {
+            "type": "boolean"
+          },
+          "volumeNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "chapterNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "processDateUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "scrobbleEventType": {
+            "$ref": "#/components/schemas/ScrobbleEventType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleEventType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
       "ScrobbleProvider": {
         "enum": [
           1
@@ -13976,11 +14196,6 @@
             "type": "integer",
             "description": "Rating from logged in user. Calculated at API-time.",
             "format": "int32"
-          },
-          "userReview": {
-            "type": "string",
-            "description": "Review from logged in user. Calculated at API-time.",
-            "nullable": true
           },
           "format": {
             "$ref": "#/components/schemas/MangaFormat"
@@ -15559,11 +15774,6 @@
           "userRating": {
             "type": "integer",
             "format": "int32"
-          },
-          "userReview": {
-            "maxLength": 1000,
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15597,6 +15807,28 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserReviewDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagline": {
+            "maxLength": 120,
+            "minLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "maxLength": 1000,
+            "minLength": 20,
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15871,6 +16103,43 @@
           }
         },
         "additionalProperties": false
+      },
+      "UserReviewDto": {
+        "type": "object",
+        "properties": {
+          "tagline": {
+            "type": "string",
+            "description": "A tagline for the review",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "description": "The main review",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "The series this is for",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "The library this series belongs in",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "description": "The user who wrote this",
+            "nullable": true
+          },
+          "score": {
+            "type": "integer",
+            "description": "How many upvotes this review has gotten",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a User Review for a given Series"
       },
       "Volume": {
         "type": "object",

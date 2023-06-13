@@ -27,10 +27,6 @@ export interface Series {
      * User's rating (0-5)
      */
     userRating: number;
-    /**
-     * The user's review
-     */
-    userReview: string;
     libraryId: number;
     /**
      * DateTime the entity was created

@@ -21,6 +21,7 @@ import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import { UserLicenseComponent } from './user-license/user-license.component';
 import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
+import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 
 @NgModule({
@@ -57,6 +58,7 @@ import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.comp
     SidenavModule,
 
     UserSettingsRoutingModule,
+    UserScrobbleHistoryComponent,
   ],
   exports: [
     SiteThemeProviderPipe,

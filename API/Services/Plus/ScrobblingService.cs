@@ -15,6 +15,7 @@ using API.Entities.Scrobble;
 using API.Helpers;
 using API.SignalR;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -34,6 +35,12 @@ public interface IScrobblingService
     Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
+
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public Task ClearProcessedEvents();
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     Task ProcessUpdatesSinceLastSync();
     Task CreateEventsFromExistingHistory(int userId = 0);
 }
@@ -179,6 +186,7 @@ public class ScrobblingService : IScrobblingService
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
@@ -198,9 +206,19 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
-        var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
+        var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
-        if (existing) return;
+        if (existingEvt != null)
+        {
+            // We need to just update Volume/Chapter number
+            existingEvt.VolumeNumber =
+                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
+            existingEvt.ChapterNumber =
+                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
+            _unitOfWork.ScrobbleRepository.Update(existingEvt);
+            await _unitOfWork.CommitAsync();
+            return;
+        }
 
         try
         {
@@ -385,16 +403,23 @@ public class ScrobblingService : IScrobblingService
             }
 
         }
+    }
 
-        // Update SyncHistory saying we've processed all rows
-        //await _unitOfWork.SyncHistoryRepository.Update(SyncKey.Scrobble); // TODO: Remove this migration and table
-
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
+    public async Task ClearProcessedEvents()
+    {
+        var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(7);
+        _unitOfWork.ScrobbleRepository.Remove(events);
+        await _unitOfWork.CommitAsync();
     }
 
     /// <summary>
     /// This is a task that is ran on a fixed schedule (every few hours or every day) that clears out the scrobble event table
     /// and offloads the data to the API server which performs the syncing to the providers.
     /// </summary>
+    [DisableConcurrentExecution(60 * 60 * 60)]
+    [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ProcessUpdatesSinceLastSync()
     {
         // Check how many scrobbles we have available then only do those.
@@ -517,7 +542,10 @@ public class ScrobblingService : IScrobblingService
             {
                 var data = createEvent(evt);
                 userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, evt.AppUser.License, evt);
-                _unitOfWork.ScrobbleRepository.Remove(evt);
+                evt.IsProcessed = true;
+                evt.ProcessDateUtc = DateTime.UtcNow;
+                _unitOfWork.ScrobbleRepository.Update(evt);
+                //_unitOfWork.ScrobbleRepository.Remove(evt);
             }
             catch (FlurlHttpException)
             {

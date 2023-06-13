@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnChanges,
+  OnInit
+} from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
@@ -10,9 +19,9 @@ import {AccountService} from "../../_services/account.service";
   styleUrls: ['./anilist-key.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AnilistKeyComponent implements OnInit {
+export class AnilistKeyComponent implements OnInit, OnChanges {
 
-  @Input({required: true}) hasValidLicense = false;
+  @Input({required: true}) hasValidLicense!: boolean;
 
   formGroup: FormGroup = new FormGroup({});
   token: string = '';
@@ -25,6 +34,9 @@ export class AnilistKeyComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup.addControl('aniListToken', new FormControl('', [Validators.required]));
+  }
+
+  ngOnChanges() {
     if (this.hasValidLicense) {
       this.scrobblingService.getAniListToken().subscribe(token => {
         this.token = token;

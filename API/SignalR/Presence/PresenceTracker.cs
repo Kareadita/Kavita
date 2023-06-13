@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -59,7 +60,15 @@ public class PresenceTracker : IPresenceTracker
 
         // Update the last active for the user
         user.UpdateLastActive();
-        await _unitOfWork.CommitAsync();
+        _unitOfWork.UserRepository.Update(user);
+        try
+        {
+            await _unitOfWork.CommitAsync();
+        }
+        catch (Exception)
+        {
+            // Swallow the exception
+        }
     }
 
     public Task UserDisconnected(int userId, string connectionId)

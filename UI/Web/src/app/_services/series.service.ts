@@ -18,6 +18,7 @@ import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
+import {UserReview} from "../_single-module/review-card/user-review";
 
 @Injectable({
   providedIn: 'root'
@@ -83,8 +84,8 @@ export class SeriesService {
     return this.httpClient.post<boolean>(this.baseUrl + 'series/delete-multiple', {seriesIds});
   }
 
-  updateRating(seriesId: number, userRating: number, userReview: string) {
-    return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating, userReview});
+  updateRating(seriesId: number, userRating: number) {
+    return this.httpClient.post(this.baseUrl + 'series/update-rating', {seriesId, userRating});
   }
 
   updateSeries(model: any) {
@@ -205,5 +206,15 @@ export class SeriesService {
 
   getSeriesDetail(seriesId: number) {
     return this.httpClient.get<SeriesDetail>(this.baseUrl + 'series/series-detail?seriesId=' + seriesId);
+  }
+
+  getReviews(seriesId: number) {
+    return this.httpClient.get<Array<UserReview>>(this.baseUrl + 'review?seriesId=' + seriesId);
+  }
+
+  updateReview(seriesId: number, tagline: string, body: string) {
+    return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
+      seriesId, tagline, body
+    });
   }
 }

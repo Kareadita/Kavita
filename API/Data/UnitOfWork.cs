@@ -27,7 +27,6 @@ public interface IUnitOfWork
     IDeviceRepository DeviceRepository { get; }
     IMediaErrorRepository MediaErrorRepository { get; }
     IScrobbleRepository ScrobbleRepository { get; }
-    ISyncHistoryRepository SyncHistoryRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -67,7 +66,6 @@ public class UnitOfWork : IUnitOfWork
     public IDeviceRepository DeviceRepository => new DeviceRepository(_context, _mapper);
     public IMediaErrorRepository MediaErrorRepository => new MediaErrorRepository(_context, _mapper);
     public IScrobbleRepository ScrobbleRepository => new ScrobbleRepository(_context, _mapper);
-    public ISyncHistoryRepository SyncHistoryRepository => new SyncHistoryRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

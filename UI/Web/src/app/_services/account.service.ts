@@ -101,8 +101,8 @@ export class AccountService {
       );
   }
 
-  hasValidLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license', TextResonse)
+  hasValidLicense(forceCheck: boolean = false) {
+    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
         map(res => res === "true"),
         tap(res => this.hasValidLicenseSource.next(res))

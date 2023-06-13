@@ -34,6 +34,7 @@ public interface ITaskScheduler
     void ScanSiteThemes();
     Task CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    Task ScrobbleUpdates(int userId);
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -67,6 +68,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ReportStatsTaskId = "report-stats";
     public const string CheckScrobblingTokens = "check-scrobbling-tokens";
     public const string ProcessScrobblingEvents = "process-scrobbling-events";
+    public const string ProcessProcessedScrobblingEvents = "process-processed-scrobbling-events";
     public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
@@ -144,6 +146,7 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEvents, () => _scrobblingService.ClearProcessedEvents(), Cron.Daily, RecurringJobOptions);
     }
 
     #region StatsTasks
@@ -271,6 +274,16 @@ public class TaskScheduler : ITaskScheduler
     public async Task CleanupDbEntries()
     {
         await _cleanupService.CleanupDbEntries();
+    }
+
+    /// <summary>
+    /// TODO: Remove this for Release
+    /// </summary>
+    /// <returns></returns>
+    public async Task ScrobbleUpdates(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense(userId)) return;
+        BackgroundJob.Enqueue(() => _scrobblingService.ProcessUpdatesSinceLastSync());
     }
 
     /// <summary>

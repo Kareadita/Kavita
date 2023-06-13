@@ -22,4 +22,11 @@ export class UserKavitaPlusComponent implements OnInit {
     })
   }
 
+  validateLicense() {
+    this.accountService.hasValidLicense(true).subscribe(res => {
+      this.hasValidLicense = res;
+      this.cdRef.markForCheck();
+    });
+  }
+
 }

@@ -637,24 +637,16 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("FolderWatching")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IncludeInDashboard")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IncludeInRecommended")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IncludeInSearch")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
@@ -666,14 +658,10 @@ namespace API.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("ManageCollections")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("ManageReadingLists")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -1079,6 +1067,9 @@ namespace API.Data.Migrations
                     b.Property<int>("Format")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");
 
@@ -1087,6 +1078,9 @@ namespace API.Data.Migrations
 
                     b.Property<int>("LibraryId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ProcessDateUtc")
+                        .HasColumnType("TEXT");
 
                     b.Property<float?>("Rating")
                         .HasColumnType("REAL");
@@ -1301,19 +1295,6 @@ namespace API.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SiteTheme");
-                });
-
-            modelBuilder.Entity("API.Entities.SyncHistory", b =>
-                {
-                    b.Property<int>("Key")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("Value")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("SyncHistory");
                 });
 
             modelBuilder.Entity("API.Entities.Tag", b =>

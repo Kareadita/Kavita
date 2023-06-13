@@ -1,0 +1,16 @@
+<div>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Edit Review</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <p *ngIf="review.tagline" [innerHTML]="review.tagline | safeHtml"></p>
+    <p [innerHTML]="review.body | safeHtml"></p>
+
+  </div>
+  <div class="modal-footer">
+    <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
+  </div>
+</div>
+
+

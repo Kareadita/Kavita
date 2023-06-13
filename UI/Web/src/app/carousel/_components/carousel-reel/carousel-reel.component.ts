@@ -13,6 +13,7 @@ export class CarouselReelComponent {
   @Input() items: any[] = [];
   @Input() title = '';
   @Input() clickableTitle: boolean = true;
+  @Input() iconClasses = '';
   /**
    * Track by identity. By default, this has an implementation based on title, item's name, pagesRead, and index
    */
@@ -21,7 +22,7 @@ export class CarouselReelComponent {
 
   swiper: Swiper | undefined;
 
-  
+
 
   constructor(private readonly cdRef: ChangeDetectorRef) {}
 

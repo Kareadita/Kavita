@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
-internal class RecommendationDto
+public class PlusSeriesDto
 {
     public int? AniListId { get; set; }
     public string SeriesName { get; set; }
@@ -55,16 +55,18 @@ public class RecommendationService : IRecommendationService
                 SeriesIncludes.Metadata | SeriesIncludes.Library);
         var seriesRecs = new List<SeriesDto>();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return seriesRecs;
+        if (user == null || series == null) return seriesRecs;
         var recs = await GetRecommendations(user.License, series);
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames, series.Library.Type);
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames,
+                series.Library.Type);
             if (seriesForRec == null) continue;
             seriesRecs.Add(seriesForRec);
         }
 
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
         return seriesRecs;
     }
 
@@ -82,7 +84,7 @@ public class RecommendationService : IRecommendationService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new RecommendationDto()
+                .PostJsonAsync(new PlusSeriesDto()
                 {
                     MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
                     SeriesName = series.Name,

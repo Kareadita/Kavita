@@ -41,11 +41,12 @@ enum AccordionPanelID {
 
 enum FragmentID {
   Account = 'account',
-  Prefernces = '',
+  Preferences = '',
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
+  Plus = 'plus'
 
 }
 
@@ -78,11 +79,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   tabs: Array<{title: string, fragment: string}> = [
     {title: 'Account', fragment: FragmentID.Account},
-    {title: 'Preferences', fragment: FragmentID.Prefernces},
+    {title: 'Preferences', fragment: FragmentID.Preferences},
     {title: '3rd Party Clients', fragment: FragmentID.Clients},
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
     {title: 'Stats', fragment: FragmentID.Stats},
+    {title: 'Plus', fragment: FragmentID.Plus},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;

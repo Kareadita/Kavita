@@ -30,7 +30,7 @@
                   </div>
 
               </ng-container>
-              <ng-container *ngIf="tab.fragment === FragmentID.Prefernces">
+              <ng-container *ngIf="tab.fragment === FragmentID.Preferences">
                 <p>
                     These are global settings that are bound to your account.
                 </p>
@@ -370,6 +370,9 @@
               </ng-container>
               <ng-container *ngIf="tab.fragment === FragmentID.Stats">
                 <app-user-stats></app-user-stats>
+              </ng-container>
+              <ng-container *ngIf="tab.fragment === FragmentID.Plus">
+                <app-user-scrobble-history></app-user-scrobble-history>
               </ng-container>
             </ng-template>
         </li>

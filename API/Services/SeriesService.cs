@@ -310,7 +310,6 @@ public class SeriesService : ISeriesService
         try
         {
             userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0, 5);
-            userRating.Review = updateSeriesRatingDto.UserReview;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
 
             if (userRating.Id == 0)
