@@ -306,7 +306,7 @@ public class ScrobblingService : IScrobblingService
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/anilist/update")
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
@@ -350,6 +350,16 @@ public class ScrobblingService : IScrobblingService
             _logger.LogError("Scrobbling to KavitaPlus API failed due to error: {ErrorMessage}", ex.Message);
             if (ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
             {
+                if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
+                {
+                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                    {
+                        Comment = "Unknown Series",
+                        Details = data.SeriesName,
+                        LibraryId = evt.LibraryId,
+                        SeriesId = evt.SeriesId
+                    });
+                }
                 throw new KavitaException("Bad payload from Scrobble Provider");
             }
             throw;
@@ -433,17 +443,27 @@ public class ScrobblingService : IScrobblingService
             .Select(l => l.Id)
             .ToImmutableHashSet();
 
+        var errors = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors())
+            .Where(e => e.Comment == "Unknown Series")
+            .Select(e => e.SeriesId)
+            .ToList();
+
+
         var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+            .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
         var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+            .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
         var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+            .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
         var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated))
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+            .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
@@ -485,7 +505,8 @@ public class ScrobblingService : IScrobblingService
                 AniListToken = readEvent.AppUser.AniListAccessToken,
                 SeriesName = readEvent.Series.Name,
                 LocalizedSeriesName = readEvent.Series.LocalizedName,
-                StartedReadingDateUtc = readEvent.CreatedUtc
+                StartedReadingDateUtc = readEvent.CreatedUtc,
+                Year = readEvent.Series.Metadata.ReleaseYear
             });
 
             progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, ratingEvent => new ScrobbleDto()
@@ -496,7 +517,8 @@ public class ScrobblingService : IScrobblingService
                 AniListToken = ratingEvent.AppUser.AniListAccessToken,
                 SeriesName = ratingEvent.Series.Name,
                 LocalizedSeriesName = ratingEvent.Series.LocalizedName,
-                Rating = ratingEvent.Rating
+                Rating = ratingEvent.Rating,
+                Year = ratingEvent.Series.Metadata.ReleaseYear
             });
 
             progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, decision => new ScrobbleDto()
@@ -508,7 +530,8 @@ public class ScrobblingService : IScrobblingService
                 VolumeNumber = decision.VolumeNumber,
                 AniListToken = decision.AppUser.AniListAccessToken,
                 SeriesName = decision.Series.Name,
-                LocalizedSeriesName = decision.Series.LocalizedName
+                LocalizedSeriesName = decision.Series.LocalizedName,
+                Year = decision.Series.Metadata.ReleaseYear
             });
         }
         catch (FlurlHttpException)
@@ -545,7 +568,6 @@ public class ScrobblingService : IScrobblingService
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
-                //_unitOfWork.ScrobbleRepository.Remove(evt);
             }
             catch (FlurlHttpException)
             {

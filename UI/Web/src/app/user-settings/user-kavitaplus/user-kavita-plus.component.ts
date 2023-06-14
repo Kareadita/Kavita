@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {AccountService} from "../../_services/account.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {FeatureListModalComponent} from "../../_single-module/feature-list-modal/feature-list-modal.component";
 
 @Component({
   selector: 'app-user-kavitaplus',
@@ -12,7 +14,7 @@ export class UserKavitaPlusComponent implements OnInit {
   hasValidLicense = false;
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  constructor(private accountService: AccountService) {
+  constructor(private accountService: AccountService, private modalService: NgbModal) {
   }
 
   ngOnInit() {
@@ -28,5 +30,10 @@ export class UserKavitaPlusComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+  openFeatureListModal() {
+    this.modalService.open(FeatureListModalComponent, {size: "lg"});
+  }
+
 
 }

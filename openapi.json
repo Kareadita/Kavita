@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.5"
+    "version": "0.7.3.6"
   },
   "servers": [
     {
@@ -10630,6 +10630,11 @@
           "review": {
             "type": "string",
             "description": "A short summary the user can write when giving their review.",
+            "nullable": true
+          },
+          "tagline": {
+            "type": "string",
+            "description": "An optional tagline for the review",
             "nullable": true
           },
           "seriesId": {

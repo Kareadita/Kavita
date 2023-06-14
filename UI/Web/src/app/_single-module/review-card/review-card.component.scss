@@ -2,3 +2,19 @@
     font-size: 2rem;
     padding: 20px;
 }
+
+.my-review {
+    position: absolute;
+    z-index: 20;
+    top: 38px;
+    left: 38px;
+    color: var(--review-card-star-color);
+}
+
+.card-text {
+    font-size: 14px;
+}
+
+.card {
+    cursor: pointer;
+}
