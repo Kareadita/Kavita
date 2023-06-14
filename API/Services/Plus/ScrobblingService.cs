@@ -569,12 +569,12 @@ public class ScrobblingService : IScrobblingService
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
             }
-            catch (FlurlHttpException)
+            catch (FlurlHttpException ex)
             {
                 // If a flurl exception occured, the API is likely down. Kill processing
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 /* Swallow as it's already been handled in PostScrobbleUpdate */
             }
