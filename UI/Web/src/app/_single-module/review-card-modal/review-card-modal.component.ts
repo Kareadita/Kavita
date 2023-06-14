@@ -18,8 +18,6 @@ export class ReviewCardModalComponent {
   @Input({required: true}) review!: UserReview;
 
 
-
-
   constructor(private modal: NgbActiveModal) {
   }
 

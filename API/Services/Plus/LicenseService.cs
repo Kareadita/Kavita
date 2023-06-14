@@ -58,7 +58,7 @@ public class LicenseService : ILicenseService
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return false;
-        var result = await IsLicenseValid(user.License);
+        var result = await IsLicenseValid(user.Email, user.License);
         await provider.SetAsync($"{userId}", result, _licenseCacheTimeout);
         // TODO: Think about an EventHub message to user when something like license changes
         return result;
@@ -68,9 +68,10 @@ public class LicenseService : ILicenseService
     /// <summary>
     /// Performs license lookup to API layer
     /// </summary>
+    /// <param name="email"></param>
     /// <param name="license"></param>
     /// <returns></returns>
-    private async Task<bool> IsLicenseValid(string license)
+    private async Task<bool> IsLicenseValid(string email, string license)
     {
         if (string.IsNullOrEmpty(license)) return false;
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -87,7 +88,8 @@ public class LicenseService : ILicenseService
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId
+                    InstallId = serverSetting.InstallId,
+                    UserEmail = email
                 })
                 .ReceiveString();
             return bool.Parse(response);
@@ -147,7 +149,7 @@ public class LicenseService : ILicenseService
         var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
         foreach (var user in users)
         {
-            var isValid = await IsLicenseValid(user.License);
+            var isValid = await IsLicenseValid(user.Email, user.License);
             if (isValid)
             {
                 await provider.SetAsync($"{user.Id}", true, _licenseCacheTimeout);
