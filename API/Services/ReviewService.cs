@@ -112,7 +112,8 @@ public class ReviewService : IReviewService
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite),
                     VolumeCount = series.Volumes.Count,
-                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial)
+                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
+                    Year = series.Metadata.ReleaseYear
                 })
                 .ReceiveJson<IEnumerable<MediaReviewDto>>();
 

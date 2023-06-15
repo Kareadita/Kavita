@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -29,6 +30,8 @@ public class PlusSeriesDto
     /// Optional but can help with matching
     /// </summary>
     public int? VolumeCount { get; set; }
+
+    public int? Year { get; set; }
 }
 
 internal record MediaRecommendationDto
@@ -60,7 +63,7 @@ public class RecommendationService : IRecommendationService
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-                SeriesIncludes.Metadata | SeriesIncludes.Library);
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
         var seriesRecs = new List<SeriesDto>();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return seriesRecs;
@@ -98,7 +101,10 @@ public class RecommendationService : IRecommendationService
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite)
+                        ScrobblingService.AniListWeblinkWebsite),
+                    VolumeCount = series.Volumes.Count,
+                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
+                    Year = series.Metadata.ReleaseYear
                 })
                 .ReceiveJson<IEnumerable<MediaRecommendationDto>>();
 
