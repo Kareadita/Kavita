@@ -47,28 +47,40 @@ public class ReviewController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<IEnumerable<UserReviewDto>>> GetReviews(int seriesId)
     {
-        var userRatings = await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId);
-        if (!await _licenseService.DefaultUserHasLicense() || !await _licenseService.HasActiveLicense(User.GetUserId()))
+        var userId = User.GetUserId();
+        var userRatings = await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId);
+        if (!await _licenseService.DefaultUserHasLicense() || !await _licenseService.HasActiveLicense(userId))
         {
             return Ok(userRatings);
         }
 
         var cacheKey = "review-" + seriesId;
+        IEnumerable<UserReviewDto> externalReviews;
+        var setCache = false;
         if (_cache.TryGetValue(cacheKey, out string cachedData))
         {
-            return Ok(JsonConvert.DeserializeObject<IEnumerable<UserReviewDto>>(cachedData));
+            externalReviews = JsonConvert.DeserializeObject<IEnumerable<UserReviewDto>>(cachedData);
+        }
+        else
+        {
+            externalReviews = await _reviewService.GetReviewsForSeries(userId, seriesId);
+            setCache = true;
         }
 
         // Fetch external reviews and splice them in
-        var externalReviews = await _reviewService.GetReviewsForSeries(User.GetUserId(), seriesId);
         foreach (var r in externalReviews)
         {
             userRatings.Add(r);
         }
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSize(userRatings.Count)
-            .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-        _cache.Set(cacheKey, JsonConvert.SerializeObject(userRatings), cacheEntryOptions);
+
+        if (setCache)
+        {
+            var cacheEntryOptions = new MemoryCacheEntryOptions()
+                .SetSize(userRatings.Count)
+                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            _cache.Set(cacheKey, JsonConvert.SerializeObject(externalReviews), cacheEntryOptions);
+        }
+
         return Ok(userRatings);
     }
 

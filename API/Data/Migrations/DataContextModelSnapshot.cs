@@ -272,6 +272,9 @@ namespace API.Data.Migrations
                     b.Property<int>("ScalingOption")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShareReviews")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowScreenHints")
                         .HasColumnType("INTEGER");
 

@@ -5,7 +5,7 @@
 namespace API.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class ReviewTagline : Migration
+    public partial class ReviewTaglineAndOptInShares : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,6 +15,13 @@ namespace API.Data.Migrations
                 table: "AppUserRating",
                 type: "TEXT",
                 nullable: true);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "ShareReviews",
+                table: "AppUserPreferences",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
@@ -23,6 +30,10 @@ namespace API.Data.Migrations
             migrationBuilder.DropColumn(
                 name: "Tagline",
                 table: "AppUserRating");
+
+            migrationBuilder.DropColumn(
+                name: "ShareReviews",
+                table: "AppUserPreferences");
         }
     }
 }

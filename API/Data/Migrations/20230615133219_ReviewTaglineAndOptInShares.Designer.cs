@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230613195248_ReviewTagline")]
-    partial class ReviewTagline
+    [Migration("20230615133219_ReviewTaglineAndOptInShares")]
+    partial class ReviewTaglineAndOptInShares
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -273,6 +273,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ScalingOption")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShareReviews")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("ShowScreenHints")

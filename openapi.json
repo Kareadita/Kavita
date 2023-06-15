@@ -10537,6 +10537,10 @@
             "type": "boolean",
             "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
           },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -15825,13 +15829,11 @@
           },
           "tagline": {
             "maxLength": 120,
-            "minLength": 20,
             "type": "string",
             "nullable": true
           },
           "body": {
             "maxLength": 1000,
-            "minLength": 20,
             "type": "string",
             "nullable": true
           }
@@ -15961,6 +15963,7 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
+          "shareReviews",
           "showScreenHints",
           "swipeToPaginate",
           "theme"
@@ -16065,6 +16068,10 @@
           "collapseSeriesRelationships": {
             "type": "boolean",
             "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
           }
         },
         "additionalProperties": false
