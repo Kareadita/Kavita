@@ -1,9 +1,9 @@
 <div>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{review.username.startsWith("external") ? 'External' : review.username + "'s"}} Review</h4>
+    <h4 class="modal-title" id="modal-basic-title">{{review.username + "'s"}} Review {{review.isExternal ? '(external)' : ''}}</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
   </div>
-  <div class="modal-body">
+  <div class="modal-body scrollable-modal">
     <p *ngIf="review.tagline" [innerHTML]="review.tagline | safeHtml"></p>
     <p class="img-max-width" [innerHTML]="review.body | safeHtml"></p>
   </div>

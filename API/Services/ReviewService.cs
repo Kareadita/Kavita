@@ -60,20 +60,22 @@ public class ReviewService : IReviewService
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-                SeriesIncludes.Metadata | SeriesIncludes.Library);
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Volumes);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return new List<UserReviewDto>();
-        return (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
+        var ret = (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
         {
             Body = r.Body,
             Tagline = r.Tagline,
             Score = r.Score,
-            Username = "external_" + r.Username,
+            Username = r.Username,
             LibraryId = series.LibraryId,
             SeriesId = series.Id,
             IsExternal = true,
             BodyJustText = GetCharacters(r.RawBody),
         });
+
+        return ret.OrderBy(r => r.Score);
     }
 
     private static string GetCharacters(string body)
@@ -91,6 +93,7 @@ public class ReviewService : IReviewService
     private async Task<IEnumerable<MediaReviewDto>> GetReviews(string license, Series series)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        _logger.LogDebug("Fetching external reviews for Series: {SeriesName}", series.Name);
         try
         {
             return await (Configuration.KavitaPlusApiUrl + "/api/review")
@@ -107,7 +110,9 @@ public class ReviewService : IReviewService
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite)
+                        ScrobblingService.AniListWeblinkWebsite),
+                    VolumeCount = series.Volumes.Count,
+                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial)
                 })
                 .ReceiveJson<IEnumerable<MediaReviewDto>>();
 
