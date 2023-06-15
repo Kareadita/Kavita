@@ -33,6 +33,7 @@ internal class MediaReviewDto
     /// In Markdown
     /// </summary>
     public string RawBody { get; set; }
+    public string Username { get; set; }
 }
 
 public interface IReviewService
@@ -67,11 +68,11 @@ public class ReviewService : IReviewService
             Body = r.Body,
             Tagline = r.Tagline,
             Score = r.Score,
-            Username = "external",
+            Username = "external_" + r.Username,
             LibraryId = series.LibraryId,
             SeriesId = series.Id,
             IsExternal = true,
-            BodyJustText = GetCharacters(r.RawBody)
+            BodyJustText = GetCharacters(r.RawBody),
         });
     }
 
