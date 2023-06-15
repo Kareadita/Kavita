@@ -31,7 +31,7 @@ internal record MediaRecommendationDto
 
 public interface IRecommendationService
 {
-    Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
+    Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
 }
 
 public class RecommendationService : IRecommendationService
@@ -48,7 +48,7 @@ public class RecommendationService : IRecommendationService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
+    public async Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -7,6 +9,8 @@ using API.Extensions;
 using API.Helpers;
 using API.Services.Plus;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace API.Controllers;
 
@@ -15,13 +19,15 @@ public class RecommendedController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRecommendationService _recommendationService;
     private readonly ILicenseService _licenseService;
+    private readonly IMemoryCache _cache;
 
     public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
-        ILicenseService licenseService)
+        ILicenseService licenseService, IMemoryCache cache)
     {
         _unitOfWork = unitOfWork;
         _recommendationService = recommendationService;
         _licenseService = licenseService;
+        _cache = cache;
     }
 
     /// <summary>
@@ -43,7 +49,19 @@ public class RecommendedController : BaseApiController
         {
             return BadRequest("User does not have access to this Series");
         }
-        return Ok(await _recommendationService.GetRecommendationsForSeries(userId, seriesId));
+
+        var cacheKey = $"recommendation-{seriesId}-{userId}";
+        if (_cache.TryGetValue(cacheKey, out string cachedData))
+        {
+            return Ok(JsonConvert.DeserializeObject<IEnumerable<SeriesDto>>(cachedData));
+        }
+
+        var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetSize(ret.Count)
+            .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+        _cache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
+        return Ok(ret);
     }
 
 

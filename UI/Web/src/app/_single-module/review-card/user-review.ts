@@ -5,4 +5,7 @@ export interface UserReview {
   username: string;
   body: string;
   tagline?: string;
+  isExternal: boolean;
+  bodyJustText?: string;
+  externalUrl?: string;
 }

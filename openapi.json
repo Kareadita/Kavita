@@ -16141,6 +16141,20 @@
             "type": "integer",
             "description": "How many upvotes this review has gotten",
             "format": "int32"
+          },
+          "externalUrl": {
+            "type": "string",
+            "description": "If External, the url of the review",
+            "nullable": true
+          },
+          "isExternal": {
+            "type": "boolean",
+            "description": "Does this review come from an external Source"
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
           }
         },
         "additionalProperties": false,

@@ -11,7 +11,7 @@
       <div class="card-body">
         <h6 class="card-title" *ngIf="review.tagline && review.tagline.length > 0" [innerHTML]="review.tagline | safeHtml"></h6>
         <p class="card-text no-images">
-          <app-read-more [text]="review.body || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
+          <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>
         <p class="card-text">
 

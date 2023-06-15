@@ -250,4 +250,5 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
                 .Where(s => char.IsLetter(s[0])))
             .Sum(words => words.Count());
     }
+
 }

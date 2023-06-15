@@ -15,6 +15,10 @@ export class CarouselReelComponent {
   @Input() clickableTitle: boolean = true;
   @Input() iconClasses = '';
   /**
+   * Show's the carousel component even if there is nothing in it
+   */
+  @Input() alwaysShow = false;
+  /**
    * Track by identity. By default, this has an implementation based on title, item's name, pagesRead, and index
    */
   @Input() trackByIdentity: (index: number, item: any) => string = (index: number, item: any) => `${this.title}_${item.id}_${item?.name}_${item?.pagesRead}_${index}`;

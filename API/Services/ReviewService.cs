@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -9,6 +10,7 @@ using API.Entities;
 using API.Helpers;
 using API.Services.Plus;
 using Flurl.Http;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -27,6 +29,10 @@ internal class MediaReviewDto
     /// </summary>
     public int Score { get; set; }
     public string SiteUrl { get; set; }
+    /// <summary>
+    /// In Markdown
+    /// </summary>
+    public string RawBody { get; set; }
 }
 
 public interface IReviewService
@@ -63,9 +69,23 @@ public class ReviewService : IReviewService
             Score = r.Score,
             Username = "external",
             LibraryId = series.LibraryId,
-            SeriesId = series.Id
+            SeriesId = series.Id,
+            IsExternal = true,
+            BodyJustText = GetCharacters(r.RawBody)
         });
     }
+
+    private static string GetCharacters(string body)
+    {
+        if (string.IsNullOrEmpty(body)) return body;
+        var plainText = Regex.Replace(body, @"[_*\[\]]", string.Empty);
+
+        // Take the first 100 characters
+        plainText = plainText.Length > 100 ? plainText.Substring(0, 100) : plainText;
+
+        return plainText + "…";
+    }
+
 
     private async Task<IEnumerable<MediaReviewDto>> GetReviews(string license, Series series)
     {
