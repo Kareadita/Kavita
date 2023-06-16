@@ -77,8 +77,9 @@ public class ReviewController : BaseApiController
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetSize(userRatings.Count)
-                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+                .SetAbsoluteExpiration(TimeSpan.FromHours(10));
             _cache.Set(cacheKey, JsonConvert.SerializeObject(externalReviews), cacheEntryOptions);
+            _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
         }
 
         return Ok(userRatings);

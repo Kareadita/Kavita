@@ -81,7 +81,13 @@ public class ReviewService : IReviewService
     private static string GetCharacters(string body)
     {
         if (string.IsNullOrEmpty(body)) return body;
-        var plainText = Regex.Replace(body, @"[_*\[\]]", string.Empty);
+
+        var plainText = Regex.Replace(body, @"[_*\[\]~]", string.Empty);
+        plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
+        plainText = Regex.Replace(plainText, @"~~~(.*?)~~~", "$1");
+        plainText = Regex.Replace(plainText, @"~~(.*?)~~", "$1");
+        plainText = Regex.Replace(plainText, @"__(.*?)__", "$1");
+        plainText = Regex.Replace(plainText, @"#\s(.*?)", "$1");
 
         // Take the first 100 characters
         plainText = plainText.Length > 100 ? plainText.Substring(0, 100) : plainText;

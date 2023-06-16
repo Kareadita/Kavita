@@ -15,6 +15,13 @@
     font-size: 14px;
 }
 
+.card-title {
+    overflow: hidden;
+    width: 235px;
+    word-break: break-all;
+    height: 20px;
+}
+
 .card {
     cursor: pointer;
 }

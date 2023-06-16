@@ -283,6 +283,8 @@ public class UserRepository : IUserRepository
             .Include(r => r.AppUser)
             .Where(r => r.SeriesId == seriesId)
             .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .OrderBy(r => r.AppUserId == userId)
+            .ThenBy(r => r.Rating)
             .AsSplitQuery()
             .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

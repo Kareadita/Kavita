@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -59,7 +58,7 @@ public class RecommendedController : BaseApiController
         var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetSize(ret.Count)
-            .SetAbsoluteExpiration(TimeSpan.FromHours(1));
+            .SetAbsoluteExpiration(TimeSpan.FromHours(10));
         _cache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
         return Ok(ret);
     }
