@@ -5,7 +5,7 @@
   </div>
   <div class="modal-body scrollable-modal">
     <p *ngIf="review.tagline" [innerHTML]="review.tagline | safeHtml"></p>
-    <p class="img-max-width" [innerHTML]="review.body | safeHtml"></p>
+    <p #container class="img-max-width" [innerHTML]="review.body | safeHtml"></p>
   </div>
   <div class="modal-footer">
     <button type="submit" class="btn btn-primary" (click)="close()">Close</button>

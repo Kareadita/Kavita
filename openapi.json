@@ -8194,6 +8194,18 @@
         }
       }
     },
+    "/api/Server/bust-review-and-rec-cache": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [

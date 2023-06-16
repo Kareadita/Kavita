@@ -6,6 +6,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import {UserReview} from "../review-card/user-review";
 import {CommonModule} from "@angular/common";
 import {PipeModule} from "../../pipe/pipe.module";
+import {SpoilerComponent} from "../spoiler/spoiler.component";
 
 @Component({
   selector: 'app-review-series-modal',
