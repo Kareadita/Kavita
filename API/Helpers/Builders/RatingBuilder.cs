@@ -28,7 +28,7 @@ public class RatingBuilder : IEntityBuilder<AppUserRating>
 
     public RatingBuilder WithTagline(string? tagline)
     {
-        //_rating.Tagline = tagline;
+        _rating.Tagline = tagline;
         return this;
     }
 

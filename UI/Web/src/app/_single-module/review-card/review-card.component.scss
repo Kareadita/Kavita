@@ -2,3 +2,34 @@
     font-size: 2rem;
     padding: 20px;
 }
+
+.my-review {
+    position: absolute;
+    z-index: 20;
+    top: 38px;
+    left: 38px;
+    color: var(--review-card-star-color);
+}
+
+.card-text {
+    font-size: 14px;
+}
+
+.card-title {
+    overflow: hidden;
+    width: 235px;
+    word-break: break-all;
+    height: 20px;
+}
+
+.card {
+    cursor: pointer;
+}
+
+.no-images img {
+    display: none;
+}
+
+.card-footer {
+    font-size: 13px
+}

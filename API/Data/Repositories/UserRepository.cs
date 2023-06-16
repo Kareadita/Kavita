@@ -45,7 +45,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
-    Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId);
+    Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
@@ -277,11 +277,14 @@ public class UserRepository : IUserRepository
             .SingleOrDefaultAsync();
     }
 
-    public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId)
+    public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)
     {
         return await _context.AppUserRating
             .Include(r => r.AppUser)
             .Where(r => r.SeriesId == seriesId)
+            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .OrderBy(r => r.AppUserId == userId)
+            .ThenBy(r => r.Rating)
             .AsSplitQuery()
             .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
             .ToListAsync();

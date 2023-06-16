@@ -20,15 +20,12 @@
                       <div ngbAccordionCollapse>
                         <div ngbAccordionBody>
                           <ng-template>
-                            <p>KavitaPlus is a premium subscription service which unlocks optional features for your Kavita instance, like scrobbling, recommendations, etc.
-                            Some features are unlocked when the admin has a subscription, while others require individual users. You can find more here.</p>
                             <app-user-kavitaplus></app-user-kavitaplus>
                           </ng-template>
                         </div>
                       </div>
                     </div>
                   </div>
-
               </ng-container>
               <ng-container *ngIf="tab.fragment === FragmentID.Preferences">
                 <p>
@@ -61,8 +58,8 @@
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
-                                                <input type="checkbox" id="auto-close" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
-                                                <label class="form-check-label" for="auto-close">Blur Unread Summaries</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
+                                                <input type="checkbox" id="blur-unread-summaries" role="switch" formControlName="blurUnreadSummaries" class="form-check-input" aria-describedby="settings-global-blurUnreadSummaries-help" [value]="true" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="blur-unread-summaries">Blur Unread Summaries</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="blurUnreadSummariesTooltip" role="button" tabindex="0"></i>
                                             </div>
 
                                             <ng-template #blurUnreadSummariesTooltip>Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)</ng-template>
@@ -77,15 +74,16 @@
                                                 <label class="form-check-label" for="prompt-download">Prompt on Download</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="promptForDownloadSizeTooltip" role="button" tabindex="0"></i>
                                             </div>
 
-                                            <ng-template #promptForDownloadSizeTooltip>Prompt when a download exceedes 100MB in size</ng-template>
-                                            <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">Prompt when a download exceedes 100MB in size</span>
+                                            <ng-template #promptForDownloadSizeTooltip>Prompt when a download exceeds 100MB in size</ng-template>
+                                            <span class="visually-hidden" id="settings-global-promptForDownloadSize-help">Prompt when a download exceeds 100MB in size</span>
                                         </div>
                                     </div>
 
                                     <div class="row g-0">
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                             <div class="form-check form-switch">
-                                                <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input" aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
+                                                <input type="checkbox" id="no-transitions" role="switch" formControlName="noTransitions" class="form-check-input"
+                                                       aria-describedby="settings-global-noTransitions-help" [value]="true" aria-labelledby="auto-close-label">
                                                 <label class="form-check-label" for="no-transitions">Disable Animations</label><i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="noTransitionsTooltip" role="button" tabindex="0"></i>
                                             </div>
 
@@ -96,15 +94,28 @@
 
                                     <div class="row g-0">
                                         <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                                            <div class="mb-3 mt-1">
-                                                <div class="form-check form-switch">
-                                                    <input type="checkbox" id="collapse-relationships" role="switch" formControlName="collapseSeriesRelationships" aria-describedby="settings-collapse-relationships-help" class="form-check-input" aria-labelledby="auto-close-label">
-                                                    <label class="form-check-label" for="collapse-relationships">Collapse Series Relationships</label>
-                                                </div>
+                                            <div class="form-check form-switch">
+                                                <input type="checkbox" id="collapse-relationships" role="switch" formControlName="collapseSeriesRelationships"
+                                                       aria-describedby="settings-collapse-relationships-help" class="form-check-input" aria-labelledby="auto-close-label">
+                                                <label class="form-check-label" for="collapse-relationships">Collapse Series Relationships</label>
+                                                <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="collapseSeriesRelationshipsTooltip" role="button" tabindex="0"></i>
                                             </div>
-                                            <ng-template #noTransitionsTooltip>Experiemental: Should Kavita show Series that have no relationships or is the parent/prequel</ng-template>
-                                            <span class="visually-hidden" id="settings-collapse-relationships-help">Experiemental: Should Kavita show Series that have no relationships or is the parent/prequel</span>
+                                            <ng-template #collapseSeriesRelationshipsTooltip>Experimental: Should Kavita show Series that have no relationships or is the parent/prequel</ng-template>
+                                            <span class="visually-hidden" id="settings-collapse-relationships-help">Experimental: Should Kavita show Series that have no relationships or is the parent/prequel</span>
                                         </div>
+                                    </div>
+
+                                    <div class="row g-0">
+                                      <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                                        <div class="form-check form-switch">
+                                          <input type="checkbox" id="share-reviews" role="switch" formControlName="shareReviews"
+                                                 aria-describedby="settings-share-reviews-help" class="form-check-input" aria-labelledby="auto-close-label">
+                                          <label class="form-check-label" for="share-reviews">Share Series Reviews</label>
+                                          <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="shareReviewsTooltip" role="button" tabindex="0"></i>
+                                        </div>
+                                        <ng-template #shareReviewsTooltip>Should Kavita include your reviews of Series for other users</ng-template>
+                                        <span class="visually-hidden" id="settings-share-reviews-help">Should Kavita include your reviews of Series for other users</span>
+                                      </div>
                                     </div>
 
                                     <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
@@ -241,7 +252,7 @@
                                         <div class="mb-3">
                                             <div class="form-check form-switch">
                                                 <input type="checkbox" role="switch" id="taptopaginate" formControlName="bookReaderTapToPaginate" class="form-check-input" [value]="true" aria-labelledby="taptopaginate-label">
-                                                <label id="taptopaginate" class="form-check-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
+                                                <label for="taptopaginate" class="form-check-label">Tap to Paginate</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tapToPaginateOptionTooltip" role="button" tabindex="0"></i>
                                                 <ng-template #tapToPaginateOptionTooltip>Should the sides of the book reader screen allow tapping on it to move to prev/next page</ng-template>
                                                 <span class="visually-hidden" id="settings-taptopaginate-option-help">Should the sides of the book reader screen allow tapping on it to move to prev/next page</span>
                                             </div>
@@ -252,7 +263,7 @@
                                         <div class="mb-3">
                                             <div class="form-check form-switch">
                                                 <input type="checkbox" role="switch" id="immersivemode" formControlName="bookReaderImmersiveMode" class="form-check-input" [value]="true" aria-labelledby="immersivemode-label">
-                                                <label id="immersivemode" class="form-check-label">Immersive Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
+                                                <label for="immersivemode" class="form-check-label">Immersive Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="immersivemodeOptionTooltip" role="button" tabindex="0"></i>
                                                 <ng-template #immersivemodeOptionTooltip>This will hide the menu behind a click on the reader document and turn tap to paginate on</ng-template>
                                                 <span class="visually-hidden" id="settings-immersivemode-option-help">This will hide the menu behind a click on the reader document and turn tap to paginate on</span>
                                             </div>
@@ -264,8 +275,8 @@
                                     <div class="col-md-6 col-sm-12 pe-2 mb-3">
                                         <label for="settings-book-reading-direction" class="form-label">Reading Direction</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="bookReadingDirectionTooltip" role="button" tabindex="0"></i>
                                         <ng-template #bookReadingDirectionTooltip>Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</ng-template>
-                                        <span class="visually-hidden" id="settings-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
-                                        <select class="form-select" aria-describedby="settings-reading-direction-help" formControlName="bookReaderReadingDirection">
+                                        <span class="visually-hidden" id="settings-book-reading-direction-help">Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.</span>
+                                        <select id="settings-book-reading-direction" class="form-select" aria-describedby="settings-book-reading-direction-help" formControlName="bookReaderReadingDirection">
                                             <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
                                         </select>
                                     </div>
@@ -275,7 +286,7 @@
                                         <label for="settings-fontfamily-option" class="form-label">Font Family</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="fontFamilyOptionTooltip" role="button" tabindex="0"></i>
                                         <ng-template #fontFamilyOptionTooltip>Font family to load up. Default will load the book's default font</ng-template>
                                         <span class="visually-hidden" id="settings-fontfamily-option-help">Font family to load up. Default will load the book's default font</span>
-                                        <select class="form-select" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
+                                        <select id="settings-fontfamily-option" class="form-select" aria-describedby="settings-fontfamily-option-help" formControlName="bookReaderFontFamily">
                                             <option *ngFor="let opt of fontFamilies" [value]="opt">{{opt | titlecase}}</option>
                                         </select>
                                     </div>

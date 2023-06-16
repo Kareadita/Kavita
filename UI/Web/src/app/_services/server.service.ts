@@ -62,6 +62,10 @@ export class ServerService {
     return this.httpClient.post(this.baseUrl + 'server/scrobble-updates', {});
   }
 
+  bustCache() {
+    return this.httpClient.post(this.baseUrl + 'server/bust-review-and-rec-cache', {});
+  }
+
   getMediaErrors() {
     return this.httpClient.get<Array<KavitaMediaError>>(this.baseUrl + 'server/media-errors', {});
   }

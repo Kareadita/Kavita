@@ -36,4 +36,16 @@ public class UserReviewDto
     /// </summary>
     /// <remarks>More upvotes get loaded first</remarks>
     public int Score { get; set; } = 0;
+    /// <summary>
+    /// If External, the url of the review
+    /// </summary>
+    public string? ExternalUrl { get; set; }
+    /// <summary>
+    /// Does this review come from an external Source
+    /// </summary>
+    public bool IsExternal { get; set; }
+    /// <summary>
+    /// The main body with just text, for review preview
+    /// </summary>
+    public string? BodyJustText { get; set; }
 }

@@ -73,6 +73,8 @@ public class ScrobbleRepository : IScrobbleRepository
         return await _context.ScrobbleEvent
             .Include(s => s.Series)
             .ThenInclude(s => s.Library)
+            .Include(s => s.Series)
+            .ThenInclude(s => s.Metadata)
             .Include(s => s.AppUser)
             .Where(s => s.ScrobbleEventType == type)
             .Where(s => s.IsProcessed == isProcessed)

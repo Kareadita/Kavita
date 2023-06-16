@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.5"
+    "version": "0.7.3.6"
   },
   "servers": [
     {
@@ -8194,6 +8194,18 @@
         }
       }
     },
+    "/api/Server/bust-review-and-rec-cache": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
@@ -10537,6 +10549,10 @@
             "type": "boolean",
             "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
           },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -10630,6 +10646,11 @@
           "review": {
             "type": "string",
             "description": "A short summary the user can write when giving their review.",
+            "nullable": true
+          },
+          "tagline": {
+            "type": "string",
+            "description": "An optional tagline for the review",
             "nullable": true
           },
           "seriesId": {
@@ -15820,13 +15841,11 @@
           },
           "tagline": {
             "maxLength": 120,
-            "minLength": 20,
             "type": "string",
             "nullable": true
           },
           "body": {
             "maxLength": 1000,
-            "minLength": 20,
             "type": "string",
             "nullable": true
           }
@@ -15956,6 +15975,7 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
+          "shareReviews",
           "showScreenHints",
           "swipeToPaginate",
           "theme"
@@ -16060,6 +16080,10 @@
           "collapseSeriesRelationships": {
             "type": "boolean",
             "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
           }
         },
         "additionalProperties": false
@@ -16136,6 +16160,20 @@
             "type": "integer",
             "description": "How many upvotes this review has gotten",
             "format": "int32"
+          },
+          "externalUrl": {
+            "type": "string",
+            "description": "If External, the url of the review",
+            "nullable": true
+          },
+          "isExternal": {
+            "type": "boolean",
+            "description": "Does this review come from an external Source"
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
           }
         },
         "additionalProperties": false,

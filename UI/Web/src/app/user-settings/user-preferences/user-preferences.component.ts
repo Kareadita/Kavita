@@ -171,6 +171,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
       this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
       this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
+      this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
 
       this.cdRef.markForCheck();
     });
@@ -216,6 +217,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
+    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -249,7 +251,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       noTransitions: modelSettings.noTransitions,
       emulateBook: modelSettings.emulateBook,
       swipeToPaginate: modelSettings.swipeToPaginate,
-      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships
+      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
+      shareReviews: modelSettings.shareReviews
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

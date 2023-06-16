@@ -41,6 +41,7 @@ export interface Preferences {
     promptForDownloadSize: boolean;
     noTransitions: boolean;
     collapseSeriesRelationships: boolean;
+    shareReviews: boolean;
 }
 
 export const readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];

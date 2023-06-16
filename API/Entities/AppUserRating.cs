@@ -12,6 +12,10 @@ public class AppUserRating
     /// A short summary the user can write when giving their review.
     /// </summary>
     public string? Review { get; set; }
+    /// <summary>
+    /// An optional tagline for the review
+    /// </summary>
+    public string? Tagline { get; set; }
     public int SeriesId { get; set; }
     public Series Series { get; set; }
 

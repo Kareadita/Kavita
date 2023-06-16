@@ -40,6 +40,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'Scrobbling has been queued'
     },
     {
+      name: 'Bust Cache',
+      description: 'Bust\'s the Review and Recommendation Cache - should only be used when debugging bad matches',
+      api: this.serverService.bustCache(),
+      successMessage: 'Review and Recommendation Cache busted'
+    },
+    {
       name: 'Convert Media to Target Encoding',
       description: 'Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).',
       api: this.serverService.convertMedia(),

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -9,6 +10,7 @@ using API.Entities;
 using API.Helpers;
 using API.Services.Plus;
 using Flurl.Http;
+using HtmlAgilityPack;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
@@ -27,6 +29,11 @@ internal class MediaReviewDto
     /// </summary>
     public int Score { get; set; }
     public string SiteUrl { get; set; }
+    /// <summary>
+    /// In Markdown
+    /// </summary>
+    public string RawBody { get; set; }
+    public string Username { get; set; }
 }
 
 public interface IReviewService
@@ -53,23 +60,47 @@ public class ReviewService : IReviewService
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-                SeriesIncludes.Metadata | SeriesIncludes.Library);
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Volumes);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return new List<UserReviewDto>();
-        return (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
+        var ret = (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
         {
             Body = r.Body,
             Tagline = r.Tagline,
             Score = r.Score,
-            Username = "external",
+            Username = r.Username,
             LibraryId = series.LibraryId,
-            SeriesId = series.Id
+            SeriesId = series.Id,
+            IsExternal = true,
+            BodyJustText = GetCharacters(r.RawBody),
         });
+
+        return ret.OrderBy(r => r.Score);
     }
+
+    private static string GetCharacters(string body)
+    {
+        if (string.IsNullOrEmpty(body)) return body;
+
+        var plainText = Regex.Replace(body, @"[_*\[\]~]", string.Empty);
+        plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
+        plainText = Regex.Replace(plainText, @"~~~(.*?)~~~", "$1");
+        plainText = Regex.Replace(plainText, @"\+{3}(.*?)\+{3}", "$1");
+        plainText = Regex.Replace(plainText, @"~~(.*?)~~", "$1");
+        plainText = Regex.Replace(plainText, @"__(.*?)__", "$1");
+        plainText = Regex.Replace(plainText, @"#\s(.*?)", "$1");
+
+        // Take the first 100 characters
+        plainText = plainText.Length > 100 ? plainText.Substring(0, 100) : plainText;
+
+        return plainText + "…";
+    }
+
 
     private async Task<IEnumerable<MediaReviewDto>> GetReviews(string license, Series series)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        _logger.LogDebug("Fetching external reviews for Series: {SeriesName}", series.Name);
         try
         {
             return await (Configuration.KavitaPlusApiUrl + "/api/review")
@@ -86,7 +117,10 @@ public class ReviewService : IReviewService
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite)
+                        ScrobblingService.AniListWeblinkWebsite),
+                    VolumeCount = series.Volumes.Count,
+                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
+                    Year = series.Metadata.ReleaseYear
                 })
                 .ReceiveJson<IEnumerable<MediaReviewDto>>();
 

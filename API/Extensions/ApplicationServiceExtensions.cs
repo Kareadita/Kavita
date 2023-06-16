@@ -78,6 +78,12 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory(EasyCacheProfiles.License);
         });
+
+        services.AddMemoryCache(options =>
+        {
+            options.SizeLimit = 50 * 1024 * 1024; // 50 MB
+            options.CompactionPercentage = 0.1; // LRU compaction (10%)
+        });
     }
 
     private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)

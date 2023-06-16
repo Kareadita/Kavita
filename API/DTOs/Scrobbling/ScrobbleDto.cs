@@ -34,6 +34,7 @@ public class ScrobbleDto
     public string SeriesName { get; set; }
     public string LocalizedSeriesName { get; set; }
     public MediaFormat Format { get; set; }
+    public int? Year { get; set; }
     /// <summary>
     /// Optional AniListId if present on Kavita's WebLinks
     /// </summary>

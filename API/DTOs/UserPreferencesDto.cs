@@ -142,4 +142,9 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool CollapseSeriesRelationships { get; set; } = false;
+    /// <summary>
+    /// UI Site Global Setting: Should series reviews be shared with all users in the server
+    /// </summary>
+    [Required]
+    public bool ShareReviews { get; set; } = false;
 }

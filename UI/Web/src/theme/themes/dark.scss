@@ -15,7 +15,7 @@
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
-    
+
 
     /* Navbar */
     --navbar-bg-color: black;
@@ -180,7 +180,6 @@
     --ratingstar-star-filled: var(--primary-color);
 
     /* Global */
-    //--hr-color: transparent;
     --hr-color: rgba(239, 239, 239, 0.125);
     --accent-bg-color: rgba(1, 4, 9, 0.5);
     --accent-text-color: lightgrey;
@@ -246,4 +245,10 @@
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+
+    /* Review Card */
+    --review-card-star-color: gold;
+    --review-spoiler-bg-color: var(--primary-color);
+    --review-spoiler-text-color: var(--body-text-color);
+
   }

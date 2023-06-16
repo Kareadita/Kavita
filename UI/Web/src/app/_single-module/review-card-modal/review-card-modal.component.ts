@@ -1,30 +1,53 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ComponentFactoryResolver, Inject,
+  Input, ViewChild,
+  ViewContainerRef,
+  ViewEncapsulation
+} from '@angular/core';
+import {CommonModule, DOCUMENT} from '@angular/common';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
 import {PipeModule} from "../../pipe/pipe.module";
 import {UserReview} from "../review-card/user-review";
+import {SpoilerComponent} from "../spoiler/spoiler.component";
 
 @Component({
   selector: 'app-review-card-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PipeModule],
+  imports: [CommonModule, ReactiveFormsModule, PipeModule, SpoilerComponent],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
 })
-export class ReviewCardModalComponent {
+export class ReviewCardModalComponent implements AfterViewInit {
 
   @Input({required: true}) review!: UserReview;
+  @ViewChild('container', { read: ViewContainerRef }) container!: ViewContainerRef;
 
 
-
-
-  constructor(private modal: NgbActiveModal) {
+  constructor(private modal: NgbActiveModal, @Inject(DOCUMENT) private document: Document) {
   }
 
   close() {
     this.modal.close();
+  }
+
+  ngAfterViewInit() {
+    const spoilers = this.document.querySelectorAll('span.spoiler');
+
+    for (let i = 0; i < spoilers.length; i++) {
+      const spoiler = spoilers[i];
+      const componentRef = this.container.createComponent(SpoilerComponent);
+      componentRef.instance.html = spoiler.innerHTML;
+      if (spoiler.parentNode != null) {
+        spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);
+      }
+      componentRef.instance.cdRef.markForCheck();
+    }
   }
 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -21,6 +22,16 @@ public class PlusSeriesDto
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
     public MediaFormat MediaFormat { get; set; }
+    /// <summary>
+    /// Optional but can help with matching
+    /// </summary>
+    public int? ChapterCount { get; set; }
+    /// <summary>
+    /// Optional but can help with matching
+    /// </summary>
+    public int? VolumeCount { get; set; }
+
+    public int? Year { get; set; }
 }
 
 internal record MediaRecommendationDto
@@ -31,7 +42,7 @@ internal record MediaRecommendationDto
 
 public interface IRecommendationService
 {
-    Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
+    Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
 }
 
 public class RecommendationService : IRecommendationService
@@ -48,11 +59,11 @@ public class RecommendationService : IRecommendationService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
+    public async Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-                SeriesIncludes.Metadata | SeriesIncludes.Library);
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
         var seriesRecs = new List<SeriesDto>();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return seriesRecs;
@@ -90,7 +101,10 @@ public class RecommendationService : IRecommendationService
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite)
+                        ScrobblingService.AniListWeblinkWebsite),
+                    VolumeCount = series.Volumes.Count,
+                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
+                    Year = series.Metadata.ReleaseYear
                 })
                 .ReceiveJson<IEnumerable<MediaRecommendationDto>>();
 

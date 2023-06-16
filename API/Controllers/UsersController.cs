@@ -112,6 +112,7 @@ public class UsersController : BaseApiController
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
+        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
