@@ -85,7 +85,7 @@ public class ReviewService : IReviewService
         var plainText = Regex.Replace(body, @"[_*\[\]~]", string.Empty);
         plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
         plainText = Regex.Replace(plainText, @"~~~(.*?)~~~", "$1");
-        plainText = Regex.Replace(plainText, @"+++(.*?)+++", "$1");
+        plainText = Regex.Replace(plainText, @"\+{3}(.*?)\+{3}", "$1");
         plainText = Regex.Replace(plainText, @"~~(.*?)~~", "$1");
         plainText = Regex.Replace(plainText, @"__(.*?)__", "$1");
         plainText = Regex.Replace(plainText, @"#\s(.*?)", "$1");
