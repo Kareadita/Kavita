@@ -17,7 +17,7 @@
       </div>
 
     <div class="card-footer bg-transparent text-muted">
-      {{(isMyReview ? '' : review.username)}}
+      {{(isMyReview ? '' : review.username | defaultValue:'')}}
       <span style="float: right" *ngIf="review.isExternal">Rating {{review.score}}%</span>
     </div>
   </div>
