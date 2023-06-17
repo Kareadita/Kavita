@@ -72,17 +72,28 @@ public class ReviewService : IReviewService
             LibraryId = series.LibraryId,
             SeriesId = series.Id,
             IsExternal = true,
-            BodyJustText = GetCharacters(r.RawBody),
+            BodyJustText = GetCharacters(r.Body),
+            ExternalUrl = r.SiteUrl
         });
 
-        return ret.OrderBy(r => r.Score);
+        return ret.OrderByDescending(r => r.Score);
     }
 
     private static string GetCharacters(string body)
     {
         if (string.IsNullOrEmpty(body)) return body;
 
-        var plainText = Regex.Replace(body, @"[_*\[\]~]", string.Empty);
+        var doc = new HtmlDocument();
+        doc.LoadHtml(body);
+
+        var textNodes = doc.DocumentNode.SelectNodes("//text()[not(parent::script)]");
+        if (textNodes == null) return string.Empty;
+        var plainText =  string.Join(" ", textNodes
+            .Select(node => node.InnerText)
+            .Where(s => !s.Equals("\n")));
+
+        // Clean any leftover markdown out
+        plainText = Regex.Replace(plainText, @"[_*\[\]~]", string.Empty);
         plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
         plainText = Regex.Replace(plainText, @"~~~(.*?)~~~", "$1");
         plainText = Regex.Replace(plainText, @"\+{3}(.*?)\+{3}", "$1");

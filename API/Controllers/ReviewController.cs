@@ -82,7 +82,7 @@ public class ReviewController : BaseApiController
             _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
         }
 
-        return Ok(userRatings);
+        return Ok(userRatings.Take(10));
     }
 
     /// <summary>

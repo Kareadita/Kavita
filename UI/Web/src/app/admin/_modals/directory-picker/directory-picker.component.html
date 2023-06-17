@@ -5,7 +5,7 @@
 <div class="modal-body">
 
     <div class="mb-3">
-        <label for="filter" class="form-label">Path</label>
+        <label for="typeahead-focus" class="form-label">Path</label>
         <div class="input-group">
             <input id="typeahead-focus" type="text" class="form-control" [(ngModel)]="path" [ngbTypeahead]="search"
                 (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)"

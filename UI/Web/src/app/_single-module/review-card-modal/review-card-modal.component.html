@@ -8,6 +8,9 @@
     <p #container class="img-max-width" [innerHTML]="review.body | safeHtml"></p>
   </div>
   <div class="modal-footer">
+    <a *ngIf="review.externalUrl" class="btn btn-icon" [href]="review.externalUrl | safeHtml" target="_blank" rel="noopener noreferrer" [title]="review.externalUrl">
+      Go To Review
+    </a>
     <button type="submit" class="btn btn-primary" (click)="close()">Close</button>
   </div>
 </div>
