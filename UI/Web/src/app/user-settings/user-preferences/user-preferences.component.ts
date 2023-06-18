@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import {
   readingDirections,
@@ -27,7 +27,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import { environment } from 'src/environments/environment';
@@ -46,7 +46,7 @@ enum FragmentID {
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
-  Plus = 'plus'
+  Scrobbling = 'Scrobbling'
 
 }
 
@@ -84,7 +84,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
     {title: 'Stats', fragment: FragmentID.Stats},
-    {title: 'Plus', fragment: FragmentID.Plus},
+    {title: 'Scrobbling', fragment: FragmentID.Scrobbling},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;

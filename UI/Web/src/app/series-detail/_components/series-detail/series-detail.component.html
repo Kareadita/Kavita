@@ -63,12 +63,14 @@
         <app-tag-badge [selectionMode]="TagBadgeCursor.NotAllowed" fillStyle="filled">{{unreadCount}}</app-tag-badge>
       </div>
       <app-image height="100%" maxHeight="400px" objectFit="contain" background="none" [imageUrl]="seriesImage"></app-image>
-      <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) | number:'1.0-1'}}% Read" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
-        <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
-      </div>
-      <div class="under-image" *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
-        Continue {{ContinuePointTitle}}
-      </div>
+      <ng-container *ngIf="series.pagesRead < series.pages && hasReadingProgress && currentlyReadingChapter && !currentlyReadingChapter.isSpecial">
+        <div class="progress-banner" ngbTooltip="{{(series.pagesRead / series.pages) | number:'1.0-1'}}% Read">
+          <ngb-progressbar type="primary" height="5px" [value]="series.pagesRead" [max]="series.pages"></ngb-progressbar>
+        </div>
+        <div class="under-image">
+          Continue {{ContinuePointTitle}}
+        </div>
+      </ng-container>
     </div>
     <div class="col-xlg-10 col-lg-8 col-md-8 col-xs-8 col-sm-6 mt-2">
       <div class="row g-0">

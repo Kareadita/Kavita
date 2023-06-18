@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Account;
 using API.DTOs.Scrobbling;
 using API.Extensions;
+using API.Helpers.Builders;
 using API.Services.Plus;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -94,6 +97,54 @@ public class ScrobblingController : BaseApiController
     [HttpGet("scrobble-events")]
     public async Task<ActionResult<IEnumerable<ScrobbleEventDto>>> GetScrobblingEvents()
     {
-        return Ok(await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId()));
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId());
+        return Ok(events.OrderByDescending(e => e.LastModifiedUtc));
+    }
+
+    /// <summary>
+    /// Returns all scrobble holds for the current user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("holds")]
+    public async Task<ActionResult<IEnumerable<ScrobbleHoldDto>>> GetScrobbleHolds()
+    {
+        return Ok(await _unitOfWork.UserRepository.GetHolds(User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Adds a hold against the Series for user's scrobbling
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpPost("add-hold")]
+    public async Task<ActionResult> AddHold(int seriesId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
+        if (user == null) return Unauthorized();
+        if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId)) return Ok("Nothing to do");
+
+        var seriesHold = new ScrobbleHoldBuilder().WithSeriesId(seriesId).Build();
+        user.ScrobbleHolds.Add(seriesHold);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    /// <summary>
+    /// Adds a hold against the Series for user's scrobbling
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpDelete("remove-hold")]
+    public async Task<ActionResult> RemoveHold(int seriesId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
+        if (user == null) return Unauthorized();
+
+        user.ScrobbleHolds = user.ScrobbleHolds.Where(h => h.SeriesId != seriesId).ToList();
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        return Ok();
     }
 }

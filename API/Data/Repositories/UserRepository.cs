@@ -7,6 +7,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Reader;
+using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Extensions;
@@ -30,6 +31,7 @@ public enum AppUserIncludes
     WantToRead = 64,
     ReadingListsWithItems = 128,
     Devices = 256,
+    ScrobbleHolds = 512
 
 }
 
@@ -68,6 +70,7 @@ public interface IUserRepository
     Task<AppUser> GetDefaultAdminUser();
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
+    Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -265,6 +268,14 @@ public class UserRepository : IUserRepository
         return await _context.AppUser
             .AsSplitQuery()
             .AnyAsync(u => u.ScrobbleHolds.Select(s => s.SeriesId).Contains(seriesId) && u.Id == userId);
+    }
+
+    public async Task<IList<ScrobbleHoldDto>> GetHolds(int userId)
+    {
+        return await _context.ScrobbleHold
+            .Where(s => s.AppUserId == userId)
+            .ProjectTo<ScrobbleHoldDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

@@ -181,10 +181,10 @@
                                             </select>
                                         </div>
                                         <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                            <label for="settings-backgroundcolor-option" class="form-label">Background Color</label>
+                                            <label for="settings-background-color-option" class="form-label">Background Color</label>
                                             <input [value]="user.preferences.backgroundColor"
                                                    class="form-control"
-                                                   id="settings-backgroundcolor-option"
+                                                   id="settings-background-color-option"
                                                    (colorPickerChange)="handleBackgroundColorChange()"
                                                    [style.background]="user.preferences.backgroundColor"
                                                    [cpAlphaChannel]="'disabled'"
@@ -382,7 +382,8 @@
               <ng-container *ngIf="tab.fragment === FragmentID.Stats">
                 <app-user-stats></app-user-stats>
               </ng-container>
-              <ng-container *ngIf="tab.fragment === FragmentID.Plus">
+              <ng-container *ngIf="tab.fragment === FragmentID.Scrobbling">
+                <app-user-holds></app-user-holds>
                 <app-user-scrobble-history></app-user-scrobble-history>
               </ng-container>
             </ng-template>

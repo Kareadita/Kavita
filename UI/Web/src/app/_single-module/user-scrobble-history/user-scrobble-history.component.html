@@ -1,7 +1,14 @@
+<h5>Scrobble History</h5>
+<p>Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active
+  scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it
+  is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.</p>
 <ng-container *ngIf="events$ | async as events">
     <table class="table table-light table-striped table-hover table-sm scrollable">
       <thead>
       <tr>
+        <th scope="col">
+          Last Modified
+        </th>
         <th scope="col">
           Type
         </th>
@@ -18,6 +25,9 @@
       </thead>
       <tbody>
       <tr *ngFor="let item of events; let idx = index;">
+        <td>
+          {{item.lastModifiedUtc | date:'MM/dd/yyyy h:mm a' }}
+        </td>
         <td>
           {{item.scrobbleEventType | scrobbleEventType}}
         </td>

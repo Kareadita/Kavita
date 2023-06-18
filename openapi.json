@@ -6550,6 +6550,93 @@
         }
       }
     },
+    "/api/Scrobbling/holds": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns all scrobble holds for the current user",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/add-hold": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Adds a hold against the Series for user's scrobbling",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/remove-hold": {
+      "delete": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Adds a hold against the Series for user's scrobbling",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Search/series-for-mangafile": {
       "get": {
         "tags": [
@@ -14083,6 +14170,10 @@
             "format": "date-time",
             "nullable": true
           },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
           "rating": {
             "type": "number",
             "format": "float",
@@ -14135,6 +14226,28 @@
             "format": "date-time"
           },
           "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleHoldDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
             "type": "string",
             "format": "date-time"
           }
