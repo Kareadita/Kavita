@@ -6589,6 +6589,47 @@
         }
       }
     },
+    "/api/Scrobbling/has-hold": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "If there is an active hold on the series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Scrobbling/add-hold": {
       "post": {
         "tags": [
@@ -14235,6 +14276,10 @@
       "ScrobbleHoldDto": {
         "type": "object",
         "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
           "seriesId": {
             "type": "integer",
             "format": "int32"

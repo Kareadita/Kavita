@@ -150,7 +150,6 @@ public class ReaderService : IReaderService
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
-
         }
 
         _unitOfWork.UserRepository.Update(user);

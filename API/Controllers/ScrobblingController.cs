@@ -11,7 +11,9 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
@@ -112,6 +114,17 @@ public class ScrobblingController : BaseApiController
     }
 
     /// <summary>
+    /// If there is an active hold on the series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("has-hold")]
+    public async Task<ActionResult<bool>> HasHold(int seriesId)
+    {
+        return Ok(await _unitOfWork.UserRepository.HasHoldOnSeries(User.GetUserId(), seriesId));
+    }
+
+    /// <summary>
     /// Adds a hold against the Series for user's scrobbling
     /// </summary>
     /// <param name="seriesId"></param>
@@ -126,8 +139,31 @@ public class ScrobblingController : BaseApiController
         var seriesHold = new ScrobbleHoldBuilder().WithSeriesId(seriesId).Build();
         user.ScrobbleHolds.Add(seriesHold);
         _unitOfWork.UserRepository.Update(user);
-        await _unitOfWork.CommitAsync();
-        return Ok();
+        try
+        {
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.CommitAsync();
+            return Ok();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                // Reload the entity from the database
+                await entry.ReloadAsync();
+            }
+
+            // Retry the update
+            _unitOfWork.UserRepository.Update(user);
+            await _unitOfWork.CommitAsync();
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            // Handle other exceptions or log the error
+            //_logger.LogError(ex, "An error occurred while adding the hold");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the hold");
+        }
     }
 
     /// <summary>

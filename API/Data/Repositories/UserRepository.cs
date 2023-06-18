@@ -142,7 +142,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Where(x => x.Id == userId)
             .Includes(includeFlags)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()

@@ -41,7 +41,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<ScrobbleHold, ScrobbleHoldDto>()
             .ForMember(dest => dest.LibraryId,
                 opt =>
-                    opt.MapFrom(src => src.Series.LibraryId));
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.SeriesName,
+                opt =>
+                    opt.MapFrom(src => src.Series.Name));
 
         CreateMap<ScrobbleEvent, ScrobbleEventDto>()
             .ForMember(dest => dest.SeriesName,
