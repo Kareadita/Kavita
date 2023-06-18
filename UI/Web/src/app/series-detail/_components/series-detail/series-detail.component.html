@@ -141,6 +141,9 @@
         <ng-template #carouselItem let-item let-position="idx">
           <app-review-card [review]="item"></app-review-card>
         </ng-template>
+        <ng-template #promptToAdd>
+          <app-review-card [review]="promptToAddReview"></app-review-card>
+        </ng-template>
       </app-carousel-reel>
     </div>
   </div>

@@ -17,6 +17,11 @@
             <ng-template *ngFor="let item of items; index as i;" swiperSlide>
                 <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
             </ng-template>
+            <ng-container *ngIf="alwaysShow && items.length === 0">
+              <ng-template swiperSlide>
+                <ng-container [ngTemplateOutlet]="promptToAddTemplate"></ng-container>
+              </ng-template>
+            </ng-container>
         </swiper>
     </div>
 </div>

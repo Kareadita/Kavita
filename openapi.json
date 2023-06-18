@@ -10458,6 +10458,14 @@
             "description": "KavitaPlus License Key",
             "nullable": true
           },
+          "scrobbleHolds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScrobbleHold"
+            },
+            "description": "A list of Series the user doesn't want scrobbling for",
+            "nullable": true
+          },
           "rowVersion": {
             "type": "integer",
             "format": "int32",
@@ -14089,6 +14097,46 @@
             ],
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleHold": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false

@@ -67,6 +67,7 @@ public interface IUserRepository
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser();
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
+    Task<bool> HasHoldOnSeries(int userId, int seriesId);
 }
 
 public class UserRepository : IUserRepository
@@ -257,6 +258,13 @@ public class UserRepository : IUserRepository
             .Where(u => u.AppUserId == userId && u.Rating > 0)
             .Include(u => u.Series)
             .ToListAsync();
+    }
+
+    public async Task<bool> HasHoldOnSeries(int userId, int seriesId)
+    {
+        return await _context.AppUser
+            .AsSplitQuery()
+            .AnyAsync(u => u.ScrobbleHolds.Select(s => s.SeriesId).Contains(seriesId) && u.Id == userId);
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

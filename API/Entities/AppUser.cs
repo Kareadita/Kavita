@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -61,6 +62,11 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// KavitaPlus License Key
     /// </summary>
     public string? License { get; set; }
+
+    /// <summary>
+    /// A list of Series the user doesn't want scrobbling for
+    /// </summary>
+    public ICollection<ScrobbleHold> ScrobbleHolds { get; set; } = null!;
 
 
     /// <inheritdoc />

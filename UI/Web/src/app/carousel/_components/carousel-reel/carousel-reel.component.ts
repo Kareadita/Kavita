@@ -10,6 +10,7 @@ import { Swiper, SwiperEvents } from 'swiper/types';
 export class CarouselReelComponent {
 
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
+  @ContentChild('promptToAdd') promptToAddTemplate!: TemplateRef<any>;
   @Input() items: any[] = [];
   @Input() title = '';
   @Input() clickableTitle: boolean = true;

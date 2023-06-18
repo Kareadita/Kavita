@@ -181,6 +181,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
+  promptToAddReview!: UserReview;
+
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
@@ -230,25 +232,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  get LibraryType() {
-    return LibraryType;
-  }
+  get TagBadgeCursor() { return TagBadgeCursor; }
 
-  get MangaFormat() {
-    return MangaFormat;
-  }
+  get TabID() { return TabID; }
 
-  get TagBadgeCursor() {
-    return TagBadgeCursor;
-  }
+  get PageLayoutMode() { return PageLayoutMode; }
 
-  get TabID() {
-    return TabID;
-  }
-
-  get PageLayoutMode() {
-    return PageLayoutMode;
-  }
+  get LibraryType() { return LibraryType; }
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -340,6 +330,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
+    this.promptToAddReview = {
+      seriesId: this.seriesId,
+      tagline: 'Add your review!',
+      body: 'Add your own review here and share with the server',
+      bodyJustText:'Add your own review here and share with the server',
+      libraryId: this.libraryId,
+      username: this.user!.username,
+      isExternal: false,
+      externalUrl: undefined,
+      score: 0
+    };
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {

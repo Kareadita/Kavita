@@ -101,6 +101,14 @@ public class ReviewService : IReviewService
         plainText = Regex.Replace(plainText, @"__(.*?)__", "$1");
         plainText = Regex.Replace(plainText, @"#\s(.*?)", "$1");
 
+        // Just strip symbols
+        plainText = Regex.Replace(plainText, @"[_*\[\]~]", string.Empty);
+        plainText = Regex.Replace(plainText, @"img\d*\((.*?)\)", string.Empty);
+        plainText = Regex.Replace(plainText, @"~~~", string.Empty);
+        plainText = Regex.Replace(plainText, @"\+", string.Empty);
+        plainText = Regex.Replace(plainText, @"~~", string.Empty);
+        plainText = Regex.Replace(plainText, @"__", string.Empty);
+
         // Take the first 100 characters
         plainText = plainText.Length > 100 ? plainText.Substring(0, 100) : plainText;
 
