@@ -208,7 +208,7 @@ public class ScrobblingService : IScrobblingService
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
-        if (existingEvt != null)
+        if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
             existingEvt.VolumeNumber =
