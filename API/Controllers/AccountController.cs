@@ -1003,4 +1003,22 @@ public class AccountController : BaseApiController
 
         return false;
     }
+
+    /// <summary>
+    /// Returns the OPDS url for this user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("opds-url")]
+    public async Task<ActionResult<string>> GetOpdsUrl()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
+        if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
+
+        var baseUrl = string.Empty;
+        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) && !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl)) baseUrl = serverSettings.BaseUrl + "/";
+        return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
+
+    }
 }

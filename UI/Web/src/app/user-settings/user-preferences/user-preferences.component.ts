@@ -88,8 +88,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
-  baseUrl: string = '';
-  makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
+  opdsUrl: string = '';
+  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   private readonly destroyRef = inject(DestroyRef);
 
   get AccordionPanelID() {
@@ -107,6 +107,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
+    this.accountService.getOpdsUrl().subscribe(res => {
+      this.opdsUrl = res;
+      this.cdRef.markForCheck();
+    });
+
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -116,8 +121,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-
-    this.settingsService.getBaseUrl().subscribe(url => this.baseUrl = url);
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
@@ -264,15 +267,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.resetForm();
     }));
   }
-
-
-  transformKeyToOpdsUrl(key: string) {
-    if (environment.production) {
-      return `${location.origin}` + `${this.baseUrl}${environment.apiUrl}opds/${key}`.replace('//', '/');
-    }
-
-    return `${location.origin}${this.baseUrl.replace('//', '/')}api/opds/${key}`;
-  }
+  
 
   handleBackgroundColorChange() {
     this.settingsForm.markAsDirty();

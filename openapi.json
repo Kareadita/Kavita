@@ -845,6 +845,36 @@
         }
       }
     },
+    "/api/Account/opds-url": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns the OPDS url for this user",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
