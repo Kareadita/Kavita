@@ -249,7 +249,10 @@ public class ImageService : IImageService
 
         try
         {
-            correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+            if (string.IsNullOrEmpty(correctSizeLink))
+            {
+                correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+            }
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
