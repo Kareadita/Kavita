@@ -22,6 +22,7 @@ import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import { UserLicenseComponent } from './user-license/user-license.component';
 import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
+import {UserHoldsComponent} from "./user-holds/user-holds.component";
 
 
 @NgModule({
@@ -41,25 +42,26 @@ import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-hist
     UserLicenseComponent,
     UserKavitaPlusComponent,
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
 
-    NgbAccordionModule,
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbCollapseModule,
+        NgbAccordionModule,
+        NgbNavModule,
+        NgbTooltipModule,
+        NgbCollapseModule,
 
-    ColorPickerModule, // User prefernces background color
+        ColorPickerModule, // User prefernces background color
 
-    StatisticsModule,
+        StatisticsModule,
 
-    PipeModule,
-    SidenavModule,
+        PipeModule,
+        SidenavModule,
 
-    UserSettingsRoutingModule,
-    UserScrobbleHistoryComponent,
-  ],
+        UserSettingsRoutingModule,
+        UserScrobbleHistoryComponent,
+        UserHoldsComponent,
+    ],
   exports: [
     SiteThemeProviderPipe,
     ApiKeyComponent,

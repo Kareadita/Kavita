@@ -490,7 +490,7 @@ export class EditSeriesModalComponent implements OnInit {
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
     this.metadata.webLinks = Object.keys(this.editSeriesForm.controls)
       .filter(key => key.startsWith('link'))
-      .map(key => this.editSeriesForm.get(key)?.value)
+      .map(key => this.editSeriesForm.get(key)?.value.replace(',', '%2C'))
       .filter(v => v !== null && v !== '')
       .join(',');
 

@@ -59,13 +59,13 @@ public class PresenceTracker : IPresenceTracker
         }
 
         // Update the last active for the user
-        user.UpdateLastActive();
-        _unitOfWork.UserRepository.Update(user);
         try
         {
+            user.UpdateLastActive();
+            _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Swallow the exception
         }

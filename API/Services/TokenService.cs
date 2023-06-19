@@ -105,8 +105,16 @@ public class TokenService : ITokenService
                 return null;
             }
 
-            user.UpdateLastActive();
-            await _unitOfWork.CommitAsync();
+            try
+            {
+                user.UpdateLastActive();
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error updating last active for the user");
+            }
 
             return new TokenRequestDto()
             {

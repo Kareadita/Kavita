@@ -5,13 +5,12 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, map, take, takeUntil, tap, shareReplay } from 'rxjs/operators';
+import { Observable, of, ReplaySubject } from 'rxjs';
+import { debounceTime, map, take, tap, shareReplay } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { SeriesAddedEvent } from 'src/app/_models/events/series-added-event';
 import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
@@ -64,9 +63,11 @@ export class DashboardComponent implements OnInit {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
+
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            this.recentlyAddedSeries.unshift(series);
-            this.cdRef.detectChanges();
+            console.log('Adding Series: ', seriesAddedEvent.seriesId);
+            this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
+            this.cdRef.markForCheck();
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;

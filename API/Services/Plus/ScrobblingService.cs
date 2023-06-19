@@ -203,12 +203,17 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException("Series not found");
+        if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
+        {
+            _logger.LogInformation("Series {SeriesName} is on UserId {UserId}'s hold list. Not scrobbling", series.Name, userId);
+            return;
+        }
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
-        if (existingEvt != null)
+        if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
             existingEvt.VolumeNumber =

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import {
   readingDirections,
@@ -27,7 +27,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { forkJoin, Subject } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import { environment } from 'src/environments/environment';
@@ -46,7 +46,7 @@ enum FragmentID {
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
-  Plus = 'plus'
+  Scrobbling = 'Scrobbling'
 
 }
 
@@ -84,12 +84,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
     {title: 'Stats', fragment: FragmentID.Stats},
-    {title: 'Plus', fragment: FragmentID.Plus},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
-  baseUrl: string = '';
-  makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
+  opdsUrl: string = '';
+  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   private readonly destroyRef = inject(DestroyRef);
 
   get AccordionPanelID() {
@@ -107,6 +106,19 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
+    this.accountService.getOpdsUrl().subscribe(res => {
+      this.opdsUrl = res;
+      this.cdRef.markForCheck();
+    });
+
+    this.accountService.hasServerLicense().subscribe(res => {
+      console.log('has server license:', res)
+      if (res) {
+        this.tabs.push({title: 'Scrobbling', fragment: FragmentID.Scrobbling});
+        this.cdRef.markForCheck();
+      }
+    })
+
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -116,8 +128,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-
-    this.settingsService.getBaseUrl().subscribe(url => this.baseUrl = url);
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
@@ -265,14 +275,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     }));
   }
 
-
-  transformKeyToOpdsUrl(key: string) {
-    if (environment.production) {
-      return `${location.origin}` + `${this.baseUrl}${environment.apiUrl}opds/${key}`.replace('//', '/');
-    }
-
-    return `${location.origin}${this.baseUrl.replace('//', '/')}api/opds/${key}`;
-  }
 
   handleBackgroundColorChange() {
     this.settingsForm.markAsDirty();

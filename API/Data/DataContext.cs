@@ -51,6 +51,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<MediaError> MediaError { get; set; } = null!;
     public DbSet<ScrobbleEvent> ScrobbleEvent { get; set; } = null!;
     public DbSet<ScrobbleError> ScrobbleError { get; set; } = null!;
+    public DbSet<ScrobbleHold> ScrobbleHold { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

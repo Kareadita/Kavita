@@ -2,7 +2,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ComponentFactoryResolver, Inject,
+  Inject,
   Input, ViewChild,
   ViewContainerRef,
   ViewEncapsulation
@@ -41,7 +41,7 @@ export class ReviewCardModalComponent implements AfterViewInit {
 
     for (let i = 0; i < spoilers.length; i++) {
       const spoiler = spoilers[i];
-      const componentRef = this.container.createComponent(SpoilerComponent);
+      const componentRef = this.container.createComponent<SpoilerComponent>(SpoilerComponent);
       componentRef.instance.html = spoiler.innerHTML;
       if (spoiler.parentNode != null) {
         spoiler.parentNode.replaceChild(componentRef.location.nativeElement, spoiler);

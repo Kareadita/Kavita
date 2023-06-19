@@ -17,6 +17,7 @@ import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleError} from "../_models/scrobbling/scrobble-error";
 import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";
+import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 
 export enum ScrobbleProvider {
   AniList= 1
@@ -57,5 +58,22 @@ export class ScrobblingService {
 
   clearScrobbleErrors() {
     return this.httpClient.post(this.baseUrl + 'scrobbling/clear-errors', {});
+  }
+
+  getHolds() {
+    return this.httpClient.get<Array<ScrobbleHold>>(this.baseUrl + 'scrobbling/holds');
+  }
+
+  hasHold(seriesId: number) {
+    return this.httpClient.get(this.baseUrl + 'scrobbling/has-hold?seriesId=' + seriesId, TextResonse)
+      .pipe(map(res => res === "true"));
+  }
+
+  addHold(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/add-hold?seriesId=' + seriesId, TextResonse);
+  }
+
+  removeHold(seriesId: number) {
+    return this.httpClient.delete(this.baseUrl + 'scrobbling/remove-hold?seriesId=' + seriesId, TextResonse);
   }
 }

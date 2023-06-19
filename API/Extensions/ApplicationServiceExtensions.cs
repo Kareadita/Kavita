@@ -84,6 +84,11 @@ public static class ApplicationServiceExtensions
             options.SizeLimit = 50 * 1024 * 1024; // 50 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
+
+        services.AddSwaggerGen(g =>
+        {
+            g.UseInlineDefinitionsForEnums();
+        });
     }
 
     private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)

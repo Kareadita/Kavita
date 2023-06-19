@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   HostListener,
-  OnDestroy,
   OnInit,
   ViewChild,
   Inject,
@@ -18,12 +17,11 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { catchError, forkJoin, of, Subject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { catchError, forkJoin, of } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { CardDetailDrawerComponent } from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import { EditSeriesModalComponent } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
-import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { DownloadService } from 'src/app/shared/_services/download.service';
@@ -33,7 +31,6 @@ import { Device } from 'src/app/_models/device/device';
 import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
 import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
 import { LibraryType } from 'src/app/_models/library';
-import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { Series } from 'src/app/_models/series';
 import { RelatedSeries } from 'src/app/_models/series-detail/related-series';
@@ -181,6 +178,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
+  promptToAddReview!: UserReview;
+
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
@@ -230,25 +229,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  get LibraryType() {
-    return LibraryType;
-  }
+  get TagBadgeCursor() { return TagBadgeCursor; }
 
-  get MangaFormat() {
-    return MangaFormat;
-  }
+  get TabID() { return TabID; }
 
-  get TagBadgeCursor() {
-    return TagBadgeCursor;
-  }
+  get PageLayoutMode() { return PageLayoutMode; }
 
-  get TabID() {
-    return TabID;
-  }
-
-  get PageLayoutMode() {
-    return PageLayoutMode;
-  }
+  get LibraryType() { return LibraryType; }
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -340,6 +327,17 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
+    this.promptToAddReview = {
+      seriesId: this.seriesId,
+      tagline: 'Add your review!',
+      body: 'Add your own review here and share with the server',
+      bodyJustText:'Add your own review here and share with the server',
+      libraryId: this.libraryId,
+      username: this.user!.username,
+      isExternal: false,
+      externalUrl: undefined,
+      score: 0
+    };
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
@@ -763,8 +761,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   openReviewModal(force = false) {
-    // TODO: When we have external reviews, we might have a username collision. We should ensure external usernames have some special character
-    const userReview = this.reviews.filter(r => r.username === this.user?.username);
+    const userReview = this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
     if (userReview.length > 0) {
@@ -829,4 +826,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.isWantToRead = !this.isWantToRead;
     this.cdRef.markForCheck();
   }
+
+  protected readonly undefined = undefined;
 }

@@ -301,13 +301,10 @@ export class AccountService {
     }));
   }
 
-  updateAniListToken(token: string) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
+  getOpdsUrl() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
   }
 
-  getAniListToken() {
-    return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
-  }
 
   private refreshAccount() {
     console.log('Refreshing account');
