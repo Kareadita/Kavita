@@ -84,7 +84,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Theme', fragment: FragmentID.Theme},
     {title: 'Devices', fragment: FragmentID.Devices},
     {title: 'Stats', fragment: FragmentID.Stats},
-    {title: 'Scrobbling', fragment: FragmentID.Scrobbling},
   ];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
@@ -111,6 +110,14 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.opdsUrl = res;
       this.cdRef.markForCheck();
     });
+
+    this.accountService.hasServerLicense().subscribe(res => {
+      console.log('has server license:', res)
+      if (res) {
+        this.tabs.push({title: 'Scrobbling', fragment: FragmentID.Scrobbling});
+        this.cdRef.markForCheck();
+      }
+    })
 
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
@@ -267,7 +274,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.resetForm();
     }));
   }
-  
+
 
   handleBackgroundColorChange() {
     this.settingsForm.markAsDirty();

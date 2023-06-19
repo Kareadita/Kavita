@@ -105,10 +105,10 @@ public class TokenService : ITokenService
                 return null;
             }
 
-            user.UpdateLastActive();
-            _unitOfWork.UserRepository.Update(user);
             try
             {
+                user.UpdateLastActive();
+                _unitOfWork.UserRepository.Update(user);
                 await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
