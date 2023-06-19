@@ -109,6 +109,7 @@ public class LicenseService : ILicenseService
     {
         if (string.IsNullOrEmpty(license)) return string.Empty;
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/encrypt")
@@ -122,7 +123,8 @@ public class LicenseService : ILicenseService
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId
+                    InstallId = serverSetting.InstallId,
+                    EmailId = defaultAdmin.Email
                 })
                 .ReceiveString();
 
