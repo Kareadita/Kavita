@@ -17,7 +17,9 @@ public static class SeriesExtensions
     /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
     public static string? GetCoverImage(this Series series)
     {
-        var volumes = series.Volumes.OrderBy(v => (double) v.Number, ChapterSortComparer.Default).ToList() ?? new List<Volume>();
+        var volumes = (series.Volumes ?? new List<Volume>())
+            .OrderBy(v => v.Number, ChapterSortComparer.Default)
+            .ToList();
         var firstVolume = volumes.GetCoverImage(series.Format);
         if (firstVolume == null) return null;
 
