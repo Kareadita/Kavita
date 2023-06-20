@@ -34,6 +34,7 @@ export class UserLicenseComponent implements OnInit {
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
+    this.formGroup.addControl('email', new FormControl('', [Validators.required]));
     this.accountService.currentUser$.subscribe(user => {
       if (user) {
         this.hasLicense = user.hasLicense;
@@ -45,11 +46,12 @@ export class UserLicenseComponent implements OnInit {
 
   resetForm() {
     this.formGroup.get('licenseKey')?.setValue('');
+    this.formGroup.get('email')?.setValue('');
     this.cdRef.markForCheck();
   }
 
   saveForm() {
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value).subscribe(isValid => {
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value, this.formGroup.get('email')!.value).subscribe(isValid => {
       this.hasValidLicense = isValid;
       if (!this.hasValidLicense) {
         this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription");

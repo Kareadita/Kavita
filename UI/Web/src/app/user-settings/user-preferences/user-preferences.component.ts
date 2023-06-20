@@ -111,7 +111,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
 
-    this.accountService.hasServerLicense().subscribe(res => {
+    this.accountService.hasValidLicense().subscribe(res => {
       console.log('has server license:', res)
       if (res) {
         this.tabs.push({title: 'Scrobbling', fragment: FragmentID.Scrobbling});

@@ -22,7 +22,7 @@ import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import { UserLicenseComponent } from './user-license/user-license.component';
 import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
-import {UserHoldsComponent} from "./user-holds/user-holds.component";
+import { UserHoldsComponent } from "./user-holds/user-holds.component";
 
 
 @NgModule({

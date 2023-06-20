@@ -90,16 +90,6 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
-  hasServerLicense() {
-    return this.httpClient.get<string>(this.baseUrl + 'license/server-has-license', TextResonse)
-      .pipe(
-        map(res => res === "true"),
-        tap(res => {
-          console.log('server license: ', res)
-          this.hasServerLicenseSource.next(res)
-        })
-      );
-  }
 
   hasValidLicense(forceCheck: boolean = false) {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
@@ -109,8 +99,8 @@ export class AccountService {
       );
   }
 
-  updateUserLicense(license: string) {
-  return this.httpClient.post<string>(this.baseUrl + 'license', {license: license}, TextResonse)
+  updateUserLicense(license: string, email: string) {
+  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email}, TextResonse)
     .pipe(map(res => res === "true"));
   }
 

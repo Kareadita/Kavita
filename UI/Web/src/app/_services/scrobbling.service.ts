@@ -64,6 +64,11 @@ export class ScrobblingService {
     return this.httpClient.get<Array<ScrobbleHold>>(this.baseUrl + 'scrobbling/holds');
   }
 
+  libraryAllowsScrobbling(seriesId: number) {
+    return this.httpClient.get(this.baseUrl + 'scrobbling/library-allows-scrobbling?seriesId=' + seriesId, TextResonse)
+      .pipe(map(res => res === "true"));
+  }
+
   hasHold(seriesId: number) {
     return this.httpClient.get(this.baseUrl + 'scrobbling/has-hold?seriesId=' + seriesId, TextResonse)
       .pipe(map(res => res === "true"));

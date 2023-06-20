@@ -28,9 +28,14 @@
 
     <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
       <form [formGroup]="formGroup">
+        <p>Enter the License Key and Email used to register with Stripe.</p>
         <div class="form-group mb-3">
           <label for="license-key">License Key</label>
           <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"/>
+        </div>
+        <div class="form-group mb-3">
+          <label for="email">Email</label>
+          <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"/>
         </div>
       </form>
       <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">

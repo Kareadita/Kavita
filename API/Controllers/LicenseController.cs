@@ -2,6 +2,7 @@
 using API.Constants;
 using API.Data;
 using API.DTOs.Account;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Plus;
 using API.SignalR;
@@ -27,18 +28,6 @@ public class LicenseController : BaseApiController
     }
 
     /// <summary>
-    /// If the Admin has a license, then some features of Kavita server are unlocked for all users
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("server-has-license")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
-    public async Task<ActionResult<bool>> AdminHasLicense()
-    {
-        var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        return Ok(await _licenseService.HasActiveLicense(user.Id));
-    }
-
-    /// <summary>
     /// Checks if the user's license is valid or not
     /// </summary>
     /// <returns></returns>
@@ -46,33 +35,27 @@ public class LicenseController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await _licenseService.HasActiveLicense(User.GetUserId(), forceCheck));
+        return Ok(await _licenseService.HasActiveLicense(forceCheck));
     }
 
     /// <summary>
-    /// Updates user's license. Returns true if updated and valid
+    /// Updates server license. Returns true if updated and valid
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
-
+        dto.License = dto.License.Trim();
         if (string.IsNullOrEmpty(dto.License))
         {
-            await _licenseService.RemoveLicenseFromUser(user);
+            await _licenseService.RemoveLicense();
         }
         else
         {
-            await _licenseService.AddLicenseToUser(user, dto.License);
+            await _licenseService.AddLicense(dto.License, dto.Email);
         }
 
-        // Send an event to the user so their account updates
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
-
-        return Ok(await _licenseService.HasActiveLicense(user.Id, true));
+        return Ok(await _licenseService.HasActiveLicense(true));
     }
 }

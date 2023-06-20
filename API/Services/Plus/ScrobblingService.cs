@@ -162,7 +162,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
     {
-        if (!await _licenseService.HasActiveLicense(userId)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
@@ -194,7 +194,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
     {
-        if (!await _licenseService.HasActiveLicense(userId)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
@@ -252,7 +252,7 @@ public class ScrobblingService : IScrobblingService
 
     public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
     {
-        if (!await _licenseService.HasActiveLicense(userId)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
         {
@@ -384,7 +384,7 @@ public class ScrobblingService : IScrobblingService
             .Where(l => userId == 0 || userId == l.Id);
         foreach (var user in users)
         {
-            if (!(await _licenseService.HasActiveLicense(user.Id))) continue;
+            if (!await _licenseService.HasActiveLicense()) continue;
 
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
             foreach (var wtr in wantToRead)

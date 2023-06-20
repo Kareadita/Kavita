@@ -62,7 +62,7 @@ export class AppComponent implements OnInit {
 
     if (user) {
       // Bootstrap anything that's needed
-      this.accountService.hasServerLicense().subscribe();
+      this.accountService.hasValidLicense().subscribe();
       this.themeService.getThemes().subscribe();
       this.libraryService.getLibraryNames().pipe(take(1), shareReplay()).subscribe();
     }

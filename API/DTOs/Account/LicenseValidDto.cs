@@ -4,5 +4,4 @@ public class LicenseValidDto
 {
     public required string License { get; set; }
     public required string InstallId { get; set; }
-    public required string UserEmail { get; set; }
 }
