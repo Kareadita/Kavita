@@ -160,7 +160,6 @@ public class AccountController : BaseApiController
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
                 KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
-                HasLicense = !string.IsNullOrEmpty(user.License)
             };
         }
         catch (Exception ex)
@@ -231,7 +230,6 @@ public class AccountController : BaseApiController
 
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
-        dto.HasLicense = !string.IsNullOrEmpty(user.License);
 
         return Ok(dto);
     }
@@ -251,7 +249,6 @@ public class AccountController : BaseApiController
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
         dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
             .Value;
-        dto.HasLicense = !string.IsNullOrEmpty(user.License);
         return Ok(dto);
     }
 
@@ -725,7 +722,6 @@ public class AccountController : BaseApiController
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
-            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 
@@ -880,7 +876,6 @@ public class AccountController : BaseApiController
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
-            HasLicense = !string.IsNullOrEmpty(user.License)
         };
     }
 

@@ -1,14 +1,8 @@
 <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
         <div class="alert alert-warning" role="alert">
-            <strong>Notice:</strong> Changing Port or Base Url requires a manual restart of Kavita to take effect.
+            <strong>Notice:</strong> Changing Port, Base Url or IPs requires a manual restart of Kavita to take effect.
         </div>
-        <!-- <div class="mb-3">
-            <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
-            <ng-template #cacheDirectoryTooltip>Where the server places temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Where the server places temporary files when reading. This will be cleaned up on a regular basis.</span>
-            <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
-        </div> -->
 
         <div class="mb-3">
             <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>

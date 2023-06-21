@@ -20,9 +20,10 @@ import { RestrictionSelectorComponent } from './restriction-selector/restriction
 import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import { UserLicenseComponent } from './user-license/user-license.component';
-import { UserKavitaPlusComponent } from './user-kavitaplus/user-kavita-plus.component';
+import { ManageKavitaPlusComponent } from './user-kavitaplus/manage-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
+import {SharedModule} from "../shared/shared.module";
 
 
 @NgModule({
@@ -40,32 +41,34 @@ import { UserHoldsComponent } from "./user-holds/user-holds.component";
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
     UserLicenseComponent,
-    UserKavitaPlusComponent,
+    ManageKavitaPlusComponent,
   ],
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
 
-        NgbAccordionModule,
-        NgbNavModule,
-        NgbTooltipModule,
-        NgbCollapseModule,
+    NgbAccordionModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbCollapseModule,
 
-        ColorPickerModule, // User prefernces background color
+    ColorPickerModule, // User prefernces background color
 
-        StatisticsModule,
+    StatisticsModule,
 
-        PipeModule,
-        SidenavModule,
+    PipeModule,
+    SidenavModule,
 
-        UserSettingsRoutingModule,
-        UserScrobbleHistoryComponent,
-        UserHoldsComponent,
-    ],
+    UserSettingsRoutingModule,
+    UserScrobbleHistoryComponent,
+    UserHoldsComponent,
+    SharedModule,
+  ],
   exports: [
     SiteThemeProviderPipe,
     ApiKeyComponent,
-    RestrictionSelectorComponent
+    RestrictionSelectorComponent,
+    ManageKavitaPlusComponent
   ]
 })
 export class UserSettingsModule { }

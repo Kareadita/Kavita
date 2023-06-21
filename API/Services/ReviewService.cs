@@ -7,6 +7,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs.SeriesDetail;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using API.Services.Plus;
 using Flurl.Http;
@@ -63,7 +64,8 @@ public class ReviewService : IReviewService
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Volumes);
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return new List<UserReviewDto>();
-        var ret = (await GetReviews(user.License, series)).Select(r => new UserReviewDto()
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var ret = (await GetReviews(license.Value, series)).Select(r => new UserReviewDto()
         {
             Body = r.Body,
             Tagline = r.Tagline,
@@ -137,6 +139,8 @@ public class ReviewService : IReviewService
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite),
+                    MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
+                        ScrobblingService.MalWeblinkWebsite),
                     VolumeCount = series.Volumes.Count,
                     ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                     Year = series.Metadata.ReleaseYear

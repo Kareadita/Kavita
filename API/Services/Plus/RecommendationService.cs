@@ -7,6 +7,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Scrobbling;
 using API.Entities;
+using API.Entities.Enums;
 using API.Helpers;
 using Flurl.Http;
 using Kavita.Common;
@@ -19,6 +20,7 @@ namespace API.Services.Plus;
 public class PlusSeriesDto
 {
     public int? AniListId { get; set; }
+    public int? MalId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
     public MediaFormat MediaFormat { get; set; }
@@ -67,7 +69,8 @@ public class RecommendationService : IRecommendationService
         var seriesRecs = new List<SeriesDto>();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return seriesRecs;
-        var recs = await GetRecommendations(user.License, series);
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var recs = await GetRecommendations(license.Value, series);
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
@@ -102,6 +105,8 @@ public class RecommendationService : IRecommendationService
                     AltSeriesName = series.LocalizedName,
                     AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite),
+                    MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
+                        ScrobblingService.MalWeblinkWebsite),
                     VolumeCount = series.Volumes.Count,
                     ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                     Year = series.Metadata.ReleaseYear

@@ -58,10 +58,6 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     /// <remarks>Requires KavitaPlus Subscription</remarks>
     public string? AniListAccessToken { get; set; }
-    /// <summary>
-    /// KavitaPlus License Key
-    /// </summary>
-    public string? License { get; set; }
 
     /// <summary>
     /// A list of Series the user doesn't want scrobbling for

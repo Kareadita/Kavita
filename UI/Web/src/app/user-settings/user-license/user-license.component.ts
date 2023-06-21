@@ -21,13 +21,14 @@ import {ToastrService} from "ngx-toastr";
 })
 export class UserLicenseComponent implements OnInit {
 
-  @Input({required: true}) hasValidLicense: boolean = false;
-  @Output() validate: EventEmitter<void> = new EventEmitter<void>();
-
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
+
+  hasValidLicense: boolean = false;
   hasLicense: boolean = false;
+  isChecking: boolean = false;
+
 
 
   constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
@@ -35,11 +36,13 @@ export class UserLicenseComponent implements OnInit {
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
     this.formGroup.addControl('email', new FormControl('', [Validators.required]));
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.hasLicense = user.hasLicense;
-        this.cdRef.markForCheck();
-      }
+    this.accountService.hasAnyLicense().subscribe(res => {
+      this.hasLicense = res;
+      this.cdRef.markForCheck();
+    });
+    this.accountService.hasValidLicense().subscribe(res => {
+      this.hasValidLicense = res;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -73,7 +76,12 @@ export class UserLicenseComponent implements OnInit {
   }
 
   validateLicense() {
-    this.validate.emit();
+    this.isChecking = true;
+    this.accountService.hasValidLicense(true).subscribe(res => {
+      this.hasValidLicense = res;
+      this.isChecking = false;
+      this.cdRef.markForCheck();
+    })
 
   }
 

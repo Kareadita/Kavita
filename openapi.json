@@ -2751,7 +2751,47 @@
         }
       }
     },
+    "/api/License/has-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Has any license",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/License": {
+      "delete": {
+        "tags": [
+          "License"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
       "post": {
         "tags": [
           "License"
@@ -10622,11 +10662,6 @@
             "description": "The JWT for the user's AniList account. Expires after a year.",
             "nullable": true
           },
-          "license": {
-            "type": "string",
-            "description": "KavitaPlus License Key",
-            "nullable": true
-          },
           "scrobbleHolds": {
             "type": "array",
             "items": {
@@ -16641,9 +16676,6 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
-          },
-          "hasLicense": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false

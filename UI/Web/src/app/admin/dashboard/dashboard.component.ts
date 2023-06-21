@@ -16,7 +16,7 @@ enum TabID {
   Tasks = 'tasks',
   Logs = 'logs',
   Statistics = 'statistics',
-
+  KavitaPlus = 'kavitaplus'
 }
 
 @Component({
@@ -37,15 +37,15 @@ export class DashboardComponent implements OnInit {
     {title: 'Tasks', fragment: TabID.Tasks},
     {title: 'Statistics', fragment: TabID.Statistics},
     {title: 'System', fragment: TabID.System},
+    {title: 'Kavita+', fragment: TabID.KavitaPlus},
   ];
-  counter = this.tabs.length + 1;
   active = this.tabs[0];
 
   get TabID() {
     return TabID;
   }
 
-  constructor(public route: ActivatedRoute, private serverService: ServerService, 
+  constructor(public route: ActivatedRoute, private serverService: ServerService,
     private toastr: ToastrService, private titleService: Title, public navService: NavService) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
@@ -60,11 +60,5 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.titleService.setTitle('Kavita - Admin Dashboard');
-  }
-
-  restartServer() {
-    this.serverService.restart().subscribe(() => {
-      setTimeout(() => this.toastr.success('Please reload.'), 1000);
-    });
   }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
@@ -104,7 +103,7 @@ public class ScrobblingService : IScrobblingService
     {
         var token = await GetTokenForProvider(userId, provider);
 
-        if (await HasTokenExpired(userId, token, provider))
+        if (await HasTokenExpired(token, provider))
         {
             // NOTE: Should this side effect be here?
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
@@ -115,20 +114,22 @@ public class ScrobblingService : IScrobblingService
         return false;
     }
 
-    private async Task<bool> HasTokenExpired(int userId, string token, ScrobbleProvider provider)
+    private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
     {
         if (string.IsNullOrEmpty(token) ||
             !_tokenService.HasTokenExpired(token)) return false;
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (string.IsNullOrEmpty(user?.License)) return true;
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        if (string.IsNullOrEmpty(license.Value)) return true;
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/valid-key?provider=" + provider + "&key=" + token)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
-                .WithHeader("x-license-key", user.License)
+                .WithHeader("x-license-key", license.Value)
+                .WithHeader("x-installId", serverSetting.InstallId)
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -164,7 +165,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -184,6 +185,7 @@ public class ScrobblingService : IScrobblingService
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             Rating = rating
@@ -196,7 +198,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -233,6 +235,7 @@ public class ScrobblingService : IScrobblingService
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
                 AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+                MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
@@ -254,7 +257,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(userId, token, ScrobbleProvider.AniList))
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
             throw new KavitaException("AniList Credentials have expired or not set");
         }
@@ -274,6 +277,7 @@ public class ScrobblingService : IScrobblingService
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
             AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
         };
@@ -439,6 +443,7 @@ public class ScrobblingService : IScrobblingService
     {
         // Check how many scrobbles we have available then only do those.
         var userRateLimits = new Dictionary<int, int>();
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
         var progressCounter = 0;
 
@@ -493,7 +498,7 @@ public class ScrobblingService : IScrobblingService
             .ToList();
         foreach (var user in usersToScrobble)
         {
-            await SetAndCheckRateLimit(userRateLimits, user);
+            await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
         var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count;
@@ -553,13 +558,14 @@ public class ScrobblingService : IScrobblingService
     private async Task<int> ProcessEvents(IEnumerable<ScrobbleEvent> events, IDictionary<int, int> userRateLimits,
         int usersToScrobble, int progressCounter, int totalProgress, Func<ScrobbleEvent, ScrobbleDto> createEvent)
     {
+        var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         foreach (var evt in events)
         {
             _logger.LogDebug("Processing Reading Events: {Count} / {Total}", progressCounter, totalProgress);
             progressCounter++;
             // Check if this media item can even be processed for this user
             if (!DoesUserHaveProviderAndValid(evt)) continue;
-            var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser);
+            var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser, license.Value);
             if (count == 0)
             {
                 if (usersToScrobble == 1) break;
@@ -569,17 +575,17 @@ public class ScrobblingService : IScrobblingService
             try
             {
                 var data = createEvent(evt);
-                userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, evt.AppUser.License, evt);
+                userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, license.Value, evt);
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
                 _unitOfWork.ScrobbleRepository.Update(evt);
             }
-            catch (FlurlHttpException ex)
+            catch (FlurlHttpException)
             {
                 // If a flurl exception occured, the API is likely down. Kill processing
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 /* Swallow as it's already been handled in PostScrobbleUpdate */
             }
@@ -650,13 +656,13 @@ public class ScrobblingService : IScrobblingService
         return 0;
     }
 
-    private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user)
+    private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)
     {
         try
         {
             if (!userRateLimits.ContainsKey(user.Id))
             {
-                var rate = await GetRateLimit(user.License, user.AniListAccessToken);
+                var rate = await GetRateLimit(license, user.AniListAccessToken);
                 userRateLimits.Add(user.Id, rate);
             }
         }

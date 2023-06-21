@@ -154,15 +154,12 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUser, UserDto>()
             .ForMember(dest => dest.AgeRestriction,
-            opt =>
-                opt.MapFrom(src => new AgeRestrictionDto()
-                {
-                    AgeRating = src.AgeRestriction,
-                    IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
-                }))
-            .ForMember(dest => dest.HasLicense,
                 opt =>
-                    opt.MapFrom(src => !string.IsNullOrEmpty(src.License)));
+                    opt.MapFrom(src => new AgeRestrictionDto()
+                    {
+                        AgeRating = src.AgeRestriction,
+                        IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
+                    }));
 
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()

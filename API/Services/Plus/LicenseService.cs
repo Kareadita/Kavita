@@ -166,7 +166,7 @@ public class LicenseService : ILicenseService
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var result = await IsLicenseValid(serverSetting.Value);
         await provider.FlushAsync();
-        await provider.SetAsync(string.Empty, result, _licenseCacheTimeout);
+        await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
 
         return result;
     }

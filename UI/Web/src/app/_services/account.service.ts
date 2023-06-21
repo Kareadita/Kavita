@@ -99,6 +99,14 @@ export class AccountService {
       );
   }
 
+  hasAnyLicense() {
+    return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
+      .pipe(
+        map(res => res === "true"),
+        tap(res => this.hasValidLicenseSource.next(res))
+      );
+  }
+
   updateUserLicense(license: string, email: string) {
   return this.httpClient.post<string>(this.baseUrl + 'license', {license, email}, TextResonse)
     .pipe(map(res => res === "true"));
@@ -343,7 +351,5 @@ export class AccountService {
       clearInterval(this.refreshTokenTimeout);
     }
   }
-
-
 
 }

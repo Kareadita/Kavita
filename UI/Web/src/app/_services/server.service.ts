@@ -15,9 +15,6 @@ export class ServerService {
 
   constructor(private httpClient: HttpClient) { }
 
-  restart() {
-    return this.httpClient.post(this.baseUrl + 'server/restart', {});
-  }
 
   getServerInfo() {
     return this.httpClient.get<ServerInfo>(this.baseUrl + 'server/server-info');
