@@ -69,6 +69,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         services.AddSqLite(env);
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

@@ -19,6 +19,7 @@ import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
 import {UserReview} from "../_single-module/review-card/user-review";
+import {Rating} from "../_models/rating";
 
 @Injectable({
   providedIn: 'root'
@@ -216,5 +217,9 @@ export class SeriesService {
     return this.httpClient.post<UserReview>(this.baseUrl + 'review', {
       seriesId, tagline, body
     });
+  }
+
+  getRatings(seriesId: number) {
+    return this.httpClient.get<Array<Rating>>(this.baseUrl + 'rating?seriesId=' + seriesId);
   }
 }
