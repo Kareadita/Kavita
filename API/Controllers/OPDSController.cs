@@ -17,6 +17,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using EasyCaching.Core;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,7 @@ public class OpdsController : BaseApiController
     private readonly IReaderService _readerService;
     private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
+    private readonly IEasyCachingProvider _provider;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -68,7 +70,7 @@ public class OpdsController : BaseApiController
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
-        IAccountService accountService)
+        IAccountService accountService, IEasyCachingProvider provider)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -77,6 +79,7 @@ public class OpdsController : BaseApiController
         _readerService = readerService;
         _seriesService = seriesService;
         _accountService = accountService;
+        _provider = provider;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));

@@ -3,20 +3,31 @@
     <div class="card-title">
       <div class="container-fluid row mb-2">
         <div class="col-10 col-sm-10">
-            <h4 id="license-key-header">KavitaPlus License</h4>
+            <h4 id="license-key-header">Kavita+ License</h4>
         </div>
-      <div class="col-2 text-end">
-          <button class="btn btn-secondary btn-sm me-1" (click)="validateLicense()">Check</button>
-          <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
-      </div>
+        <div class="col-2 text-end">
+          <ng-container *ngIf="hasLicense; else noLicense">
+            <a class="btn btn-primary btn-sm me-1" href="https://billing.stripe.com/p/login/test_14kfZocuh6Tz5ag7ss" target="_blank" rel="noreferrer nofollow">Manage</a>
+            <button class="btn btn-secondary btn-sm" style="width: 58px" (click)="validateLicense()">
+              <span *ngIf="!isChecking">Check</span>
+              <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
+            </button>
+          </ng-container>
+          <ng-template #noLicense>
+            <a class="btn btn-secondary btn-sm me-1" href="https://buy.stripe.com/test_4gwg0W7xA9zn9wcbIJ" target="_blank" rel="noreferrer nofollow">Buy Kavita+</a>
+            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Activate' : 'Cancel'}}</button>
+          </ng-template>
+        </div>
     </div>
-</div>
+    </div>
 
     <ng-container *ngIf="isViewMode">
       <div class="container-fluid row">
           <span class="col-12">
               <ng-container *ngIf="hasLicense; else noToken">
-                <span>*********</span>
+                <span>*********</span><i *ngIf="hasValidLicense" ngbTooltip="License is valid" class="fa-solid fa-check-circle successful-validation ms-1">
+                <span class="visually-hidden">License is Valid</span>
+              </i>
                 <i class="error fa-solid fa-exclamation-circle ms-1" ngbTooltip="License Invalid" *ngIf="!hasValidLicense">
                   <span class="visually-hidden">License Not Valid</span>
                 </i>
@@ -28,17 +39,20 @@
 
     <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
       <form [formGroup]="formGroup">
+        <p>Enter the License Key and Email used to register with Stripe</p>
         <div class="form-group mb-3">
           <label for="license-key">License Key</label>
           <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"/>
+        </div>
+        <div class="form-group mb-3">
+          <label for="email">Email</label>
+          <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"/>
         </div>
       </form>
       <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
         <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" (click)="saveForm()">Save</button>
       </div>
     </div>
-
-
   </div>
 </div>
 

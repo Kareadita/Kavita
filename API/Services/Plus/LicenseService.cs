@@ -5,8 +5,10 @@ using API.Data;
 using API.DTOs.Account;
 using API.DTOs.License;
 using API.Entities;
+using API.Entities.Enums;
 using EasyCaching.Core;
 using Flurl.Http;
+using Hangfire;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Microsoft.Extensions.Logging;
@@ -15,13 +17,10 @@ namespace API.Services.Plus;
 
 public interface ILicenseService
 {
-    Task<bool> HasActiveLicense(int userId, bool forceCheck = false);
-
-    Task<string> EncryptLicense(string license);
     Task ValidateAllLicenses();
-    Task RemoveLicenseFromUser(AppUser user);
-    Task AddLicenseToUser(AppUser user, string license);
-    Task<bool> DefaultUserHasLicense();
+    Task RemoveLicense();
+    Task AddLicense(string license, string email);
+    Task<bool> HasActiveLicense(bool forceCheck = false);
 }
 
 public class LicenseService : ILicenseService
@@ -31,6 +30,7 @@ public class LicenseService : ILicenseService
     private readonly ILogger<LicenseService> _logger;
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
     public const string Cron = "0 */4 * * *";
+    private const string CacheKey = "license";
 
 
     public LicenseService(IEasyCachingProviderFactory cachingProviderFactory, IUnitOfWork unitOfWork, ILogger<LicenseService> logger)
@@ -40,39 +40,15 @@ public class LicenseService : ILicenseService
         _logger = logger;
     }
 
-    /// <summary>
-    /// Checks if the user has an active/valid license
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <returns></returns>
-    public async Task<bool> HasActiveLicense(int userId, bool forceCheck = false)
-    {
-        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        if (!forceCheck)
-        {
-            var cacheValue = await provider.GetAsync<bool>($"{userId}");
-            if (cacheValue.HasValue) return cacheValue.Value;
-        }
-
-
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null) return false;
-        var result = await IsLicenseValid(user.Email, user.License);
-        await provider.SetAsync($"{userId}", result, _licenseCacheTimeout);
-        // TODO: Think about an EventHub message to user when something like license changes
-        return result;
-
-    }
 
     /// <summary>
     /// Performs license lookup to API layer
     /// </summary>
-    /// <param name="email"></param>
     /// <param name="license"></param>
     /// <returns></returns>
-    private async Task<bool> IsLicenseValid(string email, string license)
+    private async Task<bool> IsLicenseValid(string license)
     {
-        if (string.IsNullOrEmpty(license)) return false;
+        if (string.IsNullOrWhiteSpace(license)) return false;
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
@@ -87,8 +63,7 @@ public class LicenseService : ILicenseService
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId,
-                    UserEmail = email
+                    InstallId = serverSetting.InstallId
                 })
                 .ReceiveString();
             return bool.Parse(response);
@@ -96,23 +71,22 @@ public class LicenseService : ILicenseService
         catch (Exception e)
         {
             _logger.LogError(e, "An error happened during the request to KavitaPlus API");
-            return false;
+            throw;
         }
     }
 
     /// <summary>
-    /// Sends to KavitaPlus API to encrypt the key
+    /// Register the license with KavitaPlus
     /// </summary>
     /// <param name="license"></param>
     /// <returns></returns>
-    public async Task<string> EncryptLicense(string license)
+    public async Task<string> RegisterLicense(string license, string email)
     {
         if (string.IsNullOrEmpty(license)) return string.Empty;
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser();
         try
         {
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/encrypt")
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
@@ -124,7 +98,7 @@ public class LicenseService : ILicenseService
                 {
                     License = license,
                     InstallId = serverSetting.InstallId,
-                    EmailId = defaultAdmin.Email
+                    EmailId = email
                 })
                 .ReceiveString();
 
@@ -140,60 +114,60 @@ public class LicenseService : ILicenseService
     /// <summary>
     /// Checks all licenses and updates cache
     /// </summary>
-    /// <remarks>Expected to be called at startup and on reoccuring basis</remarks>
+    /// <remarks>Expected to be called at startup and on reoccurring basis</remarks>
     public async Task ValidateAllLicenses()
     {
-        _logger.LogInformation("Validating user's KavitaPlus Licenses");
-        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        await provider.FlushAsync();
-
-        var users = await _unitOfWork.UserRepository.GetAllUsersAsync();
-        foreach (var user in users)
-        {
-            var isValid = await IsLicenseValid(user.Email, user.License);
-            if (isValid)
-            {
-                await provider.SetAsync($"{user.Id}", true, _licenseCacheTimeout);
-            }
-        }
-
-        _logger.LogInformation("Validating user's KavitaPlus Licenses - Complete");
-    }
-
-    public async Task RemoveLicenseFromUser(AppUser user)
-    {
         try
         {
-            user.License = string.Empty;
-            _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.CommitAsync();
+            _logger.LogInformation("Validating KavitaPlus License");
             var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-            await provider.RemoveAsync($"{user.Id}");
+            await provider.FlushAsync();
+
+            var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            var isValid = await IsLicenseValid(license.Value);
+            await provider.SetAsync(CacheKey, isValid, _licenseCacheTimeout);
+
+            _logger.LogInformation("Validating KavitaPlus License - Complete");
         }
         catch (Exception ex)
         {
-            throw new KavitaException("Could not remove user's License", ex);
+            _logger.LogError(ex, "There was an error talking with KavitaPlus API for license validation. Rescheduling check in 30 mins");
+            BackgroundJob.Schedule(() => ValidateAllLicenses(), TimeSpan.FromMinutes(30));
         }
     }
 
-    public async Task AddLicenseToUser(AppUser user, string license)
+    public async Task RemoveLicense()
     {
-        try
-        {
-            user.License =  await EncryptLicense(license);
-            _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            throw new KavitaException("Could not remove user's License", ex);
-        }
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        serverSetting.Value = string.Empty;
+        _unitOfWork.SettingsRepository.Update(serverSetting);
+        await _unitOfWork.CommitAsync();
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+        await provider.RemoveAsync(CacheKey);
     }
 
-    public async Task<bool> DefaultUserHasLicense()
+    public async Task AddLicense(string license, string email)
     {
-        var defaultAdminUser = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        if (defaultAdminUser == null) return false;
-        return await HasActiveLicense(defaultAdminUser.Id);
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        serverSetting.Value = await RegisterLicense(license, email);
+        _unitOfWork.SettingsRepository.Update(serverSetting);
+        await _unitOfWork.CommitAsync();
+    }
+
+    public async Task<bool> HasActiveLicense(bool forceCheck = false)
+    {
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+        if (!forceCheck)
+        {
+            var cacheValue = await provider.GetAsync<bool>(CacheKey);
+            if (cacheValue.HasValue) return cacheValue.Value;
+        }
+
+        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var result = await IsLicenseValid(serverSetting.Value);
+        await provider.FlushAsync();
+        await provider.SetAsync(CacheKey, result, _licenseCacheTimeout);
+
+        return result;
     }
 }

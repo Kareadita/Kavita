@@ -2,7 +2,7 @@
   <div class="card-body">
     <div class="card-title">
       <div class="container-fluid row mb-2">
-        <div class="col-10 col-sm-11"><h4 id="anilist-token-header">Scrobbling Tokens</h4></div>
+        <div class="col-10 col-sm-11"><h4 id="anilist-token-header">Scrobbling Providers</h4></div>
         <div class="col-1 text-end">
           <button class="btn btn-primary btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
         </div>
@@ -13,7 +13,7 @@
       <div class="container-fluid row">
           <span class="col-12">
             <ng-container *ngIf="!hasValidLicense; else showToken">
-              This feature is only available for Kavita Plus Subscribers
+              This feature requires an active <a href="" target="_blank" rel="noreferrer nofollow">Kavita+</a> license
             </ng-container>
             <ng-template #showToken>
               <ng-container *ngIf="token && token.length > 0; else noToken">

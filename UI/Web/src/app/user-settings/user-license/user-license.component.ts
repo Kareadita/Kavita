@@ -21,35 +21,40 @@ import {ToastrService} from "ngx-toastr";
 })
 export class UserLicenseComponent implements OnInit {
 
-  @Input({required: true}) hasValidLicense: boolean = false;
-  @Output() validate: EventEmitter<void> = new EventEmitter<void>();
-
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
+
+  hasValidLicense: boolean = false;
   hasLicense: boolean = false;
+  isChecking: boolean = false;
+
 
 
   constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
-    this.accountService.currentUser$.subscribe(user => {
-      if (user) {
-        this.hasLicense = user.hasLicense;
-        this.cdRef.markForCheck();
-      }
+    this.formGroup.addControl('email', new FormControl('', [Validators.required]));
+    this.accountService.hasAnyLicense().subscribe(res => {
+      this.hasLicense = res;
+      this.cdRef.markForCheck();
+    });
+    this.accountService.hasValidLicense().subscribe(res => {
+      this.hasValidLicense = res;
+      this.cdRef.markForCheck();
     });
   }
 
 
   resetForm() {
     this.formGroup.get('licenseKey')?.setValue('');
+    this.formGroup.get('email')?.setValue('');
     this.cdRef.markForCheck();
   }
 
   saveForm() {
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value).subscribe(isValid => {
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(isValid => {
       this.hasValidLicense = isValid;
       if (!this.hasValidLicense) {
         this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription");
@@ -71,7 +76,12 @@ export class UserLicenseComponent implements OnInit {
   }
 
   validateLicense() {
-    this.validate.emit();
+    this.isChecking = true;
+    this.accountService.hasValidLicense(true).subscribe(res => {
+      this.hasValidLicense = res;
+      this.isChecking = false;
+      this.cdRef.markForCheck();
+    })
 
   }
 

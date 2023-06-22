@@ -2,9 +2,9 @@
 using API.Constants;
 using API.Data;
 using API.DTOs.Account;
-using API.Extensions;
+using API.Entities.Enums;
 using API.Services.Plus;
-using API.SignalR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -15,27 +15,13 @@ public class LicenseController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LicenseController> _logger;
     private readonly ILicenseService _licenseService;
-    private readonly IEventHub _eventHub;
 
     public LicenseController(IUnitOfWork unitOfWork, ILogger<LicenseController> logger,
-        ILicenseService licenseService, IEventHub eventHub)
+        ILicenseService licenseService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _licenseService = licenseService;
-        _eventHub = eventHub;
-    }
-
-    /// <summary>
-    /// If the Admin has a license, then some features of Kavita server are unlocked for all users
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("server-has-license")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
-    public async Task<ActionResult<bool>> AdminHasLicense()
-    {
-        var user = await _unitOfWork.UserRepository.GetDefaultAdminUser();
-        return Ok(await _licenseService.HasActiveLicense(user.Id));
     }
 
     /// <summary>
@@ -46,33 +32,53 @@ public class LicenseController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-        return Ok(await _licenseService.HasActiveLicense(User.GetUserId(), forceCheck));
+        return Ok(await _licenseService.HasActiveLicense(forceCheck));
     }
 
     /// <summary>
-    /// Updates user's license. Returns true if updated and valid
+    /// Has any license
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpGet("has-license")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
+    public async Task<ActionResult<bool>> HasLicense()
+    {
+        return Ok(!string.IsNullOrEmpty(
+            (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value));
+    }
+
+    [Authorize("RequireAdminRole")]
+    [HttpDelete]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
+    public async Task<ActionResult> RemoveLicense()
+    {
+        var setting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        setting.Value = null;
+        _unitOfWork.SettingsRepository.Update(setting);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    /// <summary>
+    /// Updates server license. Returns true if updated and valid
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>
+    [Authorize("RequireAdminRole")]
     [HttpPost]
     public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
-
+        dto.License = dto.License.Trim();
         if (string.IsNullOrEmpty(dto.License))
         {
-            await _licenseService.RemoveLicenseFromUser(user);
+            await _licenseService.RemoveLicense();
         }
         else
         {
-            await _licenseService.AddLicenseToUser(user, dto.License);
+            await _licenseService.AddLicense(dto.License, dto.Email);
         }
 
-        // Send an event to the user so their account updates
-        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate,
-            MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
-
-        return Ok(await _licenseService.HasActiveLicense(user.Id, true));
+        return Ok(await _licenseService.HasActiveLicense(true));
     }
 }

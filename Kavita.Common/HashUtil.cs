@@ -38,6 +38,12 @@ public static class HashUtil
         return CalculateCrc(seed);
     }
 
+    public static string ServerToken()
+    {
+        var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.UserName}";
+        return CalculateCrc(seed);
+    }
+
     /// <summary>
     /// Generates a unique API key to this server instance
     /// </summary>

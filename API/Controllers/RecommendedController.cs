@@ -39,7 +39,7 @@ public class RecommendedController : BaseApiController
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecommendations(int seriesId)
     {
         var userId = User.GetUserId();
-        if (!await _licenseService.DefaultUserHasLicense() || !await _licenseService.HasActiveLicense(userId))
+        if (!await _licenseService.HasActiveLicense())
         {
             return Ok(new List<SeriesDto>());
         }

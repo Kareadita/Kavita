@@ -49,7 +49,7 @@ public class ReviewController : BaseApiController
     {
         var userId = User.GetUserId();
         var userRatings = await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId);
-        if (!await _licenseService.DefaultUserHasLicense() || !await _licenseService.HasActiveLicense(userId))
+        if (!await _licenseService.HasActiveLicense())
         {
             return Ok(userRatings);
         }

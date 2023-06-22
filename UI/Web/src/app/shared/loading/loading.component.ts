@@ -10,10 +10,11 @@ export class LoadingComponent {
 
   @Input() loading: boolean = false;
   @Input() message: string = '';
+  @Input() size: '' | 'spinner-border-sm' = '';
   /**
    * Uses absolute positioning to ensure it loads over content
    */
   @Input() absolute: boolean = false;
-  
+
   constructor() { }
 }

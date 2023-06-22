@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.7"
+    "version": "0.7.3.9"
   },
   "servers": [
     {
@@ -2711,36 +2711,6 @@
         }
       }
     },
-    "/api/License/server-has-license": {
-      "get": {
-        "tags": [
-          "License"
-        ],
-        "summary": "If the Admin has a license, then some features of Kavita server are unlocked for all users",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/License/valid-license": {
       "get": {
         "tags": [
@@ -2781,12 +2751,52 @@
         }
       }
     },
+    "/api/License/has-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Has any license",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/License": {
+      "delete": {
+        "tags": [
+          "License"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
       "post": {
         "tags": [
           "License"
         ],
-        "summary": "Updates user's license. Returns true if updated and valid",
+        "summary": "Updates server license. Returns true if updated and valid",
         "description": "Caches the result",
         "requestBody": {
           "content": {
@@ -6625,6 +6635,47 @@
           "Scrobbling"
         ],
         "summary": "If there is an active hold on the series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/library-allows-scrobbling": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Does the library the series is in allow scrobbling?",
         "parameters": [
           {
             "name": "seriesId",
@@ -10609,11 +10660,6 @@
           "aniListAccessToken": {
             "type": "string",
             "description": "The JWT for the user's AniList account. Expires after a year.",
-            "nullable": true
-          },
-          "license": {
-            "type": "string",
-            "description": "KavitaPlus License Key",
             "nullable": true
           },
           "scrobbleHolds": {
@@ -16087,6 +16133,12 @@
         "properties": {
           "license": {
             "type": "string",
+            "description": "License Key received from KavitaPlus",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email registered with Stripe",
             "nullable": true
           }
         },
@@ -16624,9 +16676,6 @@
           "kavitaVersion": {
             "type": "string",
             "nullable": true
-          },
-          "hasLicense": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false

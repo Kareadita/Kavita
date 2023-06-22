@@ -22,6 +22,17 @@
     height: 20px;
 }
 
+.card-text.no-images {
+    min-height: 63px;
+    max-height: 63px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.card-footer {
+    width: 288px;
+}
+
 .card {
     cursor: pointer;
 }

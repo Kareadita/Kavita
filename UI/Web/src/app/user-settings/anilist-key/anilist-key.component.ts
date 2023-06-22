@@ -21,7 +21,7 @@ import {AccountService} from "../../_services/account.service";
 })
 export class AnilistKeyComponent implements OnInit, OnChanges {
 
-  @Input({required: true}) hasValidLicense!: boolean;
+  hasValidLicense: boolean = false;
 
   formGroup: FormGroup = new FormGroup({});
   token: string = '';
@@ -30,7 +30,12 @@ export class AnilistKeyComponent implements OnInit, OnChanges {
   tokenExpired: boolean = false;
 
 
-  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) {
+    this.accountService.hasValidLicense().subscribe(res => {
+      this.hasValidLicense = res;
+      this.cdRef.markForCheck();
+    });
+  }
 
   ngOnInit(): void {
     this.formGroup.addControl('aniListToken', new FormControl('', [Validators.required]));

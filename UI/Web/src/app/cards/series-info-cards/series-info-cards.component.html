@@ -43,10 +43,16 @@
 
     <ng-container *ngIf="userHasLicense">
       <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-          <app-icon-and-title label="Scrobbling" [clickable]="true" fontClasses="fa-solid fa-tower-{{isScrobbling ? 'broadcast' : 'observation'}}"
+          <app-icon-and-title label="Scrobbling" [clickable]="libraryAllowsScrobbling" fontClasses="fa-solid fa-tower-{{(isScrobbling && libraryAllowsScrobbling) ? 'broadcast' : 'observation'}}"
                               (click)="toggleScrobbling($event)"
                               ngbTooltip="Scrobbling Status">
-            {{ isScrobbling ? 'On' : 'Off' }}
+            <ng-container *ngIf="libraryAllowsScrobbling; else noScrobble">
+              {{ isScrobbling ? 'On' : 'Off' }}
+            </ng-container>
+            <ng-template #noScrobble>
+              Disabled
+            </ng-template>
+
           </app-icon-and-title>
       </div>
       <div class="vr m-2 d-none d-lg-block"></div>

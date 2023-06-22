@@ -282,7 +282,7 @@ public class TaskScheduler : ITaskScheduler
     /// <returns></returns>
     public async Task ScrobbleUpdates(int userId)
     {
-        if (!await _licenseService.HasActiveLicense(userId)) return;
+        if (!await _licenseService.HasActiveLicense()) return;
         BackgroundJob.Enqueue(() => _scrobblingService.ProcessUpdatesSinceLastSync());
     }
 
