@@ -131,6 +131,9 @@
               <span class="star" [class.filled]="(index < series.userRating) && series.userRating > 0">&#9733;</span>
             </ng-template>
           </ngb-rating>
+<!--          <div class="external-rating" *ngFor="let rating of externalRatings">-->
+<!--            {{rating.averageScore}}-->
+<!--          </div>-->
         </div>
       </div>
       <div *ngIf="seriesMetadata" class="mt-2">

@@ -3883,6 +3883,48 @@
         }
       }
     },
+    "/api/Rating": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reader/pdf": {
       "get": {
         "tags": [
@@ -17155,6 +17197,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
     },
     {
       "name": "Reader",
