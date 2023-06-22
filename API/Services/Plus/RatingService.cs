@@ -39,7 +39,7 @@ public class RatingService : IRatingService
     {
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
-            SeriesIncludes.Library | SeriesIncludes.Metadata | SeriesIncludes.Chapters);
+            SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Volumes);
         return await GetRatings(license.Value, series);
     }
 
