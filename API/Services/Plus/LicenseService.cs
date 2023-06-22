@@ -80,7 +80,7 @@ public class LicenseService : ILicenseService
     /// </summary>
     /// <param name="license"></param>
     /// <returns></returns>
-    public async Task<string> RegisterLicense(string license, string email)
+    private async Task<string> RegisterLicense(string license, string email)
     {
         if (string.IsNullOrEmpty(license)) return string.Empty;
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
