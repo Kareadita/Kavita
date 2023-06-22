@@ -1,12 +1,14 @@
 <div class="row">
+  <!-- TODO: Put a kavita icon here with a rating then click and open a popover with the 5 stars -->
+  <ngb-rating class="rating-star col-auto" [(rate)]="userRating" (rateChange)="updateRating($event)" [resettable]="false">
+    <ng-template let-fill="fill" let-index="index">
+      <span class="star" [class.filled]="(index < userRating) && userRating > 0">&#9733;</span>
+    </ng-template>
+  </ngb-rating>
+
   <div class="col-auto" *ngFor="let rating of ratings">
     <span class="badge rounded-pill me-1">
       <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="">
       {{rating.averageScore}}%</span>
   </div>
-  <ngb-rating class="rating-star" [(rate)]="userRating" (rateChange)="updateRating($event)" [resettable]="false">
-    <ng-template let-fill="fill" let-index="index">
-      <span class="star" [class.filled]="(index < userRating) && userRating > 0">&#9733;</span>
-    </ng-template>
-  </ngb-rating>
 </div>
