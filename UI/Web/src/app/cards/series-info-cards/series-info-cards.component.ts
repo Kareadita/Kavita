@@ -70,15 +70,6 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
             this.getReadingTimeLeft();
           });
         });
-
-      forkJoin([
-        this.scrobbleService.libraryAllowsScrobbling(this.series.id),
-        this.accountService.hasValidLicense()
-      ]).subscribe(results => {
-        this.libraryAllowsScrobbling = results[0];
-        this.userHasLicense = results[1];
-        this.cdRef.markForCheck();
-      });
   }
 
   ngOnInit(): void {
@@ -89,6 +80,15 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
       this.readingTime.avgHours = this.series.avgHoursToRead;
       this.scrobbleService.hasHold(this.series.id).subscribe(res => {
         this.isScrobbling = !res;
+        this.cdRef.markForCheck();
+      });
+
+      forkJoin([
+        this.scrobbleService.libraryAllowsScrobbling(this.series.id),
+        this.accountService.hasValidLicense()
+      ]).subscribe(results => {
+        this.libraryAllowsScrobbling = results[0];
+        this.userHasLicense = results[1];
         this.cdRef.markForCheck();
       });
 
