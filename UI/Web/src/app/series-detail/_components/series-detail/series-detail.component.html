@@ -320,7 +320,7 @@
         </ng-template>
       </li>
 
-      <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations && user?.hasLicense">
+      <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations">
           <a ngbNavLink>Recommendations</a>
           <ng-template ngbNavContent>
               <virtual-scroller #scroll [items]="recommendations" [parentScroll]="scrollingBlock">

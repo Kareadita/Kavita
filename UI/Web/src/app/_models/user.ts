@@ -11,9 +11,4 @@ export interface User {
     apiKey: string;
     email: string;
     ageRestriction: AgeRestriction;
-    hasLicense: boolean;
-    /**
-     * This is only on the UI client
-     */
-    validLicense: boolean;
 }
