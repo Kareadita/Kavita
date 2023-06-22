@@ -5,7 +5,7 @@
 </app-side-nav-companion-bar>
 <div class="container-fluid g-0">
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
-      <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
+      <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class=tab>
         <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
         <ng-template ngbNavContent>
           <ng-container *ngIf="tab.fragment === TabID.General">

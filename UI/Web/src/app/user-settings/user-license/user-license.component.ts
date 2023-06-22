@@ -54,7 +54,7 @@ export class UserLicenseComponent implements OnInit {
   }
 
   saveForm() {
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value, this.formGroup.get('email')!.value).subscribe(isValid => {
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(isValid => {
       this.hasValidLicense = isValid;
       if (!this.hasValidLicense) {
         this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription");
