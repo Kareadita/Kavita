@@ -686,15 +686,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateRating(rating: any) {
-    if (this.series === undefined) {
-      return;
-    }
-
-    this.seriesService.updateRating(this.series?.id, rating).subscribe(() => {
-      this.series.userRating = rating;
-    });
-  }
+  // updateRating(rating: any) {
+  //   if (this.series === undefined) {
+  //     return;
+  //   }
+  //
+  //   this.seriesService.updateRating(this.series?.id, rating).subscribe(() => {
+  //     this.series.userRating = rating;
+  //   });
+  // }
 
   openChapter(chapter: Chapter, incognitoMode = false) {
     if (this.bulkSelectionService.hasSelections()) return;

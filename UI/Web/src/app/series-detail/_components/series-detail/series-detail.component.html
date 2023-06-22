@@ -125,19 +125,10 @@
             </ng-template>
           </button>
         </div>
-        <div class="col-auto ms-2">
-          <ngb-rating class="rating-star" [(rate)]="series.userRating" (rateChange)="updateRating($event)" [resettable]="false">
-            <ng-template let-fill="fill" let-index="index">
-              <span class="star" [class.filled]="(index < series.userRating) && series.userRating > 0">&#9733;</span>
-            </ng-template>
-          </ngb-rating>
-<!--          <div>-->
-<!--            <app-external-rating [seriesId]="seriesId"></app-external-rating>-->
-<!--          </div>-->
-        </div>
       </div>
       <div *ngIf="seriesMetadata" class="mt-2">
-        <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series" [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
+        <app-series-metadata-detail [seriesMetadata]="seriesMetadata" [readingLists]="readingLists" [series]="series"
+                                    [hasReadingProgress]="hasReadingProgress"></app-series-metadata-detail>
       </div>
     </div>
 
