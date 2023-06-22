@@ -63,18 +63,15 @@ public class LibraryController : BaseApiController
             return BadRequest("Library name already exists. Please choose a unique name to the server.");
         }
 
-        var library = new Library
-        {
-            Name = dto.Name,
-            Type = dto.Type,
-            Folders = dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList(),
-            FolderWatching = dto.FolderWatching,
-            IncludeInDashboard = dto.IncludeInDashboard,
-            IncludeInRecommended = dto.IncludeInRecommended,
-            IncludeInSearch = dto.IncludeInSearch,
-            ManageCollections = dto.ManageCollections,
-            ManageReadingLists = dto.ManageReadingLists,
-        };
+        var library = new LibraryBuilder(dto.Name, dto.Type)
+            .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
+            .WithFolderWatching(dto.FolderWatching)
+            .WithIncludeInDashboard(dto.IncludeInDashboard)
+            .WithIncludeInRecommended(dto.IncludeInRecommended)
+            .WithManageCollections(dto.ManageCollections)
+            .WithManageReadingLists(dto.ManageReadingLists)
+            .WIthAllowScrobbling(dto.AllowScrobbling)
+            .Build();
 
         _unitOfWork.LibraryRepository.Add(library);
 

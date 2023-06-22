@@ -9,7 +9,12 @@
     </div>
     <div class="col-md-10">
       <div class="card-body">
-        <h6 class="card-title" *ngIf="review.tagline && review.tagline.length > 0" [title]="review.tagline">{{review.tagline.substring(0, 29)}}{{review.tagline.length > 29 ? '…' : ''}}</h6>
+        <h6 class="card-title" [title]="review.tagline">
+          <ng-container *ngIf="review.tagline && review.tagline.length > 0; else noTagline">{{review.tagline.substring(0, 29)}}{{review.tagline.length > 29 ? '…' : ''}}</ng-container>
+          <ng-template #noTagline>
+            {{review.isExternal ? 'External Review' : 'Review'}}
+          </ng-template>
+        </h6>
         <p class="card-text no-images">
           <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>

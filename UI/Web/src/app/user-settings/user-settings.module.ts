@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
 import { NgbAccordionModule, NgbCollapseModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -43,27 +43,28 @@ import {SharedModule} from "../shared/shared.module";
     UserLicenseComponent,
     ManageKavitaPlusComponent,
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
 
-    NgbAccordionModule,
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbCollapseModule,
+        NgbAccordionModule,
+        NgbNavModule,
+        NgbTooltipModule,
+        NgbCollapseModule,
 
-    ColorPickerModule, // User prefernces background color
+        ColorPickerModule, // User prefernces background color
 
-    StatisticsModule,
+        StatisticsModule,
 
-    PipeModule,
-    SidenavModule,
+        PipeModule,
+        SidenavModule,
 
-    UserSettingsRoutingModule,
-    UserScrobbleHistoryComponent,
-    UserHoldsComponent,
-    SharedModule,
-  ],
+        UserSettingsRoutingModule,
+        UserScrobbleHistoryComponent,
+        UserHoldsComponent,
+        SharedModule,
+        NgOptimizedImage,
+    ],
   exports: [
     SiteThemeProviderPipe,
     ApiKeyComponent,

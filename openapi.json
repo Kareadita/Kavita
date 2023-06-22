@@ -3883,6 +3883,56 @@
         }
       }
     },
+    "/api/Rating": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "summary": "Get the external ratings for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reader/pdf": {
       "get": {
         "tags": [
@@ -13602,6 +13652,31 @@
         },
         "additionalProperties": false
       },
+      "RatingDto": {
+        "type": "object",
+        "properties": {
+          "averageScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "meanScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "favoriteCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider": {
+            "enum": [
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "ReadHistoryEvent": {
         "type": "object",
         "properties": {
@@ -17155,6 +17230,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
     },
     {
       "name": "Reader",

@@ -2,6 +2,16 @@
     <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
 </div>
 
+<div class="row g-0 mt-2 mb-2">
+  <div class="col-md-4">
+    <h5>Ratings</h5>
+  </div>
+  <div class="col-md-8">
+    <app-external-rating [seriesId]="series.id" [userRating]="series.userRating"></app-external-rating>
+  </div>
+</div>
+
+
 <ng-container *ngIf="WebLinks as links">
     <div class="row g-0 mt-2 mb-2" *ngIf="links.length > 0">
         <div class="col-md-4">

@@ -185,6 +185,7 @@ public class Startup
         {
             options.Providers.Add<BrotliCompressionProvider>();
             options.Providers.Add<GzipCompressionProvider>();
+            // TODO: Add more MimeTypes for compression
             options.MimeTypes =
                 ResponseCompressionDefaults.MimeTypes.Concat(
                     new[] { "image/jpeg", "image/jpg" });
@@ -233,9 +234,6 @@ public class Startup
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-                    var themeService = serviceProvider.GetRequiredService<IThemeService>();
-                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
-                    var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
                     logger.LogInformation("Running Migrations");

@@ -12,6 +12,7 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
 import { SeriesDetailComponent } from './_components/series-detail/series-detail.component';
 import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
 import {CarouselModule} from "../carousel/carousel.module";
+import {ExternalRatingComponent} from "./_components/external-rating/external-rating.component";
 
 
 @NgModule({
@@ -37,7 +38,8 @@ import {CarouselModule} from "../carousel/carousel.module";
 
         SeriesDetailRoutingModule,
         ReviewCardComponent,
-        CarouselModule
+        CarouselModule,
+        ExternalRatingComponent
     ]
 })
 export class SeriesDetailModule { }

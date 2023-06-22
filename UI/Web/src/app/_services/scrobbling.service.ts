@@ -20,7 +20,8 @@ import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";
 import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 
 export enum ScrobbleProvider {
-  AniList= 1
+  AniList= 1,
+  Mal = 2
 }
 
 @Injectable({
