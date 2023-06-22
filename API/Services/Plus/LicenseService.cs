@@ -149,7 +149,10 @@ public class LicenseService : ILicenseService
     public async Task AddLicense(string license, string email)
     {
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
-        serverSetting.Value = await RegisterLicense(license, email);
+        var lic = await RegisterLicense(license, email);
+        if (string.IsNullOrWhiteSpace(lic))
+            throw new KavitaException("Unable to register license due to error. Reach out to Kavita+ Support");
+        serverSetting.Value = lic;
         _unitOfWork.SettingsRepository.Update(serverSetting);
         await _unitOfWork.CommitAsync();
     }
