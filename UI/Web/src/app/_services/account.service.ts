@@ -46,10 +46,6 @@ export class AccountService {
   hasValidLicense$ = this.hasValidLicenseSource.asObservable();
 
   private hasServerLicenseSource = new ReplaySubject<boolean>(1);
-  /**
-   * Does the server have an active license
-   */
-  hasServerLicense$ = this.hasServerLicenseSource.asObservable();
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -103,7 +99,6 @@ export class AccountService {
     return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
       .pipe(
         map(res => res === "true"),
-        tap(res => this.hasValidLicenseSource.next(res))
       );
   }
 
