@@ -6,7 +6,7 @@
     </ng-template>
   </ngb-rating>
 
-  <div class="col-auto" *ngFor="let rating of ratings">
+  <div class="col-auto custom-col" *ngFor="let rating of ratings">
     <span class="badge rounded-pill me-1">
       <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="">
       {{rating.averageScore}}%</span>

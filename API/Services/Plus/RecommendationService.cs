@@ -81,7 +81,7 @@ public class RecommendationService : IRecommendationService
         }
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
-        return seriesRecs;
+        return seriesRecs.DistinctBy(s => s.Id).ToList();
     }
 
 
