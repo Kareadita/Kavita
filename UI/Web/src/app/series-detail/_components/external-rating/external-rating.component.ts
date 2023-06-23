@@ -3,13 +3,13 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {SeriesService} from "../../../_services/series.service";
 import {Rating} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../pipe/provider-image.pipe";
-import {NgbRating} from "@ng-bootstrap/ng-bootstrap";
+import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {SharedModule} from "../../../shared/shared.module";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, SharedModule],
+  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, SharedModule, NgbPopover],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

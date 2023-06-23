@@ -22,6 +22,10 @@ import {BehaviorSubject, filter, Observable, shareReplay} from "rxjs";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
 import {TableModule} from "../../_single-module/table/table.module";
+import {SeriesService} from "../../_services/series.service";
+import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
+import {Series} from "../../_models/series";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
@@ -38,6 +42,8 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly seriesService = inject(SeriesService);
+  private readonly modalService = inject(NgbModal);
 
   messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
   currentSort = new BehaviorSubject<SortEvent<ScrobbleError>>({column: 'created', direction: 'asc'});
@@ -98,5 +104,12 @@ export class ManageScrobbleErrorsComponent implements OnInit {
   filterList = (listItem: ScrobbleError) => {
     const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
     return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.details.toLowerCase().indexOf(query) >= 0;
+  }
+
+  editSeries(seriesId: number) {
+    this.seriesService.getSeries(seriesId).subscribe(series => {
+      const modalRef = this.modalService.open(EditSeriesModalComponent, {  size: 'xl' });
+      modalRef.componentInstance.series = series;
+    });
   }
 }
