@@ -14681,10 +14681,6 @@
             "description": "The type of all the files attached to this series",
             "format": "int32"
           },
-          "nameLocked": {
-            "type": "boolean",
-            "deprecated": true
-          },
           "sortNameLocked": {
             "type": "boolean"
           },
@@ -16661,7 +16657,6 @@
             "nullable": true
           },
           "body": {
-            "maxLength": 1000,
             "type": "string",
             "nullable": true
           }

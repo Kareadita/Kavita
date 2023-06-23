@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using API.Entities.Enums;
 
 namespace API.DTOs.Scrobbling;
 

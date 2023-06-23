@@ -4,7 +4,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Account;
 using API.DTOs.License;
-using API.Entities;
 using API.Entities.Enums;
 using EasyCaching.Core;
 using Flurl.Http;

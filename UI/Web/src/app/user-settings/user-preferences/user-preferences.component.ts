@@ -46,7 +46,7 @@ enum FragmentID {
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
-  Scrobbling = 'Scrobbling'
+  Scrobbling = 'scrobbling'
 
 }
 

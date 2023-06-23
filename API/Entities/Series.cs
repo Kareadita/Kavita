@@ -76,8 +76,6 @@ public class Series : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public MangaFormat Format { get; set; } = MangaFormat.Unknown;
 
-    [Obsolete]
-    public bool NameLocked { get; set; }
     public bool SortNameLocked { get; set; }
     public bool LocalizedNameLocked { get; set; }
 
