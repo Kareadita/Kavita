@@ -28,7 +28,6 @@ import {ImageComponent} from "./image/image.component";
     SeriesFormatComponent,
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
-    PersonBadgeComponent,
     BadgeExpanderComponent,
     IconAndTitleComponent,
     LoadingComponent,
@@ -49,7 +48,6 @@ import {ImageComponent} from "./image/image.component";
     TagBadgeComponent, // Used globally
     CircularLoaderComponent, // Used in Cards and Series Detail
 
-    PersonBadgeComponent,  // Used Series Detail
     BadgeExpanderComponent, // Used Series Detail/Metadata
     IconAndTitleComponent, // Used in Series Detail/Metadata
 

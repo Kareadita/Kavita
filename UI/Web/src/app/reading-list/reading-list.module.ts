@@ -21,6 +21,7 @@ import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 
 @NgModule({
   declarations: [
@@ -50,6 +51,7 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
     ImageComponent,
     ReadMoreComponent,
+    PersonBadgeComponent,
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL

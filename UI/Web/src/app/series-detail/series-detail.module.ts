@@ -14,6 +14,7 @@ import {CarouselModule} from "../carousel/carousel.module";
 import {ExternalRatingComponent} from "./_components/external-rating/external-rating.component";
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 
 
 @NgModule({
@@ -34,6 +35,7 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
       ImageComponent,
       ReadMoreComponent,
+      PersonBadgeComponent,
 
       TypeaheadModule,
       PipeModule,
