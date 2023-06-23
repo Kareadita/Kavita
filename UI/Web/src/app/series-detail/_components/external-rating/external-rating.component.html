@@ -11,4 +11,7 @@
       <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="">
       {{rating.averageScore}}%</span>
   </div>
+  <div class="col-auto" style="padding-top: 8px">
+    <app-loading [loading]="isLoading" size="spinner-border-sm"></app-loading>
+  </div>
 </div>
