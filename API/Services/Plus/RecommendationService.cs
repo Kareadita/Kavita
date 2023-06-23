@@ -70,13 +70,25 @@ public class RecommendationService : IRecommendationService
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null || series == null) return seriesRecs;
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+
+        var canSeeExternalSeries = user.AgeRestriction == AgeRating.NotApplicable &&
+                                    await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+
+
+
         var recs = await GetRecommendations(license.Value, series);
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames,
                 series.Library.Type);
-            if (seriesForRec == null) continue;
+            if (seriesForRec == null)
+            {
+                if (!canSeeExternalSeries) continue;
+                // We can show this based on user permissions
+
+                continue;
+            }
             seriesRecs.Add(seriesForRec);
         }
 
