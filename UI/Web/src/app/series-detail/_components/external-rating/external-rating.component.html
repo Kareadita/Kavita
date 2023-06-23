@@ -3,7 +3,7 @@
        popoverTitle="Series Rating"
        [autoClose]="false">
     <span class="badge rounded-pill me-1">
-      <img class="me-1" ngSrc="assets/images/logo.png" width="24" height="24" alt="">
+      <img class="me-1" ngSrc="assets/images/logo-32.png" width="24" height="24" alt="">
       {{userRating * 20}}%
     </span>
   </div>
@@ -20,7 +20,7 @@
 </div>
 
 <ng-template #popContent>
-  <ngb-rating class="rating-star col-auto" [(rate)]="userRating" (rateChange)="updateRating($event)" [resettable]="false">
+  <ngb-rating class="rating-star" [(rate)]="userRating" (rateChange)="updateRating($event)" [resettable]="false">
     <ng-template let-fill="fill" let-index="index">
       <span class="star" [class.filled]="(index < userRating) && userRating > 0">&#9733;</span>
     </ng-template>

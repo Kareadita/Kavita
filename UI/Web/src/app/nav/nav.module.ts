@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { EventsWidgetComponent } from './_components/events-widget/events-widget.component';
 import { NgbDropdownModule, NgbPopoverModule, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from '../shared/shared.module';
@@ -18,19 +18,20 @@ import { NavHeaderComponent } from './_components/nav-header/nav-header.componen
     EventsWidgetComponent,
     GroupedTypeaheadComponent,
   ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterModule,
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        RouterModule,
 
-    NgbDropdownModule,
-    NgbPopoverModule,
-    NgbNavModule,
+        NgbDropdownModule,
+        NgbPopoverModule,
+        NgbNavModule,
 
-    SharedModule, // app image, series-format
-    PipeModule,
-    TypeaheadModule,
-  ],
+        SharedModule, // app image, series-format
+        PipeModule,
+        TypeaheadModule,
+        NgOptimizedImage,
+    ],
   exports: [
     NavHeaderComponent,
     SharedModule
