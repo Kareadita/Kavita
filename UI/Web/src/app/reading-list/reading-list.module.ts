@@ -19,6 +19,7 @@ import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
 import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import {ImageComponent} from "../shared/image/image.component";
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     PipeModule,
     SharedModule,
     SharedSideNavCardsModule,
+    ImageComponent,
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL

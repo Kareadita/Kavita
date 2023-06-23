@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { SeriesDetailRoutingModule } from './series-detail-routing.module';
 import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SeriesMetadataDetailComponent } from './_components/series-metadata-detail/series-metadata-detail.component';
-import { ReviewSeriesModalComponent } from '../_single-module/review-series-modal/review-series-modal.component';
 import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { PipeModule } from '../pipe/pipe.module';
@@ -13,6 +12,7 @@ import { SeriesDetailComponent } from './_components/series-detail/series-detail
 import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
 import {CarouselModule} from "../carousel/carousel.module";
 import {ExternalRatingComponent} from "./_components/external-rating/external-rating.component";
+import {ImageComponent} from "../shared/image/image.component";
 
 
 @NgModule({
@@ -30,6 +30,8 @@ import {ExternalRatingComponent} from "./_components/external-rating/external-ra
         NgbTooltipModule, // Series Detail, Extras Drawer
         NgbProgressbarModule,
         NgbDropdownModule,
+
+        ImageComponent,
 
         TypeaheadModule,
         PipeModule,
