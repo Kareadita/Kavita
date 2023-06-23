@@ -41,9 +41,9 @@ export class ManageTasksSettingsComponent implements OnInit {
     },
     {
       name: 'Bust Cache',
-      description: 'Bust\'s the Review and Recommendation Cache - should only be used when debugging bad matches',
+      description: 'Busts the Kavita+ Cache - should only be used when debugging bad matches',
       api: this.serverService.bustCache(),
-      successMessage: 'Review and Recommendation Cache busted'
+      successMessage: 'Kavita+ Cache busted'
     },
     {
       name: 'Convert Media to Target Encoding',
