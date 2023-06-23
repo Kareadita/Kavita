@@ -6,6 +6,7 @@ import { AnnouncementsRoutingModule } from './announcements-routing.module';
 import { SharedModule } from '../shared/shared.module';
 import { PipeModule } from '../pipe/pipe.module';
 import { SidenavModule } from '../sidenav/sidenav.module';
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
 
 
@@ -14,12 +15,13 @@ import { SidenavModule } from '../sidenav/sidenav.module';
     AnnouncementsComponent,
     ChangelogComponent
   ],
-  imports: [
-    CommonModule,
-    AnnouncementsRoutingModule,
-    SharedModule,
-    PipeModule,
-    SidenavModule
-  ]
+    imports: [
+        CommonModule,
+        AnnouncementsRoutingModule,
+        SharedModule,
+        PipeModule,
+        SidenavModule,
+        ReadMoreComponent
+    ]
 })
 export class AnnouncementsModule { }

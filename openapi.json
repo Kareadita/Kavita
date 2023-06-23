@@ -14681,7 +14681,8 @@
             "format": "int32"
           },
           "nameLocked": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
           },
           "sortNameLocked": {
             "type": "boolean"
@@ -16546,10 +16547,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
           "localizedName": {
             "type": "string",
             "nullable": true
@@ -16559,9 +16556,6 @@
             "nullable": true
           },
           "coverImageLocked": {
-            "type": "boolean"
-          },
-          "nameLocked": {
             "type": "boolean"
           },
           "sortNameLocked": {

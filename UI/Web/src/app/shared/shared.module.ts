@@ -26,9 +26,7 @@ import {ImageComponent} from "./image/image.component";
     TagBadgeComponent,
     A11yClickDirective,
     SeriesFormatComponent,
-    UpdateNotificationModalComponent,
     CircularLoaderComponent,
-    BadgeExpanderComponent,
     LoadingComponent,
   ],
   imports: [
@@ -47,7 +45,6 @@ import {ImageComponent} from "./image/image.component";
     TagBadgeComponent, // Used globally
     CircularLoaderComponent, // Used in Cards and Series Detail
 
-    BadgeExpanderComponent, // Used Series Detail/Metadata
 
     LoadingComponent
   ],

@@ -27,6 +27,12 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
 import { DownloadIndicatorComponent } from './download-indicator/download-indicator.component';
 import { DynamicListPipe } from './dynamic-list.pipe';
+import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
+import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
+import {UpdateNotificationModalComponent} from "../shared/update-notification/update-notification-modal.component";
+import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
 
 
 
@@ -61,26 +67,32 @@ import { DynamicListPipe } from './dynamic-list.pipe';
     SharedModule,
     TypeaheadModule, // edit series modal
 
+    ImageComponent,
+    ReadMoreComponent,
+    BadgeExpanderComponent,
+    PersonBadgeComponent,
+    UpdateNotificationModalComponent,
+
     MetadataFilterModule,
 
     NgbTooltipModule, // Card item
     NgbCollapseModule,
     NgbRatingModule,
-    
+
     VirtualScrollerModule,
 
     NgbOffcanvasModule, // Series Detail, action of cards
     NgbNavModule, //Series Detail
-    NgbPaginationModule, // EditCollectionTagsComponent 
+    NgbPaginationModule, // EditCollectionTagsComponent
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
     PipeModule, // filter for BulkAddToCollectionComponent
 
-    
-    
 
-    SharedModule, // IconAndTitleComponent
+    SharedModule,
+    IconAndTitleComponent,
+    // IconAndTitleComponent
   ],
   exports: [
     CardItemComponent,
@@ -103,8 +115,6 @@ import { DynamicListPipe } from './dynamic-list.pipe';
 
     VirtualScrollerModule,
     SeriesInfoCardsComponent
-
-
   ]
 })
 export class CardsModule { }

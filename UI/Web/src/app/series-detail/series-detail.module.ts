@@ -16,6 +16,7 @@ import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 
 @NgModule({
@@ -38,6 +39,7 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
       ReadMoreComponent,
       PersonBadgeComponent,
       IconAndTitleComponent,
+      BadgeExpanderComponent,
 
       TypeaheadModule,
       PipeModule,

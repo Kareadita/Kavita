@@ -22,6 +22,7 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 @NgModule({
   declarations: [
@@ -52,6 +53,7 @@ import {PersonBadgeComponent} from "../shared/person-badge/person-badge.componen
     ImageComponent,
     ReadMoreComponent,
     PersonBadgeComponent,
+    BadgeExpanderComponent,
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL

@@ -9,6 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { GroupedTypeaheadComponent } from './_components/grouped-typeahead/grouped-typeahead.component';
 import { NavHeaderComponent } from './_components/nav-header/nav-header.component';
+import {ImageComponent} from "../shared/image/image.component";
 
 
 
@@ -31,6 +32,7 @@ import { NavHeaderComponent } from './_components/nav-header/nav-header.componen
         PipeModule,
         TypeaheadModule,
         NgOptimizedImage,
+        ImageComponent,
     ],
   exports: [
     NavHeaderComponent,
