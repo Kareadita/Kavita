@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -32,7 +33,6 @@ public class PlusSeriesDto
     /// Optional but can help with matching
     /// </summary>
     public int? VolumeCount { get; set; }
-
     public int? Year { get; set; }
 }
 
@@ -40,11 +40,14 @@ internal record MediaRecommendationDto
 {
     public int Rating { get; set; }
     public IEnumerable<string> RecommendationNames { get; set; } = null!;
+    public string Name { get; set; }
+    public string CoverUrl { get; set; }
+    public string SiteUrl { get; set; }
 }
 
 public interface IRecommendationService
 {
-    Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId);
+    Task<RecommendationDto> GetRecommendationsForSeries(int userId, int seriesId);
 }
 
 public class RecommendationService : IRecommendationService
@@ -61,20 +64,24 @@ public class RecommendationService : IRecommendationService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<IList<SeriesDto>> GetRecommendationsForSeries(int userId, int seriesId)
+    public async Task<RecommendationDto> GetRecommendationsForSeries(int userId, int seriesId)
     {
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
         var seriesRecs = new List<SeriesDto>();
-        if (series == null) return seriesRecs;
+        if (series == null) return new RecommendationDto();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         var canSeeExternalSeries = user != null && user.AgeRestriction == AgeRating.NotApplicable &&
                                    await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
-
+        var recDto = new RecommendationDto()
+        {
+            ExternalSeries = new List<ExternalSeriesDto>(),
+            OwnedSeries = new List<SeriesDto>()
+        };
 
         var recs = await GetRecommendations(license.Value, series);
         foreach (var rec in recs)
@@ -86,14 +93,24 @@ public class RecommendationService : IRecommendationService
             {
                 if (!canSeeExternalSeries) continue;
                 // We can show this based on user permissions
-
+                if (string.IsNullOrEmpty(rec.Name) || string.IsNullOrEmpty(rec.SiteUrl) || string.IsNullOrEmpty(rec.CoverUrl)) continue;
+                recDto.ExternalSeries.Add(new ExternalSeriesDto()
+                {
+                    Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
+                    Url = rec.SiteUrl,
+                    CoverUrl = rec.CoverUrl
+                });
                 continue;
             }
             seriesRecs.Add(seriesForRec);
         }
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
-        return seriesRecs.DistinctBy(s => s.Id).ToList();
+
+        recDto.OwnedSeries = seriesRecs.DistinctBy(s => s.Id).ToList();
+        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).ToList();
+
+        return recDto;
     }
 
 

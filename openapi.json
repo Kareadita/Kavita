@@ -5993,26 +5993,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               }
             }
@@ -12456,6 +12447,24 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "ExternalSeriesDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FileDimensionDto": {
         "type": "object",
         "properties": {
@@ -14100,6 +14109,26 @@
         },
         "additionalProperties": false,
         "description": "A mesh of data for Recently added volume/chapters"
+      },
+      "RecommendationDto": {
+        "type": "object",
+        "properties": {
+          "ownedSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
+          },
+          "externalSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "RefreshSeriesDto": {
         "type": "object",

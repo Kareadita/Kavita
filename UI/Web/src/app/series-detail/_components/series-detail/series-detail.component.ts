@@ -55,6 +55,7 @@ import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
 import {ReviewCardModalComponent} from "../../../_single-module/review-card-modal/review-card-modal.component";
+import {ExternalSeries} from "../../../_models/series-detail/external-series";
 
 interface RelatedSeris {
   series: Series;
@@ -163,6 +164,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Recommended Series
    */
   recommendations: Array<Series> = [];
+  externalRecs: Array<ExternalSeries> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
     {value: 'Storyline', text: 'Storyline'},
@@ -615,8 +617,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   loadRecommendations() {
-    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
-      this.recommendations = recommendations;
+    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+      this.recommendations = rec.ownedSeries;
+      this.externalRecs = rec.externalSeries;
       this.hasRecommendations = this.recommendations.length > 0;
       this.cdRef.markForCheck();
     });
