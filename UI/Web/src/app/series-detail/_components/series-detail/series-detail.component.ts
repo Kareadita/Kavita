@@ -163,8 +163,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Recommended Series
    */
-  recommendations: Array<Series> = [];
-  externalRecs: Array<ExternalSeries> = [];
+  combinedRecs: Array<any> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
     {value: 'Storyline', text: 'Storyline'},
@@ -618,9 +617,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadRecommendations() {
     this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
-      this.recommendations = rec.ownedSeries;
-      this.externalRecs = rec.externalSeries;
-      this.hasRecommendations = this.recommendations.length > 0;
+      this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
+      this.hasRecommendations = this.combinedRecs.length > 0;
       this.cdRef.markForCheck();
     });
   }

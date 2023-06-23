@@ -323,11 +323,16 @@
       <li [ngbNavItem]="TabID.Recommendations" *ngIf="hasRecommendations">
           <a ngbNavLink>Recommendations</a>
           <ng-template ngbNavContent>
-              <virtual-scroller #scroll [items]="recommendations" [parentScroll]="scrollingBlock">
+              <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock">
                   <div class="card-container row g-0" #container>
-                      <ng-container *ngFor="let item of scroll.viewPortItems let idx = index; trackBy: trackBySeriesIdentify">
-                          <app-series-card class="col-auto mt-2 mb-2" [data]="item" [libraryId]="item.libraryId"></app-series-card>
+                    <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
+                      <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
+                        <app-series-card class="col-auto mt-2 mb-2" [data]="item" [libraryId]="item.libraryId"></app-series-card>
                       </ng-container>
+                      <ng-template #externalRec>
+                        <app-external-series-card class="col-auto mt-2 mb-2" [data]="item"></app-external-series-card>
+                      </ng-template>
+                    </ng-container>
                   </div>
               </virtual-scroller>
           </ng-template>

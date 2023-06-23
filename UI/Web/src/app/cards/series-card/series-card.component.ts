@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -8,7 +17,6 @@ import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/acti
 import { SeriesService } from 'src/app/_services/series.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
-import { Subject } from 'rxjs';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 
 @Component({
@@ -17,7 +25,7 @@ import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
+export class SeriesCardComponent implements OnInit, OnChanges {
   @Input({required: true}) data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
@@ -43,11 +51,10 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * When the card is selected.
    */
-   @Output() selection = new EventEmitter<boolean>();
+  @Output() selection = new EventEmitter<boolean>();
 
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
-  onDestroy: Subject<void> = new Subject<void>();
 
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
@@ -70,11 +77,6 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
-
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case(Action.MarkAsRead):
@@ -87,7 +89,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.scanLibrary(series);
         break;
       case(Action.RefreshMetadata):
-        this.refreshMetdata(series);
+        this.refreshMetadata(series);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -133,8 +135,8 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  async refreshMetdata(series: Series) {
-    this.actionService.refreshMetdata(series);
+  async refreshMetadata(series: Series) {
+    await this.actionService.refreshMetdata(series);
   }
 
   async scanLibrary(series: Series) {
@@ -144,7 +146,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   async deleteSeries(series: Series) {
-    this.actionService.deleteSeries(series, (result: boolean) => {
+    await this.actionService.deleteSeries(series, (result: boolean) => {
       if (result) {
         this.reload.emit(series.id);
       }

@@ -17,6 +17,7 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
+import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
 
 
 @NgModule({
@@ -24,32 +25,34 @@ import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.co
     SeriesDetailComponent,
     SeriesMetadataDetailComponent,
   ],
-    imports: [
-      CommonModule,
-      ReactiveFormsModule,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
 
-      NgbCollapseModule, // Series Metadata
-      NgbNavModule,
-      NgbRatingModule,
-      NgbTooltipModule, // Series Detail, Extras Drawer
-      NgbProgressbarModule,
-      NgbDropdownModule,
+    NgbCollapseModule, // Series Metadata
+    NgbNavModule,
+    NgbRatingModule,
+    NgbTooltipModule, // Series Detail, Extras Drawer
+    NgbProgressbarModule,
+    NgbDropdownModule,
 
-      ImageComponent,
-      ReadMoreComponent,
-      PersonBadgeComponent,
-      IconAndTitleComponent,
-      BadgeExpanderComponent,
+    ImageComponent,
+    ReadMoreComponent,
+    PersonBadgeComponent,
+    IconAndTitleComponent,
+    BadgeExpanderComponent,
+    ExternalSeriesCardComponent,
 
-      TypeaheadModule,
-      PipeModule,
-      SharedModule, // person badge, badge expander (these 2 can be their own module)
-      SharedSideNavCardsModule,
+    TypeaheadModule,
+    PipeModule,
+    SharedModule, // person badge, badge expander (these 2 can be their own module)
+    SharedSideNavCardsModule,
 
-      SeriesDetailRoutingModule,
-      ReviewCardComponent,
-      CarouselModule,
-      ExternalRatingComponent
-    ]
+    SeriesDetailRoutingModule,
+    ReviewCardComponent,
+    CarouselModule,
+    ExternalRatingComponent,
+    ExternalSeriesCardComponent
+  ]
 })
 export class SeriesDetailModule { }
