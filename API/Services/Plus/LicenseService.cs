@@ -82,7 +82,6 @@ public class LicenseService : ILicenseService
     private async Task<string> RegisterLicense(string license, string email)
     {
         if (string.IsNullOrEmpty(license)) return string.Empty;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
@@ -96,7 +95,7 @@ public class LicenseService : ILicenseService
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId,
+                    InstallId = HashUtil.ServerToken(),
                     EmailId = email
                 })
                 .ReceiveString();
