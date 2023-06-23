@@ -144,21 +144,10 @@ public class SeriesController : BaseApiController
     [HttpPost("update")]
     public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
     {
-        _logger.LogInformation("{UserName} is updating Series {SeriesName}", User.GetUsername(), updateSeries.Name);
-
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
 
         if (series == null) return BadRequest("Series does not exist");
 
-        var seriesExists =
-            await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name.Trim(), series.LibraryId,
-                series.Format);
-        if (series.Name != updateSeries.Name && seriesExists)
-        {
-            return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
-        }
-
-        series.Name = updateSeries.Name.Trim();
         series.NormalizedName = series.Name.ToNormalized();
         if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
@@ -168,7 +157,6 @@ public class SeriesController : BaseApiController
         series.LocalizedName = updateSeries.LocalizedName?.Trim();
         series.NormalizedLocalizedName = series.LocalizedName?.ToNormalized();
 
-        series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;
         series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
 
