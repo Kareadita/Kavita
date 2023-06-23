@@ -2,7 +2,8 @@ export enum ScrobbleEventType {
   ChapterRead = 0,
   AddWantToRead = 1,
   RemoveWantToRead = 2,
-  ScoreUpdated = 3
+  ScoreUpdated = 3,
+  Review = 4
 }
 
 export interface ScrobbleEvent {

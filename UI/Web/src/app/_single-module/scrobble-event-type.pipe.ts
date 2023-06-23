@@ -13,6 +13,7 @@ export class ScrobbleEventTypePipe implements PipeTransform {
       case ScrobbleEventType.ScoreUpdated: return 'Rating Update';
       case ScrobbleEventType.AddWantToRead: return 'Want To Read: Add';
       case ScrobbleEventType.RemoveWantToRead: return 'Want To Read: Remove';
+      case ScrobbleEventType.Review: return 'Review update';
     }
   }
 

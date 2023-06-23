@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.10"
+    "version": "0.7.3.12"
   },
   "servers": [
     {
@@ -5993,26 +5993,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
+                  "$ref": "#/components/schemas/RecommendationDto"
                 }
               }
             }
@@ -12456,6 +12447,24 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
+      "ExternalSeriesDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "FileDimensionDto": {
         "type": "object",
         "properties": {
@@ -14101,6 +14110,26 @@
         "additionalProperties": false,
         "description": "A mesh of data for Recently added volume/chapters"
       },
+      "RecommendationDto": {
+        "type": "object",
+        "properties": {
+          "ownedSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
+          },
+          "externalSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "RefreshSeriesDto": {
         "type": "object",
         "properties": {
@@ -14376,7 +14405,8 @@
               0,
               1,
               2,
-              3
+              3,
+              4
             ],
             "type": "integer",
             "format": "int32"
@@ -14679,9 +14709,6 @@
             "type": "integer",
             "description": "The type of all the files attached to this series",
             "format": "int32"
-          },
-          "nameLocked": {
-            "type": "boolean"
           },
           "sortNameLocked": {
             "type": "boolean"
@@ -16546,10 +16573,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
           "localizedName": {
             "type": "string",
             "nullable": true
@@ -16559,9 +16582,6 @@
             "nullable": true
           },
           "coverImageLocked": {
-            "type": "boolean"
-          },
-          "nameLocked": {
             "type": "boolean"
           },
           "sortNameLocked": {
@@ -16666,7 +16686,6 @@
             "nullable": true
           },
           "body": {
-            "maxLength": 1000,
             "type": "string",
             "nullable": true
           }

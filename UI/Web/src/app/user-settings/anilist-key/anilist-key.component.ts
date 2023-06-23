@@ -19,7 +19,7 @@ import {AccountService} from "../../_services/account.service";
   styleUrls: ['./anilist-key.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AnilistKeyComponent implements OnInit, OnChanges {
+export class AnilistKeyComponent implements OnInit {
 
   hasValidLicense: boolean = false;
 
@@ -34,6 +34,17 @@ export class AnilistKeyComponent implements OnInit, OnChanges {
     this.accountService.hasValidLicense().subscribe(res => {
       this.hasValidLicense = res;
       this.cdRef.markForCheck();
+      if (this.hasValidLicense) {
+        this.scrobblingService.getAniListToken().subscribe(token => {
+          this.token = token;
+          this.formGroup.get('aniListToken')?.setValue(token);
+          this.cdRef.markForCheck();
+        });
+        this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
+          this.tokenExpired = hasExpired;
+          this.cdRef.markForCheck();
+        });
+      }
     });
   }
 
@@ -41,19 +52,6 @@ export class AnilistKeyComponent implements OnInit, OnChanges {
     this.formGroup.addControl('aniListToken', new FormControl('', [Validators.required]));
   }
 
-  ngOnChanges() {
-    if (this.hasValidLicense) {
-      this.scrobblingService.getAniListToken().subscribe(token => {
-        this.token = token;
-        this.formGroup.get('aniListToken')?.setValue(token);
-        this.cdRef.markForCheck();
-      });
-      this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList).subscribe(hasExpired => {
-        this.tokenExpired = hasExpired;
-        this.cdRef.markForCheck();
-      })
-    }
-  }
 
 
   resetForm() {
@@ -67,8 +65,6 @@ export class AnilistKeyComponent implements OnInit, OnChanges {
       this.token = this.formGroup.get('aniListToken')!.value;
       this.resetForm();
       this.isViewMode = true;
-    }, err => {
-
     });
   }
 

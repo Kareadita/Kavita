@@ -4,7 +4,6 @@ using API.Constants;
 using API.Data;
 using API.DTOs.Account;
 using API.DTOs.License;
-using API.Entities;
 using API.Entities.Enums;
 using EasyCaching.Core;
 using Flurl.Http;
@@ -49,21 +48,20 @@ public class LicenseService : ILicenseService
     private async Task<bool> IsLicenseValid(string license)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId
+                    InstallId = HashUtil.ServerToken()
                 })
                 .ReceiveString();
             return bool.Parse(response);
@@ -83,21 +81,20 @@ public class LicenseService : ILicenseService
     private async Task<string> RegisterLicense(string license, string email)
     {
         if (string.IsNullOrEmpty(license)) return string.Empty;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId,
+                    InstallId = HashUtil.ServerToken(),
                     EmailId = email
                 })
                 .ReceiveString();

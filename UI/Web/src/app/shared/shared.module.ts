@@ -14,25 +14,19 @@ import { CircularLoaderComponent } from './circular-loader/circular-loader.compo
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { PersonBadgeComponent } from './person-badge/person-badge.component';
 import { BadgeExpanderComponent } from './badge-expander/badge-expander.component';
-import { ImageComponent } from './image/image.component';
 import { PipeModule } from '../pipe/pipe.module';
 import { IconAndTitleComponent } from './icon-and-title/icon-and-title.component';
 import { LoadingComponent } from './loading/loading.component';
+import {ImageComponent} from "./image/image.component";
 
 @NgModule({
   declarations: [
     ConfirmDialogComponent,
-    ReadMoreComponent,
     DrawerComponent,
     TagBadgeComponent,
     A11yClickDirective,
     SeriesFormatComponent,
-    UpdateNotificationModalComponent,
     CircularLoaderComponent,
-    PersonBadgeComponent,
-    BadgeExpanderComponent,
-    ImageComponent,
-    IconAndTitleComponent,
     LoadingComponent,
   ],
   imports: [
@@ -45,18 +39,13 @@ import { LoadingComponent } from './loading/loading.component';
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
-    ReadMoreComponent, // Used globably
     DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5) (also used in book reader and series metadata filter)
     A11yClickDirective, // Used globally
     SeriesFormatComponent, // Used globally
     TagBadgeComponent, // Used globally
     CircularLoaderComponent, // Used in Cards and Series Detail
-    ImageComponent, // Used globally
 
-    PersonBadgeComponent,  // Used Series Detail
-    BadgeExpanderComponent, // Used Series Detail/Metadata
-    IconAndTitleComponent, // Used in Series Detail/Metadata
-    
+
     LoadingComponent
   ],
 })

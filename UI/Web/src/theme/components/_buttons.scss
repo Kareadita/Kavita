@@ -24,7 +24,6 @@
 
 button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :disabled {
   cursor: not-allowed;
-
 }
 
 .btn-link {
@@ -53,18 +52,18 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
 .btn-outline-secondary {
   color: var(--body-text-color);
 }
-  
+
 .btn.btn-secondary.alt {
     background-color: var(--btn-alt-bg-color);
     border-color: var(--btn-alt-border-color);
-  
+
     &:hover {
-      background-color: var(--btn-alt-hover-bg-color); 
+      background-color: var(--btn-alt-hover-bg-color);
     }
-  
+
     &:focus {
       background-color: var(--btn-alt-focus-bg-color);
-      box-shadow: 0 0 0 0.2rem var(--btn-alt-focus-boxshadow-color); 
+      box-shadow: 0 0 0 0.05rem var(--btn-alt-focus-boxshadow-color);
     }
 }
 
@@ -73,5 +72,5 @@ button i.fa {
 }
 
 .btn-check:focus + .btn, .btn:focus {
-  box-shadow: 0 0 0 0.25rem var(--btn-focus-boxshadow-color);
+  box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);
 }

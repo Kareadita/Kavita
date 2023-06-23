@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Recommendation;
 using API.Extensions;
 using API.Helpers;
 using API.Services.Plus;
@@ -36,7 +38,7 @@ public class RecommendedController : BaseApiController
     /// <returns></returns>
     [HttpGet("recommendations")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecommendations(int seriesId)
+    public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
     {
         var userId = User.GetUserId();
         if (!await _licenseService.HasActiveLicense())
@@ -52,12 +54,12 @@ public class RecommendedController : BaseApiController
         var cacheKey = $"recommendation-{seriesId}-{userId}";
         if (_cache.TryGetValue(cacheKey, out string cachedData))
         {
-            return Ok(JsonConvert.DeserializeObject<IEnumerable<SeriesDto>>(cachedData));
+            return Ok(JsonConvert.DeserializeObject<RecommendationDto>(cachedData));
         }
 
         var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
         var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSize(ret.Count)
+            .SetSize(ret.OwnedSeries.Count() + ret.ExternalSeries.Count())
             .SetAbsoluteExpiration(TimeSpan.FromHours(10));
         _cache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
         return Ok(ret);

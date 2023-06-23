@@ -32,6 +32,7 @@ public interface IScrobblingService
     Task CheckExternalAccessTokens();
     Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
     Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
+    Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
 
@@ -129,7 +130,7 @@ public class ScrobblingService : IScrobblingService
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license.Value)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -149,7 +150,7 @@ public class ScrobblingService : IScrobblingService
         return true;
     }
 
-    private async Task<string?> GetTokenForProvider(int userId, ScrobbleProvider provider)
+    private async Task<string> GetTokenForProvider(int userId, ScrobbleProvider provider)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return null;
@@ -159,6 +160,47 @@ public class ScrobblingService : IScrobblingService
             ScrobbleProvider.AniList => user.AniListAccessToken,
             _ => string.Empty
         };
+    }
+
+    public async Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody)
+    {
+        if (!await _licenseService.HasActiveLicense()) return;
+        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
+        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
+        {
+            throw new KavitaException("AniList Credentials have expired or not set");
+        }
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
+        if (series == null) throw new KavitaException("Series not found");
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        if (library is not {AllowScrobbling: true}) return;
+
+        var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
+            ScrobbleEventType.Review);
+        if (existingEvt is {IsProcessed: false})
+        {
+            existingEvt.ReviewBody = reviewBody;
+            existingEvt.ReviewTitle = reviewTitle;
+            _unitOfWork.ScrobbleRepository.Update(existingEvt);
+            await _unitOfWork.CommitAsync();
+            return;
+        }
+
+        var evt = new ScrobbleEvent()
+        {
+            SeriesId = series.Id,
+            LibraryId = series.LibraryId,
+            ScrobbleEventType = ScrobbleEventType.Review,
+            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AppUserId = userId,
+            Format = LibraryTypeHelper.GetFormat(series.Library.Type),
+            ReviewBody = reviewBody,
+            ReviewTitle = reviewTitle
+        };
+        _unitOfWork.ScrobbleRepository.Attach(evt);
+        await _unitOfWork.CommitAsync();
     }
 
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
@@ -287,14 +329,13 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> GetRateLimit(string license, string aniListToken)
     {
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -312,14 +353,13 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
     {
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -404,8 +444,15 @@ public class ScrobblingService : IScrobblingService
                 await ScrobbleRatingUpdate(user.Id, rating.SeriesId, rating.Rating);
             }
 
+            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(user.Id);
+            foreach (var review in reviews)
+            {
+                if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
+                await ScrobbleReviewUpdate(user.Id, review.SeriesId, review.Tagline, review.Review);
+            }
+
             var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id,
-                new UserParams() {}, new FilterDto()
+                new UserParams(), new FilterDto()
                 {
                     ReadStatus = new ReadStatus()
                     {
@@ -475,6 +522,10 @@ public class ScrobblingService : IScrobblingService
             .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
             .Where(e => !errors.Contains(e.SeriesId))
             .ToList();
+        var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review))
+            .Where(e => librariesWithScrobbling.Contains(e.LibraryId))
+            .Where(e => !errors.Contains(e.SeriesId))
+            .ToList();
         var decisions = addToWantToRead
             .GroupBy(item => new { item.SeriesId, item.AppUserId })
             .Select(group => new
@@ -501,47 +552,65 @@ public class ScrobblingService : IScrobblingService
             await SetAndCheckRateLimit(userRateLimits, user, license.Value);
         }
 
-        var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count;
+        var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
 
         try
         {
-            progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, readEvent => new ScrobbleDto()
+            progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
-                Format = readEvent.Format,
-                AniListId = readEvent.AniListId,
-                ScrobbleEventType = readEvent.ScrobbleEventType,
-                ChapterNumber = readEvent.ChapterNumber,
-                VolumeNumber = readEvent.VolumeNumber,
-                AniListToken = readEvent.AppUser.AniListAccessToken,
-                SeriesName = readEvent.Series.Name,
-                LocalizedSeriesName = readEvent.Series.LocalizedName,
-                StartedReadingDateUtc = readEvent.CreatedUtc,
-                Year = readEvent.Series.Metadata.ReleaseYear
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MALId = evt.MalId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                ChapterNumber = evt.ChapterNumber,
+                VolumeNumber = evt.VolumeNumber,
+                AniListToken = evt.AppUser.AniListAccessToken,
+                SeriesName = evt.Series.Name,
+                LocalizedSeriesName = evt.Series.LocalizedName,
+                StartedReadingDateUtc = evt.CreatedUtc,
+                Year = evt.Series.Metadata.ReleaseYear
             });
 
-            progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, ratingEvent => new ScrobbleDto()
+            progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
-                Format = ratingEvent.Format,
-                AniListId = ratingEvent.AniListId,
-                ScrobbleEventType = ratingEvent.ScrobbleEventType,
-                AniListToken = ratingEvent.AppUser.AniListAccessToken,
-                SeriesName = ratingEvent.Series.Name,
-                LocalizedSeriesName = ratingEvent.Series.LocalizedName,
-                Rating = ratingEvent.Rating,
-                Year = ratingEvent.Series.Metadata.ReleaseYear
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MALId = evt.MalId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                AniListToken = evt.AppUser.AniListAccessToken,
+                SeriesName = evt.Series.Name,
+                LocalizedSeriesName = evt.Series.LocalizedName,
+                Rating = evt.Rating,
+                Year = evt.Series.Metadata.ReleaseYear
             });
 
-            progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, decision => new ScrobbleDto()
+            progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
-                Format = decision.Format,
-                AniListId = decision.AniListId,
-                ScrobbleEventType = decision.ScrobbleEventType,
-                ChapterNumber = decision.ChapterNumber,
-                VolumeNumber = decision.VolumeNumber,
-                AniListToken = decision.AppUser.AniListAccessToken,
-                SeriesName = decision.Series.Name,
-                LocalizedSeriesName = decision.Series.LocalizedName,
-                Year = decision.Series.Metadata.ReleaseYear
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MALId = evt.MalId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                AniListToken = evt.AppUser.AniListAccessToken,
+                SeriesName = evt.Series.Name,
+                LocalizedSeriesName = evt.Series.LocalizedName,
+                Rating = evt.Rating,
+                Year = evt.Series.Metadata.ReleaseYear,
+                ReviewBody = evt.ReviewBody,
+                ReviewTitle = evt.ReviewTitle
+            });
+
+            progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
+            {
+                Format = evt.Format,
+                AniListId = evt.AniListId,
+                MALId = evt.MalId,
+                ScrobbleEventType = evt.ScrobbleEventType,
+                ChapterNumber = evt.ChapterNumber,
+                VolumeNumber = evt.VolumeNumber,
+                AniListToken = evt.AppUser.AniListAccessToken,
+                SeriesName = evt.Series.Name,
+                LocalizedSeriesName = evt.Series.LocalizedName,
+                Year = evt.Series.Metadata.ReleaseYear
             });
         }
         catch (FlurlHttpException)

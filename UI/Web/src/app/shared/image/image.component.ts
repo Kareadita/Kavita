@@ -16,12 +16,17 @@ import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {SharedModule} from "../shared.module";
+import {PipeModule} from "../../pipe/pipe.module";
 
 /**
  * This is used for images with placeholder fallback.
  */
 @Component({
   selector: 'app-image',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -74,12 +79,12 @@ export class ImageComponent implements OnChanges {
       if (res.event === EVENTS.CoverUpdate) {
         const updateEvent = res.payload as CoverUpdateEvent;
         if (this.imageUrl === undefined || this.imageUrl === null || this.imageUrl === '') return;
-        const enityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
-        if (enityType === updateEvent.entityType) {
+        const entityType = this.imageService.getEntityTypeFromUrl(this.imageUrl);
+        if (entityType === updateEvent.entityType) {
           const tokens = this.imageUrl.split('?')[1].split('&');
 
           //...seriesId=123&random=
-          let id = tokens[0].replace(enityType + 'Id=', '');
+          let id = tokens[0].replace(entityType + 'Id=', '');
           if (id.includes('&')) {
             id = id.split('&')[0];
           }

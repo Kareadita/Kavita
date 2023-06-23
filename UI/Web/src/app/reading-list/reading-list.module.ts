@@ -19,6 +19,10 @@ import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
 import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
 import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
+import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 
 @NgModule({
   declarations: [
@@ -45,6 +49,11 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
     PipeModule,
     SharedModule,
     SharedSideNavCardsModule,
+
+    ImageComponent,
+    ReadMoreComponent,
+    PersonBadgeComponent,
+    BadgeExpanderComponent,
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL

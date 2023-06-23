@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,8 +70,10 @@ public interface IUserRepository
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser();
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
+    Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId);
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
+
 }
 
 public class UserRepository : IUserRepository
@@ -260,6 +263,16 @@ public class UserRepository : IUserRepository
         return await _context.AppUserRating
             .Where(u => u.AppUserId == userId && u.Rating > 0)
             .Include(u => u.Series)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId)
+    {
+        return await _context.AppUserRating
+            .Where(u => u.AppUserId == userId && !string.IsNullOrEmpty(u.Review))
+            .Include(u => u.Series)
+            .AsSplitQuery()
             .ToListAsync();
     }
 

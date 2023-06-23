@@ -25,6 +25,9 @@ series name or localized series name or adding a weblink for the providers.</p>
         <th scope="col" sortable="comment" (sort)="onSort($event)">
             Comment
         </th>
+      <th scope="col">
+        Edit
+      </th>
     </tr>
     </thead>
     <tbody #container>
@@ -40,6 +43,12 @@ series name or localized series name or adding a weblink for the providers.</p>
             </td>
             <td>
                 {{item.comment}}
+            </td>
+            <td>
+              <button class="btn btn-icon primary-icon" (click)="editSeries(item.seriesId)">
+                <i class="fa fa-pen me-1" aria-hidden="true"></i>
+                <span class="visually-hidden">Edit {{item.details}}</span>
+              </button>
             </td>
         </tr>
     </ng-container>

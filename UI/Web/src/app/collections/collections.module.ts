@@ -5,6 +5,8 @@ import { SharedModule } from '../shared/shared.module';
 import { AllCollectionsComponent } from './_components/all-collections/all-collections.component';
 import { CollectionsRoutingModule } from './collections-routing.module';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
+import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
 
 
@@ -18,6 +20,9 @@ import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-n
     SharedModule,
 
     SharedSideNavCardsModule,
+
+    ImageComponent,
+    ReadMoreComponent,
 
     CollectionsRoutingModule,
   ],

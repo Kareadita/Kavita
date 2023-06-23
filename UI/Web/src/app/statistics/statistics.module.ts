@@ -18,6 +18,8 @@ import { ReadingActivityComponent } from './_components/reading-activity/reading
 import { GenericListModalComponent } from './_components/_modals/generic-list-modal/generic-list-modal.component';
 import { DayBreakdownComponent } from './_components/day-breakdown/day-breakdown.component';
 import { DayOfWeekPipe } from './_pipes/day-of-week.pipe';
+import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
+import {ImageComponent} from "../shared/image/image.component";
 
 
 
@@ -46,7 +48,9 @@ import { DayOfWeekPipe } from './_pipes/day-of-week.pipe';
     PipeModule,
 
     // Server only
-    NgxChartsModule
+    NgxChartsModule,
+    IconAndTitleComponent,
+    ImageComponent
   ],
   exports: [
     UserStatsComponent,

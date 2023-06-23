@@ -120,7 +120,6 @@ public class ReviewService : IReviewService
 
     private async Task<IEnumerable<MediaReviewDto>> GetReviews(string license, Series series)
     {
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         _logger.LogDebug("Fetching external reviews for Series: {SeriesName}", series.Name);
         try
         {
@@ -128,7 +127,7 @@ public class ReviewService : IReviewService
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))

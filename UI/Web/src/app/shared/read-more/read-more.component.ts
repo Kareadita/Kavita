@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core';
+import {CommonModule} from "@angular/common";
+import {PipeModule} from "../../pipe/pipe.module";
 
 @Component({
   selector: 'app-read-more',
+  standalone: true,
+  imports: [CommonModule, PipeModule],
   templateUrl: './read-more.component.html',
   styleUrls: ['./read-more.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,12 +47,12 @@ export class ReadMoreComponent implements OnChanges {
         return;
     }
     this.hideToggle = false;
-    if (this.isCollapsed === true) {
+    if (this.isCollapsed) {
       this.currentText = this.text.substring(0, this.maxLength);
-      this.currentText = this.currentText.substr(0, Math.min(this.currentText.length, this.currentText.lastIndexOf(' ')));
+      this.currentText = this.currentText.substring(0, Math.min(this.currentText.length, this.currentText.lastIndexOf(' ')));
       this.currentText = this.currentText + '…';
-    } else if (this.isCollapsed === false)  {
-        this.currentText = this.text;
+    } else if (!this.isCollapsed)  {
+      this.currentText = this.text;
     }
 
     this.cdRef.markForCheck();

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Account;
@@ -69,16 +70,16 @@ public class LicenseController : BaseApiController
     [HttpPost]
     public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
     {
-        dto.License = dto.License.Trim();
-        if (string.IsNullOrEmpty(dto.License))
+        if (string.IsNullOrWhiteSpace(dto.License))
         {
             await _licenseService.RemoveLicense();
         }
         else
         {
-            await _licenseService.AddLicense(dto.License, dto.Email);
+            await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
         }
 
+        await Task.Delay(TimeSpan.FromSeconds(10));
         return Ok(await _licenseService.HasActiveLicense(true));
     }
 }

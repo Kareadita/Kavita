@@ -54,6 +54,8 @@ import { ReviewSeriesModalComponent } from '../../../_single-module/review-serie
 import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
+import {ReviewCardModalComponent} from "../../../_single-module/review-card-modal/review-card-modal.component";
+import {ExternalSeries} from "../../../_models/series-detail/external-series";
 
 interface RelatedSeris {
   series: Series;
@@ -161,7 +163,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Recommended Series
    */
-  recommendations: Array<Series> = [];
+  combinedRecs: Array<any> = [];
 
   sortingOptions: Array<{value: string, text: string}> = [
     {value: 'Storyline', text: 'Storyline'},
@@ -513,8 +515,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      //this.createHTML();
       this.loadReviews();
+      this.loadRecommendations();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -524,11 +526,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
-      this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
-        this.recommendations = recommendations;
-        this.hasRecommendations = this.recommendations.length > 0;
-        this.cdRef.markForCheck();
-      });
+
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relations = [
@@ -617,6 +615,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     }
   }
 
+  loadRecommendations() {
+    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+      this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
+      this.hasRecommendations = this.combinedRecs.length > 0;
+      this.cdRef.markForCheck();
+    });
+  }
+
   loadReviews() {
     this.seriesService.getReviews(this.series.id).subscribe(reviews => {
       this.reviews = reviews;
@@ -686,16 +692,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  // updateRating(rating: any) {
-  //   if (this.series === undefined) {
-  //     return;
-  //   }
-  //
-  //   this.seriesService.updateRating(this.series?.id, rating).subscribe(() => {
-  //     this.series.userRating = rating;
-  //   });
-  // }
-
   openChapter(chapter: Chapter, incognitoMode = false) {
     if (this.bulkSelectionService.hasSelections()) return;
     if (chapter.pages === 0) {
@@ -760,7 +756,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  openReviewModal(force = false) {
+  openReviewModal() {
     const userReview = this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });

@@ -20,6 +20,7 @@ import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";
+import {Recommendation} from "../_models/series-detail/recommendation";
 
 @Injectable({
   providedIn: 'root'
@@ -193,7 +194,7 @@ export class SeriesService {
   }
 
   getRecommendationsForSeries(seriesId: number) {
-    return this.httpClient.get<Array<Series>>(this.baseUrl + 'recommended/recommendations?seriesId=' + seriesId);
+    return this.httpClient.get<Recommendation>(this.baseUrl + 'recommended/recommendations?seriesId=' + seriesId);
   }
 
   updateRelationships(seriesId: number, adaptations: Array<number>, characters: Array<number>,
