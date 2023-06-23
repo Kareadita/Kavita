@@ -29,7 +29,6 @@ import {ImageComponent} from "./image/image.component";
     UpdateNotificationModalComponent,
     CircularLoaderComponent,
     BadgeExpanderComponent,
-    IconAndTitleComponent,
     LoadingComponent,
   ],
   imports: [
@@ -49,7 +48,6 @@ import {ImageComponent} from "./image/image.component";
     CircularLoaderComponent, // Used in Cards and Series Detail
 
     BadgeExpanderComponent, // Used Series Detail/Metadata
-    IconAndTitleComponent, // Used in Series Detail/Metadata
 
     LoadingComponent
   ],
