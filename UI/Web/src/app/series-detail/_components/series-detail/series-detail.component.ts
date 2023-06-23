@@ -54,6 +54,7 @@ import { ReviewSeriesModalComponent } from '../../../_single-module/review-serie
 import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
+import {ReviewCardModalComponent} from "../../../_single-module/review-card-modal/review-card-modal.component";
 
 interface RelatedSeris {
   series: Series;
@@ -750,7 +751,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  openReviewModal(force = false) {
+  openReviewModal() {
     const userReview = this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
