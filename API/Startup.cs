@@ -185,10 +185,9 @@ public class Startup
         {
             options.Providers.Add<BrotliCompressionProvider>();
             options.Providers.Add<GzipCompressionProvider>();
-            // TODO: Add more MimeTypes for compression
             options.MimeTypes =
                 ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "image/jpeg", "image/jpg" });
+                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp" });
             options.EnableForHttps = true;
         });
         services.Configure<BrotliCompressionProviderOptions>(options =>

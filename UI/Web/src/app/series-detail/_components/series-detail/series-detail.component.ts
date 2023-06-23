@@ -514,8 +514,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      //this.createHTML();
       this.loadReviews();
+      this.loadRecommendations();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -525,11 +525,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.volumeActions = this.actionFactoryService.getVolumeActions(this.handleVolumeActionCallback.bind(this));
       this.chapterActions = this.actionFactoryService.getChapterActions(this.handleChapterActionCallback.bind(this));
 
-      this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
-        this.recommendations = recommendations;
-        this.hasRecommendations = this.recommendations.length > 0;
-        this.cdRef.markForCheck();
-      });
+
 
       this.seriesService.getRelatedForSeries(this.seriesId).subscribe((relations: RelatedSeries) => {
         this.relations = [
@@ -616,6 +612,14 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     } else {
       this.activeTabId = TabID.Storyline;
     }
+  }
+
+  loadRecommendations() {
+    this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(recommendations => {
+      this.recommendations = recommendations;
+      this.hasRecommendations = this.recommendations.length > 0;
+      this.cdRef.markForCheck();
+    });
   }
 
   loadReviews() {
