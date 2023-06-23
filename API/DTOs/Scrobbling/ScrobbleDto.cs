@@ -13,7 +13,9 @@ public enum ScrobbleEventType
     [Description("Remove from Want to Read")]
     RemoveWantToRead = 2,
     [Description("Score Updated")]
-    ScoreUpdated = 3
+    ScoreUpdated = 3,
+    [Description("Review Added/Updated")]
+    Review = 4
 }
 
 public enum MediaFormat
@@ -57,6 +59,8 @@ public class ScrobbleDto
     /// Rating for the Series
     /// </summary>
     public float? Rating { get; set; }
+    public string? ReviewTitle { get; set; }
+    public string? ReviewBody { get; set; }
     /// <summary>
     /// The date that the series was started reading. Will be null for non ReadingProgress events
     /// </summary>

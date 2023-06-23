@@ -11,6 +11,7 @@ using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -26,9 +27,10 @@ public class ReviewController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IReviewService _reviewService;
     private readonly IMemoryCache _cache;
+    private readonly IScrobblingService _scrobblingService;
 
     public ReviewController(ILogger<ReviewController> logger, IUnitOfWork unitOfWork, ILicenseService licenseService,
-        IMapper mapper, IReviewService reviewService, IMemoryCache cache)
+        IMapper mapper, IReviewService reviewService, IMemoryCache cache, IScrobblingService scrobblingService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -36,6 +38,7 @@ public class ReviewController : BaseApiController
         _mapper = mapper;
         _reviewService = reviewService;
         _cache = cache;
+        _scrobblingService = scrobblingService;
     }
 
 
@@ -111,6 +114,10 @@ public class ReviewController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
 
         await _unitOfWork.CommitAsync();
+
+
+        BackgroundJob.Enqueue(() =>
+            _scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, dto.Tagline, dto.Body));
         return Ok(_mapper.Map<UserReviewDto>(rating));
     }
 }

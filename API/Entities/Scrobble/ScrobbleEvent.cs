@@ -1,6 +1,7 @@
 ﻿using System;
 using API.DTOs.Scrobbling;
 using API.Entities.Interfaces;
+using API.Services;
 
 namespace API.Entities.Scrobble;
 
@@ -21,6 +22,11 @@ public class ScrobbleEvent : IEntityDate
     /// Rating for the Series
     /// </summary>
     public float? Rating { get; set; }
+    /// <summary>
+    /// Review for the Series
+    /// </summary>
+    public string? ReviewBody { get; set; }
+    public string? ReviewTitle { get; set; }
     public required MediaFormat Format { get; set; }
     /// <summary>
     /// Depends on the ScrobbleEvent if filled in
