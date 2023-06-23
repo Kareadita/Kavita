@@ -22,7 +22,6 @@ import {ImageComponent} from "./image/image.component";
 @NgModule({
   declarations: [
     ConfirmDialogComponent,
-    ReadMoreComponent,
     DrawerComponent,
     TagBadgeComponent,
     A11yClickDirective,
@@ -44,7 +43,6 @@ import {ImageComponent} from "./image/image.component";
     NgCircleProgressModule.forRoot(),
   ],
   exports: [
-    ReadMoreComponent, // Used globably
     DrawerComponent, // Can be replaced with boostrap offscreen canvas (v5) (also used in book reader and series metadata filter)
     A11yClickDirective, // Used globally
     SeriesFormatComponent, // Used globally

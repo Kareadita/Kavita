@@ -13,6 +13,7 @@ import {ReviewCardComponent} from "../_single-module/review-card/review-card.com
 import {CarouselModule} from "../carousel/carousel.module";
 import {ExternalRatingComponent} from "./_components/external-rating/external-rating.component";
 import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
 
 @NgModule({
@@ -21,27 +22,28 @@ import {ImageComponent} from "../shared/image/image.component";
     SeriesMetadataDetailComponent,
   ],
     imports: [
-        CommonModule,
-        ReactiveFormsModule,
+      CommonModule,
+      ReactiveFormsModule,
 
-        NgbCollapseModule, // Series Metadata
-        NgbNavModule,
-        NgbRatingModule,
-        NgbTooltipModule, // Series Detail, Extras Drawer
-        NgbProgressbarModule,
-        NgbDropdownModule,
+      NgbCollapseModule, // Series Metadata
+      NgbNavModule,
+      NgbRatingModule,
+      NgbTooltipModule, // Series Detail, Extras Drawer
+      NgbProgressbarModule,
+      NgbDropdownModule,
 
-        ImageComponent,
+      ImageComponent,
+      ReadMoreComponent,
 
-        TypeaheadModule,
-        PipeModule,
-        SharedModule, // person badge, badge expander (these 2 can be their own module)
-        SharedSideNavCardsModule,
+      TypeaheadModule,
+      PipeModule,
+      SharedModule, // person badge, badge expander (these 2 can be their own module)
+      SharedSideNavCardsModule,
 
-        SeriesDetailRoutingModule,
-        ReviewCardComponent,
-        CarouselModule,
-        ExternalRatingComponent
+      SeriesDetailRoutingModule,
+      ReviewCardComponent,
+      CarouselModule,
+      ExternalRatingComponent
     ]
 })
 export class SeriesDetailModule { }

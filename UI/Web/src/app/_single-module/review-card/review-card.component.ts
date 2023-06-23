@@ -7,11 +7,12 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {ReviewSeriesModalComponent} from "../review-series-modal/review-series-modal.component";
+import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, SharedModule, PipeModule],
+  imports: [CommonModule, SharedModule, PipeModule, ReadMoreComponent],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -6,6 +6,7 @@ import { AllCollectionsComponent } from './_components/all-collections/all-colle
 import { CollectionsRoutingModule } from './collections-routing.module';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
 
 
@@ -19,7 +20,9 @@ import {ImageComponent} from "../shared/image/image.component";
     SharedModule,
 
     SharedSideNavCardsModule,
+
     ImageComponent,
+    ReadMoreComponent,
 
     CollectionsRoutingModule,
   ],

@@ -20,6 +20,7 @@ import { StepTrackerComponent } from './_components/step-tracker/step-tracker.co
 import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import {ImageComponent} from "../shared/image/image.component";
+import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
 @NgModule({
   declarations: [
@@ -46,7 +47,9 @@ import {ImageComponent} from "../shared/image/image.component";
     PipeModule,
     SharedModule,
     SharedSideNavCardsModule,
+
     ImageComponent,
+    ReadMoreComponent,
 
     ReadingListRoutingModule,
     NgbAccordionModule, // Import CBL
