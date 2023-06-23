@@ -67,12 +67,12 @@ public class RecommendationService : IRecommendationService
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
         var seriesRecs = new List<SeriesDto>();
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        if (user == null || series == null) return seriesRecs;
+        if (series == null) return seriesRecs;
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
-        var canSeeExternalSeries = user.AgeRestriction == AgeRating.NotApplicable &&
-                                    await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        var canSeeExternalSeries = user != null && user.AgeRestriction == AgeRating.NotApplicable &&
+                                   await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
 
 

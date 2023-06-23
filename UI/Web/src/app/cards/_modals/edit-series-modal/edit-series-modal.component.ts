@@ -5,13 +5,12 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
@@ -58,29 +57,27 @@ export class EditSeriesModalComponent implements OnInit {
    */
   initSeries!: Series;
 
-  isCollapsed = true;
   volumeCollapsed: any = {};
   tabs = ['General', 'Metadata', 'People', 'Web Links', 'Cover Image', 'Related', 'Info'];
   active = this.tabs[0];
-  activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
   private readonly destroyRef = inject(DestroyRef);
 
   // Typeaheads
-  ageRatingSettings: TypeaheadSettings<AgeRatingDto> = new TypeaheadSettings();
-  publicationStatusSettings: TypeaheadSettings<PublicationStatusDto> = new TypeaheadSettings();
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   collectionTagSettings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
-
   collectionTags: CollectionTag[] = [];
   tags: Tag[] = [];
   genres: Genre[] = [];
+  ageRatings: Array<AgeRatingDto> = [];
+  publicationStatuses: Array<PublicationStatusDto> = [];
+  validLanguages: Array<Language> = [];
 
   metadata!: SeriesMetadata;
   imageUrls: Array<string> = [];
@@ -88,11 +85,6 @@ export class EditSeriesModalComponent implements OnInit {
    * Selected Cover for uploading
    */
   selectedCover: string = '';
-
-  ageRatings: Array<AgeRatingDto> = [];
-  publicationStatuses: Array<PublicationStatusDto> = [];
-  validLanguages: Array<Language> = [];
-
   coverImageReset = false;
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
