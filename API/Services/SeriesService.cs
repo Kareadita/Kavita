@@ -17,7 +17,6 @@ using API.Helpers.Builders;
 using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
-using Hangfire.InMemory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -417,6 +416,7 @@ public class SeriesService : ISeriesService
         {
             foreach (var volume in volumes)
             {
+                volume.Chapters = volume.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
@@ -427,7 +427,11 @@ public class SeriesService : ISeriesService
         else
         {
             processedVolumes = volumes.Where(v => v.Number > 0).ToList();
-            processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
+            processedVolumes.ForEach(v =>
+            {
+                v.Name = $"Volume {v.Name}";
+                v.Chapters = v.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
+            });
         }
 
         var specials = new List<ChapterDto>();
