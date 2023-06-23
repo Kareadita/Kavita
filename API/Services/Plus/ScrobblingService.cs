@@ -130,7 +130,7 @@ public class ScrobblingService : IScrobblingService
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license.Value)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -329,14 +329,13 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> GetRateLimit(string license, string aniListToken)
     {
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
@@ -354,14 +353,13 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> PostScrobbleUpdate(ScrobbleDto data, string license, ScrobbleEvent evt)
     {
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/update")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))

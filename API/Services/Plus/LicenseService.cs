@@ -49,21 +49,20 @@ public class LicenseService : ILicenseService
     private async Task<bool> IsLicenseValid(string license)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = serverSetting.InstallId
+                    InstallId = HashUtil.ServerToken()
                 })
                 .ReceiveString();
             return bool.Parse(response);
@@ -90,7 +89,7 @@ public class LicenseService : ILicenseService
                 .WithHeader("Accept", "application/json")
                 .WithHeader("User-Agent", "Kavita")
                 .WithHeader("x-license-key", license)
-                .WithHeader("x-installId", serverSetting.InstallId)
+                .WithHeader("x-installId", HashUtil.ServerToken())
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))

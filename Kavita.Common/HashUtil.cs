@@ -40,7 +40,7 @@ public static class HashUtil
 
     public static string ServerToken()
     {
-        var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.UserName}";
+        var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.UserName}_{Environment.Version}_{Environment.MachineName}";
         return CalculateCrc(seed);
     }
 
