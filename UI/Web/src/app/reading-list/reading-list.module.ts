@@ -32,6 +32,7 @@ import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
+import {A11yClickDirective} from "../shared/a11y-click.directive";
 
 @NgModule({
   declarations: [
@@ -74,6 +75,7 @@ import {LoadingComponent} from "../shared/loading/loading.component";
     CardItemComponent,
     SideNavCompanionBarComponent,
     LoadingComponent,
+    A11yClickDirective,
   ],
   exports: [
     AddToListModalComponent,
