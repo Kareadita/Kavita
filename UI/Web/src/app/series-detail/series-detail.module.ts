@@ -18,6 +18,7 @@ import {PersonBadgeComponent} from "../shared/person-badge/person-badge.componen
 import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
+import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
 
 
 @NgModule({
@@ -42,6 +43,7 @@ import {ExternalSeriesCardComponent} from "../cards/external-series-card/externa
     IconAndTitleComponent,
     BadgeExpanderComponent,
     ExternalSeriesCardComponent,
+    ExternalListItemComponent,
 
     TypeaheadModule,
     PipeModule,
@@ -52,7 +54,6 @@ import {ExternalSeriesCardComponent} from "../cards/external-series-card/externa
     ReviewCardComponent,
     CarouselModule,
     ExternalRatingComponent,
-    ExternalSeriesCardComponent
   ]
 })
 export class SeriesDetailModule { }
