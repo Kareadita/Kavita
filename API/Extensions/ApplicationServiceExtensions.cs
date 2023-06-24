@@ -9,6 +9,7 @@ using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using API.SignalR.Presence;
+using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -82,7 +83,7 @@ public static class ApplicationServiceExtensions
 
         services.AddMemoryCache(options =>
         {
-            options.SizeLimit = 50 * 1024 * 1024; // 50 MB
+            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 50 MB
             options.CompactionPercentage = 0.1; // LRU compaction (10%)
         });
 
