@@ -11,9 +11,18 @@
         }
 
         &::after {
-            border-bottom-color: var(--popover-arrow-color);
+          border-bottom-color: var(--popover-arrow-color);
         }
     }
+}
+
+.bs-popover-top {
+  > .popover-arrow {
+
+    &::after {
+      border-top-color: var(--popover-body-bg-color);
+    }
+  }
 }
 
 .popover-body, .popover-header {
