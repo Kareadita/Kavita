@@ -1,4 +1,10 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  Input,
+  ViewChild
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ExternalSeries} from "../../_models/series-detail/external-series";
 import {Router, RouterLinkActive} from "@angular/router";
@@ -18,12 +24,11 @@ import {ReactiveFormsModule} from "@angular/forms";
 })
 export class ExternalSeriesCardComponent {
   @Input({required: true}) data!: ExternalSeries;
-  private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly router = inject(Router);
+  @ViewChild('link', {static: false}) link!: ElementRef<HTMLAnchorElement>;
 
   handleClick() {
-    this.router.navigateByUrl(this.data.url);
+    if (this.link) {
+      this.link.nativeElement.click();
+    }
   }
-
-  protected readonly undefined = undefined;
 }

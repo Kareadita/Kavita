@@ -43,6 +43,7 @@ internal record MediaRecommendationDto
     public string Name { get; set; }
     public string CoverUrl { get; set; }
     public string SiteUrl { get; set; }
+    public string? Summary { get; set; }
 }
 
 public interface IRecommendationService

@@ -19,6 +19,7 @@ using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace API.Services.Plus;
 
@@ -55,6 +56,12 @@ public class ScrobblingService : IScrobblingService
 
     public const string AniListWeblinkWebsite = "https://anilist.co/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+
+    private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
+    {
+        {AniListWeblinkWebsite, 1},
+        {MalWeblinkWebsite, 0},
+    };
 
     private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
@@ -370,11 +377,12 @@ public class ScrobblingService : IScrobblingService
                 // Might want to log this under ScrobbleError
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
-                    _logger.LogError("Hit Too many requests, sleeping to regain requests");
+                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
                     await Task.Delay(TimeSpan.FromMinutes(1));
                 } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
+                    _logger.LogInformation("Kavita+ was unable to match the series");
                     if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                     {
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
@@ -488,6 +496,7 @@ public class ScrobblingService : IScrobblingService
     public async Task ProcessUpdatesSinceLastSync()
     {
         // Check how many scrobbles we have available then only do those.
+        _logger.LogInformation("Starting Scrobble Processing");
         var userRateLimits = new Dictionary<int, int>();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
@@ -553,6 +562,7 @@ public class ScrobblingService : IScrobblingService
 
         var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
 
+        _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
         {
             progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
@@ -714,11 +724,12 @@ public class ScrobblingService : IScrobblingService
     /// <returns></returns>
     public static long? ExtractId(string webLinks, string website)
     {
+        var index = WeblinkExtractionMap[website];
         foreach (var webLink in webLinks.Split(','))
         {
             if (!webLink.StartsWith(website)) continue;
             var tokens = webLink.Split(website)[1].Split('/');
-            return long.Parse(tokens[1]);
+            return long.Parse(tokens[index]);
         }
 
         return 0;
