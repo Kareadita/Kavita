@@ -21,7 +21,7 @@ namespace API.Services.Plus;
 public class PlusSeriesDto
 {
     public int? AniListId { get; set; }
-    public int? MalId { get; set; }
+    public long? MalId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
     public MediaFormat MediaFormat { get; set; }
@@ -131,7 +131,7 @@ public class RecommendationService : IRecommendationService
                     MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
-                    AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
+                    AniListId = (int?) ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite),
                     MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.MalWeblinkWebsite),

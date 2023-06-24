@@ -15,7 +15,7 @@ public class ScrobbleEvent : IEntityDate
     public required ScrobbleEventType ScrobbleEventType { get; set; }
 
     public int? AniListId { get; set; }
-    public int? MalId { get; set; }
+    public long? MalId { get; set; }
 
 
     /// <summary>

@@ -122,7 +122,6 @@ public class ScrobblingService : IScrobblingService
 
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         if (string.IsNullOrEmpty(license.Value)) return true;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         try
         {
@@ -192,7 +191,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.Review,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -226,7 +225,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -276,7 +275,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+                AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
                 MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
@@ -318,7 +317,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -560,7 +559,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = evt.VolumeNumber,
@@ -575,7 +574,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
@@ -588,7 +587,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
@@ -603,7 +602,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = evt.VolumeNumber,
@@ -713,13 +712,13 @@ public class ScrobblingService : IScrobblingService
     /// <param name="webLinks"></param>
     /// <param name="website"></param>
     /// <returns></returns>
-    public static int? ExtractId(string webLinks, string website)
+    public static long? ExtractId(string webLinks, string website)
     {
-        foreach (var webLink in webLinks.Split(","))
+        foreach (var webLink in webLinks.Split(','))
         {
             if (!webLink.StartsWith(website)) continue;
-            var tokens = webLink.Split(website)[1].Split("/");
-            return int.Parse(tokens[1]);
+            var tokens = webLink.Split(website)[1].Split('/');
+            return long.Parse(tokens[1]);
         }
 
         return 0;
