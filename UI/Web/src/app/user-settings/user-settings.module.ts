@@ -8,7 +8,6 @@ import { ApiKeyComponent } from './api-key/api-key.component';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
@@ -22,9 +21,12 @@ import { LicenseComponent } from './user-license/license.component';
 import { ManageKavitaPlusComponent } from './user-kavitaplus/manage-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
-import {SharedModule} from "../shared/shared.module";
 import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
 import {AgeRatingPipe} from "../pipe/age-rating.pipe";
+import {LoadingComponent} from "../shared/loading/loading.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 
 
 @NgModule({
@@ -53,19 +55,18 @@ import {AgeRatingPipe} from "../pipe/age-rating.pipe";
     NgbTooltipModule,
     NgbCollapseModule,
 
-    ColorPickerModule, // User prefernces background color
+    ColorPickerModule, // User preferences background color
 
     StatisticsModule,
-
-    SidenavModule,
 
     UserSettingsRoutingModule,
     UserScrobbleHistoryComponent,
     UserHoldsComponent,
-    SharedModule,
     NgOptimizedImage,
     SentenceCasePipe,
     AgeRatingPipe,
+    LoadingComponent,
+    SideNavCompanionBarComponent,
   ],
   exports: [
     SiteThemeProviderPipe,

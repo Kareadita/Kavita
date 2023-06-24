@@ -12,7 +12,6 @@ import {
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {SharedModule} from "../../shared/shared.module";
 import {compare, SortableHeader, SortEvent} from "../../_single-module/table/_directives/sortable-header.directive";
 import {KavitaMediaError} from "../_models/media-error";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -25,11 +24,12 @@ import {SeriesService} from "../../_services/series.service";
 import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FilterPipe} from "../../pipe/filter.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SharedModule, TableModule, FilterPipe],
+  imports: [CommonModule, ReactiveFormsModule, TableModule, FilterPipe, LoadingComponent],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

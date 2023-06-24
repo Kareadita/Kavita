@@ -18,9 +18,14 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
+import {CommonModule} from "@angular/common";
+import {CardItemComponent} from "../card-item/card-item.component";
+import {RelationshipPipe} from "../../pipe/relationship.pipe";
 
 @Component({
   selector: 'app-series-card',
+  standalone: true,
+  imports: [CommonModule, CardItemComponent, RelationshipPipe],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

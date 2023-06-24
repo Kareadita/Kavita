@@ -7,8 +7,16 @@ import {
   Input,
   OnInit
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  NgbActiveModal, NgbCollapse,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavModule, NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -30,6 +38,19 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule, NgTemplateOutlet} from "@angular/common";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
+import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
+import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {MangaFormatPipe} from "../../../pipe/manga-format.pipe";
+import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
+import {TimeAgoPipe} from "../../../pipe/time-ago.pipe";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {PublicationStatusPipe} from "../../../pipe/publication-status.pipe";
+import {BytesPipe} from "../../../pipe/bytes.pipe";
+import {ImageComponent} from "../../../shared/image/image.component";
+import {DefaultValuePipe} from "../../../pipe/default-value.pipe";
 
 enum TabID {
   General = 0,
@@ -43,6 +64,31 @@ enum TabID {
 
 @Component({
   selector: 'app-edit-series-modal',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgbNav,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLink,
+    CommonModule,
+    TypeaheadComponent,
+    CoverImageChooserComponent,
+    EditSeriesRelationComponent,
+    SentenceCasePipe,
+    MangaFormatPipe,
+    DefaultDatePipe,
+    TimeAgoPipe,
+    TagBadgeComponent,
+    PublicationStatusPipe,
+    NgbTooltip,
+    BytesPipe,
+    ImageComponent,
+    NgbCollapse,
+    NgbNavOutlet,
+    DefaultValuePipe,
+
+  ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

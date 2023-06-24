@@ -1,9 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WantToReadComponent } from './_components/want-to-read/want-to-read.component';
-import { CardsModule } from '../cards/cards.module';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { WantToReadRoutingModule } from './want-to-read-routing.module';
+import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
+import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
+import {SeriesCardComponent} from "../cards/series-card/series-card.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 
 
 
@@ -13,9 +17,11 @@ import { WantToReadRoutingModule } from './want-to-read-routing.module';
   ],
   imports: [
     CommonModule,
-    CardsModule,
-    SidenavModule,
-    WantToReadRoutingModule
+    WantToReadRoutingModule,
+    BulkOperationsComponent,
+    CardDetailLayoutComponent,
+    SeriesCardComponent,
+    SideNavCompanionBarComponent
   ]
 })
 export class WantToReadModule { }

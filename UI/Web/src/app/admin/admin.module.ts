@@ -5,7 +5,6 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
-import { SharedModule } from '../shared/shared.module';
 import { LibraryAccessModalComponent } from './_modals/library-access-modal/library-access-modal.component';
 import { DirectoryPickerComponent } from './_modals/directory-picker/directory-picker.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -17,7 +16,6 @@ import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
 import { EditUserComponent } from './edit-user/edit-user.component';
 import { UserSettingsModule } from '../user-settings/user-settings.module';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageMediaSettingsComponent } from './manage-media-settings/manage-media-settings.component';
 import { ManageEmailSettingsComponent } from './manage-email-settings/manage-email-settings.component';
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
@@ -31,6 +29,12 @@ import {LibraryTypePipe} from "../pipe/library-type.pipe";
 import {TimeAgoPipe} from "../pipe/time-ago.pipe";
 import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
 import {FilterPipe} from "../pipe/filter.pipe";
+import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
+import {LoadingComponent} from "../shared/loading/loading.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {RouterModule} from "@angular/router";
 
 
 
@@ -59,14 +63,13 @@ import {FilterPipe} from "../pipe/filter.pipe";
     CommonModule,
     AdminRoutingModule,
     ReactiveFormsModule,
+    RouterModule,
     FormsModule,
     NgbNavModule,
     NgbTooltipModule,
     NgbTypeaheadModule, // Directory Picker
     NgbDropdownModule,
     NgbAccordionModule,
-    SharedModule,
-    SidenavModule,
     UserSettingsModule, // API-key componet
     VirtualScrollerModule,
 
@@ -76,7 +79,10 @@ import {FilterPipe} from "../pipe/filter.pipe";
     LibraryTypePipe,
     TimeAgoPipe,
     SentenceCasePipe,
-    FilterPipe
+    FilterPipe,
+    TagBadgeComponent,
+    LoadingComponent,
+    SideNavCompanionBarComponent
   ],
   providers: []
 })

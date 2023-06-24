@@ -10,8 +10,8 @@ import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from './_interceptors/error.interceptor';
 
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
-import { SidenavModule } from './sidenav/sidenav.module';
 import { NavModule } from './nav/nav.module';
+import {SideNavComponent} from "./sidenav/_components/side-nav/side-nav.component";
 
 
 
@@ -24,21 +24,21 @@ if (disableAnimations) console.error("Web Animations have been disabled as your 
     declarations: [
         AppComponent,
     ],
-    imports: [
-        HttpClientModule,
-        BrowserModule,
-        AppRoutingModule,
-        BrowserAnimationsModule.withConfig({ disableAnimations }),
-        SidenavModule,
-        NavModule,
-        ToastrModule.forRoot({
-            positionClass: 'toast-bottom-right',
-            preventDuplicates: true,
-            timeOut: 6000,
-            countDuplicates: true,
-            autoDismiss: true
-        }),
-    ],
+  imports: [
+    HttpClientModule,
+    BrowserModule,
+    AppRoutingModule,
+    BrowserAnimationsModule.withConfig({disableAnimations}),
+    NavModule,
+    ToastrModule.forRoot({
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true,
+      timeOut: 6000,
+      countDuplicates: true,
+      autoDismiss: true
+    }),
+    SideNavComponent,
+  ],
     providers: [
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },

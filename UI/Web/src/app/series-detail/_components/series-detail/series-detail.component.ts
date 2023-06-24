@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   Component,
   ElementRef,

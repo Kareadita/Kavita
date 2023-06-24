@@ -4,12 +4,12 @@ import {SeriesService} from "../../../_services/series.service";
 import {Rating} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../pipe/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
-import {SharedModule} from "../../../shared/shared.module";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, SharedModule, NgbPopover],
+  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -6,9 +6,7 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
-import { SharedModule } from '../shared/shared.module';
 import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
@@ -27,6 +25,13 @@ import {MangaFormatPipe} from "../pipe/manga-format.pipe";
 import {MangaFormatIconPipe} from "../pipe/manga-format-icon.pipe";
 import {SafeHtmlPipe} from "../pipe/safe-html.pipe";
 import {FilterPipe} from "../pipe/filter.pipe";
+import {CoverImageChooserComponent} from "../cards/cover-image-chooser/cover-image-chooser.component";
+import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
+import {CardItemComponent} from "../cards/card-item/card-item.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {LoadingComponent} from "../shared/loading/loading.component";
 
 @NgModule({
   declarations: [
@@ -50,9 +55,6 @@ import {FilterPipe} from "../pipe/filter.pipe";
     NgbTooltipModule,
     NgbDropdownModule,
 
-    SharedModule,
-    SharedSideNavCardsModule,
-
     ImageComponent,
     ReadMoreComponent,
     PersonBadgeComponent,
@@ -67,6 +69,11 @@ import {FilterPipe} from "../pipe/filter.pipe";
     MangaFormatIconPipe,
     SafeHtmlPipe,
     FilterPipe,
+    CoverImageChooserComponent,
+    CardDetailLayoutComponent,
+    CardItemComponent,
+    SideNavCompanionBarComponent,
+    LoadingComponent,
   ],
   exports: [
     AddToListModalComponent,

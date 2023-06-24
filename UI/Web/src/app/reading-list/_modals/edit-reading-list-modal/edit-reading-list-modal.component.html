@@ -5,7 +5,7 @@
 </div>
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
-     orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">     
+     orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
         <li [ngbNavItem]="TabID.General">
             <a ngbNavLink>{{TabID.General}}</a>
             <ng-template ngbNavContent>
@@ -42,10 +42,10 @@
                             <h6 id="starting-year-header">Starting</h6>
                             <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('startingMonth') as formControl" style="width: 90%">
                                 <label for="start-month" class="form-label">Month</label>
-                                <input id="start-month" class="form-control" formControlName="startingMonth" 
+                                <input id="start-month" class="form-control" formControlName="startingMonth"
                                 type="number" inputmode="numeric" [class.is-invalid]="formControl?.invalid && formControl?.touched"
                                 aria-describedby="starting-year-header">
-                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
                                         Must be between 1 and 12 or blank
                                     </div>
@@ -56,7 +56,7 @@
                                 <input id="start-year" class="form-control" formControlName="startingYear" type="number" inputmode="numeric"
                                 [class.is-invalid]="formControl.invalid && formControl.touched"
                                 aria-describedby="starting-year-header">
-                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
                                         Must be greater than 1000, 0 or blank
                                     </div>
@@ -67,22 +67,22 @@
                         <div class="col-md-6 col-sm-12">
                             <h6 id="ending-year-heading">Ending</h6>
                             <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingMonth') as formControl" style="width: 90%">
-                                <label for="library-name" class="form-label">Month</label>
-                                <input id="library-name" class="form-control" formControlName="endingMonth" type="number" inputmode="numeric"
+                                <label for="ending-month" class="form-label">Month</label>
+                                <input id="ending-month" class="form-control" formControlName="endingMonth" type="number" inputmode="numeric"
                                  [class.is-invalid]="formControl?.invalid && formControl?.touched"
                                  aria-describedby="ending-year-header">
-                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
                                         Must be between 1 and 12 or blank
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-12" *ngIf="reviewGroup.get('endingYear') as formControl" style="width: 90%">
-                                <label for="library-name" class="form-label">Year</label>
-                                <input id="library-name" class="form-control" formControlName="endingYear" type="number" inputmode="numeric"
+                                <label for="ending-year" class="form-label">Year</label>
+                                <input id="ending-year" class="form-control" formControlName="endingYear" type="number" inputmode="numeric"
                                 [class.is-invalid]="formControl?.invalid && formControl?.touched"
                                 aria-describedby="ending-year-header">
-                                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
+                                <div class="invalid-feedback" *ngIf="reviewGroup.dirty || reviewGroup.touched">
                                     <div *ngIf="formControl.errors?.min || formControl.errors?.max">
                                         Must be greater than 1000, 0 or blank
                                     </div>
@@ -90,7 +90,7 @@
                             </div>
                         </div>
                     </div>
-    
+
                     <div class="row g-0 mb-3">
                         <label for="summary" class="form-label">Summary</label>
                         <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>

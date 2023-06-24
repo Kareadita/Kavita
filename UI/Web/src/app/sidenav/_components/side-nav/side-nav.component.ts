@@ -21,9 +21,16 @@ import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {switchMap} from "rxjs";
+import {CommonModule} from "@angular/common";
+import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
+import {CardActionablesComponent} from "../../../cards/card-item/card-actionables/card-actionables.component";
+import {FilterPipe} from "../../../pipe/filter.pipe";
+import {FormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-side-nav',
+  standalone: true,
+  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

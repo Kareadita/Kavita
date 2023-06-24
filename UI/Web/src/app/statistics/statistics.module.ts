@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { UserStatsComponent } from './_components/user-stats/user-stats.component';
 import { TableModule } from '../_single-module/table/table.module';
 import { UserStatsInfoCardsComponent } from './_components/user-stats-info-cards/user-stats-info-cards.component';
-import { SharedModule } from '../shared/shared.module';
 import { ServerStatsComponent } from './_components/server-stats/server-stats.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { StatListComponent } from './_components/stat-list/stat-list.component';
@@ -46,7 +45,6 @@ import {FilterPipe} from "../pipe/filter.pipe";
   imports: [
     CommonModule,
     TableModule,
-    SharedModule,
     NgbTooltipModule,
     NgbModalModule,
     ReactiveFormsModule,

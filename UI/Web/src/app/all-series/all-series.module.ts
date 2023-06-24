@@ -1,8 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AllSeriesRoutingModule } from './all-series-routing.module';
-import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { AllSeriesComponent } from './_components/all-series/all-series.component';
+import {SeriesCardComponent} from "../cards/series-card/series-card.component";
+import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.component";
+import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 
 
 
@@ -13,7 +18,10 @@ import { AllSeriesComponent } from './_components/all-series/all-series.componen
   imports: [
     CommonModule,
     AllSeriesRoutingModule,
-    SharedSideNavCardsModule
+    SeriesCardComponent,
+    BulkOperationsComponent,
+    CardDetailLayoutComponent,
+    SideNavCompanionBarComponent,
   ]
 })
 export class AllSeriesModule { }

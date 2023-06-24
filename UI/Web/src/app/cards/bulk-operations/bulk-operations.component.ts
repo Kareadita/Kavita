@@ -12,9 +12,17 @@ import { Subject, takeUntil } from 'rxjs';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {AsyncPipe, CommonModule} from "@angular/common";
+import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-bulk-operations',
+  standalone: true,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    CardActionablesComponent
+  ],
   templateUrl: './bulk-operations.component.html',
   styleUrls: ['./bulk-operations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
