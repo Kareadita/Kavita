@@ -11,7 +11,6 @@ import {
   ViewChildren
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {PipeModule} from "../../pipe/pipe.module";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SharedModule} from "../../shared/shared.module";
 import {compare, SortableHeader, SortEvent} from "../../_single-module/table/_directives/sortable-header.directive";
@@ -24,13 +23,13 @@ import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
 import {TableModule} from "../../_single-module/table/table.module";
 import {SeriesService} from "../../_services/series.service";
 import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
-import {Series} from "../../_models/series";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {FilterPipe} from "../../pipe/filter.pipe";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, PipeModule, ReactiveFormsModule, SharedModule, TableModule],
+  imports: [CommonModule, ReactiveFormsModule, SharedModule, TableModule, FilterPipe],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

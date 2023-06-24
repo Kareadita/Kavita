@@ -6,12 +6,11 @@ import {
   ElementRef,
   inject,
   Inject,
-  OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -42,19 +41,8 @@ export class NavHeaderComponent implements OnInit {
 
   isLoading = false;
   debounceTime = 300;
-  imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
-  customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const matches = items.filter(item => {
-      const normalizedSeriesName = item.name.toLowerCase().trim();
-      const normalizedOriginalName = item.originalName.toLowerCase().trim();
-      const normalizedLocalizedName = item.localizedName.toLowerCase().trim();
-      return normalizedSeriesName.indexOf(normalizedQuery) >= 0 || normalizedOriginalName.indexOf(normalizedQuery) >= 0 || normalizedLocalizedName.indexOf(normalizedQuery) >= 0;
-    });
-    return matches;
-  };
 
 
   backToTopNeeded = false;

@@ -5,7 +5,8 @@ import { LibraryType } from '../_models/library';
  * Returns the name of the LibraryType
  */
 @Pipe({
-  name: 'libraryType'
+  name: 'libraryType',
+  standalone: true
 })
 export class LibraryTypePipe implements PipeTransform {
 

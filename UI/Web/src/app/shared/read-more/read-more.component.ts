@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges } from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {PipeModule} from "../../pipe/pipe.module";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 
 @Component({
   selector: 'app-read-more',
   standalone: true,
-  imports: [CommonModule, PipeModule],
+  imports: [CommonModule, SafeHtmlPipe],
   templateUrl: './read-more.component.html',
   styleUrls: ['./read-more.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

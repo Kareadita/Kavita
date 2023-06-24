@@ -4,7 +4,6 @@ import { AnnouncementsComponent } from './_components/announcements/announcement
 import { ChangelogComponent } from './_components/changelog/changelog.component';
 import { AnnouncementsRoutingModule } from './announcements-routing.module';
 import { SharedModule } from '../shared/shared.module';
-import { PipeModule } from '../pipe/pipe.module';
 import { SidenavModule } from '../sidenav/sidenav.module';
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 
@@ -19,7 +18,6 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
         CommonModule,
         AnnouncementsRoutingModule,
         SharedModule,
-        PipeModule,
         SidenavModule,
         ReadMoreComponent
     ]

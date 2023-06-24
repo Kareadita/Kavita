@@ -5,7 +5,6 @@ import { NgbCollapseModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModul
 import { SeriesMetadataDetailComponent } from './_components/series-metadata-detail/series-metadata-detail.component';
 import { SharedModule } from '../shared/shared.module';
 import { TypeaheadModule } from '../typeahead/typeahead.module';
-import { PipeModule } from '../pipe/pipe.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import { SeriesDetailComponent } from './_components/series-detail/series-detail.component';
@@ -19,6 +18,9 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
 import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
+import {ListItemComponent} from "../cards/list-item/list-item.component";
+import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
+import {SafeHtmlPipe} from "../pipe/safe-html.pipe";
 
 
 @NgModule({
@@ -44,9 +46,9 @@ import {ExternalListItemComponent} from "../cards/external-list-item/external-li
     BadgeExpanderComponent,
     ExternalSeriesCardComponent,
     ExternalListItemComponent,
+    ListItemComponent,
 
     TypeaheadModule,
-    PipeModule,
     SharedModule, // person badge, badge expander (these 2 can be their own module)
     SharedSideNavCardsModule,
 
@@ -54,6 +56,8 @@ import {ExternalListItemComponent} from "../cards/external-list-item/external-li
     ReviewCardComponent,
     CarouselModule,
     ExternalRatingComponent,
+    CardActionablesComponent,
+    SafeHtmlPipe,
   ]
 })
 export class SeriesDetailModule { }

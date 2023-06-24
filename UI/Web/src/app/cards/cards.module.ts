@@ -5,7 +5,6 @@ import { CoverImageChooserComponent } from './cover-image-chooser/cover-image-ch
 import { EditSeriesModalComponent } from './_modals/edit-series-modal/edit-series-modal.component';
 import { EditCollectionTagsComponent } from './_modals/edit-collection-tags/edit-collection-tags.component';
 import { NgbTooltipModule, NgbCollapseModule, NgbPaginationModule, NgbDropdownModule, NgbProgressbarModule, NgbNavModule, NgbRatingModule, NgbOffcanvasModule } from '@ng-bootstrap/ng-bootstrap';
-import { CardActionablesComponent } from './card-item/card-actionables/card-actionables.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxFileDropModule } from 'ngx-file-drop';
 import { CardItemComponent } from './card-item/card-item.component';
@@ -15,24 +14,35 @@ import { TypeaheadModule } from '../typeahead/typeahead.module';
 import { CardDetailLayoutComponent } from './card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from './bulk-operations/bulk-operations.component';
 import { BulkAddToCollectionComponent } from './_modals/bulk-add-to-collection/bulk-add-to-collection.component';
-import { PipeModule } from '../pipe/pipe.module';
 import { ChapterMetadataDetailComponent } from './chapter-metadata-detail/chapter-metadata-detail.component';
 import { MetadataFilterModule } from '../metadata-filter/metadata-filter.module';
 import { EditSeriesRelationComponent } from './edit-series-relation/edit-series-relation.component';
 import { CardDetailDrawerComponent } from './card-detail-drawer/card-detail-drawer.component';
 import { EntityTitleComponent } from './entity-title/entity-title.component';
-import { EntityInfoCardsComponent } from './entity-info-cards/entity-info-cards.component';
-import { ListItemComponent } from './list-item/list-item.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { SeriesInfoCardsComponent } from './series-info-cards/series-info-cards.component';
-import { DownloadIndicatorComponent } from './download-indicator/download-indicator.component';
-import { DynamicListPipe } from './dynamic-list.pipe';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 import {UpdateNotificationModalComponent} from "../shared/update-notification/update-notification-modal.component";
 import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.component";
+import {CardActionablesComponent} from "./card-item/card-actionables/card-actionables.component";
+import {DownloadIndicatorComponent} from "./download-indicator/download-indicator.component";
+import {AgeRatingPipe} from "../pipe/age-rating.pipe";
+import {LanguageNamePipe} from "../pipe/language-name.pipe";
+import {DefaultValuePipe} from "../pipe/default-value.pipe";
+import {PublicationStatusPipe} from "../pipe/publication-status.pipe";
+import {MangaFormatIconPipe} from "../pipe/manga-format-icon.pipe";
+import {MangaFormatPipe} from "../pipe/manga-format.pipe";
+import {TimeAgoPipe} from "../pipe/time-ago.pipe";
+import {CompactNumberPipe} from "../pipe/compact-number.pipe";
+import {RelationshipPipe} from "../pipe/relationship.pipe";
+import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
+import {BytesPipe} from "../pipe/bytes.pipe";
+import {DefaultDatePipe} from "../pipe/default-date.pipe";
+import {EntityInfoCardsComponent} from "./entity-info-cards/entity-info-cards.component";
+import {FilterPipe} from "../pipe/filter.pipe";
 
 
 
@@ -43,7 +53,6 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    CardActionablesComponent,
     CardDetailLayoutComponent,
     BulkOperationsComponent,
     BulkAddToCollectionComponent,
@@ -51,11 +60,7 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
     EditSeriesRelationComponent,
     CardDetailDrawerComponent,
     EntityTitleComponent,
-    EntityInfoCardsComponent,
-    ListItemComponent,
     SeriesInfoCardsComponent,
-    DownloadIndicatorComponent,
-    DynamicListPipe,
   ],
   imports: [
     CommonModule,
@@ -63,7 +68,6 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
     ReactiveFormsModule,
     FormsModule, // EditCollectionsModal
 
-    PipeModule,
     SharedModule,
     TypeaheadModule, // edit series modal
 
@@ -87,12 +91,26 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
     NgbDropdownModule,
     NgbProgressbarModule,
     NgxFileDropModule, // Cover Chooser
-    PipeModule, // filter for BulkAddToCollectionComponent
 
 
     SharedModule,
     IconAndTitleComponent,
-    // IconAndTitleComponent
+    CardActionablesComponent,
+    DownloadIndicatorComponent,
+    AgeRatingPipe,
+    LanguageNamePipe,
+    DefaultValuePipe,
+    PublicationStatusPipe,
+    MangaFormatIconPipe,
+    MangaFormatPipe,
+    TimeAgoPipe,
+    CompactNumberPipe,
+    RelationshipPipe,
+    SentenceCasePipe,
+    BytesPipe,
+    DefaultDatePipe,
+    EntityInfoCardsComponent,
+    FilterPipe,
   ],
   exports: [
     CardItemComponent,
@@ -101,20 +119,17 @@ import {IconAndTitleComponent} from "../shared/icon-and-title/icon-and-title.com
     CoverImageChooserComponent,
     EditSeriesModalComponent,
     EditCollectionTagsComponent,
-    CardActionablesComponent,
     CardDetailLayoutComponent,
     BulkOperationsComponent,
     ChapterMetadataDetailComponent,
     EditSeriesRelationComponent,
 
     EntityTitleComponent,
-    EntityInfoCardsComponent,
-    ListItemComponent,
 
     NgbOffcanvasModule,
 
     VirtualScrollerModule,
-    SeriesInfoCardsComponent
+    SeriesInfoCardsComponent,
   ]
 })
 export class CardsModule { }

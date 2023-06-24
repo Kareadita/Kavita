@@ -12,7 +12,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ResetPasswordModalComponent } from './_modals/reset-password-modal/reset-password-modal.component';
 import { ManageSettingsComponent } from './manage-settings/manage-settings.component';
 import { ManageSystemComponent } from './manage-system/manage-system.component';
-import { PipeModule } from '../pipe/pipe.module';
 import { InviteUserComponent } from './invite-user/invite-user.component';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { LibrarySelectorComponent } from './library-selector/library-selector.component';
@@ -27,6 +26,11 @@ import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
 import {ManageScrobbleErrorsComponent} from "./manage-scrobble-errors/manage-scrobble-errors.component";
+import {DefaultValuePipe} from "../pipe/default-value.pipe";
+import {LibraryTypePipe} from "../pipe/library-type.pipe";
+import {TimeAgoPipe} from "../pipe/time-ago.pipe";
+import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
+import {FilterPipe} from "../pipe/filter.pipe";
 
 
 
@@ -51,25 +55,29 @@ import {ManageScrobbleErrorsComponent} from "./manage-scrobble-errors/manage-scr
     ManageLogsComponent,
     ManageAlertsComponent,
   ],
-    imports: [
-        CommonModule,
-        AdminRoutingModule,
-        ReactiveFormsModule,
-        FormsModule,
-        NgbNavModule,
-        NgbTooltipModule,
-        NgbTypeaheadModule, // Directory Picker
-        NgbDropdownModule,
-        NgbAccordionModule,
-        SharedModule,
-        PipeModule,
-        SidenavModule,
-        UserSettingsModule, // API-key componet
-        VirtualScrollerModule,
+  imports: [
+    CommonModule,
+    AdminRoutingModule,
+    ReactiveFormsModule,
+    FormsModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbTypeaheadModule, // Directory Picker
+    NgbDropdownModule,
+    NgbAccordionModule,
+    SharedModule,
+    SidenavModule,
+    UserSettingsModule, // API-key componet
+    VirtualScrollerModule,
 
-        StatisticsModule,
-        ManageScrobbleErrorsComponent
-    ],
+    StatisticsModule,
+    ManageScrobbleErrorsComponent,
+    DefaultValuePipe,
+    LibraryTypePipe,
+    TimeAgoPipe,
+    SentenceCasePipe,
+    FilterPipe
+  ],
   providers: []
 })
 export class AdminModule { }

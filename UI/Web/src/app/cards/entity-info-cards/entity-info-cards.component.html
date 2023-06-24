@@ -76,11 +76,11 @@
             <div class="col-auto">
                 <app-icon-and-title label="Links" [clickable]="false" fontClasses="fa-solid fa-link" title="Links">
                     <a class="me-1" [href]="link | safeHtml" *ngFor="let link of WebLinks" target="_blank" rel="noopener noreferrer" [title]="link">
-                        <img width="24px" height="24px"  #img class="lazyload img-placeholder" 
-                            src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" 
-                            [attr.data-src]="imageService.getWebLinkImage(link)" 
-                            (error)="imageService.updateErroredWebLinkImage($event)" 
-                            aria-hidden="true">
+                        <img width="24" height="24"  #img class="lazyload img-placeholder"
+                            src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                            [attr.data-src]="imageService.getWebLinkImage(link)"
+                            (error)="imageService.updateErroredWebLinkImage($event)"
+                            aria-hidden="true" alt="">
                     </a>
                 </app-icon-and-title>
             </div>

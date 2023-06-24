@@ -5,7 +5,6 @@ import { NgbAccordionModule, NgbCollapseModule, NgbNavModule, NgbTooltipModule }
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
-import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
@@ -24,6 +23,8 @@ import { ManageKavitaPlusComponent } from './user-kavitaplus/manage-kavita-plus.
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
 import {SharedModule} from "../shared/shared.module";
+import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
+import {AgeRatingPipe} from "../pipe/age-rating.pipe";
 
 
 @NgModule({
@@ -43,28 +44,29 @@ import {SharedModule} from "../shared/shared.module";
     LicenseComponent,
     ManageKavitaPlusComponent,
   ],
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
 
-        NgbAccordionModule,
-        NgbNavModule,
-        NgbTooltipModule,
-        NgbCollapseModule,
+    NgbAccordionModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbCollapseModule,
 
-        ColorPickerModule, // User prefernces background color
+    ColorPickerModule, // User prefernces background color
 
-        StatisticsModule,
+    StatisticsModule,
 
-        PipeModule,
-        SidenavModule,
+    SidenavModule,
 
-        UserSettingsRoutingModule,
-        UserScrobbleHistoryComponent,
-        UserHoldsComponent,
-        SharedModule,
-        NgOptimizedImage,
-    ],
+    UserSettingsRoutingModule,
+    UserScrobbleHistoryComponent,
+    UserHoldsComponent,
+    SharedModule,
+    NgOptimizedImage,
+    SentenceCasePipe,
+    AgeRatingPipe,
+  ],
   exports: [
     SiteThemeProviderPipe,
     ApiKeyComponent,

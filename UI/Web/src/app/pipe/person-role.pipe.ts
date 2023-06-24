@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { PersonRole } from '../_models/metadata/person';
 
 @Pipe({
-  name: 'personRole'
+  name: 'personRole',
+  standalone: true
 })
 export class PersonRolePipe implements PipeTransform {
 

@@ -7,6 +7,7 @@ import { CollectionsRoutingModule } from './collections-routing.module';
 import { SharedSideNavCardsModule } from '../shared-side-nav-cards/shared-side-nav-cards.module';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
+import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
 
 
 
@@ -15,17 +16,18 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
     AllCollectionsComponent,
     CollectionDetailComponent
   ],
-  imports: [
-    CommonModule,
-    SharedModule,
+    imports: [
+        CommonModule,
+        SharedModule,
 
-    SharedSideNavCardsModule,
+        SharedSideNavCardsModule,
 
-    ImageComponent,
-    ReadMoreComponent,
+        ImageComponent,
+        ReadMoreComponent,
 
-    CollectionsRoutingModule,
-  ],
+        CollectionsRoutingModule,
+        CardActionablesComponent,
+    ],
   exports: [
     AllCollectionsComponent
   ]

@@ -27,15 +27,15 @@
         </div>
     </div>
     <app-loading [loading]="isLoading" [absolute]="true"></app-loading>
-    <div class="reading-area" 
+    <div class="reading-area"
             ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
             [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : 'calc(var(--vh)*100)'}" #readingArea>
-        
+
         <ng-container *ngIf="readerMode !== ReaderMode.Webtoon; else webtoon">
             <div (dblclick)="bookmarkPage($event)">
-                <app-canvas-renderer 
+                <app-canvas-renderer
                     [readerSettings$]="readerSettings$"
-                    [image$]="currentImage$" 
+                    [image$]="currentImage$"
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$">
                 </app-canvas-renderer>
@@ -43,7 +43,7 @@
 
             <!-- Pagination controls and screen hints-->
             <div class="pagination-area">
-                <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)" 
+                <div class="{{readerMode === ReaderMode.LeftRight ? 'left' : 'top'}} {{clickOverlayClass('left')}}" (click)="handlePageChange($event, KeyDirection.Left)"
                     [ngStyle]="{'height': (readerMode === ReaderMode.LeftRight ? ImageHeight: '25%'), 'max-height': MaxHeight}">
                     <div *ngIf="showClickOverlay">
                         <i class="fa fa-angle-{{readingDirection === ReadingDirection.RightToLeft ? 'double-' : ''}}{{readerMode === ReaderMode.LeftRight ? 'left' : 'up'}}"
@@ -63,31 +63,31 @@
             </div>
 
             <div (dblclick)="bookmarkPage($event)">
-                <app-single-renderer [image$]="currentImage$" 
-                    [readerSettings$]="readerSettings$" 
+                <app-single-renderer [image$]="currentImage$"
+                    [readerSettings$]="readerSettings$"
                     [bookmark$]="showBookmarkEffect$"
                     [pageNum$]="pageNum$"
                     [showClickOverlay$]="showClickOverlay$">
                 </app-single-renderer>
 
-                <app-double-renderer [image$]="currentImage$" 
-                    [readerSettings$]="readerSettings$" 
+                <app-double-renderer [image$]="currentImage$"
+                    [readerSettings$]="readerSettings$"
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
                     [getPage]="getPageFn">
                 </app-double-renderer>
 
-                <app-double-reverse-renderer [image$]="currentImage$" 
-                    [readerSettings$]="readerSettings$" 
+                <app-double-reverse-renderer [image$]="currentImage$"
+                    [readerSettings$]="readerSettings$"
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
                     [getPage]="getPageFn">
                 </app-double-reverse-renderer>
 
-                <app-double-no-cover-renderer [image$]="currentImage$" 
-                    [readerSettings$]="readerSettings$" 
+                <app-double-no-cover-renderer [image$]="currentImage$"
+                    [readerSettings$]="readerSettings$"
                     [bookmark$]="showBookmarkEffect$"
                     [showClickOverlay$]="showClickOverlay$"
                     [pageNum$]="pageNum$"
@@ -218,10 +218,10 @@
                                             <i class="fa-regular fa-square-full fa-stack-2x"></i>
                                             <i class="fab fa-1 fa-stack-1x"></i>
                                           </span>
-                                    </div>                                   
+                                    </div>
                                 </ng-container>
                             </ng-container>
-                        <select class="form-control" id="page-fitting" formControlName="layoutMode">
+                        <select class="form-control" id="layout-mode" formControlName="layoutMode">
                             <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
                         </select>
                     </div>
@@ -258,7 +258,7 @@
                 <div class="row mb-2">
                     <div class="col-md-6 col-sm-12">
                         <label for="darkness" class="form-label range-label">Brightness</label><span class="ms-1 range-text">{{generalSettingsForm.get('darkness')?.value + '%'}}</span>
-                        <input type="range" class="form-range" id="darkness" 
+                        <input type="range" class="form-range" id="darkness"
                                 min="10" max="100" step="1" formControlName="darkness">
                     </div>
 

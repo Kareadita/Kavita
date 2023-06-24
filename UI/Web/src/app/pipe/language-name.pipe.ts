@@ -3,7 +3,8 @@ import { map, Observable } from 'rxjs';
 import { MetadataService } from '../_services/metadata.service';
 
 @Pipe({
-  name: 'languageName'
+  name: 'languageName',
+  standalone: true
 })
 export class LanguageNamePipe implements PipeTransform {
 

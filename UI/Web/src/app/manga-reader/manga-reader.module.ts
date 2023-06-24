@@ -7,7 +7,6 @@ import { SharedModule } from '../shared/shared.module';
 import { NgxSliderModule } from 'ngx-slider-v2';
 import { InfiniteScrollerComponent } from './_components/infinite-scroller/infinite-scroller.component';
 import { ReaderSharedModule } from '../reader-shared/reader-shared.module';
-import { PipeModule } from '../pipe/pipe.module';
 import { FullscreenIconPipe } from './_pipes/fullscreen-icon.pipe';
 import { LayoutModeIconPipe } from './_pipes/layout-mode-icon.pipe';
 import { ReaderModeIconPipe } from './_pipes/reader-mode-icon.pipe';
@@ -19,33 +18,33 @@ import { MangaReaderComponent } from './_components/manga-reader/manga-reader.co
 import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
 import { DoubleNoCoverRendererComponent } from './_components/double-renderer-no-cover/double-no-cover-renderer.component';
 import { NgSwipeModule } from '../ng-swipe/ng-swipe.module';
+import {SafeStylePipe} from "../pipe/safe-style.pipe";
 
 @NgModule({
   declarations: [
     MangaReaderComponent,
     InfiniteScrollerComponent,
-    FullscreenIconPipe,
-    ReaderModeIconPipe,
-    LayoutModeIconPipe,
     CanvasRendererComponent,
     SingleRendererComponent,
     DoubleRendererComponent,
     DoubleReverseRendererComponent,
-    FittingIconPipe,
     DoubleNoCoverRendererComponent,
   ],
   imports: [
     CommonModule,
     MangaReaderRoutingModule,
     ReactiveFormsModule,
-    PipeModule,
 
     NgbDropdownModule,
     NgxSliderModule,
     SharedModule,
     ReaderSharedModule,
 
-    NgSwipeModule
+    NgSwipeModule,
+    SafeStylePipe,
+    FittingIconPipe,
+    ReaderModeIconPipe,
+    FullscreenIconPipe
   ],
   exports: [
     MangaReaderComponent

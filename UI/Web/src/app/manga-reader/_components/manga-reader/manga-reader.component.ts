@@ -39,7 +39,7 @@ import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { PAGING_DIRECTION, FITTING_OPTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
+import { ManagaReaderService } from '../../_service/managa-reader.service';
 import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.component';
 import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
 import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';

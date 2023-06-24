@@ -8,12 +8,12 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {PipeModule} from "../../pipe/pipe.module";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 
 @Component({
   selector: 'app-spoiler',
   standalone: true,
-  imports: [CommonModule, PipeModule],
+  imports: [CommonModule, SafeHtmlPipe],
   templateUrl: './spoiler.component.html',
   styleUrls: ['./spoiler.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

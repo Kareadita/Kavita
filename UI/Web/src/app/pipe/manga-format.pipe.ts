@@ -5,7 +5,8 @@ import { MangaFormat } from '../_models/manga-format';
  * Returns the string name for the format
  */
 @Pipe({
-  name: 'mangaFormat'
+  name: 'mangaFormat',
+  standalone: true
 })
 export class MangaFormatPipe implements PipeTransform {
 

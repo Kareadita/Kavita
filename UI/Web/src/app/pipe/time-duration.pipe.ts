@@ -4,7 +4,8 @@ import { Pipe, PipeTransform } from '@angular/core';
  * Converts hours -> days, months, years, etc
  */
 @Pipe({
-  name: 'timeDuration'
+  name: 'timeDuration',
+  standalone: true
 })
 export class TimeDurationPipe implements PipeTransform {
 
