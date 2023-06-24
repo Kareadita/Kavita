@@ -12,12 +12,12 @@ import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 
 @Component({
-  selector: 'app-user-license',
-  templateUrl: './user-license.component.html',
-  styleUrls: ['./user-license.component.scss'],
+  selector: 'app-license',
+  templateUrl: './license.component.html',
+  styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserLicenseComponent implements OnInit {
+export class LicenseComponent implements OnInit {
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;

@@ -19,7 +19,7 @@ import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-a
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
-import { UserLicenseComponent } from './user-license/user-license.component';
+import { LicenseComponent } from './user-license/license.component';
 import { ManageKavitaPlusComponent } from './user-kavitaplus/manage-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
@@ -40,7 +40,7 @@ import {SharedModule} from "../shared/shared.module";
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
-    UserLicenseComponent,
+    LicenseComponent,
     ManageKavitaPlusComponent,
   ],
     imports: [
