@@ -35,7 +35,6 @@ public class OpdsController : BaseApiController
     private readonly IReaderService _readerService;
     private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
-    private readonly IEasyCachingProvider _provider;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -79,7 +78,6 @@ public class OpdsController : BaseApiController
         _readerService = readerService;
         _seriesService = seriesService;
         _accountService = accountService;
-        _provider = provider;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -678,7 +676,7 @@ public class OpdsController : BaseApiController
     {
         return new ContentResult
         {
-            ContentType = "application/xml",
+            ContentType = "application/atom+xml",
             Content = xml,
             StatusCode = 200
         };
