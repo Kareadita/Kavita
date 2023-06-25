@@ -43,7 +43,7 @@ public static class SeriesExtensions
         if (volumes.Count >= 1 && $"{volumes.First().Number}" != Parser.DefaultVolume)
         {
             var looseLeafChapters = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
-                .SelectMany(c => c.Chapters)
+                .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
                 .ToList();
             if ((1.0f * volumes.First().Number) > float.Parse(looseLeafChapters.First().Number))

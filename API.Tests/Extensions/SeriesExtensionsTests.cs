@@ -44,7 +44,7 @@ public class SeriesExtensionsTests
             .WithFormat(MangaFormat.Archive)
             .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
+                .WithChapter(new ChapterBuilder("13")
                     .WithCoverImage("Chapter 13")
                     .Build())
                 .Build())
