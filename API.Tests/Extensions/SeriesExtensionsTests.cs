@@ -244,5 +244,38 @@ public class SeriesExtensionsTests
         Assert.Equal("Volume 1", series.GetCoverImage());
     }
 
+    [Fact]
+    public void GetCoverImage_VolumesChapters_WhereVolumeIsNot1()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder("0")
+                .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("2.5")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 2.5")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 2")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("4")
+                .WithNumber(4)
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 4")
+                    .Build())
+                .Build())
+            .Build();
+
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Chapter 2", series.GetCoverImage());
+    }
+
 
 }

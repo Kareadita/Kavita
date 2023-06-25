@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Genre } from '../_models/metadata/genre';
@@ -86,7 +86,8 @@ export class MetadataService {
     if (this.validLanguages != undefined && this.validLanguages.length > 0) {
       return of(this.validLanguages);
     }
-    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages').pipe(map(l => this.validLanguages = l));
+    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-languages')
+      .pipe(tap(l => this.validLanguages = l));
   }
 
   getAllPeople(libraries?: Array<number>) {

@@ -11,7 +11,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
-
+#nullable enable
 public interface IAppUserProgressRepository
 {
     void Update(AppUserProgress userProgress);
@@ -32,7 +32,7 @@ public interface IAppUserProgressRepository
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
     Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
 }
-
+#nullable disable
 public class AppUserProgressRepository : IAppUserProgressRepository
 {
     private readonly DataContext _context;
@@ -103,10 +103,12 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
     }
 
+    #nullable enable
     public async Task<AppUserProgress?> GetAnyProgress()
     {
         return await _context.AppUserProgresses.FirstOrDefaultAsync();
     }
+    #nullable disable
 
     /// <summary>
     /// This will return any user progress. This filters out progress rows that have no pages read.
@@ -176,10 +178,12 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
 
+    #nullable enable
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
             .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)
             .FirstOrDefaultAsync();
     }
+    #nullable disable
 }

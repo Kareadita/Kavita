@@ -13672,10 +13672,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "meanScore": {
-            "type": "integer",
-            "format": "int32"
-          },
           "favoriteCount": {
             "type": "integer",
             "format": "int32"
@@ -15632,6 +15628,11 @@
             "type": "integer",
             "description": "The encoding the server is using to save media",
             "format": "int32"
+          },
+          "lastReadTime": {
+            "type": "string",
+            "description": "The last user reading progress on the server (in UTC)",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
