@@ -26,6 +26,7 @@ public interface IAppUserProgressRepository
     Task<AppUserProgress?> GetAnyProgress();
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
+    Task<DateTime> GetLatestProgress();
     Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId);
     Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
@@ -123,6 +124,17 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     public async Task<IEnumerable<AppUserProgress>> GetAllProgress()
     {
         return await _context.AppUserProgresses.ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns the latest progress in UTC
+    /// </summary>
+    /// <returns></returns>
+    public async Task<DateTime> GetLatestProgress()
+    {
+        return await _context.AppUserProgresses
+            .Select(d => d.LastModifiedUtc)
+            .MaxAsync();
     }
 
     public async Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId)

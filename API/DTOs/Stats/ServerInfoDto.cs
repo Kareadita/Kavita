@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using API.Entities.Enums;
 
 namespace API.DTOs.Stats;
@@ -174,4 +175,9 @@ public class ServerInfoDto
     /// </summary>
     /// <remarks>Added in v0.7.3</remarks>
     public EncodeFormat EncodeMediaAs { get; set; }
+    /// <summary>
+    /// The last user reading progress on the server (in UTC)
+    /// </summary>
+    /// <remarks>Added in v0.7.4</remarks>
+    public DateTime LastReadTime { get; set; }
 }
