@@ -8,7 +8,7 @@
         <div class="col-2 text-end">
           <ng-container *ngIf="hasLicense; else noLicense">
             <a class="btn btn-primary btn-sm me-1" href="https://billing.stripe.com/p/login/test_14kfZocuh6Tz5ag7ss" target="_blank" rel="noreferrer nofollow">Manage</a>
-            <button class="btn btn-danger btn-sm me-1" style="width: 58px" (click)="toggleViewMode()">
+            <button class="btn btn-danger btn-sm me-1" style="width: 62px" (click)="toggleViewMode()">
               <span *ngIf="!isViewMode">Cancel</span>
               <span *ngIf="isViewMode">Edit</span>
             </button>
@@ -29,12 +29,21 @@
       <div class="container-fluid row">
           <span class="col-12">
               <ng-container *ngIf="hasLicense; else noToken">
-                <span>*********</span><i *ngIf="hasValidLicense" ngbTooltip="License is valid" class="fa-solid fa-check-circle successful-validation ms-1">
-                <span class="visually-hidden">License is Valid</span>
-              </i>
-                <i class="error fa-solid fa-exclamation-circle ms-1" ngbTooltip="License Invalid" *ngIf="!hasValidLicense">
-                  <span class="visually-hidden">License Not Valid</span>
-                </i>
+                <span class="me-1">*********</span>
+                <ng-container *ngIf="!isChecking; else checking">
+                  <i *ngIf="hasValidLicense" ngbTooltip="License is valid" class="fa-solid fa-check-circle successful-validation ms-1">
+                    <span class="visually-hidden">License is Valid</span>
+                  </i>
+                  <i class="error fa-solid fa-exclamation-circle ms-1" ngbTooltip="License Invalid" *ngIf="!hasValidLicense">
+                    <span class="visually-hidden">License Not Valid</span>
+                  </i>
+                </ng-container>
+                <ng-template #checking>
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </ng-template>
+
               </ng-container>
               <ng-template #noToken>No license key</ng-template>
           </span>
@@ -54,7 +63,10 @@
         </div>
       </form>
       <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-        <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" (click)="saveForm()">Save</button>
+        <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" (click)="saveForm()">
+          <span *ngIf="!isSaving">Save</span>
+          <app-loading [loading]="isSaving" size="spinner-border-sm"></app-loading>
+        </button>
       </div>
     </div>
   </div>

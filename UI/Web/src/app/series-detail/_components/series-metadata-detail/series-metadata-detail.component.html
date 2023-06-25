@@ -19,11 +19,11 @@
         </div>
         <div class="col-md-8">
             <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
-                <img width="24px" height="24px"  #img class="lazyload img-placeholder"
+                <img width="24" height="24" class="lazyload img-placeholder"
                     [src]="imageService.errorWebLinkImage"
                     [attr.data-src]="imageService.getWebLinkImage(link)"
                     (error)="imageService.updateErroredWebLinkImage($event)"
-                    aria-hidden="true">
+                    aria-hidden="true" alt="">
             </a>
         </div>
     </div>
@@ -61,7 +61,7 @@
     <div class="col-md-8">
         <app-badge-expander [items]="seriesMetadata.collectionTags">
             <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" routerLink="/collections/{{item.id}}" [selectionMode]="TagBadgeCursor.Clickable">
+                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
                     {{item.title}}
                 </app-tag-badge>
             </ng-template>
@@ -75,7 +75,7 @@
     <div class="col-md-8">
         <app-badge-expander [items]="readingLists">
             <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" routerLink="/lists/{{item.id}}" [selectionMode]="TagBadgeCursor.Clickable">
+                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
                     <span *ngIf="item.promoted">
                         <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
                         <span class="visually-hidden">(promoted)</span>

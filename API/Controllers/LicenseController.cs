@@ -79,7 +79,6 @@ public class LicenseController : BaseApiController
             await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(10));
         return Ok(await _licenseService.HasActiveLicense(true));
     }
 }

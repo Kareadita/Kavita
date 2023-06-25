@@ -3,23 +3,21 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
-  Input,
-  OnInit, Output
+  OnInit
 } from '@angular/core';
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 
 @Component({
-  selector: 'app-user-license',
-  templateUrl: './user-license.component.html',
-  styleUrls: ['./user-license.component.scss'],
+  selector: 'app-license',
+  templateUrl: './license.component.html',
+  styleUrls: ['./license.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserLicenseComponent implements OnInit {
+export class LicenseComponent implements OnInit {
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
@@ -28,6 +26,7 @@ export class UserLicenseComponent implements OnInit {
   hasValidLicense: boolean = false;
   hasLicense: boolean = false;
   isChecking: boolean = false;
+  isSaving: boolean = false;
 
 
 
@@ -54,19 +53,26 @@ export class UserLicenseComponent implements OnInit {
   }
 
   saveForm() {
-    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim()).subscribe(isValid => {
-      this.hasValidLicense = isValid;
-      if (!this.hasValidLicense) {
-        this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription then press check");
-      } else {
-        this.toastr.success('Kavita+ unlocked! Please refresh the page');
-      }
-      this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
-      this.resetForm();
-      this.isViewMode = true;
-      this.cdRef.markForCheck();
-    }, err => {
+    this.isSaving = true;
+    this.cdRef.markForCheck();
+    this.accountService.updateUserLicense(this.formGroup.get('licenseKey')!.value.trim(), this.formGroup.get('email')!.value.trim())
+      .subscribe(() => {
+      this.accountService.hasValidLicense(true).subscribe(isValid => {
+        this.hasValidLicense = isValid;
+        if (!this.hasValidLicense) {
+          this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription then press check");
+        } else {
+          this.toastr.success('Kavita+ unlocked! Please refresh the page');
+        }
+        this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
+        this.resetForm();
+        this.isViewMode = true;
+        this.cdRef.markForCheck();
+        this.isSaving = false;
+      });
 
+    }, err => {
+      this.toastr.error("There was an error when activating your license. Please try again.");
     });
   }
 

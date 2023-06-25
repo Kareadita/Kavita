@@ -17,9 +17,10 @@ $image-width: 160px;
 
 .card-actions {
   position: absolute;
-  top: 234px;
-  right: 5px;
+  top: 236px;
+  right: 0px;
   width: 20px;
+  font-size: 13px;
 }
 
 .library {
@@ -30,7 +31,7 @@ $image-width: 160px;
 
 .card-title {
   font-size: 13px;
-  width: 125px;
+  width: 131px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

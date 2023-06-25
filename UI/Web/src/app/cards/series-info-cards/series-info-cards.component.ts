@@ -22,9 +22,22 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 import { ReaderService } from 'src/app/_services/reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobblingService} from "../../_services/scrobbling.service";
+import {CommonModule} from "@angular/common";
+import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
+import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
+import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {LanguageNamePipe} from "../../pipe/language-name.pipe";
+import {PublicationStatusPipe} from "../../pipe/publication-status.pipe";
+import {MangaFormatPipe} from "../../pipe/manga-format.pipe";
+import {TimeAgoPipe} from "../../pipe/time-ago.pipe";
+import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
+import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-series-info-cards',
+  standalone: true,
+  imports: [CommonModule, IconAndTitleComponent, AgeRatingPipe, DefaultValuePipe, LanguageNamePipe, PublicationStatusPipe, MangaFormatPipe, TimeAgoPipe, CompactNumberPipe, MangaFormatIconPipe, NgbTooltip],
   templateUrl: './series-info-cards.component.html',
   styleUrls: ['./series-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

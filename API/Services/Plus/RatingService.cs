@@ -60,7 +60,7 @@ public class RatingService : IRatingService
                     MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
                     SeriesName = series.Name,
                     AltSeriesName = series.LocalizedName,
-                    AniListId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
+                    AniListId = (int?) ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.AniListWeblinkWebsite),
                     MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
                         ScrobblingService.MalWeblinkWebsite),

@@ -5,14 +5,19 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgbActiveOffcanvas } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbActiveOffcanvas,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet
+} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { finalize, Observable, of, Subject, take, takeWhile, takeUntil, map, shareReplay } from 'rxjs';
-import { Download } from 'src/app/shared/_models/download';
+import { Observable, of, map, shareReplay } from 'rxjs';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -21,19 +26,29 @@ import { Device } from 'src/app/_models/device/device';
 import { LibraryType } from 'src/app/_models/library';
 import { MangaFile } from 'src/app/_models/manga-file';
 import { MangaFormat } from 'src/app/_models/manga-format';
-import { PersonRole } from 'src/app/_models/metadata/person';
 import { Volume } from 'src/app/_models/volume';
 import { AccountService } from 'src/app/_services/account.service';
 import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
-import { DeviceService } from 'src/app/_services/device.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {EntityTitleComponent} from "../entity-title/entity-title.component";
+import {ImageComponent} from "../../shared/image/image.component";
+import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
+import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
+import {CoverImageChooserComponent} from "../cover-image-chooser/cover-image-chooser.component";
+import {ChapterMetadataDetailComponent} from "../chapter-metadata-detail/chapter-metadata-detail.component";
+import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {BytesPipe} from "../../pipe/bytes.pipe";
+import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 
 enum TabID {
   General = 0,
@@ -44,6 +59,8 @@ enum TabID {
 
 @Component({
   selector: 'app-card-detail-drawer',
+  standalone: true,
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -83,7 +100,6 @@ export class CardDetailDrawerComponent implements OnInit {
   chapterMetadata!: ChapterMetadata;
   summary: string = '';
 
-  download$: Observable<Download> | null = null;
   downloadInProgress: boolean = false;
 
   get MangaFormat() {
@@ -92,10 +108,6 @@ export class CardDetailDrawerComponent implements OnInit {
 
   get Breakpoint() {
     return Breakpoint;
-  }
-
-  get PersonRole() {
-    return PersonRole;
   }
 
   get LibraryType() {
@@ -155,7 +167,7 @@ export class CardDetailDrawerComponent implements OnInit {
     });
 
 
-    var collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
+    const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'});
     this.chapters.forEach((c: Chapter) => {
       c.files.sort((a: MangaFile, b: MangaFile) => collator.compare(a.filePath, b.filePath));
     });
@@ -252,7 +264,7 @@ export class CardDetailDrawerComponent implements OnInit {
   }
 
   download(chapter: Chapter) {
-    if (this.downloadInProgress === true) {
+    if (this.downloadInProgress) {
       this.toastr.info('Download is already in progress. Please wait.');
       return;
     }

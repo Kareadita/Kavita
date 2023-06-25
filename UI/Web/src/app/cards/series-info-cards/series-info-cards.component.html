@@ -61,7 +61,9 @@
     <ng-container *ngIf="series">
         <ng-container>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Format" [clickable]="true" [fontClasses]="'fa ' + (series.format | mangaFormatIcon)" (click)="handleGoTo(FilterQueryParam.Format, series.format)" title="Format">
+                <app-icon-and-title label="Format" [clickable]="true"
+                                    [fontClasses]="'fa ' + (series.format | mangaFormatIcon)"
+                                    (click)="handleGoTo(FilterQueryParam.Format, series.format)" title="Format">
                     {{series.format | mangaFormat}}
                 </app-icon-and-title>
             </div>

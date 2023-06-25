@@ -1,18 +1,17 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {SharedModule} from "../../shared/shared.module";
 import {UserReview} from "./user-review";
-import {PipeModule} from "../../pipe/pipe.module";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
 import {AccountService} from "../../_services/account.service";
 import {ReviewSeriesModalComponent} from "../review-series-modal/review-series-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
+import {DefaultValuePipe} from "../../pipe/default-value.pipe";
 
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, SharedModule, PipeModule, ReadMoreComponent],
+  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -13,6 +13,7 @@ public static class Configuration
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
     public const string DefaultXFrameOptions = "SAMEORIGIN";
+    public const int DefaultCacheMemory = 50;
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static string KavitaPlusApiUrl = "https://plus.kavitareader.com";
@@ -39,6 +40,12 @@ public static class Configuration
     {
         get => GetBaseUrl(GetAppSettingFilename());
         set => SetBaseUrl(GetAppSettingFilename(), value);
+    }
+
+    public static int CacheSize
+    {
+        get => GetCacheSize(GetAppSettingFilename());
+        set => SetCacheSize(GetAppSettingFilename(), value);
     }
 
     public static string XFrameOptions => GetXFrameOptions(GetAppSettingFilename());
@@ -276,6 +283,48 @@ public static class Configuration
     }
     #endregion
 
+    #region CacheSize
+    private static void SetCacheSize(string filePath, int cache)
+    {
+        if (cache <= 0) return;
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
+            jsonObj.Cache = cache;
+            json = JsonSerializer.Serialize(jsonObj, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, json);
+        }
+        catch (Exception)
+        {
+            /* Swallow Exception */
+        }
+    }
+
+    private static int GetCacheSize(string filePath)
+    {
+        try
+        {
+            var json = File.ReadAllText(filePath);
+            var jsonObj = JsonSerializer.Deserialize<dynamic>(json);
+            const string key = "Port";
+
+            if (jsonObj.TryGetProperty(key, out JsonElement tokenElement))
+            {
+                return tokenElement.GetInt32();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error writing app settings: " + ex.Message);
+        }
+
+        return DefaultCacheMemory;
+    }
+
+
+    #endregion
+
     #region XFrameOrigins
     private static string GetXFrameOptions(string filePath)
     {
@@ -314,5 +363,7 @@ public static class Configuration
         public string IpAddresses { get; set; } = string.Empty;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string BaseUrl { get; set; }
+        // ReSharper disable once MemberHidesStaticFromOuterClass
+        public int Cache { get; set; }
     }
 }

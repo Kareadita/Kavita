@@ -8,8 +8,16 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormGroup, FormControl, Validators, ReactiveFormsModule} from '@angular/forms';
+import {
+  NgbActiveModal,
+  NgbModal, NgbModalModule,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink, NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { SettingsService } from 'src/app/admin/settings.service';
@@ -21,6 +29,9 @@ import { ImageService } from 'src/app/_services/image.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 
 enum TabID {
   General = 'General',
@@ -38,6 +49,8 @@ enum StepID {
 
 @Component({
   selector: 'app-library-settings-modal',
+  standalone: true,
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

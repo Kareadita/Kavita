@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { MetadataFilterComponent } from './metadata-filter.component';
 import { NgbCollapseModule, NgbRatingModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { SharedModule } from '../shared/shared.module';
-import { TypeaheadModule } from '../typeahead/typeahead.module';
+import {DrawerComponent} from "../shared/drawer/drawer.component";
+import {TypeaheadComponent} from "../typeahead/_components/typeahead.component";
 
 @NgModule({
   declarations: [
@@ -14,11 +14,11 @@ import { TypeaheadModule } from '../typeahead/typeahead.module';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    NgbTooltipModule, 
+    NgbTooltipModule,
     NgbRatingModule,
     NgbCollapseModule,
-    SharedModule,
-    TypeaheadModule,
+    DrawerComponent,
+    TypeaheadComponent,
   ],
   exports: [
     MetadataFilterComponent

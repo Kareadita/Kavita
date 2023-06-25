@@ -1,6 +1,6 @@
 <app-side-nav-companion-bar [hasExtras]="readingList !== undefined" [extraDrawer]="extrasDrawer">
   <h2 title>
-    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.labelBy]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
+    <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [attr.aria-labelledby]="readingList?.title" *ngIf="actions.length > 0"></app-card-actionables>
     {{readingList?.title}}
     <span *ngIf="readingList?.promoted" class="ms-1">(<i class="fa fa-angle-double-up" aria-hidden="true"></i>)</span>
   </h2>
@@ -36,7 +36,7 @@
 </app-side-nav-companion-bar>
 <div class="container-fluid mt-2" *ngIf="readingList" >
 
-  <div class="row mb-3">
+  <div class="row mb-2">
     <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block" *ngIf="readingList.coverImage !== '' && readingList.coverImage !== undefined && readingList.coverImage !== null">
         <app-image maxWidth="300px" maxHeight="400px" [imageUrl]="readingListImage"></app-image>
     </div>
@@ -102,26 +102,28 @@
     </div>
   </div>
 
-  <div class="row mb-3">
-    <ng-container *ngIf="characters$ | async as characters">
+  <ng-container *ngIf="characters$ | async as characters">
+    <div class="row mb-2">
       <div class="row" *ngIf="characters && characters.length > 0">
         <h5>Characters</h5>
         <app-badge-expander [items]="characters">
           <ng-template #badgeExpanderItem let-item let-position="idx">
             <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
           </ng-template>
-      </app-badge-expander>
+        </app-badge-expander>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="row mb-1 scroll-container" #scrollingBlock>
+    <ng-container *ngIf="items.length === 0 && !isLoading; else loading">
+      <div class="mx-auto" style="width: 200px;">
+          Nothing added
       </div>
     </ng-container>
-  </div>
-
-  <div class="row mb-3 scroll-container" #scrollingBlock>
-    <div class="mx-auto" style="width: 200px;">
-      <ng-container *ngIf="items.length === 0 && !isLoading">
-        Nothing added
-      </ng-container>
-      <app-loading [loading]="isLoading"></app-loading>
-    </div>
+    <ng-template #loading>
+      <app-loading *ngIf="isLoading" [loading]="isLoading"></app-loading>
+    </ng-template>
 
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
        [showRemoveButton]="false">

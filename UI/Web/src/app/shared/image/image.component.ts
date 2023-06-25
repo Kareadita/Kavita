@@ -6,19 +6,14 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   Renderer2,
   ViewChild
 } from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { CoverUpdateEvent } from 'src/app/_models/events/cover-update-event';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
-import {SharedModule} from "../shared.module";
-import {PipeModule} from "../../pipe/pipe.module";
 
 /**
  * This is used for images with placeholder fallback.

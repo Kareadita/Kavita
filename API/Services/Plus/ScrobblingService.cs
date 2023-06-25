@@ -19,6 +19,7 @@ using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace API.Services.Plus;
 
@@ -55,6 +56,12 @@ public class ScrobblingService : IScrobblingService
 
     public const string AniListWeblinkWebsite = "https://anilist.co/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+
+    private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
+    {
+        {AniListWeblinkWebsite, 1},
+        {MalWeblinkWebsite, 0},
+    };
 
     private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
 
@@ -122,7 +129,6 @@ public class ScrobblingService : IScrobblingService
 
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         if (string.IsNullOrEmpty(license.Value)) return true;
-        var serverSetting = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
 
         try
         {
@@ -192,7 +198,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.Review,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -226,7 +232,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -276,7 +282,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+                AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
                 MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
@@ -318,7 +324,7 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
-            AniListId = ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
             MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
@@ -371,11 +377,12 @@ public class ScrobblingService : IScrobblingService
                 // Might want to log this under ScrobbleError
                 if (response.ErrorMessage != null && response.ErrorMessage.Contains("Too Many Requests"))
                 {
-                    _logger.LogError("Hit Too many requests, sleeping to regain requests");
+                    _logger.LogInformation("Hit Too many requests, sleeping to regain requests");
                     await Task.Delay(TimeSpan.FromMinutes(1));
                 } else if (response.ErrorMessage != null && response.ErrorMessage.Contains("Unknown Series"))
                 {
                     // Log the Series name and Id in ScrobbleErrors
+                    _logger.LogInformation("Kavita+ was unable to match the series");
                     if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                     {
                         _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
@@ -489,6 +496,7 @@ public class ScrobblingService : IScrobblingService
     public async Task ProcessUpdatesSinceLastSync()
     {
         // Check how many scrobbles we have available then only do those.
+        _logger.LogInformation("Starting Scrobble Processing");
         var userRateLimits = new Dictionary<int, int>();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
@@ -554,13 +562,14 @@ public class ScrobblingService : IScrobblingService
 
         var totalProgress = readEvents.Count + addToWantToRead.Count + removeWantToRead.Count + ratingEvents.Count + decisions.Count + reviewEvents.Count;
 
+        _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
         {
             progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = evt.VolumeNumber,
@@ -575,7 +584,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
@@ -588,7 +597,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
@@ -603,7 +612,7 @@ public class ScrobblingService : IScrobblingService
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
-                MALId = evt.MalId,
+                MALId = (int?) evt.MalId,
                 ScrobbleEventType = evt.ScrobbleEventType,
                 ChapterNumber = evt.ChapterNumber,
                 VolumeNumber = evt.VolumeNumber,
@@ -713,13 +722,14 @@ public class ScrobblingService : IScrobblingService
     /// <param name="webLinks"></param>
     /// <param name="website"></param>
     /// <returns></returns>
-    public static int? ExtractId(string webLinks, string website)
+    public static long? ExtractId(string webLinks, string website)
     {
-        foreach (var webLink in webLinks.Split(","))
+        var index = WeblinkExtractionMap[website];
+        foreach (var webLink in webLinks.Split(','))
         {
             if (!webLink.StartsWith(website)) continue;
-            var tokens = webLink.Split(website)[1].Split("/");
-            return int.Parse(tokens[1]);
+            var tokens = webLink.Split(website)[1].Split('/');
+            return long.Parse(tokens[index]);
         }
 
         return 0;

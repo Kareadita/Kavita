@@ -13,7 +13,6 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
-using Flurl.Util;
 using Hangfire;
 using Hangfire.Storage;
 using Kavita.Common;

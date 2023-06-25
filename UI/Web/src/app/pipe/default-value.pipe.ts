@@ -1,7 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'defaultValue'
+  name: 'defaultValue',
+  pure: true,
+  standalone: true
 })
 export class DefaultValuePipe implements PipeTransform {
 

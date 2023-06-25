@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -116,7 +116,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   specials: Array<Chapter> = [];
   activeTabId = TabID.Storyline;
 
-  userReview: string = '';
   reviews: Array<UserReview> = [];
   libraryType: LibraryType = LibraryType.Manga;
   seriesMetadata: SeriesMetadata | null = null;
@@ -196,7 +195,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     let chapterArray = this.storyChapters;
     if (this.activeTabId === TabID.Chapters) chapterArray = this.chapters;
 
-    // We must augment chapter indecies as Bulk Selection assumes all on one page, but Storyline has mixed
+    // We must augment chapter indices as Bulk Selection assumes all on one page, but Storyline has mixed
     const chapterIndexModifier = this.activeTabId === TabID.Storyline ? this.volumes.length + 1 : 0;
     const selectedChapterIds = chapterArray.filter((_chapter, index: number) => {
       const mappedIndex = index + chapterIndexModifier;
@@ -508,15 +507,15 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
+    this.loadReviews();
+
+
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
-
-      this.loadReviews();
-      this.loadRecommendations();
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 
@@ -624,10 +623,11 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   loadReviews() {
-    this.seriesService.getReviews(this.series.id).subscribe(reviews => {
+    this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
       this.reviews = reviews;
+      this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
       this.cdRef.markForCheck();
-    })
+    });
   }
 
   setContinuePoint() {

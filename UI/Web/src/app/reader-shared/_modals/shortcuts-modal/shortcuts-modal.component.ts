@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
+import {CommonModule} from "@angular/common";
 
 export interface KeyboardShortcut {
   /**
@@ -14,6 +15,8 @@ export interface KeyboardShortcut {
 
 @Component({
   selector: 'app-shortcuts-modal',
+  standalone: true,
+  imports: [CommonModule, NgbModalModule],
   templateUrl: './shortcuts-modal.component.html',
   styleUrls: ['./shortcuts-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

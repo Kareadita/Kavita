@@ -7,19 +7,18 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   ViewChild
 } from '@angular/core';
-import { filter, map, Observable, of, Subject, takeUntil, takeWhile, tap } from 'rxjs';
+import { filter, map, Observable, of, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
+import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
@@ -55,7 +54,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   /**
    * Maps darkness value to the filter style
    */
-  darkenss$: Observable<string> = of('brightness(100%)');
+  darkness$: Observable<string> = of('brightness(100%)');
   /**
    * Maps image fit value to the classes for image fitting
    */
@@ -78,7 +77,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
       }
     })).subscribe(() => {});
 
-    this.darkenss$ = this.readerSettings$.pipe(
+    this.darkness$ = this.readerSettings$.pipe(
       map(values => 'brightness(' + values.darkness + '%)'),
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef)

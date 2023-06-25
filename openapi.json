@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.12"
+    "version": "0.7.3.13"
   },
   "servers": [
     {
@@ -12461,6 +12461,10 @@
           "url": {
             "type": "string",
             "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13665,10 +13669,6 @@
         "type": "object",
         "properties": {
           "averageScore": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "meanScore": {
             "type": "integer",
             "format": "int32"
           },
@@ -15628,6 +15628,11 @@
             "type": "integer",
             "description": "The encoding the server is using to save media",
             "format": "int32"
+          },
+          "lastReadTime": {
+            "type": "string",
+            "description": "The last user reading progress on the server (in UTC)",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,

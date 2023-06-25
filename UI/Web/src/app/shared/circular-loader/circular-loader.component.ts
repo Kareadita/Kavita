@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {CommonModule} from "@angular/common";
+import {NgCircleProgressModule} from "ng-circle-progress";
 
 @Component({
   selector: 'app-circular-loader',
+  standalone: true,
+  imports: [CommonModule, NgCircleProgressModule],
   templateUrl: './circular-loader.component.html',
   styleUrls: ['./circular-loader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,7 +40,7 @@ export class CircularLoaderComponent {
    */
   @Input() height: string = '100px';
   /**
-   * Centers the icon in the middle of the loader. Best for card use. 
+   * Centers the icon in the middle of the loader. Best for card use.
    */
   @Input() center: boolean = true;
 }

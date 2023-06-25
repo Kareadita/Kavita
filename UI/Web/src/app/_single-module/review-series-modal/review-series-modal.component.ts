@@ -1,17 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
-import { Series } from 'src/app/_models/series';
 import { SeriesService } from 'src/app/_services/series.service';
 import {UserReview} from "../review-card/user-review";
 import {CommonModule} from "@angular/common";
-import {PipeModule} from "../../pipe/pipe.module";
-import {SpoilerComponent} from "../spoiler/spoiler.component";
 
 @Component({
   selector: 'app-review-series-modal',
   standalone: true,
-  imports: [CommonModule, NgbRating, ReactiveFormsModule, PipeModule],
+  imports: [CommonModule, NgbRating, ReactiveFormsModule],
   templateUrl: './review-series-modal.component.html',
   styleUrls: ['./review-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

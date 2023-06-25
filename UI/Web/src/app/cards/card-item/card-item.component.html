@@ -58,6 +58,8 @@
         </span>
       </div>
       <span class="card-title library" [ngbTooltip]="subtitle" placement="top" *ngIf="subtitle.length > 0">{{subtitle}}</span>
-      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!suppressLibraryLink && libraryName">{{libraryName | sentenceCase}}</a>
+      <a class="card-title library" [routerLink]="['/library', libraryId]" routerLinkActive="router-link-active" *ngIf="!suppressLibraryLink && libraryName">
+        {{libraryName | sentenceCase}}
+      </a>
     </div>
 </div>

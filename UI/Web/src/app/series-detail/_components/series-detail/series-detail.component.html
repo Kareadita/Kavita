@@ -324,6 +324,7 @@
           <a ngbNavLink>Recommendations</a>
           <ng-template ngbNavContent>
               <virtual-scroller #scroll [items]="combinedRecs" [parentScroll]="scrollingBlock">
+                <ng-container *ngIf="renderMode === PageLayoutMode.Cards; else recListLayout">
                   <div class="card-container row g-0" #container>
                     <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
                       <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
@@ -334,6 +335,26 @@
                       </ng-template>
                     </ng-container>
                   </div>
+                </ng-container>
+                <ng-template #recListLayout>
+                  <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
+                    <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
+                      <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                        <ng-container title>
+                          {{item.name}}
+                        </ng-container>
+                      </app-external-list-item>
+                    </ng-container>
+                    <ng-template #externalRec>
+                      <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                        <ng-container title>
+                          <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                        </ng-container>
+                      </app-external-list-item>
+                    </ng-template>
+                  </ng-container>
+                </ng-template>
+
               </virtual-scroller>
           </ng-template>
       </li>
