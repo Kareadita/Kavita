@@ -28,6 +28,7 @@ public class ReviewController : BaseApiController
     private readonly IReviewService _reviewService;
     private readonly IMemoryCache _cache;
     private readonly IScrobblingService _scrobblingService;
+    public const string CacheKey = "review-";
 
     public ReviewController(ILogger<ReviewController> logger, IUnitOfWork unitOfWork, ILicenseService licenseService,
         IMapper mapper, IReviewService reviewService, IMemoryCache cache, IScrobblingService scrobblingService)
@@ -57,7 +58,7 @@ public class ReviewController : BaseApiController
             return Ok(userRatings);
         }
 
-        var cacheKey = "review-" + seriesId;
+        var cacheKey = CacheKey + seriesId;
         IEnumerable<UserReviewDto> externalReviews;
         var setCache = false;
         if (_cache.TryGetValue(cacheKey, out string cachedData))
