@@ -8,3 +8,7 @@
 i.fa.nav {
     color: var(--navbar-fa-icon-color);
 }
+
+.nav-tabs .nav-link.active::before {
+  transform: scaleY(0);
+}
