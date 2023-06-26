@@ -108,13 +108,13 @@
             <span><i class="fa fa-pen" aria-hidden="true"></i></span>
           </button>
         </div>
-        <div class="col-auto ms-2 d-none d-sm-block">
+        <div class="col-auto ms-2 d-none d-md-block">
           <div class="card-actions">
             <app-card-actionables (actionHandler)="performAction($event)" [actions]="seriesActions" [labelBy]="series.name" iconClass="fa-ellipsis-h" btnClass="btn-secondary"></app-card-actionables>
           </div>
         </div>
 
-        <div class="col-auto ms-2" *ngIf="isAdmin || hasDownloadingRole">
+        <div class="col-auto ms-2 d-none d-md-block" *ngIf="isAdmin || hasDownloadingRole">
           <button class="btn btn-secondary" (click)="downloadSeries()" title="Download Series" [disabled]="downloadInProgress">
             <ng-container *ngIf="downloadInProgress; else notDownloading">
               <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
