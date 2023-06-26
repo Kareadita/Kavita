@@ -2,7 +2,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminRoutingModule } from './admin-routing.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbTooltipModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbAccordionModule,
+  NgbCollapse,
+  NgbDropdownModule,
+  NgbNavModule,
+  NgbTooltipModule,
+  NgbTypeaheadModule
+} from '@ng-bootstrap/ng-bootstrap';
 import { ManageLibraryComponent } from './manage-library/manage-library.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { LibraryAccessModalComponent } from './_modals/library-access-modal/library-access-modal.component';
@@ -35,6 +42,7 @@ import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {RouterModule} from "@angular/router";
+import {LicenseComponent} from "./license/license.component";
 
 
 
@@ -58,6 +66,7 @@ import {RouterModule} from "@angular/router";
     ManageTasksSettingsComponent,
     ManageLogsComponent,
     ManageAlertsComponent,
+    LicenseComponent
   ],
   imports: [
     CommonModule,
@@ -82,7 +91,8 @@ import {RouterModule} from "@angular/router";
     FilterPipe,
     TagBadgeComponent,
     LoadingComponent,
-    SideNavCompanionBarComponent
+    SideNavCompanionBarComponent,
+    NgbCollapse
   ],
   providers: []
 })

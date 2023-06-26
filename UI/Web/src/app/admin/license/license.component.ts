@@ -21,7 +21,6 @@ export class LicenseComponent implements OnInit {
 
   formGroup: FormGroup = new FormGroup({});
   isViewMode: boolean = true;
-  private readonly destroyRef = inject(DestroyRef);
 
   hasValidLicense: boolean = false;
   hasLicense: boolean = false;
