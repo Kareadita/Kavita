@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using DeviceId;
 
 namespace Kavita.Common;
 
@@ -40,7 +41,20 @@ public static class HashUtil
 
     public static string ServerToken()
     {
-        var seed = $"{Environment.ProcessorCount}_{Environment.OSVersion.Platform}_{Environment.UserName}_{Environment.Version}_{Environment.MachineName}";
+        var seed = new DeviceIdBuilder()
+            .AddMacAddress()
+            .AddUserName()
+            .AddOsVersion()
+            .OnWindows(windows => windows
+                .AddMotherboardSerialNumber()
+                .AddSystemDriveSerialNumber())
+            .OnLinux(linux => linux
+                .AddMotherboardSerialNumber()
+                .AddSystemDriveSerialNumber())
+            .OnMac(mac => mac
+                .AddSystemDriveSerialNumber()
+                .AddPlatformSerialNumber())
+            .ToString();
         return CalculateCrc(seed);
     }
 

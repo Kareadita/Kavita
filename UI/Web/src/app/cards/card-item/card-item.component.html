@@ -8,7 +8,7 @@
       </ng-container>
 
       <div class="progress-banner">
-        <p *ngIf="read < total && total > 0 && read !== total" ngbTooltip="{{(read / total) | number:'1.0-1'}}% Read">
+        <p *ngIf="read < total && total > 0 && read !== total" ngbTooltip="{{((read / total) * 100) | number:'1.0-1'}}% Read">
           <ngb-progressbar type="primary" height="5px" [value]="read" [max]="total"></ngb-progressbar>
         </p>
         <span class="download">

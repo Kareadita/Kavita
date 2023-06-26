@@ -22,6 +22,7 @@ public class RatingController : BaseApiController
     private readonly IRatingService _ratingService;
     private readonly IMemoryCache _cache;
     private readonly ILogger<RatingController> _logger;
+    public const string CacheKey = "rating-";
 
     public RatingController(ILicenseService licenseService, IRatingService ratingService, IMemoryCache memoryCache, ILogger<RatingController> logger)
     {
@@ -45,7 +46,7 @@ public class RatingController : BaseApiController
             return Ok(new List<RatingDto>());
         }
 
-        var cacheKey = "rating-" + seriesId;
+        var cacheKey = CacheKey + seriesId;
         var setCache = false;
         IEnumerable<RatingDto> ratings;
         if (_cache.TryGetValue(cacheKey, out string cachedData))

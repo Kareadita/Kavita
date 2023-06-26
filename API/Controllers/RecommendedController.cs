@@ -21,6 +21,7 @@ public class RecommendedController : BaseApiController
     private readonly IRecommendationService _recommendationService;
     private readonly ILicenseService _licenseService;
     private readonly IMemoryCache _cache;
+    public const string CacheKey = "recommendation-";
 
     public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
         ILicenseService licenseService, IMemoryCache cache)
@@ -51,7 +52,7 @@ public class RecommendedController : BaseApiController
             return BadRequest("User does not have access to this Series");
         }
 
-        var cacheKey = $"recommendation-{seriesId}-{userId}";
+        var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
         if (_cache.TryGetValue(cacheKey, out string cachedData))
         {
             return Ok(JsonConvert.DeserializeObject<RecommendationDto>(cachedData));

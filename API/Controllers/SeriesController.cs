@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -13,10 +14,12 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -27,15 +30,19 @@ public class SeriesController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISeriesService _seriesService;
+    private readonly IMemoryCache _cache;
+    private readonly ILicenseService _licenseService;
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
-        ISeriesService seriesService)
+        ISeriesService seriesService, IMemoryCache cache, ILicenseService licenseService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _seriesService = seriesService;
+        _cache = cache;
+        _licenseService = licenseService;
     }
 
     [HttpPost]
@@ -310,6 +317,18 @@ public class SeriesController : BaseApiController
     {
         if (await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
         {
+            if (await _licenseService.HasActiveLicense())
+            {
+                _logger.LogDebug("Clearing cache as series weblinks may have changed");
+                _cache.Remove(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                _cache.Remove(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
+                foreach (var userId in allUsers)
+                {
+                    _cache.Remove(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
+                }
+            }
+
             return Ok("Successfully updated");
         }
 

@@ -17,8 +17,6 @@ import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-a
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
 import { StatisticsModule } from '../statistics/statistics.module';
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
-import { LicenseComponent } from './user-license/license.component';
-import { ManageKavitaPlusComponent } from './user-kavitaplus/manage-kavita-plus.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
 import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
@@ -43,8 +41,6 @@ import {
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
-    LicenseComponent,
-    ManageKavitaPlusComponent,
   ],
   imports: [
     CommonModule,
@@ -72,7 +68,6 @@ import {
     SiteThemeProviderPipe,
     ApiKeyComponent,
     RestrictionSelectorComponent,
-    ManageKavitaPlusComponent
   ]
 })
 export class UserSettingsModule { }
