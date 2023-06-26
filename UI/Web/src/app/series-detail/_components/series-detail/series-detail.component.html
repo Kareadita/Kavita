@@ -339,7 +339,7 @@
                 <ng-template #recListLayout>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
                     <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
-                      <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
+                      <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="">
                         <ng-container title>
                           {{item.name}}
                         </ng-container>
