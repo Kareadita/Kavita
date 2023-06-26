@@ -5,6 +5,7 @@ using API.Data;
 using API.DTOs.Account;
 using API.Entities.Enums;
 using API.Services.Plus;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -54,6 +55,7 @@ public class LicenseController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.LicenseCache)]
     public async Task<ActionResult> RemoveLicense()
     {
+        _logger.LogInformation("Removing license on file for Server");
         var setting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         setting.Value = null;
         _unitOfWork.SettingsRepository.Update(setting);
@@ -68,17 +70,9 @@ public class LicenseController : BaseApiController
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpPost]
-    public async Task<ActionResult<bool>> UpdateLicense(UpdateLicenseDto dto)
+    public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.License))
-        {
-            await _licenseService.RemoveLicense();
-        }
-        else
-        {
-            await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
-        }
-
-        return Ok(await _licenseService.HasActiveLicense(true));
+        await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
+        return Ok();
     }
 }
