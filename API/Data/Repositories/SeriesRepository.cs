@@ -91,7 +91,7 @@ public interface ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="series"></param>
     /// <returns></returns>
-    Task AddSeriesModifiers(int userId, List<SeriesDto> series);
+    Task AddSeriesModifiers(int userId, IList<SeriesDto> series);
     Task<string?> GetSeriesCoverImageAsync(int seriesId);
     Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
     Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
@@ -593,7 +593,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
 
-    public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
+    public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {
         var userProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))

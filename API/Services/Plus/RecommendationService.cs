@@ -70,7 +70,6 @@ public class RecommendationService : IRecommendationService
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        var seriesRecs = new List<SeriesDto>();
         if (series == null) return new RecommendationDto();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
@@ -99,16 +98,17 @@ public class RecommendationService : IRecommendationService
                 {
                     Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
                     Url = rec.SiteUrl,
-                    CoverUrl = rec.CoverUrl
+                    CoverUrl = rec.CoverUrl,
+                    Summary = rec.Summary
                 });
                 continue;
             }
-            seriesRecs.Add(seriesForRec);
+            recDto.OwnedSeries.Add(seriesForRec);
         }
 
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, recDto.OwnedSeries);
 
-        recDto.OwnedSeries = seriesRecs.DistinctBy(s => s.Id).ToList();
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).ToList();
         recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).ToList();
 
         return recDto;
