@@ -18,7 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, forkJoin, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import {map, shareReplay, take} from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { CardDetailDrawerComponent } from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import { EditSeriesModalComponent } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -616,6 +616,9 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadRecommendations() {
     this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+      rec.ownedSeries.map(r => {
+        this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
+      });
       this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
       this.hasRecommendations = this.combinedRecs.length > 0;
       this.cdRef.markForCheck();
@@ -629,6 +632,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.cdRef.markForCheck();
     });
   }
+
 
   setContinuePoint() {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {

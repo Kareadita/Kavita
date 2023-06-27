@@ -14374,7 +14374,7 @@
             "format": "date-time",
             "nullable": true
           },
-          "lastModifiedUtc": {
+          "lastModified": {
             "type": "string",
             "format": "date-time"
           },

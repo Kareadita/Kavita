@@ -26,7 +26,7 @@
       <tbody>
       <tr *ngFor="let item of events; let idx = index;">
         <td>
-          {{item.lastModifiedUtc | date:'MM/dd/yyyy h:mm a' }}
+          {{item.lastModified | date:'MM/dd/yyyy h:mm a' }}
         </td>
         <td>
           {{item.scrobbleEventType | scrobbleEventType}}

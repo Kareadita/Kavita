@@ -100,7 +100,7 @@ public class ScrobblingController : BaseApiController
     public async Task<ActionResult<IEnumerable<ScrobbleEventDto>>> GetScrobblingEvents()
     {
         var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId());
-        return Ok(events.OrderByDescending(e => e.LastModifiedUtc));
+        return Ok(events.OrderByDescending(e => e.LastModified));
     }
 
     /// <summary>
