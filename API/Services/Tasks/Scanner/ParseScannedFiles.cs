@@ -403,7 +403,7 @@ public class ParseScannedFiles
             .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
         if (nonLocalizedSeriesFound.Count == 1)
         {
-            nonLocalizedSeries = nonLocalizedSeriesFound.First();
+            nonLocalizedSeries = nonLocalizedSeriesFound[0];
         }
         else
         {

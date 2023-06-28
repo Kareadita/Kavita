@@ -565,10 +565,7 @@ public class DirectoryService : IDirectoryService
                 }
 
                 var fullPath = Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(folder, parts.Last()));
-                if (!dirs.ContainsKey(fullPath))
-                {
-                    dirs.Add(fullPath, string.Empty);
-                }
+                dirs.TryAdd(fullPath, string.Empty);
             }
         }
 

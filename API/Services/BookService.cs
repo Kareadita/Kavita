@@ -285,7 +285,7 @@ public class BookService : IBookService
 
         if (images == null) return;
 
-        var parent = images.First().ParentNode;
+        var parent = images[0].ParentNode;
 
         foreach (var image in images)
         {

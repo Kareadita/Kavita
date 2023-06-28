@@ -247,9 +247,9 @@ public class ScannerService : IScannerService
 
             var foundParsedSeries = new ParsedSeries()
             {
-                Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.ToNormalized(),
-                Format = parsedFiles.First().Format
+                Name = parsedFiles[0].Series,
+                NormalizedName = parsedFiles[0].Series.ToNormalized(),
+                Format = parsedFiles[0].Format
             };
 
             // For Scan Series, we need to filter out anything that isn't our Series
@@ -350,7 +350,7 @@ public class ScannerService : IScannerService
 
             try
             {
-                if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+                if (allFolders.TrueForAll(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
                 {
                     _logger.LogInformation(
                         "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
@@ -496,9 +496,9 @@ public class ScannerService : IScannerService
 
             var foundParsedSeries = new ParsedSeries()
             {
-                Name = parsedFiles.First().Series,
+                Name = parsedFiles[0].Series,
                 NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
-                Format = parsedFiles.First().Format
+                Format = parsedFiles[0].Format
             };
 
             if (skippedScan)

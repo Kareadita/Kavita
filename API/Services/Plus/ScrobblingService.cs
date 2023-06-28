@@ -450,34 +450,35 @@ public class ScrobblingService : IScrobblingService
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
-        var users = (await _unitOfWork.UserRepository.GetAllUsersAsync())
-            .Where(l => userId == 0 || userId == l.Id);
-        foreach (var user in users)
+        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
+            .Where(l => userId == 0 || userId == l.Id)
+            .Select(u => u.Id);
+        foreach (var uId in userIds)
         {
             if (!await _licenseService.HasActiveLicense()) continue;
 
-            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
+            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
             foreach (var wtr in wantToRead)
             {
                 if (!libAllowsScrobbling[wtr.LibraryId]) continue;
-                await ScrobbleWantToReadUpdate(user.Id, wtr.Id, true);
+                await ScrobbleWantToReadUpdate(uId, wtr.Id, true);
             }
 
-            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(user.Id);
+            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId);
             foreach (var rating in ratings)
             {
                 if (!libAllowsScrobbling[rating.Series.LibraryId]) continue;
-                await ScrobbleRatingUpdate(user.Id, rating.SeriesId, rating.Rating);
+                await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
             }
 
-            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(user.Id);
+            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
             foreach (var review in reviews)
             {
                 if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
-                await ScrobbleReviewUpdate(user.Id, review.SeriesId, review.Tagline, review.Review);
+                await ScrobbleReviewUpdate(uId, review.SeriesId, review.Tagline, review.Review);
             }
 
-            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id,
+            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
                 new UserParams(), new FilterDto()
                 {
                     ReadStatus = new ReadStatus()
@@ -491,7 +492,7 @@ public class ScrobblingService : IScrobblingService
 
             foreach (var series in seriesWithProgress)
             {
-                await ScrobbleReadingUpdate(user.Id, series.Id);
+                await ScrobbleReadingUpdate(uId, series.Id);
             }
 
         }
@@ -777,5 +778,11 @@ public class ScrobblingService : IScrobblingService
         }
 
         return count;
+    }
+
+    public static string CreateUrl(string url, long? id)
+    {
+        if (id is null or 0) return string.Empty;
+        return url + id + "/";
     }
 }

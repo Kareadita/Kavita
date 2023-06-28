@@ -44,6 +44,8 @@ internal record MediaRecommendationDto
     public string CoverUrl { get; set; }
     public string SiteUrl { get; set; }
     public string? Summary { get; set; }
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
 }
 
 public interface IRecommendationService
@@ -87,8 +89,9 @@ public class RecommendationService : IRecommendationService
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames,
-                series.Library.Type);
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsForUser(userId, rec.RecommendationNames,
+                series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
+                ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
 
             if (seriesForRec != null)
             {

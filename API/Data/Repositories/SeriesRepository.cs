@@ -135,7 +135,7 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId);
-    Task<SeriesDto?> GetSeriesDtoByNamesForUser(int userId, IEnumerable<string> names, LibraryType libraryType);
+    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1617,12 +1617,12 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="names"></param>
     /// <returns></returns>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesForUser(int userId, IEnumerable<string> names, LibraryType libraryType)
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
     {
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var libraryIds = await _context.Library.GetUserLibrariesByType(userId, libraryType).ToListAsync();
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
-        return await _context.Series
+        var result = await _context.Series
             .RestrictAgainstAgeRestriction(userRating)
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
                         normalizedNames.Contains(s.NormalizedLocalizedName))
@@ -1630,7 +1630,23 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
+        if (result == null && (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl)))
+        {
+            //https://anilist.co/manga/63031/Imawa-no-Kuni-no-Alice/
+            var results = await _context.Series
+                .RestrictAgainstAgeRestriction(userRating)
+                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
+                .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => EF.Functions.Like(s.Metadata.WebLinks, $"%{aniListUrl}%"))
+                // .WhereIf(!string.IsNullOrEmpty(malUrl), s => EF.Functions.Like(s.Metadata.WebLinks, $"%{malUrl}%"))
+                .Where(s => libraryIds.Contains(s.Library.Id))
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsSplitQuery()
+                .ToListAsync();
 
+            return results.FirstOrDefault();
+        }
+
+        return result;
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)
