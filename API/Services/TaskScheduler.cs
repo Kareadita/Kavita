@@ -438,14 +438,14 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
-                                     j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                                     j.Value.Job.Method.Name.Equals(methodName) &&
-                                     j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
+                                           j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                                           j.Value.Job.Method.Name.Equals(methodName) &&
+                                           j.Value.Job.Method.DeclaringType.Name.Equals(className));
         if (ret) return true;
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        ret = scheduledJobs.Any(j =>
+        ret = scheduledJobs.Exists(j =>
             j.Value.Job != null &&
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
@@ -456,7 +456,7 @@ public class TaskScheduler : ITaskScheduler
         if (checkRunningJobs)
         {
             var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-            return runningJobs.Any(j =>
+            return runningJobs.Exists(j =>
                 j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                 j.Value.Job.Method.Name.Equals(methodName) &&
                 j.Value.Job.Method.DeclaringType.Name.Equals(className));
@@ -474,11 +474,11 @@ public class TaskScheduler : ITaskScheduler
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Exists(j => !j.Value.InEnqueuedState &&
                                      classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
         if (ret) return true;
 
         var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-        return runningJobs.Any(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+        return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 }

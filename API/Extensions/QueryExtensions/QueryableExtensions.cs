@@ -7,6 +7,7 @@ using API.Data.Misc;
 using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
+using API.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Extensions.QueryExtensions;
@@ -107,5 +108,33 @@ public static class QueryableExtensions
         Expression<Func<T, bool>> predicate)
     {
         return condition ? queryable.Where(predicate) : queryable;
+    }
+
+    public static IQueryable<ScrobbleEvent> SortBy(this IQueryable<ScrobbleEvent> query, ScrobbleEventSortField sort, bool isDesc = false)
+    {
+        if (isDesc)
+        {
+            return sort switch
+            {
+                ScrobbleEventSortField.None => query,
+                ScrobbleEventSortField.Created => query.OrderByDescending(s => s.Created),
+                ScrobbleEventSortField.LastModified => query.OrderByDescending(s => s.LastModified),
+                ScrobbleEventSortField.Type => query.OrderByDescending(s => s.ScrobbleEventType),
+                ScrobbleEventSortField.Series => query.OrderByDescending(s => s.Series.NormalizedName),
+                ScrobbleEventSortField.IsProcessed => query.OrderByDescending(s => s.IsProcessed),
+                _ => query
+            };
+        }
+
+        return sort switch
+        {
+            ScrobbleEventSortField.None => query,
+            ScrobbleEventSortField.Created => query.OrderBy(s => s.Created),
+            ScrobbleEventSortField.LastModified => query.OrderBy(s => s.LastModified),
+            ScrobbleEventSortField.Type => query.OrderBy(s => s.ScrobbleEventType),
+            ScrobbleEventSortField.Series => query.OrderBy(s => s.Series.NormalizedName),
+            ScrobbleEventSortField.IsProcessed => query.OrderBy(s => s.IsProcessed),
+            _ => query
+        };
     }
 }

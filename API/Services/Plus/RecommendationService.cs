@@ -44,6 +44,8 @@ internal record MediaRecommendationDto
     public string CoverUrl { get; set; }
     public string SiteUrl { get; set; }
     public string? Summary { get; set; }
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
 }
 
 public interface IRecommendationService
@@ -70,12 +72,11 @@ public class RecommendationService : IRecommendationService
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
                 SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        var seriesRecs = new List<SeriesDto>();
         if (series == null) return new RecommendationDto();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
-        var canSeeExternalSeries = user != null && user.AgeRestriction == AgeRating.NotApplicable &&
+        var canSeeExternalSeries = user is {AgeRestriction: AgeRating.NotApplicable} &&
                                    await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         var recDto = new RecommendationDto()
@@ -88,27 +89,31 @@ public class RecommendationService : IRecommendationService
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesForUser(userId, rec.RecommendationNames,
-                series.Library.Type);
-            if (seriesForRec == null)
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsForUser(userId, rec.RecommendationNames,
+                series.Library.Type, ScrobblingService.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
+                ScrobblingService.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
+
+            if (seriesForRec != null)
             {
-                if (!canSeeExternalSeries) continue;
-                // We can show this based on user permissions
-                if (string.IsNullOrEmpty(rec.Name) || string.IsNullOrEmpty(rec.SiteUrl) || string.IsNullOrEmpty(rec.CoverUrl)) continue;
-                recDto.ExternalSeries.Add(new ExternalSeriesDto()
-                {
-                    Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
-                    Url = rec.SiteUrl,
-                    CoverUrl = rec.CoverUrl
-                });
+                recDto.OwnedSeries.Add(seriesForRec);
                 continue;
             }
-            seriesRecs.Add(seriesForRec);
+
+            if (!canSeeExternalSeries) continue;
+            // We can show this based on user permissions
+            if (string.IsNullOrEmpty(rec.Name) || string.IsNullOrEmpty(rec.SiteUrl) || string.IsNullOrEmpty(rec.CoverUrl)) continue;
+            recDto.ExternalSeries.Add(new ExternalSeriesDto()
+            {
+                Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
+                Url = rec.SiteUrl,
+                CoverUrl = rec.CoverUrl,
+                Summary = rec.Summary
+            });
         }
 
-        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, seriesRecs);
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, recDto.OwnedSeries);
 
-        recDto.OwnedSeries = seriesRecs.DistinctBy(s => s.Id).ToList();
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).ToList();
         recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).ToList();
 
         return recDto;

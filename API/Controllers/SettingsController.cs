@@ -210,10 +210,10 @@ public class SettingsController : BaseApiController
 
             if (setting.Key == ServerSettingKey.BaseUrl && updateSettingsDto.BaseUrl + string.Empty != setting.Value)
             {
-                var path = !updateSettingsDto.BaseUrl.StartsWith("/")
+                var path = !updateSettingsDto.BaseUrl.StartsWith('/')
                     ? $"/{updateSettingsDto.BaseUrl}"
                     : updateSettingsDto.BaseUrl;
-                path = !path.EndsWith("/")
+                path = !path.EndsWith('/')
                     ? $"{path}/"
                     : path;
                 setting.Value = path;
@@ -243,7 +243,7 @@ public class SettingsController : BaseApiController
             if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
             {
                 setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();
-                if (setting.Value.EndsWith("/")) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
+                if (setting.Value.EndsWith('/')) setting.Value = setting.Value.Substring(0, setting.Value.Length - 1);
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 

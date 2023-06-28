@@ -11,7 +11,8 @@ public class ScrobbleEventDto
     public int? VolumeNumber { get; set; }
     public int? ChapterNumber { get; set; }
     public DateTime? ProcessDateUtc { get; set; }
-    public DateTime LastModifiedUtc { get; set; }
+    public DateTime LastModified { get; set; }
+    public DateTime Created { get; set; }
     public float? Rating { get; set; }
     public ScrobbleEventType ScrobbleEventType { get; set; }
 }

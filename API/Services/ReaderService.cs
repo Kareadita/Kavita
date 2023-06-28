@@ -519,16 +519,16 @@ public class ReaderService : IReaderService
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
     {
         var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
-        if (chaptersWithProgress.Count <= 0) return volumeChapters.First();
+        if (chaptersWithProgress.Count <= 0) return volumeChapters[0];
 
 
         var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);
         if (last + 1 < chaptersWithProgress.Count)
         {
-            return chaptersWithProgress.ElementAt(last + 1);
+            return chaptersWithProgress[last + 1];
         }
 
-        var lastChapter = chaptersWithProgress.ElementAt(last);
+        var lastChapter = chaptersWithProgress[last];
         if (lastChapter.PagesRead < lastChapter.Pages)
         {
             return lastChapter;
@@ -546,10 +546,10 @@ public class ReaderService : IReaderService
         var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
         if (lastIndexWithProgress + 1 < volumeChapters.Count)
         {
-            return volumeChapters.ElementAt(lastIndexWithProgress + 1);
+            return volumeChapters[lastIndexWithProgress + 1];
         }
 
-        return volumeChapters.First();
+        return volumeChapters[0];
     }
 
 
@@ -583,8 +583,8 @@ public class ReaderService : IReaderService
         foreach (var volume in volumes.OrderBy(v => v.Number))
         {
             var chapters = volume.Chapters
-                .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
+                .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber)
+                .OrderBy(c => float.Parse(c.Number));
             await MarkChaptersAsRead(user, volume.SeriesId, chapters.ToList());
         }
     }
@@ -592,7 +592,7 @@ public class ReaderService : IReaderService
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
+        foreach (var volume in volumes.Where(v => v.Number <= volumeNumber && v.Number > 0).OrderBy(v => v.Number))
         {
             await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }

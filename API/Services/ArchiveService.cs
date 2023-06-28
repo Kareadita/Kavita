@@ -274,7 +274,7 @@ public class ArchiveService : IArchiveService
     {
         // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
         return archive.Entries.Count > 0 &&
-               !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
+               !Path.HasExtension(archive.Entries[0].FullName) ||
                archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
     }
 

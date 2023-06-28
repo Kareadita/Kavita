@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
 import { of, ReplaySubject, Subject } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
@@ -18,6 +18,10 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleError} from "../_models/scrobbling/scrobble-error";
 import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";
 import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
+import {PaginatedResult, Pagination} from "../_models/pagination";
+import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
+import {UtilityService} from "../shared/_services/utility.service";
+import {ReadingList} from "../_models/reading-list";
 
 export enum ScrobbleProvider {
   AniList= 1,
@@ -33,13 +37,12 @@ export class ScrobblingService {
   baseUrl = environment.apiUrl;
 
 
-  constructor(private httpClient: HttpClient) {}
+  constructor(private httpClient: HttpClient, private utilityService: UtilityService) {}
 
   hasTokenExpired(provider: ScrobbleProvider) {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/token-expired?provider=' + provider, TextResonse)
       .pipe(map(r => r === "true"));
   }
-
 
   updateAniListToken(token: string) {
     return this.httpClient.post(this.baseUrl + 'scrobbling/update-anilist-token', {token});
@@ -49,12 +52,18 @@ export class ScrobblingService {
     return this.httpClient.get<string>(this.baseUrl + 'scrobbling/anilist-token', TextResonse);
   }
 
-
   getScrobbleErrors() {
     return this.httpClient.get<Array<ScrobbleError>>(this.baseUrl + 'scrobbling/scrobble-errors');
   }
-  getScrobbleEvents() {
-    return this.httpClient.get<Array<ScrobbleEvent>>(this.baseUrl + 'scrobbling/scrobble-events');
+
+  getScrobbleEvents(filter: ScrobbleEventFilter, pageNum: number | undefined = undefined, itemsPerPage: number | undefined = undefined) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+    return this.httpClient.post<PaginatedResult<ScrobbleEvent[]>>(this.baseUrl + 'scrobbling/scrobble-events', filter, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response, new PaginatedResult<ScrobbleEvent[]>());
+      })
+    );
   }
 
   clearScrobbleErrors() {

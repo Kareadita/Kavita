@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.14"
+    "version": "0.7.3.15"
   },
   "servers": [
     {
@@ -6575,12 +6575,50 @@
       }
     },
     "/api/Scrobbling/scrobble-events": {
-      "get": {
+      "post": {
         "tags": [
           "Scrobbling"
         ],
         "summary": "Returns the scrobbling history for the user",
         "description": "User must have a valid license",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success",
@@ -14374,7 +14412,11 @@
             "format": "date-time",
             "nullable": true
           },
-          "lastModifiedUtc": {
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
             "type": "string",
             "format": "date-time"
           },
@@ -14393,6 +14435,34 @@
             ],
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleEventFilter": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "description": "Which field to sort on",
+            "format": "int32"
+          },
+          "isDescending": {
+            "type": "boolean",
+            "description": "If the sort should be a descending sort"
+          },
+          "query": {
+            "type": "string",
+            "description": "A query to search against",
+            "nullable": true
           }
         },
         "additionalProperties": false

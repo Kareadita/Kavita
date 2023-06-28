@@ -18,7 +18,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { catchError, forkJoin, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import {map, shareReplay, take} from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { CardDetailDrawerComponent } from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
 import { EditSeriesModalComponent } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
@@ -179,8 +179,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
-  promptToAddReview!: UserReview;
-
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
@@ -328,17 +326,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
-    this.promptToAddReview = {
-      seriesId: this.seriesId,
-      tagline: 'Add your review!',
-      body: 'Add your own review here and share with the server',
-      bodyJustText:'Add your own review here and share with the server',
-      libraryId: this.libraryId,
-      username: this.user!.username,
-      isExternal: false,
-      externalUrl: undefined,
-      score: 0
-    };
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
@@ -507,7 +494,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    this.loadReviews();
+    this.loadReviews(true);
 
 
     forkJoin({
@@ -616,19 +603,26 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
   loadRecommendations() {
     this.seriesService.getRecommendationsForSeries(this.seriesId).subscribe(rec => {
+      rec.ownedSeries.map(r => {
+        this.seriesService.getMetadata(r.id).subscribe(m => r.summary = m.summary);
+      });
       this.combinedRecs = [...rec.ownedSeries, ...rec.externalSeries];
       this.hasRecommendations = this.combinedRecs.length > 0;
       this.cdRef.markForCheck();
     });
   }
 
-  loadReviews() {
+  loadReviews(loadRecs: boolean = false) {
+    console.log('fetching reviews')
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
-      this.reviews = reviews;
-      this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
+      this.reviews = [...reviews];
+      if (loadRecs) {
+        this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
+      }
       this.cdRef.markForCheck();
     });
   }
+
 
   setContinuePoint() {
     this.readerService.hasSeriesProgress(this.seriesId).subscribe(hasProgress => {
@@ -756,8 +750,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  getUserReview() {
+    return this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
+  }
+
   openReviewModal() {
-    const userReview = this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
+    const userReview = this.getUserReview();
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
     if (userReview.length > 0) {
@@ -770,9 +768,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       };
     }
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, review: string, rating: number}) => {
-      if (closeResult.success && this.series !== undefined) {
-        this.series.userRating = closeResult.rating;
+    modalRef.closed.subscribe((closeResult: {success: boolean}) => {
+      if (closeResult.success) {
         this.loadReviews();
       }
     });

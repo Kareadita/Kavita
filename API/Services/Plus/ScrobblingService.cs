@@ -54,12 +54,12 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
 
-    public const string AniListWeblinkWebsite = "https://anilist.co/";
+    public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
 
     private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
-        {AniListWeblinkWebsite, 1},
+        {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
     };
 
@@ -186,6 +186,8 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType.Review);
         if (existingEvt is {IsProcessed: false})
         {
+            _logger.LogDebug("Overriding scrobble event for {Series} from Review {Tagline}/{Body} -> {UpdatedTagline}{UpdatedBody}",
+                existingEvt.Series.Name, existingEvt.ReviewTitle, existingEvt.ReviewBody, reviewTitle, reviewBody);
             existingEvt.ReviewBody = reviewBody;
             existingEvt.ReviewTitle = reviewTitle;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
@@ -207,6 +209,7 @@ public class ScrobblingService : IScrobblingService
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
+        _logger.LogDebug("Added Scrobbling Review update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
@@ -223,9 +226,18 @@ public class ScrobblingService : IScrobblingService
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
 
-        var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
+        var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
-        if (existing) return;
+        if (existingEvt is {IsProcessed: false})
+        {
+            // We need to just update Volume/Chapter number
+            _logger.LogDebug("Overriding scrobble event for {Series} from Rating {rating} -> {updatedRating}",
+                existingEvt.Series.Name, existingEvt.Rating, rating);
+            existingEvt.Rating = rating;
+            _unitOfWork.ScrobbleRepository.Update(existingEvt);
+            await _unitOfWork.CommitAsync();
+            return;
+        }
 
         var evt = new ScrobbleEvent()
         {
@@ -240,6 +252,7 @@ public class ScrobblingService : IScrobblingService
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
+        _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
@@ -266,12 +279,17 @@ public class ScrobblingService : IScrobblingService
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
+            var prevChapter = $"{existingEvt.ChapterNumber}";
+            var prevVol = $"{existingEvt.VolumeNumber}";
+
             existingEvt.VolumeNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
             existingEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync();
+            _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
+                existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
             return;
         }
 
@@ -293,7 +311,7 @@ public class ScrobblingService : IScrobblingService
             };
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync();
-            _logger.LogDebug("Scrobbling Record on {SeriesName} with Userid {UserId} ", series.Name, userId);
+            _logger.LogDebug("Added Scrobbling Read update on {SeriesName} with Userid {UserId} ", series.Name, userId);
         }
         catch (Exception ex)
         {
@@ -331,6 +349,7 @@ public class ScrobblingService : IScrobblingService
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
+        _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
     private async Task<int> GetRateLimit(string license, string aniListToken)
@@ -431,34 +450,35 @@ public class ScrobblingService : IScrobblingService
         var libAllowsScrobbling = (await _unitOfWork.LibraryRepository.GetLibrariesAsync())
             .ToDictionary(lib => lib.Id, lib => lib.AllowScrobbling);
 
-        var users = (await _unitOfWork.UserRepository.GetAllUsersAsync())
-            .Where(l => userId == 0 || userId == l.Id);
-        foreach (var user in users)
+        var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
+            .Where(l => userId == 0 || userId == l.Id)
+            .Select(u => u.Id);
+        foreach (var uId in userIds)
         {
             if (!await _licenseService.HasActiveLicense()) continue;
 
-            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id);
+            var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
             foreach (var wtr in wantToRead)
             {
                 if (!libAllowsScrobbling[wtr.LibraryId]) continue;
-                await ScrobbleWantToReadUpdate(user.Id, wtr.Id, true);
+                await ScrobbleWantToReadUpdate(uId, wtr.Id, true);
             }
 
-            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(user.Id);
+            var ratings = await _unitOfWork.UserRepository.GetSeriesWithRatings(uId);
             foreach (var rating in ratings)
             {
                 if (!libAllowsScrobbling[rating.Series.LibraryId]) continue;
-                await ScrobbleRatingUpdate(user.Id, rating.SeriesId, rating.Rating);
+                await ScrobbleRatingUpdate(uId, rating.SeriesId, rating.Rating);
             }
 
-            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(user.Id);
+            var reviews = await _unitOfWork.UserRepository.GetSeriesWithReviews(uId);
             foreach (var review in reviews)
             {
                 if (!libAllowsScrobbling[review.Series.LibraryId]) continue;
-                await ScrobbleReviewUpdate(user.Id, review.SeriesId, review.Tagline, review.Review);
+                await ScrobbleReviewUpdate(uId, review.SeriesId, review.Tagline, review.Review);
             }
 
-            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id,
+            var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, uId,
                 new UserParams(), new FilterDto()
                 {
                     ReadStatus = new ReadStatus()
@@ -472,7 +492,7 @@ public class ScrobblingService : IScrobblingService
 
             foreach (var series in seriesWithProgress)
             {
-                await ScrobbleReadingUpdate(user.Id, series.Id);
+                await ScrobbleReadingUpdate(uId, series.Id);
             }
 
         }
@@ -758,5 +778,11 @@ public class ScrobblingService : IScrobblingService
         }
 
         return count;
+    }
+
+    public static string CreateUrl(string url, long? id)
+    {
+        if (id is null or 0) return string.Empty;
+        return $"{url}{id}/";
     }
 }

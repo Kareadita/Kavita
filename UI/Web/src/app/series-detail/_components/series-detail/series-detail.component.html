@@ -133,12 +133,9 @@
     </div>
 
     <div class="row pt-4">
-      <app-carousel-reel [items]="reviews" [alwaysShow]="true" title="User Reviews" iconClasses="fa-solid fa-pen" [clickableTitle]="true" (sectionClick)="openReviewModal()">
+      <app-carousel-reel [items]="reviews" [alwaysShow]="true" title="User Reviews" iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}" [clickableTitle]="true" (sectionClick)="openReviewModal()">
         <ng-template #carouselItem let-item let-position="idx">
           <app-review-card [review]="item"></app-review-card>
-        </ng-template>
-        <ng-template #promptToAdd>
-          <app-review-card [review]="promptToAddReview"></app-review-card>
         </ng-template>
       </app-carousel-reel>
     </div>
@@ -339,9 +336,9 @@
                 <ng-template #recListLayout>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
                     <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
-                      <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="">
+                      <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
                         <ng-container title>
-                          {{item.name}}
+                          <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
                         </ng-container>
                       </app-external-list-item>
                     </ng-container>

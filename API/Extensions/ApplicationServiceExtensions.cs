@@ -72,7 +72,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IRatingService, RatingService>();
 
-        services.AddSqLite(env);
+        services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
         services.AddEasyCaching(options =>
@@ -93,7 +93,7 @@ public static class ApplicationServiceExtensions
         });
     }
 
-    private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)
+    private static void AddSqLite(this IServiceCollection services)
     {
         services.AddDbContext<DataContext>(options =>
         {

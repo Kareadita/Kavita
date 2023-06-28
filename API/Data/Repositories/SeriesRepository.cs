@@ -26,6 +26,7 @@ using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using SQLite;
 
 
 namespace API.Data.Repositories;
@@ -91,7 +92,7 @@ public interface ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="series"></param>
     /// <returns></returns>
-    Task AddSeriesModifiers(int userId, List<SeriesDto> series);
+    Task AddSeriesModifiers(int userId, IList<SeriesDto> series);
     Task<string?> GetSeriesCoverImageAsync(int seriesId);
     Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
     Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
@@ -135,7 +136,7 @@ public interface ISeriesRepository
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId);
-    Task<SeriesDto?> GetSeriesDtoByNamesForUser(int userId, IEnumerable<string> names, LibraryType libraryType);
+    Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -593,7 +594,7 @@ public class SeriesRepository : ISeriesRepository
     }
 
 
-    public async Task AddSeriesModifiers(int userId, List<SeriesDto> series)
+    public async Task AddSeriesModifiers(int userId, IList<SeriesDto> series)
     {
         var userProgress = await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && series.Select(s => s.Id).Contains(p.SeriesId))
@@ -1617,11 +1618,26 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userId"></param>
     /// <param name="names"></param>
     /// <returns></returns>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesForUser(int userId, IEnumerable<string> names, LibraryType libraryType)
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl)
     {
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var libraryIds = await _context.Library.GetUserLibrariesByType(userId, libraryType).ToListAsync();
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
+        SeriesDto? result = null;
+        if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
+        {
+            result =  await _context.Series
+                .RestrictAgainstAgeRestriction(userRating)
+                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
+                .Where(s => libraryIds.Contains(s.Library.Id))
+                .Where(s => s.Metadata.WebLinks.Contains(aniListUrl) || s.Metadata.WebLinks.Contains(malUrl))
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
+        }
+
+        if (result != null) return result;
+
         return await _context.Series
             .RestrictAgainstAgeRestriction(userRating)
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
@@ -1630,7 +1646,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
-
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

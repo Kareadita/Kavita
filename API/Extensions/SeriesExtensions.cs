@@ -33,7 +33,7 @@ public static class SeriesExtensions
         }
 
         // just volumes
-        if (volumes.All(v => $"{v.Number}" != Parser.DefaultVolume))
+        if (volumes.TrueForAll(v => $"{v.Number}" != Parser.DefaultVolume))
         {
             return firstVolume.CoverImage;
         }
@@ -48,7 +48,7 @@ public static class SeriesExtensions
                 .ToList();
             if ((1.0f * volumes.First().Number) > float.Parse(looseLeafChapters.First().Number))
             {
-                return looseLeafChapters.First().CoverImage;
+                return looseLeafChapters[0].CoverImage;
             }
             return firstVolume.CoverImage;
         }

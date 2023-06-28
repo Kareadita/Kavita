@@ -52,7 +52,9 @@ public class ReviewController : BaseApiController
     public async Task<ActionResult<IEnumerable<UserReviewDto>>> GetReviews(int seriesId)
     {
         var userId = User.GetUserId();
-        var userRatings = await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId);
+        var userRatings = (await _unitOfWork.UserRepository.GetUserRatingDtosForSeriesAsync(seriesId, userId))
+            .Where(r => !string.IsNullOrEmpty(r.Body) && !string.IsNullOrEmpty(r.Tagline))
+            .ToList();
         if (!await _licenseService.HasActiveLicense())
         {
             return Ok(userRatings);

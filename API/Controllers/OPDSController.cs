@@ -518,7 +518,7 @@ public class OpdsController : BaseApiController
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
+        var (_, prefix) = await GetPrefix();
         var feed = new OpenSearchDescription()
         {
             ShortName = "Search",
@@ -676,7 +676,7 @@ public class OpdsController : BaseApiController
     {
         return new ContentResult
         {
-            ContentType = "application/atom+xml",
+            ContentType = "application/xml",
             Content = xml,
             StatusCode = 200
         };

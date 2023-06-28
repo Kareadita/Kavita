@@ -178,7 +178,7 @@ public class ReadingListRepository : IReadingListRepository
        var finalQuery = query.ProjectTo<ReadingListDto>(_mapper.ConfigurationProvider)
             .AsNoTracking();
 
-        return await PagedList<ReadingListDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
+       return await PagedList<ReadingListDto>.CreateAsync(finalQuery, userParams.PageNumber, userParams.PageSize);
     }
 
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId, bool includePromoted)

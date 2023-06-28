@@ -30,7 +30,6 @@ import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mod
 import { forkJoin } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
-import { environment } from 'src/environments/environment';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum AccordionPanelID {
@@ -71,9 +70,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
 
-  passwordsMatch = false;
-  resetPasswordErrors: string[] = [];
-
   observableHandles: Array<any> = [];
   fontFamilies: Array<string> = [];
 
@@ -112,22 +108,22 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     });
 
     this.accountService.hasValidLicense().subscribe(res => {
-      console.log('has server license:', res)
       if (res) {
         this.tabs.push({title: 'Scrobbling', fragment: FragmentID.Scrobbling});
         this.cdRef.markForCheck();
       }
+
+      this.route.fragment.subscribe(frag => {
+        const tab = this.tabs.filter(item => item.fragment === frag);
+        if (tab.length > 0) {
+          this.active = tab[0];
+        } else {
+          this.active = this.tabs[1]; // Default to preferences
+        }
+        this.cdRef.markForCheck();
+      });
     })
 
-    this.route.fragment.subscribe(frag => {
-      const tab = this.tabs.filter(item => item.fragment === frag);
-      if (tab.length > 0) {
-        this.active = tab[0];
-      } else {
-        this.active = this.tabs[1]; // Default to preferences
-      }
-      this.cdRef.markForCheck();
-    });
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
