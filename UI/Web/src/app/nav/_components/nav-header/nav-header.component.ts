@@ -53,7 +53,7 @@ export class NavHeaderComponent implements OnInit {
     public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
     private scrollService: ScrollService, private searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
       this.scrollElem = this.document.body;
-    }
+  }
 
   ngOnInit(): void {
     this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap((scrollContainer) => {

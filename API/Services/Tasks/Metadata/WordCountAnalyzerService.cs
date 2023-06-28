@@ -246,7 +246,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         doc.LoadHtml(await bookFile.ReadContentAsync());
 
         var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-        return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) * AverageCharactersPerWord ?? 0;
+        return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) / AverageCharactersPerWord ?? 0;
     }
 
 }

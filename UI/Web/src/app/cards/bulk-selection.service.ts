@@ -9,7 +9,7 @@ type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark';
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
  * This will clear selections between pages.
- * 
+ *
  * Remakrs: Page which renders cards is responsible for listening for shift keydown/keyup and updating our state variable.
  */
 @Injectable({
@@ -41,7 +41,6 @@ export class BulkSelectionService {
         this.dataSourceMax = {};
         this.prevIndex = 0;
       });
-
   }
 
   handleCardSelection(dataSource: DataSource, index: number, maxIndex: number, wasSelected: boolean) {
@@ -49,18 +48,18 @@ export class BulkSelectionService {
 
       if (dataSource === this.prevDataSource) {
         this.debugLog('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index);
-        this.selectCards(dataSource, this.prevIndex, index, !wasSelected);  
+        this.selectCards(dataSource, this.prevIndex, index, !wasSelected);
       } else {
         const isForwardSelection = index > this.prevIndex;
 
         if (isForwardSelection) {
           this.debugLog('Selecting ' + this.prevDataSource + ' cards from ' + this.prevIndex + ' to ' + this.dataSourceMax[this.prevDataSource]);
-          this.selectCards(this.prevDataSource, this.prevIndex, this.dataSourceMax[this.prevDataSource], !wasSelected);  
+          this.selectCards(this.prevDataSource, this.prevIndex, this.dataSourceMax[this.prevDataSource], !wasSelected);
           this.debugLog('Selecting ' + dataSource + ' cards from ' + 0 + ' to ' + index);
           this.selectCards(dataSource, 0, index, !wasSelected);
         } else {
           this.debugLog('Selecting ' + this.prevDataSource + ' cards from ' + 0 + ' to ' + this.prevIndex);
-          this.selectCards(this.prevDataSource, this.prevIndex, 0, !wasSelected);  
+          this.selectCards(this.prevDataSource, this.prevIndex, 0, !wasSelected);
           this.debugLog('Selecting ' + dataSource + ' cards from ' + index + ' to ' + maxIndex);
           this.selectCards(dataSource, index, maxIndex, !wasSelected);
         }
@@ -135,14 +134,14 @@ export class BulkSelectionService {
         ret.push(k);
       }
     }
-    
+
     return ret;
   }
 
   getActions(callback: (action: ActionItem<any>, data: any) => void) {
     // checks if series is present. If so, returns only series actions
     // else returns volume/chapter items
-    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection, 
+    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection,
       Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList];
     if (Object.keys(this.selectedCards).filter(item => item === 'series').length > 0) {
       return this.applyFilterToList(this.actionFactory.getSeriesActions(callback), allowedActions);
@@ -159,14 +158,14 @@ export class BulkSelectionService {
     if (!this.debug) return;
 
     if (extraData !== undefined) {
-      console.log(message, extraData);  
+      console.log(message, extraData);
     } else {
       console.log(message);
     }
   }
 
   private applyFilter(action: ActionItem<any>, allowedActions: Array<Action>) {
-    
+
     var ret = false;
     if (action.action === Action.Submenu || allowedActions.includes(action.action)) {
       // Do something
@@ -176,7 +175,7 @@ export class BulkSelectionService {
     if (action.children === null || action.children?.length === 0) return ret;
 
     action.children = action.children.filter((childAction) => this.applyFilter(childAction, allowedActions));
-    
+
     return ret;
   }
 

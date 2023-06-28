@@ -86,8 +86,6 @@ export class LicenseComponent implements OnInit {
       this.hasValidLicense = res;
       this.isChecking = false;
       this.cdRef.markForCheck();
-    })
-
+    });
   }
-
 }
