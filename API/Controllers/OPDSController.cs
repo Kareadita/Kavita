@@ -676,7 +676,7 @@ public class OpdsController : BaseApiController
     {
         return new ContentResult
         {
-            ContentType = "application/atom+xml",
+            ContentType = "application/xml",
             Content = xml,
             StatusCode = 200
         };
