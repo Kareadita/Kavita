@@ -494,7 +494,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    this.loadReviews();
+    this.loadReviews(true);
 
 
     forkJoin({
@@ -612,10 +612,13 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  loadReviews() {
+  loadReviews(loadRecs: boolean = false) {
+    console.log('fetching reviews')
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
-      this.reviews = reviews;
-      this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
+      this.reviews = [...reviews];
+      if (loadRecs) {
+        this.loadRecommendations(); // We do this as first load will spam 3 calls on API layer
+      }
       this.cdRef.markForCheck();
     });
   }
@@ -765,9 +768,8 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       };
     }
     modalRef.componentInstance.series = this.series;
-    modalRef.closed.subscribe((closeResult: {success: boolean, review: string, rating: number}) => {
-      if (closeResult.success && this.series !== undefined) {
-        this.series.userRating = closeResult.rating;
+    modalRef.closed.subscribe((closeResult: {success: boolean}) => {
+      if (closeResult.success) {
         this.loadReviews();
       }
     });

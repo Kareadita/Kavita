@@ -34,8 +34,8 @@ export class ReviewSeriesModalComponent implements OnInit {
 
   save() {
     const model = this.reviewGroup.value;
-    this.seriesService.updateReview(this.review.seriesId, model.tagline, model.reviewBody).subscribe((updatedReview) => {
-      this.modal.close({success: true, review: updatedReview});
+    this.seriesService.updateReview(this.review.seriesId, model.tagline, model.reviewBody).subscribe(() => {
+      this.modal.close({success: true});
     });
   }
 }
