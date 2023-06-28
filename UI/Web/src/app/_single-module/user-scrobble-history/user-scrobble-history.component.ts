@@ -26,9 +26,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly scrobbleService = inject(ScrobblingService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  page: number = 0;
-  pageSize: number = 30;
-  totalPages: number = 1;
+
   pagination: Pagination | undefined;
   events: Array<ScrobbleEvent> = [];
   formGroup: FormGroup = new FormGroup({
@@ -38,7 +36,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   get ScrobbleEventType() { return ScrobbleEventType; }
 
   ngOnInit() {
-    this.loadPage();
+    this.loadPage({column: 'lastModified', direction: 'desc'});
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(query => {
       this.loadPage();
@@ -46,10 +44,19 @@ export class UserScrobbleHistoryComponent implements OnInit {
   }
 
   onPageChange(pageNum: number) {
+    let prevPage = 0;
     if (this.pagination) {
+      prevPage = this.pagination.currentPage;
       this.pagination.currentPage = pageNum;
+    }
+    if (prevPage !== pageNum) {
       this.loadPage();
     }
+
+  }
+
+  updateSort(sortEvent: SortEvent<ScrobbleEvent>) {
+    this.loadPage(sortEvent);
   }
 
   loadPage(sortEvent?: SortEvent<ScrobbleEvent>) {
@@ -59,8 +66,11 @@ export class UserScrobbleHistoryComponent implements OnInit {
     }
     const page = this.pagination?.currentPage || 0;
     const pageSize = this.pagination?.itemsPerPage || 0;
+    const isDescending = sortEvent?.direction === 'desc';
+    const field = this.mapSortColumnField(sortEvent?.column);
+    const query = this.formGroup.get('filter')?.value;
 
-    this.scrobbleService.getScrobbleEvents({query: this.formGroup.get('filter')?.value, field: this.mapSortColumnField(sortEvent?.column), isDescending: sortEvent?.direction === 'desc'}, page, pageSize)
+    this.scrobbleService.getScrobbleEvents({query, field, isDescending}, page, pageSize)
       .pipe(take(1))
       .subscribe((result: PaginatedResult<ScrobbleEvent[]>) => {
       this.events = result.result;

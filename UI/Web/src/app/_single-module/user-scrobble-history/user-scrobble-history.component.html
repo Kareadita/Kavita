@@ -23,16 +23,16 @@
   <table class="table table-light table-striped table-hover table-sm scrollable">
     <thead>
     <tr>
-      <th scope="col" sortable="created" (sort)="loadPage($event)">
+      <th scope="col" sortable="created" (sort)="updateSort($event)">
         Created
       </th>
-      <th scope="col" sortable="lastModified" (sort)="loadPage($event)">
+      <th scope="col" sortable="lastModified" (sort)="updateSort($event)" direction="desc">
         Last Modified
       </th>
       <th scope="col">
         Type
       </th>
-      <th scope="col" sortable="seriesName" (sort)="loadPage($event)">
+      <th scope="col" sortable="seriesName" (sort)="updateSort($event)">
         Series
       </th>
       <th scope="col">
@@ -45,7 +45,7 @@
     </thead>
     <tbody>
     <tr *ngIf="events.length === 0">
-      No Data
+      <td colspan="6">No Data</td>
     </tr>
     <tr *ngFor="let item of events; let idx = index;">
       <td>

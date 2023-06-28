@@ -266,12 +266,17 @@ public class ScrobblingService : IScrobblingService
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
+            var prevChapter = $"{existingEvt.ChapterNumber}";
+            var prevVol = $"{existingEvt.VolumeNumber}";
+
             existingEvt.VolumeNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId);
             existingEvt.ChapterNumber =
                 await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(seriesId, userId);
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync();
+            _logger.LogInformation("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
+                existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
             return;
         }
 
