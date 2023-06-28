@@ -55,6 +55,14 @@ public static class HashUtil
                 .AddSystemDriveSerialNumber()
                 .AddPlatformSerialNumber())
             .ToString();
+        Console.WriteLine("Seed: {seed}");
+        Console.WriteLine($"Processor Count: {Environment.ProcessorCount}");
+        Console.WriteLine($"OSVersion.Platform Count: {Environment.OSVersion.Platform}");
+        Console.WriteLine($"UserName: {Environment.UserName}");
+        Console.WriteLine($"MacId: {new DeviceIdBuilder().AddMacAddress()}");
+        Console.WriteLine($"MotherboardSerialNumber: {new DeviceIdBuilder().OnLinux(l => l.AddMotherboardSerialNumber())}");
+        Console.WriteLine($"SystemDriveSerialNumber: {new DeviceIdBuilder().OnLinux(l => l.AddSystemDriveSerialNumber())}");
+        Console.WriteLine($"AddPlatformSerialNumber: {new DeviceIdBuilder().OnMac(l => l.AddPlatformSerialNumber())}");
         return CalculateCrc(seed);
     }
 
