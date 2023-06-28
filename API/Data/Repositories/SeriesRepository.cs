@@ -26,6 +26,7 @@ using API.Services.Tasks.Scanner;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using SQLite;
 
 
 namespace API.Data.Repositories;
@@ -1622,7 +1623,22 @@ public class SeriesRepository : ISeriesRepository
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var libraryIds = await _context.Library.GetUserLibrariesByType(userId, libraryType).ToListAsync();
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
-        var result = await _context.Series
+        SeriesDto? result = null;
+        if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
+        {
+            result =  await _context.Series
+                .RestrictAgainstAgeRestriction(userRating)
+                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
+                .Where(s => libraryIds.Contains(s.Library.Id))
+                .Where(s => s.Metadata.WebLinks.Contains(aniListUrl) || s.Metadata.WebLinks.Contains(malUrl))
+                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync();
+        }
+
+        if (result != null) return result;
+
+        return await _context.Series
             .RestrictAgainstAgeRestriction(userRating)
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
                         normalizedNames.Contains(s.NormalizedLocalizedName))
@@ -1630,23 +1646,6 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
-        if (result == null && (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl)))
-        {
-            //https://anilist.co/manga/63031/Imawa-no-Kuni-no-Alice/
-            var results = await _context.Series
-                .RestrictAgainstAgeRestriction(userRating)
-                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
-                .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => EF.Functions.Like(s.Metadata.WebLinks, $"%{aniListUrl}%"))
-                // .WhereIf(!string.IsNullOrEmpty(malUrl), s => EF.Functions.Like(s.Metadata.WebLinks, $"%{malUrl}%"))
-                .Where(s => libraryIds.Contains(s.Library.Id))
-                .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
-                .AsSplitQuery()
-                .ToListAsync();
-
-            return results.FirstOrDefault();
-        }
-
-        return result;
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

@@ -54,12 +54,12 @@ public class ScrobblingService : IScrobblingService
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
 
-    public const string AniListWeblinkWebsite = "https://anilist.co/";
+    public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
 
     private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
-        {AniListWeblinkWebsite, 1},
+        {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
     };
 
@@ -783,6 +783,6 @@ public class ScrobblingService : IScrobblingService
     public static string CreateUrl(string url, long? id)
     {
         if (id is null or 0) return string.Empty;
-        return url + id + "/";
+        return $"{url}{id}/";
     }
 }
