@@ -101,7 +101,7 @@ public class ScrobblingController : BaseApiController
     [HttpPost("scrobble-events")]
     public async Task<ActionResult<PagedList<ScrobbleEventDto>>> GetScrobblingEvents([FromQuery] UserParams pagination, [FromBody] ScrobbleEventFilter filter)
     {
-        pagination ??= new UserParams();
+        pagination ??= UserParams.Default;
         var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), filter, pagination);
         Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
         return Ok(events);

@@ -53,6 +53,10 @@ export class UserScrobbleHistoryComponent implements OnInit {
   }
 
   loadPage(sortEvent?: SortEvent<ScrobbleEvent>) {
+    if (sortEvent && this.pagination) {
+      this.pagination.currentPage = 1;
+      this.cdRef.markForCheck();
+    }
     const page = this.pagination?.currentPage || 0;
     const pageSize = this.pagination?.itemsPerPage || 0;
 
