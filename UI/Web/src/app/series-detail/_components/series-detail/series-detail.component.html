@@ -133,12 +133,9 @@
     </div>
 
     <div class="row pt-4">
-      <app-carousel-reel [items]="reviews" [alwaysShow]="true" title="User Reviews" iconClasses="fa-solid fa-pen" [clickableTitle]="true" (sectionClick)="openReviewModal()">
+      <app-carousel-reel [items]="reviews" [alwaysShow]="true" title="User Reviews" iconClasses="fa-solid fa-{{getUserReview().length > 0 ? 'pen' : 'plus'}}" [clickableTitle]="true" (sectionClick)="openReviewModal()">
         <ng-template #carouselItem let-item let-position="idx">
           <app-review-card [review]="item"></app-review-card>
-        </ng-template>
-        <ng-template #promptToAdd>
-          <app-review-card [review]="promptToAddReview"></app-review-card>
         </ng-template>
       </app-carousel-reel>
     </div>

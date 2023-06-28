@@ -179,8 +179,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
-  promptToAddReview!: UserReview;
-
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     if (this.series === undefined) {
       return;
@@ -328,17 +326,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
-    this.promptToAddReview = {
-      seriesId: this.seriesId,
-      tagline: 'Add your review!',
-      body: 'Add your own review here and share with the server',
-      bodyJustText:'Add your own review here and share with the server',
-      libraryId: this.libraryId,
-      username: this.user!.username,
-      isExternal: false,
-      externalUrl: undefined,
-      score: 0
-    };
     this.loadSeries(this.seriesId);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
@@ -760,8 +747,12 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  getUserReview() {
+    return this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
+  }
+
   openReviewModal() {
-    const userReview = this.reviews.filter(r => r.username === this.user?.username && !r.isExternal);
+    const userReview = this.getUserReview();
 
     const modalRef = this.modalService.open(ReviewSeriesModalComponent, { scrollable: true, size: 'lg' });
     if (userReview.length > 0) {
