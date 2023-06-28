@@ -6,7 +6,9 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Account;
 using API.DTOs.Scrobbling;
+using API.Entities.Scrobble;
 using API.Extensions;
+using API.Helpers;
 using API.Helpers.Builders;
 using API.Services.Plus;
 using Hangfire;
@@ -96,11 +98,13 @@ public class ScrobblingController : BaseApiController
     /// </summary>
     /// <remarks>User must have a valid license</remarks>
     /// <returns></returns>
-    [HttpGet("scrobble-events")]
-    public async Task<ActionResult<IEnumerable<ScrobbleEventDto>>> GetScrobblingEvents()
+    [HttpPost("scrobble-events")]
+    public async Task<ActionResult<PagedList<ScrobbleEventDto>>> GetScrobblingEvents([FromQuery] UserParams pagination, [FromBody] ScrobbleEventFilter filter)
     {
-        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId());
-        return Ok(events.OrderByDescending(e => e.LastModified));
+        pagination ??= new UserParams();
+        var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), filter, pagination);
+        Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
+        return Ok(events);
     }
 
     /// <summary>

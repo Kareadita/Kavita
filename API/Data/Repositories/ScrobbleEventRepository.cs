@@ -6,6 +6,7 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Scrobble;
 using API.Extensions.QueryExtensions;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ public interface IScrobbleRepository
     Task<bool> HasErrorForSeries(int seriesId);
     Task<ScrobbleEvent?> GetEvent(int userId, int seriesId, ScrobbleEventType eventType);
     Task<IEnumerable<ScrobbleEventDto>> GetUserEvents(int userId);
+    Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination);
 }
 
 /// <summary>
@@ -134,5 +136,19 @@ public class ScrobbleRepository : IScrobbleRepository
             .AsSplitQuery()
             .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+    public async Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination)
+    {
+        var query =  _context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId)
+            .Include(e => e.Series)
+            .SortBy(filter.Field, filter.IsDescending)
+            .WhereIf(!string.IsNullOrEmpty(filter.Query), s =>
+                EF.Functions.Like(s.Series.Name, $"%{filter.Query}%")
+            )
+            .AsSplitQuery()
+            .ProjectTo<ScrobbleEventDto>(_mapper.ConfigurationProvider);
+
+        return await PagedList<ScrobbleEventDto>.CreateAsync(query, pagination.PageNumber, pagination.PageSize);
     }
 }

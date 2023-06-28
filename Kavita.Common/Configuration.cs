@@ -236,11 +236,11 @@ public static class Configuration
                 var baseUrl = tokenElement.GetString();
                 if (!string.IsNullOrEmpty(baseUrl))
                 {
-                    baseUrl = !baseUrl.StartsWith("/")
+                    baseUrl = !baseUrl.StartsWith('/')
                                 ? $"/{baseUrl}"
                                 : baseUrl;
 
-                    baseUrl = !baseUrl.EndsWith("/")
+                    baseUrl = !baseUrl.EndsWith('/')
                                 ? $"{baseUrl}/"
                                 : baseUrl;
 
@@ -260,11 +260,11 @@ public static class Configuration
     private static void SetBaseUrl(string filePath, string value)
     {
 
-        var baseUrl = !value.StartsWith("/")
+        var baseUrl = !value.StartsWith('/')
             ? $"/{value}"
             : value;
 
-        baseUrl = !baseUrl.EndsWith("/")
+        baseUrl = !baseUrl.EndsWith('/')
                     ? $"{baseUrl}/"
                     : baseUrl;
 

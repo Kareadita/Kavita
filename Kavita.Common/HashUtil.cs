@@ -55,7 +55,7 @@ public static class HashUtil
                 .AddSystemDriveSerialNumber()
                 .AddPlatformSerialNumber())
             .ToString();
-        Console.WriteLine("Seed: {seed}");
+        Console.WriteLine($"Seed: {seed}");
         Console.WriteLine($"Processor Count: {Environment.ProcessorCount}");
         Console.WriteLine($"OSVersion.Platform Count: {Environment.OSVersion.Platform}");
         Console.WriteLine($"UserName: {Environment.UserName}");

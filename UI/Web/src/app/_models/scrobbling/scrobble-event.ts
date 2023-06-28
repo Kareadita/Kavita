@@ -15,6 +15,7 @@ export interface ScrobbleEvent {
   rating: number | null;
   processedDateUtc: string;
   lastModified: string;
+  created: string;
   volumeNumber: number | null;
   chapterNumber: number | null;
 }
