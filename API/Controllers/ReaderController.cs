@@ -62,7 +62,7 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("pdf")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult<PhysicalFileResult>> GetPdf(int chapterId, string apiKey)
+    public async Task<ActionResult> GetPdf(int chapterId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId);
@@ -100,7 +100,7 @@ public class ReaderController : BaseApiController
     [HttpGet("image")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId","page", "extractPdf", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult<PhysicalFileResult>> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
+    public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
@@ -132,7 +132,7 @@ public class ReaderController : BaseApiController
     [HttpGet("thumbnail")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult<PhysicalFileResult>> GetThumbnail(int chapterId, int pageNum, string apiKey)
+    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
@@ -155,7 +155,7 @@ public class ReaderController : BaseApiController
     [HttpGet("bookmark-image")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "page", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult<PhysicalFileResult>> GetBookmarkImage(int seriesId, string apiKey, int page)
+    public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);

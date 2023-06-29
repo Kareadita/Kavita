@@ -147,7 +147,7 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("logs")]
-    public ActionResult<PhysicalFileResult> GetLogs()
+    public ActionResult GetLogs()
     {
         var files = _backupService.GetLogFiles();
         try

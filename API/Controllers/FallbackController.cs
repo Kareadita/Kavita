@@ -18,7 +18,7 @@ public class FallbackController : Controller
         _taskScheduler = taskScheduler;
     }
 
-    public ActionResult<PhysicalFileResult> Index()
+    public PhysicalFileResult Index()
     {
         return PhysicalFile(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html"), "text/HTML");
     }

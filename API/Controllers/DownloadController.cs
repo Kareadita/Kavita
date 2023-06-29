@@ -90,7 +90,7 @@ public class DownloadController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy="RequireDownloadRole")]
     [HttpGet("volume")]
-    public async Task<ActionResult<PhysicalFileResult>> DownloadVolume(int volumeId)
+    public async Task<ActionResult> DownloadVolume(int volumeId)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
         var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
@@ -114,7 +114,7 @@ public class DownloadController : BaseApiController
         return await _accountService.HasDownloadPermission(user);
     }
 
-    private ActionResult<PhysicalFileResult> GetFirstFileDownload(IEnumerable<MangaFile> files)
+    private ActionResult GetFirstFileDownload(IEnumerable<MangaFile> files)
     {
         var (zipFile, contentType, fileDownloadName) = _downloadService.GetFirstFileDownload(files);
         return PhysicalFile(zipFile, contentType, Uri.EscapeDataString(fileDownloadName), true);
@@ -126,7 +126,7 @@ public class DownloadController : BaseApiController
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("chapter")]
-    public async Task<ActionResult<PhysicalFileResult>> DownloadChapter(int chapterId)
+    public async Task<ActionResult> DownloadChapter(int chapterId)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
@@ -144,7 +144,7 @@ public class DownloadController : BaseApiController
         }
     }
 
-    private async Task<ActionResult<PhysicalFileResult>> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
+    private async Task<ActionResult> DownloadFiles(ICollection<MangaFile> files, string tempFolder, string downloadName)
     {
         try
         {
@@ -176,7 +176,7 @@ public class DownloadController : BaseApiController
     }
 
     [HttpGet("series")]
-    public async Task<ActionResult<PhysicalFileResult>> DownloadSeries(int seriesId)
+    public async Task<ActionResult> DownloadSeries(int seriesId)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
@@ -198,7 +198,7 @@ public class DownloadController : BaseApiController
     /// <param name="downloadBookmarkDto"></param>
     /// <returns></returns>
     [HttpPost("bookmarks")]
-    public async Task<ActionResult<PhysicalFileResult>> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
+    public async Task<ActionResult> DownloadBookmarkPages(DownloadBookmarkDto downloadBookmarkDto)
     {
         if (!await HasDownloadPermission()) return BadRequest("You do not have permission");
         if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest("Bookmarks cannot be empty");
