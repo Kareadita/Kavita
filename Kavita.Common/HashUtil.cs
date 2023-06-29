@@ -50,10 +50,10 @@ public static class HashUtil
                 .AddSystemDriveSerialNumber())
             .OnLinux(linux => linux
                 .AddMotherboardSerialNumber()
-                .AddSystemDriveSerialNumber())
+                .AddSystemDriveSerialNumber()) // On Docker, this is always the same
             .OnMac(mac => mac
                 .AddSystemDriveSerialNumber()
-                .AddPlatformSerialNumber())
+                .AddPlatformSerialNumber())// On Docker, this is the same as SystemDriveSerialNumber
             .ToString();
         Console.WriteLine($"Seed: {seed}");
         Console.WriteLine($"Processor Count: {Environment.ProcessorCount}");
