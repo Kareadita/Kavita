@@ -38,7 +38,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("chapter-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult> GetChapterCoverImage(int chapterId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetChapterCoverImage(int chapterId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
@@ -55,7 +55,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("library-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"libraryId", "apiKey"})]
-    public async Task<ActionResult> GetLibraryCoverImage(int libraryId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetLibraryCoverImage(int libraryId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
@@ -72,7 +72,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("volume-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"volumeId", "apiKey"})]
-    public async Task<ActionResult> GetVolumeCoverImage(int volumeId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetVolumeCoverImage(int volumeId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
@@ -89,7 +89,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"seriesId", "apiKey"})]
     [HttpGet("series-cover")]
-    public async Task<ActionResult> GetSeriesCoverImage(int seriesId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetSeriesCoverImage(int seriesId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
@@ -108,7 +108,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("collection-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"collectionTagId", "apiKey"})]
-    public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetCollectionCoverImage(int collectionTagId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
@@ -125,7 +125,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"readingListId", "apiKey"})]
-    public async Task<ActionResult> GetReadingListCoverImage(int readingListId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetReadingListCoverImage(int readingListId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
@@ -145,7 +145,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("bookmark")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
-    public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetBookmarkImage(int chapterId, int pageNum, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
@@ -167,7 +167,7 @@ public class ImageController : BaseApiController
     /// <returns></returns>
     [HttpGet("web-link")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month, VaryByQueryKeys = new []{"url", "apiKey"})]
-    public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetWebLinkImage(string url, string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
@@ -204,7 +204,7 @@ public class ImageController : BaseApiController
     [Authorize(Policy="RequireAdminRole")]
     [HttpGet("cover-upload")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Images, VaryByQueryKeys = new []{"filename", "apiKey"})]
-    public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetCoverUploadImage(string filename, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         if (filename.Contains("..")) return BadRequest("Invalid Filename");

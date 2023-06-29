@@ -62,7 +62,7 @@ public class ReaderController : BaseApiController
     /// <returns></returns>
     [HttpGet("pdf")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "apiKey"})]
-    public async Task<ActionResult> GetPdf(int chapterId, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetPdf(int chapterId, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId);
@@ -79,7 +79,7 @@ public class ReaderController : BaseApiController
             var path = _cacheService.GetCachedFile(chapter);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
-            return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(Path.GetExtension(path)), Path.GetFileName(path), true);
         }
         catch (Exception)
         {
@@ -100,7 +100,7 @@ public class ReaderController : BaseApiController
     [HttpGet("image")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId","page", "extractPdf", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
+    public async Task<ActionResult<PhysicalFileResult>> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
@@ -122,10 +122,17 @@ public class ReaderController : BaseApiController
         }
     }
 
+    /// <summary>
+    /// Returns a thumbnail for the given page number
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="pageNum"></param>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
     [HttpGet("thumbnail")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
+    public async Task<ActionResult<PhysicalFileResult>> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
@@ -148,7 +155,7 @@ public class ReaderController : BaseApiController
     [HttpGet("bookmark-image")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"seriesId", "page", "apiKey"})]
     [AllowAnonymous]
-    public async Task<ActionResult> GetBookmarkImage(int seriesId, string apiKey, int page)
+    public async Task<ActionResult<PhysicalFileResult>> GetBookmarkImage(int seriesId, string apiKey, int page)
     {
         if (page < 0) page = 0;
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);

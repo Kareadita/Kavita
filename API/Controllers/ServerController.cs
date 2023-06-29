@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using MimeTypes;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -145,13 +146,13 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("logs")]
-    public ActionResult GetLogs()
+    public ActionResult<PhysicalFileResult> GetLogs()
     {
         var files = _backupService.GetLogFiles();
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip",
+            return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)

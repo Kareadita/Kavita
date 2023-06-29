@@ -657,7 +657,7 @@ public class OpdsController : BaseApiController
     /// <param name="filename">Not used. Only for Chunky to allow download links</param>
     /// <returns></returns>
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
-    public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
+    public async Task<ActionResult<PhysicalFileResult>> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest("OPDS is not enabled on this server");
