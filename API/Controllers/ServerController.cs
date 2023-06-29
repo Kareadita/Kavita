@@ -136,7 +136,8 @@ public class ServerController : BaseApiController
             return BadRequest(
                 "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
         }
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
+        _taskScheduler.CovertAllCoversToEncoding();
 
         return Ok();
     }
