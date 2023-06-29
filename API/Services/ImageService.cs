@@ -77,6 +77,10 @@ public class ImageService : IImageService
     /// </summary>
     private const int ThumbnailWidth = 320;
     /// <summary>
+    /// Height of the Thumbnail generation
+    /// </summary>
+    private const int ThumbnailHeight = 455;
+    /// <summary>
     /// Width of a cover for Library
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
@@ -124,7 +128,7 @@ public class ImageService : IImageService
 
         try
         {
-            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
+            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
@@ -148,7 +152,7 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
-        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -161,7 +165,7 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
-        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth);
+        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
