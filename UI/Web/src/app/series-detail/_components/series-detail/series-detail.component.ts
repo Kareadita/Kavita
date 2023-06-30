@@ -613,7 +613,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   loadReviews(loadRecs: boolean = false) {
-    console.log('fetching reviews')
     this.seriesService.getReviews(this.seriesId).subscribe(reviews => {
       this.reviews = [...reviews];
       if (loadRecs) {

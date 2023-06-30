@@ -20,12 +20,6 @@
         }
     }
 
-    .side-nav-img {
-        width: 20px;
-        height: 18px;
-    }
-
-
     span {
         display:flex;
 
@@ -42,7 +36,7 @@
             min-width: 30px;
             width: 100%;
             padding-left: 5px;
-    
+
             i {
                 font-size: 18px;
             }
@@ -99,7 +93,7 @@
                 color: var(--side-nav-hover-text-color) !important;
             }
         }
-        
+
     }
 }
 
@@ -120,7 +114,7 @@ a {
             width: 100%;
         }
 
-    
+
         &.closed {
             .card-actions {
                font-size: inherit;
