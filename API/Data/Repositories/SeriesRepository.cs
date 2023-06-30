@@ -1118,13 +1118,13 @@ public class SeriesRepository : ISeriesRepository
             if (item.SeriesName == null) continue;
 
 
-            if (seriesMap.TryGetValue(item.SeriesName, out var value))
+            if (seriesMap.TryGetValue(item.SeriesName + "_" + item.LibraryId, out var value))
             {
                 value.Count += 1;
             }
             else
             {
-                seriesMap[item.SeriesName] = new GroupedSeriesDto()
+                seriesMap[item.SeriesName + "_" + item.LibraryId] = new GroupedSeriesDto()
                 {
                     LibraryId = item.LibraryId,
                     LibraryType = item.LibraryType,
