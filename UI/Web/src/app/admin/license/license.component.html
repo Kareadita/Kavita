@@ -7,7 +7,13 @@
         </div>
         <div class="col-2 text-end">
           <ng-container *ngIf="hasLicense; else noLicense">
-            <a class="btn btn-primary btn-sm me-1" href="https://billing.stripe.com/p/login/test_14kfZocuh6Tz5ag7ss" target="_blank" rel="noreferrer nofollow">Manage</a>
+            <ng-container *ngIf="hasValidLicense; else invalidLicenseBuy">
+              <a class="btn btn-primary btn-sm me-1" href="https://billing.stripe.com/p/login/test_14kfZocuh6Tz5ag7ss" target="_blank" rel="noreferrer nofollow">Manage</a>
+            </ng-container>
+            <ng-template #invalidLicenseBuy>
+              <a class="btn btn-primary btn-sm me-1" ngbTooltip="If your subscription has elapsed, you will need to re-register"
+                 href="https://buy.stripe.com/test_8wM4ie2dg5j77o4cMO" target="_blank" rel="noreferrer nofollow">Buy</a>
+            </ng-template>
             <button class="btn btn-secondary btn-sm me-1" style="width: 58px" (click)="validateLicense()">
               <span *ngIf="!isChecking">Check</span>
               <app-loading [loading]="isChecking" size="spinner-border-sm"></app-loading>
@@ -18,7 +24,7 @@
             </button>
           </ng-container>
           <ng-template #noLicense>
-            <a class="btn btn-secondary btn-sm me-1" href="https://buy.stripe.com/test_4gwg0W7xA9zn9wcbIJ" target="_blank" rel="noreferrer nofollow">Buy Kavita+</a>
+            <a class="btn btn-secondary btn-sm me-1" href="https://buy.stripe.com/test_8wM4ie2dg5j77o4cMO?prefilled_promo_code=FREETRIAL" target="_blank" rel="noreferrer nofollow">Buy</a>
             <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? 'Activate' : 'Cancel'}}</button>
           </ng-template>
         </div>
