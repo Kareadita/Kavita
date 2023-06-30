@@ -29,7 +29,10 @@ export class ExternalRatingComponent implements OnInit {
       this.ratings = res;
       this.isLoading = false;
       this.cdRef.markForCheck();
-    })
+    }, err => {
+      this.isLoading = false;
+      this.cdRef.markForCheck();
+    });
   }
 
   updateRating(rating: any) {

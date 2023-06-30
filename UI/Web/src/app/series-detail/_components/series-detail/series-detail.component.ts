@@ -583,7 +583,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * This assumes loadPage() has already primed all the calculations and state variables. Do not call directly.
    */
   updateSelectedTab() {
-
     // Book libraries only have Volumes or Specials enabled
     if (this.libraryType === LibraryType.Book) {
       if (this.volumes.length === 0) {

@@ -1,4 +1,4 @@
-<div class="row g-0 mb-4 mt-3">
+<div class="row g-0 mt-3">
     <ng-container *ngIf="seriesMetadata.releaseYear > 0">
         <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
             <app-icon-and-title label="Release" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
@@ -41,7 +41,7 @@
         <div class="vr m-2 d-none d-lg-block"></div>
     </ng-container>
 
-    <ng-container *ngIf="userHasLicense">
+    <ng-container *ngIf="accountService.hasValidLicense$ | async">
       <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
           <app-icon-and-title label="Scrobbling" [clickable]="libraryAllowsScrobbling"
                               fontClasses="fa-solid fa-tower-{{(isScrobbling && libraryAllowsScrobbling) ? 'broadcast' : 'observation'}}"
