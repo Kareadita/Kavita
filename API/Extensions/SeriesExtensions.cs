@@ -46,7 +46,7 @@ public static class SeriesExtensions
                 .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
                 .ToList();
-            if ((1.0f * volumes.First().Number) > float.Parse(looseLeafChapters.First().Number))
+            if (looseLeafChapters.Count > 0 && (1.0f * volumes.First().Number) > float.Parse(looseLeafChapters.First().Number))
             {
                 return looseLeafChapters[0].CoverImage;
             }
