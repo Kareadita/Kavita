@@ -109,7 +109,7 @@
               <div style="display: flex;padding: 5px;" class="clickable" (click)="clickChapterSearchResult(item)">
                 <div class="ms-1">
                   <ng-container *ngIf="item.files.length > 0">
-                    <app-series-format [format]="item.files[0].format"></app-series-format>
+                    <app-series-format [format]="item.files?.[0].format"></app-series-format>
                   </ng-container>
                   <span>{{item.titleName}}</span>
                 </div>

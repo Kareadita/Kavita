@@ -7,14 +7,12 @@ import {
   inject,
   Inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
@@ -73,22 +71,16 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       takeUntilDestroyed(this.destroyRef)
     );
 
-    this.imageContainerHeight$ = this.readerSettings$.pipe(
-      map(values => values.fitting),
-      map(mode => {
-        if ( mode !== FITTING_OPTION.HEIGHT) return '';
-
-        const readingArea = this.document.querySelector('.reading-area');
-        if (!readingArea) return 'calc(100vh)';
-
-        if (this.currentImage.width - readingArea.scrollWidth > 0) {
-          return 'calc(100vh - 34px)'
-        }
-        return 'calc(100vh)'
-      }),
+    this.imageContainerHeight$ = this.image$.pipe(
       filter(_ => this.isValid()),
+      switchMap(img => {
+        console.log('image update');
+        this.cdRef.markForCheck();
+        return this.calculateImageContainerHeight$();
+      }),
       takeUntilDestroyed(this.destroyRef)
     );
+
 
     this.pageNum$.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -146,6 +138,25 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       shareReplay(),
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef),
+    );
+  }
+
+  private calculateImageContainerHeight$(): Observable<string> {
+    return this.readerSettings$.pipe(
+      map(values => values.fitting),
+      map(mode => {
+        if (mode !== FITTING_OPTION.HEIGHT) return '';
+
+        const readingArea = this.document.querySelector('.reading-area');
+        if (!readingArea) return 'calc(100vh)';
+
+        // If you ever see fit to height and a bit of scrollbar, it's due to currentImage not being ready on first load
+        if (this.currentImage?.width - readingArea.scrollWidth > 0) {
+          return 'calc(100vh - 34px)';
+        }
+        return 'calc(100vh)';
+      }),
+      filter(_ => this.isValid())
     );
   }
 

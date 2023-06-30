@@ -7,11 +7,10 @@ import {
   inject,
   Inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, shareReplay, filter, combineLatest } from 'rxjs';
+import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -75,7 +74,6 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
 
 
   get ReaderMode() {return ReaderMode;}
-  get FITTING_OPTION() {return FITTING_OPTION;}
   get LayoutMode() {return LayoutMode;}
 
 
