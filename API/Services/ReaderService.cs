@@ -507,7 +507,7 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => double.Parse(c.Number), _chapterSortComparer) // BUG: This is throwing an exception when Range is 1-11
+            .OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
@@ -535,7 +535,7 @@ public class ReaderService : IReaderService
         }
 
         // If the last chapter didn't fit, then we need the next chapter without full progress
-        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages);
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages && !c.IsSpecial);
         if (firstChapterWithoutProgress != null)
         {
             return firstChapterWithoutProgress;

@@ -1667,6 +1667,59 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesRead_HasSpecialAndLooseChapters_Unread()
+    {
+        await ResetDb();
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("0")
+                .WithChapter(new ChapterBuilder("100").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("101").WithPages(1).Build())
+                .WithChapter(new ChapterBuilder("Christmas Eve").WithIsSpecial(true).WithPages(1).Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("2")
+                .WithChapter(new ChapterBuilder("0").WithPages(1).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        var user = new AppUser()
+        {
+            UserName = "majora2007"
+        };
+        _context.AppUser.Add(user);
+
+        await _context.SaveChangesAsync();
+
+        // Mark everything but chapter 101 as read
+        await _readerService.MarkSeriesAsRead(user, 1);
+        await _unitOfWork.CommitAsync();
+
+        // Unmark last chapter as read
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
+        foreach (var chapt in vol.Chapters)
+        {
+            await _readerService.SaveReadingProgress(new ProgressDto()
+            {
+                PageNum = 0,
+                ChapterId = chapt.Id,
+                SeriesId = 1,
+                VolumeId = 1
+            }, 1);
+        }
+        await _context.SaveChangesAsync();
+
+        var nextChapter = await _readerService.GetContinuePoint(1, 1);
+
+        Assert.Equal("100", nextChapter.Range);
+    }
+
+    [Fact]
     public async Task GetContinuePoint_ShouldReturnLooseChapter_WhenAllVolumesAndAFewLooseChaptersRead()
     {
         await ResetDb();
@@ -1697,24 +1750,23 @@ public class ReaderServiceTests
 
         await _context.SaveChangesAsync();
 
-
-
         // Mark everything but chapter 101 as read
         await _readerService.MarkSeriesAsRead(user, 1);
         await _unitOfWork.CommitAsync();
 
         // Unmark last chapter as read
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1);
         await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
-            ChapterId = (await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1)).Chapters.ElementAt(1).Id,
+            ChapterId = vol.Chapters.ElementAt(1).Id,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
         await _readerService.SaveReadingProgress(new ProgressDto()
         {
             PageNum = 0,
-            ChapterId = (await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(1)).Chapters.ElementAt(2).Id,
+            ChapterId = vol.Chapters.ElementAt(2).Id,
             SeriesId = 1,
             VolumeId = 1
         }, 1);
