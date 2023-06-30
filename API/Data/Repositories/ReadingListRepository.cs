@@ -106,6 +106,7 @@ public class ReadingListRepository : IReadingListRepository
             .Where(item => item.ReadingListId == readingListId)
             .SelectMany(item => item.Chapter.People.Where(p => p.Role == PersonRole.Character))
             .OrderBy(p => p.NormalizedName)
+            .Distinct()
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
     }
