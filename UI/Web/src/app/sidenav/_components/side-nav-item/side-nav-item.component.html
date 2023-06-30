@@ -1,4 +1,4 @@
-<ng-container *ngIf="link === undefined || link.length === 0; else useLink">
+<ng-container *ngIf="link === undefined || link?.length === 0; else useLink">
     <div class="side-nav-item" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </div>

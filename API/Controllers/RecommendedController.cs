@@ -44,7 +44,7 @@ public class RecommendedController : BaseApiController
         var userId = User.GetUserId();
         if (!await _licenseService.HasActiveLicense())
         {
-            return Ok(new List<SeriesDto>());
+            return Ok(new RecommendationDto());
         }
 
         if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))

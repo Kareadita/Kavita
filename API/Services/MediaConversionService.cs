@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Comparators;
 using API.Data;
 using API.Entities.Enums;
 using API.Extensions;
@@ -120,46 +121,21 @@ public class MediaConversionService : IMediaConversionService
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started));
 
         var chapterCovers = await _unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat);
-        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
+        var customSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
+        var seriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, false);
+        var nonCustomOrConvertedVolumeCovers = await _unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
 
         var readingListCovers = await _unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
         var libraryCovers = await _unitOfWork.LibraryRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
         var collectionCovers = await _unitOfWork.CollectionTagRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
 
         var totalCount = chapterCovers.Count + seriesCovers.Count + readingListCovers.Count +
-                         libraryCovers.Count + collectionCovers.Count;
+                         libraryCovers.Count + collectionCovers.Count + nonCustomOrConvertedVolumeCovers.Count + customSeriesCovers.Count;
 
         var count = 1F;
         _logger.LogInformation("[MediaConversionService] Starting conversion of chapters");
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(0, ProgressEventType.Started));
-        foreach (var chapter in chapterCovers)
-        {
-            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, chapter.CoverImage, coverDirectory, encodeFormat);
-            chapter.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.ChapterRepository.Update(chapter);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated));
-            count++;
-        }
-
-        _logger.LogInformation("[MediaConversionService] Starting conversion of series");
-        foreach (var series in seriesCovers)
-        {
-            if (string.IsNullOrEmpty(series.CoverImage)) continue;
-
-            var newFile = await SaveAsEncodingFormat(coverDirectory, series.CoverImage, coverDirectory, encodeFormat);
-            series.CoverImage = Path.GetFileName(newFile);
-            _unitOfWork.SeriesRepository.Update(series);
-            await _unitOfWork.CommitAsync();
-            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated));
-            count++;
-        }
-
         _logger.LogInformation("[MediaConversionService] Starting conversion of libraries");
         foreach (var library in libraryCovers)
         {
@@ -202,24 +178,57 @@ public class MediaConversionService : IMediaConversionService
             count++;
         }
 
+        _logger.LogInformation("[MediaConversionService] Starting conversion of chapters");
+        foreach (var chapter in chapterCovers)
+        {
+            if (string.IsNullOrEmpty(chapter.CoverImage)) continue;
+
+            var newFile = await SaveAsEncodingFormat(coverDirectory, chapter.CoverImage, coverDirectory, encodeFormat);
+            chapter.CoverImage = Path.GetFileName(newFile);
+            _unitOfWork.ChapterRepository.Update(chapter);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated));
+            count++;
+        }
+
         // Now null out all series and volumes that aren't webp or custom
-        var nonCustomOrConvertedVolumeCovers = await _unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
+        _logger.LogInformation("[MediaConversionService] Starting conversion of volumes");
         foreach (var volume in nonCustomOrConvertedVolumeCovers)
         {
             if (string.IsNullOrEmpty(volume.CoverImage)) continue;
-            volume.CoverImage = null; // We null it out so when we call Refresh Metadata it will auto update from first chapter
+            volume.CoverImage = volume.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
             _unitOfWork.VolumeRepository.Update(volume);
             await _unitOfWork.CommitAsync();
         }
 
-        var nonCustomOrConvertedSeriesCovers = await _unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, false);
-        foreach (var series in nonCustomOrConvertedSeriesCovers)
+        _logger.LogInformation("[MediaConversionService] Starting conversion of series");
+        foreach (var series in customSeriesCovers)
         {
             if (string.IsNullOrEmpty(series.CoverImage)) continue;
-            series.CoverImage = null; // We null it out so when we call Refresh Metadata it will auto update from first chapter
+
+            var newFile = await SaveAsEncodingFormat(coverDirectory, series.CoverImage, coverDirectory, encodeFormat);
+            series.CoverImage = string.IsNullOrEmpty(newFile) ?
+                series.CoverImage.Replace(Path.GetExtension(series.CoverImage), encodeFormat.GetExtension()) : Path.GetFileName(newFile);
+
+            _unitOfWork.SeriesRepository.Update(series);
+            await _unitOfWork.CommitAsync();
+            await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated));
+            count++;
+        }
+
+        foreach (var series in seriesCovers)
+        {
+            if (string.IsNullOrEmpty(series.CoverImage)) continue;
+            series.CoverImage = series.GetCoverImage();
             _unitOfWork.SeriesRepository.Update(series);
             await _unitOfWork.CommitAsync();
         }
+
+        // Get all volumes and remap their covers
+
+        // Get all series and remap their covers
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.ConvertCoverProgressEvent(1F, ProgressEventType.Ended));

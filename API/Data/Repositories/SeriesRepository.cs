@@ -580,17 +580,26 @@ public class SeriesRepository : ISeriesRepository
     /// <summary>
     /// Returns custom images only
     /// </summary>
+    /// <remarks>If customOnly, this will not include any volumes/chapters</remarks>
     /// <returns></returns>
     public async Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
         bool customOnly = true)
     {
         var extension = encodeFormat.GetExtension();
         var prefix = ImageService.GetSeriesFormat(0).Replace("0", string.Empty);
-        return await _context.Series
+        var query = _context.Series
             .Where(c => !string.IsNullOrEmpty(c.CoverImage)
                         && !c.CoverImage.EndsWith(extension)
                         && (!customOnly || c.CoverImage.StartsWith(prefix)))
-            .ToListAsync();
+            .AsSplitQuery();
+
+        if (!customOnly)
+        {
+            query = query.Include(s => s.Volumes)
+                .ThenInclude(v => v.Chapters);
+        }
+
+        return await query.ToListAsync();
     }
 
 

@@ -207,9 +207,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    /// <summary>
-    /// Do not invoke this manually, always enqueue on a background thread
-    /// </summary>
     public void CovertAllCoversToEncoding()
     {
         var defaultParams = Array.Empty<object>();
@@ -219,18 +216,7 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        var jobId = BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
-        BackgroundJob.ContinueJobWith(jobId, () => ScanAfterCoverConversion());
-    }
-
-    private async Task ScanAfterCoverConversion()
-    {
-        _logger.LogInformation("Queuing tasks to update Series and Volume references via Cover Refresh");
-        var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
-        foreach (var lib in libraryIds)
-        {
-            RefreshMetadata(lib.Id, false);
-        }
+        BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
     }
 
     #endregion
