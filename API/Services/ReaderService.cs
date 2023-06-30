@@ -14,6 +14,7 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Services.Plus;
 using API.Services.Tasks;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -351,7 +352,8 @@ public class ReaderService : IReaderService
     /// <returns>-1 if nothing can be found</returns>
     public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
     {
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
+            .ToList();
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
@@ -389,7 +391,7 @@ public class ReaderService : IReaderService
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
             var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
-            if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
+            if (currentChapter.Number.Equals(Parser.DefaultChapter) && chapters.Last().Number.Equals(Parser.DefaultChapter))
             {
                 // We need to handle an extra check if the current chapter is the last special, as we should return -1
                 if (currentChapter.IsSpecial) return -1;
@@ -408,17 +410,45 @@ public class ReaderService : IReaderService
             } else if (double.Parse(firstChapter.Number) >= double.Parse(currentChapter.Number)) return firstChapter.Id;
             // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
             else if (double.Parse(firstChapter.Number) == 0) return firstChapter.Id;
+
+            // If on last volume AND there are no specials left, then let's return -1
+            var anySpecials = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
+                .SelectMany(v => v.Chapters.Where(c => c.IsSpecial)).Any();
+            if (currentVolume.Number != 0 && !anySpecials)
+            {
+                return -1;
+            }
         }
+
+
 
         // If we are the last volume and we didn't find any next volume, loop back to volume 0 and give the first chapter
         // This has an added problem that it will loop up to the beginning always
         // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
+
         if (currentVolume.Number != 0 && currentVolume.Number == volumes.LastOrDefault()?.Number && volumes.Count > 1)
         {
             var chapterVolume = volumes.FirstOrDefault();
             if (chapterVolume?.Number != 0) return -1;
+
+            // This is my attempt at fixing a bug where we loop around to the beginning, but I just can't seem to figure it out
+            // var orderedVolumes = volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).ToList();
+            // if (currentVolume.Number == orderedVolumes.FirstOrDefault().Number)
+            // {
+            //     // We can move into loose leaf chapters
+            //     //var firstLooseLeaf = volumes.LastOrDefault().Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
+            //     var nextChapterId = GetNextChapterId(
+            //         volumes.LastOrDefault().Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer),
+            //         "0", dto => dto.Range);
+            //     // CHECK if we need a IsSpecial check
+            //     if (nextChapterId > 0) return nextChapterId;
+            // }
+
+
             var firstChapter = chapterVolume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
             if (firstChapter == null) return -1;
+
+
             return firstChapter.Id;
         }
 
