@@ -5,6 +5,7 @@ import {Rating} from "../../../_models/rating";
 import {ProviderImagePipe} from "../../../pipe/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
   selector: 'app-external-rating',
@@ -19,19 +20,26 @@ export class ExternalRatingComponent implements OnInit {
   @Input({required: true}) userRating!: number;
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
+  private readonly accountService = inject(AccountService);
 
   ratings: Array<Rating> = [];
-  isLoading: boolean = true;
+  isLoading: boolean = false;
 
 
   ngOnInit() {
-    this.seriesService.getRatings(this.seriesId).subscribe(res => {
-      this.ratings = res;
-      this.isLoading = false;
+
+    this.accountService.hasValidLicense$.subscribe((res) => {
+      if (!res) return;
+      this.isLoading = true;
       this.cdRef.markForCheck();
-    }, err => {
-      this.isLoading = false;
-      this.cdRef.markForCheck();
+      this.seriesService.getRatings(this.seriesId).subscribe(res => {
+        this.ratings = res;
+        this.isLoading = false;
+        this.cdRef.markForCheck();
+      }, () => {
+        this.isLoading = false;
+        this.cdRef.markForCheck();
+      });
     });
   }
 
