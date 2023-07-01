@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
-public class PlusSeriesDto
+public record PlusSeriesDto
 {
     public int? AniListId { get; set; }
     public long? MalId { get; set; }

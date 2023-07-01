@@ -585,6 +585,17 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
         {
+            // Recalculate the highest volume/chapter
+            foreach (var readEvt in readEvents)
+            {
+                readEvt.VolumeNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
+                        readEvt.AppUser.Id);
+                readEvt.ChapterNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,
+                        readEvt.AppUser.Id);
+                _unitOfWork.ScrobbleRepository.Update(readEvt);
+            }
             progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
                 Format = evt.Format,
