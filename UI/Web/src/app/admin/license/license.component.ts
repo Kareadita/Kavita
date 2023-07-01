@@ -59,7 +59,7 @@ export class LicenseComponent implements OnInit {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
         if (!this.hasValidLicense) {
-          this.toastr.info("License Key saved, but it is not valid. Please ensure you have an active subscription then press check");
+          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription.");
         } else {
           this.toastr.success('Kavita+ unlocked! Please refresh the page');
         }
@@ -69,7 +69,6 @@ export class LicenseComponent implements OnInit {
         this.cdRef.markForCheck();
         this.isSaving = false;
       });
-
     }, err => {
       this.toastr.error("There was an error when activating your license. Please try again.");
     });

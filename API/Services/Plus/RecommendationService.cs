@@ -113,8 +113,8 @@ public class RecommendationService : IRecommendationService
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, recDto.OwnedSeries);
 
-        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).ToList();
-        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).ToList();
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).OrderBy(r => r.Name).ToList();
+        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).OrderBy(r => r.Name).ToList();
 
         return recDto;
     }
