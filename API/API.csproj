@@ -62,7 +62,7 @@
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="Hangfire" Version="1.8.3" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.3" />
-    <PackageReference Include="Hangfire.InMemory" Version="0.5.0" />
+    <PackageReference Include="Hangfire.InMemory" Version="0.5.1" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.4" />
@@ -81,7 +81,7 @@
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.3.2" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="Nager.ArticleNumber" Version="1.0.7" />
-    <PackageReference Include="NetVips" Version="2.3.0" />
+    <PackageReference Include="NetVips" Version="2.3.1" />
     <PackageReference Include="NetVips.Native" Version="8.14.2" />
     <PackageReference Include="NReco.Logging.File" Version="1.1.6" />
     <PackageReference Include="Serilog" Version="3.0.1" />
