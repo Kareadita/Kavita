@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs.Account;
+using API.DTOs.License;
 using API.Entities.Enums;
 using API.Services.Plus;
 using Kavita.Common;

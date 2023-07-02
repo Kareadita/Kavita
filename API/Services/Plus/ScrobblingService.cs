@@ -19,7 +19,6 @@ using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace API.Services.Plus;
 
@@ -231,7 +230,7 @@ public class ScrobblingService : IScrobblingService
         if (existingEvt is {IsProcessed: false})
         {
             // We need to just update Volume/Chapter number
-            _logger.LogDebug("Overriding scrobble event for {Series} from Rating {rating} -> {updatedRating}",
+            _logger.LogDebug("Overriding scrobble event for {Series} from Rating {Rating} -> {UpdatedRating}",
                 existingEvt.Series.Name, existingEvt.Rating, rating);
             existingEvt.Rating = rating;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
@@ -585,6 +584,17 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Found {TotalEvents} Scrobble Events", totalProgress);
         try
         {
+            // Recalculate the highest volume/chapter
+            foreach (var readEvt in readEvents)
+            {
+                readEvt.VolumeNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
+                        readEvt.AppUser.Id);
+                readEvt.ChapterNumber =
+                    await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,
+                        readEvt.AppUser.Id);
+                _unitOfWork.ScrobbleRepository.Update(readEvt);
+            }
             progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
             {
                 Format = evt.Format,

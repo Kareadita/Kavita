@@ -32,7 +32,7 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-    Task CovertAllCoversToEncoding();
+    void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
     Task ScrobbleUpdates(int userId);
 
@@ -207,10 +207,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    /// <summary>
-    /// Do not invoke this manually, always enqueue on a background thread
-    /// </summary>
-    public async Task CovertAllCoversToEncoding()
+    public void CovertAllCoversToEncoding()
     {
         var defaultParams = Array.Empty<object>();
         if (MediaConversionService.ConversionMethods.Any(method =>
@@ -219,13 +216,7 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        await _mediaConversionService.ConvertAllManagedMediaToEncodingFormat();
-        _logger.LogInformation("Queuing tasks to update Series and Volume references via Cover Refresh");
-        var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
-        foreach (var lib in libraryIds)
-        {
-            RefreshMetadata(lib.Id, false);
-        }
+        BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
     }
 
     #endregion

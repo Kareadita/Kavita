@@ -28,6 +28,7 @@ img {
     width: auto;
     margin: 0 auto;
     max-height: calc(var(--vh)*100);
+    overflow: hidden; // This technically will crop and make it just fit
     vertical-align: top;
       &.wide {
         height: 100vh;

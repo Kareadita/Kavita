@@ -8,14 +8,6 @@ on:
     types: [synchronize]
 
 jobs:
-  check_pr:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Check PR Body
-          uses: JJ/github-pr-contains-action@releases/v10
-          with:
-              github-token: ${{ secrets.GITHUB_TOKEN }}
-              bodyDoesNotContain: "[\"|`]"
   build:
     name: Build .Net
     runs-on: windows-latest

@@ -1,4 +1,4 @@
-﻿namespace API.DTOs.Account;
+﻿namespace API.DTOs.License;
 
 public class UpdateLicenseDto
 {

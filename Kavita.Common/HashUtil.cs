@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using DeviceId;
+using DeviceId.Components;
 
 namespace Kavita.Common;
 
@@ -45,15 +46,17 @@ public static class HashUtil
             .AddMacAddress()
             .AddUserName()
             .AddOsVersion()
+            //.AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
             .OnWindows(windows => windows
+                .AddSystemUuid()
                 .AddMotherboardSerialNumber()
                 .AddSystemDriveSerialNumber())
             .OnLinux(linux => linux
                 .AddMotherboardSerialNumber()
-                .AddSystemDriveSerialNumber())
+                .AddSystemDriveSerialNumber()) // On Docker, this is always the same
             .OnMac(mac => mac
                 .AddSystemDriveSerialNumber()
-                .AddPlatformSerialNumber())
+                .AddPlatformSerialNumber())// On Docker, this is the same as SystemDriveSerialNumber
             .ToString();
         Console.WriteLine($"Seed: {seed}");
         Console.WriteLine($"Processor Count: {Environment.ProcessorCount}");
@@ -61,8 +64,10 @@ public static class HashUtil
         Console.WriteLine($"UserName: {Environment.UserName}");
         Console.WriteLine($"MacId: {new DeviceIdBuilder().AddMacAddress()}");
         Console.WriteLine($"MotherboardSerialNumber: {new DeviceIdBuilder().OnLinux(l => l.AddMotherboardSerialNumber())}");
-        Console.WriteLine($"SystemDriveSerialNumber: {new DeviceIdBuilder().OnLinux(l => l.AddSystemDriveSerialNumber())}");
-        Console.WriteLine($"AddPlatformSerialNumber: {new DeviceIdBuilder().OnMac(l => l.AddPlatformSerialNumber())}");
+        Console.WriteLine($"CPUInfo: {new DeviceIdBuilder().OnLinux(l => l.AddCpuInfo())}");
+        Console.WriteLine($"MachineId: {new DeviceIdBuilder().OnLinux(l => l.AddMachineId())}");
+        Console.WriteLine($"ProductUuid: {new DeviceIdBuilder().OnLinux(l => l.AddProductUuid())}");
+        Console.WriteLine($"DockerContainerId: {new DeviceIdBuilder().OnLinux(l => l.AddDockerContainerId())}");
         return CalculateCrc(seed);
     }
 

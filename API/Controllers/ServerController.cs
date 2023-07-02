@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using MimeTypes;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -135,7 +136,8 @@ public class ServerController : BaseApiController
             return BadRequest(
                 "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
         }
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
+        _taskScheduler.CovertAllCoversToEncoding();
 
         return Ok();
     }
@@ -151,7 +153,7 @@ public class ServerController : BaseApiController
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip",
+            return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)

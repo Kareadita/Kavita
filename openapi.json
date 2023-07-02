@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.15"
+    "version": "0.7.3.16"
   },
   "servers": [
     {
@@ -4003,10 +4003,12 @@
         "tags": [
           "Reader"
         ],
+        "summary": "Returns a thumbnail for the given page number",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4015,6 +4017,7 @@
           {
             "name": "pageNum",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4023,6 +4026,7 @@
           {
             "name": "apiKey",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }

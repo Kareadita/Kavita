@@ -786,15 +786,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
-          if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
-          const page = parseInt(e.target.attributes['kavita-page'].value, 10);
+          let targetElem = e.target;
+          if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
+            // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
+            targetElem = e.target.parentNode;
+          }
+          if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
+          const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
             this.adhocPageHistory.push({page: this.pageNum, scrollPart: this.lastSeenScrollPartPath});
           }
 
-          const partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
+          const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
           if (partValue && page === this.pageNum) {
-            this.scrollTo(e.target.attributes['kavita-part'].value);
+            this.scrollTo(targetElem.attributes['kavita-part'].value);
             return;
           }
 

@@ -9,7 +9,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import {debounceTime, filter, forkJoin, map} from 'rxjs';
+import {debounceTime, filter, map} from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
@@ -56,7 +56,6 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
   isScrobbling: boolean = true;
-  userHasLicense: boolean = false;
   libraryAllowsScrobbling: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
 
@@ -70,7 +69,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
   constructor(public utilityService: UtilityService, private readerService: ReaderService,
               private readonly cdRef: ChangeDetectorRef, private messageHub: MessageHubService,
-              private accountService: AccountService, private scrobbleService: ScrobblingService) {
+              public accountService: AccountService, private scrobbleService: ScrobblingService) {
       // Listen for progress events and re-calculate getTimeLeft
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
                                     map(evt => evt.payload as UserProgressUpdateEvent),
@@ -96,12 +95,8 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
         this.cdRef.markForCheck();
       });
 
-      forkJoin([
-        this.scrobbleService.libraryAllowsScrobbling(this.series.id),
-        this.accountService.hasValidLicense()
-      ]).subscribe(results => {
-        this.libraryAllowsScrobbling = results[0];
-        this.userHasLicense = results[1];
+      this.scrobbleService.libraryAllowsScrobbling(this.series.id).subscribe(res => {
+        this.libraryAllowsScrobbling = res;
         this.cdRef.markForCheck();
       });
 

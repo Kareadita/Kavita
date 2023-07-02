@@ -79,7 +79,7 @@ public class ReaderController : BaseApiController
             var path = _cacheService.GetCachedFile(chapter);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
 
-            return PhysicalFile(path, "application/pdf", Path.GetFileName(path), true);
+            return PhysicalFile(path, MimeTypeMap.GetMimeType(Path.GetExtension(path)), Path.GetFileName(path), true);
         }
         catch (Exception)
         {
@@ -122,6 +122,13 @@ public class ReaderController : BaseApiController
         }
     }
 
+    /// <summary>
+    /// Returns a thumbnail for the given page number
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <param name="pageNum"></param>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
     [HttpGet("thumbnail")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = new []{"chapterId", "pageNum", "apiKey"})]
     [AllowAnonymous]

@@ -107,7 +107,7 @@ export class NavHeaderComponent implements OnInit {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();
-      }, err => {
+      }, () => {
         this.searchResults.reset();
         this.isLoading = false;
         this.searchTerm = '';

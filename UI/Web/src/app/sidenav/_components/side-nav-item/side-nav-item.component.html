@@ -1,4 +1,4 @@
-<ng-container *ngIf="link === undefined || link.length === 0; else useLink">
+<ng-container *ngIf="link === undefined || link?.length === 0; else useLink">
     <div class="side-nav-item" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}">
         <ng-container [ngTemplateOutlet]="inner"></ng-container>
     </div>
@@ -24,7 +24,7 @@
     <span class="phone-hidden" title="{{title}}">
         <div>
             <ng-container *ngIf="imageUrl !== null && imageUrl !== ''; else iconImg">
-                <img [ngSrc]="imageUrl" width="20" height="18" alt="icon" class="side-nav-img">
+                <img [ngSrc]="imageUrl" width="20" height="20" alt="icon">
             </ng-container>
             <ng-template #iconImg><i class="fa {{icon}}" aria-hidden="true"></i></ng-template>
         </div>

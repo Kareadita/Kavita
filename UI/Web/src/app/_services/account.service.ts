@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import {DestroyRef, inject, Injectable } from '@angular/core';
-import { of, ReplaySubject } from 'rxjs';
+import {catchError, of, ReplaySubject, throwError} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
@@ -33,19 +33,17 @@ export class AccountService {
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public lastLoginKey = 'kavita-lastlogin';
-  currentUser: User | undefined;
+  private currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
-  currentUser$ = this.currentUserSource.asObservable();
+  public currentUser$ = this.currentUserSource.asObservable();
 
   private hasValidLicenseSource = new ReplaySubject<boolean>(1);
   /**
    * Does the user have an active license
    */
-  hasValidLicense$ = this.hasValidLicenseSource.asObservable();
-
-  private hasServerLicenseSource = new ReplaySubject<boolean>(1);
+  public hasValidLicense$ = this.hasValidLicenseSource.asObservable();
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -91,7 +89,13 @@ export class AccountService {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
         map(res => res === "true"),
-        tap(res => this.hasValidLicenseSource.next(res))
+        tap(res => {
+          this.hasValidLicenseSource.next(res)
+        }),
+        catchError(error => {
+          this.hasValidLicenseSource.next(false);
+          return throwError(error); // Rethrow the error to propagate it further
+        })
       );
   }
 
