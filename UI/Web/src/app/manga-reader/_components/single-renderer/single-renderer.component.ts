@@ -74,7 +74,6 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
     this.imageContainerHeight$ = this.image$.pipe(
       filter(_ => this.isValid()),
       switchMap(img => {
-        console.log('image update');
         this.cdRef.markForCheck();
         return this.calculateImageContainerHeight$();
       }),
@@ -152,6 +151,7 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
 
         // If you ever see fit to height and a bit of scrollbar, it's due to currentImage not being ready on first load
         if (this.currentImage?.width - readingArea.scrollWidth > 0) {
+          // we also need to check if this is FF or Chrome. FF doesn't require the -34px as it doesn't render a scrollbar
           return 'calc(100vh - 34px)';
         }
         return 'calc(100vh)';
