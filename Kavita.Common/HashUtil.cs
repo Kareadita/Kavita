@@ -46,28 +46,17 @@ public static class HashUtil
             .AddMacAddress()
             .AddUserName()
             .AddOsVersion()
-            //.AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
+            .AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
             .OnWindows(windows => windows
                 .AddSystemUuid()
                 .AddMotherboardSerialNumber()
                 .AddSystemDriveSerialNumber())
             .OnLinux(linux => linux
-                .AddMotherboardSerialNumber()
-                .AddSystemDriveSerialNumber()) // On Docker, this is always the same
+                .AddMotherboardSerialNumber())
             .OnMac(mac => mac
                 .AddSystemDriveSerialNumber()
-                .AddPlatformSerialNumber())// On Docker, this is the same as SystemDriveSerialNumber
+                .AddPlatformSerialNumber()) // On Docker, this is the same as SystemDriveSerialNumber
             .ToString();
-        Console.WriteLine($"Seed: {seed}");
-        Console.WriteLine($"Processor Count: {Environment.ProcessorCount}");
-        Console.WriteLine($"OSVersion.Platform Count: {Environment.OSVersion.Platform}");
-        Console.WriteLine($"UserName: {Environment.UserName}");
-        Console.WriteLine($"MacId: {new DeviceIdBuilder().AddMacAddress()}");
-        Console.WriteLine($"MotherboardSerialNumber: {new DeviceIdBuilder().OnLinux(l => l.AddMotherboardSerialNumber())}");
-        Console.WriteLine($"CPUInfo: {new DeviceIdBuilder().OnLinux(l => l.AddCpuInfo())}");
-        Console.WriteLine($"MachineId: {new DeviceIdBuilder().OnLinux(l => l.AddMachineId())}");
-        Console.WriteLine($"ProductUuid: {new DeviceIdBuilder().OnLinux(l => l.AddProductUuid())}");
-        Console.WriteLine($"DockerContainerId: {new DeviceIdBuilder().OnLinux(l => l.AddDockerContainerId())}");
         return CalculateCrc(seed);
     }
 
