@@ -203,18 +203,17 @@ $action-bar-height: 38px;
 }
 
 .book-content {
-    position: relative;
-    padding: 20px 0;
-    margin: 0px 0px;
-    //background-color: red !important;
+  position: relative;
+  margin: 0 0;
+  padding: 20px 2px;
 
-    &.column-layout-1 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+  &.column-layout-1 {
+      height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-        &.writing-style-vertical {
-            padding: 0 10px 0 0;
-            margin: 20px 0;
-        }
+      &.writing-style-vertical {
+          padding: 0 10px 0 0;
+          margin: 20px 0;
+      }
     }
 
     &.column-layout-2 {
