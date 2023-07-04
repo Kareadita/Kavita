@@ -230,6 +230,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
 
   shouldMoveNext() {
     if (this.mangaReaderService.isNoSplit(this.pageSplit)) return true;
+    const isSplitLeftToRight = this.mangaReaderService.isSplitLeftToRight(this.pageSplit);
     return this.currentImageSplitPart !== (this.mangaReaderService.isSplitLeftToRight(this.pageSplit) ? SPLIT_PAGE_PART.LEFT_PART : SPLIT_PAGE_PART.RIGHT_PART);
   }
 

@@ -375,11 +375,12 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ColumnWidth() {
     const base = this.writingStyle === WritingStyle.Vertical ? this.windowHeight : this.windowWidth;
+    console.log('base width: ', base);
     switch (this.layoutMode) {
       case BookPageLayoutMode.Default:
         return 'unset';
       case BookPageLayoutMode.Column1:
-        return (base / 2) + 'px';
+        return ((base / 2) - 4) + 'px';
       case BookPageLayoutMode.Column2:
         return (base / 4) + 'px';
       default:
