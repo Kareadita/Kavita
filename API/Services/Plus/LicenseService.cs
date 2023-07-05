@@ -16,7 +16,7 @@ namespace API.Services.Plus;
 
 public interface ILicenseService
 {
-    Task ValidateAllLicenses();
+    Task ValidateLicenseStatus();
     Task RemoveLicense();
     Task AddLicense(string license, string email);
     Task<bool> HasActiveLicense(bool forceCheck = false);
@@ -68,7 +68,7 @@ public class LicenseService : ILicenseService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
             throw;
         }
     }
@@ -93,9 +93,9 @@ public class LicenseService : ILicenseService
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
-                    License = license,
+                    License = license.Trim(),
                     InstallId = HashUtil.ServerToken(),
-                    EmailId = email
+                    EmailId = email.Trim()
                 })
                 .ReceiveString();
 
@@ -103,20 +103,20 @@ public class LicenseService : ILicenseService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
             return string.Empty;
         }
     }
 
     /// <summary>
-    /// Checks all licenses and updates cache
+    /// Checks licenses and updates cache
     /// </summary>
     /// <remarks>Expected to be called at startup and on reoccurring basis</remarks>
-    public async Task ValidateAllLicenses()
+    public async Task ValidateLicenseStatus()
     {
         try
         {
-            _logger.LogInformation("Validating KavitaPlus License");
+            _logger.LogInformation("Validating Kavita+ License");
             var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await provider.FlushAsync();
 
@@ -124,12 +124,12 @@ public class LicenseService : ILicenseService
             var isValid = await IsLicenseValid(license.Value);
             await provider.SetAsync(CacheKey, isValid, _licenseCacheTimeout);
 
-            _logger.LogInformation("Validating KavitaPlus License - Complete");
+            _logger.LogInformation("Validating Kavita+ License - Complete");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error talking with KavitaPlus API for license validation. Rescheduling check in 30 mins");
-            BackgroundJob.Schedule(() => ValidateAllLicenses(), TimeSpan.FromMinutes(30));
+            _logger.LogError(ex, "There was an error talking with Kavita+ API for license validation. Rescheduling check in 30 mins");
+            BackgroundJob.Schedule(() => ValidateLicenseStatus(), TimeSpan.FromMinutes(30));
         }
     }
 

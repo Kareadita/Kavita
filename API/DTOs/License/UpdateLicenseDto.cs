@@ -3,7 +3,7 @@
 public class UpdateLicenseDto
 {
     /// <summary>
-    /// License Key received from KavitaPlus
+    /// License Key received from Kavita+
     /// </summary>
     public required string License { get; set; }
     /// <summary>

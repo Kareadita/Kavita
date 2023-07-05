@@ -1,7 +1,7 @@
 ﻿namespace API.DTOs.Scrobbling;
 
 /// <summary>
-/// Response from KavitaPlus Scrobble API
+/// Response from Kavita+ Scrobble API
 /// </summary>
 public class ScrobbleResponseDto
 {

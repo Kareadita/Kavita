@@ -33,7 +33,7 @@ public class RecommendedController : BaseApiController
     }
 
     /// <summary>
-    /// For KavitaPlus users, this will return recommendations on the server.
+    /// For Kavita+ users, this will return recommendations on the server.
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>

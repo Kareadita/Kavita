@@ -145,11 +145,11 @@ public class ScrobblingService : IScrobblingService
         }
         catch (HttpRequestException e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
         return true;
@@ -369,7 +369,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
         return 0;
@@ -421,7 +421,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (FlurlHttpException  ex)
         {
-            _logger.LogError("Scrobbling to KavitaPlus API failed due to error: {ErrorMessage}", ex.Message);
+            _logger.LogError("Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
             if (ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
             {
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
@@ -654,7 +654,7 @@ public class ScrobblingService : IScrobblingService
         }
         catch (FlurlHttpException)
         {
-            _logger.LogError("KavitaPlus API or a Scrobble service may be experiencing an outage. Stopping sending data");
+            _logger.LogError("Kavita+ API or a Scrobble service may be experiencing an outage. Stopping sending data");
             return;
         }
 
