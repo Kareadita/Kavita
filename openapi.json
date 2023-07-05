@@ -5962,7 +5962,7 @@
         "tags": [
           "Recommended"
         ],
-        "summary": "For KavitaPlus users, this will return recommendations on the server.",
+        "summary": "For Kavita+ users, this will return recommendations on the server.",
         "parameters": [
           {
             "name": "seriesId",
@@ -16297,7 +16297,7 @@
         "properties": {
           "license": {
             "type": "string",
-            "description": "License Key received from KavitaPlus",
+            "description": "License Key received from Kavita+",
             "nullable": true
           },
           "email": {

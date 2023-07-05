@@ -59,9 +59,9 @@ export class LicenseComponent implements OnInit {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
         if (!this.hasValidLicense) {
-          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription.");
+          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.");
         } else {
-          this.toastr.success('Kavita+ unlocked! Please refresh the page');
+          this.toastr.success('Kavita+ unlocked!');
         }
         this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
         this.resetForm();
