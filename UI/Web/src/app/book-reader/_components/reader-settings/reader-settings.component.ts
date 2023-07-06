@@ -6,13 +6,11 @@ import {
   EventEmitter,
   inject,
   Inject,
-  Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subject, take, takeUntil } from 'rxjs';
+import { take } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
