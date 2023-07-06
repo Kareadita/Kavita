@@ -12,6 +12,7 @@ import { ErrorInterceptor } from './_interceptors/error.interceptor';
 import { SAVER, getSaver } from './shared/_providers/saver.provider';
 import { NavModule } from './nav/nav.module';
 import {SideNavComponent} from "./sidenav/_components/side-nav/side-nav.component";
+import {NgCircleProgressModule} from "ng-circle-progress";
 
 
 
@@ -37,6 +38,7 @@ if (disableAnimations) console.error("Web Animations have been disabled as your 
       countDuplicates: true,
       autoDismiss: true
     }),
+    NgCircleProgressModule.forRoot(),
     SideNavComponent,
   ],
     providers: [

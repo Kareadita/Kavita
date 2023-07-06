@@ -73,6 +73,13 @@ public class LibraryController : BaseApiController
             .WIthAllowScrobbling(dto.AllowScrobbling)
             .Build();
 
+        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
+        if (library.Type == LibraryType.Comic)
+        {
+            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            library.AllowScrobbling = false;
+        }
+
         _unitOfWork.LibraryRepository.Add(library);
 
         var admins = (await _unitOfWork.UserRepository.GetAdminUsersAsync()).ToList();
@@ -376,6 +383,13 @@ public class LibraryController : BaseApiController
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
         library.AllowScrobbling = dto.AllowScrobbling;
+
+        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
+        if (library.Type == LibraryType.Comic)
+        {
+            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            library.AllowScrobbling = false;
+        }
 
 
         _unitOfWork.LibraryRepository.Update(library);

@@ -1,61 +1,59 @@
-import {CommonModule, DOCUMENT} from '@angular/common';
+import {DOCUMENT} from '@angular/common';
 import {
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-  ViewChild,
-  Inject,
+  AfterContentChecked,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  AfterContentChecked,
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  Inject,
   inject,
-  DestroyRef
+  OnInit,
+  ViewChild
 } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { NgbModal, NgbNavChangeEvent, NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { catchError, forkJoin, of } from 'rxjs';
-import {map, shareReplay, take} from 'rxjs/operators';
-import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
-import { CardDetailDrawerComponent } from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
-import { EditSeriesModalComponent } from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
-import { DownloadService } from 'src/app/shared/_services/download.service';
-import { UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { Chapter } from 'src/app/_models/chapter';
-import { Device } from 'src/app/_models/device/device';
-import { ScanSeriesEvent } from 'src/app/_models/events/scan-series-event';
-import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
-import { LibraryType } from 'src/app/_models/library';
-import { ReadingList } from 'src/app/_models/reading-list';
-import { Series } from 'src/app/_models/series';
-import { RelatedSeries } from 'src/app/_models/series-detail/related-series';
-import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
-import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
-import { User } from 'src/app/_models/user';
-import { Volume } from 'src/app/_models/volume';
-import { AccountService } from 'src/app/_services/account.service';
-import { ActionItem, ActionFactoryService, Action } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { DeviceService } from 'src/app/_services/device.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { ReviewSeriesModalComponent } from '../../../_single-module/review-series-modal/review-series-modal.component';
-import { PageLayoutMode } from 'src/app/_models/page-layout-mode';
+import {FormControl, FormGroup} from '@angular/forms';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {NgbModal, NgbNavChangeEvent, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {catchError, forkJoin, of} from 'rxjs';
+import {take} from 'rxjs/operators';
+import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
+import {CardDetailDrawerComponent} from 'src/app/cards/card-detail-drawer/card-detail-drawer.component';
+import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {TagBadgeCursor} from 'src/app/shared/tag-badge/tag-badge.component';
+import {DownloadService} from 'src/app/shared/_services/download.service';
+import {KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Chapter} from 'src/app/_models/chapter';
+import {Device} from 'src/app/_models/device/device';
+import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
+import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
+import {LibraryType} from 'src/app/_models/library';
+import {ReadingList} from 'src/app/_models/reading-list';
+import {Series} from 'src/app/_models/series';
+import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
+import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
+import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
+import {User} from 'src/app/_models/user';
+import {Volume} from 'src/app/_models/volume';
+import {AccountService} from 'src/app/_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {DeviceService} from 'src/app/_services/device.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {ReadingListService} from 'src/app/_services/reading-list.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {ReviewSeriesModalComponent} from '../../../_single-module/review-series-modal/review-series-modal.component';
+import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
-import {ReviewCardModalComponent} from "../../../_single-module/review-card-modal/review-card-modal.component";
-import {ExternalSeries} from "../../../_models/series-detail/external-series";
 
 interface RelatedSeris {
   series: Series;
@@ -494,15 +492,16 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
     this.setContinuePoint();
 
-    this.loadReviews(true);
-
-
     forkJoin({
       libType: this.libraryService.getLibraryType(this.libraryId),
       series: this.seriesService.getSeries(seriesId)
     }).subscribe(results => {
       this.libraryType = results.libType;
       this.series = results.series;
+
+      if (this.libraryType !== LibraryType.Comic) {
+        this.loadReviews(true);
+      }
 
       this.titleService.setTitle('Kavita - ' + this.series.name + ' Details');
 

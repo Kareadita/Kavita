@@ -6,12 +6,11 @@ import {
   HostListener,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -89,7 +88,7 @@ export class CardItemComponent implements OnInit {
    */
   @Input() total = 0;
   /**
-   * Supress library link
+   * Suppress library link
    */
   @Input() suppressLibraryLink = false;
   /**

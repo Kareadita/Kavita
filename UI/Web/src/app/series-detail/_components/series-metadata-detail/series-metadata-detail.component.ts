@@ -19,6 +19,7 @@ import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.component";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-info-cards.component";
+import {LibraryType} from "../../../_models/library";
 
 
 @Component({
@@ -32,6 +33,7 @@ import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-
 export class SeriesMetadataDetailComponent implements OnChanges {
 
   @Input({required: true}) seriesMetadata!: SeriesMetadata;
+  @Input({required: true}) libraryType!: LibraryType;
   @Input() hasReadingProgress: boolean = false;
   /**
    * Reading lists with a connection to the Series
@@ -49,24 +51,17 @@ export class SeriesMetadataDetailComponent implements OnChanges {
    */
   seriesSummary: string = '';
 
-  get MangaFormat(): typeof MangaFormat {
-    return MangaFormat;
-  }
-
-  get TagBadgeCursor(): typeof TagBadgeCursor {
-    return TagBadgeCursor;
-  }
-
-  get FilterQueryParam() {
-    return FilterQueryParam;
-  }
+  get LibraryType() { return LibraryType; }
+  get MangaFormat() { return MangaFormat; }
+  get TagBadgeCursor() { return TagBadgeCursor; }
+  get FilterQueryParam() { return FilterQueryParam; }
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
     return this.seriesMetadata?.webLinks.split(',') || [];
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
+  constructor(public utilityService: UtilityService,
     private router: Router, public readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef) {
 
