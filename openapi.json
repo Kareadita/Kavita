@@ -7345,7 +7345,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Updates the Series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7376,6 +7378,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets all recently added series",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7397,6 +7400,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -7405,6 +7409,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7461,6 +7466,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns series that were recently updated, like adding or removing a chapter",
         "responses": {
           "200": {
             "description": "Success",
@@ -7499,6 +7505,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns all series for the library",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7520,6 +7527,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -7528,6 +7536,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
