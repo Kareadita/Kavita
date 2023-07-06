@@ -233,6 +233,7 @@ public class Startup
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+                    var dataContext = serviceProvider.GetRequiredService<DataContext>();
 
 
                     logger.LogInformation("Running Migrations");
@@ -243,13 +244,16 @@ public class Startup
                     // v0.7.3
                     await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
 
+                    // v0.7.4
+                    await MigrateDisableScrobblingOnComicLibraries.Migrate(unitOfWork, dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
 
                     await unitOfWork.CommitAsync();
-                    logger.LogInformation("Running Migrations - done");
+                    logger.LogInformation("Running Migrations - complete");
                 }).GetAwaiter()
                 .GetResult();
         }
