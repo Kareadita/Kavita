@@ -66,7 +66,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'Download Logs',
       description: 'Compiles all log files into a zip and downloads it.',
-      api: defer(() => of(this.downloadService.download('logs', undefined))),
+      api: defer(() => of(() => this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
     {
