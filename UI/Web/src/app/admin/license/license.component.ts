@@ -10,6 +10,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
   selector: 'app-license',
@@ -29,7 +30,9 @@ export class LicenseComponent implements OnInit {
 
 
 
-  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService,
+              private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
+              private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
@@ -73,6 +76,19 @@ export class LicenseComponent implements OnInit {
       this.toastr.error("There was an error when activating your license. Please try again.");
     });
   }
+
+  async deleteLicense() {
+    if (!await this.confirmService.confirm('This will only delete Kavita\'s license key and allow a buy link to show. This will not cancel your subscription! Use this only if directed by support!')) {
+      return;
+    }
+
+    this.accountService.deleteLicense().subscribe(() => {
+      this.resetForm();
+      this.validateLicense();
+    });
+
+  }
+
 
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;

@@ -14,6 +14,13 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
+internal class RegisterLicenseResponseDto
+{
+    public string EncryptedLicense { get; set; }
+    public bool Successful { get; set; }
+    public string ErrorMessage { get; set; }
+}
+
 public interface ILicenseService
 {
     Task ValidateLicenseStatus();
@@ -97,11 +104,17 @@ public class LicenseService : ILicenseService
                     InstallId = HashUtil.ServerToken(),
                     EmailId = email.Trim()
                 })
-                .ReceiveString();
+                .ReceiveJson<RegisterLicenseResponseDto>();
 
-            return response.Trim('"');
+            if (response.Successful)
+            {
+                return response.EncryptedLicense;
+            }
+
+            _logger.LogError("An error happened during the request to Kavita+ API: {ErrorMessage}", response.ErrorMessage);
+            throw new KavitaException(response.ErrorMessage);
         }
-        catch (Exception e)
+        catch (FlurlHttpException e)
         {
             _logger.LogError(e, "An error happened during the request to Kavita+ API");
             return string.Empty;

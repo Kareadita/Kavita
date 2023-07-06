@@ -84,6 +84,9 @@ export class AccountService {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
   }
 
+  deleteLicense() {
+    return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
+  }
 
   hasValidLicense(forceCheck: boolean = false) {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
