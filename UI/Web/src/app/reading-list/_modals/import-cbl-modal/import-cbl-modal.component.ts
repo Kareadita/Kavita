@@ -1,14 +1,26 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { FileUploadValidators } from '@iplab/ngx-file-upload';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FileUploadModule, FileUploadValidators} from '@iplab/ngx-file-upload';
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem, NgbAccordionModule, NgbAccordionToggle,
+  NgbActiveModal
+} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from 'src/app/_models/reading-list/cbl/cbl-import-summary';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { TimelineStep } from '../../_components/step-tracker/step-tracker.component';
+import {StepTrackerComponent, TimelineStep} from '../../_components/step-tracker/step-tracker.component';
+import {CommonModule} from "@angular/common";
+import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
+import {CblConflictReasonPipe} from "../../_pipes/cbl-conflict-reason.pipe";
+import {CblImportResultPipe} from "../../_pipes/cbl-import-result.pipe";
 
 interface FileStep {
   fileName: string;
@@ -26,6 +38,12 @@ enum Step {
 
 @Component({
   selector: 'app-import-cbl-modal',
+  standalone: true,
+  imports: [CommonModule,
+    FileUploadModule,
+    NgbAccordionModule,
+    SafeHtmlPipe,
+    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle],
   templateUrl: './import-cbl-modal.component.html',
   styleUrls: ['./import-cbl-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,7 +55,7 @@ export class ImportCblModalComponent {
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
     FileUploadValidators.accept(['.cbl']),
   ]);
-  
+
   uploadForm = new FormGroup({
     files: this.fileUploadControl
   });
@@ -59,12 +77,6 @@ export class ImportCblModalComponent {
   get Step() { return Step; }
   get CblImportResult() { return CblImportResult; }
 
-  get FileCount() { 
-    const files = this.uploadForm.get('files')?.value;
-    if (!files) return 0;
-    return files.length;
-  }
-
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
       case Step.DryRun:
@@ -76,7 +88,7 @@ export class ImportCblModalComponent {
     }
   }
 
-  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService, 
+  constructor(private ngModal: NgbActiveModal, private readingListService: ReadingListService,
     public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef,
     private toastr: ToastrService) {}
 
@@ -86,7 +98,6 @@ export class ImportCblModalComponent {
 
   nextStep() {
     if (this.currentStepIndex === Step.Import && !this.isFileSelected()) return;
-    //if (this.currentStepIndex === Step.Validate && this.validateSummary && this.validateSummary.results.length > 0) return;
 
     this.isLoading = true;
     switch (this.currentStepIndex) {
@@ -116,6 +127,7 @@ export class ImportCblModalComponent {
           });
 
           this.filesToProcess = this.filesToProcess.sort((a, b) => b.validateSummary!.success - a.validateSummary!.success);
+          this.cdRef.markForCheck();
 
           this.currentStepIndex++;
           this.isLoading = false;
@@ -141,7 +153,6 @@ export class ImportCblModalComponent {
         this.failedFiles = [];
         this.cdRef.markForCheck();
         break;
-
     }
   }
 
@@ -157,9 +168,9 @@ export class ImportCblModalComponent {
       case Step.Validate:
         return this.filesToProcess.filter(item => item.validateSummary?.success != CblImportResult.Fail).length > 0;
       case Step.DryRun:
-        return this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail).length > 0; 
+        return this.filesToProcess.filter(item => item.dryRunSummary?.success != CblImportResult.Fail).length > 0;
       case Step.Finalize:
-        return true; 
+        return true;
       default:
         return false;
     }
@@ -184,7 +195,6 @@ export class ImportCblModalComponent {
 
 
   dryRun() {
-
     const filenamesAllowedToProcess = this.filesToProcess.map(p => p.fileName);
     const files = (this.uploadForm.get('files')?.value || []).filter(f => filenamesAllowedToProcess.includes(f.name));
 

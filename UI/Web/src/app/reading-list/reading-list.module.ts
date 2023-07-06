@@ -6,15 +6,10 @@ import {DragDropModule} from '@angular/cdk/drag-drop';
 import { AddToListModalComponent } from './_modals/add-to-list-modal/add-to-list-modal.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { EditReadingListModalComponent } from './_modals/edit-reading-list-modal/edit-reading-list-modal.component';
-import { NgbAccordionModule, NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbNavModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReadingListDetailComponent } from './_components/reading-list-detail/reading-list-detail.component';
 import { ReadingListItemComponent } from './_components/reading-list-item/reading-list-item.component';
 import { ReadingListsComponent } from './_components/reading-lists/reading-lists.component';
-import { ImportCblModalComponent } from './_modals/import-cbl-modal/import-cbl-modal.component';
-import { FileUploadModule } from '@iplab/ngx-file-upload';
-import { CblConflictReasonPipe } from './_pipes/cbl-conflict-reason.pipe';
-import { StepTrackerComponent } from './_components/step-tracker/step-tracker.component';
-import { CblImportResultPipe } from './_pipes/cbl-import-result.pipe';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
@@ -42,10 +37,6 @@ import {A11yClickDirective} from "../shared/a11y-click.directive";
     ReadingListsComponent,
     EditReadingListModalComponent,
     ReadingListItemComponent,
-    ImportCblModalComponent,
-    CblConflictReasonPipe,
-    StepTrackerComponent,
-    CblImportResultPipe,
   ],
   imports: [
     CommonModule,
@@ -62,8 +53,7 @@ import {A11yClickDirective} from "../shared/a11y-click.directive";
     BadgeExpanderComponent,
 
     ReadingListRoutingModule,
-    NgbAccordionModule, // Import CBL
-    FileUploadModule, // Import CBL
+
     VirtualScrollerModule,
     CardActionablesComponent,
     MangaFormatPipe,
