@@ -173,16 +173,6 @@ public class ServerController : BaseApiController
 
 
     /// <summary>
-    /// Checks for updates, if no updates that are > current version installed, returns null
-    /// </summary>
-    [HttpPost("scrobble-updates")]
-    public async Task<ActionResult> TriggerScrobbleUpdates()
-    {
-        await _taskScheduler.ScrobbleUpdates(User.GetUserId());
-        return Ok();
-    }
-
-    /// <summary>
     /// Pull the Changelog for Kavita from Github and display
     /// </summary>
     /// <returns></returns>
