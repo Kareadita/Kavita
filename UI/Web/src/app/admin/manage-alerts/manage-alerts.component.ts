@@ -27,7 +27,7 @@ import { NgIf, NgFor } from '@angular/common';
     styleUrls: ['./manage-alerts.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe]
+  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader]
 })
 export class ManageAlertsComponent implements OnInit {
 

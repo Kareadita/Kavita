@@ -18,6 +18,7 @@ using API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -67,7 +68,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="seriesId">Series Id to fetch details for</param>
     /// <returns></returns>
-    /// <exception cref="KavitaException">Throws an exception if the series Id does exist</exception>
+    /// <exception cref="NoContent">Throws an exception if the series Id does exist</exception>
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
@@ -148,6 +149,11 @@ public class SeriesController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Updates the Series
+    /// </summary>
+    /// <param name="updateSeries"></param>
+    /// <returns></returns>
     [HttpPost("update")]
     public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
     {
@@ -192,6 +198,13 @@ public class SeriesController : BaseApiController
         return BadRequest("There was an error with updating the series");
     }
 
+    /// <summary>
+    /// Gets all recently added series
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
@@ -210,6 +223,10 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    /// <summary>
+    /// Returns series that were recently updated, like adding or removing a chapter
+    /// </summary>
+    /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
@@ -218,6 +235,13 @@ public class SeriesController : BaseApiController
         return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
     }
 
+    /// <summary>
+    /// Returns all series for the library
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpPost("all")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {

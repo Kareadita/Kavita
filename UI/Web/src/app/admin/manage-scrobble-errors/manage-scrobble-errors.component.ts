@@ -29,7 +29,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
