@@ -22,13 +22,15 @@ public class ImageController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly IReadingListService _readingListService;
 
     /// <inheritdoc />
-    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService)
+    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _imageService = imageService;
+        _readingListService = readingListService;
     }
 
     /// <summary>
@@ -129,10 +131,33 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ReadingListRepository.GetCoverImageAsync(readingListId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
-        var format = _directoryService.FileSystem.Path.GetExtension(path);
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+        {
+            var destFile = await GenerateReadingListCoverImage(readingListId);
+            if (string.IsNullOrEmpty(destFile)) return BadRequest("No cover image");
+            return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)), _directoryService.FileSystem.Path.GetFileName(destFile));
+        }
 
+        var format = _directoryService.FileSystem.Path.GetExtension(path);
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
+    }
+
+    private async Task<string> GenerateReadingListCoverImage(int readingListId)
+    {
+        var covers = _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
+        if (covers.Count < 4)
+        {
+            return string.Empty;
+        }
+
+        var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
+            ImageService.GetReadingListFormat(readingListId));
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        destFile += settings.EncodeMediaAs.GetExtension();
+        ImageService.CreateMergedImage(
+            covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            destFile);
+        return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
 
     /// <summary>

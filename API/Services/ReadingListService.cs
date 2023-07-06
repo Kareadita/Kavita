@@ -37,7 +37,6 @@ public interface IReadingListService
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
-    Task<string> GenerateMergedImage(int readingListId);
     /// <summary>
     /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
     /// </summary>
@@ -56,9 +55,10 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
+    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        Parser.RegexTimeout);
 
     public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger, IEventHub eventHub)
     {
@@ -325,19 +325,6 @@ public class ReadingListService : IReadingListService
             readingListWithItems.StartingMonth = minReleaseDate.Month;
             readingListWithItems.StartingYear = minReleaseDate.Year;
         }
-    }
-
-    public Task<string?> GenerateMergedImage(int readingListId)
-    {
-        throw new NotImplementedException();
-        // var coverImages = (await _unitOfWork.ReadingListRepository.GetFirstFourCoverImagesByReadingListId(readingListId)).ToList();
-        // if (coverImages.Count < 4) return null;
-        // var fullImages = coverImages
-        //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
-        //
-        // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
-        // // webp/avif needs to be handled
-        // return combinedFile;
     }
 
     /// <summary>

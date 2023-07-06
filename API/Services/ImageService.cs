@@ -418,10 +418,9 @@ public class ImageService : IImageService
     }
 
 
-    public static string CreateMergedImage(List<string> coverImages, string dest)
+    public static string CreateMergedImage(IList<string> coverImages, string dest)
     {
-        // Currently this doesn't work due to non-standard cover image sizes and dimensions
-        var image = Image.Black(320*4, 160*4);
+        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 160
 
         for (var i = 0; i < coverImages.Count; i++)
         {
