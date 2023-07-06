@@ -1639,7 +1639,8 @@ public class SeriesRepository : ISeriesRepository
                 .RestrictAgainstAgeRestriction(userRating)
                 .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
                 .Where(s => libraryIds.Contains(s.Library.Id))
-                .Where(s => s.Metadata.WebLinks.Contains(aniListUrl) || s.Metadata.WebLinks.Contains(malUrl))
+                .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => s.Metadata.WebLinks.Contains(aniListUrl))
+                .WhereIf(!string.IsNullOrEmpty(malUrl), s => s.Metadata.WebLinks.Contains(malUrl))
                 .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync();

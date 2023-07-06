@@ -80,7 +80,7 @@ public class LicenseService : ILicenseService
     /// <returns></returns>
     private async Task<string> RegisterLicense(string license, string email)
     {
-        if (string.IsNullOrEmpty(license)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(license) || string.IsNullOrWhiteSpace(email)) return string.Empty;
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
