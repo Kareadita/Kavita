@@ -547,10 +547,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged(),
         tap(mode => {
           this.readerMode = mode;
+          this.disableDoubleRendererIfScreenTooSmall();
           this.cdRef.markForCheck();
         }),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
+
+
 
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
