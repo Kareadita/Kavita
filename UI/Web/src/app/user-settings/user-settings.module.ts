@@ -1,7 +1,15 @@
 import { NgModule } from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
-import { NgbAccordionModule, NgbCollapseModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbAccordionBody,
+  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
+  NgbAccordionModule, NgbAccordionToggle,
+  NgbCollapseModule,
+  NgbNavModule,
+  NgbTooltipModule
+} from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
@@ -46,7 +54,6 @@ import {
     CommonModule,
     ReactiveFormsModule,
 
-    NgbAccordionModule,
     NgbNavModule,
     NgbTooltipModule,
     NgbCollapseModule,
@@ -63,6 +70,13 @@ import {
     AgeRatingPipe,
     LoadingComponent,
     SideNavCompanionBarComponent,
+
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
   ],
   exports: [
     SiteThemeProviderPipe,

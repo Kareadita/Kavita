@@ -277,4 +277,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
   }
+
+  protected readonly undefined = undefined;
 }
