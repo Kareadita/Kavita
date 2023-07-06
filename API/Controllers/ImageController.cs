@@ -159,6 +159,8 @@ public class ImageController : BaseApiController
             ImageService.GetReadingListFormat(readingListId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         destFile += settings.EncodeMediaAs.GetExtension();
+
+        if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
         ImageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             destFile);
@@ -177,6 +179,7 @@ public class ImageController : BaseApiController
             ImageService.GetCollectionTagFormat(collectionId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         destFile += settings.EncodeMediaAs.GetExtension();
+        if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
         ImageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
             destFile);
