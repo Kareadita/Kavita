@@ -1,15 +1,22 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { RestrictionSelectorComponent } from '../../user-settings/restriction-selector/restriction-selector.component';
+import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
+import { RoleSelectorComponent } from '../role-selector/role-selector.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-edit-user',
-  templateUrl: './edit-user.component.html',
-  styleUrls: ['./edit-user.component.scss']
+    selector: 'app-edit-user',
+    templateUrl: './edit-user.component.html',
+    styleUrls: ['./edit-user.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgIf, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe]
 })
 export class EditUserComponent implements OnInit {
 

@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -21,16 +21,19 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
  * page 11 page 10.
  */
 @Component({
-  selector: 'app-double-reverse-renderer',
-  templateUrl: './double-reverse-renderer.component.html',
-  styleUrls: ['./double-reverse-renderer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-double-reverse-renderer',
+    templateUrl: './double-reverse-renderer.component.html',
+    styleUrls: ['./double-reverse-renderer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
 

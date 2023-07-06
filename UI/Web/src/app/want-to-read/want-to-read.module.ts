@@ -12,16 +12,14 @@ import {
 
 
 @NgModule({
-  declarations: [
-    WantToReadComponent
-  ],
-  imports: [
-    CommonModule,
-    WantToReadRoutingModule,
-    BulkOperationsComponent,
-    CardDetailLayoutComponent,
-    SeriesCardComponent,
-    SideNavCompanionBarComponent
-  ]
+    imports: [
+        CommonModule,
+        WantToReadRoutingModule,
+        BulkOperationsComponent,
+        CardDetailLayoutComponent,
+        SeriesCardComponent,
+        SideNavCompanionBarComponent,
+        WantToReadComponent
+    ]
 })
 export class WantToReadModule { }

@@ -4,12 +4,16 @@ import { Library } from 'src/app/_models/library';
 import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
+import { NgFor, NgIf } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 // TODO: Change to OnPush
 @Component({
-  selector: 'app-library-access-modal',
-  templateUrl: './library-access-modal.component.html',
-  styleUrls: ['./library-access-modal.component.scss']
+    selector: 'app-library-access-modal',
+    templateUrl: './library-access-modal.component.html',
+    styleUrls: ['./library-access-modal.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf]
 })
 export class LibraryAccessModalComponent implements OnInit {
 

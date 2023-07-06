@@ -14,12 +14,18 @@ import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { AgeRatingPipe } from '../../pipe/age-rating.pipe';
+import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-change-age-restriction',
-  templateUrl: './change-age-restriction.component.html',
-  styleUrls: ['./change-age-restriction.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-change-age-restriction',
+    templateUrl: './change-age-restriction.component.html',
+    styleUrls: ['./change-age-restriction.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 

@@ -6,11 +6,14 @@ import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerInfo } from '../_models/server-info';
 import { ServerSettings } from '../_models/server-settings';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-manage-system',
-  templateUrl: './manage-system.component.html',
-  styleUrls: ['./manage-system.component.scss']
+    selector: 'app-manage-system',
+    templateUrl: './manage-system.component.html',
+    styleUrls: ['./manage-system.component.scss'],
+    standalone: true,
+    imports: [NgIf]
 })
 export class ManageSystemComponent implements OnInit {
 

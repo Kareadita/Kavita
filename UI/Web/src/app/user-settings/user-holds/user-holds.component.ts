@@ -4,7 +4,7 @@ import {ScrobblingService} from "../../_services/scrobbling.service";
 import {shareReplay} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEventTypePipe} from "../../_single-module/scrobble-event-type.pipe";
-import {TableModule} from "../../_single-module/table/table.module";
+
 import {
   NgbAccordionBody,
   NgbAccordionCollapse,
@@ -15,7 +15,7 @@ import {
 @Component({
   selector: 'app-user-holds',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, TableModule, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody, NgbAccordionItem, NgbAccordionHeader],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody, NgbAccordionItem, NgbAccordionHeader],
   templateUrl: './user-holds.component.html',
   styleUrls: ['./user-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

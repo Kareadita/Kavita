@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgOptimizedImage, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -9,7 +9,7 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { fromEvent } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
@@ -27,12 +27,21 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SearchService } from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { PersonRolePipe } from '../../../pipe/person-role.pipe';
+import { NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
+import { EventsWidgetComponent } from '../events-widget/events-widget.component';
+import { SeriesFormatComponent } from '../../../shared/series-format/series-format.component';
+import { ImageComponent } from '../../../shared/image/image.component';
+import { GroupedTypeaheadComponent } from '../grouped-typeahead/grouped-typeahead.component';
 
 @Component({
-  selector: 'app-nav-header',
-  templateUrl: './nav-header.component.html',
-  styleUrls: ['./nav-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-nav-header',
+    templateUrl: './nav-header.component.html',
+    styleUrls: ['./nav-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe]
 })
 export class NavHeaderComponent implements OnInit {
 

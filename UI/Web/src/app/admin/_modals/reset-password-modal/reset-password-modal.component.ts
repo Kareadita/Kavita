@@ -1,13 +1,17 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
+import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-reset-password-modal',
-  templateUrl: './reset-password-modal.component.html',
-  styleUrls: ['./reset-password-modal.component.scss']
+    selector: 'app-reset-password-modal',
+    templateUrl: './reset-password-modal.component.html',
+    styleUrls: ['./reset-password-modal.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgIf, SentenceCasePipe]
 })
 export class ResetPasswordModalComponent {
 

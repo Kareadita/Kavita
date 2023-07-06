@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {TableModule} from "../table/table.module";
+
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {shareReplay} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -10,13 +10,13 @@ import {NgbPagination} from "@ng-bootstrap/ng-bootstrap";
 import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-filter";
 import {debounceTime, map, take, tap} from "rxjs/operators";
 import {PaginatedResult, Pagination} from "../../_models/pagination";
-import {SortEvent} from "../table/_directives/sortable-header.directive";
+import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, TableModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

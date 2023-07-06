@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
@@ -8,8 +8,10 @@ import { defer, forkJoin, Observable, of } from 'rxjs';
 import { ServerService } from 'src/app/_services/server.service';
 import { Job } from 'src/app/_models/job/job';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadService } from 'src/app/shared/_services/download.service';
+import { DefaultValuePipe } from '../../pipe/default-value.pipe';
+import { NgIf, NgFor, AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
 
 interface AdhocTask {
   name: string;
@@ -20,9 +22,11 @@ interface AdhocTask {
 }
 
 @Component({
-  selector: 'app-manage-tasks-settings',
-  templateUrl: './manage-tasks-settings.component.html',
-  styleUrls: ['./manage-tasks-settings.component.scss']
+    selector: 'app-manage-tasks-settings',
+    templateUrl: './manage-tasks-settings.component.html',
+    styleUrls: ['./manage-tasks-settings.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 

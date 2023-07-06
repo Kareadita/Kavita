@@ -18,12 +18,19 @@ import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import { DecimalPipe } from '@angular/common';
+import { CardItemComponent } from '../../../cards/card-item/card-item.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-bookmarks',
-  templateUrl: './bookmarks.component.html',
-  styleUrls: ['./bookmarks.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-bookmarks',
+    templateUrl: './bookmarks.component.html',
+    styleUrls: ['./bookmarks.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe]
 })
 export class BookmarksComponent implements OnInit, OnDestroy {
 

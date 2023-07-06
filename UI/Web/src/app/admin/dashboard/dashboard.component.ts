@@ -1,9 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
 import { Title } from '@angular/platform-browser';
 import { NavService } from '../../_services/nav.service';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { LicenseComponent } from '../license/license.component';
+import { ManageTasksSettingsComponent } from '../manage-tasks-settings/manage-tasks-settings.component';
+import { ServerStatsComponent } from '../../statistics/_components/server-stats/server-stats.component';
+import { ManageSystemComponent } from '../manage-system/manage-system.component';
+import { ManageLogsComponent } from '../manage-logs/manage-logs.component';
+import { ManageLibraryComponent } from '../manage-library/manage-library.component';
+import { ManageUsersComponent } from '../manage-users/manage-users.component';
+import { ManageMediaSettingsComponent } from '../manage-media-settings/manage-media-settings.component';
+import { ManageEmailSettingsComponent } from '../manage-email-settings/manage-email-settings.component';
+import { ManageSettingsComponent } from '../manage-settings/manage-settings.component';
+import { NgFor, NgIf } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 enum TabID {
   General = '',
@@ -20,9 +34,11 @@ enum TabID {
 }
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent, ManageUsersComponent, ManageLibraryComponent, ManageLogsComponent, ManageSystemComponent, ServerStatsComponent, ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe]
 })
 export class DashboardComponent implements OnInit {
 
@@ -33,7 +49,6 @@ export class DashboardComponent implements OnInit {
     //{title: 'Logs', fragment: TabID.Logs},
     {title: 'Media', fragment: TabID.Media},
     {title: 'Email', fragment: TabID.Email},
-    //{title: 'Plugins', fragment: TabID.Plugins},
     {title: 'Tasks', fragment: TabID.Tasks},
     {title: 'Statistics', fragment: TabID.Statistics},
     {title: 'System', fragment: TabID.System},

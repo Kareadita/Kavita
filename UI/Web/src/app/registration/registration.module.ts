@@ -16,25 +16,23 @@ import { SplashContainerComponent } from './_components/splash-container/splash-
 
 
 @NgModule({
-  declarations: [
-    ConfirmEmailComponent,
-    SplashContainerComponent,
-    RegisterComponent,
-    AddEmailToAccountMigrationModalComponent,
-    ConfirmMigrationEmailComponent,
-    ResetPasswordComponent,
-    ConfirmResetPasswordComponent,
-    UserLoginComponent,
-    ConfirmEmailChangeComponent
-  ],
-  imports: [
-    CommonModule,
-    RegistrationRoutingModule,
-    NgbTooltipModule,
-    ReactiveFormsModule
-  ],
-  exports: [
-    SplashContainerComponent
-  ]
+    imports: [
+        CommonModule,
+        RegistrationRoutingModule,
+        NgbTooltipModule,
+        ReactiveFormsModule,
+        ConfirmEmailComponent,
+        SplashContainerComponent,
+        RegisterComponent,
+        AddEmailToAccountMigrationModalComponent,
+        ConfirmMigrationEmailComponent,
+        ResetPasswordComponent,
+        ConfirmResetPasswordComponent,
+        UserLoginComponent,
+        ConfirmEmailChangeComponent
+    ],
+    exports: [
+        SplashContainerComponent
+    ]
 })
 export class RegistrationModule { }

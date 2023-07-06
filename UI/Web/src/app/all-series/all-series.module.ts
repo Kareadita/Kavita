@@ -12,16 +12,14 @@ import {
 
 
 @NgModule({
-  declarations: [
-    AllSeriesComponent
-  ],
-  imports: [
-    CommonModule,
-    AllSeriesRoutingModule,
-    SeriesCardComponent,
-    BulkOperationsComponent,
-    CardDetailLayoutComponent,
-    SideNavCompanionBarComponent,
-  ]
+    imports: [
+        CommonModule,
+        AllSeriesRoutingModule,
+        SeriesCardComponent,
+        BulkOperationsComponent,
+        CardDetailLayoutComponent,
+        SideNavCompanionBarComponent,
+        AllSeriesComponent,
+    ]
 })
 export class AllSeriesModule { }

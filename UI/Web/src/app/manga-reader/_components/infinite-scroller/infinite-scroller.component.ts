@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgFor, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -52,10 +52,12 @@ const enum DEBUG_MODES {
 }
 
 @Component({
-  selector: 'app-infinite-scroller',
-  templateUrl: './infinite-scroller.component.html',
-  styleUrls: ['./infinite-scroller.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-infinite-scroller',
+    templateUrl: './infinite-scroller.component.html',
+    styleUrls: ['./infinite-scroller.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgFor, AsyncPipe]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 

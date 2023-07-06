@@ -6,17 +6,22 @@ import {
   inject,
   OnInit
 } from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../shared/confirm.service";
+import { LoadingComponent } from '../../shared/loading/loading.component';
+import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-license',
-  templateUrl: './license.component.html',
-  styleUrls: ['./license.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-license',
+    templateUrl: './license.component.html',
+    styleUrls: ['./license.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule]
 })
 export class LicenseComponent implements OnInit {
 

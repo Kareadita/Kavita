@@ -1,19 +1,23 @@
 import { Component, HostListener, Inject, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { NavigationStart, Router, RouterOutlet } from '@angular/router';
 import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
+import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
+import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: true,
+  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent]
 })
 export class AppComponent implements OnInit {
 

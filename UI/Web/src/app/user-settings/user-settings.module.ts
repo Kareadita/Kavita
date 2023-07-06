@@ -23,7 +23,7 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
-import { StatisticsModule } from '../statistics/statistics.module';
+
 import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
 import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
 import { UserHoldsComponent } from "./user-holds/user-holds.component";
@@ -36,7 +36,27 @@ import {
 
 
 @NgModule({
-  declarations: [
+    imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbCollapseModule,
+    ColorPickerModule,
+    UserSettingsRoutingModule,
+    UserScrobbleHistoryComponent,
+    UserHoldsComponent,
+    NgOptimizedImage,
+    SentenceCasePipe,
+    AgeRatingPipe,
+    LoadingComponent,
+    SideNavCompanionBarComponent,
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
     UserPreferencesComponent,
     ApiKeyComponent,
     ThemeManagerComponent,
@@ -49,39 +69,11 @@ import {
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
     AnilistKeyComponent,
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbCollapseModule,
-
-    ColorPickerModule, // User preferences background color
-
-    StatisticsModule,
-
-    UserSettingsRoutingModule,
-    UserScrobbleHistoryComponent,
-    UserHoldsComponent,
-    NgOptimizedImage,
-    SentenceCasePipe,
-    AgeRatingPipe,
-    LoadingComponent,
-    SideNavCompanionBarComponent,
-
-    NgbAccordionDirective,
-    NgbAccordionItem,
-    NgbAccordionHeader,
-    NgbAccordionButton,
-    NgbAccordionCollapse,
-    NgbAccordionBody,
-  ],
-  exports: [
-    SiteThemeProviderPipe,
-    ApiKeyComponent,
-    RestrictionSelectorComponent,
-  ]
+],
+    exports: [
+        SiteThemeProviderPipe,
+        ApiKeyComponent,
+        RestrictionSelectorComponent,
+    ]
 })
 export class UserSettingsModule { }

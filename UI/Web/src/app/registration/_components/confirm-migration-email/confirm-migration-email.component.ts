@@ -5,10 +5,11 @@ import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
 
 @Component({
-  selector: 'app-confirm-migration-email',
-  templateUrl: './confirm-migration-email.component.html',
-  styleUrls: ['./confirm-migration-email.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-confirm-migration-email',
+    templateUrl: './confirm-migration-email.component.html',
+    styleUrls: ['./confirm-migration-email.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true
 })
 export class ConfirmMigrationEmailComponent {
 

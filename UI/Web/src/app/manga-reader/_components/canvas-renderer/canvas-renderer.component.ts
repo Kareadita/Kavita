@@ -20,14 +20,18 @@ import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
 import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
+import { NgClass, AsyncPipe } from '@angular/common';
 
 const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
 
 @Component({
-  selector: 'app-canvas-renderer',
-  templateUrl: './canvas-renderer.component.html',
-  styleUrls: ['./canvas-renderer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-canvas-renderer',
+    templateUrl: './canvas-renderer.component.html',
+    styleUrls: ['./canvas-renderer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgClass, AsyncPipe, SafeStylePipe]
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 

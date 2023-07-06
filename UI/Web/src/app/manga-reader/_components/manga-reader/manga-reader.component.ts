@@ -14,7 +14,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT} from '@angular/common';
+import { DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase } from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
@@ -30,9 +30,9 @@ import {
   take,
   tap
 } from 'rxjs';
-import {ChangeContext, LabelType, Options} from 'ngx-slider-v2';
+import { ChangeContext, LabelType, Options, NgxSliderModule } from 'ngx-slider-v2';
 import {animate, state, style, transition, trigger} from '@angular/animations';
-import {FormBuilder, FormControl, FormGroup} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
@@ -62,6 +62,12 @@ import {ChapterInfo} from '../../_models/chapter-info';
 import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
 import {SwipeEvent} from 'src/app/ng-swipe/ag-swipe.core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { FullscreenIconPipe } from '../../_pipes/fullscreen-icon.pipe';
+import { ReaderModeIconPipe } from '../../_pipes/reader-mode-icon.pipe';
+import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
+import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
+import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
 
 
 const PREFETCH_PAGES = 10;
@@ -87,33 +93,35 @@ enum KeyDirection {
 }
 
 @Component({
-  selector: 'app-manga-reader',
-  templateUrl: './manga-reader.component.html',
-  styleUrls: ['./manga-reader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ManagaReaderService],
-  animations: [
-    trigger('slideFromTop', [
-      state('in', style({ transform: 'translateY(0)'})),
-      transition('void => *', [
-        style({ transform: 'translateY(-100%)' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
-      ])
-    ]),
-    trigger('slideFromBottom', [
-      state('in', style({ transform: 'translateY(0)'})),
-      transition('void => *', [
-        style({ transform: 'translateY(100%)' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
-      ])
-    ])
-  ]
+    selector: 'app-manga-reader',
+    templateUrl: './manga-reader.component.html',
+    styleUrls: ['./manga-reader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ManagaReaderService],
+    animations: [
+        trigger('slideFromTop', [
+            state('in', style({ transform: 'translateY(0)' })),
+            transition('void => *', [
+                style({ transform: 'translateY(-100%)' }),
+                animate(ANIMATION_SPEED)
+            ]),
+            transition('* => void', [
+                animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
+            ])
+        ]),
+        trigger('slideFromBottom', [
+            state('in', style({ transform: 'translateY(0)' })),
+            transition('void => *', [
+                style({ transform: 'translateY(100%)' }),
+                animate(ANIMATION_SPEED)
+            ]),
+            transition('* => void', [
+                animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
+            ])
+        ])
+    ],
+    standalone: true,
+    imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 

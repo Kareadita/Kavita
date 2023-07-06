@@ -8,7 +8,7 @@ import {
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Observable, of, ReplaySubject } from 'rxjs';
 import { debounceTime, map, take, tap, shareReplay } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
@@ -25,12 +25,19 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { CardItemComponent } from '../../cards/card-item/card-item.component';
+import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
+import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
+import { NgIf, AsyncPipe } from '@angular/common';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent, CardItemComponent, AsyncPipe]
 })
 export class DashboardComponent implements OnInit {
 

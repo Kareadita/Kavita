@@ -11,21 +11,20 @@ import {DrawerComponent} from "../shared/drawer/drawer.component";
 
 
 @NgModule({
-  declarations: [BookReaderComponent, SafeStylePipe, TableOfContentsComponent, ReaderSettingsComponent],
-  imports: [
-    CommonModule,
-    BookReaderRoutingModule,
-    ReactiveFormsModule,
-    NgbProgressbarModule,
-    NgbTooltipModule,
-    NgbTooltipModule,
-    NgbAccordionModule, // Drawer
-    NgbNavModule,
-    DrawerComponent,
-    // Drawer
-  ], exports: [
-    BookReaderComponent,
-    SafeStylePipe
-  ]
+    imports: [
+        CommonModule,
+        BookReaderRoutingModule,
+        ReactiveFormsModule,
+        NgbProgressbarModule,
+        NgbTooltipModule,
+        NgbTooltipModule,
+        NgbAccordionModule,
+        NgbNavModule,
+        DrawerComponent,
+        BookReaderComponent, SafeStylePipe, TableOfContentsComponent, ReaderSettingsComponent,
+    ], exports: [
+        BookReaderComponent,
+        SafeStylePipe
+    ]
 })
 export class BookReaderModule { }

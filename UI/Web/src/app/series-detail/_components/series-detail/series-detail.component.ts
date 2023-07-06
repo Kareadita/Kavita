@@ -1,4 +1,4 @@
-import {DOCUMENT} from '@angular/common';
+import { DOCUMENT, NgIf, NgStyle, NgFor, DecimalPipe } from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -12,10 +12,10 @@ import {
   OnInit,
   ViewChild
 } from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {Title} from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import {NgbModal, NgbNavChangeEvent, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavChangeEvent, NgbOffcanvas, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, forkJoin, of} from 'rxjs';
 import {take} from 'rxjs/operators';
@@ -54,6 +54,22 @@ import {ReviewSeriesModalComponent} from '../../../_single-module/review-series-
 import {PageLayoutMode} from 'src/app/_models/page-layout-mode';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UserReview} from "../../../_single-module/review-card/user-review";
+import { LoadingComponent } from '../../../shared/loading/loading.component';
+import { ExternalListItemComponent } from '../../../cards/external-list-item/external-list-item.component';
+import { ExternalSeriesCardComponent } from '../../../cards/external-series-card/external-series-card.component';
+import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
+import { EntityTitleComponent } from '../../../cards/entity-title/entity-title.component';
+import { ListItemComponent } from '../../../cards/list-item/list-item.component';
+import { CardItemComponent } from '../../../cards/card-item/card-item.component';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
+import { ReviewCardComponent } from '../../../_single-module/review-card/review-card.component';
+import { CarouselReelComponent } from '../../../carousel/_components/carousel-reel/carousel-reel.component';
+import { SeriesMetadataDetailComponent } from '../series-metadata-detail/series-metadata-detail.component';
+import { ImageComponent } from '../../../shared/image/image.component';
+import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component';
+import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 interface RelatedSeris {
   series: Series;
@@ -76,10 +92,12 @@ interface StoryLineItem {
 }
 
 @Component({
-  selector: 'app-series-detail',
-  templateUrl: './series-detail.component.html',
-  styleUrls: ['./series-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-series-detail',
+    templateUrl: './series-detail.component.html',
+    styleUrls: ['./series-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 

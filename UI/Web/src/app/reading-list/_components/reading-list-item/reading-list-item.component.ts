@@ -3,12 +3,19 @@ import { LibraryType } from 'src/app/_models/library';
 import { MangaFormat } from 'src/app/_models/manga-format';
 import { ReadingListItem } from 'src/app/_models/reading-list';
 import { ImageService } from 'src/app/_services/image.service';
+import { MangaFormatIconPipe } from '../../../pipe/manga-format-icon.pipe';
+import { MangaFormatPipe } from '../../../pipe/manga-format.pipe';
+import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, DatePipe } from '@angular/common';
+import { ImageComponent } from '../../../shared/image/image.component';
 
 @Component({
-  selector: 'app-reading-list-item',
-  templateUrl: './reading-list-item.component.html',
-  styleUrls: ['./reading-list-item.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-reading-list-item',
+    templateUrl: './reading-list-item.component.html',
+    styleUrls: ['./reading-list-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [ImageComponent, NgIf, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe]
 })
 export class ReadingListItemComponent {
 

@@ -30,47 +30,42 @@ import {LoadingComponent} from "../shared/loading/loading.component";
 import {A11yClickDirective} from "../shared/a11y-click.directive";
 
 @NgModule({
-  declarations: [
-    DraggableOrderedListComponent,
-    ReadingListDetailComponent,
-    AddToListModalComponent,
-    ReadingListsComponent,
-    EditReadingListModalComponent,
-    ReadingListItemComponent,
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    DragDropModule,
-    NgbNavModule,
-    NgbProgressbarModule,
-    NgbTooltipModule,
-    NgbDropdownModule,
-
-    ImageComponent,
-    ReadMoreComponent,
-    PersonBadgeComponent,
-    BadgeExpanderComponent,
-
-    ReadingListRoutingModule,
-
-    VirtualScrollerModule,
-    CardActionablesComponent,
-    MangaFormatPipe,
-    MangaFormatIconPipe,
-    SafeHtmlPipe,
-    FilterPipe,
-    CoverImageChooserComponent,
-    CardDetailLayoutComponent,
-    CardItemComponent,
-    SideNavCompanionBarComponent,
-    LoadingComponent,
-    A11yClickDirective,
-  ],
-  exports: [
-    AddToListModalComponent,
-    ReadingListsComponent,
-    EditReadingListModalComponent
-  ]
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        DragDropModule,
+        NgbNavModule,
+        NgbProgressbarModule,
+        NgbTooltipModule,
+        NgbDropdownModule,
+        ImageComponent,
+        ReadMoreComponent,
+        PersonBadgeComponent,
+        BadgeExpanderComponent,
+        ReadingListRoutingModule,
+        VirtualScrollerModule,
+        CardActionablesComponent,
+        MangaFormatPipe,
+        MangaFormatIconPipe,
+        SafeHtmlPipe,
+        FilterPipe,
+        CoverImageChooserComponent,
+        CardDetailLayoutComponent,
+        CardItemComponent,
+        SideNavCompanionBarComponent,
+        LoadingComponent,
+        A11yClickDirective,
+        DraggableOrderedListComponent,
+        ReadingListDetailComponent,
+        AddToListModalComponent,
+        ReadingListsComponent,
+        EditReadingListModalComponent,
+        ReadingListItemComponent,
+    ],
+    exports: [
+        AddToListModalComponent,
+        ReadingListsComponent,
+        EditReadingListModalComponent
+    ]
 })
 export class ReadingListModule { }

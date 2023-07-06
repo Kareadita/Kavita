@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgFor, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -9,7 +9,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { take } from 'rxjs';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
@@ -25,6 +25,7 @@ import { BookDarkTheme } from '../../_models/book-dark-theme';
 import { BookWhiteTheme } from '../../_models/book-white-theme';
 import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 /**
  * Used for book reader. Do not use for other components
@@ -79,10 +80,12 @@ export const bookColorThemes = [
 const mobileBreakpointMarginOverride = 700;
 
 @Component({
-  selector: 'app-reader-settings',
-  templateUrl: './reader-settings.component.html',
-  styleUrls: ['./reader-settings.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-reader-settings',
+    templateUrl: './reader-settings.component.html',
+    styleUrls: ['./reader-settings.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe]
 })
 export class ReaderSettingsComponent implements OnInit {
   /**
