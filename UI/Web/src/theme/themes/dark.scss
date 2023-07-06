@@ -1,4 +1,5 @@
-//
+@import '../variables';
+
 :root, :root .default {
     /* Base colors */
     --primary-color: #4ac694;
@@ -183,11 +184,11 @@
     --hr-color: rgba(239, 239, 239, 0.125);
     --accent-bg-color: rgba(1, 4, 9, 0.5);
     --accent-text-color: lightgrey;
-    --grid-breakpoints-xs: $grid-breakpoint-xs;
-    --grid-breakpoints-sm: $grid-breakpoint-sm;
-    --grid-breakpoints-md: $grid-breakpoint-md;
-    --grid-breakpoints-lg: $grid-breakpoint-lg;
-    --grid-breakpoints-xl: $grid-breakpoint-xl;
+    --grid-breakpoints-xs: $grid-breakpoints-xs;
+    --grid-breakpoints-sm: $grid-breakpoints-sm;
+    --grid-breakpoints-md: $grid-breakpoints-md;
+    --grid-breakpoints-lg: $grid-breakpoints-lg;
+    --grid-breakpoints-xl: $grid-breakpoints-xl;
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
 

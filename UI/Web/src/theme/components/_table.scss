@@ -22,3 +22,10 @@ th[sortable].desc:after {
   float: right;
   transform: rotate(180deg);
 }
+
+.table {
+  --bs-table-color-state: var(--bs-body-color);
+  --bs-table-bg: #d3d3d3;
+}
+
+
