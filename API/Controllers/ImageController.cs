@@ -114,7 +114,12 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.CollectionTagRepository.GetCoverImageAsync(collectionTagId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+        {
+            var destFile = await GenerateCollectionCoverImage(collectionTagId);
+            if (string.IsNullOrEmpty(destFile)) return BadRequest("No cover image");
+            return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)), _directoryService.FileSystem.Path.GetFileName(destFile));
+        }
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
@@ -144,7 +149,7 @@ public class ImageController : BaseApiController
 
     private async Task<string> GenerateReadingListCoverImage(int readingListId)
     {
-        var covers = _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
+        var covers = await _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
         if (covers.Count < 4)
         {
             return string.Empty;
@@ -152,6 +157,24 @@ public class ImageController : BaseApiController
 
         var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
             ImageService.GetReadingListFormat(readingListId));
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        destFile += settings.EncodeMediaAs.GetExtension();
+        ImageService.CreateMergedImage(
+            covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            destFile);
+        return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
+    }
+
+    private async Task<string> GenerateCollectionCoverImage(int collectionId)
+    {
+        var covers = await _unitOfWork.CollectionTagRepository.GetRandomCoverImagesAsync(collectionId);
+        if (covers.Count < 4)
+        {
+            return string.Empty;
+        }
+
+        var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
+            ImageService.GetCollectionTagFormat(collectionId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         destFile += settings.EncodeMediaAs.GetExtension();
         ImageService.CreateMergedImage(

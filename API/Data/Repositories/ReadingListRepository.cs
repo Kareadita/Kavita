@@ -42,7 +42,7 @@ public interface IReadingListRepository
     void Update(ReadingList list);
     Task<int> Count();
     Task<string?> GetCoverImageAsync(int readingListId);
-    IList<string> GetRandomCoverImagesAsync(int readingListId);
+    Task<IList<string>> GetRandomCoverImagesAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
@@ -93,15 +93,15 @@ public class ReadingListRepository : IReadingListRepository
             .ToListAsync())!;
     }
 
-    public IList<string> GetRandomCoverImagesAsync(int readingListId)
+    public async Task<IList<string>> GetRandomCoverImagesAsync(int readingListId)
     {
         var random = new Random();
-        var data = _context.ReadingList
+        var data = await _context.ReadingList
                 .Where(r => r.Id == readingListId)
                 .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
                 .Where(t => !string.IsNullOrEmpty(t))
-                .AsEnumerable();
-        if (data.Count() < 4) return new List<string>();
+                .ToListAsync();
+        if (data.Count < 4) return new List<string>();
         return data
             .OrderBy(_ => random.Next())
             .Take(4)
