@@ -8,15 +8,10 @@ using API.Extensions;
 using API.Helpers.Builders;
 
 namespace API.Helpers;
+#nullable enable
 
 public static class GenreHelper
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="allGenres"></param>
-    /// <param name="names"></param>
-    /// <param name="action"></param>
     public static void UpdateGenre(ICollection<Genre> allGenres, IEnumerable<string> names, Action<Genre> action)
     {
         foreach (var name in names)
@@ -50,14 +45,14 @@ public static class GenreHelper
     }
 
     /// <summary>
-    /// Adds the genre to the list if it's not already in there. This will ignore the ExternalTag.
+    /// Adds the genre to the list if it's not already in there.
     /// </summary>
     /// <param name="metadataGenres"></param>
     /// <param name="genre"></param>
     public static void AddGenreIfNotExists(ICollection<Genre> metadataGenres, Genre genre)
     {
         var existingGenre = metadataGenres.FirstOrDefault(p =>
-            p.NormalizedTitle == genre.Title?.ToNormalized());
+            p.NormalizedTitle.Equals(genre.Title?.ToNormalized()));
         if (existingGenre == null)
         {
             metadataGenres.Add(genre);
@@ -75,8 +70,7 @@ public static class GenreHelper
         var existingTags = series.Metadata.Genres.ToList();
         foreach (var existing in existingTags)
         {
-            // NOTE: Why don't I use a NormalizedName here (outside of memory pressure from string creation)?
-            if (tags.SingleOrDefault(t => t.Id == existing.Id) == null)
+            if (tags.SingleOrDefault(t => t.Title.ToNormalized().Equals(existing.NormalizedTitle)) == null)
             {
                 // Remove tag
                 series.Metadata.Genres.Remove(existing);
@@ -88,10 +82,10 @@ public static class GenreHelper
         foreach (var tagTitle in tags.Select(t => t.Title))
         {
             var normalizedTitle = tagTitle.ToNormalized();
-            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle == normalizedTitle);
+            var existingTag = allTags.SingleOrDefault(t => t.NormalizedTitle.Equals(normalizedTitle));
             if (existingTag != null)
             {
-                if (series.Metadata.Genres.All(t => t.NormalizedTitle != normalizedTitle))
+                if (series.Metadata.Genres.All(t => !t.NormalizedTitle.Equals(normalizedTitle)))
                 {
                     handleAdd(existingTag);
                     isModified = true;
