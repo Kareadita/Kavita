@@ -1,9 +1,11 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { NgbActiveModal, NgbTypeahead } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbTypeahead, NgbHighlight } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, debounceTime, distinctUntilChanged, filter, map, merge, Observable, of, OperatorFunction, Subject, switchMap, tap } from 'rxjs';
 import { Stack } from 'src/app/shared/data-structures/stack';
 import { DirectoryDto } from 'src/app/_models/system/directory-dto';
 import { LibraryService } from '../../../_services/library.service';
+import { NgIf, NgFor, NgClass } from '@angular/common';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 
 export interface DirectoryPickerResult {
@@ -14,9 +16,11 @@ export interface DirectoryPickerResult {
 
 
 @Component({
-  selector: 'app-directory-picker',
-  templateUrl: './directory-picker.component.html',
-  styleUrls: ['./directory-picker.component.scss']
+    selector: 'app-directory-picker',
+    templateUrl: './directory-picker.component.html',
+    styleUrls: ['./directory-picker.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgbTypeahead, FormsModule, NgbHighlight, NgIf, NgFor, NgClass]
 })
 export class DirectoryPickerComponent implements OnInit {
 

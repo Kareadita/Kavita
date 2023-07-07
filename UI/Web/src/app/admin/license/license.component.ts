@@ -6,16 +6,22 @@ import {
   inject,
   OnInit
 } from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import {AccountService} from "../../_services/account.service";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
+import {ConfirmService} from "../../shared/confirm.service";
+import { LoadingComponent } from '../../shared/loading/loading.component';
+import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-license',
-  templateUrl: './license.component.html',
-  styleUrls: ['./license.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-license',
+    templateUrl: './license.component.html',
+    styleUrls: ['./license.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule]
 })
 export class LicenseComponent implements OnInit {
 
@@ -29,7 +35,9 @@ export class LicenseComponent implements OnInit {
 
 
 
-  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService, private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
+  constructor(public accountService: AccountService, private scrobblingService: ScrobblingService,
+              private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef,
+              private confirmService: ConfirmService) { }
 
   ngOnInit(): void {
     this.formGroup.addControl('licenseKey', new FormControl('', [Validators.required]));
@@ -59,9 +67,9 @@ export class LicenseComponent implements OnInit {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
         if (!this.hasValidLicense) {
-          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription.");
+          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.");
         } else {
-          this.toastr.success('Kavita+ unlocked! Please refresh the page');
+          this.toastr.success('Kavita+ unlocked!');
         }
         this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
         this.resetForm();
@@ -73,6 +81,19 @@ export class LicenseComponent implements OnInit {
       this.toastr.error("There was an error when activating your license. Please try again.");
     });
   }
+
+  async deleteLicense() {
+    if (!await this.confirmService.confirm('This will only delete Kavita\'s license key and allow a buy link to show. This will not cancel your subscription! Use this only if directed by support!')) {
+      return;
+    }
+
+    this.accountService.deleteLicense().subscribe(() => {
+      this.resetForm();
+      this.validateLicense();
+    });
+
+  }
+
 
   toggleViewMode() {
     this.isViewMode = !this.isViewMode;

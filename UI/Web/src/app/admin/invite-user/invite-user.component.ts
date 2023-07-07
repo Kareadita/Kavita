@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
@@ -7,11 +7,18 @@ import { InviteUserResponse } from 'src/app/_models/auth/invite-user-response';
 import { Library } from 'src/app/_models/library';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AccountService } from 'src/app/_services/account.service';
+import { ApiKeyComponent } from '../../user-settings/api-key/api-key.component';
+import { RestrictionSelectorComponent } from '../../user-settings/restriction-selector/restriction-selector.component';
+import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
+import { RoleSelectorComponent } from '../role-selector/role-selector.component';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-invite-user',
-  templateUrl: './invite-user.component.html',
-  styleUrls: ['./invite-user.component.scss']
+    selector: 'app-invite-user',
+    templateUrl: './invite-user.component.html',
+    styleUrls: ['./invite-user.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, ApiKeyComponent]
 })
 export class InviteUserComponent implements OnInit {
 

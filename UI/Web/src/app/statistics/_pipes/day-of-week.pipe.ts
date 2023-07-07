@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DayOfWeek } from 'src/app/_services/statistics.service';
 
 @Pipe({
-  name: 'dayOfWeek'
+    name: 'dayOfWeek',
+    standalone: true
 })
 export class DayOfWeekPipe implements PipeTransform {
 

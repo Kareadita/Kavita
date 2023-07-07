@@ -8,7 +8,7 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { map, shareReplay, takeUntil } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
@@ -23,12 +23,17 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
+import { NgIf, NgClass, NgStyle, NgFor, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-nav-events-toggle',
-  templateUrl: './events-widget.component.html',
-  styleUrls: ['./events-widget.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-nav-events-toggle',
+    templateUrl: './events-widget.component.html',
+    styleUrls: ['./events-widget.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input({required: true}) user!: User;

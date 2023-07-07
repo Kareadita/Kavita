@@ -13,7 +13,7 @@ import {
   RendererStyleFlags2,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, Location} from '@angular/common';
+import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of, Subject } from 'rxjs';
@@ -37,12 +37,15 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { PageStyle } from '../reader-settings/reader-settings.component';
+import { PageStyle, ReaderSettingsComponent } from '../reader-settings/reader-settings.component';
 import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { TableOfContentsComponent } from '../table-of-contents/table-of-contents.component';
+import { NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { DrawerComponent } from '../../../shared/drawer/drawer.component';
 
 
 enum TabID {
@@ -74,22 +77,24 @@ const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
 const elementLevelStyles = ['line-height', 'font-family'];
 
 @Component({
-  selector: 'app-book-reader',
-  templateUrl: './book-reader.component.html',
-  styleUrls: ['./book-reader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('isLoading', [
-      state('false', style({opacity: 1})),
-      state('true', style({opacity: 0})),
-      transition('false <=> true', animate('200ms'))
-    ]),
-    trigger('fade', [
-      state('true', style({opacity: 0})),
-      state('false', style({opacity: 0.5})),
-      transition('false <=> true', animate('4000ms'))
-    ])
-  ]
+    selector: 'app-book-reader',
+    templateUrl: './book-reader.component.html',
+    styleUrls: ['./book-reader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('isLoading', [
+            state('false', style({ opacity: 1 })),
+            state('true', style({ opacity: 0 })),
+            transition('false <=> true', animate('200ms'))
+        ]),
+        trigger('fade', [
+            state('true', style({ opacity: 0 })),
+            state('false', style({ opacity: 0.5 })),
+            transition('false <=> true', animate('4000ms'))
+        ])
+    ],
+    standalone: true,
+    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -375,7 +380,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get ColumnWidth() {
     const base = this.writingStyle === WritingStyle.Vertical ? this.windowHeight : this.windowWidth;
-    console.log('base width: ', base);
     switch (this.layoutMode) {
       case BookPageLayoutMode.Default:
         return 'unset';

@@ -4,6 +4,7 @@ using API.Entities.Interfaces;
 using API.Services;
 
 namespace API.Entities.Scrobble;
+#nullable enable
 
 /// <summary>
 /// Represents an event that would need to be sent to the API layer. These rows will be processed and deleted.

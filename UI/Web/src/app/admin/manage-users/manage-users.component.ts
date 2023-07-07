@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs/operators';
 import { MemberService } from 'src/app/_services/member.service';
 import { Member } from 'src/app/_models/auth/member';
@@ -13,11 +13,15 @@ import { InviteUserComponent } from '../invite-user/invite-user.component';
 import { EditUserComponent } from '../edit-user/edit-user.component';
 import { ServerService } from 'src/app/_services/server.service';
 import { Router } from '@angular/router';
+import { TagBadgeComponent } from '../../shared/tag-badge/tag-badge.component';
+import { NgFor, NgIf, AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-manage-users',
-  templateUrl: './manage-users.component.html',
-  styleUrls: ['./manage-users.component.scss']
+    selector: 'app-manage-users',
+    templateUrl: './manage-users.component.html',
+    styleUrls: ['./manage-users.component.scss'],
+    standalone: true,
+    imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe]
 })
 export class ManageUsersComponent implements OnInit, OnDestroy {
 

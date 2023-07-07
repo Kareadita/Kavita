@@ -46,8 +46,6 @@ public class AccountController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
-    private readonly ILicenseService _licenseService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -55,9 +53,7 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IEventHub eventHub,
-        IEasyCachingProviderFactory cacheFactory,
-        ILicenseService licenseService)
+        IEmailService emailService, IEventHub eventHub)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -68,8 +64,6 @@ public class AccountController : BaseApiController
         _accountService = accountService;
         _emailService = emailService;
         _eventHub = eventHub;
-        _cacheFactory = cacheFactory;
-        _licenseService = licenseService;
     }
 
     /// <summary>
@@ -81,13 +75,11 @@ public class AccountController : BaseApiController
     [HttpPost("reset-password")]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
-        // TODO: Log this request to Audit Table
         _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
 
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-
 
         if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
             return Unauthorized("You are not permitted to this operation.");

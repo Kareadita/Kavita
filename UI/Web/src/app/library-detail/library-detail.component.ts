@@ -30,12 +30,23 @@ import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../pipe/sentence-case.pipe';
+import { BulkOperationsComponent } from '../cards/bulk-operations/bulk-operations.component';
+import { SeriesCardComponent } from '../cards/series-card/series-card.component';
+import { CardDetailLayoutComponent } from '../cards/card-detail-layout/card-detail-layout.component';
+import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
+import { NgFor, NgIf, DecimalPipe } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { CardActionablesComponent } from '../cards/card-item/card-actionables/card-actionables.component';
+import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-library-detail',
-  templateUrl: './library-detail.component.html',
-  styleUrls: ['./library-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-detail',
+    templateUrl: './library-detail.component.html',
+    styleUrls: ['./library-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe]
 })
 export class LibraryDetailComponent implements OnInit {
 

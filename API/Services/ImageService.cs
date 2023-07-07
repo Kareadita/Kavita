@@ -16,6 +16,7 @@ using NetVips;
 using Image = NetVips.Image;
 
 namespace API.Services;
+#nullable enable
 
 public interface IImageService
 {
@@ -54,6 +55,7 @@ public interface IImageService
     /// </summary>
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
+    /// <param name="encodeFormat">Encoding Format</param>
     /// <returns>File of written encoded image</returns>
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
@@ -244,7 +246,7 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
+            correctSizeLink = (pngLinks?.Find(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
         }
         catch (Exception ex)
         {
@@ -418,10 +420,9 @@ public class ImageService : IImageService
     }
 
 
-    public static string CreateMergedImage(List<string> coverImages, string dest)
+    public static string CreateMergedImage(IList<string> coverImages, string dest)
     {
-        // Currently this doesn't work due to non-standard cover image sizes and dimensions
-        var image = Image.Black(320*4, 160*4);
+        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 160
 
         for (var i = 0; i < coverImages.Count; i++)
         {

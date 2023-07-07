@@ -12,17 +12,30 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { IndexUpdateEvent } from '../draggable-ordered-list/draggable-ordered-list.component';
+import { IndexUpdateEvent, DraggableOrderedListComponent } from '../draggable-ordered-list/draggable-ordered-list.component';
 import { forkJoin, Observable } from 'rxjs';
 import { ReaderService } from 'src/app/_services/reader.service';
 import { LibraryService } from 'src/app/_services/library.service';
 import { Person } from 'src/app/_models/metadata/person';
+import { ReadingListItemComponent } from '../reading-list-item/reading-list-item.component';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
+import { A11yClickDirective } from '../../../shared/a11y-click.directive';
+import { PersonBadgeComponent } from '../../../shared/person-badge/person-badge.component';
+import { BadgeExpanderComponent } from '../../../shared/badge-expander/badge-expander.component';
+import { ReadMoreComponent } from '../../../shared/read-more/read-more.component';
+import { NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
+import { ImageComponent } from '../../../shared/image/image.component';
+import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
+import { NgIf, NgClass, AsyncPipe, DecimalPipe, DatePipe } from '@angular/common';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-reading-list-detail',
-  templateUrl: './reading-list-detail.component.html',
-  styleUrls: ['./reading-list-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-reading-list-detail',
+    templateUrl: './reading-list-detail.component.html',
+    styleUrls: ['./reading-list-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe]
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];

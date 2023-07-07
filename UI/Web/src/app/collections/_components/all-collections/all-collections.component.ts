@@ -22,13 +22,19 @@ import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
+import { CardItemComponent } from '../../../cards/card-item/card-item.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 
 @Component({
-  selector: 'app-all-collections',
-  templateUrl: './all-collections.component.html',
-  styleUrls: ['./all-collections.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-all-collections',
+    templateUrl: './all-collections.component.html',
+    styleUrls: ['./all-collections.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe]
 })
 export class AllCollectionsComponent implements OnInit {
 

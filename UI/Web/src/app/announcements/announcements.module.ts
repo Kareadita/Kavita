@@ -12,16 +12,14 @@ import {
 
 
 @NgModule({
-  declarations: [
-    AnnouncementsComponent,
-    ChangelogComponent
-  ],
-  imports: [
-    CommonModule,
-    AnnouncementsRoutingModule,
-    ReadMoreComponent,
-    LoadingComponent,
-    SideNavCompanionBarComponent
-  ]
+    imports: [
+        CommonModule,
+        AnnouncementsRoutingModule,
+        ReadMoreComponent,
+        LoadingComponent,
+        SideNavCompanionBarComponent,
+        AnnouncementsComponent,
+        ChangelogComponent
+    ]
 })
 export class AnnouncementsModule { }

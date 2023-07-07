@@ -17,24 +17,22 @@ import {CardItemComponent} from "../cards/card-item/card-item.component";
 
 
 @NgModule({
-  declarations: [
-    AllCollectionsComponent,
-    CollectionDetailComponent
-  ],
-  imports: [
-    CommonModule,
-    ImageComponent,
-    ReadMoreComponent,
-    CollectionsRoutingModule,
-    CardActionablesComponent,
-    SideNavCompanionBarComponent,
-    BulkOperationsComponent,
-    CardDetailLayoutComponent,
-    SeriesCardComponent,
-    CardItemComponent,
-  ],
-  exports: [
-    AllCollectionsComponent
-  ]
+    imports: [
+        CommonModule,
+        ImageComponent,
+        ReadMoreComponent,
+        CollectionsRoutingModule,
+        CardActionablesComponent,
+        SideNavCompanionBarComponent,
+        BulkOperationsComponent,
+        CardDetailLayoutComponent,
+        SeriesCardComponent,
+        CardItemComponent,
+        AllCollectionsComponent,
+        CollectionDetailComponent,
+    ],
+    exports: [
+        AllCollectionsComponent
+    ]
 })
 export class CollectionsModule { }

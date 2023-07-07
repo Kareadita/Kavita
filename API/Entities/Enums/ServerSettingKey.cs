@@ -124,7 +124,7 @@ public enum ServerSettingKey
     [Description("EncodeMediaAs")]
     EncodeMediaAs = 22,
     /// <summary>
-    /// A KavitaPlus Subscription license key
+    /// A Kavita+ Subscription license key
     /// </summary>
     [Description("LicenseKey")]
     LicenseKey = 23,

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnDestroy, OnInit} from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { filter, map, Observable, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
@@ -8,15 +8,19 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { LineChartModule } from '@swimlane/ngx-charts';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 const mangaFormatPipe = new MangaFormatPipe();
 
 @Component({
-  selector: 'app-reading-activity',
-  templateUrl: './reading-activity.component.html',
-  styleUrls: ['./reading-activity.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-reading-activity',
+    templateUrl: './reading-activity.component.html',
+    styleUrls: ['./reading-activity.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe]
 })
 export class ReadingActivityComponent implements OnInit {
   /**

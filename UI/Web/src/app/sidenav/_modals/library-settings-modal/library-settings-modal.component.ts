@@ -1,33 +1,29 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
-import {FormGroup, FormControl, Validators, ReactiveFormsModule} from '@angular/forms';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
-  NgbModal, NgbModalModule,
+  NgbModal,
+  NgbModalModule,
   NgbNav,
   NgbNavContent,
   NgbNavItem,
-  NgbNavLink, NgbNavOutlet,
+  NgbNavLink,
+  NgbNavOutlet,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { SettingsService } from 'src/app/admin/settings.service';
-import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Library, LibraryType } from 'src/app/_models/library';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { UploadService } from 'src/app/_services/upload.service';
+import {ToastrService} from 'ngx-toastr';
+import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
+import {SettingsService} from 'src/app/admin/settings.service';
+import {
+  DirectoryPickerComponent,
+  DirectoryPickerResult
+} from 'src/app/admin/_modals/directory-picker/directory-picker.component';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Library, LibraryType} from 'src/app/_models/library';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
@@ -85,7 +81,6 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
-  get StepID() { return StepID; }
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
@@ -109,6 +104,12 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.imageUrls.push(this.imageService.getLibraryCoverImage(this.library.id));
       this.cdRef.markForCheck();
     }
+
+    if (this.library && this.library.type === LibraryType.Comic) {
+      this.libraryForm.get('allowScrobbling')?.setValue(false);
+      this.libraryForm.get('allowScrobbling')?.disable();
+    }
+
 
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),

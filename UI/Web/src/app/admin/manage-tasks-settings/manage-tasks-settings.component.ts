@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
@@ -8,8 +8,10 @@ import { defer, forkJoin, Observable, of } from 'rxjs';
 import { ServerService } from 'src/app/_services/server.service';
 import { Job } from 'src/app/_models/job/job';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadService } from 'src/app/shared/_services/download.service';
+import { DefaultValuePipe } from '../../pipe/default-value.pipe';
+import { NgIf, NgFor, AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
 
 interface AdhocTask {
   name: string;
@@ -20,9 +22,11 @@ interface AdhocTask {
 }
 
 @Component({
-  selector: 'app-manage-tasks-settings',
-  templateUrl: './manage-tasks-settings.component.html',
-  styleUrls: ['./manage-tasks-settings.component.scss']
+    selector: 'app-manage-tasks-settings',
+    templateUrl: './manage-tasks-settings.component.html',
+    styleUrls: ['./manage-tasks-settings.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
@@ -34,25 +38,19 @@ export class ManageTasksSettingsComponent implements OnInit {
   recurringTasks$: Observable<Array<Job>> = of([]);
   adhocTasks: Array<AdhocTask> = [
     {
-      name: 'Scrobble Updates',
-      description: 'Triggers Process of Scrobble Updates - debug only',
-      api: this.serverService.scrobbleUpdates(),
-      successMessage: 'Scrobbling has been queued'
-    },
-    {
-      name: 'Bust Cache',
-      description: 'Busts the Kavita+ Cache - should only be used when debugging bad matches',
-      api: this.serverService.bustCache(),
-      successMessage: 'Kavita+ Cache busted'
-    },
-    {
       name: 'Convert Media to Target Encoding',
       description: 'Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).',
       api: this.serverService.convertMedia(),
       successMessage: 'Conversion of Media to Target Encoding has been queued'
     },
     {
-      name: 'Clear Cache',
+      name: 'Bust Cache',
+      description: 'Busts the Kavita+ Cache - should only be used when debugging bad matches.',
+      api: this.serverService.bustCache(),
+      successMessage: 'Kavita+ Cache busted'
+    },
+    {
+      name: 'Clear Reading Cache',
       description: 'Clears cached files for reading. Useful when you\'ve just updated a file that you were previously reading within the last 24 hours.',
       api: this.serverService.clearCache(),
       successMessage: 'Cache has been cleared'
@@ -71,13 +69,13 @@ export class ManageTasksSettingsComponent implements OnInit {
     },
     {
       name: 'Download Logs',
-      description: 'Compiles all log files into a zip and downloads it',
-      api: defer(() => of(this.downloadService.download('logs', undefined))),
+      description: 'Compiles all log files into a zip and downloads it.',
+      api: defer(() => of(() => this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
     {
       name: 'Analyze Files',
-      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release.',
+      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.',
       api: this.serverService.analyzeFiles(),
       successMessage: 'File analysis has been queued'
     },

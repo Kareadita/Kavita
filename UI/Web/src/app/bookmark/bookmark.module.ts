@@ -12,16 +12,14 @@ import {CardItemComponent} from "../cards/card-item/card-item.component";
 
 
 @NgModule({
-  declarations: [
-    BookmarksComponent
-  ],
-  imports: [
-    CommonModule,
-    BookmarkRoutingModule,
-    BulkOperationsComponent,
-    CardDetailLayoutComponent,
-    SideNavCompanionBarComponent,
-    CardItemComponent
-  ]
+    imports: [
+        CommonModule,
+        BookmarkRoutingModule,
+        BulkOperationsComponent,
+        CardDetailLayoutComponent,
+        SideNavCompanionBarComponent,
+        CardItemComponent,
+        BookmarksComponent
+    ]
 })
 export class BookmarkModule { }

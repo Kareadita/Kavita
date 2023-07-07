@@ -15,12 +15,17 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { RecommendationService } from 'src/app/_services/recommendation.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
+import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-library-recommended',
-  templateUrl: './library-recommended.component.html',
-  styleUrls: ['./library-recommended.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-recommended',
+    templateUrl: './library-recommended.component.html',
+    styleUrls: ['./library-recommended.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, CarouselReelComponent, SeriesCardComponent, AsyncPipe]
 })
 export class LibraryRecommendedComponent implements OnInit {
 

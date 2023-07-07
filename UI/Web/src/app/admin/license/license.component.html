@@ -71,6 +71,9 @@
         </div>
       </form>
       <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+        <button type="button" class="flex-fill btn btn-danger me-1" aria-describedby="license-key-header" (click)="deleteLicense()">
+          Delete
+        </button>
         <button type="submit" class="flex-fill btn btn-primary" aria-describedby="license-key-header" [disabled]="!formGroup.get('email')?.value || !formGroup.get('licenseKey')?.value" (click)="saveForm()">
           <span *ngIf="!isSaving">Save</span>
           <app-loading [loading]="isSaving" size="spinner-border-sm"></app-loading>

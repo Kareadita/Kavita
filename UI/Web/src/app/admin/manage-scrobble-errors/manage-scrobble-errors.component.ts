@@ -19,7 +19,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, filter, Observable, shareReplay} from "rxjs";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
-import {TableModule} from "../../_single-module/table/table.module";
+
 import {SeriesService} from "../../_services/series.service";
 import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/edit-series-modal.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
@@ -29,7 +29,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TableModule, FilterPipe, LoadingComponent],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -14,37 +14,32 @@ import { DoubleReverseRendererComponent } from './_components/double-reverse-ren
 import { MangaReaderComponent } from './_components/manga-reader/manga-reader.component';
 import { FittingIconPipe } from './_pipes/fitting-icon.pipe';
 import { DoubleNoCoverRendererComponent } from './_components/double-renderer-no-cover/double-no-cover-renderer.component';
-import { NgSwipeModule } from '../ng-swipe/ng-swipe.module';
+
 import {SafeStylePipe} from "../pipe/safe-style.pipe";
 import {LoadingComponent} from "../shared/loading/loading.component";
 
 @NgModule({
-  declarations: [
+    imports: [
+    CommonModule,
+    MangaReaderRoutingModule,
+    ReactiveFormsModule,
+    NgbDropdownModule,
+    NgxSliderModule,
+    SafeStylePipe,
+    FittingIconPipe,
+    ReaderModeIconPipe,
+    FullscreenIconPipe,
+    LoadingComponent,
     MangaReaderComponent,
     InfiniteScrollerComponent,
     CanvasRendererComponent,
     SingleRendererComponent,
     DoubleRendererComponent,
     DoubleReverseRendererComponent,
-    DoubleNoCoverRendererComponent,
-  ],
-  imports: [
-    CommonModule,
-    MangaReaderRoutingModule,
-    ReactiveFormsModule,
-
-    NgbDropdownModule,
-    NgxSliderModule,
-
-    NgSwipeModule,
-    SafeStylePipe,
-    FittingIconPipe,
-    ReaderModeIconPipe,
-    FullscreenIconPipe,
-    LoadingComponent
-  ],
-  exports: [
-    MangaReaderComponent
-  ]
+    DoubleNoCoverRendererComponent
+],
+    exports: [
+        MangaReaderComponent
+    ]
 })
 export class MangaReaderModule { }

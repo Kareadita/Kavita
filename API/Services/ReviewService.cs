@@ -149,7 +149,7 @@ public class ReviewService : IReviewService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
         return new List<MediaReviewDto>();

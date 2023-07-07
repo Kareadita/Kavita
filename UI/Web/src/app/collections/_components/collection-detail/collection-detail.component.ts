@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgStyle } from '@angular/common';
 import { AfterContentChecked, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -25,12 +25,21 @@ import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
+import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
+import { ReadMoreComponent } from '../../../shared/read-more/read-more.component';
+import { ImageComponent } from '../../../shared/image/image.component';
+import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-collection-detail',
-  templateUrl: './collection-detail.component.html',
-  styleUrls: ['./collection-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-collection-detail',
+    templateUrl: './collection-detail.component.html',
+    styleUrls: ['./collection-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent]
 })
 export class CollectionDetailComponent implements OnInit, OnDestroy, AfterContentChecked {
 

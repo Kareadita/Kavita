@@ -9,7 +9,9 @@ using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Helpers;
+using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -114,7 +116,7 @@ public class RecommendationService : IRecommendationService
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, recDto.OwnedSeries);
 
         recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).OrderBy(r => r.Name).ToList();
-        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name).OrderBy(r => r.Name).ToList();
+        recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name.ToNormalized()).OrderBy(r => r.Name).ToList();
 
         return recDto;
     }
@@ -150,7 +152,7 @@ public class RecommendationService : IRecommendationService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
         return new List<MediaRecommendationDto>();

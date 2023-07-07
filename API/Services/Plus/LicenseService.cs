@@ -14,9 +14,16 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
+internal class RegisterLicenseResponseDto
+{
+    public string EncryptedLicense { get; set; }
+    public bool Successful { get; set; }
+    public string ErrorMessage { get; set; }
+}
+
 public interface ILicenseService
 {
-    Task ValidateAllLicenses();
+    Task ValidateLicenseStatus();
     Task RemoveLicense();
     Task AddLicense(string license, string email);
     Task<bool> HasActiveLicense(bool forceCheck = false);
@@ -68,7 +75,7 @@ public class LicenseService : ILicenseService
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
             throw;
         }
     }
@@ -77,10 +84,11 @@ public class LicenseService : ILicenseService
     /// Register the license with KavitaPlus
     /// </summary>
     /// <param name="license"></param>
+    /// <param name="email"></param>
     /// <returns></returns>
     private async Task<string> RegisterLicense(string license, string email)
     {
-        if (string.IsNullOrEmpty(license)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(license) || string.IsNullOrWhiteSpace(email)) return string.Empty;
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
@@ -93,30 +101,36 @@ public class LicenseService : ILicenseService
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
-                    License = license,
+                    License = license.Trim(),
                     InstallId = HashUtil.ServerToken(),
-                    EmailId = email
+                    EmailId = email.Trim()
                 })
-                .ReceiveString();
+                .ReceiveJson<RegisterLicenseResponseDto>();
 
-            return response.Trim('"');
+            if (response.Successful)
+            {
+                return response.EncryptedLicense;
+            }
+
+            _logger.LogError("An error happened during the request to Kavita+ API: {ErrorMessage}", response.ErrorMessage);
+            throw new KavitaException(response.ErrorMessage);
         }
-        catch (Exception e)
+        catch (FlurlHttpException e)
         {
-            _logger.LogError(e, "An error happened during the request to KavitaPlus API");
+            _logger.LogError(e, "An error happened during the request to Kavita+ API");
             return string.Empty;
         }
     }
 
     /// <summary>
-    /// Checks all licenses and updates cache
+    /// Checks licenses and updates cache
     /// </summary>
     /// <remarks>Expected to be called at startup and on reoccurring basis</remarks>
-    public async Task ValidateAllLicenses()
+    public async Task ValidateLicenseStatus()
     {
         try
         {
-            _logger.LogInformation("Validating KavitaPlus License");
+            _logger.LogInformation("Validating Kavita+ License");
             var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await provider.FlushAsync();
 
@@ -124,12 +138,12 @@ public class LicenseService : ILicenseService
             var isValid = await IsLicenseValid(license.Value);
             await provider.SetAsync(CacheKey, isValid, _licenseCacheTimeout);
 
-            _logger.LogInformation("Validating KavitaPlus License - Complete");
+            _logger.LogInformation("Validating Kavita+ License - Complete");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error talking with KavitaPlus API for license validation. Rescheduling check in 30 mins");
-            BackgroundJob.Schedule(() => ValidateAllLicenses(), TimeSpan.FromMinutes(30));
+            _logger.LogError(ex, "There was an error talking with Kavita+ API for license validation. Rescheduling check in 30 mins");
+            BackgroundJob.Schedule(() => ValidateLicenseStatus(), TimeSpan.FromMinutes(30));
         }
     }
 

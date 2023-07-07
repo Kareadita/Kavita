@@ -20,7 +20,7 @@ your reading collection with your friends and family!
 - [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
 - [x] First class responsive readers that work great on any device (phone, tablet, desktop)
 - [x] Dark mode and customizable theming support
-- [ ] Provide a plugin system to allow external metadata integration and scrobbling for read status, ratings, and reviews
+- [x] External metadata integration and scrobbling for read status, ratings, and reviews (available via Kavita+)
 - [x] Rich Metadata support with filtering and searching
 - [x] Ways to group reading material: Collections, Reading Lists, Want to Read
 - [x] Ability to manage users, access, and ratings

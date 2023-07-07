@@ -27,9 +27,9 @@ public static class SeriesExtensions
             .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
             .ToList();
 
-        if (chapters.Count > 1 && chapters.Any(c => c.IsSpecial))
+        if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
         {
-            return chapters.FirstOrDefault(c => !c.IsSpecial)?.CoverImage ?? chapters.First().CoverImage;
+            return chapters.Find(c => !c.IsSpecial)?.CoverImage ?? chapters[0].CoverImage;
         }
 
         // just volumes
@@ -40,13 +40,13 @@ public static class SeriesExtensions
         // If we have loose leaf chapters
 
         // if loose leaf chapters AND volumes, just return first volume
-        if (volumes.Count >= 1 && $"{volumes.First().Number}" != Parser.DefaultVolume)
+        if (volumes.Count >= 1 && $"{volumes[0].Number}" != Parser.DefaultVolume)
         {
             var looseLeafChapters = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
                 .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
                 .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
                 .ToList();
-            if (looseLeafChapters.Count > 0 && (1.0f * volumes.First().Number) > float.Parse(looseLeafChapters.First().Number))
+            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].Number) > float.Parse(looseLeafChapters[0].Number))
             {
                 return looseLeafChapters[0].CoverImage;
             }

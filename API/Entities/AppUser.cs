@@ -56,7 +56,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// <summary>
     /// The JWT for the user's AniList account. Expires after a year.
     /// </summary>
-    /// <remarks>Requires KavitaPlus Subscription</remarks>
+    /// <remarks>Requires Kavita+ Subscription</remarks>
     public string? AniListAccessToken { get; set; }
 
     /// <summary>

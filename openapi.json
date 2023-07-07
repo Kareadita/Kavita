@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.17"
+    "version": "0.7.3.18"
   },
   "servers": [
     {
@@ -5962,7 +5962,7 @@
         "tags": [
           "Recommended"
         ],
-        "summary": "For KavitaPlus users, this will return recommendations on the server.",
+        "summary": "For Kavita+ users, this will return recommendations on the server.",
         "parameters": [
           {
             "name": "seriesId",
@@ -7345,7 +7345,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Updates the Series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7376,6 +7378,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets all recently added series",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7397,6 +7400,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -7405,6 +7409,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7461,6 +7466,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns series that were recently updated, like adding or removing a chapter",
         "responses": {
           "200": {
             "description": "Success",
@@ -7499,6 +7505,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns all series for the library",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7520,6 +7527,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -7528,6 +7536,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -8334,19 +8343,6 @@
         }
       }
     },
-    "/api/Server/scrobble-updates": {
-      "post": {
-        "tags": [
-          "Server"
-        ],
-        "summary": "Checks for updates, if no updates that are > current version installed, returns null",
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Server/changelog": {
       "get": {
         "tags": [
@@ -8513,6 +8509,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Bust Review and Recommendation Cache",
         "responses": {
           "200": {
             "description": "Success"
@@ -16297,7 +16294,7 @@
         "properties": {
           "license": {
             "type": "string",
-            "description": "License Key received from KavitaPlus",
+            "description": "License Key received from Kavita+",
             "nullable": true
           },
           "email": {

@@ -42,11 +42,11 @@ public interface IReadingListRepository
     void Update(ReadingList list);
     Task<int> Count();
     Task<string?> GetCoverImageAsync(int readingListId);
+    Task<IList<string>> GetRandomCoverImagesAsync(int readingListId);
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<bool> ReadingListExists(string name);
     IEnumerable<PersonDto> GetReadingListCharactersAsync(int readingListId);
     Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
-    Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId);
     Task<int> RemoveReadingListsWithoutSeries();
     Task<ReadingList?> GetReadingListByTitleAsync(string name, int userId, ReadingListIncludes includes = ReadingListIncludes.Items);
 }
@@ -93,6 +93,22 @@ public class ReadingListRepository : IReadingListRepository
             .ToListAsync())!;
     }
 
+    public async Task<IList<string>> GetRandomCoverImagesAsync(int readingListId)
+    {
+        var random = new Random();
+        var data = await _context.ReadingList
+                .Where(r => r.Id == readingListId)
+                .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
+                .Where(t => !string.IsNullOrEmpty(t))
+                .ToListAsync();
+        if (data.Count < 4) return new List<string>();
+        return data
+            .OrderBy(_ => random.Next())
+            .Take(4)
+            .ToList();
+    }
+
+
     public async Task<bool> ReadingListExists(string name)
     {
         var normalized = name.ToNormalized();
@@ -119,22 +135,6 @@ public class ReadingListRepository : IReadingListRepository
             .ToListAsync();
     }
 
-    /// <summary>
-    /// If less than 4 images exist, will return nothing back. Will not be full paths, but just cover image filenames
-    /// </summary>
-    /// <param name="readingListId"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public async Task<IList<string>> GetFirstFourCoverImagesByReadingListId(int readingListId)
-    {
-        return await _context.ReadingListItem
-            .Where(ri => ri.ReadingListId == readingListId)
-            .Include(ri => ri.Chapter)
-            .Where(ri => ri.Chapter.CoverImage != null)
-            .Select(ri => ri.Chapter.CoverImage)
-            .Take(4)
-            .ToListAsync();
-    }
 
     public async Task<int> RemoveReadingListsWithoutSeries()
     {

@@ -106,7 +106,8 @@ export class ErrorInterceptor implements HttpInterceptor {
       if (error.message != 'User is not authenticated') {
         console.error('500 error: ', error);
       }
-      this.toastr.error(error.message);
+      // This just throws duplicate errors for no reason
+      //this.toastr.error(error.message);
     }
      else {
       this.toastr.error('There was an unknown critical error.');

@@ -55,9 +55,6 @@ export class ServerService {
   convertMedia() {
     return this.httpClient.post(this.baseUrl + 'server/convert-media', {});
   }
-  scrobbleUpdates() {
-    return this.httpClient.post(this.baseUrl + 'server/scrobble-updates', {});
-  }
 
   bustCache() {
     return this.httpClient.post(this.baseUrl + 'server/bust-review-and-rec-cache', {});

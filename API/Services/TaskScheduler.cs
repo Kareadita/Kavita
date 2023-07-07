@@ -141,8 +141,8 @@ public class TaskScheduler : ITaskScheduler
         // KavitaPlus based (needs license check)
         RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
-        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateAllLicenses(), LicenseService.Cron, RecurringJobOptions);
-        BackgroundJob.Enqueue(() => _licenseService.ValidateAllLicenses());
+        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateLicenseStatus(), LicenseService.Cron, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _licenseService.ValidateLicenseStatus());
 
         // KavitaPlus Scrobbling (every 4 hours)
         RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);

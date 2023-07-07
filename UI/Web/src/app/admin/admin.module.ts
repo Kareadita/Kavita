@@ -28,7 +28,7 @@ import { ManageEmailSettingsComponent } from './manage-email-settings/manage-ema
 import { ManageTasksSettingsComponent } from './manage-tasks-settings/manage-tasks-settings.component';
 import { ManageLogsComponent } from './manage-logs/manage-logs.component';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
-import { StatisticsModule } from '../statistics/statistics.module';
+
 import { ManageAlertsComponent } from './manage-alerts/manage-alerts.component';
 import {ManageScrobbleErrorsComponent} from "./manage-scrobble-errors/manage-scrobble-errors.component";
 import {DefaultValuePipe} from "../pipe/default-value.pipe";
@@ -48,7 +48,29 @@ import {LicenseComponent} from "./license/license.component";
 
 
 @NgModule({
-  declarations: [
+    imports: [
+    CommonModule,
+    AdminRoutingModule,
+    ReactiveFormsModule,
+    RouterModule,
+    FormsModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbTypeaheadModule,
+    NgbDropdownModule,
+    NgbAccordionModule,
+    UserSettingsModule,
+    VirtualScrollerModule,
+    ManageScrobbleErrorsComponent,
+    DefaultValuePipe,
+    LibraryTypePipe,
+    TimeAgoPipe,
+    SentenceCasePipe,
+    FilterPipe,
+    TagBadgeComponent,
+    LoadingComponent,
+    SideNavCompanionBarComponent,
+    NgbCollapse,
     ManageUsersComponent,
     DashboardComponent,
     ManageLibraryComponent,
@@ -67,33 +89,7 @@ import {LicenseComponent} from "./license/license.component";
     ManageLogsComponent,
     ManageAlertsComponent,
     LicenseComponent
-  ],
-  imports: [
-    CommonModule,
-    AdminRoutingModule,
-    ReactiveFormsModule,
-    RouterModule,
-    FormsModule,
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbTypeaheadModule, // Directory Picker
-    NgbDropdownModule,
-    NgbAccordionModule,
-    UserSettingsModule, // API-key componet
-    VirtualScrollerModule,
-
-    StatisticsModule,
-    ManageScrobbleErrorsComponent,
-    DefaultValuePipe,
-    LibraryTypePipe,
-    TimeAgoPipe,
-    SentenceCasePipe,
-    FilterPipe,
-    TagBadgeComponent,
-    LoadingComponent,
-    SideNavCompanionBarComponent,
-    NgbCollapse
-  ],
-  providers: []
+],
+    providers: []
 })
 export class AdminModule { }

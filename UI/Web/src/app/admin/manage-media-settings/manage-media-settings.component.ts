@@ -1,17 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 import { DirectoryPickerComponent, DirectoryPickerResult } from '../_modals/directory-picker/directory-picker.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody } from '@ng-bootstrap/ng-bootstrap';
 import { EncodeFormats } from '../_models/encode-format';
+import { ManageScrobbleErrorsComponent } from '../manage-scrobble-errors/manage-scrobble-errors.component';
+import { ManageAlertsComponent } from '../manage-alerts/manage-alerts.component';
+import { NgIf, NgTemplateOutlet, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-manage-media-settings',
-  templateUrl: './manage-media-settings.component.html',
-  styleUrls: ['./manage-media-settings.component.scss']
+    selector: 'app-manage-media-settings',
+    templateUrl: './manage-media-settings.component.html',
+    styleUrls: ['./manage-media-settings.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

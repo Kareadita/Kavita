@@ -1,15 +1,20 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
+import { NgTemplateOutlet, NgIf } from '@angular/common';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { SplashContainerComponent } from '../splash-container/splash-container.component';
 
 @Component({
-  selector: 'app-confirm-reset-password',
-  templateUrl: './confirm-reset-password.component.html',
-  styleUrls: ['./confirm-reset-password.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-confirm-reset-password',
+    templateUrl: './confirm-reset-password.component.html',
+    styleUrls: ['./confirm-reset-password.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgIf]
 })
 export class ConfirmResetPasswordComponent {
 

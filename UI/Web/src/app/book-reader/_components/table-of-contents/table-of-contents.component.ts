@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Subject } from 'rxjs';
 import { BookChapterItem } from '../../_models/book-chapter-item';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-table-of-contents',
-  templateUrl: './table-of-contents.component.html',
-  styleUrls: ['./table-of-contents.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+    selector: 'app-table-of-contents',
+    templateUrl: './table-of-contents.component.html',
+    styleUrls: ['./table-of-contents.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default,
+    standalone: true,
+    imports: [NgIf, NgFor]
 })
 export class TableOfContentsComponent implements OnDestroy {
 

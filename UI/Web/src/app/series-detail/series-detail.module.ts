@@ -4,7 +4,7 @@ import { SeriesDetailRoutingModule } from './series-detail-routing.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SeriesDetailComponent } from './_components/series-detail/series-detail.component';
 import {ReviewCardComponent} from "../_single-module/review-card/review-card.component";
-import {CarouselModule} from "../carousel/carousel.module";
+
 import {ExternalRatingComponent} from "./_components/external-rating/external-rating.component";
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
@@ -41,13 +41,10 @@ import {RouterLink, RouterModule} from "@angular/router";
 
 
 @NgModule({
-  declarations: [SeriesDetailComponent],
-  imports: [
+    imports: [
     CommonModule,
     ReactiveFormsModule,
-
     SeriesDetailRoutingModule,
-
     ImageComponent,
     ReadMoreComponent,
     PersonBadgeComponent,
@@ -57,7 +54,6 @@ import {RouterLink, RouterModule} from "@angular/router";
     ExternalListItemComponent,
     ListItemComponent,
     ReviewCardComponent,
-    CarouselModule,
     ExternalRatingComponent,
     CardActionablesComponent,
     SafeHtmlPipe,
@@ -81,7 +77,7 @@ import {RouterLink, RouterModule} from "@angular/router";
     NgbDropdownItem,
     NgbDropdownMenu,
     NgbDropdownToggle,
-
-  ]
+    SeriesDetailComponent,
+]
 })
 export class SeriesDetailModule { }

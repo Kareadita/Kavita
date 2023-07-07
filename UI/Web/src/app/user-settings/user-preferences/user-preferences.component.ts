@@ -7,7 +7,7 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
@@ -24,13 +24,28 @@ import {
 } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
 import { forkJoin } from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { UserHoldsComponent } from '../user-holds/user-holds.component';
+import { UserScrobbleHistoryComponent } from '../../_single-module/user-scrobble-history/user-scrobble-history.component';
+import { UserStatsComponent } from '../../statistics/_components/user-stats/user-stats.component';
+import { ManageDevicesComponent } from '../manage-devices/manage-devices.component';
+import { ThemeManagerComponent } from '../theme-manager/theme-manager.component';
+import { ApiKeyComponent } from '../api-key/api-key.component';
+import { ColorPickerModule } from 'ngx-color-picker';
+import { AnilistKeyComponent } from '../anilist-key/anilist-key.component';
+import { ChangeAgeRestrictionComponent } from '../change-age-restriction/change-age-restriction.component';
+import { ChangePasswordComponent } from '../change-password/change-password.component';
+import { ChangeEmailComponent } from '../change-email/change-email.component';
+import { NgFor, NgIf, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -50,10 +65,12 @@ enum FragmentID {
 }
 
 @Component({
-  selector: 'app-user-preferences',
-  templateUrl: './user-preferences.component.html',
-  styleUrls: ['./user-preferences.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-preferences',
+    templateUrl: './user-preferences.component.html',
+    styleUrls: ['./user-preferences.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent, ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent, ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -277,4 +294,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
   }
+
+  protected readonly undefined = undefined;
 }

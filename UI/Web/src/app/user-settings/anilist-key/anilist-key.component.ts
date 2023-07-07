@@ -8,16 +8,20 @@ import {
   OnChanges,
   OnInit
 } from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
 import {ToastrService} from "ngx-toastr";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {AccountService} from "../../_services/account.service";
+import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgOptimizedImage } from '@angular/common';
 
 @Component({
-  selector: 'app-anilist-key',
-  templateUrl: './anilist-key.component.html',
-  styleUrls: ['./anilist-key.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-anilist-key',
+    templateUrl: './anilist-key.component.html',
+    styleUrls: ['./anilist-key.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgOptimizedImage, NgbTooltip, NgbCollapse, ReactiveFormsModule]
 })
 export class AnilistKeyComponent implements OnInit {
 

@@ -6,6 +6,7 @@ import {ProviderImagePipe} from "../../../pipe/provider-image.pipe";
 import {NgbPopover, NgbRating} from "@ng-bootstrap/ng-bootstrap";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {AccountService} from "../../../_services/account.service";
+import {LibraryType} from "../../../_models/library";
 
 @Component({
   selector: 'app-external-rating',
@@ -18,6 +19,7 @@ import {AccountService} from "../../../_services/account.service";
 export class ExternalRatingComponent implements OnInit {
   @Input({required: true}) seriesId!: number;
   @Input({required: true}) userRating!: number;
+  @Input({required: true}) libraryType!: LibraryType;
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly accountService = inject(AccountService);

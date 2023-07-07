@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { Swiper, SwiperEvents } from 'swiper/types';
+import { SwiperModule } from 'swiper/angular';
+import { NgIf, NgClass, NgFor, NgTemplateOutlet } from '@angular/common';
 
 @Component({
-  selector: 'app-carousel-reel',
-  templateUrl: './carousel-reel.component.html',
-  styleUrls: ['./carousel-reel.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-carousel-reel',
+    templateUrl: './carousel-reel.component.html',
+    styleUrls: ['./carousel-reel.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, SwiperModule, NgFor, NgTemplateOutlet]
 })
 export class CarouselReelComponent {
 

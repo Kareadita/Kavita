@@ -7,14 +7,19 @@ import {
   QueryList,
   ViewChildren
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { LegendPosition } from '@swimlane/ngx-charts';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { LegendPosition, PieChartModule } from '@swimlane/ngx-charts';
 import { Observable, Subject, BehaviorSubject, combineLatest, map, takeUntil, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { FileExtension, FileExtensionBreakdown } from '../../_models/file-breakdown';
 import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { MangaFormatPipe } from '../../../pipe/manga-format.pipe';
+import { BytesPipe } from '../../../pipe/bytes.pipe';
+import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
+import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 export interface StackedBarChartDataItem {
   name: string,
@@ -22,10 +27,12 @@ export interface StackedBarChartDataItem {
 }
 
 @Component({
-  selector: 'app-file-breakdown-stats',
-  templateUrl: './file-breakdown-stats.component.html',
-  styleUrls: ['./file-breakdown-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-file-breakdown-stats',
+    templateUrl: './file-breakdown-stats.component.html',
+    styleUrls: ['./file-breakdown-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe]
 })
 export class FileBreakdownStatsComponent {
 
