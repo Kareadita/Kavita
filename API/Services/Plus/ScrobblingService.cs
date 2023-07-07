@@ -607,6 +607,7 @@ public class ScrobblingService : IScrobblingService
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
                 StartedReadingDateUtc = evt.CreatedUtc,
+                ScrobbleDateUtc = evt.LastModifiedUtc,
                 Year = evt.Series.Metadata.ReleaseYear
             });
 

@@ -63,6 +63,10 @@ public class ScrobbleDto
     /// <summary>
     /// The date that the series was started reading. Will be null for non ReadingProgress events
     /// </summary>
-    public DateTime StartedReadingDateUtc { get; set; }
+    public DateTime? StartedReadingDateUtc { get; set; }
+    /// <summary>
+    /// The date that the series was scrobbled. Will be null for non ReadingProgress events
+    /// </summary>
+    public DateTime? ScrobbleDateUtc { get; set; }
 
 }

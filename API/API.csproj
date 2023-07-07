@@ -57,7 +57,7 @@
     <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.4.0-alpha.4" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.9.0" />
-    <PackageReference Include="ExCSS" Version="4.1.0" />
+    <PackageReference Include="ExCSS" Version="4.2.1" />
     <PackageReference Include="Flurl" Version="3.0.7" />
     <PackageReference Include="Flurl.Http" Version="3.2.4" />
     <PackageReference Include="Hangfire" Version="1.8.3" />
@@ -66,7 +66,7 @@
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="Hangfire.MemoryStorage.Core" Version="1.4.0" />
     <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.4" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.48" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.49" />
     <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.8" />
