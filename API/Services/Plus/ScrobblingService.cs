@@ -411,6 +411,20 @@ public class ScrobblingService : IScrobblingService
                             SeriesId = evt.SeriesId
                         });
                     }
+                } else if (response.ErrorMessage != null && response.ErrorMessage.StartsWith("Review"))
+                {
+                    // Log the Series name and Id in ScrobbleErrors
+                    _logger.LogInformation("Kavita+ was unable to save the review");
+                    if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
+                    {
+                        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                        {
+                            Comment = response.ErrorMessage,
+                            Details = data.SeriesName,
+                            LibraryId = evt.LibraryId,
+                            SeriesId = evt.SeriesId
+                        });
+                    }
                 }
 
                 _logger.LogError("Scrobbling failed due to {ErrorMessage}: {SeriesName}", response.ErrorMessage, data.SeriesName);

@@ -36,7 +36,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   get ScrobbleEventType() { return ScrobbleEventType; }
 
   ngOnInit() {
-    this.loadPage({column: 'lastModified', direction: 'desc'});
+    this.loadPage({column: 'created', direction: 'desc'});
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(query => {
       this.loadPage();
