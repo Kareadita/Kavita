@@ -10,6 +10,7 @@ using API.Helpers.Builders;
 
 namespace API.Helpers;
 
+#nullable enable
 public static class TagHelper
 {
     /// <summary>
@@ -142,3 +143,4 @@ public static class TagHelper
     }
 }
 
+#nullable disable

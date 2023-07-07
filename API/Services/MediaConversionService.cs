@@ -278,6 +278,7 @@ public class MediaConversionService : IMediaConversionService
     /// <param name="imageDirectory">Full Path to where files are stored</param>
     /// <param name="filename">The file to convert</param>
     /// <param name="targetFolder">Full path to where files should be stored or any stem</param>
+    /// <param name="encodeFormat">Encoding Format</param>
     /// <returns></returns>
     public async Task<string> SaveAsEncodingFormat(string imageDirectory, string filename, string targetFolder, EncodeFormat encodeFormat)
     {

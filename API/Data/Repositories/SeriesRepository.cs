@@ -117,6 +117,7 @@ public interface ISeriesRepository
     Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
+    Task<IList<Series>> GetWantToReadForUserAsync(int userId);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
     Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
@@ -132,10 +133,9 @@ public interface ISeriesRepository
     /// </summary>
     /// <returns></returns>
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
-
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-    Task<IList<Series>> GetWantToReadForUserAsync(int userId);
+
     Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
 }
 

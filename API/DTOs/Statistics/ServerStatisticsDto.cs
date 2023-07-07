@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace API.DTOs.Statistics;
+#nullable enable
 
 public class ServerStatisticsDto
 {

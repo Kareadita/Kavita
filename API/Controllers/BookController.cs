@@ -43,14 +43,14 @@ public class BookController : BaseApiController
         {
             case MangaFormat.Epub:
             {
-                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId))[0];
                 using var book = await EpubReader.OpenBookAsync(mangaFile.FilePath, BookService.BookReaderOptions);
                 bookTitle = book.Title;
                 break;
             }
             case MangaFormat.Pdf:
             {
-                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).First();
+                var mangaFile = (await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId))[0];
                 if (string.IsNullOrEmpty(bookTitle))
                 {
                     // Override with filename

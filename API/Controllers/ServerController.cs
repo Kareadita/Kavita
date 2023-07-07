@@ -239,7 +239,7 @@ public class ServerController : BaseApiController
 
 
     /// <summary>
-    /// Bust Review & Recommendation Cache
+    /// Bust Review and Recommendation Cache
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]

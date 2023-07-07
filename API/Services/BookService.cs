@@ -29,6 +29,7 @@ using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
 
 namespace API.Services;
+#nullable enable
 
 public interface IBookService
 {
@@ -431,7 +432,7 @@ public class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(pDate => pDate.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
@@ -568,11 +569,11 @@ public class BookService : IBookService
     {
         var titleId = metadataItem.Refines?.Replace("#", string.Empty);
         var titleElem = epubBook.Schema.Package.Metadata.Titles
-            .FirstOrDefault(item => item.Id == titleId);
+            .Find(item => item.Id == titleId);
         if (titleElem == null) return;
 
         var sortTitleElem = epubBook.Schema.Package.Metadata.MetaItems
-            .FirstOrDefault(item =>
+            .Find(item =>
                 item.Property == "file-as" && item.Refines == metadataItem.Refines);
         if (sortTitleElem == null || string.IsNullOrWhiteSpace(sortTitleElem.Content)) return;
         info.SeriesSort = sortTitleElem.Content;
@@ -582,11 +583,11 @@ public class BookService : IBookService
     {
         var titleId = metadataItem.Refines?.Replace("#", string.Empty);
         var readingListElem = epubBook.Schema.Package.Metadata.Titles
-            .FirstOrDefault(item => item.Id == titleId);
+            .Find(item => item.Id == titleId);
         if (readingListElem == null) return;
 
         var count = epubBook.Schema.Package.Metadata.MetaItems
-            .FirstOrDefault(item =>
+            .Find(item =>
                 item.Property == "display-seq" && item.Refines == metadataItem.Refines);
         if (count == null || count.Content == "0")
         {

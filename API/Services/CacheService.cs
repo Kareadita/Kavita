@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services;
+#nullable enable
 
 public interface ICacheService
 {

@@ -12,7 +12,7 @@ using API.SignalR;
 using Kavita.Common;
 
 namespace API.Services;
-
+#nullable enable
 
 public interface ICollectionTagService
 {

@@ -4,6 +4,7 @@ using API.Entities.Enums;
 using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Services;
+#nullable enable
 
 public interface IReadingItemService
 {

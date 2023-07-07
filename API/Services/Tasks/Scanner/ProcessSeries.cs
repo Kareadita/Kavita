@@ -845,7 +845,7 @@ public class ProcessSeries : IProcessSeries
             foreach (var name in names)
             {
                 var normalizedName = name.ToNormalized();
-                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                var person = allPeopleTypeRole.Find(p =>
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
 
                 if (person == null)

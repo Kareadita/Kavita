@@ -22,15 +22,13 @@ public class ImageController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
-    private readonly IReadingListService _readingListService;
 
     /// <inheritdoc />
-    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService, IReadingListService readingListService)
+    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _imageService = imageService;
-        _readingListService = readingListService;
     }
 
     /// <summary>

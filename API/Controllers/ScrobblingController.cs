@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
@@ -24,11 +25,13 @@ public class ScrobblingController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILogger<ScrobblingController> _logger;
 
-    public ScrobblingController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService)
+    public ScrobblingController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService, ILogger<ScrobblingController> logger)
     {
         _unitOfWork = unitOfWork;
         _scrobblingService = scrobblingService;
+        _logger = logger;
     }
 
     [HttpGet("anilist-token")]
@@ -177,7 +180,7 @@ public class ScrobblingController : BaseApiController
         catch (Exception ex)
         {
             // Handle other exceptions or log the error
-            //_logger.LogError(ex, "An error occurred while adding the hold");
+            _logger.LogError(ex, "An error occurred while adding the hold");
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the hold");
         }
     }

@@ -84,6 +84,7 @@ public class LicenseService : ILicenseService
     /// Register the license with KavitaPlus
     /// </summary>
     /// <param name="license"></param>
+    /// <param name="email"></param>
     /// <returns></returns>
     private async Task<string> RegisterLicense(string license, string email)
     {

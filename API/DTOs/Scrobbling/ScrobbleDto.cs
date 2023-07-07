@@ -2,6 +2,7 @@
 using System.ComponentModel;
 
 namespace API.DTOs.Scrobbling;
+#nullable enable
 
 public enum ScrobbleEventType
 {

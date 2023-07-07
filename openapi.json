@@ -8509,6 +8509,7 @@
         "tags": [
           "Server"
         ],
+        "summary": "Bust Review and Recommendation Cache",
         "responses": {
           "200": {
             "description": "Success"

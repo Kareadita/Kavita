@@ -3,6 +3,7 @@ using API.Entities.Enums;
 using API.Entities.Interfaces;
 
 namespace API.DTOs;
+#nullable enable
 
 public class SeriesDto : IHasReadTimeEstimate
 {

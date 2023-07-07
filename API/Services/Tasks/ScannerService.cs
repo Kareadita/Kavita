@@ -167,8 +167,8 @@ public class ScannerService : IScannerService
         var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
+        var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
 
-        var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
             if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
@@ -497,7 +497,7 @@ public class ScannerService : IScannerService
             var foundParsedSeries = new ParsedSeries()
             {
                 Name = parsedFiles[0].Series,
-                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
                 Format = parsedFiles[0].Format
             };
 
@@ -527,6 +527,7 @@ public class ScannerService : IScannerService
         {
             await task();
         }
+        // TODO: We might be able to do Task.WhenAll
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));

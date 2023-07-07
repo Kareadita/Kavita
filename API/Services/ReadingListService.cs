@@ -55,7 +55,6 @@ public class ReadingListService : IReadingListService
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReadingListService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly IDirectoryService _directoryService;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
         Parser.RegexTimeout);
@@ -460,7 +459,7 @@ public class ReadingListService : IReadingListService
 
                 var items = readingList.Items.ToList();
                 var order = int.Parse(arcPair.Item2);
-                var readingListItem = items.FirstOrDefault(item => item.Order == order || item.ChapterId == chapter.Id);
+                var readingListItem = items.Find(item => item.Order == order || item.ChapterId == chapter.Id);
                 if (readingListItem == null)
                 {
                     // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
@@ -647,7 +646,7 @@ public class ReadingListService : IReadingListService
             var bookVolume = string.IsNullOrEmpty(book.Volume)
                 ? Tasks.Scanner.Parser.Parser.DefaultVolume
                 : book.Volume;
-            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => bookVolume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
+            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.Find(v => v.Number == 0);
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)

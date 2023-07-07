@@ -4,7 +4,7 @@ namespace API.Helpers.Builders;
 
 public class ScrobbleHoldBuilder : IEntityBuilder<ScrobbleHold>
 {
-    private ScrobbleHold _scrobbleHold;
+    private readonly ScrobbleHold _scrobbleHold;
     public ScrobbleHold Build() => _scrobbleHold;
 
     public ScrobbleHoldBuilder(ScrobbleHold? hold = null)
