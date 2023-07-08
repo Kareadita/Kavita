@@ -74,11 +74,17 @@ export class LicenseComponent implements OnInit {
         this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
         this.resetForm();
         this.isViewMode = true;
-        this.cdRef.markForCheck();
         this.isSaving = false;
+        this.cdRef.markForCheck();
       });
     }, err => {
-      this.toastr.error("There was an error when activating your license. Please try again.");
+        if (err.hasOwnProperty('error')) {
+          this.toastr.error(JSON.parse(err['error'])['message']);
+        } else {
+          this.toastr.error("There was an error when activating your license. Please try again.");
+        }
+        this.isSaving = false;
+        this.cdRef.markForCheck();
     });
   }
 
