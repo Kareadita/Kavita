@@ -594,13 +594,13 @@ public class BookService : IBookService
             // TODO: Rewrite this to use a StringBuilder
             // Treat this as a Collection
             info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") +
-                                readingListElem.Title.Replace(",", "_");
+                                readingListElem.Title.Replace(',', '_');
         }
         else
         {
             // Treat as a reading list
             info.AlternateSeries += (string.IsNullOrEmpty(info.AlternateSeries) ? string.Empty : ",") +
-                                    readingListElem.Title.Replace(",", "_");
+                                    readingListElem.Title.Replace(',', '_');
             info.AlternateNumber += (string.IsNullOrEmpty(info.AlternateNumber) ? string.Empty : ",") + count.Content;
         }
     }
