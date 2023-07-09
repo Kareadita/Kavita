@@ -1133,9 +1133,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
-    const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
+    const margin = (this.readingSectionElemRef.nativeElement.clientWidth * this.convertVwToPx(parseInt(this.pageStyles['margin-left'], 10))) * 2;
 
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
+  }
+
+  convertVwToPx(vwValue: number) {
+    const viewportWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth || 0, window.innerWidth || 0);
+    return (vwValue * viewportWidth) / 100;
   }
 
   getPageHeight() {
@@ -1176,7 +1181,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return [currentVirtualPage, totalVirtualPages, pageSize];
-
   }
 
   private getScrollOffsetAndTotalScroll() {

@@ -422,14 +422,20 @@ public class ImageService : IImageService
 
     public static string CreateMergedImage(IList<string> coverImages, string dest)
     {
-        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 160
+        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 320x455
+
+        var thumbnailWidth = image.Width / 2;
+        var thumbnailHeight = image.Height / 2;
 
         for (var i = 0; i < coverImages.Count; i++)
         {
             var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
 
-            var x = (i % 2) * (image.Width / 2);
-            var y = (i / 2) * (image.Height / 2);
+            // Resize the tile to fit the thumbnail size
+            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+
+            var x = (i % 2) * thumbnailWidth;
+            var y = (i / 2) * thumbnailHeight;
 
             image = image.Insert(tile, x, y);
         }
