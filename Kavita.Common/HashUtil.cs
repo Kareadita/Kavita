@@ -45,8 +45,8 @@ public static class HashUtil
         var seed = new DeviceIdBuilder()
             .AddMacAddress()
             .AddUserName()
-            .AddOsVersion()
             .AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
+            .AddComponent("OSPlatform", new DeviceIdComponent($"{Environment.OSVersion.Platform}"))
             .OnWindows(windows => windows
                 .AddSystemUuid()
                 .AddMotherboardSerialNumber()
