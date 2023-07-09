@@ -1153,9 +1153,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // If we are on last page with split mode, we need to be able to progress, hence why we check if we could move backwards or not
     const isSplitRendering = [PageSplitOption.SplitRightToLeft, PageSplitOption.SplitRightToLeft].includes(parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10));
     const notInSplit = this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS) === 0;
+    const isASpread = this.mangaReaderService.isWidePage(this.pageNum);
 
 
-    if ((this.pageNum + pageAmount >= this.maxPages && (!isSplitRendering || notInSplit))) {
+    if ((this.pageNum + pageAmount >= this.maxPages && (!isASpread || !isSplitRendering || notInSplit))) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
