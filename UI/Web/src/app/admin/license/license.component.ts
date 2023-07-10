@@ -14,6 +14,7 @@ import {ConfirmService} from "../../shared/confirm.service";
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
+import {environment} from "../../../environments/environment";
 
 @Component({
     selector: 'app-license',
@@ -32,6 +33,9 @@ export class LicenseComponent implements OnInit {
   hasLicense: boolean = false;
   isChecking: boolean = false;
   isSaving: boolean = false;
+
+  buyLink = environment.buyLink;
+  manageLink = environment.manageLink;
 
 
 
