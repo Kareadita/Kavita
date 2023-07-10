@@ -89,7 +89,7 @@ export class ManageLibraryComponent implements OnInit {
   getLibraries() {
     this.loading = true;
     this.cdRef.markForCheck();
-    this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
+    this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
       this.libraries = [...libraries];
       this.loading = false;
       this.cdRef.markForCheck();
