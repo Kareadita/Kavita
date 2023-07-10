@@ -61,6 +61,13 @@ vision. You may lose data and have to restart. The Kavita team strives to avoid 
 If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
 expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
 
+## Kavita+
+[Kavita+](https://wiki.kavitareader.com/en/kavita-plus) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
+
+If you are interested, you can use the promo code `FIRSTTIME` for your initial signup for a 50% discount on the first month (2$). This can be thought of as donating to Kavita's development and getting some sweet features out of it.
+
+**If you already contribute via OpenCollective, please reach out to me for a provisioned license.**
+
 
 ## Contributors
 
