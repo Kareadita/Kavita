@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 using DeviceId;
 using DeviceId.Components;
+using Kavita.Common.EnvironmentInfo;
 
 namespace Kavita.Common;
 
@@ -51,11 +54,20 @@ public static class HashUtil
                 .AddSystemUuid()
                 .AddMotherboardSerialNumber()
                 .AddSystemDriveSerialNumber())
-            .OnLinux(linux => linux
-                .AddMotherboardSerialNumber())
+            .OnLinux(linux =>
+            {
+                var osInfo = RunAndCapture("uname", "-a");
+                if (Regex.IsMatch(osInfo, @"\bUnraid\b"))
+                {
+                    var cpuModel = RunAndCapture("lscpu", string.Empty);
+                    var match = Regex.Match(cpuModel, @"Model name:\s+(.+)");
+                    linux.AddComponent("CPUModel", new DeviceIdComponent($"{match.Groups[1].Value.Trim()}"));
+                    return;
+                }
+                linux.AddMotherboardSerialNumber();
+            })
             .OnMac(mac => mac
-                .AddSystemDriveSerialNumber()
-                .AddPlatformSerialNumber()) // On Docker, this is the same as SystemDriveSerialNumber
+                .AddSystemDriveSerialNumber())
             .ToString();
         return CalculateCrc(seed);
     }
@@ -73,5 +85,28 @@ public static class HashUtil
         }
 
         return id.ToString();
+    }
+
+    private static string RunAndCapture(string filename, string args)
+    {
+        var p = new Process
+        {
+            StartInfo =
+            {
+                FileName = filename,
+                Arguments = args,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true
+            }
+        };
+
+        p.Start();
+
+        // To avoid deadlocks, always read the output stream first and then wait.
+        var output = p.StandardOutput.ReadToEnd();
+        p.WaitForExit(1000);
+
+        return output;
     }
 }
