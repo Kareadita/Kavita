@@ -56,8 +56,6 @@ public static class HashUtil
                 .AddSystemDriveSerialNumber())
             .OnLinux(linux =>
             {
-                linux
-                    .AddMotherboardSerialNumber();
                 var osInfo = RunAndCapture("uname", "-a");
                 if (Regex.IsMatch(osInfo, @"\bUnraid\b"))
                 {
