@@ -8,7 +8,6 @@ import { MangaFormat } from '../../../_models/manga-format';
 import { ReadingList } from '../../../_models/reading-list';
 import { Series } from '../../../_models/series';
 import { SeriesMetadata } from '../../../_models/metadata/series-metadata';
-import { MetadataService } from '../../../_services/metadata.service';
 import { ImageService } from 'src/app/_services/image.service';
 import {CommonModule} from "@angular/common";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
@@ -75,8 +74,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
                                   this.seriesMetadata.publishers.length > 0 ||
-                                  this.seriesMetadata.translators.length > 0 ||
-                                  this.seriesMetadata.tags.length > 0;
+                                  this.seriesMetadata.translators.length > 0;
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
