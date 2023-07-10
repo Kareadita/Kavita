@@ -72,7 +72,6 @@ export class DashboardComponent implements OnInit {
 
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            console.log('Adding Series: ', seriesAddedEvent.seriesId);
             this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
             this.cdRef.markForCheck();
           });

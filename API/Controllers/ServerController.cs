@@ -246,12 +246,7 @@ public class ServerController : BaseApiController
     [HttpPost("bust-review-and-rec-cache")]
     public ActionResult BustReviewAndRecCache()
     {
-        if (_memoryCache is MemoryCache concreteMemoryCache)
-        {
-            concreteMemoryCache.Clear();
-        }
-
-
+        _memoryCache.Clear();
         return Ok();
     }
 
