@@ -36,6 +36,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   logLevels: Array<string> = [];
 
   recurringTasks$: Observable<Array<Job>> = of([]);
+  // noinspection JSVoidFunctionReturnValueUsed
   adhocTasks: Array<AdhocTask> = [
     {
       name: 'Convert Media to Target Encoding',
@@ -70,7 +71,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'Download Logs',
       description: 'Compiles all log files into a zip and downloads it.',
-      api: defer(() => of(() => this.downloadService.download('logs', undefined))),
+      api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
     {

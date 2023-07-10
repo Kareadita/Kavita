@@ -232,7 +232,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, 20));
     }
 
     /// <summary>

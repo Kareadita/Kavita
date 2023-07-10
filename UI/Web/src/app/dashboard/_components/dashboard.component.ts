@@ -72,7 +72,6 @@ export class DashboardComponent implements OnInit {
 
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            console.log('Adding Series: ', seriesAddedEvent.seriesId);
             this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
             this.cdRef.markForCheck();
           });
@@ -107,7 +106,7 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), tap((libs) => {
+    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
       this.isLoading = false;
       this.cdRef.markForCheck();
     }));

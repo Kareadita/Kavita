@@ -20,8 +20,8 @@
     <nav aria-label="directory breadcrumb">
         <ol class="breadcrumb" *ngIf="routeStack.peek() !== undefined; else noBreadcrumb">
             <li class="breadcrumb-item {{route === routeStack.peek() ? 'active' : ''}}"
-                *ngFor="let route of routeStack.items; let index = index">
-                <ng-container *ngIf="route === routeStack.peek(); else nonActive">
+                *ngFor="let route of routeStack.items; let index = index; let last = last;">
+                <ng-container *ngIf="last; else nonActive">
                     {{route}}
                 </ng-container>
                 <ng-template #nonActive>
