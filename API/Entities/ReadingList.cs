@@ -5,6 +5,8 @@ using API.Entities.Interfaces;
 
 namespace API.Entities;
 
+#nullable enable
+
 /// <summary>
 /// This is a collection of <see cref="ReadingListItem"/> which represent individual chapters and an order.
 /// </summary>
@@ -59,5 +61,4 @@ public class ReadingList : IEntityDate
     // Relationships
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; } = null!;
-
 }

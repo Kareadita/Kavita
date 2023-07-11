@@ -1,16 +1,20 @@
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
+import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { CollectionTag } from 'src/app/_models/collection-tag';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
+import {CommonModule} from "@angular/common";
+import {FilterPipe} from "../../../pipe/filter.pipe";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule],
   templateUrl: './bulk-add-to-collection.component.html',
-  encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
   styleUrls: ['./bulk-add-to-collection.component.scss'],
+  encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {

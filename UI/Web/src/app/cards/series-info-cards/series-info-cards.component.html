@@ -1,6 +1,6 @@
-<div class="row g-0 mb-4 mt-3">
+<div class="row g-0 mt-3">
     <ng-container *ngIf="seriesMetadata.releaseYear > 0">
-        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
             <app-icon-and-title label="Release" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
                 {{seriesMetadata.releaseYear}}
             </app-icon-and-title>
@@ -10,7 +10,7 @@
 
     <ng-container *ngIf="seriesMetadata">
         <ng-container *ngIf="seriesMetadata.ageRating">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
                     {{this.seriesMetadata.ageRating | ageRating | async}}
                 </app-icon-and-title>
@@ -19,7 +19,7 @@
         </ng-container>
 
         <ng-container *ngIf="seriesMetadata.language !== null">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
+            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
                 <app-icon-and-title label="Language" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterQueryParam.Languages, seriesMetadata.language)" title="Language">
                     {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
                 </app-icon-and-title>
@@ -29,9 +29,11 @@
     </ng-container>
 
     <ng-container>
-        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
             <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
-                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}" (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)" ngbTooltip="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
+                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}"
+                      (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)"
+                      ngbTooltip="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
                     {{pubStatus}}
                 </app-icon-and-title>
             </ng-container>
@@ -39,10 +41,30 @@
         <div class="vr m-2 d-none d-lg-block"></div>
     </ng-container>
 
+    <ng-container *ngIf="accountService.hasValidLicense$ | async">
+      <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title label="Scrobbling" [clickable]="libraryAllowsScrobbling"
+                              fontClasses="fa-solid fa-tower-{{(isScrobbling && libraryAllowsScrobbling) ? 'broadcast' : 'observation'}}"
+                              (click)="toggleScrobbling($event)"
+                              ngbTooltip="Scrobbling Status">
+            <ng-container *ngIf="libraryAllowsScrobbling; else noScrobble">
+              {{ isScrobbling ? 'On' : 'Off' }}
+            </ng-container>
+            <ng-template #noScrobble>
+              Disabled
+            </ng-template>
+
+          </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
+    </ng-container>
+
     <ng-container *ngIf="series">
         <ng-container>
             <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Format" [clickable]="true" [fontClasses]="'fa ' + (series.format | mangaFormatIcon)" (click)="handleGoTo(FilterQueryParam.Format, series.format)" title="Format">
+                <app-icon-and-title label="Format" [clickable]="true"
+                                    [fontClasses]="'fa ' + (series.format | mangaFormatIcon)"
+                                    (click)="handleGoTo(FilterQueryParam.Format, series.format)" title="Format">
                     {{series.format | mangaFormat}}
                 </app-icon-and-title>
             </div>

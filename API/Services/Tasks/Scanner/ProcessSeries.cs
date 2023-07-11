@@ -107,13 +107,13 @@ public class ProcessSeries : IProcessSeries
 
         var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
-        var seriesName = parsedInfos.First().Series;
+        var seriesName = parsedInfos[0].Series;
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
         _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
 
         // Check if there is a Series
-        var firstInfo = parsedInfos.First();
+        var firstInfo = parsedInfos[0];
         Series? series;
         try
         {
@@ -845,7 +845,7 @@ public class ProcessSeries : IProcessSeries
             foreach (var name in names)
             {
                 var normalizedName = name.ToNormalized();
-                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                var person = allPeopleTypeRole.Find(p =>
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
 
                 if (person == null)

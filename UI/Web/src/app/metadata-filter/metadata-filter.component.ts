@@ -10,8 +10,8 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { NgbCollapse, NgbTooltip, NgbRating } from '@ng-bootstrap/ng-bootstrap';
 import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
@@ -32,12 +32,17 @@ import { MetadataService } from '../_services/metadata.service';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { TypeaheadComponent } from '../typeahead/_components/typeahead.component';
+import { DrawerComponent } from '../shared/drawer/drawer.component';
+import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-metadata-filter',
-  templateUrl: './metadata-filter.component.html',
-  styleUrls: ['./metadata-filter.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-metadata-filter',
+    templateUrl: './metadata-filter.component.html',
+    styleUrls: ['./metadata-filter.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent, ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe]
 })
 export class MetadataFilterComponent implements OnInit {
 

@@ -1,18 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgFor, TitleCasePipe } from '@angular/common';
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
-  selector: 'app-manage-settings',
-  templateUrl: './manage-settings.component.html',
-  styleUrls: ['./manage-settings.component.scss']
+    selector: 'app-manage-settings',
+    templateUrl: './manage-settings.component.html',
+    styleUrls: ['./manage-settings.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe]
 })
 export class ManageSettingsComponent implements OnInit {
 

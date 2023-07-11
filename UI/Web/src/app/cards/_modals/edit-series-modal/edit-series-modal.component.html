@@ -3,13 +3,13 @@
         <h4 class="modal-title">
             {{this.series.name}} Details</h4>
         <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-            
+
         </button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
         <form [formGroup]="editSeriesForm">
             <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-                
+
                 <li [ngbNavItem]="tabs[TabID.General]">
                     <a ngbNavLink>{{tabs[TabID.General]}}</a>
                     <ng-template ngbNavContent>
@@ -17,7 +17,8 @@
                             <div class="mb-3" style="width: 100%">
                                 <label for="name" class="form-label">Name</label>
                                 <div class="input-group">
-                                    <input id="name" class="form-control" formControlName="name" type="text" [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
+                                    <input id="name" class="form-control" formControlName="name" type="text" readonly
+                                           [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
                                     <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
                                         <div class="invalid-feedback" *ngIf="errors.required">
                                             This field is required
@@ -99,12 +100,12 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row g-0">
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="genres" class="form-label">Genres</label>
-                                    <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings" 
+                                    <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings"
                                         [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
                                         (newItemAdded)="metadata.genresLocked = true" (selectedData)="metadata.genresLocked = true">
                                         <ng-template #badgeItem let-item let-position="idx">
@@ -177,7 +178,7 @@
                         </div>
                     </ng-template>
                 </li>
-            
+
                 <li [ngbNavItem]="tabs[TabID.People]">
                     <a ngbNavLink>{{tabs[TabID.People]}}</a>
                     <ng-template ngbNavContent>
@@ -309,7 +310,7 @@
                             </div>
                         </div>
 
-                    
+
 
                         <div class="row g-0">
                             <div class="mb-3">
@@ -369,7 +370,7 @@
                         </div>
                     </ng-template>
                 </li>
-                
+
                 <li [ngbNavItem]="tabs[TabID.CoverImage]">
                   <a ngbNavLink>{{tabs[TabID.CoverImage]}}</a>
                   <ng-template ngbNavContent>
@@ -436,7 +437,8 @@
                                     </div>
                                     <div class="row g-0">
                                         <div class="col">
-                                            <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()" [attr.aria-expanded]="!volumeCollapsed[volume.name]">
+                                            <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
+                                                    [attr.aria-expanded]="!volumeCollapsed[volume.name]">
                                                 View Files
                                             </button>
                                         </div>
@@ -444,7 +446,7 @@
                                             Pages: {{volume.pages}}
                                         </div>
                                     </div>
-                                    
+
                                     <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
                                         <ul class="list-group mt-2">
                                             <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
@@ -471,7 +473,7 @@
                 </li>
             </ul>
         </form>
-        
+
         <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">

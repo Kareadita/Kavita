@@ -2,27 +2,28 @@ import { Directive, Input, HostListener, OnInit, ElementRef, Inject } from '@ang
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[a11y-click]'
+  selector: '[a11y-click]',
+  standalone: true
 })
 export class A11yClickDirective implements OnInit {
   @Input('a11y-click') keyCodes!: string;
   keyCodeArray!: string[];
-  
+
   constructor(@Inject(ElementRef) private element : ElementRef){}
-  
+
   ngOnInit(){
     if(this.keyCodes) {
       this.keyCodeArray = this.keyCodes.split(',');
     }
   }
-  
+
   @HostListener('keydown', ['$event'])
   onEvent(event: any) {
     var keyCodeCondition = function (that: any) {
       var flag = false;
       if (!(event.keyCode)) {
         if (event.which) {
-          event.keyCode = event.which; 
+          event.keyCode = event.which;
         } else if (event.charCode) {
           event.keyCode = event.charCode;
         }
@@ -37,7 +38,7 @@ export class A11yClickDirective implements OnInit {
       this.element.nativeElement.click();
       event.preventDefault();
     }
-    
+
   }
 
 }

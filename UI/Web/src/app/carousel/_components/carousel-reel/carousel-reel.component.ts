@@ -1,18 +1,28 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
 import { Swiper, SwiperEvents } from 'swiper/types';
+import { SwiperModule } from 'swiper/angular';
+import { NgIf, NgClass, NgFor, NgTemplateOutlet } from '@angular/common';
 
 @Component({
-  selector: 'app-carousel-reel',
-  templateUrl: './carousel-reel.component.html',
-  styleUrls: ['./carousel-reel.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-carousel-reel',
+    templateUrl: './carousel-reel.component.html',
+    styleUrls: ['./carousel-reel.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, SwiperModule, NgFor, NgTemplateOutlet]
 })
 export class CarouselReelComponent {
 
   @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
+  @ContentChild('promptToAdd') promptToAddTemplate!: TemplateRef<any>;
   @Input() items: any[] = [];
   @Input() title = '';
   @Input() clickableTitle: boolean = true;
+  @Input() iconClasses = '';
+  /**
+   * Show's the carousel component even if there is nothing in it
+   */
+  @Input() alwaysShow = false;
   /**
    * Track by identity. By default, this has an implementation based on title, item's name, pagesRead, and index
    */
@@ -21,7 +31,7 @@ export class CarouselReelComponent {
 
   swiper: Swiper | undefined;
 
-  
+
 
   constructor(private readonly cdRef: ChangeDetectorRef) {}
 

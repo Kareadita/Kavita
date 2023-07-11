@@ -206,8 +206,10 @@ public class VolumeRepository : IVolumeRepository
     {
         var extension = encodeFormat.GetExtension();
         return await _context.Volume
-                    .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-                    .ToListAsync();
+            .Include(v => v.Chapters)
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
+            .AsSplitQuery()
+            .ToListAsync();
     }
 
 

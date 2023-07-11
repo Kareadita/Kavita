@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Entities;
 
@@ -35,6 +36,11 @@ public class Library : IEntityDate
     /// Should this library create reading lists from Metadata
     /// </summary>
     public bool ManageReadingLists { get; set; } = true;
+    /// <summary>
+    /// Should this library allow Scrobble events to emit from it
+    /// </summary>
+    /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
+    public bool AllowScrobbling { get; set; } = true;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

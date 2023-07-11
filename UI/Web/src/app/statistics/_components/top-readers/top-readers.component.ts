@@ -7,19 +7,22 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Observable, Subject, takeUntil, switchMap, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgFor, AsyncPipe } from '@angular/common';
 
 export const TimePeriods: Array<{title: string, value: number}> = [{title: 'This Week', value: new Date().getDay() || 1}, {title: 'Last 7 Days', value: 7}, {title: 'Last 30 Days', value: 30}, {title: 'Last 90 Days', value: 90}, {title: 'Last Year', value: 365}, {title: 'All Time', value: 0}];
 
 @Component({
-  selector: 'app-top-readers',
-  templateUrl: './top-readers.component.html',
-  styleUrls: ['./top-readers.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-top-readers',
+    templateUrl: './top-readers.component.html',
+    styleUrls: ['./top-readers.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [ReactiveFormsModule, NgFor, AsyncPipe]
 })
 export class TopReadersComponent implements OnInit {
 

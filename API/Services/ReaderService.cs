@@ -12,7 +12,9 @@ using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
+using API.Services.Plus;
 using API.Services.Tasks;
+using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Hangfire;
 using Kavita.Common;
@@ -27,7 +29,7 @@ public interface IReaderService
     Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters);
     Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters);
     Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
-    Task<int> CapPageToChapter(int chapterId, int page);
+    Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page);
     int CapPageToChapter(Chapter chapter, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
@@ -46,6 +48,7 @@ public class ReaderService : IReaderService
     private readonly IEventHub _eventHub;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IScrobblingService _scrobblingService;
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
 
@@ -58,13 +61,14 @@ public class ReaderService : IReaderService
 
 
     public ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
-        IDirectoryService directoryService)
+        IDirectoryService directoryService, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _eventHub = eventHub;
         _imageService = imageService;
         _directoryService = directoryService;
+        _scrobblingService = scrobblingService;
     }
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -147,7 +151,6 @@ public class ReaderService : IReaderService
                     MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, seriesId,
                         chapter.VolumeId, 0, chapters.Where(c => c.VolumeId == chapter.VolumeId).Sum(c => c.Pages)));
             }
-
         }
 
         _unitOfWork.UserRepository.Update(user);
@@ -232,7 +235,9 @@ public class ReaderService : IReaderService
     public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId)
     {
         // Don't let user save past total pages.
-        progressDto.PageNum = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
+        var pageInfo = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
+        progressDto.PageNum = pageInfo.Item1;
+        var totalPages = pageInfo.Item2;
 
         try
         {
@@ -274,6 +279,13 @@ public class ReaderService : IReaderService
                 await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
                     MessageFactory.UserProgressUpdateEvent(userId, user!.UserName!, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
+
+                if (progressDto.PageNum >= totalPages)
+                {
+                    // Inform Scrobble service that a chapter is read
+                    BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
+                }
+
                 return true;
             }
         }
@@ -296,7 +308,7 @@ public class ReaderService : IReaderService
     /// <param name="chapterId"></param>
     /// <param name="page"></param>
     /// <returns></returns>
-    public async Task<int> CapPageToChapter(int chapterId, int page)
+    public async Task<Tuple<int, int>> CapPageToChapter(int chapterId, int page)
     {
         if (page < 0)
         {
@@ -309,7 +321,7 @@ public class ReaderService : IReaderService
             page = totalPages;
         }
 
-        return page;
+        return Tuple.Create(page, totalPages);
     }
 
     public int CapPageToChapter(Chapter chapter, int page)
@@ -340,7 +352,8 @@ public class ReaderService : IReaderService
     /// <returns>-1 if nothing can be found</returns>
     public async Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId)
     {
-        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId)).ToList();
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
+            .ToList();
         var currentVolume = volumes.Single(v => v.Id == volumeId);
         var currentChapter = currentVolume.Chapters.Single(c => c.Id == currentChapterId);
 
@@ -378,7 +391,7 @@ public class ReaderService : IReaderService
             // Handle Chapters within next Volume
             // ! When selecting the chapter for the next volume, we need to make sure a c0 comes before a c1+
             var chapters = volume.Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer).ToList();
-            if (currentChapter.Number.Equals("0") && chapters.Last().Number.Equals("0"))
+            if (currentChapter.Number.Equals(Parser.DefaultChapter) && chapters.Last().Number.Equals(Parser.DefaultChapter))
             {
                 // We need to handle an extra check if the current chapter is the last special, as we should return -1
                 if (currentChapter.IsSpecial) return -1;
@@ -397,17 +410,45 @@ public class ReaderService : IReaderService
             } else if (double.Parse(firstChapter.Number) >= double.Parse(currentChapter.Number)) return firstChapter.Id;
             // If we are the last chapter and next volume is there, we should try to use it (unless it's volume 0)
             else if (double.Parse(firstChapter.Number) == 0) return firstChapter.Id;
+
+            // If on last volume AND there are no specials left, then let's return -1
+            var anySpecials = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
+                .SelectMany(v => v.Chapters.Where(c => c.IsSpecial)).Any();
+            if (currentVolume.Number != 0 && !anySpecials)
+            {
+                return -1;
+            }
         }
+
+
 
         // If we are the last volume and we didn't find any next volume, loop back to volume 0 and give the first chapter
         // This has an added problem that it will loop up to the beginning always
         // Should I change this to Max number? volumes.LastOrDefault()?.Number -> volumes.Max(v => v.Number)
+
         if (currentVolume.Number != 0 && currentVolume.Number == volumes.LastOrDefault()?.Number && volumes.Count > 1)
         {
             var chapterVolume = volumes.FirstOrDefault();
             if (chapterVolume?.Number != 0) return -1;
+
+            // This is my attempt at fixing a bug where we loop around to the beginning, but I just can't seem to figure it out
+            // var orderedVolumes = volumes.OrderBy(v => v.Number, SortComparerZeroLast.Default).ToList();
+            // if (currentVolume.Number == orderedVolumes.FirstOrDefault().Number)
+            // {
+            //     // We can move into loose leaf chapters
+            //     //var firstLooseLeaf = volumes.LastOrDefault().Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
+            //     var nextChapterId = GetNextChapterId(
+            //         volumes.LastOrDefault().Chapters.OrderBy(x => double.Parse(x.Number), _chapterSortComparer),
+            //         "0", dto => dto.Range);
+            //     // CHECK if we need a IsSpecial check
+            //     if (nextChapterId > 0) return nextChapterId;
+            // }
+
+
             var firstChapter = chapterVolume.Chapters.MinBy(x => double.Parse(x.Number), _chapterSortComparer);
             if (firstChapter == null) return -1;
+
+
             return firstChapter.Id;
         }
 
@@ -496,7 +537,7 @@ public class ReaderService : IReaderService
         // NOTE: If volume 1 has chapter 1 and volume 2 is just chapter 0 due to being a full volume file, then this fails
         // If there are any volumes that have progress, return those. If not, move on.
         var currentlyReadingChapter = volumeChapters
-            .OrderBy(c => double.Parse(c.Number), _chapterSortComparer) // BUG: This is throwing an exception when Range is 1-11
+            .OrderBy(c => double.Parse(c.Number), _chapterSortComparer)
             .FirstOrDefault(chapter => chapter.PagesRead < chapter.Pages && chapter.PagesRead > 0);
         if (currentlyReadingChapter != null) return currentlyReadingChapter;
 
@@ -508,23 +549,23 @@ public class ReaderService : IReaderService
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
     {
         var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
-        if (chaptersWithProgress.Count <= 0) return volumeChapters.First();
+        if (chaptersWithProgress.Count <= 0) return volumeChapters[0];
 
 
         var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);
         if (last + 1 < chaptersWithProgress.Count)
         {
-            return chaptersWithProgress.ElementAt(last + 1);
+            return chaptersWithProgress[last + 1];
         }
 
-        var lastChapter = chaptersWithProgress.ElementAt(last);
+        var lastChapter = chaptersWithProgress[last];
         if (lastChapter.PagesRead < lastChapter.Pages)
         {
             return lastChapter;
         }
 
         // If the last chapter didn't fit, then we need the next chapter without full progress
-        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages);
+        var firstChapterWithoutProgress = volumeChapters.FirstOrDefault(c => c.PagesRead < c.Pages && !c.IsSpecial);
         if (firstChapterWithoutProgress != null)
         {
             return firstChapterWithoutProgress;
@@ -535,10 +576,10 @@ public class ReaderService : IReaderService
         var lastIndexWithProgress = volumeChapters.IndexOf(lastChapter);
         if (lastIndexWithProgress + 1 < volumeChapters.Count)
         {
-            return volumeChapters.ElementAt(lastIndexWithProgress + 1);
+            return volumeChapters[lastIndexWithProgress + 1];
         }
 
-        return volumeChapters.First();
+        return volumeChapters[0];
     }
 
 
@@ -572,8 +613,8 @@ public class ReaderService : IReaderService
         foreach (var volume in volumes.OrderBy(v => v.Number))
         {
             var chapters = volume.Chapters
-                .OrderBy(c => float.Parse(c.Number))
-                .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber);
+                .Where(c => !c.IsSpecial && Tasks.Scanner.Parser.Parser.MaxNumberFromRange(c.Range) <= chapterNumber)
+                .OrderBy(c => float.Parse(c.Number));
             await MarkChaptersAsRead(user, volume.SeriesId, chapters.ToList());
         }
     }
@@ -581,7 +622,7 @@ public class ReaderService : IReaderService
     public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
     {
         var volumes = await _unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.Number).Where(v => v.Number <= volumeNumber && v.Number > 0))
+        foreach (var volume in volumes.Where(v => v.Number <= volumeNumber && v.Number > 0).OrderBy(v => v.Number))
         {
             await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }

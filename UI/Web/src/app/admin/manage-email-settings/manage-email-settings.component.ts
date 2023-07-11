@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
 import { SettingsService, EmailTestResult } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgTemplateOutlet } from '@angular/common';
 
 @Component({
-  selector: 'app-manage-email-settings',
-  templateUrl: './manage-email-settings.component.html',
-  styleUrls: ['./manage-email-settings.component.scss']
+    selector: 'app-manage-email-settings',
+    templateUrl: './manage-email-settings.component.html',
+    styleUrls: ['./manage-email-settings.component.scss'],
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

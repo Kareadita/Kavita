@@ -148,6 +148,7 @@ public class StatsService : IStatsService
             MangaReaderLayoutModes = await AllMangaReaderLayoutModes(),
             FileFormats = AllFormats(),
             UsingRestrictedProfiles = await GetUsingRestrictedProfiles(),
+            LastReadTime = await _unitOfWork.AppUserProgressRepository.GetLatestProgress()
         };
 
         var usersWithPref = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.UserPreferences)).ToList();

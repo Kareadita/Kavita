@@ -6,7 +6,8 @@ const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid 
 const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';
 
 @Pipe({
-  name: 'cblConflictReason'
+  name: 'cblConflictReason',
+  standalone: true
 })
 export class CblConflictReasonPipe implements PipeTransform {
 

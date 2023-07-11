@@ -8,7 +8,7 @@
         <label class="form-label col-md-7">Target Series</label>
         <label class="form-label col-md-5">Relationship</label>
     </div>
-    
+
     <form>
         <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
             <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
@@ -27,7 +27,8 @@
                     <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
                 </select>
             </div>
-            <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)"><i class="fa fa-trash"></i><span class="visually-hidden">Remove</span></button>
+            <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)">
+              <i class="fa fa-trash"></i><span class="visually-hidden">Remove</span></button>
         </div>
     </form>
 

@@ -36,7 +36,7 @@ public interface ILibraryRepository
     Task<IEnumerable<LibraryDto>> GetLibraryDtosAsync();
     Task<bool> LibraryExists(string libraryName);
     Task<Library?> GetLibraryForIdAsync(int libraryId, LibraryIncludes includes = LibraryIncludes.None);
-    Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName);
+    IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName);
     Task<IEnumerable<Library>> GetLibrariesAsync(LibraryIncludes includes = LibraryIncludes.None);
     Task<IEnumerable<Library>> GetLibrariesForUserIdAsync(int userId);
     IEnumerable<int> GetLibraryIdsForUserIdAsync(int userId, QueryContext queryContext = QueryContext.None);
@@ -82,16 +82,15 @@ public class LibraryRepository : ILibraryRepository
         _context.Library.Remove(library);
     }
 
-    public async Task<IEnumerable<LibraryDto>> GetLibraryDtosForUsernameAsync(string userName)
+    public IEnumerable<LibraryDto> GetLibraryDtosForUsernameAsync(string userName)
     {
-        return await _context.Library
+        return _context.Library
             .Include(l => l.AppUsers)
-            .Where(library => library.AppUsers.Any(x => x.UserName == userName))
+            .Where(library => library.AppUsers.Any(x => x.UserName.Equals(userName)))
             .OrderBy(l => l.Name)
             .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
-            .AsNoTracking()
-            .AsSingleQuery()
-            .ToListAsync();
+            .AsSplitQuery()
+            .AsEnumerable();
     }
 
     /// <summary>
@@ -138,7 +137,7 @@ public class LibraryRepository : ILibraryRepository
             .Where(l => l.Id == libraryId)
             .AsNoTracking()
             .Select(l => l.Type)
-            .SingleAsync();
+            .FirstAsync();
     }
 
     public async Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None)

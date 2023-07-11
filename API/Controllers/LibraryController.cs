@@ -20,7 +20,9 @@ using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -35,10 +37,12 @@ public class LibraryController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
+    private readonly IMemoryCache _memoryCache;
+    private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-        IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher)
+        IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher, IMemoryCache memoryCache)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -47,6 +51,7 @@ public class LibraryController : BaseApiController
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
+        _memoryCache = memoryCache;
     }
 
     /// <summary>
@@ -63,18 +68,22 @@ public class LibraryController : BaseApiController
             return BadRequest("Library name already exists. Please choose a unique name to the server.");
         }
 
-        var library = new Library
+        var library = new LibraryBuilder(dto.Name, dto.Type)
+            .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
+            .WithFolderWatching(dto.FolderWatching)
+            .WithIncludeInDashboard(dto.IncludeInDashboard)
+            .WithIncludeInRecommended(dto.IncludeInRecommended)
+            .WithManageCollections(dto.ManageCollections)
+            .WithManageReadingLists(dto.ManageReadingLists)
+            .WIthAllowScrobbling(dto.AllowScrobbling)
+            .Build();
+
+        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
+        if (library.Type == LibraryType.Comic)
         {
-            Name = dto.Name,
-            Type = dto.Type,
-            Folders = dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList(),
-            FolderWatching = dto.FolderWatching,
-            IncludeInDashboard = dto.IncludeInDashboard,
-            IncludeInRecommended = dto.IncludeInRecommended,
-            IncludeInSearch = dto.IncludeInSearch,
-            ManageCollections = dto.ManageCollections,
-            ManageReadingLists = dto.ManageReadingLists,
-        };
+            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            library.AllowScrobbling = false;
+        }
 
         _unitOfWork.LibraryRepository.Add(library);
 
@@ -93,6 +102,7 @@ public class LibraryController : BaseApiController
         _taskScheduler.ScanLibrary(library.Id);
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
+        _memoryCache.RemoveByPrefix(CacheKey);
         return Ok();
     }
 
@@ -124,9 +134,24 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
+    public ActionResult<IEnumerable<LibraryDto>> GetLibraries()
     {
-        return Ok(await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername()));
+        var username = User.GetUsername();
+        if (string.IsNullOrEmpty(username)) return Unauthorized();
+
+        var cacheKey = CacheKey + username;
+        if (_memoryCache.TryGetValue(cacheKey, out string cachedValue))
+        {
+            return Ok(JsonConvert.DeserializeObject<IEnumerable<LibraryDto>>(cachedValue));
+        }
+
+        var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetSize(1)
+            .SetAbsoluteExpiration(TimeSpan.FromHours(24));
+        _memoryCache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
+        _logger.LogDebug("Caching libraries for {Key}", cacheKey);
+        return Ok(ret);
     }
 
     /// <summary>
@@ -178,13 +203,15 @@ public class LibraryController : BaseApiController
 
         if (!_unitOfWork.HasChanges())
         {
-            _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
+            _logger.LogInformation("No changes for update library access");
             return Ok(_mapper.Map<MemberDto>(user));
         }
 
         if (await _unitOfWork.CommitAsync())
         {
             _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
+            // Bust cache
+            _memoryCache.RemoveByPrefix(CacheKey);
             return Ok(_mapper.Map<MemberDto>(user));
         }
 
@@ -307,6 +334,8 @@ public class LibraryController : BaseApiController
 
             await _unitOfWork.CommitAsync();
 
+            _memoryCache.RemoveByPrefix(CacheKey);
+
             if (chapterIds.Any())
             {
                 await _unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters();
@@ -378,6 +407,14 @@ public class LibraryController : BaseApiController
         library.IncludeInSearch = dto.IncludeInSearch;
         library.ManageCollections = dto.ManageCollections;
         library.ManageReadingLists = dto.ManageReadingLists;
+        library.AllowScrobbling = dto.AllowScrobbling;
+
+        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
+        if (library.Type == LibraryType.Comic)
+        {
+            _logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name);
+            library.AllowScrobbling = false;
+        }
 
 
         _unitOfWork.LibraryRepository.Update(library);
@@ -395,6 +432,8 @@ public class LibraryController : BaseApiController
         }
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
+
+        _memoryCache.RemoveByPrefix(CacheKey);
 
         return Ok();
 

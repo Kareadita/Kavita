@@ -6,12 +6,11 @@ import {
   HostListener,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { filter, map, takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -31,9 +30,33 @@ import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ImageComponent} from "../../shared/image/image.component";
+import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
+import {FormsModule} from "@angular/forms";
+import {MangaFormatPipe} from "../../pipe/manga-format.pipe";
+import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
+import {CardActionablesComponent} from "./card-actionables/card-actionables.component";
+import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
+import {CommonModule} from "@angular/common";
+import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-card-item',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ImageComponent,
+    NgbProgressbar,
+    DownloadIndicatorComponent,
+    FormsModule,
+    NgbTooltip,
+    MangaFormatPipe,
+    MangaFormatIconPipe,
+    CardActionablesComponent,
+    SentenceCasePipe,
+    RouterLink
+  ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -65,7 +88,7 @@ export class CardItemComponent implements OnInit {
    */
   @Input() total = 0;
   /**
-   * Supress library link
+   * Suppress library link
    */
   @Input() suppressLibraryLink = false;
   /**

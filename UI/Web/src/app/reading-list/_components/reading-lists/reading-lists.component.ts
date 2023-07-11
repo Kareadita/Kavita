@@ -13,12 +13,19 @@ import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { ImportCblModalComponent } from '../../_modals/import-cbl-modal/import-cbl-modal.component';
+import { CardItemComponent } from '../../../cards/card-item/card-item.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { NgIf, DecimalPipe } from '@angular/common';
+import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-reading-lists',
-  templateUrl: './reading-lists.component.html',
-  styleUrls: ['./reading-lists.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-reading-lists',
+    templateUrl: './reading-lists.component.html',
+    styleUrls: ['./reading-lists.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe]
 })
 export class ReadingListsComponent implements OnInit {
 

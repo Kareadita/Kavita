@@ -26,4 +26,6 @@ public class UpdateLibraryDto
     public bool ManageCollections { get; init; }
     [Required]
     public bool ManageReadingLists { get; init; }
+    [Required]
+    public bool AllowScrobbling { get; init; }
 }

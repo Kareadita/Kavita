@@ -2,21 +2,31 @@
     background-color: var(--popover-bg-color);
     border-color: var(--popover-border-color);
 }
-  
+
 .bs-popover-bottom {
     > .popover-arrow {
-  
+
         &::before {
             border-bottom-color: var(--popover-outerarrow-color);
         }
-  
+
         &::after {
-            border-bottom-color: var(--popover-arrow-color);
+          border-bottom-color: var(--popover-arrow-color);
         }
     }
 }
-  
-.popover-body {
+
+.bs-popover-top {
+  > .popover-arrow {
+
+    &::after {
+      border-top-color: var(--popover-body-bg-color);
+    }
+  }
+}
+
+.popover-body, .popover-header, .tooltip-inner {
     background-color: var(--popover-body-bg-color);
     color: var(--popover-body-text-color)
 }
+

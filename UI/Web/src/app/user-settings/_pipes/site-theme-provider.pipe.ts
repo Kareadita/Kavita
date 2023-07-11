@@ -3,7 +3,8 @@ import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 
 
 @Pipe({
-  name: 'siteThemeProvider'
+    name: 'siteThemeProvider',
+    standalone: true
 })
 export class SiteThemeProviderPipe implements PipeTransform {
 

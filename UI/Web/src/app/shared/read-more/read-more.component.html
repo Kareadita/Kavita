@@ -1,6 +1,6 @@
 <div>
     <span [innerHTML]="currentText | safeHtml" [ngClass]="{'blur-text': blur && isCollapsed}"></span>
-    <a [class.hidden]="hideToggle" *ngIf="text && text.length > maxLength" class="read-more-link" (click)="toggleView()">
+    <a [class.hidden]="hideToggle" *ngIf="text && text.length > maxLength && showToggle" class="read-more-link" (click)="toggleView()">
         &nbsp;<i aria-hidden="true" class="fa" [ngClass]="{'fa-caret-down': isCollapsed, 'fa-caret-up': !isCollapsed}"></i>&nbsp;Read {{isCollapsed ? 'More' : 'Less'}}
     </a>
 </div>

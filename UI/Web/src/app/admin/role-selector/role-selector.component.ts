@@ -4,12 +4,16 @@ import { Member } from 'src/app/_models/auth/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-role-selector',
-  templateUrl: './role-selector.component.html',
-  styleUrls: ['./role-selector.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-role-selector',
+    templateUrl: './role-selector.component.html',
+    styleUrls: ['./role-selector.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgFor, ReactiveFormsModule, FormsModule]
 })
 export class RoleSelectorComponent implements OnInit {
 

@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -19,17 +19,20 @@ import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
+import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
 
 /**
  * Renders 2 pages except on last page, and before a wide image
  */
 @Component({
-  selector: 'app-double-no-cover-renderer',
-  templateUrl: './double-no-cover-renderer.component.html',
-  styleUrls: ['./double-no-cover-renderer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-double-no-cover-renderer',
+    templateUrl: './double-no-cover-renderer.component.html',
+    styleUrls: ['./double-no-cover-renderer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
 

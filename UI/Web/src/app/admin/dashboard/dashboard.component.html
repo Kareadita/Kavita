@@ -5,7 +5,7 @@
 </app-side-nav-companion-bar>
 <div class="container-fluid g-0">
   <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
-      <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
+      <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class=tab>
         <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
         <ng-template ngbNavContent>
           <ng-container *ngIf="tab.fragment === TabID.General">
@@ -35,12 +35,16 @@
           <ng-container *ngIf="tab.fragment === TabID.Tasks">
             <app-manage-tasks-settings></app-manage-tasks-settings>
           </ng-container>
+          <ng-container *ngIf="tab.fragment === TabID.KavitaPlus">
+            <p>Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock <a href="https://wiki.kavitareader.com/en/kavita-plus" target="_blank" rel="noreferrer nofollow">premium benefits</a> today!</p>
+            <app-license></app-license>
+          </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.Plugins">
             Nothing here yet. This will be built out in a future update.
           </ng-container>
         </ng-template>
       </li>
   </ul>
-  <div [ngbNavOutlet]="nav" class="mt-3"></div>
+  <div [ngbNavOutlet]="nav" class="mt-3 mb-3"></div>
 
 </div>

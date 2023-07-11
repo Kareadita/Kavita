@@ -86,7 +86,8 @@
         </ng-container>
         <div #bookContainer class="book-container {{WritingStyleClass}}" [ngClass]="{'immersive' : immersiveMode}">
 
-            <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
+            <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
+                 [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
                  [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                  [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
 

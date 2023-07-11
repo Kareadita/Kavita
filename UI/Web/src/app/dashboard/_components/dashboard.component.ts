@@ -5,13 +5,12 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Router } from '@angular/router';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
-import { debounceTime, map, take, takeUntil, tap, shareReplay } from 'rxjs/operators';
+import { Router, RouterLink } from '@angular/router';
+import { Observable, of, ReplaySubject } from 'rxjs';
+import { debounceTime, map, take, tap, shareReplay } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { SeriesAddedEvent } from 'src/app/_models/events/series-added-event';
 import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
@@ -26,12 +25,19 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { CardItemComponent } from '../../cards/card-item/card-item.component';
+import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
+import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
+import { NgIf, AsyncPipe } from '@angular/common';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent, CardItemComponent, AsyncPipe]
 })
 export class DashboardComponent implements OnInit {
 
@@ -64,9 +70,10 @@ export class DashboardComponent implements OnInit {
         if (res.event === EVENTS.SeriesAdded) {
           const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
+
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            this.recentlyAddedSeries.unshift(series);
-            this.cdRef.detectChanges();
+            this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
+            this.cdRef.markForCheck();
           });
         } else if (res.event === EVENTS.SeriesRemoved) {
           const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
@@ -99,7 +106,7 @@ export class DashboardComponent implements OnInit {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), tap((libs) => {
+    this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
       this.isLoading = false;
       this.cdRef.markForCheck();
     }));

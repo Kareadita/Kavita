@@ -1,9 +1,11 @@
 import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
+import { FilterPipe } from '../../../pipe/filter.pipe';
+import { NgIf, NgFor } from '@angular/common';
 
 export enum ADD_FLOW {
   Series = 0,
@@ -14,9 +16,11 @@ export enum ADD_FLOW {
 }
 
 @Component({
-  selector: 'app-add-to-list-modal',
-  templateUrl: './add-to-list-modal.component.html',
-  styleUrls: ['./add-to-list-modal.component.scss']
+    selector: 'app-add-to-list-modal',
+    templateUrl: './add-to-list-modal.component.html',
+    styleUrls: ['./add-to-list-modal.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
 

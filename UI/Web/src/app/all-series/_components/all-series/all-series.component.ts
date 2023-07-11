@@ -26,14 +26,21 @@ import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { MessageHubService, Message, EVENTS } from 'src/app/_services/message-hub.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
+import { NgIf, DecimalPipe } from '@angular/common';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 
 
 @Component({
-  selector: 'app-all-series',
-  templateUrl: './all-series.component.html',
-  styleUrls: ['./all-series.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-all-series',
+    templateUrl: './all-series.component.html',
+    styleUrls: ['./all-series.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe]
 })
 export class AllSeriesComponent implements OnInit {
 

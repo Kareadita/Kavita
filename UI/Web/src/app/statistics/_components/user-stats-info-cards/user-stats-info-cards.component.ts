@@ -3,12 +3,19 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CompactNumberPipe } from 'src/app/pipe/compact-number.pipe';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
+import { TimeAgoPipe } from '../../../pipe/time-ago.pipe';
+import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
+import { CompactNumberPipe as CompactNumberPipe_1 } from '../../../pipe/compact-number.pipe';
+import { DecimalPipe } from '@angular/common';
+import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 
 @Component({
-  selector: 'app-user-stats-info-cards',
-  templateUrl: './user-stats-info-cards.component.html',
-  styleUrls: ['./user-stats-info-cards.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-stats-info-cards',
+    templateUrl: './user-stats-info-cards.component.html',
+    styleUrls: ['./user-stats-info-cards.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe_1, TimeDurationPipe, TimeAgoPipe]
 })
 export class UserStatsInfoCardsComponent {
 

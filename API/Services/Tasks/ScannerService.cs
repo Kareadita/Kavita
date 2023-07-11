@@ -167,8 +167,8 @@ public class ScannerService : IScannerService
         var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
+        var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
 
-        var library = libraries.FirstOrDefault(l => l.Folders.Select(Scanner.Parser.Parser.NormalizePath).Contains(libraryFolder));
         if (library != null)
         {
             if (TaskScheduler.HasScanTaskRunningForLibrary(library.Id))
@@ -199,7 +199,7 @@ public class ScannerService : IScannerService
         if (await ShouldScanSeries(seriesId, library, libraryPaths, series, true) != ScanCancelReason.NoCancel)
         {
             BackgroundJob.Enqueue(() => _metadataService.GenerateCoversForSeries(series.LibraryId, seriesId, false));
-            BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, false));
+            BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(library.Id, seriesId, bypassFolderOptimizationChecks));
             return;
         }
 
@@ -247,9 +247,9 @@ public class ScannerService : IScannerService
 
             var foundParsedSeries = new ParsedSeries()
             {
-                Name = parsedFiles.First().Series,
-                NormalizedName = parsedFiles.First().Series.ToNormalized(),
-                Format = parsedFiles.First().Format
+                Name = parsedFiles[0].Series,
+                NormalizedName = parsedFiles[0].Series.ToNormalized(),
+                Format = parsedFiles[0].Format
             };
 
             // For Scan Series, we need to filter out anything that isn't our Series
@@ -350,7 +350,7 @@ public class ScannerService : IScannerService
 
             try
             {
-                if (allFolders.All(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
+                if (allFolders.TrueForAll(folder => _directoryService.GetLastWriteTime(folder) <= series.LastFolderScanned))
                 {
                     _logger.LogInformation(
                         "[ScannerService] {SeriesName} scan has no work to do. All folders have not been changed since last scan",
@@ -496,9 +496,9 @@ public class ScannerService : IScannerService
 
             var foundParsedSeries = new ParsedSeries()
             {
-                Name = parsedFiles.First().Series,
-                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles.First().Series),
-                Format = parsedFiles.First().Format
+                Name = parsedFiles[0].Series,
+                NormalizedName = Scanner.Parser.Parser.Normalize(parsedFiles[0].Series),
+                Format = parsedFiles[0].Format
             };
 
             if (skippedScan)
@@ -527,6 +527,7 @@ public class ScannerService : IScannerService
         {
             await task();
         }
+        // TODO: We might be able to do Task.WhenAll
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.FileScanProgressEvent(string.Empty, library.Name, ProgressEventType.Ended));

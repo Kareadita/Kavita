@@ -1,11 +1,15 @@
 import { Component, EventEmitter, Input } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FilterPipe } from '../../../../pipe/filter.pipe';
+import { NgIf, NgFor } from '@angular/common';
 
 @Component({
-  selector: 'app-generic-list-modal',
-  templateUrl: './generic-list-modal.component.html',
-  styleUrls: ['./generic-list-modal.component.scss']
+    selector: 'app-generic-list-modal',
+    templateUrl: './generic-list-modal.component.html',
+    styleUrls: ['./generic-list-modal.component.scss'],
+    standalone: true,
+    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe]
 })
 export class GenericListModalComponent {
   @Input() items: Array<string> = [];

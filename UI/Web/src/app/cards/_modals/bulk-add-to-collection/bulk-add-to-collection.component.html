@@ -2,7 +2,7 @@
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Add to Collection</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-    
+
     </button>
 </div>
 <form style="width: 100%" [formGroup]="listForm">
@@ -15,7 +15,7 @@
         </div>
     </div>
     <ul class="list-group">
-        <li class="list-group-item clickable" tabindex="0" role="button" *ngFor="let collectionTag of lists | filter: filterList; let i = index; trackBy: collectionTitleTrackby" (click)="addToCollection(collectionTag)">
+        <li class="list-group-item clickable" tabindex="0" role="option" *ngFor="let collectionTag of lists | filter: filterList; let i = index; trackBy: collectionTitleTrackby" (click)="addToCollection(collectionTag)">
             {{collectionTag.title}} <i class="fa fa-angle-double-up" *ngIf="collectionTag.promoted" title="Promoted"></i>
         </li>
         <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No collections created yet</li>

@@ -55,6 +55,7 @@ public class EmailService : IEmailService
     /// </summary>
     /// <remarks>This will do some basic filtering to auto return false if the emailUrl is a LAN ip</remarks>
     /// <param name="emailUrl"></param>
+    /// <param name="sendEmail">Should an email be sent if connectivity is successful</param>
     /// <returns></returns>
     public async Task<EmailTestResultDto> TestConnectivity(string emailUrl, string adminEmail, bool sendEmail)
     {

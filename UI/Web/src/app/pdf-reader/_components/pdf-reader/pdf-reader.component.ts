@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent } from 'ngx-extended-pdf-viewer';
+import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
 import { Subject, take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/_services/book.service';
@@ -12,12 +12,16 @@ import { NavService } from 'src/app/_services/nav.service';
 import { CHAPTER_ID_DOESNT_EXIST, ReaderService } from 'src/app/_services/reader.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ThemeService } from 'src/app/_services/theme.service';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-pdf-reader',
-  templateUrl: './pdf-reader.component.html',
-  styleUrls: ['./pdf-reader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-pdf-reader',
+    templateUrl: './pdf-reader.component.html',
+    styleUrls: ['./pdf-reader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 

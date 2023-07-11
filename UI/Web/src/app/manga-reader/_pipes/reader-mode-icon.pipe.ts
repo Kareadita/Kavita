@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 
 @Pipe({
-  name: 'readerModeIcon'
+  name: 'readerModeIcon',
+  standalone: true,
 })
 export class ReaderModeIconPipe implements PipeTransform {
 

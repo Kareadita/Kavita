@@ -1,7 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'defaultDate'
+  name: 'defaultDate',
+  pure: true,
+  standalone: true
 })
 export class DefaultDatePipe implements PipeTransform {
 

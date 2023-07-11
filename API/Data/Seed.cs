@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -106,6 +107,7 @@ public static class Seed
             new() {Key = ServerSettingKey.EnableFolderWatching, Value = "false"},
             new() {Key = ServerSettingKey.HostName, Value = string.Empty},
             new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
+            new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)

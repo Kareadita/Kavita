@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.System;
+using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
+#nullable enable
 
 public interface IDirectoryService
 {
@@ -484,10 +486,8 @@ public class DirectoryService : IDirectoryService
             }
 
             var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-            //if (FileCopyAppendRegex().IsMatch(noExtension))
             if (FileCopyAppend.IsMatch(noExtension))
             {
-                //var match = FileCopyAppendRegex().Match(noExtension).Value;
                 var match = FileCopyAppend.Match(noExtension).Value;
                 var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
                 noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
@@ -564,11 +564,8 @@ public class DirectoryService : IDirectoryService
                     break;
                 }
 
-                var fullPath = Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(folder, parts.Last()));
-                if (!dirs.ContainsKey(fullPath))
-                {
-                    dirs.Add(fullPath, string.Empty);
-                }
+                var fullPath = Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(folder, parts[parts.Count - 1]));
+                dirs.TryAdd(fullPath, string.Empty);
             }
         }
 

@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { RelationKind } from '../_models/series-detail/relation-kind';
 
 @Pipe({
-  name: 'relationship'
+  name: 'relationship',
+  standalone: true
 })
 export class RelationshipPipe implements PipeTransform {
 

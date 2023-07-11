@@ -6,11 +6,10 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { debounceTime, filter, map, Subject, takeUntil } from 'rxjs';
+import {debounceTime, filter, map} from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
@@ -20,12 +19,25 @@ import { Series } from 'src/app/_models/series';
 import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
 import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
 import { ReaderService } from 'src/app/_services/reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ScrobblingService} from "../../_services/scrobbling.service";
+import {CommonModule} from "@angular/common";
+import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
+import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
+import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {LanguageNamePipe} from "../../pipe/language-name.pipe";
+import {PublicationStatusPipe} from "../../pipe/publication-status.pipe";
+import {MangaFormatPipe} from "../../pipe/manga-format.pipe";
+import {TimeAgoPipe} from "../../pipe/time-ago.pipe";
+import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
+import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-series-info-cards',
+  standalone: true,
+  imports: [CommonModule, IconAndTitleComponent, AgeRatingPipe, DefaultValuePipe, LanguageNamePipe, PublicationStatusPipe, MangaFormatPipe, TimeAgoPipe, CompactNumberPipe, MangaFormatIconPipe, NgbTooltip],
   templateUrl: './series-info-cards.component.html',
   styleUrls: ['./series-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,6 +55,8 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
   @Output() goTo: EventEmitter<{queryParamName: FilterQueryParam, filter: any}> = new EventEmitter();
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
+  isScrobbling: boolean = true;
+  libraryAllowsScrobbling: boolean = true;
   private readonly destroyRef = inject(DestroyRef);
 
   get MangaFormat() {
@@ -53,9 +67,9 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
     return FilterQueryParam;
   }
 
-  constructor(public utilityService: UtilityService, public metadataService: MetadataService,
-    private readerService: ReaderService, private readonly cdRef: ChangeDetectorRef,
-    private messageHub: MessageHubService, private accountService: AccountService) {
+  constructor(public utilityService: UtilityService, private readerService: ReaderService,
+              private readonly cdRef: ChangeDetectorRef, private messageHub: MessageHubService,
+              public accountService: AccountService, private scrobbleService: ScrobblingService) {
       // Listen for progress events and re-calculate getTimeLeft
       this.messageHub.messages$.pipe(filter(event => event.event === EVENTS.UserProgressUpdate),
                                     map(evt => evt.payload as UserProgressUpdateEvent),
@@ -76,6 +90,16 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
       this.readingTime.minHours = this.series.minHoursToRead;
       this.readingTime.maxHours = this.series.maxHoursToRead;
       this.readingTime.avgHours = this.series.avgHoursToRead;
+      this.scrobbleService.hasHold(this.series.id).subscribe(res => {
+        this.isScrobbling = !res;
+        this.cdRef.markForCheck();
+      });
+
+      this.scrobbleService.libraryAllowsScrobbling(this.series.id).subscribe(res => {
+        this.libraryAllowsScrobbling = res;
+        this.cdRef.markForCheck();
+      });
+
       this.cdRef.markForCheck();
     }
   }
@@ -94,5 +118,20 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
       this.readingTimeLeft = timeLeft;
       this.cdRef.markForCheck();
     });
+  }
+
+  toggleScrobbling(evt: any) {
+    evt.stopPropagation();
+    if (this.isScrobbling) {
+      this.scrobbleService.addHold(this.series.id).subscribe(() => {
+        this.isScrobbling = !this.isScrobbling;
+        this.cdRef.markForCheck();
+      });
+    } else {
+      this.scrobbleService.removeHold(this.series.id).subscribe(() => {
+        this.isScrobbling = !this.isScrobbling;
+        this.cdRef.markForCheck();
+      });
+    }
   }
 }

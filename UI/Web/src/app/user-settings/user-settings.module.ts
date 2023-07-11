@@ -1,15 +1,21 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { UserPreferencesComponent } from './user-preferences/user-preferences.component';
-import { NgbAccordionModule, NgbCollapseModule, NgbNavModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import {
+  NgbAccordionBody,
+  NgbAccordionButton, NgbAccordionCollapse,
+  NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
+  NgbAccordionModule, NgbAccordionToggle,
+  NgbCollapseModule,
+  NgbNavModule,
+  NgbTooltipModule
+} from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserSettingsRoutingModule } from './user-settings-routing.module';
 import { ApiKeyComponent } from './api-key/api-key.component';
-import { PipeModule } from '../pipe/pipe.module';
 import { SiteThemeProviderPipe } from './_pipes/site-theme-provider.pipe';
 import { ThemeManagerComponent } from './theme-manager/theme-manager.component';
 import { ColorPickerModule } from 'ngx-color-picker';
-import { SidenavModule } from '../sidenav/sidenav.module';
 import { ManageDevicesComponent } from './manage-devices/manage-devices.component';
 import { DevicePlatformPipe } from './_pipes/device-platform.pipe';
 import { EditDeviceComponent } from './edit-device/edit-device.component';
@@ -17,11 +23,40 @@ import { ChangePasswordComponent } from './change-password/change-password.compo
 import { ChangeEmailComponent } from './change-email/change-email.component';
 import { ChangeAgeRestrictionComponent } from './change-age-restriction/change-age-restriction.component';
 import { RestrictionSelectorComponent } from './restriction-selector/restriction-selector.component';
-import { StatisticsModule } from '../statistics/statistics.module';
+
+import { AnilistKeyComponent } from './anilist-key/anilist-key.component';
+import {UserScrobbleHistoryComponent} from "../_single-module/user-scrobble-history/user-scrobble-history.component";
+import { UserHoldsComponent } from "./user-holds/user-holds.component";
+import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
+import {AgeRatingPipe} from "../pipe/age-rating.pipe";
+import {LoadingComponent} from "../shared/loading/loading.component";
+import {
+  SideNavCompanionBarComponent
+} from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 
 
 @NgModule({
-  declarations: [
+    imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    NgbNavModule,
+    NgbTooltipModule,
+    NgbCollapseModule,
+    ColorPickerModule,
+    UserSettingsRoutingModule,
+    UserScrobbleHistoryComponent,
+    UserHoldsComponent,
+    NgOptimizedImage,
+    SentenceCasePipe,
+    AgeRatingPipe,
+    LoadingComponent,
+    SideNavCompanionBarComponent,
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
     UserPreferencesComponent,
     ApiKeyComponent,
     ThemeManagerComponent,
@@ -33,29 +68,12 @@ import { StatisticsModule } from '../statistics/statistics.module';
     ChangeEmailComponent,
     RestrictionSelectorComponent,
     ChangeAgeRestrictionComponent,
-  ],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-
-    NgbAccordionModule,
-    NgbNavModule,
-    NgbTooltipModule,
-    NgbCollapseModule,
-
-    ColorPickerModule, // User prefernces background color
-
-    StatisticsModule,
-    
-    PipeModule,
-    SidenavModule,
-
-    UserSettingsRoutingModule,
-  ],
-  exports: [
-    SiteThemeProviderPipe,
-    ApiKeyComponent,
-    RestrictionSelectorComponent
-  ]
+    AnilistKeyComponent,
+],
+    exports: [
+        SiteThemeProviderPipe,
+        ApiKeyComponent,
+        RestrictionSelectorComponent,
+    ]
 })
 export class UserSettingsModule { }

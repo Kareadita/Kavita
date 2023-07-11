@@ -109,6 +109,20 @@ public class Startup
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
+            options.CacheProfiles.Add(ResponseCacheProfiles.LicenseCache,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromHours(4).Seconds,
+                    Location = ResponseCacheLocation.Client,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.Recommendation,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Location = ResponseCacheLocation.Any,
+                    NoStore = false
+                });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -173,7 +187,7 @@ public class Startup
             options.Providers.Add<GzipCompressionProvider>();
             options.MimeTypes =
                 ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "image/jpeg", "image/jpg" });
+                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff" });
             options.EnableForHttps = true;
         });
         services.Configure<BrotliCompressionProviderOptions>(options =>
@@ -219,9 +233,7 @@ public class Startup
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-                    var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
-                    var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
                     logger.LogInformation("Running Migrations");
@@ -232,13 +244,16 @@ public class Startup
                     // v0.7.3
                     await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
 
+                    // v0.7.4
+                    await MigrateDisableScrobblingOnComicLibraries.Migrate(unitOfWork, dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
 
                     await unitOfWork.CommitAsync();
-                    logger.LogInformation("Running Migrations - done");
+                    logger.LogInformation("Running Migrations - complete");
                 }).GetAwaiter()
                 .GetResult();
         }

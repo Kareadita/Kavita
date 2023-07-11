@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers.Builders;
 using API.Middleware.RateLimit;
 using API.Services;
+using API.Services.Plus;
 using API.SignalR;
 using AutoMapper;
 using EasyCaching.Core;
@@ -45,7 +46,6 @@ public class AccountController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
-    private readonly IEasyCachingProviderFactory _cacheFactory;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -53,8 +53,7 @@ public class AccountController : BaseApiController
         ITokenService tokenService, IUnitOfWork unitOfWork,
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
-        IEmailService emailService, IEventHub eventHub,
-        IEasyCachingProviderFactory cacheFactory)
+        IEmailService emailService, IEventHub eventHub)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -65,7 +64,6 @@ public class AccountController : BaseApiController
         _accountService = accountService;
         _emailService = emailService;
         _eventHub = eventHub;
-        _cacheFactory = cacheFactory;
     }
 
     /// <summary>
@@ -77,13 +75,11 @@ public class AccountController : BaseApiController
     [HttpPost("reset-password")]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
-        // TODO: Log this request to Audit Table
         _logger.LogInformation("{UserName} is changing {ResetUser}'s password", User.GetUsername(), resetPasswordDto.UserName);
 
         var user = await _userManager.Users.SingleOrDefaultAsync(x => x.UserName == resetPasswordDto.UserName);
         if (user == null) return Ok(); // Don't report BadRequest as that would allow brute forcing to find accounts on system
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
-
 
         if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
             return Unauthorized("You are not permitted to this operation.");
@@ -155,7 +151,7 @@ public class AccountController : BaseApiController
                 RefreshToken = await _tokenService.CreateRefreshToken(user),
                 ApiKey = user.ApiKey,
                 Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+                KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
             };
         }
         catch (Exception ex)
@@ -191,7 +187,7 @@ public class AccountController : BaseApiController
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
 
-        if (result.IsLockedOut) // result.IsLockedOut
+        if (result.IsLockedOut)
         {
             await _userManager.UpdateSecurityStampAsync(user);
             return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
@@ -227,6 +223,24 @@ public class AccountController : BaseApiController
         pref.Theme ??= await _unitOfWork.SiteThemeRepository.GetDefaultTheme();
         dto.Preferences = _mapper.Map<UserPreferencesDto>(pref);
 
+        return Ok(dto);
+    }
+
+    /// <summary>
+    /// Returns an up-to-date user account
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("refresh-account")]
+    public async Task<ActionResult<UserDto>> RefreshAccount()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.UserPreferences);
+        if (user == null) return Unauthorized();
+
+        var dto = _mapper.Map<UserDto>(user);
+        dto.Token = await _tokenService.CreateToken(user);
+        dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
+        dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
+            .Value;
         return Ok(dto);
     }
 
@@ -699,7 +713,7 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
     }
 
@@ -853,7 +867,7 @@ public class AccountController : BaseApiController
             RefreshToken = await _tokenService.CreateRefreshToken(user),
             ApiKey = user.ApiKey,
             Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
+            KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
         };
     }
 
@@ -957,6 +971,8 @@ public class AccountController : BaseApiController
         return BadRequest("There was an error setting up your account. Please check the logs");
     }
 
+
+
     private async Task<bool> ConfirmEmailToken(string token, AppUser user)
     {
         var result = await _userManager.ConfirmEmailAsync(user, token);
@@ -973,6 +989,23 @@ public class AccountController : BaseApiController
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Returns the OPDS url for this user
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("opds-url")]
+    public async Task<ActionResult<string>> GetOpdsUrl()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
+        if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
+
+        var baseUrl = string.Empty;
+        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) && !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl)) baseUrl = serverSettings.BaseUrl + "/";
+        return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
 
     }
 }

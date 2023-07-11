@@ -1,8 +1,6 @@
 <app-side-nav-companion-bar [hasFilter]="false" (filterOpen)="filterOpen.emit($event)">
-    <h2 title>
-        Collections
-    </h2>
-    <h6 subtitle>{{collections.length | number}} Items</h6>
+  <h2 title>Collections</h2>
+  <h6 subtitle>{{collections.length | number}} Items</h6>
 </app-side-nav-companion-bar>
 <app-card-detail-layout
     [isLoading]="isLoading"
@@ -11,12 +9,12 @@
     [jumpBarKeys]="jumpbarKeys"
     [trackByIdentity]="trackByIdentity"
     >
-        <ng-template #cardItem let-item let-position="idx">
-            <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="imageSerivce.getCollectionCoverImage(item.id)" (clicked)="loadCollection(item)"></app-card-item>
-        </ng-template>
+      <ng-template #cardItem let-item let-position="idx">
+          <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="imageSerivce.getCollectionCoverImage(item.id)" (clicked)="loadCollection(item)"></app-card-item>
+      </ng-template>
 
-        <ng-template #noData>
-            There are no collections.
-            <ng-container *ngIf="isAdmin$ | async"> Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a></ng-container>
-        </ng-template>
+      <ng-template #noData>
+          There are no collections.
+          <ng-container *ngIf="isAdmin$ | async"> Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/collections" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a></ng-container>
+      </ng-template>
 </app-card-detail-layout>

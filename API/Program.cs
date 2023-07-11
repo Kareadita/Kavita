@@ -55,6 +55,9 @@ public class Program
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
 
+        Configuration.KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
+            ?  "http://localhost:5020" : "https://plus.kavitareader.com";
+
         try
         {
             var host = CreateHostBuilder(args).Build();

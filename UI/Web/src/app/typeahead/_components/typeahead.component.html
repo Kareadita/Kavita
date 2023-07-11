@@ -15,7 +15,7 @@
           <span class="visually-hidden">Loading...</span>
         </div>
         <ng-container *ngIf="!disabled && settings.multiple && (selectedData | async) as selected">
-          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections()"></button>
+          <button class="btn btn-close float-end mt-2" *ngIf="selected.length > 0" style="font-size: 0.8rem;" (click)="clearSelections(true);$event.stopPropagation()"></button>
         </ng-container>
     </div>
   </div>
@@ -23,11 +23,11 @@
   <ng-container *ngIf="filteredOptions | async as options">
     <div class="dropdown" *ngIf="hasFocus" [@slideFromTop]="hasFocus">
       <ul class="list-group results" #results>
-        <li *ngIf="showAddItem" 
+        <li *ngIf="showAddItem"
             class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
             Add {{typeaheadControl.value}}...
         </li>
-        <li *ngFor="let option of options; let index = index; trackBy: settings.trackByIdentityFn" (click)="handleOptionClick(option)"  
+        <li *ngFor="let option of options; let index = index; trackBy: settings.trackByIdentityFn" (click)="handleOptionClick(option)"
             class="list-group-item" role="option" [attr.data-index]="index"
             (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
           <ng-container [ngTemplateOutlet]="optionTemplate" [ngTemplateOutletContext]="{ $implicit: option, idx: index }"></ng-container>

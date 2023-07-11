@@ -14,7 +14,9 @@ using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services.Plus;
 using API.SignalR;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
@@ -36,13 +38,16 @@ public class SeriesService : ISeriesService
     private readonly IEventHub _eventHub;
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
+    private readonly IScrobblingService _scrobblingService;
 
-    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler, ILogger<SeriesService> logger)
+    public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
+        _scrobblingService = scrobblingService;
     }
 
     /// <summary>
@@ -107,12 +112,6 @@ public class SeriesService : ISeriesService
                 series.Metadata.PublicationStatus = updateSeriesMetadataDto.SeriesMetadata.PublicationStatus;
                 series.Metadata.PublicationStatusLocked = true;
             }
-
-            // This shouldn't be needed post v0.5.3 release
-            // if (string.IsNullOrEmpty(series.Metadata.Summary))
-            // {
-            //     series.Metadata.Summary = string.Empty;
-            // }
 
             if (string.IsNullOrEmpty(updateSeriesMetadataDto.SeriesMetadata.Summary))
             {
@@ -304,7 +303,6 @@ public class SeriesService : ISeriesService
         try
         {
             userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0, 5);
-            userRating.Review = updateSeriesRatingDto.UserReview;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
 
             if (userRating.Id == 0)
@@ -315,7 +313,13 @@ public class SeriesService : ISeriesService
 
             _unitOfWork.UserRepository.Update(user);
 
-            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync()) return true;
+            if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
+            {
+                BackgroundJob.Enqueue(() =>
+                    _scrobblingService.ScrobbleRatingUpdate(user.Id, updateSeriesRatingDto.SeriesId,
+                        userRating.Rating));
+                return true;
+            }
         }
         catch (Exception ex)
         {
@@ -406,6 +410,7 @@ public class SeriesService : ISeriesService
         {
             foreach (var volume in volumes)
             {
+                volume.Chapters = volume.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
@@ -416,7 +421,11 @@ public class SeriesService : ISeriesService
         else
         {
             processedVolumes = volumes.Where(v => v.Number > 0).ToList();
-            processedVolumes.ForEach(v => v.Name = $"Volume {v.Name}");
+            processedVolumes.ForEach(v =>
+            {
+                v.Name = $"Volume {v.Name}";
+                v.Chapters = v.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
+            });
         }
 
         var specials = new List<ChapterDto>();

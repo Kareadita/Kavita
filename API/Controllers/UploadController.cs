@@ -320,7 +320,9 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
+            var filePath = await CreateThumbnail(uploadFileDto,
+                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}",
+                ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))
             {

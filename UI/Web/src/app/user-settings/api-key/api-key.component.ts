@@ -12,12 +12,16 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {AccountService} from 'src/app/_services/account.service';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-api-key',
-  templateUrl: './api-key.component.html',
-  styleUrls: ['./api-key.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-api-key',
+    templateUrl: './api-key.component.html',
+    styleUrls: ['./api-key.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbTooltip]
 })
 export class ApiKeyComponent implements OnInit {
 

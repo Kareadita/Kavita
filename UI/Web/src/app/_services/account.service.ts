@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
-import { of, ReplaySubject, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import {DestroyRef, inject, Injectable } from '@angular/core';
+import {catchError, of, ReplaySubject, throwError} from 'rxjs';
+import {filter, map, switchMap, tap} from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Preferences } from '../_models/preferences/preferences';
 import { User } from '../_models/user';
@@ -33,11 +33,17 @@ export class AccountService {
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public lastLoginKey = 'kavita-lastlogin';
-  currentUser: User | undefined;
+  private currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
   private currentUserSource = new ReplaySubject<User | undefined>(1);
-  currentUser$ = this.currentUserSource.asObservable();
+  public currentUser$ = this.currentUserSource.asObservable();
+
+  private hasValidLicenseSource = new ReplaySubject<boolean>(1);
+  /**
+   * Does the user have an active license
+   */
+  public hasValidLicense$ = this.hasValidLicenseSource.asObservable();
 
   /**
    * SetTimeout handler for keeping track of refresh token call
@@ -48,8 +54,9 @@ export class AccountService {
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
         map(evt => evt.payload as UserUpdateEvent),
+        tap(u => console.log('user update: ', u)),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
-        switchMap(() => this.refreshToken()))
+        switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
     }
 
@@ -75,6 +82,36 @@ export class AccountService {
 
   getRoles() {
     return this.httpClient.get<string[]>(this.baseUrl + 'account/roles');
+  }
+
+  deleteLicense() {
+    return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse);
+  }
+
+  hasValidLicense(forceCheck: boolean = false) {
+    return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
+      .pipe(
+        map(res => res === "true"),
+        tap(res => {
+          this.hasValidLicenseSource.next(res)
+        }),
+        catchError(error => {
+          this.hasValidLicenseSource.next(false);
+          return throwError(error); // Rethrow the error to propagate it further
+        })
+      );
+  }
+
+  hasAnyLicense() {
+    return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
+      .pipe(
+        map(res => res === "true"),
+      );
+  }
+
+  updateUserLicense(license: string, email: string) {
+  return this.httpClient.post<string>(this.baseUrl + 'license', {license, email}, TextResonse)
+    .pipe(map(res => res === "true"));
   }
 
   login(model: {username: string, password: string}) {
@@ -110,6 +147,12 @@ export class AccountService {
     this.currentUser = user;
     this.currentUserSource.next(user);
 
+    if (user) {
+      this.messageHub.createHubConnection(user, this.hasAdminRole(user));
+    }
+
+    this.hasValidLicense().subscribe();
+
     this.stopRefreshTokenTimer();
 
     if (this.currentUser !== undefined) {
@@ -122,9 +165,9 @@ export class AccountService {
     this.currentUserSource.next(undefined);
     this.currentUser = undefined;
     this.stopRefreshTokenTimer();
+    this.messageHub.stopHubConnection();
     // Upon logout, perform redirection
     this.router.navigateByUrl('/login');
-    this.messageHub.stopHubConnection();
   }
 
 
@@ -173,6 +216,7 @@ export class AccountService {
   /**
    * Given a user id, returns a full url for setting up the user account
    * @param userId
+   * @param withBaseUrl Should base url be included in invite url
    * @returns
    */
   getInviteUrl(userId: number, withBaseUrl: boolean = true) {
@@ -213,7 +257,7 @@ export class AccountService {
    */
   getPreferences() {
     return this.httpClient.get<Preferences>(this.baseUrl + 'users/get-preferences').pipe(map(pref => {
-      if (this.currentUser !== undefined || this.currentUser != null) {
+      if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = pref;
         this.setCurrentUser(this.currentUser);
       }
@@ -223,7 +267,7 @@ export class AccountService {
 
   updatePreferences(userPreferences: Preferences) {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
-      if (this.currentUser !== undefined || this.currentUser != null) {
+      if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
       }
@@ -237,7 +281,7 @@ export class AccountService {
 
     if (userString) {
       return JSON.parse(userString)
-    };
+    }
 
     return undefined;
   }
@@ -256,6 +300,25 @@ export class AccountService {
       return key;
     }));
   }
+
+  getOpdsUrl() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
+  }
+
+
+  private refreshAccount() {
+    console.log('Refreshing account');
+    if (this.currentUser === null || this.currentUser === undefined) return of();
+    return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
+      if (user) {
+        this.currentUser = {...user};
+      }
+
+      this.setCurrentUser(this.currentUser);
+      return user;
+    }));
+  }
+
 
   private refreshToken() {
     if (this.currentUser === null || this.currentUser === undefined) return of();
@@ -290,7 +353,5 @@ export class AccountService {
       clearInterval(this.refreshTokenTimeout);
     }
   }
-
-
 
 }

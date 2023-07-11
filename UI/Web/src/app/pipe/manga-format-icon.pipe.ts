@@ -5,7 +5,8 @@ import { MangaFormat } from '../_models/manga-format';
  * Returns the icon class representing the format
  */
 @Pipe({
-  name: 'mangaFormatIcon'
+  name: 'mangaFormatIcon',
+  standalone: true
 })
 export class MangaFormatIconPipe implements PipeTransform {
 

@@ -1,0 +1,17 @@
+<div class="list-item-container d-flex flex-row g-0 mb-2 p-2">
+  <div class="pe-2">
+    <app-image [imageUrl]="imageUrl" [height]="imageHeight" maxHeight="200px" [width]="imageWidth"></app-image>
+  </div>
+  <div class="flex-grow-1">
+    <div class="g-0">
+      <h5 class="mb-0">
+        <ng-content select="[title]"></ng-content>
+      </h5>
+      <ng-container *ngIf="summary && summary.length > 0">
+        <div class="mt-2 ps-2">
+          <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
