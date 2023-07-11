@@ -1,9 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ServerService } from 'src/app/_services/server.service';
 import { Title } from '@angular/platform-browser';
 import { NavService } from '../../_services/nav.service';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { LicenseComponent } from '../license/license.component';
+import { ManageTasksSettingsComponent } from '../manage-tasks-settings/manage-tasks-settings.component';
+import { ServerStatsComponent } from '../../statistics/_components/server-stats/server-stats.component';
+import { ManageSystemComponent } from '../manage-system/manage-system.component';
+import { ManageLogsComponent } from '../manage-logs/manage-logs.component';
+import { ManageLibraryComponent } from '../manage-library/manage-library.component';
+import { ManageUsersComponent } from '../manage-users/manage-users.component';
+import { ManageMediaSettingsComponent } from '../manage-media-settings/manage-media-settings.component';
+import { ManageEmailSettingsComponent } from '../manage-email-settings/manage-email-settings.component';
+import { ManageSettingsComponent } from '../manage-settings/manage-settings.component';
+import { NgFor, NgIf } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
 enum TabID {
   General = '',
@@ -16,13 +30,15 @@ enum TabID {
   Tasks = 'tasks',
   Logs = 'logs',
   Statistics = 'statistics',
-
+  KavitaPlus = 'kavitaplus'
 }
 
 @Component({
-  selector: 'app-dashboard',
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+    selector: 'app-dashboard',
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss'],
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent, ManageUsersComponent, ManageLibraryComponent, ManageLogsComponent, ManageSystemComponent, ServerStatsComponent, ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe]
 })
 export class DashboardComponent implements OnInit {
 
@@ -33,19 +49,18 @@ export class DashboardComponent implements OnInit {
     //{title: 'Logs', fragment: TabID.Logs},
     {title: 'Media', fragment: TabID.Media},
     {title: 'Email', fragment: TabID.Email},
-    //{title: 'Plugins', fragment: TabID.Plugins},
     {title: 'Tasks', fragment: TabID.Tasks},
     {title: 'Statistics', fragment: TabID.Statistics},
     {title: 'System', fragment: TabID.System},
+    {title: 'Kavita+', fragment: TabID.KavitaPlus},
   ];
-  counter = this.tabs.length + 1;
   active = this.tabs[0];
 
   get TabID() {
     return TabID;
   }
 
-  constructor(public route: ActivatedRoute, private serverService: ServerService, 
+  constructor(public route: ActivatedRoute, private serverService: ServerService,
     private toastr: ToastrService, private titleService: Title, public navService: NavService) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
@@ -60,11 +75,5 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     this.titleService.setTitle('Kavita - Admin Dashboard');
-  }
-
-  restartServer() {
-    this.serverService.restart().subscribe(() => {
-      setTimeout(() => this.toastr.success('Please reload.'), 1000);
-    });
   }
 }

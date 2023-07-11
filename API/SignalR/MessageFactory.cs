@@ -1,6 +1,7 @@
 ﻿using System;
 using API.DTOs.Update;
 using API.Extensions;
+using API.Services.Plus;
 
 namespace API.SignalR;
 
@@ -117,6 +118,10 @@ public static class MessageFactory
     /// When files are being emailed to a device
     /// </summary>
     public const string SendingToDevice = "SendingToDevice";
+    /// <summary>
+    /// A Scrobbling Key has expired and needs rotation
+    /// </summary>
+    public const string ScrobblingKeyExpired = "ScrobblingKeyExpired";
 
 
     public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
@@ -510,6 +515,18 @@ public static class MessageFactory
                 Progress = progress,
                 EventTime = DateTime.Now
             }
+        };
+    }
+
+    public static SignalRMessage ScrobblingKeyExpiredEvent(ScrobbleProvider provider)
+    {
+        return new SignalRMessage
+        {
+            Name = ScrobblingKeyExpired,
+            Title = "Scrobbling Key Expired",
+            SubTitle = provider + " expired. Please re-generate on User Account page.",
+            Progress = ProgressType.None,
+            EventType = ProgressEventType.Single,
         };
     }
 }

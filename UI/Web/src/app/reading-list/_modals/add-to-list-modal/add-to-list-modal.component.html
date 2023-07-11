@@ -2,7 +2,7 @@
 <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">Add to Reading List</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-    
+
     </button>
 </div>
 <form style="width: 100%" [formGroup]="listForm">
@@ -15,7 +15,7 @@
         </div>
     </div>
     <ul class="list-group">
-        <li class="list-group-item clickable" tabindex="0" role="button" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
+        <li class="list-group-item clickable" tabindex="0" role="option" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
             {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" title="Promoted"></i>
         </li>
         <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>

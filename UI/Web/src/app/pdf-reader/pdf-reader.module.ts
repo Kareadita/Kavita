@@ -8,14 +8,12 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 
 @NgModule({
-  declarations: [
-    PdfReaderComponent
-  ],
-  imports: [
-    CommonModule,
-    PdfReaderRoutingModule,
-    NgxExtendedPdfViewerModule,
-    NgbTooltipModule
-  ]
+    imports: [
+        CommonModule,
+        PdfReaderRoutingModule,
+        NgxExtendedPdfViewerModule,
+        NgbTooltipModule,
+        PdfReaderComponent
+    ]
 })
 export class PdfReaderModule { }

@@ -4,7 +4,8 @@ import { Pipe, PipeTransform } from '@angular/core';
  * Returns the icon for the given state of fullscreen mode
  */
 @Pipe({
-  name: 'fullscreenIcon'
+  name: 'fullscreenIcon',
+  standalone: true,
 })
 export class FullscreenIconPipe implements PipeTransform {
 

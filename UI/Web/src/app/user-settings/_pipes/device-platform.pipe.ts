@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DevicePlatform } from 'src/app/_models/device/device-platform';
 
 @Pipe({
-  name: 'devicePlatform'
+    name: 'devicePlatform',
+    standalone: true
 })
 export class DevicePlatformPipe implements PipeTransform {
 

@@ -10,9 +10,18 @@ import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ImageService } from 'src/app/_services/image.service';
+import {CommonModule} from "@angular/common";
+import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {BytesPipe} from "../../pipe/bytes.pipe";
+import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
+import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
 
 @Component({
   selector: 'app-entity-info-cards',
+  standalone: true,
+  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

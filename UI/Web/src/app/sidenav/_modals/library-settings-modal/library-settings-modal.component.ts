@@ -1,26 +1,33 @@
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnDestroy,
-  OnInit
-} from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { SettingsService } from 'src/app/admin/settings.service';
-import { DirectoryPickerComponent, DirectoryPickerResult } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Library, LibraryType } from 'src/app/_models/library';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { UploadService } from 'src/app/_services/upload.service';
+  NgbActiveModal,
+  NgbModal,
+  NgbModalModule,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
+import {SettingsService} from 'src/app/admin/settings.service';
+import {
+  DirectoryPickerComponent,
+  DirectoryPickerResult
+} from 'src/app/admin/_modals/directory-picker/directory-picker.component';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Library, LibraryType} from 'src/app/_models/library';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 
 enum TabID {
   General = 'General',
@@ -38,6 +45,8 @@ enum StepID {
 
 @Component({
   selector: 'app-library-settings-modal',
+  standalone: true,
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -59,6 +68,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     includeInSearch: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageCollections: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     manageReadingLists: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
+    allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [Validators.required] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [Validators.required] }),
   });
 
@@ -71,7 +81,6 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   get Breakpoint() { return Breakpoint; }
   get TabID() { return TabID; }
-  get StepID() { return StepID; }
 
   constructor(public utilityService: UtilityService, private uploadService: UploadService, private modalService: NgbModal,
     private settingService: SettingsService, public modal: NgbActiveModal, private confirmService: ConfirmService,
@@ -95,6 +104,12 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.imageUrls.push(this.imageService.getLibraryCoverImage(this.library.id));
       this.cdRef.markForCheck();
     }
+
+    if (this.library && this.library.type === LibraryType.Comic) {
+      this.libraryForm.get('allowScrobbling')?.setValue(false);
+      this.libraryForm.get('allowScrobbling')?.disable();
+    }
+
 
     this.libraryForm.get('name')?.valueChanges.pipe(
       debounceTime(100),
@@ -127,6 +142,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('manageCollections')?.setValue(this.library.manageCollections);
       this.libraryForm.get('manageReadingLists')?.setValue(this.library.manageReadingLists);
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
+      this.libraryForm.get('allowScrobbling')?.setValue(this.library.allowScrobbling);
       this.selectedFolders = this.library.folders;
       this.madeChanges = false;
       this.cdRef.markForCheck();

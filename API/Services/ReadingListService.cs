@@ -37,7 +37,6 @@ public interface IReadingListService
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
-    Task<string> GenerateMergedImage(int readingListId);
     /// <summary>
     /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.
     /// </summary>
@@ -58,7 +57,7 @@ public class ReadingListService : IReadingListService
     private readonly IEventHub _eventHub;
     private readonly ChapterSortComparerZeroFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerZeroFirst.Default;
     private static readonly Regex JustNumbers = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase,
-        Tasks.Scanner.Parser.Parser.RegexTimeout);
+        Parser.RegexTimeout);
 
     public ReadingListService(IUnitOfWork unitOfWork, ILogger<ReadingListService> logger, IEventHub eventHub)
     {
@@ -327,19 +326,6 @@ public class ReadingListService : IReadingListService
         }
     }
 
-    public Task<string?> GenerateMergedImage(int readingListId)
-    {
-        throw new NotImplementedException();
-        // var coverImages = (await _unitOfWork.ReadingListRepository.GetFirstFourCoverImagesByReadingListId(readingListId)).ToList();
-        // if (coverImages.Count < 4) return null;
-        // var fullImages = coverImages
-        //     .Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList();
-        //
-        // var combinedFile = ImageService.CreateMergedImage(fullImages, _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory, $"{readingListId}.png"));
-        // // webp/avif needs to be handled
-        // return combinedFile;
-    }
-
     /// <summary>
     /// Calculates the highest Age Rating from each Reading List Item
     /// </summary>
@@ -473,7 +459,7 @@ public class ReadingListService : IReadingListService
 
                 var items = readingList.Items.ToList();
                 var order = int.Parse(arcPair.Item2);
-                var readingListItem = items.FirstOrDefault(item => item.Order == order || item.ChapterId == chapter.Id);
+                var readingListItem = items.Find(item => item.Order == order || item.ChapterId == chapter.Id);
                 if (readingListItem == null)
                 {
                     // If no number was provided in the reading list, we default to MaxValue and hence we should insert the item at the end of the list
@@ -660,7 +646,7 @@ public class ReadingListService : IReadingListService
             var bookVolume = string.IsNullOrEmpty(book.Volume)
                 ? Tasks.Scanner.Parser.Parser.DefaultVolume
                 : book.Volume;
-            var matchingVolume = bookSeries.Volumes.FirstOrDefault(v => bookVolume == v.Name) ?? bookSeries.Volumes.FirstOrDefault(v => v.Number == 0);
+            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.Find(v => v.Number == 0);
             if (matchingVolume == null)
             {
                 importSummary.Results.Add(new CblBookResult(book)

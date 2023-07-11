@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data.ManualMigrations;
@@ -10,7 +11,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
-
+#nullable enable
 public interface IAppUserProgressRepository
 {
     void Update(AppUserProgress userProgress);
@@ -25,10 +26,13 @@ public interface IAppUserProgressRepository
     Task<AppUserProgress?> GetAnyProgress();
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
+    Task<DateTime> GetLatestProgress();
     Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId);
     Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
+    Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
+    Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
 }
-
+#nullable disable
 public class AppUserProgressRepository : IAppUserProgressRepository
 {
     private readonly DataContext _context;
@@ -99,10 +103,12 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .AnyAsync(aup => aup.PagesRead > 0 && aup.AppUserId == userId && aup.SeriesId == seriesId);
     }
 
+    #nullable enable
     public async Task<AppUserProgress?> GetAnyProgress()
     {
         return await _context.AppUserProgresses.FirstOrDefaultAsync();
     }
+    #nullable disable
 
     /// <summary>
     /// This will return any user progress. This filters out progress rows that have no pages read.
@@ -122,6 +128,17 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         return await _context.AppUserProgresses.ToListAsync();
     }
 
+    /// <summary>
+    /// Returns the latest progress in UTC
+    /// </summary>
+    /// <returns></returns>
+    public async Task<DateTime> GetLatestProgress()
+    {
+        return await _context.AppUserProgresses
+            .Select(d => d.LastModifiedUtc)
+            .MaxAsync();
+    }
+
     public async Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
@@ -137,10 +154,36 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .AnyAsync();
     }
 
+    public async Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId)
+    {
+        var list = await _context.AppUserProgresses
+            .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
+                (appUserProgresses, chapter) => new {appUserProgresses, chapter})
+            .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
+                        p.appUserProgresses.PagesRead >= p.chapter.Pages)
+            .Select(p => p.chapter.Number)
+            .ToListAsync();
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(float.Parse(d)));
+    }
+
+    public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
+    {
+        var list = await _context.AppUserProgresses
+            .Join(_context.Chapter, appUserProgresses => appUserProgresses.ChapterId, chapter => chapter.Id,
+                (appUserProgresses, chapter) => new {appUserProgresses, chapter})
+            .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
+                        p.appUserProgresses.PagesRead >= p.chapter.Pages)
+            .Select(p => p.chapter.Volume.Number)
+            .ToListAsync();
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
+    }
+
+    #nullable enable
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
             .Where(p => p.ChapterId == chapterId && p.AppUserId == userId)
             .FirstOrDefaultAsync();
     }
+    #nullable disable
 }

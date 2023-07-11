@@ -13,7 +13,7 @@ import {
   RendererStyleFlags2,
   ViewChild
 } from '@angular/core';
-import {DOCUMENT, Location} from '@angular/common';
+import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of, Subject } from 'rxjs';
@@ -37,12 +37,15 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { LibraryType } from 'src/app/_models/library';
 import { BookTheme } from 'src/app/_models/preferences/book-theme';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { PageStyle } from '../reader-settings/reader-settings.component';
+import { PageStyle, ReaderSettingsComponent } from '../reader-settings/reader-settings.component';
 import { User } from 'src/app/_models/user';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { PAGING_DIRECTION } from 'src/app/manga-reader/_models/reader-enums';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { TableOfContentsComponent } from '../table-of-contents/table-of-contents.component';
+import { NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { DrawerComponent } from '../../../shared/drawer/drawer.component';
 
 
 enum TabID {
@@ -74,22 +77,24 @@ const pageLevelStyles = ['margin-left', 'margin-right', 'font-size'];
 const elementLevelStyles = ['line-height', 'font-family'];
 
 @Component({
-  selector: 'app-book-reader',
-  templateUrl: './book-reader.component.html',
-  styleUrls: ['./book-reader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [
-    trigger('isLoading', [
-      state('false', style({opacity: 1})),
-      state('true', style({opacity: 0})),
-      transition('false <=> true', animate('200ms'))
-    ]),
-    trigger('fade', [
-      state('true', style({opacity: 0})),
-      state('false', style({opacity: 0.5})),
-      transition('false <=> true', animate('4000ms'))
-    ])
-  ]
+    selector: 'app-book-reader',
+    templateUrl: './book-reader.component.html',
+    styleUrls: ['./book-reader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [
+        trigger('isLoading', [
+            state('false', style({ opacity: 1 })),
+            state('true', style({ opacity: 0 })),
+            transition('false <=> true', animate('200ms'))
+        ]),
+        trigger('fade', [
+            state('true', style({ opacity: 0 })),
+            state('false', style({ opacity: 0.5 })),
+            transition('false <=> true', animate('4000ms'))
+        ])
+    ],
+    standalone: true,
+    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -379,7 +384,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       case BookPageLayoutMode.Default:
         return 'unset';
       case BookPageLayoutMode.Column1:
-        return (base / 2) + 'px';
+        return ((base / 2) - 4) + 'px';
       case BookPageLayoutMode.Column2:
         return (base / 4) + 'px';
       default:
@@ -786,15 +791,20 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
-          if (!e.target.attributes.hasOwnProperty('kavita-page')) { return; }
-          const page = parseInt(e.target.attributes['kavita-page'].value, 10);
+          let targetElem = e.target;
+          if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
+            // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
+            targetElem = e.target.parentNode;
+          }
+          if (!targetElem.attributes.hasOwnProperty('kavita-page')) { return; }
+          const page = parseInt(targetElem.attributes['kavita-page'].value, 10);
           if (this.adhocPageHistory.peek()?.page !== this.pageNum) {
             this.adhocPageHistory.push({page: this.pageNum, scrollPart: this.lastSeenScrollPartPath});
           }
 
-          const partValue = e.target.attributes.hasOwnProperty('kavita-part') ? e.target.attributes['kavita-part'].value : undefined;
+          const partValue = targetElem.attributes.hasOwnProperty('kavita-part') ? targetElem.attributes['kavita-part'].value : undefined;
           if (partValue && page === this.pageNum) {
-            this.scrollTo(e.target.attributes['kavita-part'].value);
+            this.scrollTo(targetElem.attributes['kavita-part'].value);
             return;
           }
 
@@ -1123,8 +1133,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   getPageWidth() {
     if (this.readingSectionElemRef == null) return 0;
-    const margin = (this.readingSectionElemRef.nativeElement.clientWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
-
+    const margin = (this.convertVwToPx(parseInt(this.pageStyles['margin-left'], 10)) * 2);
     return this.readingSectionElemRef.nativeElement.clientWidth - margin + COLUMN_GAP;
   }
 
@@ -1139,6 +1148,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const margin = (window.innerWidth * (parseInt(this.pageStyles['margin-left'], 10) / 100)) * 2;
     const windowWidth = window.innerWidth || document.documentElement.clientWidth;
     return windowWidth - margin;
+  }
+
+  convertVwToPx(vwValue: number) {
+    const viewportWidth = Math.max(this.readingSectionElemRef.nativeElement.clientWidth || 0, window.innerWidth || 0);
+    return (vwValue * viewportWidth) / 100;
   }
 
   /**
@@ -1166,7 +1180,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     return [currentVirtualPage, totalVirtualPages, pageSize];
-
   }
 
   private getScrollOffsetAndTotalScroll() {

@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 
 @Pipe({
-  name: 'cblImportResult'
+  name: 'cblImportResult',
+  standalone: true
 })
 export class CblImportResultPipe implements PipeTransform {
 

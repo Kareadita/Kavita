@@ -184,8 +184,7 @@ $action-bar-height: 38px;
     position: relative;
     height: 100%;
 
-
-    //background-color: purple !important;
+   // background-color: purple !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -203,18 +202,17 @@ $action-bar-height: 38px;
 }
 
 .book-content {
-    position: relative;
-    padding: 20px 0;
-    margin: 0px 0px;
-    //background-color: red !important;
+  position: relative;
+  margin: 0 0;
+  padding: 20px 0px;
 
-    &.column-layout-1 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+  &.column-layout-1 {
+      height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-        &.writing-style-vertical {
-            padding: 0 10px 0 0;
-            margin: 20px 0;
-        }
+      &.writing-style-vertical {
+          padding: 0 10px 0 0;
+          margin: 20px 0;
+      }
     }
 
     &.column-layout-2 {
@@ -275,8 +273,6 @@ $action-bar-height: 38px;
         word-break: break-word;
         overflow-wrap: break-word;
     }
-
-
 }
 
 .column-layout-2 {
@@ -287,9 +283,6 @@ $action-bar-height: 38px;
         word-break: break-word;
         overflow-wrap: break-word;
     }
-
-
-
 }
 
 // A bunch of resets so books render correctly

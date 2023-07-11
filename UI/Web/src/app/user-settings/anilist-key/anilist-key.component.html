@@ -1,0 +1,51 @@
+<div class="card mt-2">
+  <div class="card-body">
+    <div class="card-title">
+      <div class="container-fluid row mb-2">
+        <div class="col-10 col-sm-11"><h4 id="anilist-token-header">Scrobbling Providers</h4></div>
+        <div class="col-1 text-end">
+          <button class="btn btn-primary btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
+        </div>
+      </div>
+    </div>
+
+    <ng-container *ngIf="isViewMode">
+      <div class="container-fluid row">
+          <span class="col-12">
+            <ng-container *ngIf="!hasValidLicense; else showToken">
+              This feature requires an active <a href="" target="_blank" rel="noreferrer nofollow">Kavita+</a> license
+            </ng-container>
+            <ng-template #showToken>
+              <ng-container *ngIf="token && token.length > 0; else noToken">
+                <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/AniList.png" alt="AniList" ngbTooltip="AniList"> Token Set
+                <i class="error fa-solid fa-exclamation-circle" ngbTooltip="Token Expired" *ngIf="tokenExpired">
+                  <span class="visually-hidden">Token Expired</span>
+                </i>
+              </ng-container>
+              <ng-template #noToken>No Token Set</ng-template>
+            </ng-template>
+          </span>
+      </div>
+    </ng-container>
+
+    <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+      <p>First time users should click on "Generate" below to allow KavitaPlus to talk with Anilist.
+        Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.</p>
+      <form [formGroup]="formGroup">
+        <div class="form-group mb-3">
+          <label for="anilist-token">AniList Token Goes Here</label>
+          <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
+        </div>
+      </form>
+      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+        <a class="flex-fill btn btn-secondary me-2"
+           href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
+           target="_blank" rel="noopener noreferrer">Generate</a>
+        <button type="submit" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveForm()">Save</button>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+

@@ -3,7 +3,8 @@ import { FITTING_OPTION } from '../_models/reader-enums';
 
 @Pipe({
   name: 'fittingIcon',
-  pure: true
+  pure: true,
+  standalone: true,
 })
 export class FittingIconPipe implements PipeTransform {
 

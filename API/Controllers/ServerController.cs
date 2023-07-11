@@ -18,7 +18,9 @@ using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using MimeTypes;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -32,16 +34,16 @@ public class ServerController : BaseApiController
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
-    private readonly IBookmarkService _bookmarkService;
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IMemoryCache _memoryCache;
 
     public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
+        ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IMemoryCache memoryCache)
     {
         _logger = logger;
         _backupService = backupService;
@@ -49,11 +51,11 @@ public class ServerController : BaseApiController
         _versionUpdaterService = versionUpdaterService;
         _statsService = statsService;
         _cleanupService = cleanupService;
-        _bookmarkService = bookmarkService;
         _scannerService = scannerService;
         _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
+        _memoryCache = memoryCache;
     }
 
     /// <summary>
@@ -134,7 +136,8 @@ public class ServerController : BaseApiController
             return BadRequest(
                 "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
         }
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
+        _taskScheduler.CovertAllCoversToEncoding();
 
         return Ok();
     }
@@ -150,7 +153,7 @@ public class ServerController : BaseApiController
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip",
+            return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
@@ -167,6 +170,7 @@ public class ServerController : BaseApiController
     {
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
+
 
     /// <summary>
     /// Pull the Changelog for Kavita from Github and display
@@ -230,6 +234,19 @@ public class ServerController : BaseApiController
     public async Task<ActionResult> ClearMediaErrors()
     {
         await _unitOfWork.MediaErrorRepository.DeleteAll();
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// Bust Review and Recommendation Cache
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("bust-review-and-rec-cache")]
+    public ActionResult BustReviewAndRecCache()
+    {
+        _memoryCache.Clear();
         return Ok();
     }
 

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.3.1
+    "version": "0.7.4.0"
   },
   "servers": [
     {
@@ -136,6 +136,36 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account/refresh-account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns an up-to-date user account",
         "responses": {
           "200": {
             "description": "Success",
@@ -791,6 +821,36 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account/opds-url": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Returns the OPDS url for this user",
         "responses": {
           "200": {
             "description": "Success",
@@ -2615,20 +2675,151 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryType"
+                  "enum": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryType"
+                  "enum": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LibraryType"
+                  "enum": [
+                    0,
+                    1,
+                    2
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/License/valid-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Checks if the user's license is valid or not",
+        "parameters": [
+          {
+            "name": "forceCheck",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/has-license": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Has any license",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License": {
+      "delete": {
+        "tags": [
+          "License"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Updates server license. Returns true if updated and valid",
+        "description": "Caches the result",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -3675,6 +3866,56 @@
         }
       }
     },
+    "/api/Rating": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "summary": "Get the external ratings for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RatingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Reader/pdf": {
       "get": {
         "tags": [
@@ -3762,10 +4003,12 @@
         "tags": [
           "Reader"
         ],
+        "summary": "Returns a thumbnail for the given page number",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3774,6 +4017,7 @@
           {
             "name": "pageNum",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3782,6 +4026,7 @@
           {
             "name": "apiKey",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "string"
             }
@@ -5712,6 +5957,47 @@
         }
       }
     },
+    "/api/Recommended/recommendations": {
+      "get": {
+        "tags": [
+          "Recommended"
+        ],
+        "summary": "For Kavita+ users, this will return recommendations on the server.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Recommended/quick-reads": {
       "get": {
         "tags": [
@@ -6052,6 +6338,489 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Review": {
+      "get": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Fetches reviews from the server for a given series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserReviewDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Review"
+        ],
+        "summary": "Updates the review for a given series",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserReviewDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserReviewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/anilist-token": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/update-anilist-token": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AniListUpdateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/token-expired": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "schema": {
+              "enum": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/scrobble-errors": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns all scrobbling errors for the instance",
+        "description": "Requires admin",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleErrorDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/clear-errors": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Clears the scrobbling errors table",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/scrobble-events": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns the scrobbling history for the user",
+        "description": "User must have a valid license",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScrobbleEventFilter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleEventDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/holds": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns all scrobble holds for the current user",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleHoldDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/has-hold": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "If there is an active hold on the series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/library-allows-scrobbling": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Does the library the series is in allow scrobbling?",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/add-hold": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Adds a hold against the Series for user's scrobbling",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/remove-hold": {
+      "delete": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Adds a hold against the Series for user's scrobbling",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -6543,7 +7312,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Update the user rating for the given series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -6574,7 +7345,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Updates the Series",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -6605,6 +7378,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets all recently added series",
         "parameters": [
           {
             "name": "PageNumber",
@@ -6626,6 +7400,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -6634,6 +7409,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -6690,6 +7466,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns series that were recently updated, like adding or removing a chapter",
         "responses": {
           "200": {
             "description": "Success",
@@ -6728,6 +7505,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns all series for the library",
         "parameters": [
           {
             "name": "PageNumber",
@@ -6749,6 +7527,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32",
@@ -6757,6 +7536,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7297,7 +8077,24 @@
             "in": "query",
             "description": "Type of Relationship to pull back",
             "schema": {
-              "$ref": "#/components/schemas/RelationKind"
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13
+              ],
+              "type": "integer",
+              "description": "Represents a relationship between Series",
+              "format": "int32"
             }
           }
         ],
@@ -7700,6 +8497,19 @@
           "Server"
         ],
         "summary": "Deletes all media errors",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Server/bust-review-and-rec-cache": {
+      "post": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Bust Review and Recommendation Cache",
         "responses": {
           "200": {
             "description": "Success"
@@ -9629,34 +10439,31 @@
   },
   "components": {
     "schemas": {
-      "AgeRating": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13,
-          14,
-          -1
-        ],
-        "type": "integer",
-        "description": "Represents Age Rating for content.",
-        "format": "int32"
-      },
       "AgeRatingDto": {
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
           },
           "title": {
             "type": "string",
@@ -9669,11 +10476,41 @@
         "type": "object",
         "properties": {
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The maximum age rating a user has access to. -1 if not applicable",
+            "format": "int32"
           },
           "includeUnknowns": {
             "type": "boolean",
             "description": "Are Unknowns explicitly allowed against age rating"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AniListUpdateDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -9857,11 +10694,44 @@
             "nullable": true
           },
           "ageRestriction": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The highest age rating the user has access to. Not applicable for admins",
+            "format": "int32"
           },
           "ageRestrictionIncludeUnknowns": {
             "type": "boolean",
             "description": "If an age rating restriction is applied to the account, if Unknowns should be allowed for the user. Defaults to false."
+          },
+          "aniListAccessToken": {
+            "type": "string",
+            "description": "The JWT for the user's AniList account. Expires after a year.",
+            "nullable": true
+          },
+          "scrobbleHolds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScrobbleHold"
+            },
+            "description": "A list of Series the user doesn't want scrobbling for",
+            "nullable": true
           },
           "rowVersion": {
             "type": "integer",
@@ -9931,16 +10801,45 @@
             "format": "int32"
           },
           "readingDirection": {
-            "$ref": "#/components/schemas/ReadingDirection"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
           },
           "scalingOption": {
-            "$ref": "#/components/schemas/ScalingOption"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How should the image be scaled to screen",
+            "format": "int32"
           },
           "pageSplitOption": {
-            "$ref": "#/components/schemas/PageSplitOption"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Which side of a split image should we show first",
+            "format": "int32"
           },
           "readerMode": {
-            "$ref": "#/components/schemas/ReaderMode"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, MANGA_LR uses paging by clicking left/right side of reader, MANGA_UD uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
+            "format": "int32"
           },
           "autoCloseMenu": {
             "type": "boolean",
@@ -9955,7 +10854,14 @@
             "description": "Manga Reader Option: Emulate a book by applying a shadow effect on the pages"
           },
           "layoutMode": {
-            "$ref": "#/components/schemas/LayoutMode"
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How many pages to display in the reader at once",
+            "format": "int32"
           },
           "backgroundColor": {
             "type": "string",
@@ -9991,10 +10897,22 @@
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
           },
           "bookReaderReadingDirection": {
-            "$ref": "#/components/schemas/ReadingDirection"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
           },
           "bookReaderWritingStyle": {
-            "$ref": "#/components/schemas/WritingStyle"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: Defines the writing styles vertical/horizontal",
+            "format": "int32"
           },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
@@ -10005,14 +10923,27 @@
             "nullable": true
           },
           "bookReaderLayoutMode": {
-            "$ref": "#/components/schemas/BookPageLayoutMode"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: The way a page from a book is rendered. Default is as book dictates, 1 column is fit to height,\r\n2 column is fit to height, 2 columns",
+            "format": "int32"
           },
           "bookReaderImmersiveMode": {
             "type": "boolean",
             "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
           },
           "globalPageLayoutMode": {
-            "$ref": "#/components/schemas/PageLayoutMode"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Global Site Option: If the UI should layout items as Cards or List items",
+            "format": "int32"
           },
           "blurUnreadSummaries": {
             "type": "boolean",
@@ -10029,6 +10960,10 @@
           "collapseSeriesRelationships": {
             "type": "boolean",
             "description": "UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
           },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
@@ -10125,9 +11060,17 @@
             "description": "A short summary the user can write when giving their review.",
             "nullable": true
           },
+          "tagline": {
+            "type": "string",
+            "description": "An optional tagline for the review",
+            "nullable": true
+          },
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
           },
           "appUserId": {
             "type": "integer",
@@ -10203,7 +11146,16 @@
             "format": "int32"
           },
           "seriesFormat": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "seriesName": {
             "type": "string",
@@ -10234,15 +11186,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "BookPageLayoutMode": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "BookmarkDto": {
         "required": [
@@ -10284,7 +11227,16 @@
             "nullable": true
           },
           "seriesFormat": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "seriesId": {
             "type": "integer",
@@ -10295,7 +11247,13 @@
             "format": "int32"
           },
           "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "pages": {
             "type": "integer",
@@ -10371,35 +11329,23 @@
             "nullable": true
           },
           "reason": {
-            "$ref": "#/components/schemas/CblImportReason"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
-      },
-      "CblImportReason": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "CblImportResult": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "CblImportSummaryDto": {
         "type": "object",
@@ -10421,7 +11367,13 @@
             "nullable": true
           },
           "success": {
-            "$ref": "#/components/schemas/CblImportResult"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "successfulInserts": {
             "type": "array",
@@ -10498,7 +11450,27 @@
             "nullable": true
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Age Rating for the issue/chapter",
+            "format": "int32"
           },
           "titleName": {
             "type": "string",
@@ -10713,7 +11685,27 @@
             "nullable": true
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Age Rating for the issue/chapter",
+            "format": "int32"
           },
           "wordCount": {
             "type": "integer",
@@ -10775,7 +11767,16 @@
             "nullable": true
           },
           "seriesFormat": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Series Format",
+            "format": "int32"
           },
           "seriesId": {
             "type": "integer",
@@ -10788,7 +11789,14 @@
             "format": "int32"
           },
           "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Library type",
+            "format": "int32"
           },
           "chapterTitle": {
             "type": "string",
@@ -10941,14 +11949,42 @@
             "nullable": true
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
           },
           "releaseDate": {
             "type": "string",
             "nullable": true
           },
           "publicationStatus": {
-            "$ref": "#/components/schemas/PublicationStatus"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "summary": {
             "type": "string",
@@ -11182,7 +12218,15 @@
             "type": "string"
           },
           "platform": {
-            "$ref": "#/components/schemas/DevicePlatform"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Platform of the device. If not know, defaults to \"Custom\"",
+            "format": "int32"
           },
           "emailAddress": {
             "minLength": 1,
@@ -11215,29 +12259,35 @@
             "format": "int64"
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Format of those files",
+            "format": "int32"
           }
         },
         "additionalProperties": false
-      },
-      "DayOfWeek": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "DayOfWeekStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/DayOfWeek"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "count": {
             "type": "integer",
@@ -11284,7 +12334,15 @@
             "nullable": true
           },
           "platform": {
-            "$ref": "#/components/schemas/DevicePlatform"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Platform (ie) Windows 10",
+            "format": "int32"
           },
           "appUserId": {
             "type": "integer",
@@ -11342,7 +12400,15 @@
             "nullable": true
           },
           "platform": {
-            "$ref": "#/components/schemas/DevicePlatform"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Platform (ie) Windows 10",
+            "format": "int32"
           },
           "lastUsed": {
             "type": "string",
@@ -11357,16 +12423,6 @@
         },
         "additionalProperties": false,
         "description": "A Device is an entity that can receive data from Kavita (kindle)"
-      },
-      "DevicePlatform": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "DirectoryDto": {
         "type": "object",
@@ -11413,14 +12469,27 @@
         "additionalProperties": false,
         "description": "Represents if Test Email Service URL was successful or not and if any error occured"
       },
-      "EncodeFormat": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
+      "ExternalSeriesDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "FileDimensionDto": {
         "type": "object",
@@ -11475,7 +12544,16 @@
             "nullable": true
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "totalSize": {
             "type": "integer",
@@ -11497,7 +12575,16 @@
             "nullable": true
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Format of extension",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -11508,7 +12595,16 @@
           "formats": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MangaFormat"
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "description": "Represents the format of the file",
+              "format": "int32"
             },
             "description": "The type of Formats you want to be returned. An empty list will return all formats back",
             "nullable": true
@@ -11653,7 +12749,27 @@
           "ageRating": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AgeRating"
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                -1
+              ],
+              "type": "integer",
+              "description": "Represents Age Rating for content.",
+              "format": "int32"
             },
             "description": "Age Ratings. Empty list will return everything back",
             "nullable": true
@@ -11669,7 +12785,15 @@
           "publicationStatus": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PublicationStatus"
+              "enum": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "type": "integer",
+              "format": "int32"
             },
             "description": "Publication statuses to filter by. Empty list will return everything back",
             "nullable": true
@@ -11921,15 +13045,6 @@
         },
         "additionalProperties": false
       },
-      "LayoutMode": {
-        "enum": [
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "Library": {
         "type": "object",
         "properties": {
@@ -11946,7 +13061,13 @@
             "nullable": true
           },
           "type": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "folderWatching": {
             "type": "boolean",
@@ -11971,6 +13092,10 @@
           "manageReadingLists": {
             "type": "boolean",
             "description": "Should this library create reading lists from Metadata"
+          },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
           },
           "created": {
             "type": "string",
@@ -12034,7 +13159,13 @@
             "format": "date-time"
           },
           "type": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "coverImage": {
             "type": "string",
@@ -12065,6 +13196,10 @@
             "type": "boolean",
             "description": "Include library series in Search"
           },
+          "allowScrobbling": {
+            "type": "boolean",
+            "description": "Should this library allow Scrobble events to emit from it"
+          },
           "folders": {
             "type": "array",
             "items": {
@@ -12091,15 +13226,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "LibraryType": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "LoginDto": {
         "type": "object",
@@ -12133,7 +13259,16 @@
             "format": "int32"
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "bytes": {
             "type": "integer",
@@ -12202,7 +13337,16 @@
             "format": "int64"
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "created": {
             "type": "string",
@@ -12211,23 +13355,20 @@
         },
         "additionalProperties": false
       },
-      "MangaFormat": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "description": "Represents the format of the file",
-        "format": "int32"
-      },
       "MangaFormatStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "count": {
             "type": "integer",
@@ -12403,24 +13544,6 @@
         },
         "additionalProperties": false
       },
-      "PageLayoutMode": {
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "PageSplitOption": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "Person": {
         "type": "object",
         "properties": {
@@ -12437,7 +13560,21 @@
             "nullable": true
           },
           "role": {
-            "$ref": "#/components/schemas/PersonRole"
+            "enum": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "seriesMetadatas": {
             "type": "array",
@@ -12468,27 +13605,24 @@
             "nullable": true
           },
           "role": {
-            "$ref": "#/components/schemas/PersonRole"
+            "enum": [
+              1,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
-      },
-      "PersonRole": {
-        "enum": [
-          1,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12
-        ],
-        "type": "integer",
-        "format": "int32"
       },
       "ProgressDto": {
         "required": [
@@ -12532,26 +13666,44 @@
         },
         "additionalProperties": false
       },
-      "PublicationStatus": {
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "PublicationStatusStatCount": {
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/PublicationStatus"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RatingDto": {
+        "type": "object",
+        "properties": {
+          "averageScore": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "favoriteCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "provider": {
+            "enum": [
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -12611,23 +13763,6 @@
         "additionalProperties": false,
         "description": "Represents the Reading Status. This is a flag and allows multiple statues"
       },
-      "ReaderMode": {
-        "enum": [
-          0,
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "ReadingDirection": {
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "ReadingList": {
         "type": "object",
         "properties": {
@@ -12661,7 +13796,27 @@
             "type": "boolean"
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "The highest age rating from all Series within the reading list",
+            "format": "int32"
           },
           "items": {
             "type": "array",
@@ -12834,7 +13989,16 @@
             "nullable": true
           },
           "seriesFormat": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "pagesRead": {
             "type": "integer",
@@ -12869,7 +14033,13 @@
             "nullable": true
           },
           "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "libraryName": {
             "type": "string",
@@ -12914,7 +14084,13 @@
             "format": "int32"
           },
           "libraryType": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "title": {
             "type": "string",
@@ -12941,11 +14117,40 @@
             "format": "int32"
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           }
         },
         "additionalProperties": false,
         "description": "A mesh of data for Recently added volume/chapters"
+      },
+      "RecommendationDto": {
+        "type": "object",
+        "properties": {
+          "ownedSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
+          },
+          "externalSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "RefreshSeriesDto": {
         "type": "object",
@@ -13094,26 +14299,6 @@
         },
         "additionalProperties": false
       },
-      "RelationKind": {
-        "enum": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9,
-          10,
-          11,
-          12,
-          13
-        ],
-        "type": "integer",
-        "description": "Represents a relationship between Series",
-        "format": "int32"
-      },
       "RemoveBookmarkForSeriesDto": {
         "type": "object",
         "properties": {
@@ -13150,16 +14335,6 @@
         },
         "additionalProperties": false
       },
-      "ScalingOption": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "ScanFolderDto": {
         "type": "object",
         "properties": {
@@ -13176,6 +14351,188 @@
         },
         "additionalProperties": false,
         "description": "DTO for requesting a folder to be scanned"
+      },
+      "ScrobbleErrorDto": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Developer defined string",
+            "nullable": true
+          },
+          "details": {
+            "type": "string",
+            "description": "List of providers that could not",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleEventDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isProcessed": {
+            "type": "boolean"
+          },
+          "volumeNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "chapterNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "processDateUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "scrobbleEventType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleEventFilter": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "description": "Which field to sort on",
+            "format": "int32"
+          },
+          "isDescending": {
+            "type": "boolean",
+            "description": "If the sort should be a descending sort"
+          },
+          "query": {
+            "type": "string",
+            "description": "A query to search against",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleHold": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleHoldDto": {
+        "type": "object",
+        "properties": {
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
       },
       "SearchResultDto": {
         "type": "object",
@@ -13201,7 +14558,16 @@
             "nullable": true
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "libraryName": {
             "type": "string",
@@ -13387,10 +14753,16 @@
             "format": "date-time"
           },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
-          },
-          "nameLocked": {
-            "type": "boolean"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "The type of all the files attached to this series",
+            "format": "int32"
           },
           "sortNameLocked": {
             "type": "boolean"
@@ -13590,13 +14962,17 @@
             "description": "Rating from logged in user. Calculated at API-time.",
             "format": "int32"
           },
-          "userReview": {
-            "type": "string",
-            "description": "Review from logged in user. Calculated at API-time.",
-            "nullable": true
-          },
           "format": {
-            "$ref": "#/components/schemas/MangaFormat"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Represents the format of the file",
+            "format": "int32"
           },
           "created": {
             "type": "string",
@@ -13703,7 +15079,27 @@
             "nullable": true
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Highest Age Rating from all Chapters",
+            "format": "int32"
           },
           "releaseYear": {
             "type": "integer",
@@ -13726,7 +15122,15 @@
             "format": "int32"
           },
           "publicationStatus": {
-            "$ref": "#/components/schemas/PublicationStatus"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "webLinks": {
             "type": "string",
@@ -13907,7 +15311,27 @@
             "nullable": true
           },
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Highest Age Rating from all Chapters",
+            "format": "int32"
           },
           "releaseYear": {
             "type": "integer",
@@ -13930,7 +15354,16 @@
             "format": "int32"
           },
           "publicationStatus": {
-            "$ref": "#/components/schemas/PublicationStatus"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "Publication status of the Series",
+            "format": "int32"
           },
           "webLinks": {
             "type": "string",
@@ -14005,7 +15438,24 @@
             "format": "int32"
           },
           "relationKind": {
-            "$ref": "#/components/schemas/RelationKind"
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13
+            ],
+            "type": "integer",
+            "description": "Represents a relationship between Series",
+            "format": "int32"
           },
           "targetSeries": {
             "$ref": "#/components/schemas/Series"
@@ -14072,7 +15522,14 @@
             "nullable": true
           },
           "mangaReaderMode": {
-            "$ref": "#/components/schemas/ReaderMode"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "The reading mode the main user has as a preference",
+            "format": "int32"
           },
           "numberOfUsers": {
             "type": "integer",
@@ -14148,7 +15605,14 @@
           "mangaReaderPageSplittingModes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PageSplitOption"
+              "enum": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "type": "integer",
+              "format": "int32"
             },
             "description": "A list of Page Split defaults being used on the instance",
             "nullable": true
@@ -14156,7 +15620,13 @@
           "mangaReaderLayoutModes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/LayoutMode"
+              "enum": [
+                1,
+                2,
+                3
+              ],
+              "type": "integer",
+              "format": "int32"
             },
             "description": "A list of Layout Mode defaults being used on the instance",
             "nullable": true
@@ -14204,7 +15674,19 @@
             "format": "int64"
           },
           "encodeMediaAs": {
-            "$ref": "#/components/schemas/EncodeFormat"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "The encoding the server is using to save media",
+            "format": "int32"
+          },
+          "lastReadTime": {
+            "type": "string",
+            "description": "The last user reading progress on the server (in UTC)",
+            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -14273,7 +15755,14 @@
             "nullable": true
           },
           "encodeMediaAs": {
-            "$ref": "#/components/schemas/EncodeFormat"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "The format that should be used when saving media for Kavita",
+            "format": "int32"
           },
           "totalBackups": {
             "type": "integer",
@@ -14417,7 +15906,13 @@
             "description": "Only one theme can have this. Will auto-set this as default for new user accounts"
           },
           "provider": {
-            "$ref": "#/components/schemas/ThemeProvider"
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Where did the theme come from",
+            "format": "int32"
           },
           "created": {
             "type": "string",
@@ -14466,7 +15961,13 @@
             "description": "Only one theme can have this. Will auto-set this as default for new user accounts"
           },
           "provider": {
-            "$ref": "#/components/schemas/ThemeProvider"
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Where did the theme come from",
+            "format": "int32"
           },
           "created": {
             "type": "string",
@@ -14493,23 +15994,20 @@
         "additionalProperties": false,
         "description": "Represents a set of css overrides the user can upload to Kavita and will load into webui"
       },
-      "SortField": {
-        "enum": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "SortOptions": {
         "type": "object",
         "properties": {
           "sortField": {
-            "$ref": "#/components/schemas/SortField"
+            "enum": [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "isAscending": {
             "type": "boolean"
@@ -14574,14 +16072,6 @@
         },
         "additionalProperties": false
       },
-      "ThemeProvider": {
-        "enum": [
-          1,
-          2
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
       "TokenRequestDto": {
         "type": "object",
         "properties": {
@@ -14632,7 +16122,27 @@
         "type": "object",
         "properties": {
           "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              -1
+            ],
+            "type": "integer",
+            "description": "Represents Age Rating for content.",
+            "format": "int32"
           },
           "includeUnknowns": {
             "type": "boolean"
@@ -14668,7 +16178,15 @@
             "type": "string"
           },
           "platform": {
-            "$ref": "#/components/schemas/DevicePlatform"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Platform of the device. If not know, defaults to \"Custom\"",
+            "format": "int32"
           },
           "emailAddress": {
             "minLength": 1,
@@ -14693,6 +16211,7 @@
       },
       "UpdateLibraryDto": {
         "required": [
+          "allowScrobbling",
           "folders",
           "folderWatching",
           "id",
@@ -14715,7 +16234,13 @@
             "type": "string"
           },
           "type": {
-            "$ref": "#/components/schemas/LibraryType"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "folders": {
             "type": "array",
@@ -14740,6 +16265,9 @@
           },
           "manageReadingLists": {
             "type": "boolean"
+          },
+          "allowScrobbling": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -14756,6 +16284,22 @@
             "items": {
               "$ref": "#/components/schemas/LibraryDto"
             },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateLicenseDto": {
+        "type": "object",
+        "properties": {
+          "license": {
+            "type": "string",
+            "description": "License Key received from Kavita+",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "Email registered with Stripe",
             "nullable": true
           }
         },
@@ -15088,10 +16632,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
           "localizedName": {
             "type": "string",
             "nullable": true
@@ -15101,9 +16641,6 @@
             "nullable": true
           },
           "coverImageLocked": {
-            "type": "boolean"
-          },
-          "nameLocked": {
             "type": "boolean"
           },
           "sortNameLocked": {
@@ -15158,11 +16695,6 @@
           "userRating": {
             "type": "integer",
             "format": "int32"
-          },
-          "userReview": {
-            "maxLength": 1000,
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15196,6 +16728,25 @@
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateUserReviewDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tagline": {
+            "maxLength": 120,
+            "type": "string",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -15320,6 +16871,7 @@
           "readerMode",
           "readingDirection",
           "scalingOption",
+          "shareReviews",
           "showScreenHints",
           "swipeToPaginate",
           "theme"
@@ -15327,19 +16879,55 @@
         "type": "object",
         "properties": {
           "readingDirection": {
-            "$ref": "#/components/schemas/ReadingDirection"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
           },
           "scalingOption": {
-            "$ref": "#/components/schemas/ScalingOption"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How should the image be scaled to screen",
+            "format": "int32"
           },
           "pageSplitOption": {
-            "$ref": "#/components/schemas/PageSplitOption"
+            "enum": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: Which side of a split image should we show first",
+            "format": "int32"
           },
           "readerMode": {
-            "$ref": "#/components/schemas/ReaderMode"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How the manga reader should perform paging or reading of the file\r\n<example>\r\nWebtoon uses scrolling to page, LeftRight uses paging by clicking left/right side of reader, UpDown uses paging\r\nby clicking top/bottom sides of reader.\r\n</example>",
+            "format": "int32"
           },
           "layoutMode": {
-            "$ref": "#/components/schemas/LayoutMode"
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "Manga Reader Option: How many pages to display in the reader at once",
+            "format": "int32"
           },
           "emulateBook": {
             "type": "boolean",
@@ -15387,10 +16975,22 @@
             "description": "Book Reader Option: Allows tapping on side of screens to paginate"
           },
           "bookReaderReadingDirection": {
-            "$ref": "#/components/schemas/ReadingDirection"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What direction should the next/prev page buttons go",
+            "format": "int32"
           },
           "bookReaderWritingStyle": {
-            "$ref": "#/components/schemas/WritingStyle"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Book Reader Option: What writing style should be used, horizontal or vertical.",
+            "format": "int32"
           },
           "theme": {
             "$ref": "#/components/schemas/SiteTheme"
@@ -15400,14 +17000,26 @@
             "type": "string"
           },
           "bookReaderLayoutMode": {
-            "$ref": "#/components/schemas/BookPageLayoutMode"
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "bookReaderImmersiveMode": {
             "type": "boolean",
             "description": "Book Reader Option: A flag that hides the menu-ing system behind a click on the screen. This should be used with tap to paginate, but the app doesn't enforce this."
           },
           "globalPageLayoutMode": {
-            "$ref": "#/components/schemas/PageLayoutMode"
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "Global Site Option: If the UI should layout items as Cards or List items",
+            "format": "int32"
           },
           "blurUnreadSummaries": {
             "type": "boolean",
@@ -15424,6 +17036,10 @@
           "collapseSeriesRelationships": {
             "type": "boolean",
             "description": "When showing series, only parent series or series with no relationships will be returned"
+          },
+          "shareReviews": {
+            "type": "boolean",
+            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
           }
         },
         "additionalProperties": false
@@ -15467,6 +17083,57 @@
           }
         },
         "additionalProperties": false
+      },
+      "UserReviewDto": {
+        "type": "object",
+        "properties": {
+          "tagline": {
+            "type": "string",
+            "description": "A tagline for the review",
+            "nullable": true
+          },
+          "body": {
+            "type": "string",
+            "description": "The main review",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "description": "The series this is for",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "description": "The library this series belongs in",
+            "format": "int32"
+          },
+          "username": {
+            "type": "string",
+            "description": "The user who wrote this",
+            "nullable": true
+          },
+          "score": {
+            "type": "integer",
+            "description": "How many upvotes this review has gotten",
+            "format": "int32"
+          },
+          "externalUrl": {
+            "type": "string",
+            "description": "If External, the url of the review",
+            "nullable": true
+          },
+          "isExternal": {
+            "type": "boolean",
+            "description": "Does this review come from an external Source"
+          },
+          "bodyJustText": {
+            "type": "string",
+            "description": "The main body with just text, for review preview",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Represents a User Review for a given Series"
       },
       "Volume": {
         "type": "object",
@@ -15601,15 +17268,6 @@
           }
         },
         "additionalProperties": false
-      },
-      "WritingStyle": {
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "description": "Represents the writing styles for the book-reader",
-        "format": "int32"
       }
     },
     "securitySchemes": {
@@ -15650,6 +17308,10 @@
     {
       "name": "Image",
       "description": "Responsible for servicing up images stored in Kavita for entities"
+    },
+    {
+      "name": "Rating",
+      "description": "Responsible for providing external ratings for Series"
     },
     {
       "name": "Reader",

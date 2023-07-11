@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace API.DTOs;
+#nullable enable
 
 public class ProgressDto
 {

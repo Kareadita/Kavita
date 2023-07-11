@@ -1,4 +1,4 @@
-<app-side-nav-companion-bar >
+<app-side-nav-companion-bar>
     <h2 title>
         <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
         <span>Reading Lists</span>
@@ -14,8 +14,8 @@
     [filteringDisabled]="true"
     >
     <ng-template #cardItem let-item let-position="idx" >
-        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]" 
-            [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)" 
+        <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]"
+            [suppressLibraryLink]="true" [imageUrl]="imageService.getReadingListCoverImage(item.id)"
             (clicked)="handleClick(item)"></app-card-item>
     </ng-template>
 

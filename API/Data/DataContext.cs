@@ -7,6 +7,7 @@ using API.Entities.Enums;
 using API.Entities.Enums.UserPreferences;
 using API.Entities.Interfaces;
 using API.Entities.Metadata;
+using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<Device> Device { get; set; } = null!;
     public DbSet<ServerStatistics> ServerStatistics { get; set; } = null!;
     public DbSet<MediaError> MediaError { get; set; } = null!;
+    public DbSet<ScrobbleEvent> ScrobbleEvent { get; set; } = null!;
+    public DbSet<ScrobbleError> ScrobbleError { get; set; } = null!;
+    public DbSet<ScrobbleHold> ScrobbleHold { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -95,13 +99,17 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.BookReaderWritingStyle)
             .HasDefaultValue(WritingStyle.Horizontal);
 
+        builder.Entity<Library>()
+            .Property(b => b.AllowScrobbling)
+            .HasDefaultValue(true);
+
         builder.Entity<Chapter>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
-            
+
         builder.Entity<Chapter>()
             .Property(b => b.ISBN)
             .HasDefaultValue(string.Empty);

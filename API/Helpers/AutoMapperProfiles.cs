@@ -8,12 +8,15 @@ using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
 using API.DTOs.ReadingLists;
+using API.DTOs.Scrobbling;
 using API.DTOs.Search;
+using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
+using API.Entities.Scrobble;
 using API.Helpers.Converters;
 using AutoMapper;
 
@@ -35,6 +38,28 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
         CreateMap<MediaError, MediaErrorDto>();
+        CreateMap<ScrobbleHold, ScrobbleHoldDto>()
+            .ForMember(dest => dest.LibraryId,
+                opt =>
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.SeriesName,
+                opt =>
+                    opt.MapFrom(src => src.Series.Name));
+
+        CreateMap<ScrobbleEvent, ScrobbleEventDto>()
+            .ForMember(dest => dest.SeriesName,
+            opt =>
+                opt.MapFrom(src => src.Series.Name));
+        CreateMap<AppUserRating, UserReviewDto>()
+            .ForMember(dest => dest.LibraryId,
+                opt =>
+                    opt.MapFrom(src => src.Series.LibraryId))
+            .ForMember(dest => dest.Body,
+                opt =>
+                    opt.MapFrom(src => src.Review))
+            .ForMember(dest => dest.Username,
+                opt =>
+                    opt.MapFrom(src => src.AppUser.UserName));
 
         CreateMap<AppUserProgress, ProgressDto>()
             .ForMember(dest => dest.PageNum,
@@ -129,12 +154,13 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUser, UserDto>()
             .ForMember(dest => dest.AgeRestriction,
-            opt =>
-                opt.MapFrom(src => new AgeRestrictionDto()
-                {
-                    AgeRating = src.AgeRestriction,
-                    IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
-                }));
+                opt =>
+                    opt.MapFrom(src => new AgeRestrictionDto()
+                    {
+                        AgeRating = src.AgeRestriction,
+                        IncludeUnknowns = src.AgeRestrictionIncludeUnknowns
+                    }));
+
         CreateMap<SiteTheme, SiteThemeDto>();
         CreateMap<AppUserPreferences, UserPreferencesDto>()
             .ForMember(dest => dest.Theme,
@@ -152,6 +178,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ReadingList, ReadingListDto>();
         CreateMap<ReadingListItem, ReadingListItemDto>();
+        CreateMap<ScrobbleError, ScrobbleErrorDto>();
 
         CreateMap<Series, SearchResultDto>()
             .ForMember(dest => dest.SeriesId,

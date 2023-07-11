@@ -6,7 +6,7 @@ import {
   inject,
   OnInit
 } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -17,12 +17,19 @@ import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
+import { LibraryTypePipe } from '../../pipe/library-type.pipe';
+import { RouterLink } from '@angular/router';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-manage-library',
-  templateUrl: './manage-library.component.html',
-  styleUrls: ['./manage-library.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-library',
+    templateUrl: './manage-library.component.html',
+    styleUrls: ['./manage-library.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -82,7 +89,7 @@ export class ManageLibraryComponent implements OnInit {
   getLibraries() {
     this.loading = true;
     this.cdRef.markForCheck();
-    this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
+    this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
       this.libraries = [...libraries];
       this.loading = false;
       this.cdRef.markForCheck();

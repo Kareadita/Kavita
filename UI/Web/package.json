@@ -26,7 +26,7 @@
     "@iharbeck/ngx-virtual-scroller": "^16.0.0",
     "@iplab/ngx-file-upload": "^16.0.1",
     "@microsoft/signalr": "^7.0.5",
-    "@ng-bootstrap/ng-bootstrap": "^15.0.0",
+    "@ng-bootstrap/ng-bootstrap": "^15.1.0",
     "@popperjs/core": "^2.11.7",
     "@swimlane/ngx-charts": "^20.1.2",
     "@tweenjs/tween.js": "^20.0.3",

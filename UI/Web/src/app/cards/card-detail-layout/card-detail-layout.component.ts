@@ -1,5 +1,5 @@
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
-import { DOCUMENT } from '@angular/common';
+import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -18,8 +18,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { VirtualScrollerComponent } from '@iharbeck/ngx-virtual-scroller';
-import { Subject } from 'rxjs';
+import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
@@ -30,9 +29,16 @@ import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
+import {LoadingComponent} from "../../shared/loading/loading.component";
+
+import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 
 @Component({
   selector: 'app-card-detail-layout',
+  standalone: true,
+  imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

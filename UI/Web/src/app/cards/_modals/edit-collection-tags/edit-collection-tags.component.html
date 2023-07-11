@@ -4,7 +4,7 @@
     <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
 </div>
 <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" 
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
     orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
         <li [ngbNavItem]="TabID.General">
         <a ngbNavLink>{{TabID.General}}</a>
@@ -13,7 +13,8 @@
                 <div class="row g-0 mb-3">
                     <div class="col-md-8 col-sm-12">
                         <label for="library-name" class="form-label">Name</label>
-                        <input id="library-name" class="form-control" formControlName="title" type="text" [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
+                        <input id="library-name" class="form-control" formControlName="title" type="text"
+                               [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
                         <div id="inviteForm-validations" class="invalid-feedback" *ngIf="collectionTagForm.dirty || collectionTagForm.touched">
                             <div *ngIf="collectionTagForm.get('title')?.errors?.required">
                                 This field is required
@@ -50,14 +51,14 @@
                 <div class="list-group" *ngIf="!isLoading">
                     <h6>Applies to Series</h6>
                     <div class="form-check">
-                        <input id="selectall" type="checkbox" class="form-check-input" 
+                        <input id="selectall" type="checkbox" class="form-check-input"
                             [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
                         <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
                     </div>
                     <ul>
                         <li class="list-group-item" *ngFor="let item of series; let i = index">
                             <div class="form-check">
-                                <input id="series-{{i}}" type="checkbox" class="form-check-input" 
+                                <input id="series-{{i}}" type="checkbox" class="form-check-input"
                                     [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
                                 <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
                             </div>
@@ -79,7 +80,9 @@
         <li [ngbNavItem]="TabID.CoverImage">
             <a ngbNavLink>{{TabID.CoverImage}}</a>
             <ng-template ngbNavContent>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
+                                         (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked"
+                                         (resetClicked)="handleReset()"></app-cover-image-chooser>
             </ng-template>
         </li>
     </ul>

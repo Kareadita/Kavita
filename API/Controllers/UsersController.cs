@@ -71,9 +71,9 @@ public class UsersController : BaseApiController
     }
 
     [HttpGet("has-library-access")]
-    public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
+    public ActionResult<bool> HasLibraryAccess(int libraryId)
     {
-        var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
+        var libs = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
         return Ok(libs.Any(x => x.Id == libraryId));
     }
 
@@ -112,6 +112,7 @@ public class UsersController : BaseApiController
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
+        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 

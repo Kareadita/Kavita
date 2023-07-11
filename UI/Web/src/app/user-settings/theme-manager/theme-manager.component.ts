@@ -14,12 +14,17 @@ import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SiteThemeProviderPipe } from '../_pipes/site-theme-provider.pipe';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-theme-manager',
-  templateUrl: './theme-manager.component.html',
-  styleUrls: ['./theme-manager.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-theme-manager',
+    templateUrl: './theme-manager.component.html',
+    styleUrls: ['./theme-manager.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe]
 })
 export class ThemeManagerComponent {
 

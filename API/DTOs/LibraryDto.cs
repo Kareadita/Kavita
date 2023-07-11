@@ -41,6 +41,11 @@ public class LibraryDto
     /// Include library series in Search
     /// </summary>
     public bool IncludeInSearch { get; set; } = true;
+    /// <summary>
+    /// Should this library allow Scrobble events to emit from it
+    /// </summary>
+    /// <remarks>Scrobbling requires a valid LicenseKey</remarks>
+    public bool AllowScrobbling { get; set; } = true;
     public ICollection<string> Folders { get; init; } = new List<string>();
     /// <summary>
     /// When showing series, only parent series or series with no relationships will be returned

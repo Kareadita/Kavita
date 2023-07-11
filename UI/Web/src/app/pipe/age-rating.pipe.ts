@@ -4,7 +4,8 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 
 @Pipe({
-  name: 'ageRating'
+  name: 'ageRating',
+  standalone: true
 })
 export class AgeRatingPipe implements PipeTransform {
 
@@ -14,7 +15,7 @@ export class AgeRatingPipe implements PipeTransform {
     if (value === undefined || value === null) return of('Unknown');
 
     if (value.hasOwnProperty('title')) {
-      return of((value as AgeRatingDto).title);  
+      return of((value as AgeRatingDto).title);
     }
 
     switch(value) {

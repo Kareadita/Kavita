@@ -5,17 +5,19 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { filter, map, Subject, takeUntil } from 'rxjs';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import { filter, map } from 'rxjs';
 import { NavService } from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule, NgOptimizedImage} from "@angular/common";
 
 
 @Component({
   selector: 'app-side-nav-item',
+  standalone: true,
+  imports: [CommonModule, RouterLink, NgOptimizedImage],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

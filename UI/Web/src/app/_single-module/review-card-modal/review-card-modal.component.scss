@@ -1,0 +1,14 @@
+.img-max-width {
+    hr {
+        border: solid 2px rgba(var(--primary-color), 0.5) !important;
+    }
+
+    img {
+        max-width: 100%;
+        max-height: 800px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+}

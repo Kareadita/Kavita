@@ -37,14 +37,39 @@
         </div>
     </form>
 
-    <ngb-accordion #a="ngbAccordion" [destroyOnHide]="false">
-        <ngb-panel>
-            <ng-template ngbPanelTitle>
-                Media Issues <span class="ms-1" *ngIf="alertCount > 0">({{alertCount}})</span>
-            </ng-template>
-            <ng-template ngbPanelContent>
-                <app-manage-alerts (alertCount)="alertCount = $event"></app-manage-alerts>
-            </ng-template>
-        </ngb-panel>
-    </ngb-accordion>
+    <div class="mt-3" ngbAccordion [destroyOnHide]="false">
+        <div ngbAccordionItem>
+            <h2 ngbAccordionHeader>
+                <button ngbAccordionButton>
+                    Media Issues <span class="ms-1" *ngIf="alertCount > 0">({{alertCount}})</span>
+                </button>
+            </h2>
+            <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                    <ng-template>
+                        <app-manage-alerts (alertCount)="alertCount = $event"></app-manage-alerts>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3" ngbAccordion [destroyOnHide]="false">
+        <div ngbAccordionItem>
+            <h2 ngbAccordionHeader>
+                <button ngbAccordionButton>
+                    Scrobble Issues <span class="ms-1" *ngIf="scrobbleCount > 0">({{scrobbleCount}})</span>
+                </button>
+            </h2>
+            <div ngbAccordionCollapse>
+                <div ngbAccordionBody>
+                    <ng-template>
+                        <app-manage-scrobble-errors (scrobbleCount)="scrobbleCount = $event"></app-manage-scrobble-errors>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>

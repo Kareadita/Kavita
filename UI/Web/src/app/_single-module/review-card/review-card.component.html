@@ -1,0 +1,29 @@
+<div class="card mb-3" style="max-width: 320px; max-height: 160px; height: 160px" (click)="showModal()">
+  <div class="row g-0">
+    <div class="col-md-2 d-none d-md-block">
+      <i class="img-fluid rounded-start fa-solid fa-circle-user profile-image" aria-hidden="true"></i>
+      <div *ngIf="isMyReview" class="my-review">
+            <i class="fa-solid fa-star" aria-hidden="true" title="This is your review"></i>
+            <span class="visually-hidden">This is your review</span>
+      </div>
+    </div>
+    <div class="col-md-10">
+      <div class="card-body">
+        <h6 class="card-title" [title]="review.tagline">
+          <ng-container *ngIf="review.tagline && review.tagline.length > 0; else noTagline">{{review.tagline.substring(0, 29)}}{{review.tagline.length > 29 ? '…' : ''}}</ng-container>
+          <ng-template #noTagline>
+            {{review.isExternal ? 'External Review' : 'Review'}}
+          </ng-template>
+        </h6>
+        <p class="card-text no-images">
+          <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
+        </p>
+      </div>
+      </div>
+
+    <div class="card-footer bg-transparent text-muted">
+      {{(isMyReview ? '' : review.username | defaultValue:'')}}
+      <span style="float: right" *ngIf="review.isExternal">Rating {{review.score}}%</span>
+    </div>
+  </div>
+</div>

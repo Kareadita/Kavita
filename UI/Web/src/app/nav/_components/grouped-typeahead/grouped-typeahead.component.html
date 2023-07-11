@@ -2,7 +2,8 @@
       <div class="typeahead-input" [ngClass]="{'focused': hasFocus}" (click)="onInputFocus($event)">
         <div class="search">
           <input #input [id]="id" type="text" inputmode="search" autocomplete="off" formControlName="typeahead" [placeholder]="placeholder"
-          aria-haspopup="listbox" aria-owns="dropdown" aria-expanded="hasFocus && (grouppedData.persons.length || grouppedData.collections.length || grouppedData.series.length || grouppedData.persons.length || grouppedData.tags.length || grouppedData.genres.length)"
+          aria-haspopup="listbox" aria-owns="dropdown"
+          [attr.aria-expanded]="hasFocus && hasData"
           aria-autocomplete="list" (focusout)="close($event)" (focus)="open($event)" role="search"
           >
           <div class="spinner-border spinner-border-sm" role="status" *ngIf="isLoading">

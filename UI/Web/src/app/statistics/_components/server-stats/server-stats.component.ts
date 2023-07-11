@@ -12,12 +12,25 @@ import { PieDataItem } from '../../_models/pie-data-item';
 import { ServerStatistics } from '../../_models/server-statistics';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { BytesPipe } from '../../../pipe/bytes.pipe';
+import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
+import { CompactNumberPipe } from '../../../pipe/compact-number.pipe';
+import { DayBreakdownComponent } from '../day-breakdown/day-breakdown.component';
+import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
+import { PublicationStatusStatsComponent } from '../publication-status-stats/publication-status-stats.component';
+import { FileBreakdownStatsComponent } from '../file-breakdown-stats/file-breakdown-stats.component';
+import { TopReadersComponent } from '../top-readers/top-readers.component';
+import { StatListComponent } from '../stat-list/stat-list.component';
+import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
+import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
 
 @Component({
-  selector: 'app-server-stats',
-  templateUrl: './server-stats.component.html',
-  styleUrls: ['./server-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-server-stats',
+    templateUrl: './server-stats.component.html',
+    styleUrls: ['./server-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe]
 })
 export class ServerStatsComponent {
 

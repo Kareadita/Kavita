@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 
 @Pipe({
-  name: 'publicationStatus'
+  name: 'publicationStatus',
+  standalone: true
 })
 export class PublicationStatusPipe implements PipeTransform {
 
@@ -13,7 +14,7 @@ export class PublicationStatusPipe implements PipeTransform {
       case PublicationStatus.Completed: return 'Completed';
       case PublicationStatus.Cancelled: return 'Cancelled';
       case PublicationStatus.Ended: return 'Ended';
-      
+
       default: return '';
     }
   }

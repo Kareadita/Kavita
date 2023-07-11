@@ -345,10 +345,6 @@ public class StatisticService : IStatisticService
             .WhereIf(days > 0, x => x.appUserProgresses.LastModified >= DateTime.Now.AddDays(days * -1));
 
 
-        // .Where(p => p.chapter.AvgHoursToRead > 0)
-        // .SumAsync(p =>
-        //     p.chapter.AvgHoursToRead * (p.progress.PagesRead / (1.0f * p.chapter.Pages))))
-
         var results = await query.GroupBy(x => new
             {
                 Day = x.appUserProgresses.LastModified.Date,
@@ -508,16 +504,9 @@ public class StatisticService : IStatisticService
     public async Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds)
     {
         var query = _context.AppUserProgresses
+            .WhereIf(userIds.Any(), p => userIds.Contains(p.AppUserId))
+            .WhereIf(libraryIds.Any(), p => libraryIds.Contains(p.LibraryId))
             .AsSplitQuery();
-
-        if (userIds.Any())
-        {
-            query = query.Where(p => userIds.Contains(p.AppUserId));
-        }
-        if (libraryIds.Any())
-        {
-            query = query.Where(p => libraryIds.Contains(p.LibraryId));
-        }
 
         return (long) Math.Round(await query
             .Join(_context.Chapter,

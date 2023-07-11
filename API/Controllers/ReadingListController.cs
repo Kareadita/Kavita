@@ -20,13 +20,11 @@ namespace API.Controllers;
 public class ReadingListController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
 
-    public ReadingListController(IUnitOfWork unitOfWork, IEventHub eventHub, IReadingListService readingListService)
+    public ReadingListController(IUnitOfWork unitOfWork, IReadingListService readingListService)
     {
         _unitOfWork = unitOfWork;
-        _eventHub = eventHub;
         _readingListService = readingListService;
     }
 

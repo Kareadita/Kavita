@@ -20,9 +20,18 @@ import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import { Volume } from 'src/app/_models/volume';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
+import {CommonModule} from "@angular/common";
+import {ImageComponent} from "../../shared/image/image.component";
+import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
+import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
+import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-list-item',
+  standalone: true,
+  imports: [CommonModule, ReadMoreComponent, ImageComponent, DownloadIndicatorComponent, EntityInfoCardsComponent, CardActionablesComponent, NgbProgressbar, NgbTooltip],
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

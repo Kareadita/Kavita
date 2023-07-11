@@ -104,7 +104,7 @@ public class ThemeService : IThemeService
 
         // if there are no default themes, reselect Dark as default
         var postSaveThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-        if (!postSaveThemes.Any(t => t.IsDefault))
+        if (!postSaveThemes.Exists(t => t.IsDefault))
         {
             var defaultThemeName = Seed.DefaultThemes.Single(t => t.IsDefault).NormalizedName;
             var theme = postSaveThemes.SingleOrDefault(t => t.NormalizedName == defaultThemeName);

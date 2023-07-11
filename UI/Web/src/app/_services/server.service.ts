@@ -15,9 +15,6 @@ export class ServerService {
 
   constructor(private httpClient: HttpClient) { }
 
-  restart() {
-    return this.httpClient.post(this.baseUrl + 'server/restart', {});
-  }
 
   getServerInfo() {
     return this.httpClient.get<ServerInfo>(this.baseUrl + 'server/server-info');
@@ -57,6 +54,10 @@ export class ServerService {
 
   convertMedia() {
     return this.httpClient.post(this.baseUrl + 'server/convert-media', {});
+  }
+
+  bustCache() {
+    return this.httpClient.post(this.baseUrl + 'server/bust-review-and-rec-cache', {});
   }
 
   getMediaErrors() {

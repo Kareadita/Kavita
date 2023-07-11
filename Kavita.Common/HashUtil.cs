@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
+using DeviceId;
+using DeviceId.Components;
+using Kavita.Common.EnvironmentInfo;
 
 namespace Kavita.Common;
 
@@ -7,9 +12,9 @@ public static class HashUtil
 {
     private static string CalculateCrc(string input)
     {
-        uint mCrc = 0xffffffff;
-        byte[] bytes = Encoding.UTF8.GetBytes(input);
-        foreach (byte myByte in bytes)
+        var mCrc = 0xffffffff;
+        var bytes = Encoding.UTF8.GetBytes(input);
+        foreach (var myByte in bytes)
         {
             mCrc ^=  (uint)myByte << 24;
             for (var i = 0; i < 8; i++)
@@ -38,6 +43,35 @@ public static class HashUtil
         return CalculateCrc(seed);
     }
 
+    public static string ServerToken()
+    {
+        var seed = new DeviceIdBuilder()
+            .AddMacAddress()
+            .AddUserName()
+            .AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
+            .AddComponent("OSPlatform", new DeviceIdComponent($"{Environment.OSVersion.Platform}"))
+            .OnWindows(windows => windows
+                .AddSystemUuid()
+                .AddMotherboardSerialNumber()
+                .AddSystemDriveSerialNumber())
+            .OnLinux(linux =>
+            {
+                var osInfo = RunAndCapture("uname", "-a");
+                if (Regex.IsMatch(osInfo, @"\bUnraid\b"))
+                {
+                    var cpuModel = RunAndCapture("lscpu", string.Empty);
+                    var match = Regex.Match(cpuModel, @"Model name:\s+(.+)");
+                    linux.AddComponent("CPUModel", new DeviceIdComponent($"{match.Groups[1].Value.Trim()}"));
+                    return;
+                }
+                linux.AddMotherboardSerialNumber();
+            })
+            .OnMac(mac => mac
+                .AddSystemDriveSerialNumber())
+            .ToString();
+        return CalculateCrc(seed);
+    }
+
     /// <summary>
     /// Generates a unique API key to this server instance
     /// </summary>
@@ -51,5 +85,28 @@ public static class HashUtil
         }
 
         return id.ToString();
+    }
+
+    private static string RunAndCapture(string filename, string args)
+    {
+        var p = new Process
+        {
+            StartInfo =
+            {
+                FileName = filename,
+                Arguments = args,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true
+            }
+        };
+
+        p.Start();
+
+        // To avoid deadlocks, always read the output stream first and then wait.
+        var output = p.StandardOutput.ReadToEnd();
+        p.WaitForExit(1000);
+
+        return output;
     }
 }

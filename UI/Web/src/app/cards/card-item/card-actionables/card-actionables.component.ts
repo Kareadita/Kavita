@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import { take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
+import {CommonModule} from "@angular/common";
+import {DynamicListPipe} from "../../dynamic-list.pipe";
 
 @Component({
   selector: 'app-card-actionables',
+  standalone: true,
+  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -54,7 +58,7 @@ export class CardActionablesComponent implements OnInit {
   }
 
   willRenderAction(action: ActionItem<any>) {
-    return (action.requiresAdmin && this.isAdmin) 
+    return (action.requiresAdmin && this.isAdmin)
         || (action.action === Action.Download && (this.canDownload || this.isAdmin))
         || (!action.requiresAdmin && action.action !== Action.Download);
   }

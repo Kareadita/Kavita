@@ -1,3 +1,10 @@
 .container {
     padding-top: 10px;
 }
+
+.tab:last-child > a {
+    &.active, &::before {
+        background-color: #FFBA15;
+    }
+}
+

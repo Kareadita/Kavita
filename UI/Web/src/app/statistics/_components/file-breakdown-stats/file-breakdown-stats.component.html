@@ -1,4 +1,4 @@
-<div class="dashboard-card-content"> 
+<div class="dashboard-card-content">
     <div class="row g-0 mb-2">
         <div class="col-8">
             <h4><span>Format</span>
@@ -14,16 +14,16 @@
             </form>
         </div>
     </div>
-    
+
     <ng-template #tooltip>Not Classified means Kavita has not scanned some files. This occurs on old files existing prior to v0.7. You may need to run a forced scan via Library settings modal.</ng-template>
-    
-    
+
+
     <ng-container *ngIf="files$ | async as files">
         <ng-container *ngIf="formControl.value; else tableLayout">
             <ngx-charts-advanced-pie-chart [results]="vizData2$ | async"></ngx-charts-advanced-pie-chart>
         </ng-container>
         <ng-template #tableLayout>
-            <table class="table table-light table-striped table-hover table-sm scrollable">
+            <table class="table table-striped table-striped table-hover table-sm scrollable">
                 <thead>
                     <tr>
                         <th scope="col" sortable="extension" (sort)="onSort($event)">
@@ -67,8 +67,8 @@
             </table>
         </ng-template>
     </ng-container>
-    
-    
+
+
 </div>
 
 

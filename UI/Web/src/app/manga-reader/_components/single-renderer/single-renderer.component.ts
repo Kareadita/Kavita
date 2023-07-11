@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,26 +7,27 @@ import {
   inject,
   Inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { combineLatest, filter, map, Observable, of, shareReplay, Subject, takeUntil, tap } from 'rxjs';
+import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReaderService } from 'src/app/_services/reader.service';
 import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
+import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
 
 @Component({
-  selector: 'app-single-renderer',
-  templateUrl: './single-renderer.component.html',
-  styleUrls: ['./single-renderer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-single-renderer',
+    templateUrl: './single-renderer.component.html',
+    styleUrls: ['./single-renderer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, AsyncPipe, SafeStylePipe]
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {
 
@@ -73,22 +74,15 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       takeUntilDestroyed(this.destroyRef)
     );
 
-    this.imageContainerHeight$ = this.readerSettings$.pipe(
-      map(values => values.fitting),
-      map(mode => {
-        if ( mode !== FITTING_OPTION.HEIGHT) return '';
-
-        const readingArea = this.document.querySelector('.reading-area');
-        if (!readingArea) return 'calc(100vh)';
-
-        if (this.currentImage.width - readingArea.scrollWidth > 0) {
-          return 'calc(100vh - 34px)'
-        }
-        return 'calc(100vh)'
-      }),
+    this.imageContainerHeight$ = this.image$.pipe(
       filter(_ => this.isValid()),
+      switchMap(img => {
+        this.cdRef.markForCheck();
+        return this.calculateImageContainerHeight$();
+      }),
       takeUntilDestroyed(this.destroyRef)
     );
+
 
     this.pageNum$.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -146,6 +140,26 @@ export class SingleRendererComponent implements OnInit, ImageRenderer {
       shareReplay(),
       filter(_ => this.isValid()),
       takeUntilDestroyed(this.destroyRef),
+    );
+  }
+
+  private calculateImageContainerHeight$(): Observable<string> {
+    return this.readerSettings$.pipe(
+      map(values => values.fitting),
+      map(mode => {
+        if (mode !== FITTING_OPTION.HEIGHT) return '';
+
+        const readingArea = this.document.querySelector('.reading-area');
+        if (!readingArea) return 'calc(100vh)';
+
+        // If you ever see fit to height and a bit of scrollbar, it's due to currentImage not being ready on first load
+        if (this.currentImage?.width - readingArea.scrollWidth > 0) {
+          // we also need to check if this is FF or Chrome. FF doesn't require the -34px as it doesn't render a scrollbar
+          return 'calc(100vh - 34px)';
+        }
+        return 'calc(100vh)';
+      }),
+      filter(_ => this.isValid())
     );
   }
 

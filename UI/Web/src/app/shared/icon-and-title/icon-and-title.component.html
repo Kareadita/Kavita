@@ -1,5 +1,5 @@
-<div class="d-flex justify-content-center align-self-center align-items-center icon-and-title" [ngClass]="{'clickable': clickable}" [attr.role]="clickable ? 'button' : ''"
-    (click)="handleClick($event)">
+<div class="d-flex justify-content-center align-self-center align-items-center icon-and-title"
+     [ngClass]="{'clickable': clickable}" [attr.role]="clickable ? 'button' : ''" (click)="handleClick($event)">
     <div class="label" *ngIf="label && label.length > 0">
         {{label}}
     </div>

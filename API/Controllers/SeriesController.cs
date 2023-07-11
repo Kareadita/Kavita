@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
@@ -13,10 +14,13 @@ using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -27,14 +31,19 @@ public class SeriesController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISeriesService _seriesService;
+    private readonly IMemoryCache _cache;
+    private readonly ILicenseService _licenseService;
 
 
-    public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, ISeriesService seriesService)
+    public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
+        ISeriesService seriesService, IMemoryCache cache, ILicenseService licenseService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _seriesService = seriesService;
+        _cache = cache;
+        _licenseService = licenseService;
     }
 
     [HttpPost]
@@ -59,7 +68,7 @@ public class SeriesController : BaseApiController
     /// </summary>
     /// <param name="seriesId">Series Id to fetch details for</param>
     /// <returns></returns>
-    /// <exception cref="KavitaException">Throws an exception if the series Id does exist</exception>
+    /// <exception cref="NoContent">Throws an exception if the series Id does exist</exception>
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
@@ -127,6 +136,11 @@ public class SeriesController : BaseApiController
     }
 
 
+    /// <summary>
+    /// Update the user rating for the given series
+    /// </summary>
+    /// <param name="updateSeriesRatingDto"></param>
+    /// <returns></returns>
     [HttpPost("update-rating")]
     public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
     {
@@ -135,24 +149,18 @@ public class SeriesController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Updates the Series
+    /// </summary>
+    /// <param name="updateSeries"></param>
+    /// <returns></returns>
     [HttpPost("update")]
     public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
     {
-        _logger.LogInformation("{UserName} is updating Series {SeriesName}", User.GetUsername(), updateSeries.Name);
-
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
 
         if (series == null) return BadRequest("Series does not exist");
 
-        var seriesExists =
-            await _unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary(updateSeries.Name.Trim(), series.LibraryId,
-                series.Format);
-        if (series.Name != updateSeries.Name && seriesExists)
-        {
-            return BadRequest("A series already exists in this library with this name. Series Names must be unique to a library.");
-        }
-
-        series.Name = updateSeries.Name.Trim();
         series.NormalizedName = series.Name.ToNormalized();
         if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
@@ -162,7 +170,6 @@ public class SeriesController : BaseApiController
         series.LocalizedName = updateSeries.LocalizedName?.Trim();
         series.NormalizedLocalizedName = series.LocalizedName?.ToNormalized();
 
-        series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;
         series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
 
@@ -191,6 +198,13 @@ public class SeriesController : BaseApiController
         return BadRequest("There was an error with updating the series");
     }
 
+    /// <summary>
+    /// Gets all recently added series
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
@@ -209,14 +223,25 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    /// <summary>
+    /// Returns series that were recently updated, like adding or removing a chapter
+    /// </summary>
+    /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, 20));
     }
 
+    /// <summary>
+    /// Returns all series for the library
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpPost("all")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
@@ -316,6 +341,18 @@ public class SeriesController : BaseApiController
     {
         if (await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
         {
+            if (await _licenseService.HasActiveLicense())
+            {
+                _logger.LogDebug("Clearing cache as series weblinks may have changed");
+                _cache.Remove(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                _cache.Remove(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
+                foreach (var userId in allUsers)
+                {
+                    _cache.Remove(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
+                }
+            }
+
             return Ok("Successfully updated");
         }
 
@@ -433,5 +470,7 @@ public class SeriesController : BaseApiController
 
         return BadRequest("There was an issue updating relationships");
     }
+
+
 
 }

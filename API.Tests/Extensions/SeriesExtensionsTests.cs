@@ -12,7 +12,7 @@ namespace API.Tests.Extensions;
 public class SeriesExtensionsTests
 {
     [Fact]
-    public void GetCoverImage_MultipleSpecials_Comics()
+    public void GetCoverImage_MultipleSpecials()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
@@ -29,33 +29,93 @@ public class SeriesExtensionsTests
                 .Build())
             .Build();
 
-        Assert.Equal("Special 1", series.GetCoverImage());
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
 
+        Assert.Equal("Special 1", series.GetCoverImage());
     }
 
     [Fact]
-    public void GetCoverImage_MultipleSpecials_Books()
+    public void GetCoverImage_Volume1Chapter1_Volume2_AndLooseChapters()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
-            .WithVolume(new VolumeBuilder("0")
+            .WithVolume(new VolumeBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
-                    .WithCoverImage("Special 1")
-                    .WithIsSpecial(true)
+                .WithChapter(new ChapterBuilder("13")
+                    .WithCoverImage("Chapter 13")
                     .Build())
-                .WithChapter(new ChapterBuilder(API.Services.Tasks.Scanner.Parser.Parser.DefaultChapter)
-                    .WithCoverImage("Special 2")
-                    .WithIsSpecial(true)
+                .Build())
+
+            .WithVolume(new VolumeBuilder("1")
+                .WithName("Volume 1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithCoverImage("Volume 1 Chapter 1")
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2")
+                .WithName("Volume 2")
+                .WithChapter(new ChapterBuilder("0")
+                    .WithCoverImage("Volume 2")
                     .Build())
                 .Build())
             .Build();
 
-        Assert.Equal("Special 1", series.GetCoverImage());
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
     }
 
     [Fact]
-    public void GetCoverImage_JustChapters_Comics()
+    public void GetCoverImage_JustVolumes()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+
+            .WithVolume(new VolumeBuilder("1")
+                .WithName("Volume 1")
+                .WithChapter(new ChapterBuilder("0")
+                    .WithCoverImage("Volume 1 Chapter 1")
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2")
+                .WithName("Volume 2")
+                .WithChapter(new ChapterBuilder("0")
+                    .WithCoverImage("Volume 2")
+                    .Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("3")
+                .WithName("Volume 3")
+                .WithChapter(new ChapterBuilder("10")
+                    .WithCoverImage("Volume 3 Chapter 10")
+                    .Build())
+                .WithChapter(new ChapterBuilder("11")
+                    .WithCoverImage("Volume 3 Chapter 11")
+                    .Build())
+                .WithChapter(new ChapterBuilder("12")
+                    .WithCoverImage("Volume 3 Chapter 12")
+                    .Build())
+                .Build())
+            .Build();
+
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Volume 1 Chapter 1", series.GetCoverImage());
+    }
+
+    [Fact]
+    public void GetCoverImage_JustSpecials_WithDecimal()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
@@ -81,7 +141,7 @@ public class SeriesExtensionsTests
     }
 
     [Fact]
-    public void GetCoverImage_JustChaptersAndSpecials_Comics()
+    public void GetCoverImage_JustChaptersAndSpecials()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
@@ -89,15 +149,15 @@ public class SeriesExtensionsTests
                 .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 1")
+                    .WithCoverImage("Chapter 2.5")
                     .Build())
                 .WithChapter(new ChapterBuilder("2")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 2")
+                    .WithCoverImage("Chapter 2")
                     .Build())
                 .WithChapter(new ChapterBuilder("0")
                     .WithIsSpecial(true)
-                    .WithCoverImage("Special 3")
+                    .WithCoverImage("Special 1")
                     .Build())
                 .Build())
             .Build();
@@ -107,11 +167,11 @@ public class SeriesExtensionsTests
             vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
         }
 
-        Assert.Equal("Special 2", series.GetCoverImage());
+        Assert.Equal("Chapter 2", series.GetCoverImage());
     }
 
     [Fact]
-    public void GetCoverImage_VolumesChapters_Comics()
+    public void GetCoverImage_VolumesChapters()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
@@ -119,11 +179,11 @@ public class SeriesExtensionsTests
                 .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 1")
+                    .WithCoverImage("Chapter 2.5")
                     .Build())
                 .WithChapter(new ChapterBuilder("2")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 2")
+                    .WithCoverImage("Chapter 2")
                     .Build())
                 .WithChapter(new ChapterBuilder("0")
                     .WithIsSpecial(true)
@@ -148,7 +208,7 @@ public class SeriesExtensionsTests
     }
 
     [Fact]
-    public void GetCoverImage_VolumesChaptersAndSpecials_Comics()
+    public void GetCoverImage_VolumesChaptersAndSpecials()
     {
         var series = new SeriesBuilder("Test 1")
             .WithFormat(MangaFormat.Archive)
@@ -156,15 +216,15 @@ public class SeriesExtensionsTests
                 .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
                 .WithChapter(new ChapterBuilder("2.5")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 1")
+                    .WithCoverImage("Chapter 2.5")
                     .Build())
                 .WithChapter(new ChapterBuilder("2")
                     .WithIsSpecial(false)
-                    .WithCoverImage("Special 2")
+                    .WithCoverImage("Chapter 2")
                     .Build())
                 .WithChapter(new ChapterBuilder("0")
                     .WithIsSpecial(true)
-                    .WithCoverImage("Special 3")
+                    .WithCoverImage("Special 1")
                     .Build())
                 .Build())
             .WithVolume(new VolumeBuilder("1")
@@ -182,6 +242,83 @@ public class SeriesExtensionsTests
         }
 
         Assert.Equal("Volume 1", series.GetCoverImage());
+    }
+
+    [Fact]
+    public void GetCoverImage_VolumesChaptersAndSpecials_Ippo()
+    {
+        var series = new SeriesBuilder("Ippo")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder("0")
+                .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("1426")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 1426")
+                    .Build())
+                .WithChapter(new ChapterBuilder("1425")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 1425")
+                    .Build())
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(true)
+                    .WithCoverImage("Special 1")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 1")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("137")
+                .WithNumber(1)
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 137")
+                    .Build())
+                .Build())
+            .Build();
+
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Volume 1", series.GetCoverImage());
+    }
+
+    [Fact]
+    public void GetCoverImage_VolumesChapters_WhereVolumeIsNot1()
+    {
+        var series = new SeriesBuilder("Test 1")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder("0")
+                .WithName(API.Services.Tasks.Scanner.Parser.Parser.DefaultVolume)
+                .WithChapter(new ChapterBuilder("2.5")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 2.5")
+                    .Build())
+                .WithChapter(new ChapterBuilder("2")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Chapter 2")
+                    .Build())
+                .Build())
+            .WithVolume(new VolumeBuilder("4")
+                .WithNumber(4)
+                .WithChapter(new ChapterBuilder("0")
+                    .WithIsSpecial(false)
+                    .WithCoverImage("Volume 4")
+                    .Build())
+                .Build())
+            .Build();
+
+        foreach (var vol in series.Volumes)
+        {
+            vol.CoverImage = vol.Chapters.MinBy(x => double.Parse(x.Number), ChapterSortComparerZeroFirst.Default)?.CoverImage;
+        }
+
+        Assert.Equal("Chapter 2", series.GetCoverImage());
     }
 
 

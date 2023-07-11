@@ -123,5 +123,10 @@ public enum ServerSettingKey
     /// <remarks>As of v0.7.3 this replaced ConvertCoverToWebP and ConvertBookmarkToWebP</remarks>
     [Description("EncodeMediaAs")]
     EncodeMediaAs = 22,
+    /// <summary>
+    /// A Kavita+ Subscription license key
+    /// </summary>
+    [Description("LicenseKey")]
+    LicenseKey = 23,
 
 }

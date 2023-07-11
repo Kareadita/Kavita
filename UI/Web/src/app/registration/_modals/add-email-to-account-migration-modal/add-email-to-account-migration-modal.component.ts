@@ -1,15 +1,18 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { SafeUrl } from '@angular/platform-browser';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
+import { NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-add-email-to-account-migration-modal',
-  templateUrl: './add-email-to-account-migration-modal.component.html',
-  styleUrls: ['./add-email-to-account-migration-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-add-email-to-account-migration-modal',
+    templateUrl: './add-email-to-account-migration-modal.component.html',
+    styleUrls: ['./add-email-to-account-migration-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, ReactiveFormsModule]
 })
 export class AddEmailToAccountMigrationModalComponent implements OnInit {
 
