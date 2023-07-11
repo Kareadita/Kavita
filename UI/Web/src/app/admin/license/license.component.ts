@@ -99,6 +99,7 @@ export class LicenseComponent implements OnInit {
 
     this.accountService.deleteLicense().subscribe(() => {
       this.resetForm();
+      this.toggleViewMode();
       this.validateLicense();
     });
 
