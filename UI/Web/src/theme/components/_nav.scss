@@ -1,3 +1,7 @@
+.nav {
+  --bs-nav-link-disabled-color: rgb(154 187 219 / 75%);
+}
+
 .nav-link {
     color: var(--nav-link-text-color);
 
@@ -19,11 +23,11 @@
 
 .nav-tabs {
     border-color: var(--nav-tab-border-color);
-    
+
     .nav-link {
         color: var(--nav-link-text-color);
         position: relative;
-        
+
         &.active, &:focus {
             color: var(--nav-tab-active-text-color);
             background-color: var(--nav-tab-bg-color);
@@ -37,7 +41,7 @@
         &.active::before {
             transform: scaleY(1);
         }
-    
+
         &:hover {
             color: var(--nav-tab-hover-text-color);
             background-color: var(--nav-tab-hover-bg-color);
