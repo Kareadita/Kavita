@@ -1643,6 +1643,37 @@
         }
       }
     },
+    "/api/Device/send-series-to": {
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Download/volume-size": {
       "get": {
         "tags": [
@@ -14649,6 +14680,20 @@
         },
         "additionalProperties": false,
         "description": "Represents all Search results for a query"
+      },
+      "SendSeriesToDeviceDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "SendToDeviceDto": {
         "type": "object",
