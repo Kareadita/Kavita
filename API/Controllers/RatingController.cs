@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
-using API.DTOs.SeriesDetail;
 using API.Services.Plus;
+using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace API.Controllers;
 
@@ -20,16 +17,18 @@ public class RatingController : BaseApiController
 {
     private readonly ILicenseService _licenseService;
     private readonly IRatingService _ratingService;
-    private readonly IMemoryCache _cache;
     private readonly ILogger<RatingController> _logger;
-    public const string CacheKey = "rating-";
+    private readonly IEasyCachingProvider _cacheProvider;
+    public const string CacheKey = "rating_";
 
-    public RatingController(ILicenseService licenseService, IRatingService ratingService, IMemoryCache memoryCache, ILogger<RatingController> logger)
+    public RatingController(ILicenseService licenseService, IRatingService ratingService,
+        ILogger<RatingController> logger, IEasyCachingProviderFactory cachingProviderFactory)
     {
         _licenseService = licenseService;
         _ratingService = ratingService;
-        _cache = memoryCache;
         _logger = logger;
+
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
     }
 
     /// <summary>
@@ -47,27 +46,16 @@ public class RatingController : BaseApiController
         }
 
         var cacheKey = CacheKey + seriesId;
-        var setCache = false;
-        IEnumerable<RatingDto> ratings;
-        if (_cache.TryGetValue(cacheKey, out string cachedData))
+        var results = await _cacheProvider.GetAsync<IEnumerable<RatingDto>>(cacheKey);
+        if (results.HasValue)
         {
-            ratings = JsonConvert.DeserializeObject<IEnumerable<RatingDto>>(cachedData);
-        }
-        else
-        {
-            ratings = await _ratingService.GetRatings(seriesId);
-            setCache = true;
+            return Ok(results.Value);
         }
 
-        if (setCache)
-        {
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetSize(1)
-                .SetAbsoluteExpiration(TimeSpan.FromHours(24));
-            _cache.Set(cacheKey, JsonConvert.SerializeObject(ratings), cacheEntryOptions);
-            _logger.LogDebug("Caching external rating for {Key}", cacheKey);
-        }
-
+        var ratings = await _ratingService.GetRatings(seriesId);
+        await _cacheProvider.SetAsync(cacheKey, ratings, TimeSpan.FromHours(24));
+        _logger.LogDebug("Caching external rating for {Key}", cacheKey);
         return Ok(ratings);
+
     }
 }

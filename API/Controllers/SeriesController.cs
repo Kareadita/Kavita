@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -15,12 +14,11 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Plus;
-using Kavita.Common;
+using EasyCaching.Core;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
@@ -31,19 +29,25 @@ public class SeriesController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISeriesService _seriesService;
-    private readonly IMemoryCache _cache;
     private readonly ILicenseService _licenseService;
+    private readonly IEasyCachingProvider _ratingCacheProvider;
+    private readonly IEasyCachingProvider _reviewCacheProvider;
+    private readonly IEasyCachingProvider _recommendationCacheProvider;
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
-        ISeriesService seriesService, IMemoryCache cache, ILicenseService licenseService)
+        ISeriesService seriesService, ILicenseService licenseService,
+        IEasyCachingProviderFactory cachingProviderFactory)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _seriesService = seriesService;
-        _cache = cache;
         _licenseService = licenseService;
+
+        _ratingCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
+        _reviewCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
+        _recommendationCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
     }
 
     [HttpPost]
@@ -344,12 +348,13 @@ public class SeriesController : BaseApiController
             if (await _licenseService.HasActiveLicense())
             {
                 _logger.LogDebug("Clearing cache as series weblinks may have changed");
-                _cache.Remove(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-                _cache.Remove(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+                await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+
                 var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
                 foreach (var userId in allUsers)
                 {
-                    _cache.Remove(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
+                    await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
                 }
             }
 

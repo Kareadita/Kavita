@@ -11,6 +11,7 @@ using API.Helpers.Builders;
 using API.Services;
 using API.Services.Plus;
 using AutoMapper;
+using EasyCaching.Core;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
@@ -26,20 +27,22 @@ public class ReviewController : BaseApiController
     private readonly ILicenseService _licenseService;
     private readonly IMapper _mapper;
     private readonly IReviewService _reviewService;
-    private readonly IMemoryCache _cache;
     private readonly IScrobblingService _scrobblingService;
-    public const string CacheKey = "review-";
+    private readonly IEasyCachingProvider _cacheProvider;
+    public const string CacheKey = "review_";
 
     public ReviewController(ILogger<ReviewController> logger, IUnitOfWork unitOfWork, ILicenseService licenseService,
-        IMapper mapper, IReviewService reviewService, IMemoryCache cache, IScrobblingService scrobblingService)
+        IMapper mapper, IReviewService reviewService, IScrobblingService scrobblingService,
+        IEasyCachingProviderFactory cachingProviderFactory)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
         _licenseService = licenseService;
         _mapper = mapper;
         _reviewService = reviewService;
-        _cache = cache;
         _scrobblingService = scrobblingService;
+
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
     }
 
 
@@ -63,15 +66,26 @@ public class ReviewController : BaseApiController
         var cacheKey = CacheKey + seriesId;
         IEnumerable<UserReviewDto> externalReviews;
         var setCache = false;
-        if (_cache.TryGetValue(cacheKey, out string cachedData))
+
+        var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
+        if (result.HasValue)
         {
-            externalReviews = JsonConvert.DeserializeObject<IEnumerable<UserReviewDto>>(cachedData);
+            externalReviews = result.Value;
         }
         else
         {
             externalReviews = await _reviewService.GetReviewsForSeries(userId, seriesId);
             setCache = true;
         }
+        // if (_cache.TryGetValue(cacheKey, out string cachedData))
+        // {
+        //     externalReviews = JsonConvert.DeserializeObject<IEnumerable<UserReviewDto>>(cachedData);
+        // }
+        // else
+        // {
+        //     externalReviews = await _reviewService.GetReviewsForSeries(userId, seriesId);
+        //     setCache = true;
+        // }
 
         // Fetch external reviews and splice them in
         foreach (var r in externalReviews)
@@ -81,10 +95,11 @@ public class ReviewController : BaseApiController
 
         if (setCache)
         {
-            var cacheEntryOptions = new MemoryCacheEntryOptions()
-                .SetSize(userRatings.Count)
-                .SetAbsoluteExpiration(TimeSpan.FromHours(10));
-            _cache.Set(cacheKey, JsonConvert.SerializeObject(externalReviews), cacheEntryOptions);
+            // var cacheEntryOptions = new MemoryCacheEntryOptions()
+            //     .SetSize(userRatings.Count)
+            //     .SetAbsoluteExpiration(TimeSpan.FromHours(10));
+            //_cache.Set(cacheKey, JsonConvert.SerializeObject(externalReviews), cacheEntryOptions);
+            await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
             _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
         }
 
