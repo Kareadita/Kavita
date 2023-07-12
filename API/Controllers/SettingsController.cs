@@ -191,6 +191,14 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.CacheSize && updateSettingsDto.CacheSize + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.CacheSize + string.Empty;
+                // CacheSize is managed in appSetting.json
+                Configuration.CacheSize = updateSettingsDto.CacheSize;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.IpAddresses && updateSettingsDto.IpAddresses != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;

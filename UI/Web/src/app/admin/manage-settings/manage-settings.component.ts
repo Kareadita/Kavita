@@ -52,6 +52,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
+      this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, []));
@@ -82,6 +83,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
     this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
+    this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize);
     this.settingsForm.markAsPristine();
   }
 
@@ -127,5 +129,5 @@ export class ManageSettingsComponent implements OnInit {
     });
   }
 
-  
+
 }

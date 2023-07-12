@@ -70,6 +70,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.HostName:
                     destination.HostName = row.Value;
                     break;
+                case ServerSettingKey.CacheSize:
+                    destination.CacheSize = long.Parse(row.Value);
+                    break;
             }
         }
 

@@ -137,8 +137,8 @@ export class MetadataFilterComponent implements OnInit {
     });
 
     this.releaseYearRange = new FormGroup({
-      min: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)]),
-      max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999)])
+      min: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999), Validators.maxLength(4), Validators.minLength(4)]),
+      max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999), Validators.maxLength(4), Validators.minLength(4)])
     });
 
     this.readProgressGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {

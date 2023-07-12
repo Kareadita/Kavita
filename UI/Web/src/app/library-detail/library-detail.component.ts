@@ -5,13 +5,11 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { BulkSelectionService } from '../cards/bulk-selection.service';
 import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
 import { SeriesAddedEvent } from '../_models/events/series-added-event';
@@ -39,6 +37,7 @@ import { NgFor, NgIf, DecimalPipe } from '@angular/common';
 import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from '../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {Device} from "../_models/device/device";
 
 @Component({
     selector: 'app-library-detail',
@@ -233,6 +232,8 @@ export class LibraryDetailComponent implements OnInit {
         break;
     }
   }
+
+
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {

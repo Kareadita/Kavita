@@ -79,6 +79,13 @@ public static class ApplicationServiceExtensions
         {
             options.UseInMemory(EasyCacheProfiles.Favicon);
             options.UseInMemory(EasyCacheProfiles.License);
+            options.UseInMemory(EasyCacheProfiles.Library);
+            options.UseInMemory(EasyCacheProfiles.RevokedJwt);
+
+            // KavitaPlus stuff
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
         });
 
         services.AddMemoryCache(options =>

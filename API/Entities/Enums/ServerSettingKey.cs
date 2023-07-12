@@ -128,5 +128,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("LicenseKey")]
     LicenseKey = 23,
+    /// <summary>
+    /// The size in MB for Caching API data
+    /// </summary>
+    [Description("Cache")]
+    CacheSize = 24,
 
 }

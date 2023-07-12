@@ -466,10 +466,11 @@ public class ScrobblingService : IScrobblingService
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
             .Where(l => userId == 0 || userId == l.Id)
             .Select(u => u.Id);
+
+        if (!await _licenseService.HasActiveLicense()) return;
+
         foreach (var uId in userIds)
         {
-            if (!await _licenseService.HasActiveLicense()) continue;
-
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
             foreach (var wtr in wantToRead)
             {
@@ -505,6 +506,7 @@ public class ScrobblingService : IScrobblingService
 
             foreach (var series in seriesWithProgress)
             {
+                if (!libAllowsScrobbling[series.LibraryId]) continue;
                 await ScrobbleReadingUpdate(uId, series.Id);
             }
 
@@ -687,7 +689,10 @@ public class ScrobblingService : IScrobblingService
             _logger.LogDebug("Processing Reading Events: {Count} / {Total}", progressCounter, totalProgress);
             progressCounter++;
             // Check if this media item can even be processed for this user
-            if (!DoesUserHaveProviderAndValid(evt)) continue;
+            if (!DoesUserHaveProviderAndValid(evt))
+            {
+                continue;
+            }
             var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser, license.Value);
             if (count == 0)
             {

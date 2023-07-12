@@ -19,7 +19,7 @@ export class DeviceService {
 
 
   constructor(private httpClient: HttpClient, private accountService: AccountService) {
-    // Ensure we are authenticated before we make an authenticated api call. 
+    // Ensure we are authenticated before we make an authenticated api call.
     this.accountService.currentUser$.subscribe(user => {
       if (!user) {
         this.devicesSource.next([]);
@@ -54,5 +54,9 @@ export class DeviceService {
     return this.httpClient.post(this.baseUrl + 'device/send-to', {deviceId, chapterIds}, TextResonse);
   }
 
-  
+  sendSeriesTo(seriesId: number, deviceId: number) {
+    return this.httpClient.post(this.baseUrl + 'device/send-series-to', {deviceId, seriesId}, TextResonse);
+  }
+
+
 }

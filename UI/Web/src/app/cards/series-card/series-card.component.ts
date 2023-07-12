@@ -21,6 +21,7 @@ import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
 import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../pipe/relationship.pipe";
+import {Device} from "../../_models/device/device";
 
 @Component({
   selector: 'app-series-card',
@@ -119,6 +120,10 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         break;
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series);
+        break;
+      case Action.SendTo:
+        const device = (action._extra!.data as Device);
+        this.actionService.sendSeriesToDevice(series.id, device);
         break;
       default:
         break;

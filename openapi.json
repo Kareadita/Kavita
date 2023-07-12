@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.0"
+    "version": "0.7.4.1"
   },
   "servers": [
     {
@@ -1632,6 +1632,37 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/SendToDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Device/send-series-to": {
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
               }
             }
           }
@@ -14650,6 +14681,20 @@
         "additionalProperties": false,
         "description": "Represents all Search results for a query"
       },
+      "SendSeriesToDeviceDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "SendToDeviceDto": {
         "type": "object",
         "properties": {
@@ -15782,6 +15827,11 @@
             "type": "string",
             "description": "The Host name (ie Reverse proxy domain name) for the server",
             "nullable": true
+          },
+          "cacheSize": {
+            "type": "integer",
+            "description": "The size in MB for Caching API data",
+            "format": "int64"
           }
         },
         "additionalProperties": false
