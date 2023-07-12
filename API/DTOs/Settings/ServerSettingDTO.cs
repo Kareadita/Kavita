@@ -72,4 +72,8 @@ public class ServerSettingDto
     /// The Host name (ie Reverse proxy domain name) for the server
     /// </summary>
     public string HostName { get; set; }
+    /// <summary>
+    /// The size in MB for Caching API data
+    /// </summary>
+    public long CacheSize { get; set; }
 }

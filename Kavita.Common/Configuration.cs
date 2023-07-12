@@ -13,7 +13,7 @@ public static class Configuration
     public const int DefaultHttpPort = 5000;
     public const int DefaultTimeOutSecs = 90;
     public const string DefaultXFrameOptions = "SAMEORIGIN";
-    public const int DefaultCacheMemory = 75;
+    public const long DefaultCacheMemory = 75;
     private static readonly string AppSettingsFilename = Path.Join("config", GetAppSettingFilename());
 
     public static string KavitaPlusApiUrl = "https://plus.kavitareader.com";
@@ -332,6 +332,6 @@ public static class Configuration
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public long Cache { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public string XFrameOrigins { get; set; }
+        public string XFrameOrigins { get; set; } = DefaultXFrameOptions;
     }
 }

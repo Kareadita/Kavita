@@ -15827,6 +15827,11 @@
             "type": "string",
             "description": "The Host name (ie Reverse proxy domain name) for the server",
             "nullable": true
+          },
+          "cacheSize": {
+            "type": "integer",
+            "description": "The size in MB for Caching API data",
+            "format": "int64"
           }
         },
         "additionalProperties": false

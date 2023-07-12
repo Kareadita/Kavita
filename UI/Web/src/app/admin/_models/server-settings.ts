@@ -17,4 +17,5 @@ export interface ServerSettings {
     totalLogs: number;
     enableFolderWatching: boolean;
     hostName: string;
+    cacheSize: number;
 }
