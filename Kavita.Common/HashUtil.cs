@@ -51,9 +51,7 @@ public static class HashUtil
             .AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
             .AddComponent("OSPlatform", new DeviceIdComponent($"{Environment.OSVersion.Platform}"))
             .OnWindows(windows => windows
-                .AddSystemUuid()
-                .AddMotherboardSerialNumber()
-                .AddSystemDriveSerialNumber())
+                .AddProcessorId())
             .OnLinux(linux =>
             {
                 var osInfo = RunAndCapture("uname", "-a");
