@@ -65,7 +65,7 @@ public class LicenseController : BaseApiController
     }
 
     /// <summary>
-    /// Updates server license. Returns true if updated and valid
+    /// Updates server license
     /// </summary>
     /// <remarks>Caches the result</remarks>
     /// <returns></returns>

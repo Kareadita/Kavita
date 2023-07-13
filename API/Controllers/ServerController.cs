@@ -241,7 +241,7 @@ public class ServerController : BaseApiController
 
 
     /// <summary>
-    /// Bust Review and Recommendation Cache
+    /// Bust Kavita+ Cache
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
@@ -250,12 +250,12 @@ public class ServerController : BaseApiController
     {
         _logger.LogInformation("Busting Kavita+ Cache");
         var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
-       await provider.FlushAsync();
-       provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
-       await provider.FlushAsync();
-       provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
-       await provider.FlushAsync();
-       return Ok();
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
+        await provider.FlushAsync();
+        return Ok();
     }
 
 
