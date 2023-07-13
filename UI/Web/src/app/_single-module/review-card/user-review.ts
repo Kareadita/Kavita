@@ -1,3 +1,5 @@
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+
 export interface UserReview {
   seriesId: number;
   libraryId: number;
@@ -8,4 +10,5 @@ export interface UserReview {
   isExternal: boolean;
   bodyJustText?: string;
   externalUrl?: string;
+  provider: ScrobbleProvider;
 }
