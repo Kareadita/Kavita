@@ -133,6 +133,8 @@ public static class Seed
             directoryService.CacheDirectory + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
             DirectoryService.BackupDirectory + string.Empty;
+        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheSize).Value =
+            Configuration.CacheSize + string.Empty;
         await context.SaveChangesAsync();
 
     }

@@ -51,7 +51,7 @@ public class ReviewController : BaseApiController
     /// </summary>
     /// <param name="seriesId"></param>
     [HttpGet]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<IEnumerable<UserReviewDto>>> GetReviews(int seriesId)
     {
         var userId = User.GetUserId();

@@ -24,8 +24,9 @@ import {UtilityService} from "../shared/_services/utility.service";
 import {ReadingList} from "../_models/reading-list";
 
 export enum ScrobbleProvider {
+  Kavita = 0,
   AniList= 1,
-  Mal = 2
+  Mal = 2,
 }
 
 @Injectable({

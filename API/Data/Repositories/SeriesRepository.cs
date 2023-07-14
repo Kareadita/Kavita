@@ -135,8 +135,8 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-
     Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
+    Task<int> GetAverageUserRating(int seriesId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -1656,6 +1656,18 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
+    }
+
+    /// <summary>
+    /// Returns the Average rating for all users within Kavita instance
+    /// </summary>
+    /// <param name="seriesId"></param>
+    public async Task<int> GetAverageUserRating(int seriesId)
+    {
+        var avg = (await _context.AppUserRating
+            .Where(r => r.SeriesId == seriesId)
+            .AverageAsync(r => (int?) r.Rating));
+        return avg.HasValue ? (int) avg.Value : 0;
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

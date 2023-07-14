@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.1"
+    "version": "0.7.4.2"
   },
   "servers": [
     {
@@ -2827,7 +2827,7 @@
         "tags": [
           "License"
         ],
-        "summary": "Updates server license. Returns true if updated and valid",
+        "summary": "Updates server license",
         "description": "Caches the result",
         "requestBody": {
           "content": {
@@ -3940,6 +3940,45 @@
                   "items": {
                     "$ref": "#/components/schemas/RatingDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Rating/overall": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
                 }
               }
             }
@@ -6525,9 +6564,12 @@
             "in": "query",
             "schema": {
               "enum": [
-                1
+                0,
+                1,
+                2
               ],
               "type": "integer",
+              "description": "Misleading name but is the source of data (like a review coming from AniList)",
               "format": "int32"
             }
           }
@@ -8540,7 +8582,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Bust Review and Recommendation Cache",
+        "summary": "Bust Kavita+ Cache",
         "responses": {
           "200": {
             "description": "Success"
@@ -13731,9 +13773,12 @@
           },
           "provider": {
             "enum": [
-              1
+              0,
+              1,
+              2
             ],
             "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           }
         },
@@ -17180,6 +17225,16 @@
             "type": "string",
             "description": "The main body with just text, for review preview",
             "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "If this review is External, which Provider did it come from",
+            "format": "int32"
           }
         },
         "additionalProperties": false,

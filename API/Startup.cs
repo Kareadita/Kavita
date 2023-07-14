@@ -116,7 +116,7 @@ public class Startup
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
-            options.CacheProfiles.Add(ResponseCacheProfiles.Recommendation,
+            options.CacheProfiles.Add(ResponseCacheProfiles.KavitaPlus,
                 new CacheProfile()
                 {
                     Duration = TimeSpan.FromDays(30).Seconds,

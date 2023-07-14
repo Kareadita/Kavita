@@ -100,7 +100,7 @@
         <div class="row g-0 mb-2 mt-3">
           <div class="col-md-4 col-sm-12 pe-2">
             <label for="cache-size" class="form-label">Cache Size</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheSizeTooltip" role="button" tabindex="0"></i>
-            <ng-template #cacheSizeTooltip>The amount of memory allowed for caching heavy APIs. Default is 50MB.</ng-template>
+            <ng-template #cacheSizeTooltip>The amount of memory allowed for caching heavy APIs. Default is 75MB.</ng-template>
             <span class="visually-hidden" id="cache-size-help">The amount of memory allowed for caching heavy APIs. Default is 50MB.</span>
             <input id="cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
                    type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
