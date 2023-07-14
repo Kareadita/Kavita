@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data;
 using API.DTOs;
 using API.Services.Plus;
 using EasyCaching.Core;
@@ -18,15 +20,17 @@ public class RatingController : BaseApiController
     private readonly ILicenseService _licenseService;
     private readonly IRatingService _ratingService;
     private readonly ILogger<RatingController> _logger;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProvider _cacheProvider;
     public const string CacheKey = "rating_";
 
     public RatingController(ILicenseService licenseService, IRatingService ratingService,
-        ILogger<RatingController> logger, IEasyCachingProviderFactory cachingProviderFactory)
+        ILogger<RatingController> logger, IEasyCachingProviderFactory cachingProviderFactory, IUnitOfWork unitOfWork)
     {
         _licenseService = licenseService;
         _ratingService = ratingService;
         _logger = logger;
+        _unitOfWork = unitOfWork;
 
         _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
     }
@@ -37,12 +41,13 @@ public class RatingController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<IEnumerable<RatingDto>>> GetRating(int seriesId)
     {
+
         if (!await _licenseService.HasActiveLicense())
         {
-            return Ok(new List<RatingDto>());
+            return Ok(Enumerable.Empty<RatingDto>());
         }
 
         var cacheKey = CacheKey + seriesId;
@@ -56,6 +61,16 @@ public class RatingController : BaseApiController
         await _cacheProvider.SetAsync(cacheKey, ratings, TimeSpan.FromHours(24));
         _logger.LogDebug("Caching external rating for {Key}", cacheKey);
         return Ok(ratings);
+    }
 
+    [HttpGet("overall")]
+    public async Task<ActionResult<RatingDto>> GetOverallRating(int seriesId)
+    {
+        return Ok(new RatingDto()
+        {
+            Provider = ScrobbleProvider.Kavita,
+            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId),
+            FavoriteCount = 0
+        });
     }
 }

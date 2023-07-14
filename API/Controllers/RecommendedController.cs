@@ -39,7 +39,7 @@ public class RecommendedController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("recommendations")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
     {
         var userId = User.GetUserId();

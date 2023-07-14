@@ -2,3 +2,21 @@
     padding-left: 0px;
     padding-right: 0px;
 }
+
+.sm-popover {
+  width: 150px;
+
+  > .popover-body {
+    padding-top: 0px;
+  }
+}
+
+.md-popover {
+  width: 214px;
+
+  > .popover-body {
+    padding-top: 0px;
+  }
+}
+
+

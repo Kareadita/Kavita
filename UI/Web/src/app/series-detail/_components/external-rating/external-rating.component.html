@@ -1,13 +1,16 @@
 <div class="row">
-  <div class="col-auto custom-col" style="cursor: pointer" [ngbPopover]="popContent"
-       popoverTitle="Series Rating">
+  <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
+       popoverTitle="Your Rating + Overall" popoverClass="md-popover">
     <span class="badge rounded-pill me-1">
       <img class="me-1" ngSrc="assets/images/logo-32.png" width="24" height="24" alt="">
-      {{userRating * 20}}%
+      {{userRating * 20}}
+      <ng-container *ngIf="overallRating > 0; else noOverallRating"> + {{overallRating}}%</ng-container>
+      <ng-template #noOverallRating>%</ng-template>
     </span>
   </div>
 
-  <div class="col-auto custom-col" *ngFor="let rating of ratings">
+  <div class="col-auto custom-col clickable" *ngFor="let rating of ratings" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
+       [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
     <span class="badge rounded-pill me-1">
       <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="">
       {{rating.averageScore}}%
@@ -23,5 +26,9 @@
     <ng-template let-fill="fill" let-index="index">
       <span class="star" [class.filled]="(index < userRating) && userRating > 0">&#9733;</span>
     </ng-template>
-  </ngb-rating>
+  </ngb-rating> {{userRating * 20}}%
+</ng-template>
+
+<ng-template #externalPopContent let-rating="rating">
+  <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
 </ng-template>

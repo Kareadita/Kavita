@@ -2827,7 +2827,7 @@
         "tags": [
           "License"
         ],
-        "summary": "Updates server license. Returns true if updated and valid",
+        "summary": "Updates server license",
         "description": "Caches the result",
         "requestBody": {
           "content": {
@@ -3940,6 +3940,45 @@
                   "items": {
                     "$ref": "#/components/schemas/RatingDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Rating/overall": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
                 }
               }
             }
@@ -8543,7 +8582,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Bust Review and Recommendation Cache",
+        "summary": "Bust Kavita+ Cache",
         "responses": {
           "200": {
             "description": "Success"
