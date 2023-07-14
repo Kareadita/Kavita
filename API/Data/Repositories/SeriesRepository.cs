@@ -14,6 +14,7 @@ using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -757,8 +758,14 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
-        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
-        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(7);
+        var settings = await _context.ServerSetting
+            .Select(x => x)
+            .AsNoTracking()
+            .ToListAsync();
+        var serverSettings = _mapper.Map<ServerSettingDto>(settings);
+
+        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckProgressDays);
+        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckUpdateDays);
 
         var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
             .Where(id => libraryId == 0 || id == libraryId);

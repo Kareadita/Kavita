@@ -182,6 +182,24 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.OnDeckProgressDays && updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.OnDeckProgressDays + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.OnDeckUpdateDays && updateSettingsDto.OnDeckUpdateDays + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.OnDeckUpdateDays + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
+            {
+                setting.Value = updateSettingsDto.TaskScan;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;

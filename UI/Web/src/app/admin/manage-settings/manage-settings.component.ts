@@ -25,10 +25,6 @@ export class ManageSettingsComponent implements OnInit {
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
 
-  get TagBadgeCursor() {
-    return TagBadgeCursor;
-  }
-
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
 
@@ -57,6 +53,8 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, []));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
+      this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
+      this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
       this.serverService.getServerInfo().subscribe(info => {
         if (info.isDocker) {
@@ -84,6 +82,8 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
     this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize);
+    this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays);
+    this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays);
     this.settingsForm.markAsPristine();
   }
 
