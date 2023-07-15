@@ -120,15 +120,17 @@ export class DashboardComponent implements OnInit {
     this.loadRecentlyAddedSeries();
   }
 
-  reloadInProgress(series: Series | boolean) {
-    if (series === true || series === false) {
-      if (!series) {return;}
-    }
-    // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request
-    const seriesObj = (series as Series);
-    if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
-      return;
-    }
+  reloadInProgress(series: Series | number) {
+    // if (typeof series === 'number') {
+    //   this.loadOnDeck();
+    //   return;
+    // }
+    //
+    // // If the update to Series doesn't affect the requirement to be in this stream, then ignore update request
+    // const seriesObj = (series as Series);
+    // if (seriesObj.pagesRead !== seriesObj.pages && seriesObj.pagesRead !== 0) {
+    //   return;
+    // }
 
     this.loadOnDeck();
   }

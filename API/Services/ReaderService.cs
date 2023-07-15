@@ -262,6 +262,7 @@ public class ReaderService : IReaderService
                     BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
+                BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
             }
             else
             {

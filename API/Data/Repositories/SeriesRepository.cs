@@ -138,6 +138,8 @@ public interface ISeriesRepository
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
     Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
     Task<int> GetAverageUserRating(int seriesId);
+    Task RemoveFromOnDeck(int seriesId, int userId);
+    Task ClearOnDeckRemoval(int seriesId, int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -771,9 +773,20 @@ public class SeriesRepository : ISeriesRepository
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
+        // Don't allow any series the user has explicitly removed
+        var onDeckRemovals = _context.AppUserOnDeckRemoval
+            .Where(d => d.AppUserId == userId)
+            .Select(d => d.SeriesId)
+            .AsEnumerable();
+
+        // var onDeckRemovals = _context.AppUser.Where(u => u.Id == userId)
+        //     .SelectMany(u => u.OnDeckRemovals.Select(d => d.Id))
+        //     .AsEnumerable();
+
 
         var query = _context.Series
             .Where(s => usersSeriesIds.Contains(s.Id))
+            .Where(s => !onDeckRemovals.Contains(s.Id))
             .Select(s => new
             {
                 Series = s,
@@ -1675,6 +1688,30 @@ public class SeriesRepository : ISeriesRepository
             .Where(r => r.SeriesId == seriesId)
             .AverageAsync(r => (int?) r.Rating));
         return avg.HasValue ? (int) avg.Value : 0;
+    }
+
+    public async Task RemoveFromOnDeck(int seriesId, int userId)
+    {
+        var existingEntry = await _context.AppUserOnDeckRemoval
+            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .AnyAsync();
+        if (existingEntry) return;
+        _context.AppUserOnDeckRemoval.Add(new AppUserOnDeckRemoval()
+        {
+            SeriesId = seriesId,
+            AppUserId = userId
+        });
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ClearOnDeckRemoval(int seriesId, int userId)
+    {
+        var existingEntry = await _context.AppUserOnDeckRemoval
+            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .FirstOrDefaultAsync();
+        if (existingEntry == null) return;
+        _context.AppUserOnDeckRemoval.Remove(existingEntry);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

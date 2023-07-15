@@ -88,6 +88,10 @@ export enum Action {
    * Import some data into Kavita
    */
   Import = 18,
+  /**
+   * Removes the Series from On Deck inclusion
+   */
+  RemoveFromOnDeck = 19,
 }
 
 export interface ActionItem<T> {
@@ -563,9 +567,7 @@ export class ActionFactoryService {
 
   // Checks the whole tree for the action and returns true if it exists
   public hasAction(actions: Array<ActionItem<any>>, action: Action) {
-    var actionFound = false;
-
-    if (actions.length === 0) return actionFound;
+    if (actions.length === 0) return false;
 
     for (let i = 0; i < actions.length; i++)
     {
@@ -573,8 +575,7 @@ export class ActionFactoryService {
       if (this.hasAction(actions[i].children, action)) return true;
     }
 
-
-    return actionFound;
+    return false;
   }
 
 }

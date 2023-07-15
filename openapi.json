@@ -7749,6 +7749,30 @@
         }
       }
     },
+    "/api/Series/remove-from-on-deck": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Removes a series from displaying on deck until the next read event on that series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Series/refresh-metadata": {
       "post": {
         "tags": [

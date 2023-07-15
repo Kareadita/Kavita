@@ -285,6 +285,18 @@ public class SeriesController : BaseApiController
     }
 
     /// <summary>
+    /// Removes a series from displaying on deck until the next read event on that series
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpPost("remove-from-on-deck")]
+    public async Task<ActionResult> RemoveFromOnDeck([FromQuery] int seriesId)
+    {
+        await _unitOfWork.SeriesRepository.RemoveFromOnDeck(seriesId, User.GetUserId());
+        return Ok();
+    }
+
+    /// <summary>
     /// Runs a Cover Image Generation task
     /// </summary>
     /// <param name="refreshSeriesDto"></param>
