@@ -164,7 +164,7 @@ public class ScannerService : IScannerService
 
         var libraries = (await _unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
-        var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).SingleOrDefault(f => f.Contains(parentDirectory));
+        var libraryFolder = libraryFolders.Select(Scanner.Parser.Parser.NormalizePath).FirstOrDefault(f => f.Contains(parentDirectory));
 
         if (string.IsNullOrEmpty(libraryFolder)) return;
         var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
