@@ -18,4 +18,6 @@ export interface ServerSettings {
     enableFolderWatching: boolean;
     hostName: string;
     cacheSize: number;
+    onDeckProgressDays: number;
+    onDeckUpdateDays: number;
 }

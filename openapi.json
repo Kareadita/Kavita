@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.2"
+    "version": "0.7.4.3"
   },
   "servers": [
     {
@@ -7745,6 +7745,30 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Series/remove-from-on-deck": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Removes a series from displaying on deck until the next read event on that series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -15877,6 +15901,16 @@
             "type": "integer",
             "description": "The size in MB for Caching API data",
             "format": "int64"
+          },
+          "onDeckProgressDays": {
+            "type": "integer",
+            "description": "How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically",
+            "format": "int32"
+          },
+          "onDeckUpdateDays": {
+            "type": "integer",
+            "description": "How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically",
+            "format": "int32"
           }
         },
         "additionalProperties": false

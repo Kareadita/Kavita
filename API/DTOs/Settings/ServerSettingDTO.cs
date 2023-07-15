@@ -76,4 +76,12 @@ public class ServerSettingDto
     /// The size in MB for Caching API data
     /// </summary>
     public long CacheSize { get; set; }
+    /// <summary>
+    /// How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    public int OnDeckProgressDays { get; set; }
+    /// <summary>
+    /// How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    public int OnDeckUpdateDays { get; set; }
 }

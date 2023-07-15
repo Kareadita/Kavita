@@ -37,6 +37,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public ICollection<Device> Devices { get; set; } = null!;
     /// <summary>
+    /// A list of Series the user doesn't want on deck
+    /// </summary>
+    //public ICollection<Series> OnDeckRemovals { get; set; } = null!;
+    /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
     public string? ApiKey { get; set; }

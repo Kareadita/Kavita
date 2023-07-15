@@ -114,6 +114,38 @@
               </p>
             </ng-container>
           </div>
+          <div class="col-md-4 col-sm-12 pe-2">
+            <label for="on-deck-progress-days" class="form-label">On Deck Last Progress (days)</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="onDeckProgressDaysTooltip" role="button" tabindex="0"></i>
+            <ng-template #onDeckProgressDaysTooltip>The number of days since last progress before kicking something off On Deck.</ng-template>
+            <span class="visually-hidden" id="on-deck-progress-days-help">The number of days since last progress before kicking something off On Deck.</span>
+            <input id="on-deck-progress-days" aria-describedby="on-deck-progress-days-help" class="form-control" formControlName="onDeckProgressDays"
+                   type="number" inputmode="numeric" step="1" min="1"
+                   [class.is-invalid]="settingsForm.get('onDeckProgressDays')?.invalid && settingsForm.get('onDeckProgressDays')?.touched">
+            <ng-container *ngIf="settingsForm.get('onDeckProgressDays')?.errors as errors">
+              <p class="invalid-feedback" *ngIf="errors.min">
+                Must be at least 1 day
+              </p>
+              <p class="invalid-feedback" *ngIf="errors.required">
+                This field is required
+              </p>
+            </ng-container>
+          </div>
+          <div class="col-md-4 col-sm-12 pe-2">
+            <label for="on-deck-update-days" class="form-label">On Deck Last Chapter Add (days)</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="onDeckUpdateDaysTooltip" role="button" tabindex="0"></i>
+            <ng-template #onDeckUpdateDaysTooltip>The number of days since last chapter was added to include something On Deck.</ng-template>
+            <span class="visually-hidden" id="on-deck-update-days-help">The number of days since last chapter was added to include something On Deck.</span>
+            <input id="on-deck-update-days" aria-describedby="on-deck-update-days-help" class="form-control" formControlName="onDeckUpdateDays"
+                   type="number" inputmode="numeric" step="1" min="1"
+                   [class.is-invalid]="settingsForm.get('onDeckUpdateDays')?.invalid && settingsForm.get('onDeckUpdateDays')?.touched">
+            <ng-container *ngIf="settingsForm.get('onDeckUpdateDays')?.errors as errors">
+              <p class="invalid-feedback" *ngIf="errors.min">
+                Must be at least 1 day
+              </p>
+              <p class="invalid-feedback" *ngIf="errors.required">
+                This field is required
+              </p>
+            </ng-container>
+          </div>
         </div>
 
         <div class="mb-3 mt-3">
@@ -125,7 +157,6 @@
           </div>
         </div>
 
-        <!-- TODO: Move this to Plugins tab once we build out some basic tables -->
         <div class="mb-3">
             <label for="opds" aria-describedby="opds-info" class="form-label">OPDS</label>
             <p class="accent" id="opds-info">OPDS support will allow all users to use OPDS to read and download content from the server.</p>

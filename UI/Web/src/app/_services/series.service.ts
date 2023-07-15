@@ -226,4 +226,8 @@ export class SeriesService {
   getOverallRating(seriesId: number) {
     return this.httpClient.get<Rating>(this.baseUrl + 'rating/overall?seriesId=' + seriesId);
   }
+
+  removeFromOnDeck(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + 'series/remove-from-on-deck?seriesId=' + seriesId, {});
+  }
 }

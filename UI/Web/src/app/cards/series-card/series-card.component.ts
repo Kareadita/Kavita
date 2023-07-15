@@ -8,16 +8,16 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { Series } from 'src/app/_models/series';
-import { ImageService } from 'src/app/_services/image.service';
-import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
-import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
+import {Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {Series} from 'src/app/_models/series';
+import {ImageService} from 'src/app/_services/image.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series-modal.component';
+import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
 import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../pipe/relationship.pipe";
@@ -47,6 +47,10 @@ export class SeriesCardComponent implements OnInit, OnChanges {
    * If the Series has a relationship to display
    */
   @Input() relation: RelationKind | undefined = undefined;
+  /**
+   * When a series card is shown on deck, a special actionable is added to the list
+   */
+  @Input() isOnDeck: boolean = false;
 
   @Output() clicked = new EventEmitter<Series>();
   /**
@@ -79,6 +83,19 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   ngOnChanges(changes: any) {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
+      if (this.isOnDeck) {
+        const othersIndex = this.actions.findIndex(obj => obj.title === 'Others');
+        if (this.actions[othersIndex].children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
+          this.actions[othersIndex].children.push({
+            action: Action.RemoveFromOnDeck,
+            title: 'Remove From On Deck',
+            callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
+            class: 'danger',
+            requiresAdmin: false,
+            children: [],
+          });
+        }
+      }
       this.cdRef.markForCheck();
     }
   }
@@ -124,6 +141,9 @@ export class SeriesCardComponent implements OnInit, OnChanges {
       case Action.SendTo:
         const device = (action._extra!.data as Device);
         this.actionService.sendSeriesToDevice(series.id, device);
+        break;
+      case Action.RemoveFromOnDeck:
+        this.seriesService.removeFromOnDeck(series.id).subscribe(() => this.reload.emit(series.id));
         break;
       default:
         break;
