@@ -284,7 +284,7 @@ public static class Configuration
             var json = File.ReadAllText(filePath);
             var jsonObj = JsonSerializer.Deserialize<AppSettings>(json);
 
-            return jsonObj.Cache;
+            return jsonObj.Cache == 0 ? DefaultCacheMemory : jsonObj.Cache;
         }
         catch (Exception ex)
         {
@@ -324,13 +324,13 @@ public static class Configuration
     {
         public string TokenKey { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public int Port { get; set; }
+        public int Port { get; set; } = DefaultHttpPort;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string IpAddresses { get; set; } = string.Empty;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string BaseUrl { get; set; }
         // ReSharper disable once MemberHidesStaticFromOuterClass
-        public long Cache { get; set; }
+        public long Cache { get; set; } = DefaultCacheMemory;
         // ReSharper disable once MemberHidesStaticFromOuterClass
         public string XFrameOrigins { get; set; } = DefaultXFrameOptions;
     }
