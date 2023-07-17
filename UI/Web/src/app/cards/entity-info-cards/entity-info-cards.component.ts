@@ -23,11 +23,12 @@ import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 import {BytesPipe} from "../../pipe/bytes.pipe";
 import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
 import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-entity-info-cards',
   standalone: true,
-  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe],
+  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
