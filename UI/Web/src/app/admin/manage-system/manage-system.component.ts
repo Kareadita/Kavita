@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
-import { ServerInfo } from '../_models/server-info';
+import {ServerInfoSlim} from '../_models/server-info';
 import { ServerSettings } from '../_models/server-settings';
 import { NgIf } from '@angular/common';
 
@@ -19,10 +19,10 @@ export class ManageSystemComponent implements OnInit {
 
   settingsForm: FormGroup = new FormGroup({});
   serverSettings!: ServerSettings;
-  serverInfo!: ServerInfo;
+  serverInfo!: ServerInfoSlim;
 
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
+  constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
 
   ngOnInit(): void {

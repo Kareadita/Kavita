@@ -45,28 +45,7 @@ public static class HashUtil
 
     public static string ServerToken()
     {
-        var seed = new DeviceIdBuilder()
-            .AddMacAddress()
-            .AddUserName()
-            .AddComponent("ProcessorCount", new DeviceIdComponent($"{Environment.ProcessorCount}"))
-            .AddComponent("OSPlatform", new DeviceIdComponent($"{Environment.OSVersion.Platform}"))
-            .OnWindows(windows => windows
-                .AddProcessorId())
-            .OnLinux(linux =>
-            {
-                var osInfo = RunAndCapture("uname", "-a");
-                if (Regex.IsMatch(osInfo, @"\bUnraid\b"))
-                {
-                    var cpuModel = RunAndCapture("lscpu", string.Empty);
-                    var match = Regex.Match(cpuModel, @"Model name:\s+(.+)");
-                    linux.AddComponent("CPUModel", new DeviceIdComponent($"{match.Groups[1].Value.Trim()}"));
-                    return;
-                }
-                linux.AddMotherboardSerialNumber();
-            })
-            .OnMac(mac => mac.AddSystemDriveSerialNumber())
-            .ToString();
-        return CalculateCrc(seed);
+        return AnonymousToken();
     }
 
     /// <summary>

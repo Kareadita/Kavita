@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ServerInfo } from '../admin/_models/server-info';
+import {ServerInfoSlim} from '../admin/_models/server-info';
 import { UpdateVersionEvent } from '../_models/events/update-version-event';
 import { Job } from '../_models/job/job';
 import { KavitaMediaError } from '../admin/_models/media-error';
@@ -17,7 +17,7 @@ export class ServerService {
 
 
   getServerInfo() {
-    return this.httpClient.get<ServerInfo>(this.baseUrl + 'server/server-info');
+    return this.httpClient.get<ServerInfoSlim>(this.baseUrl + 'server/server-info-slim');
   }
 
   clearCache() {
