@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { Subject } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
@@ -26,7 +32,7 @@ import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EntityInfoCardsComponent implements OnInit, OnDestroy {
+export class EntityInfoCardsComponent implements OnInit {
 
   @Input({required: true}) entity!: Volume | Chapter;
   /**
@@ -49,7 +55,6 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
   size: number = 0;
 
-  private readonly onDestroy: Subject<void> = new Subject();
   imageService = inject(ImageService);
 
   get LibraryType() {
@@ -68,6 +73,8 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     if (this.chapter.webLinks === '') return [];
     return this.chapter.webLinks.split(',');
   }
+
+
 
   constructor(private utilityService: UtilityService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
@@ -119,8 +126,8 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
+  getTimezone(timezone: string): string {
+    const localDate = new Date(timezone);
+    return localDate.toLocaleString('en-US', { timeZoneName: 'short' }).split(' ')[3];
   }
 }

@@ -262,7 +262,6 @@ public class ReaderService : IReaderService
                     BookScrollId = progressDto.BookScrollId
                 });
                 _unitOfWork.UserRepository.Update(userWithProgress);
-                BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
             }
             else
             {
@@ -286,6 +285,8 @@ public class ReaderService : IReaderService
                     // Inform Scrobble service that a chapter is read
                     BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
                 }
+
+                BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
 
                 return true;
             }

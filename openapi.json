@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.3"
+    "version": "0.7.4.4"
   },
   "servers": [
     {
@@ -11736,6 +11736,11 @@
             "format": "int32"
           },
           "lastReadingProgressUtc": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
+          "lastReadingProgress": {
             "type": "string",
             "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"

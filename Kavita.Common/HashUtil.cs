@@ -64,8 +64,7 @@ public static class HashUtil
                 }
                 linux.AddMotherboardSerialNumber();
             })
-            .OnMac(mac => mac
-                .AddSystemDriveSerialNumber())
+            .OnMac(mac => mac.AddSystemDriveSerialNumber())
             .ToString();
         return CalculateCrc(seed);
     }

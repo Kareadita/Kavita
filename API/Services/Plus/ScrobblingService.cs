@@ -188,6 +188,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.Review);
@@ -232,6 +233,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -280,6 +282,7 @@ public class ScrobblingService : IScrobblingService
         }
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -339,6 +342,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);

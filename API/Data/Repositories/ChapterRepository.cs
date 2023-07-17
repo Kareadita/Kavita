@@ -253,11 +253,13 @@ public class ChapterRepository : IChapterRepository
         {
             chapter.PagesRead = progress.PagesRead ;
             chapter.LastReadingProgressUtc = progress.LastModifiedUtc;
+            chapter.LastReadingProgress = progress.LastModified;
         }
         else
         {
             chapter.PagesRead = 0;
             chapter.LastReadingProgressUtc = DateTime.MinValue;
+            chapter.LastReadingProgress = DateTime.MinValue;
         }
 
         return chapter;

@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.Services.Tasks.Scanner.Parser;
+#nullable enable
 
 /// <summary>
 /// This represents all parsed information from a single file
@@ -12,7 +13,7 @@ public class ParserInfo
     /// Represents the parsed chapters from a file. By default, will be 0 which means nothing could be parsed.
     /// <remarks>The chapters can only be a single float or a range of float ie) 1-2. Mainly floats should be multiples of 0.5 representing specials</remarks>
     /// </summary>
-    public string Chapters { get; set; } = "";
+    public string Chapters { get; set; } = string.Empty;
     /// <summary>
     /// Represents the parsed series from the file or folder
     /// </summary>
@@ -31,17 +32,17 @@ public class ParserInfo
     /// <example>Beastars Vol 3-4 will map to "3-4"</example>
     /// <remarks>The volumes can only be a single int or a range of ints ie) 1-2. Float based volumes are not supported.</remarks>
     /// </summary>
-    public string Volumes { get; set; } = "";
+    public string Volumes { get; set; } = string.Empty;
     /// <summary>
     /// Filename of the underlying file
     /// <example>Beastars v01 (digital).cbz</example>
     /// </summary>
-    public string Filename { get; init; } = "";
+    public string Filename { get; init; } = string.Empty;
     /// <summary>
     /// Full filepath of the underlying file
     /// <example>C:/Manga/Beastars v01 (digital).cbz</example>
     /// </summary>
-    public string FullFilePath { get; set; } = "";
+    public string FullFilePath { get; set; } = string.Empty;
 
     /// <summary>
     /// <see cref="MangaFormat"/> that represents the type of the file
@@ -53,7 +54,7 @@ public class ParserInfo
     /// This can potentially story things like "Omnibus, Color, Full Contact Edition, Extra, Final, etc"
     /// </summary>
     /// <remarks>Not Used in Database</remarks>
-    public string Edition { get; set; } = "";
+    public string Edition { get; set; } = string.Empty;
 
     /// <summary>
     /// If the file contains no volume/chapter information or contains Special Keywords <see cref="Parser.MangaSpecialRegex"/>
@@ -72,7 +73,7 @@ public class ParserInfo
     /// <returns></returns>
     public bool IsSpecialInfo()
     {
-        return (IsSpecial || (Volumes == "0" && Chapters == "0"));
+        return (IsSpecial || (Volumes == Parser.DefaultVolume && Chapters == Parser.DefaultChapter));
     }
 
     /// <summary>
@@ -89,8 +90,8 @@ public class ParserInfo
     public void Merge(ParserInfo? info2)
     {
         if (info2 == null) return;
-        Chapters = string.IsNullOrEmpty(Chapters) || Chapters == "0" ? info2.Chapters: Chapters;
-        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == "0" ? info2.Volumes : Volumes;
+        Chapters = string.IsNullOrEmpty(Chapters) || Chapters == Parser.DefaultChapter ? info2.Chapters: Chapters;
+        Volumes = string.IsNullOrEmpty(Volumes) || Volumes == Parser.DefaultVolume ? info2.Volumes : Volumes;
         Edition = string.IsNullOrEmpty(Edition) ? info2.Edition : Edition;
         Title = string.IsNullOrEmpty(Title) ? info2.Title : Title;
         Series = string.IsNullOrEmpty(Series) ? info2.Series : Series;
