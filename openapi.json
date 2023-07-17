@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.4"
+    "version": "0.7.4.5"
   },
   "servers": [
     {
@@ -8360,6 +8360,37 @@
           "Server"
         ],
         "summary": "Returns non-sensitive information about the current system",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Server/server-info-slim": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns non-sensitive information about the current system",
+        "description": "This is just for the UI and is extremly lightweight",
         "responses": {
           "200": {
             "description": "Success",

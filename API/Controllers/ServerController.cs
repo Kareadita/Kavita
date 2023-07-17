@@ -124,6 +124,17 @@ public class ServerController : BaseApiController
         return Ok(await _statsService.GetServerInfo());
     }
 
+    /// <summary>
+    /// Returns non-sensitive information about the current system
+    /// </summary>
+    /// <remarks>This is just for the UI and is extremly lightweight</remarks>
+    /// <returns></returns>
+    [HttpGet("server-info-slim")]
+    public async Task<ActionResult<ServerInfoDto>> GetSlimVersion()
+    {
+        return Ok(await _statsService.GetServerInfoSlim());
+    }
+
 
     /// <summary>
     /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.
