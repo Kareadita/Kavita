@@ -22,9 +22,17 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
+/// <summary>
+/// Misleading name but is the source of data (like a review coming from AniList)
+/// </summary>
 public enum ScrobbleProvider
 {
-    AniList = 1
+    /// <summary>
+    /// For now, this means data comes from within this instance of Kavita
+    /// </summary>
+    Kavita = 0,
+    AniList = 1,
+    Mal = 2,
 }
 
 public interface IScrobblingService
@@ -180,6 +188,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.Review);
@@ -224,6 +233,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -272,6 +282,7 @@ public class ScrobblingService : IScrobblingService
         }
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -331,6 +342,7 @@ public class ScrobblingService : IScrobblingService
         if (series == null) throw new KavitaException("Series not found");
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
+        if (library.Type == LibraryType.Comic) return;
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
@@ -466,10 +478,11 @@ public class ScrobblingService : IScrobblingService
         var userIds = (await _unitOfWork.UserRepository.GetAllUsersAsync())
             .Where(l => userId == 0 || userId == l.Id)
             .Select(u => u.Id);
+
+        if (!await _licenseService.HasActiveLicense()) return;
+
         foreach (var uId in userIds)
         {
-            if (!await _licenseService.HasActiveLicense()) continue;
-
             var wantToRead = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(uId);
             foreach (var wtr in wantToRead)
             {
@@ -505,6 +518,7 @@ public class ScrobblingService : IScrobblingService
 
             foreach (var series in seriesWithProgress)
             {
+                if (!libAllowsScrobbling[series.LibraryId]) continue;
                 await ScrobbleReadingUpdate(uId, series.Id);
             }
 
@@ -687,7 +701,10 @@ public class ScrobblingService : IScrobblingService
             _logger.LogDebug("Processing Reading Events: {Count} / {Total}", progressCounter, totalProgress);
             progressCounter++;
             // Check if this media item can even be processed for this user
-            if (!DoesUserHaveProviderAndValid(evt)) continue;
+            if (!DoesUserHaveProviderAndValid(evt))
+            {
+                continue;
+            }
             var count = await SetAndCheckRateLimit(userRateLimits, evt.AppUser, license.Value);
             if (count == 0)
             {

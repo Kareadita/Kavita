@@ -136,7 +136,8 @@ public class AppUserProgressRepository : IAppUserProgressRepository
     {
         return await _context.AppUserProgresses
             .Select(d => d.LastModifiedUtc)
-            .MaxAsync();
+            .OrderByDescending(d => d)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId)

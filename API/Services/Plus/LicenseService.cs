@@ -130,11 +130,13 @@ public class LicenseService : ILicenseService
     {
         try
         {
+            var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+            if (string.IsNullOrEmpty(license.Value)) return;
+
             _logger.LogInformation("Validating Kavita+ License");
             var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await provider.FlushAsync();
 
-            var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
             var isValid = await IsLicenseValid(license.Value);
             await provider.SetAsync(CacheKey, isValid, _licenseCacheTimeout);
 

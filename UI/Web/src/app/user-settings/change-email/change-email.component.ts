@@ -22,8 +22,6 @@ export class ChangeEmailComponent implements OnInit {
 
   form: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
-  hasChangePasswordAbility: Observable<boolean> = of(false);
-  passwordsMatch = false;
   errors: string[] = [];
   isViewMode: boolean = true;
   emailLink: string = '';

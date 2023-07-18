@@ -286,6 +286,8 @@ public class ReaderService : IReaderService
                     BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, progressDto.SeriesId));
                 }
 
+                BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(progressDto.SeriesId, userId));
+
                 return true;
             }
         }

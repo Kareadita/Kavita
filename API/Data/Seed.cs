@@ -89,10 +89,10 @@ public static class Seed
             },
             new()
             {
-                Key = ServerSettingKey.Port, Value = "5000"
+                Key = ServerSettingKey.Port, Value = Configuration.DefaultHttpPort + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json
             new() {
-                Key = ServerSettingKey.IpAddresses, Value = "0.0.0.0,::"
+                Key = ServerSettingKey.IpAddresses, Value = Configuration.DefaultIpAddresses
             }, // Not used from DB, but DB is sync with appSettings.json
             new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
             new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
@@ -108,6 +108,11 @@ public static class Seed
             new() {Key = ServerSettingKey.HostName, Value = string.Empty},
             new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
             new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
+            new() {Key = ServerSettingKey.OnDeckProgressDays, Value = $"{30}"},
+            new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = $"{7}"},
+            new() {
+                Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
+            }, // Not used from DB, but DB is sync with appSettings.json
         }.ToArray());
 
         foreach (var defaultSetting in DefaultSettings)
@@ -130,7 +135,8 @@ public static class Seed
             directoryService.CacheDirectory + string.Empty;
         context.ServerSetting.First(s => s.Key == ServerSettingKey.BackupDirectory).Value =
             DirectoryService.BackupDirectory + string.Empty;
-
+        context.ServerSetting.First(s => s.Key == ServerSettingKey.CacheSize).Value =
+            Configuration.CacheSize + string.Empty;
         await context.SaveChangesAsync();
 
     }

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.0"
+    "version": "0.7.4.5"
   },
   "servers": [
     {
@@ -1643,6 +1643,37 @@
         }
       }
     },
+    "/api/Device/send-series-to": {
+      "post": {
+        "tags": [
+          "Device"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendSeriesToDeviceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Download/volume-size": {
       "get": {
         "tags": [
@@ -2796,7 +2827,7 @@
         "tags": [
           "License"
         ],
-        "summary": "Updates server license. Returns true if updated and valid",
+        "summary": "Updates server license",
         "description": "Caches the result",
         "requestBody": {
           "content": {
@@ -3909,6 +3940,45 @@
                   "items": {
                     "$ref": "#/components/schemas/RatingDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Rating/overall": {
+      "get": {
+        "tags": [
+          "Rating"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingDto"
                 }
               }
             }
@@ -6494,9 +6564,12 @@
             "in": "query",
             "schema": {
               "enum": [
-                1
+                0,
+                1,
+                2
               ],
               "type": "integer",
+              "description": "Misleading name but is the source of data (like a review coming from AniList)",
               "format": "int32"
             }
           }
@@ -7676,6 +7749,30 @@
         }
       }
     },
+    "/api/Series/remove-from-on-deck": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Removes a series from displaying on deck until the next read event on that series",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Series/refresh-metadata": {
       "post": {
         "tags": [
@@ -8287,6 +8384,37 @@
         }
       }
     },
+    "/api/Server/server-info-slim": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns non-sensitive information about the current system",
+        "description": "This is just for the UI and is extremly lightweight",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/convert-media": {
       "post": {
         "tags": [
@@ -8509,7 +8637,7 @@
         "tags": [
           "Server"
         ],
-        "summary": "Bust Review and Recommendation Cache",
+        "summary": "Bust Kavita+ Cache",
         "responses": {
           "200": {
             "description": "Success"
@@ -11643,6 +11771,11 @@
             "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
           },
+          "lastReadingProgress": {
+            "type": "string",
+            "description": "The last time a chapter was read by current authenticated user",
+            "format": "date-time"
+          },
           "coverImageLocked": {
             "type": "boolean",
             "description": "If the Cover Image is locked for this entity"
@@ -13700,9 +13833,12 @@
           },
           "provider": {
             "enum": [
-              1
+              0,
+              1,
+              2
             ],
             "type": "integer",
+            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           }
         },
@@ -14649,6 +14785,20 @@
         },
         "additionalProperties": false,
         "description": "Represents all Search results for a query"
+      },
+      "SendSeriesToDeviceDto": {
+        "type": "object",
+        "properties": {
+          "deviceId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "SendToDeviceDto": {
         "type": "object",
@@ -15782,6 +15932,21 @@
             "type": "string",
             "description": "The Host name (ie Reverse proxy domain name) for the server",
             "nullable": true
+          },
+          "cacheSize": {
+            "type": "integer",
+            "description": "The size in MB for Caching API data",
+            "format": "int64"
+          },
+          "onDeckProgressDays": {
+            "type": "integer",
+            "description": "How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically",
+            "format": "int32"
+          },
+          "onDeckUpdateDays": {
+            "type": "integer",
+            "description": "How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -17130,6 +17295,16 @@
             "type": "string",
             "description": "The main body with just text, for review preview",
             "nullable": true
+          },
+          "provider": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "If this review is External, which Provider did it come from",
+            "format": "int32"
           }
         },
         "additionalProperties": false,

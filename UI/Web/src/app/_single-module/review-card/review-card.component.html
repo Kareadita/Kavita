@@ -19,9 +19,15 @@
           <app-read-more [text]="(review.isExternal ? review.bodyJustText : review.body) || ''" [maxLength]="100" [showToggle]="false"></app-read-more>
         </p>
       </div>
-      </div>
+    </div>
 
     <div class="card-footer bg-transparent text-muted">
+      <ng-container *ngIf="isMyReview; else normalReview">
+        <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" title="This is your review"></i>
+      </ng-container>
+      <ng-template #normalReview>
+        <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
+      </ng-template>
       {{(isMyReview ? '' : review.username | defaultValue:'')}}
       <span style="float: right" *ngIf="review.isExternal">Rating {{review.score}}%</span>
     </div>

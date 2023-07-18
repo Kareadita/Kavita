@@ -128,5 +128,20 @@ public enum ServerSettingKey
     /// </summary>
     [Description("LicenseKey")]
     LicenseKey = 23,
+    /// <summary>
+    /// The size in MB for Caching API data
+    /// </summary>
+    [Description("Cache")]
+    CacheSize = 24,
+    /// <summary>
+    /// How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    [Description("OnDeckProgressDays")]
+    OnDeckProgressDays = 25,
+    /// <summary>
+    /// How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically
+    /// </summary>
+    [Description("OnDeckUpdateDays")]
+    OnDeckUpdateDays = 26,
 
 }

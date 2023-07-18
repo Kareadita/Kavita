@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Jobs;
 using API.DTOs.MediaErrors;
@@ -13,6 +14,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using EasyCaching.Core;
 using Hangfire;
 using Hangfire.Storage;
 using Kavita.Common;
@@ -38,12 +40,12 @@ public class ServerController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IEasyCachingProviderFactory _cachingProviderFactory;
 
     public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IMemoryCache memoryCache)
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory)
     {
         _logger = logger;
         _backupService = backupService;
@@ -55,7 +57,7 @@ public class ServerController : BaseApiController
         _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
-        _memoryCache = memoryCache;
+        _cachingProviderFactory = cachingProviderFactory;
     }
 
     /// <summary>
@@ -120,6 +122,17 @@ public class ServerController : BaseApiController
     public async Task<ActionResult<ServerInfoDto>> GetVersion()
     {
         return Ok(await _statsService.GetServerInfo());
+    }
+
+    /// <summary>
+    /// Returns non-sensitive information about the current system
+    /// </summary>
+    /// <remarks>This is just for the UI and is extremly lightweight</remarks>
+    /// <returns></returns>
+    [HttpGet("server-info-slim")]
+    public async Task<ActionResult<ServerInfoDto>> GetSlimVersion()
+    {
+        return Ok(await _statsService.GetServerInfoSlim());
     }
 
 
@@ -239,14 +252,20 @@ public class ServerController : BaseApiController
 
 
     /// <summary>
-    /// Bust Review and Recommendation Cache
+    /// Bust Kavita+ Cache
     /// </summary>
     /// <returns></returns>
     [Authorize("RequireAdminRole")]
     [HttpPost("bust-review-and-rec-cache")]
-    public ActionResult BustReviewAndRecCache()
+    public async Task<ActionResult> BustReviewAndRecCache()
     {
-        _memoryCache.Clear();
+        _logger.LogInformation("Busting Kavita+ Cache");
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
+        await provider.FlushAsync();
         return Ok();
     }
 

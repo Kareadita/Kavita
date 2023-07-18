@@ -56,44 +56,44 @@
     }
 
     .btn {
-        text-decoration: none;
-        color: hsla(0,0%,100%,.7);
-        height: 25px;
-        text-align: center;
-        -webkit-tap-highlight-color: transparent;
-        background: none;
-        border: 0;
-        border-radius: 0;
-        cursor: pointer;
-        line-height: inherit;
-        margin: 0;
-        outline: none;
-        padding: 0;
-        text-align: inherit;
-        text-decoration: none;
-        touch-action: manipulation;
-        transition: color .2s;
-        -webkit-user-select: none;
-        user-select: none;
+      text-decoration: none;
+      color: hsla(0,0%,100%,.7);
+      height: 25px;
+      text-align: center;
+      padding: 0px 5px;
+      -webkit-tap-highlight-color: transparent;
+      background: none;
+      border: 0;
+      border-radius: 0;
+      cursor: pointer;
+      line-height: inherit;
+      margin: 0;
+      outline: none;
+      text-align: inherit;
+      text-decoration: none;
+      touch-action: manipulation;
+      transition: color .2s;
+      -webkit-user-select: none;
+      user-select: none;
 
-        &:hover {
-            color: var(--primary-color);
-        }
+      &:hover {
+        color: var(--primary-color);
+      }
 
-        .active {
-            font-weight: bold;
-        }
+      .active {
+        font-weight: bold;
+      }
 
-        &.disabled {
-            color: lightgrey;
-            cursor: not-allowed;
-        }
-    }
+      &.disabled {
+        color: lightgrey;
+        cursor: not-allowed;
+      }
+  }
 }
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  //height: calc(100vh - 160px); // 64 is a random number, 523 for me. 
+  //height: calc(100vh - 160px); // 64 is a random number, 523 for me.
   height: calc(var(--vh) * 100 - 173px);
   //height: calc(100vh - 160px);
   //background-color: red;

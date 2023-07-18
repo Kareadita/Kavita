@@ -15,7 +15,8 @@
 
 <app-carousel-reel [items]="inProgress" title="On Deck" (sectionClick)="handleSectionClick($event)">
     <ng-template #carouselItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress(item)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" [isOnDeck]="true"
+                         (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
     </ng-template>
 </app-carousel-reel>
 

@@ -94,5 +94,14 @@
                 </app-icon-and-title>
             </div>
         </ng-container>
+
+        <ng-container *ngIf="(chapter.lastReadingProgress | date: 'shortDate') !== '1/1/01'">
+          <div class="vr d-none d-lg-block m-2"></div>
+          <div class="col-auto">
+            <app-icon-and-title label="Last Read" [clickable]="false" fontClasses="fa-regular fa-clock" [ngbTooltip]="chapter.lastReadingProgress | date: 'medium'">
+              {{chapter.lastReadingProgress | date: 'shortDate'}}
+            </app-icon-and-title>
+          </div>
+        </ng-container>
     </ng-container>
 </div>

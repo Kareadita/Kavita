@@ -645,13 +645,13 @@ public class BookService : IBookService
         return Parser.CleanAuthor(person.Creator) + ",";
     }
 
-    private static (int year, int month, int day) GetPublicationDate(string publicationDate)
+    private static (int year, int month, int day) GetPublicationDate(string? publicationDate)
     {
-        var dateParsed = DateTime.TryParse(publicationDate, out var date);
         var year = 0;
         var month = 0;
         var day = 0;
-        switch (dateParsed)
+        if (string.IsNullOrEmpty(publicationDate)) return (year, month, day);
+        switch (DateTime.TryParse(publicationDate, out var date))
         {
             case true:
                 year = date.Year;

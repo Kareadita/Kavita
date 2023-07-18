@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -40,6 +41,9 @@ public class RatingService : IRatingService
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
             SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.Chapters | SeriesIncludes.Volumes);
+
+        // Don't send any ratings back for Comic libraries as Kavita+ doesn't have any providers for that
+        if (series == null || series.Library.Type == LibraryType.Comic) return ImmutableList<RatingDto>.Empty;
         return await GetRatings(license.Value, series);
     }
 

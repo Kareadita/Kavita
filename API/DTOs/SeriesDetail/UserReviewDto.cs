@@ -1,4 +1,6 @@
-﻿namespace API.DTOs.SeriesDetail;
+﻿using API.Services.Plus;
+
+namespace API.DTOs.SeriesDetail;
 
 /// <summary>
 /// Represents a User Review for a given Series
@@ -48,4 +50,9 @@ public class UserReviewDto
     /// The main body with just text, for review preview
     /// </summary>
     public string? BodyJustText { get; set; }
+
+    /// <summary>
+    /// If this review is External, which Provider did it come from
+    /// </summary>
+    public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
 }

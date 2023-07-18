@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {UserReview} from "./user-review";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ReviewCardModalComponent} from "../review-card-modal/review-card-modal.component";
@@ -7,11 +7,13 @@ import {AccountService} from "../../_services/account.service";
 import {ReviewSeriesModalComponent} from "../review-series-modal/review-series-modal.component";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {ImageComponent} from "../../shared/image/image.component";
+import {ProviderImagePipe} from "../../pipe/provider-image.pipe";
 
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe],
+  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

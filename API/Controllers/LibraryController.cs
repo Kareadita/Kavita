@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
@@ -18,11 +18,10 @@ using API.Services;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using AutoMapper;
+using EasyCaching.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -37,12 +36,13 @@ public class LibraryController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IEasyCachingProvider _libraryCacheProvider;
     private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
-        IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher, IMemoryCache memoryCache)
+        IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher,
+        IEasyCachingProviderFactory cachingProviderFactory)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -51,7 +51,8 @@ public class LibraryController : BaseApiController
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
-        _memoryCache = memoryCache;
+
+        _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
     }
 
     /// <summary>
@@ -102,7 +103,7 @@ public class LibraryController : BaseApiController
         _taskScheduler.ScanLibrary(library.Id);
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
-        _memoryCache.RemoveByPrefix(CacheKey);
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
         return Ok();
     }
 
@@ -134,23 +135,19 @@ public class LibraryController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet]
-    public ActionResult<IEnumerable<LibraryDto>> GetLibraries()
+    public async Task<ActionResult<IEnumerable<LibraryDto>>> GetLibraries()
     {
         var username = User.GetUsername();
         if (string.IsNullOrEmpty(username)) return Unauthorized();
 
         var cacheKey = CacheKey + username;
-        if (_memoryCache.TryGetValue(cacheKey, out string cachedValue))
-        {
-            return Ok(JsonConvert.DeserializeObject<IEnumerable<LibraryDto>>(cachedValue));
-        }
+        var result = await _libraryCacheProvider.GetAsync<IEnumerable<LibraryDto>>(cacheKey);
+        if (result.HasValue) return Ok(result.Value);
 
         var ret = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(username);
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSize(1)
-            .SetAbsoluteExpiration(TimeSpan.FromHours(24));
-        _memoryCache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
+        await _libraryCacheProvider.SetAsync(CacheKey, ret, TimeSpan.FromHours(24));
         _logger.LogDebug("Caching libraries for {Key}", cacheKey);
+
         return Ok(ret);
     }
 
@@ -211,7 +208,7 @@ public class LibraryController : BaseApiController
         {
             _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
             // Bust cache
-            _memoryCache.RemoveByPrefix(CacheKey);
+            await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
             return Ok(_mapper.Map<MemberDto>(user));
         }
 
@@ -334,7 +331,7 @@ public class LibraryController : BaseApiController
 
             await _unitOfWork.CommitAsync();
 
-            _memoryCache.RemoveByPrefix(CacheKey);
+            await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
             if (chapterIds.Any())
             {
@@ -433,7 +430,7 @@ public class LibraryController : BaseApiController
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "update"), false);
 
-        _memoryCache.RemoveByPrefix(CacheKey);
+        await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
 
         return Ok();
 

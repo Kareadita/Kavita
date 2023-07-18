@@ -52,6 +52,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ScrobbleEvent> ScrobbleEvent { get; set; } = null!;
     public DbSet<ScrobbleError> ScrobbleError { get; set; } = null!;
     public DbSet<ScrobbleHold> ScrobbleHold { get; set; } = null!;
+    public DbSet<AppUserOnDeckRemoval> AppUserOnDeckRemoval { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

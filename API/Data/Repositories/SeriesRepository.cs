@@ -14,6 +14,7 @@ using API.DTOs.Metadata;
 using API.DTOs.ReadingLists;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
+using API.DTOs.Settings;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
@@ -135,8 +136,10 @@ public interface ISeriesRepository
     Task<IDictionary<int, int>> GetLibraryIdsForSeriesAsync();
     Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds);
     Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, bool customOnly = true);
-
     Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsForUser(int userId, IEnumerable<string> names, LibraryType libraryType, string aniListUrl, string malUrl);
+    Task<int> GetAverageUserRating(int seriesId);
+    Task RemoveFromOnDeck(int seriesId, int userId);
+    Task ClearOnDeckRemoval(int seriesId, int userId);
 }
 
 public class SeriesRepository : ISeriesRepository
@@ -757,16 +760,33 @@ public class SeriesRepository : ISeriesRepository
     /// <returns></returns>
     public async Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
     {
-        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(30);
-        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(7);
+        var settings = await _context.ServerSetting
+            .Select(x => x)
+            .AsNoTracking()
+            .ToListAsync();
+        var serverSettings = _mapper.Map<ServerSettingDto>(settings);
+
+        var cutoffProgressPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckProgressDays);
+        var cutoffLastAddedPoint = DateTime.Now - TimeSpan.FromDays(serverSettings.OnDeckUpdateDays);
 
         var libraryIds = GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
+        // Don't allow any series the user has explicitly removed
+        var onDeckRemovals = _context.AppUserOnDeckRemoval
+            .Where(d => d.AppUserId == userId)
+            .Select(d => d.SeriesId)
+            .AsEnumerable();
+
+        // var onDeckRemovals = _context.AppUser.Where(u => u.Id == userId)
+        //     .SelectMany(u => u.OnDeckRemovals.Select(d => d.Id))
+        //     .AsEnumerable();
+
 
         var query = _context.Series
             .Where(s => usersSeriesIds.Contains(s.Id))
+            .Where(s => !onDeckRemovals.Contains(s.Id))
             .Select(s => new
             {
                 Series = s,
@@ -1656,6 +1676,42 @@ public class SeriesRepository : ISeriesRepository
             .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
             .AsSplitQuery()
             .FirstOrDefaultAsync(); // Some users may have improperly configured libraries
+    }
+
+    /// <summary>
+    /// Returns the Average rating for all users within Kavita instance
+    /// </summary>
+    /// <param name="seriesId"></param>
+    public async Task<int> GetAverageUserRating(int seriesId)
+    {
+        var avg = (await _context.AppUserRating
+            .Where(r => r.SeriesId == seriesId)
+            .AverageAsync(r => (int?) r.Rating));
+        return avg.HasValue ? (int) avg.Value : 0;
+    }
+
+    public async Task RemoveFromOnDeck(int seriesId, int userId)
+    {
+        var existingEntry = await _context.AppUserOnDeckRemoval
+            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .AnyAsync();
+        if (existingEntry) return;
+        _context.AppUserOnDeckRemoval.Add(new AppUserOnDeckRemoval()
+        {
+            SeriesId = seriesId,
+            AppUserId = userId
+        });
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task ClearOnDeckRemoval(int seriesId, int userId)
+    {
+        var existingEntry = await _context.AppUserOnDeckRemoval
+            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .FirstOrDefaultAsync();
+        if (existingEntry == null) return;
+        _context.AppUserOnDeckRemoval.Remove(existingEntry);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<bool> IsSeriesInWantToRead(int userId, int seriesId)

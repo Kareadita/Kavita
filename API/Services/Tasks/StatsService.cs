@@ -23,6 +23,7 @@ public interface IStatsService
 {
     Task Send();
     Task<ServerInfoDto> GetServerInfo();
+    Task<ServerInfoSlimDto> GetServerInfoSlim();
     Task SendCancellation();
 }
 /// <summary>
@@ -169,6 +170,17 @@ public class StatsService : IStatsService
         }
 
         return serverInfo;
+    }
+
+    public async Task<ServerInfoSlimDto> GetServerInfoSlim()
+    {
+        var serverSettings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        return new ServerInfoSlimDto()
+        {
+            InstallId = serverSettings.InstallId,
+            KavitaVersion = serverSettings.InstallVersion,
+            IsDocker = OsInfo.IsDocker
+        };
     }
 
     public async Task SendCancellation()

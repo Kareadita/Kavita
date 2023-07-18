@@ -35,6 +35,7 @@ internal class MediaReviewDto
     /// </summary>
     public string RawBody { get; set; }
     public string Username { get; set; }
+    public ScrobbleProvider Provider { get; set; }
 }
 
 public interface IReviewService
@@ -74,6 +75,7 @@ public class ReviewService : IReviewService
             LibraryId = series.LibraryId,
             SeriesId = series.Id,
             IsExternal = true,
+            Provider = r.Provider,
             BodyJustText = GetCharacters(r.Body),
             ExternalUrl = r.SiteUrl
         });

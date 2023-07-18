@@ -88,7 +88,8 @@ public class DeviceController : BaseApiController
             return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
 
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "started"), userId);
+        await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
+            MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "started"), userId);
         try
         {
             var success = await _deviceService.SendTo(dto.ChapterIds, dto.DeviceId);
@@ -100,10 +101,47 @@ public class DeviceController : BaseApiController
         }
         finally
         {
-            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "ended"), userId);
+            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice,
+                MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "ended"), userId);
         }
 
         return BadRequest("There was an error sending the file to the device");
+    }
+
+
+
+    [HttpPost("send-series-to")]
+    public async Task<ActionResult> SendSeriesToDevice(SendSeriesToDeviceDto dto)
+    {
+        if (dto.SeriesId <= 0) return BadRequest("SeriesId must be greater than 0");
+        if (dto.DeviceId < 0) return BadRequest("DeviceId must be greater than 0");
+
+        if (await _emailService.IsDefaultEmailService())
+            return BadRequest("Send to device cannot be used with Kavita's email service. Please configure your own.");
+
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "started"), userId);
+
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
+                SeriesIncludes.Volumes | SeriesIncludes.Chapters);
+        if (series == null) return BadRequest("Series doesn't Exist");
+        var chapterIds = series.Volumes.SelectMany(v => v.Chapters.Select(c => c.Id)).ToList();
+        try
+        {
+            var success = await _deviceService.SendTo(chapterIds, dto.DeviceId);
+            if (success) return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        finally
+        {
+            await _eventHub.SendMessageToAsync(MessageFactory.SendingToDevice, MessageFactory.SendingToDeviceEvent($"Transferring files to your device", "ended"), userId);
+        }
+
+        return BadRequest("There was an error sending the file(s) to the device");
     }
 
 

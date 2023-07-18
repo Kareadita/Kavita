@@ -45,6 +45,10 @@ public class ChapterDto : IHasReadTimeEstimate, IEntityDate
     /// </summary>
     public DateTime LastReadingProgressUtc { get; set; }
     /// <summary>
+    /// The last time a chapter was read by current authenticated user
+    /// </summary>
+    public DateTime LastReadingProgress { get; set; }
+    /// <summary>
     /// If the Cover Image is locked for this entity
     /// </summary>
     public bool CoverImageLocked { get; set; }

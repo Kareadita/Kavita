@@ -9,6 +9,7 @@ using API.DTOs.Recommendation;
 using API.Extensions;
 using API.Helpers;
 using API.Services.Plus;
+using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
@@ -20,16 +21,16 @@ public class RecommendedController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRecommendationService _recommendationService;
     private readonly ILicenseService _licenseService;
-    private readonly IMemoryCache _cache;
-    public const string CacheKey = "recommendation-";
+    private readonly IEasyCachingProvider _cacheProvider;
+    public const string CacheKey = "recommendation_";
 
     public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
-        ILicenseService licenseService, IMemoryCache cache)
+        ILicenseService licenseService, IEasyCachingProviderFactory cachingProviderFactory)
     {
         _unitOfWork = unitOfWork;
         _recommendationService = recommendationService;
         _licenseService = licenseService;
-        _cache = cache;
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
     }
 
     /// <summary>
@@ -38,7 +39,7 @@ public class RecommendedController : BaseApiController
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [HttpGet("recommendations")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Recommendation, VaryByQueryKeys = new []{"seriesId"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
     public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
     {
         var userId = User.GetUserId();
@@ -53,16 +54,14 @@ public class RecommendedController : BaseApiController
         }
 
         var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
-        if (_cache.TryGetValue(cacheKey, out string cachedData))
+        var results = await _cacheProvider.GetAsync<RecommendationDto>(cacheKey);
+        if (results.HasValue)
         {
-            return Ok(JsonConvert.DeserializeObject<RecommendationDto>(cachedData));
+            return Ok(results.Value);
         }
 
         var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetSize(ret.OwnedSeries.Count() + ret.ExternalSeries.Count())
-            .SetAbsoluteExpiration(TimeSpan.FromHours(10));
-        _cache.Set(cacheKey, JsonConvert.SerializeObject(ret), cacheEntryOptions);
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(10));
         return Ok(ret);
     }
 

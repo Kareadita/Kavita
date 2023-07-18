@@ -238,6 +238,7 @@ public class VolumeRepository : IVolumeRepository
                 if (progresses.Count == 0) continue;
                 c.PagesRead = progresses.Sum(p => p.PagesRead);
                 c.LastReadingProgressUtc = progresses.Max(p => p.LastModifiedUtc);
+                c.LastReadingProgress = progresses.Max(p => p.LastModified);
             }
 
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);

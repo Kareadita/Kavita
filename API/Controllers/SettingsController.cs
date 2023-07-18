@@ -182,12 +182,38 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.OnDeckProgressDays && updateSettingsDto.OnDeckProgressDays + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.OnDeckProgressDays + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.OnDeckUpdateDays && updateSettingsDto.OnDeckUpdateDays + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.OnDeckUpdateDays + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
+            {
+                setting.Value = updateSettingsDto.TaskScan;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.Port && updateSettingsDto.Port + string.Empty != setting.Value)
             {
                 if (OsInfo.IsDocker) continue;
                 setting.Value = updateSettingsDto.Port + string.Empty;
                 // Port is managed in appSetting.json
                 Configuration.Port = updateSettingsDto.Port;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.CacheSize && updateSettingsDto.CacheSize + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.CacheSize + string.Empty;
+                // CacheSize is managed in appSetting.json
+                Configuration.CacheSize = updateSettingsDto.CacheSize;
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
