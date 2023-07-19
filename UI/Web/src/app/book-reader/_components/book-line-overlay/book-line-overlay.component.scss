@@ -1,0 +1,9 @@
+.overlay {
+  position: absolute;
+  background-color: rgb(0, 0, 0);
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+  max-width: 285px; /* Optional: limit the width of the overlay box */
+  z-index: 9999; /* Ensure it's displayed above other elements */
+}

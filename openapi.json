@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.4.5"
+    "version": "0.7.5.1"
   },
   "servers": [
     {
@@ -5244,6 +5244,90 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Reader/ptoc": {
+      "get": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Returns the user's personal table of contents for the given chapter",
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonalToCDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonalToCDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PersonalToCDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Reader/create-ptoc": {
+      "post": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Create a new personal table of content entry for a given chapter",
+        "description": "The title and page number must be unique to that book",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalToCDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalToCDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePersonalToCDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -10811,6 +10895,14 @@
             "description": "A list of Devices which allows the user to send files to",
             "nullable": true
           },
+          "tableOfContents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserTableOfContent"
+            },
+            "description": "A list of Table of Contents for a given Chapter",
+            "nullable": true
+          },
           "apiKey": {
             "type": "string",
             "description": "An API Key to interact with external services, like OPDS",
@@ -11229,6 +11321,78 @@
           }
         },
         "additionalProperties": false
+      },
+      "AppUserTableOfContent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "description": "The page to bookmark",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the bookmark. Defaults to Page {PageNumber} if not set",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/Series"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "volumeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookScrollId": {
+            "type": "string",
+            "description": "For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point. If empty, the ToC point is the beginning of the page",
+            "nullable": true
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          },
+          "appUserId": {
+            "type": "integer",
+            "description": "User this table of content belongs to",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A personal table of contents for a given user linked with a given book"
       },
       "BookChapterItem": {
         "type": "object",
@@ -12364,6 +12528,40 @@
           "emailAddress": {
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreatePersonalToCDto": {
+        "type": "object",
+        "properties": {
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "volumeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "bookScrollId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13753,6 +13951,28 @@
             ],
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "PersonalToCDto": {
+        "type": "object",
+        "properties": {
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "bookScrollId": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

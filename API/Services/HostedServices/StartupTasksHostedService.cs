@@ -26,7 +26,6 @@ public class StartupTasksHostedService : IHostedService
         taskScheduler.ScheduleUpdaterTasks();
 
 
-
         try
         {
             // These methods will automatically check if stat collection is disabled to prevent sending any data regardless

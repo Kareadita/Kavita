@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, DestroyRef,
-  ElementRef,
+  ElementRef, EventEmitter,
   HostListener,
   inject,
   Inject,
@@ -16,8 +16,8 @@ import {
 import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin, fromEvent, of, Subject } from 'rxjs';
-import { catchError, debounceTime, take, takeUntil } from 'rxjs/operators';
+import { forkJoin, fromEvent, of } from 'rxjs';
+import { catchError, debounceTime, take } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -46,11 +46,17 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { TableOfContentsComponent } from '../table-of-contents/table-of-contents.component';
 import { NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { DrawerComponent } from '../../../shared/drawer/drawer.component';
+import {BookLineOverlayComponent} from "../book-line-overlay/book-line-overlay.component";
+import {
+  PersonalTableOfContentsComponent,
+  PersonalToCEvent
+} from "../personal-table-of-contents/personal-table-of-contents.component";
 
 
 enum TabID {
   Settings = 1,
-  TableOfContents = 2
+  TableOfContents = 2,
+  PersonalTableOfContents = 3
 }
 
 interface HistoryPoint {
@@ -94,7 +100,7 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
     standalone: true,
-    imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip]
+  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -279,6 +285,11 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection: PAGING_DIRECTION = PAGING_DIRECTION.FORWARD;
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
+
+  /**
+   * Used to refresh the Personal PoC
+   */
+  refreshPToC: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -666,6 +677,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   handleKeyPress(event: KeyboardEvent) {
+    const activeElement = document.activeElement as HTMLElement;
+    const isInputFocused = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA';
+    if (isInputFocused) return;
+
     if (event.key === KEY_CODES.RIGHT_ARROW) {
       this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
     } else if (event.key === KEY_CODES.LEFT_ARROW) {
@@ -781,6 +796,15 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   loadChapterPage(event: {pageNum: number, part: string}) {
     this.setPageNum(event.pageNum);
     this.loadPage('id("' + event.part + '")');
+  }
+
+  /**
+   * From personal table of contents/bookmark
+   * @param event
+   */
+  loadChapterPart(event: PersonalToCEvent) {
+    this.setPageNum(event.pageNum);
+    this.loadPage(event.scrollPart);
   }
 
   /**
@@ -1213,7 +1237,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     intersectingEntries.sort(this.sortElements);
 
     if (intersectingEntries.length > 0) {
-      let path = this.getXPathTo(intersectingEntries[0]);
+      let path = this.readerService.getXPathTo(intersectingEntries[0]);
       if (path === '') { return; }
       if (!path.startsWith('id')) {
       path = '//html[1]/' + path;
@@ -1318,7 +1342,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let element: Element | null = null;
     if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
       // Part selector is a XPATH
-      element = this.getElementFromXPath(partSelector);
+      element = this.readerService.getElementFromXPath(partSelector);
     } else {
       element = this.document.querySelector('*[id="' + partSelector + '"]');
     }
@@ -1337,35 +1361,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
     }
-  }
-
-
-  getElementFromXPath(path: string) {
-    const node = this.document.evaluate(path, this.document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-    if (node?.nodeType === Node.ELEMENT_NODE) {
-      return node as Element;
-    }
-    return null;
-  }
-
-  getXPathTo(element: any): string {
-    if (element === null) return '';
-    if (element.id !== '') { return 'id("' + element.id + '")'; }
-    if (element === this.document.body) { return element.tagName; }
-
-
-    let ix = 0;
-    const siblings = element.parentNode?.childNodes || [];
-    for (let sibling of siblings) {
-        if (sibling === element) {
-          return this.getXPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
-        }
-        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {
-          ix++;
-        }
-
-    }
-    return '';
   }
 
   /**
@@ -1583,4 +1578,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mousePosition.x = $event.screenX;
     this.mousePosition.y = $event.screenY;
   }
+
+  refreshPersonalToC() {
+    this.refreshPToC.emit();
+  }
+
 }

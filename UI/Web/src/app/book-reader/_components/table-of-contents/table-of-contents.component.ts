@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import { Subject } from 'rxjs';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { BookChapterItem } from '../../_models/book-chapter-item';
 import { NgIf, NgFor } from '@angular/common';
 
@@ -11,7 +10,7 @@ import { NgIf, NgFor } from '@angular/common';
     standalone: true,
     imports: [NgIf, NgFor]
 })
-export class TableOfContentsComponent implements OnDestroy {
+export class TableOfContentsComponent  {
 
   @Input({required: true}) chapterId!: number;
   @Input({required: true}) pageNum!: number;
@@ -20,16 +19,7 @@ export class TableOfContentsComponent implements OnDestroy {
 
   @Output() loadChapter: EventEmitter<{pageNum: number, part: string}> = new EventEmitter();
 
-  private onDestroy: Subject<void> = new Subject();
-
-  pageAnchors: {[n: string]: number } = {};
-
   constructor() {}
-
-  ngOnDestroy(): void {
-      this.onDestroy.next();
-      this.onDestroy.complete();
-  }
 
   cleanIdSelector(id: string) {
     const tokens = id.split('/');

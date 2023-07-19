@@ -1,0 +1,15 @@
+<div class="table-of-contents">
+  <div *ngIf="Pages.length === 0">
+    <em>Nothing Bookmarked yet</em>
+  </div>
+  <ul>
+    <li *ngFor="let page of Pages" (click)="loadChapterPage(page, '')">
+      Page {{page}}
+      <ul class="chapter-title">
+        <li *ngFor="let bookmark of bookmarks[page]" (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId)">
+          {{bookmark.title}}
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
