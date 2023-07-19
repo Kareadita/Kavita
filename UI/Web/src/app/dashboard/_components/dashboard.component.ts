@@ -72,6 +72,7 @@ export class DashboardComponent implements OnInit {
 
 
           this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
+            if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
             this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
             this.cdRef.markForCheck();
           });

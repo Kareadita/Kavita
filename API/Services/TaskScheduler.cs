@@ -61,6 +61,7 @@ public class TaskScheduler : ITaskScheduler
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
     public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
+    public const string CheckForUpdateId = "check-updates";
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
     public const string BackupTaskId = "backup";
@@ -226,10 +227,7 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(5, 23)), new RecurringJobOptions()
-        {
-            TimeZone = TimeZoneInfo.Local
-        });
+        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)
