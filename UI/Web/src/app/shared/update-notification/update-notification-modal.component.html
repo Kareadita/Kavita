@@ -1,7 +1,7 @@
 <div class="modal-header">
     <h4 class="modal-title">New Update Available!</h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-        
+
     </button>
 </div>
 <div class="modal-body">
@@ -10,6 +10,7 @@
 </div>
 
 <div class="modal-footer">
-    <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">Close</button>
-    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">Download</a>
+  <a class="btn btn-icon" [href]="https://wiki.kavitareader.com/en/install/windows-install#updating-kavita" target="_blank" rel="noopener noreferrer">How to Update</a>
+  <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">Close</button>
+  <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">Download</a>
 </div>
