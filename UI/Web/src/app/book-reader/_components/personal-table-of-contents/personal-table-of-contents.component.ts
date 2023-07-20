@@ -47,7 +47,6 @@ export class PersonalTableOfContentsComponent implements OnInit {
   constructor(@Inject(DOCUMENT) private document: Document) {}
 
   ngOnInit() {
-
     this.tocRefresh.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.load();
     });
@@ -69,6 +68,17 @@ export class PersonalTableOfContentsComponent implements OnInit {
 
   loadChapterPage(pageNum: number, scrollPart: string | undefined) {
     this.loadChapter.emit({pageNum, scrollPart});
+  }
+
+  removeBookmark(bookmark: PersonalToC) {
+    this.readerService.removePersonalToc(bookmark.chapterId, bookmark.pageNumber, bookmark.title).subscribe(() => {
+      this.bookmarks[bookmark.pageNumber] = this.bookmarks[bookmark.pageNumber].filter(t => t.title != bookmark.title);
+
+      if (this.bookmarks[bookmark.pageNumber].length === 0) {
+        delete this.bookmarks[bookmark.pageNumber];
+      }
+      this.cdRef.markForCheck();
+    });
   }
 
 }

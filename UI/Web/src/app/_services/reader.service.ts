@@ -279,6 +279,10 @@ export class ReaderService {
     }
   }
 
+  removePersonalToc(chapterId: number, pageNumber: number, title: string) {
+    return this.httpClient.delete(this.baseUrl + `reader/ptoc?chapterId=${chapterId}&pageNum=${pageNumber}&title=${encodeURIComponent(title)}`);
+  }
+
   getPersonalToC(chapterId: number) {
     return this.httpClient.get<Array<PersonalToC>>(this.baseUrl + 'reader/ptoc?chapterId=' + chapterId);
   }
@@ -295,10 +299,17 @@ export class ReaderService {
     return null;
   }
 
-  getXPathTo(element: any): string {
+  /**
+   *
+   * @param element
+   * @param pureXPath Will ignore shortcuts like id('')
+   */
+  getXPathTo(element: any, pureXPath = false): string {
     if (element === null) return '';
-    if (element.id !== '') { return 'id("' + element.id + '")'; }
-    if (element === document.body) { return element.tagName; }
+    if (!pureXPath) {
+      if (element.id !== '') { return 'id("' + element.id + '")'; }
+      if (element === document.body) { return element.tagName; }
+    }
 
 
     let ix = 0;

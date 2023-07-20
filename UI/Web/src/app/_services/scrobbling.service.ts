@@ -1,32 +1,20 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
-import { of, ReplaySubject, Subject } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Preferences } from '../_models/preferences/preferences';
-import { User } from '../_models/user';
-import { Router } from '@angular/router';
-import { EVENTS, MessageHubService } from './message-hub.service';
-import { ThemeService } from './theme.service';
-import { InviteUserResponse } from '../_models/auth/invite-user-response';
-import { UserUpdateEvent } from '../_models/events/user-update-event';
-import { UpdateEmailResponse } from '../_models/auth/update-email-response';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleError} from "../_models/scrobbling/scrobble-error";
 import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";
 import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
-import {PaginatedResult, Pagination} from "../_models/pagination";
+import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
-import {ReadingList} from "../_models/reading-list";
 
 export enum ScrobbleProvider {
   Kavita = 0,
   AniList= 1,
   Mal = 2,
+  GoogleBooks = 3
 }
 
 @Injectable({
@@ -34,7 +22,6 @@ export enum ScrobbleProvider {
 })
 export class ScrobblingService {
 
-  private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
 
 

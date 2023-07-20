@@ -8,6 +8,10 @@
       <ul class="chapter-title">
         <li *ngFor="let bookmark of bookmarks[page]" (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId)">
           {{bookmark.title}}
+          <button class="btn btn-icon ms-1" (click)="removeBookmark(bookmark)">
+            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            <span class="visually-hidden">Delete {{bookmark.title}}</span>
+        </button>
         </li>
       </ul>
     </li>

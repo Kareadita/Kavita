@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {fromEvent, of} from "rxjs";
-import {catchError, tap} from "rxjs/operators";
+import {catchError, filter, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -55,22 +55,49 @@ export class BookLineOverlayComponent implements OnInit {
 
   ngOnInit() {
     if (this.parent) {
-      fromEvent(this.parent.nativeElement, 'mouseup')
-        // @ts-ignore
+      fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup')
         .pipe(takeUntilDestroyed(this.destroyRef),
+          filter((evt: MouseEvent) => {
+            // Shouldn't be within the component
+            const xpath = this.readerService.getXPathTo(evt.target, true);
+            return !xpath.includes('APP-BOOK-LINE-OVERLAY');
+          }),
           tap((event: MouseEvent) => {
             const selection = window.getSelection();
+            if (!event.target) return;
+
+            console.log('mouseup: ', event.target, selection);
+
+            if (this.mode !== BookLineOverlayMode.None && !selection) {
+              this.reset();
+              return;
+            }
+
+
             this.selectedText = selection ? selection.toString().trim() : '';
-            this.xPath = this.readerService.getXPathTo(selection);
+
             if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
               // Get x,y coord so we can position overlay
               if (event.target) {
                 const range = selection!.getRangeAt(0)
                 const rect = range.getBoundingClientRect();
                 const box = getBoundingClientRect(event.target as Element);
+
+                console.log('box: ', box);
+                console.log('rect: ', rect);
+                console.log('range: ', range);
+                console.log('event:', event)
+
+
+
+                this.xPath = this.readerService.getXPathTo(event.target);
+                if (this.xPath !== '') {
+                  this.xPath = '//' + this.xPath;
+                }
+                console.log('xPath: ', this.xPath)
                 this.overlayPosition = {
-                  top: rect.top + window.scrollY - 90, // Adjust for the height of the overlay
-                  left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
+                  top: rect.top + (this.parent?.nativeElement || window).scrollY - 90, // Adjust for the height of the overlay
+                  left: rect.left + (this.parent?.nativeElement || window).scrollX + 30 // Adjust 10 to center the overlay box horizontally
                 };
               }
             }
@@ -90,15 +117,13 @@ export class BookLineOverlayComponent implements OnInit {
   }
 
   createPTOC() {
-
+    console.log('creating bookmark');
     this.readerService.createPersonalToC(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNumber,
       this.bookmarkForm.get('name')?.value, this.xPath).pipe(catchError(err => {
         this.focusOnBookmarkInput();
         return of();
     })).subscribe(() => {
-      this.bookmarkForm.reset();
-      this.mode = BookLineOverlayMode.None;
-      this.xPath = '';
+      this.reset();
       this.refreshToC.emit();
       this.cdRef.markForCheck();
     });
@@ -109,5 +134,13 @@ export class BookLineOverlayComponent implements OnInit {
     setTimeout(() => this.elementRef.nativeElement.querySelector('#bookmark-name')?.focus(), 10);
   }
 
+  reset() {
+    console.log('Resetting overlay');
+    this.bookmarkForm.reset();
+    this.mode = BookLineOverlayMode.None;
+    this.xPath = '';
+    this.selectedText = '';
+    this.cdRef.markForCheck();
+  }
 
 }

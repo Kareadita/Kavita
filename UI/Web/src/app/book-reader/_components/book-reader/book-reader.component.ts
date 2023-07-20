@@ -1342,7 +1342,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     let element: Element | null = null;
     if (partSelector.startsWith('//') || partSelector.startsWith('id(')) {
       // Part selector is a XPATH
-      element = this.readerService.getElementFromXPath(partSelector);
+      element = this.getElementFromXPath(partSelector);
     } else {
       element = this.document.querySelector('*[id="' + partSelector + '"]');
     }
@@ -1361,6 +1361,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       setTimeout(() => (element as Element).scrollIntoView({'block': 'start', 'inline': 'start'}));
     }
+  }
+
+  getElementFromXPath(path: string) {
+    const node = this.document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (node?.nodeType === Node.ELEMENT_NODE) {
+      return node as Element;
+    }
+    return null;
   }
 
   /**

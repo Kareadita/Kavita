@@ -17,7 +17,7 @@ import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 export class UpdateNotificationModalComponent implements OnInit {
 
   @Input({required: true}) updateData!: UpdateVersionEvent;
-  updateUrl: string = '';
+  updateUrl: string = 'https://wiki.kavitareader.com/en/install/windows-install#updating-kavita';
 
   constructor(public modal: NgbActiveModal) { }
 

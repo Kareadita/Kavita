@@ -5296,6 +5296,41 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Reader"
+        ],
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageNum",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
       }
     },
     "/api/Reader/create-ptoc": {
@@ -14762,11 +14797,6 @@
           "chapterNumber": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "processDateUtc": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           },
           "lastModified": {

@@ -1,4 +1,5 @@
-<div #container class="overlay" *ngIf="selectedText.length > 0 || mode !== BookLineOverlayMode.None" [ngStyle]="{ 'top.px': overlayPosition.top, 'left.px': overlayPosition.left }">
+<div #container class="overlay" *ngIf="selectedText.length > 0 || mode !== BookLineOverlayMode.None"
+     [ngStyle]="{ 'top.px': overlayPosition.top, 'left.px': overlayPosition.left }">
 
   <!-- Todo: close button or something -->
   <ng-container [ngSwitch]="mode">
