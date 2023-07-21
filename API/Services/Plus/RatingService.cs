@@ -9,6 +9,7 @@ using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
 using API.Helpers;
+using API.Helpers.Builders;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -59,19 +60,7 @@ public class RatingService : IRatingService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new PlusSeriesDto()
-                {
-                    MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
-                    SeriesName = series.Name,
-                    AltSeriesName = series.LocalizedName,
-                    AniListId = (int?) ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite),
-                    MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.MalWeblinkWebsite),
-                    VolumeCount = series.Volumes.Count,
-                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
-                    Year = series.Metadata.ReleaseYear
-                })
+                .PostJsonAsync(new PlusSeriesDtoBuilder(series).Build())
                 .ReceiveJson<IEnumerable<RatingDto>>();
         }
         catch (Exception e)

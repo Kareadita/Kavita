@@ -63,11 +63,14 @@ public class ScrobblingService : IScrobblingService
 
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
+    public const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
 
     private static readonly IDictionary<string, int> WeblinkExtractionMap = new Dictionary<string, int>()
     {
         {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
+        {GoogleBooksWeblinkWebsite, 0},
+
     };
 
     private const int ScrobbleSleepTime = 700; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
@@ -208,8 +211,8 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.Review,
-            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             ReviewBody = reviewBody,
@@ -253,8 +256,8 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
-            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
             Rating = rating
@@ -310,8 +313,8 @@ public class ScrobblingService : IScrobblingService
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
-                MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
+                AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
+                MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
                 AppUserId = userId,
                 VolumeNumber =
                     await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(seriesId, userId),
@@ -353,8 +356,8 @@ public class ScrobblingService : IScrobblingService
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             ScrobbleEventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead,
-            AniListId = (int?) ExtractId(series.Metadata.WebLinks, AniListWeblinkWebsite),
-            MalId = ExtractId(series.Metadata.WebLinks, MalWeblinkWebsite),
+            AniListId = ExtractId<int?>(series.Metadata.WebLinks, AniListWeblinkWebsite),
+            MalId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite),
             AppUserId = userId,
             Format = LibraryTypeHelper.GetFormat(series.Library.Type),
         };
@@ -542,7 +545,7 @@ public class ScrobblingService : IScrobblingService
     [AutomaticRetry(Attempts = 3, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
     public async Task ProcessUpdatesSinceLastSync()
     {
-        // Check how many scrobbles we have available then only do those.
+        // Check how many scrobble events we have available then only do those.
         _logger.LogInformation("Starting Scrobble Processing");
         var userRateLimits = new Dictionary<int, int>();
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
@@ -623,7 +626,7 @@ public class ScrobblingService : IScrobblingService
                         readEvt.AppUser.Id);
                 _unitOfWork.ScrobbleRepository.Update(readEvt);
             }
-            progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
+            progressCounter = await ProcessEvents(readEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, async evt => new ScrobbleDto()
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
@@ -634,12 +637,14 @@ public class ScrobblingService : IScrobblingService
                 AniListToken = evt.AppUser.AniListAccessToken,
                 SeriesName = evt.Series.Name,
                 LocalizedSeriesName = evt.Series.LocalizedName,
-                StartedReadingDateUtc = evt.CreatedUtc,
                 ScrobbleDateUtc = evt.LastModifiedUtc,
-                Year = evt.Series.Metadata.ReleaseYear
+                Year = evt.Series.Metadata.ReleaseYear,
+                StartedReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetFirstProgressForSeries(evt.SeriesId, evt.AppUser.Id),
+                LatestReadingDateUtc = await _unitOfWork.AppUserProgressRepository.GetLatestProgressForSeries(evt.SeriesId, evt.AppUser.Id),
             });
 
-            progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
+            progressCounter = await ProcessEvents(ratingEvents, userRateLimits, usersToScrobble.Count, progressCounter,
+                totalProgress, evt => Task.FromResult(new ScrobbleDto()
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
@@ -650,9 +655,10 @@ public class ScrobblingService : IScrobblingService
                 LocalizedSeriesName = evt.Series.LocalizedName,
                 Rating = evt.Rating,
                 Year = evt.Series.Metadata.ReleaseYear
-            });
+            }));
 
-            progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
+            progressCounter = await ProcessEvents(reviewEvents, userRateLimits, usersToScrobble.Count, progressCounter,
+                totalProgress, evt => Task.FromResult(new ScrobbleDto()
             {
                 Format = evt.Format,
                 AniListId = evt.AniListId,
@@ -665,21 +671,22 @@ public class ScrobblingService : IScrobblingService
                 Year = evt.Series.Metadata.ReleaseYear,
                 ReviewBody = evt.ReviewBody,
                 ReviewTitle = evt.ReviewTitle
-            });
+            }));
 
-            progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter, totalProgress, evt => new ScrobbleDto()
-            {
-                Format = evt.Format,
-                AniListId = evt.AniListId,
-                MALId = (int?) evt.MalId,
-                ScrobbleEventType = evt.ScrobbleEventType,
-                ChapterNumber = evt.ChapterNumber,
-                VolumeNumber = evt.VolumeNumber,
-                AniListToken = evt.AppUser.AniListAccessToken,
-                SeriesName = evt.Series.Name,
-                LocalizedSeriesName = evt.Series.LocalizedName,
-                Year = evt.Series.Metadata.ReleaseYear
-            });
+            progressCounter = await ProcessEvents(decisions, userRateLimits, usersToScrobble.Count, progressCounter,
+                totalProgress, evt => Task.FromResult(new ScrobbleDto()
+                {
+                    Format = evt.Format,
+                    AniListId = evt.AniListId,
+                    MALId = (int?) evt.MalId,
+                    ScrobbleEventType = evt.ScrobbleEventType,
+                    ChapterNumber = evt.ChapterNumber,
+                    VolumeNumber = evt.VolumeNumber,
+                    AniListToken = evt.AppUser.AniListAccessToken,
+                    SeriesName = evt.Series.Name,
+                    LocalizedSeriesName = evt.Series.LocalizedName,
+                    Year = evt.Series.Metadata.ReleaseYear
+                }));
         }
         catch (FlurlHttpException)
         {
@@ -693,7 +700,7 @@ public class ScrobblingService : IScrobblingService
     }
 
     private async Task<int> ProcessEvents(IEnumerable<ScrobbleEvent> events, IDictionary<int, int> userRateLimits,
-        int usersToScrobble, int progressCounter, int totalProgress, Func<ScrobbleEvent, ScrobbleDto> createEvent)
+        int usersToScrobble, int progressCounter, int totalProgress, Func<ScrobbleEvent, Task<ScrobbleDto>> createEvent)
     {
         var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         foreach (var evt in events)
@@ -714,7 +721,7 @@ public class ScrobblingService : IScrobblingService
 
             try
             {
-                var data = createEvent(evt);
+                var data = await createEvent(evt);
                 userRateLimits[evt.AppUserId] = await PostScrobbleUpdate(data, license.Value, evt);
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
@@ -784,17 +791,31 @@ public class ScrobblingService : IScrobblingService
     /// <param name="webLinks"></param>
     /// <param name="website"></param>
     /// <returns></returns>
-    public static long? ExtractId(string webLinks, string website)
+    public static T? ExtractId<T>(string webLinks, string website)
     {
         var index = WeblinkExtractionMap[website];
         foreach (var webLink in webLinks.Split(','))
         {
             if (!webLink.StartsWith(website)) continue;
             var tokens = webLink.Split(website)[1].Split('/');
-            return long.Parse(tokens[index]);
+            var value = tokens[index];
+            if (typeof(T) == typeof(int))
+            {
+                if (int.TryParse(value, out var intValue))
+                    return (T)(object)intValue;
+            }
+            else if (typeof(T) == typeof(long))
+            {
+                if (long.TryParse(value, out var longValue))
+                    return (T)(object)longValue;
+            }
+            else if (typeof(T) == typeof(string))
+            {
+                return (T)(object)value;
+            }
         }
 
-        return 0;
+        return default(T?);
     }
 
     private async Task<int> SetAndCheckRateLimit(IDictionary<int, int> userRateLimits, AppUser user, string license)

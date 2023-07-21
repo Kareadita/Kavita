@@ -46,6 +46,7 @@ public class ScrobbleEvent : IEntityDate
     /// </summary>
     public DateTime? ProcessDateUtc { get; set; }
 
+
     public required int SeriesId { get; set; }
     public Series Series { get; set; }
 

@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Helpers;
+using API.Helpers.Builders;
 using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
 using Kavita.Common;
@@ -24,6 +25,7 @@ public record PlusSeriesDto
 {
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+    public string? GoogleBooksId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
     public MediaFormat MediaFormat { get; set; }
@@ -134,19 +136,7 @@ public class RecommendationService : IRecommendationService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new PlusSeriesDto()
-                {
-                    MediaFormat = LibraryTypeHelper.GetFormat(series.Library.Type),
-                    SeriesName = series.Name,
-                    AltSeriesName = series.LocalizedName,
-                    AniListId = (int?) ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.AniListWeblinkWebsite),
-                    MalId = ScrobblingService.ExtractId(series.Metadata.WebLinks,
-                        ScrobblingService.MalWeblinkWebsite),
-                    VolumeCount = series.Volumes.Count,
-                    ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
-                    Year = series.Metadata.ReleaseYear
-                })
+                .PostJsonAsync(new PlusSeriesDtoBuilder(series).Build())
                 .ReceiveJson<IEnumerable<MediaRecommendationDto>>();
 
         }

@@ -228,7 +228,7 @@ public class TaskScheduler : ITaskScheduler
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
         RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
-        BackgroundJob.Schedule(() => CheckForUpdate(), TimeSpan.FromMinutes(5));
+        BackgroundJob.Enqueue(() => CheckForUpdate());
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)
