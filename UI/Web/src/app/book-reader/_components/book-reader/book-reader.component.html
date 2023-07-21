@@ -63,7 +63,23 @@
                           <li [ngbNavItem]="TabID.TableOfContents">
                             <a ngbNavLink>Table of Contents</a>
                             <ng-template ngbNavContent>
-                                <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum" [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
+                              <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
+                                <li [ngbNavItem]="TabID.TableOfContents">
+                                  <a ngbNavLink>ToC</a>
+                                  <ng-template ngbNavContent>
+                                    <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
+                                                           [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
+                                  </ng-template>
+                                </li>
+                                <li [ngbNavItem]="TabID.PersonalTableOfContents">
+                                  <a ngbNavLink>Bookmarks</a>
+                                  <ng-template ngbNavContent>
+                                    <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
+                                                                    [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
+                                  </ng-template>
+                                </li>
+                              </ul>
+                              <div [ngbNavOutlet]="subnav" class="mt-3"></div>
                             </ng-template>
                           </li>
                     </ul>
@@ -90,8 +106,6 @@
                  [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
                  [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                  [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
-
-
             <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
                  (click)="$event.stopPropagation();"
                  [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
@@ -99,7 +113,6 @@
             </div>
         </div>
     </div>
-
     <ng-template #actionBar>
         <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
             <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
@@ -133,3 +146,12 @@
     </ng-template>
 
 </div>
+
+<app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
+[libraryId]="libraryId"
+[volumeId]="volumeId"
+[chapterId]="chapterId"
+[seriesId]="seriesId"
+[pageNumber]="pageNum"
+(refreshToC)="refreshPersonalToC()">
+</app-book-line-overlay>

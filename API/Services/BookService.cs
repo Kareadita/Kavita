@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
@@ -898,7 +897,7 @@ public class BookService : IBookService
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
     /// <returns></returns>
-    public async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
+    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
     {
         await InlineStyles(doc, book, apiBase, body);
 

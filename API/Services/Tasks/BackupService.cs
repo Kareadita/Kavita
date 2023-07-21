@@ -145,7 +145,7 @@ public class BackupService : IBackupService
 
     private void CopyFaviconsToBackupDirectory(string tempDirectory)
     {
-        _directoryService.CopyDirectoryToDirectory(_directoryService.FaviconDirectory, tempDirectory);
+        _directoryService.CopyDirectoryToDirectory(_directoryService.FaviconDirectory, _directoryService.FileSystem.Path.Join(tempDirectory, "favicons"));
     }
 
     private async Task CopyCoverImagesToBackupDirectory(string tempDirectory)
