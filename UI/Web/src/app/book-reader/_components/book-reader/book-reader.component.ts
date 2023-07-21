@@ -59,6 +59,7 @@ enum TabID {
   PersonalTableOfContents = 3
 }
 
+
 interface HistoryPoint {
   /**
    * Page Number
@@ -156,6 +157,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Belongs to the drawer component
    */
   activeTabId: TabID = TabID.Settings;
+  /**
+   * Sub Nav tab id
+   */
+  tocId: TabID = TabID.TableOfContents;
   /**
    * Belongs to drawer component
    */

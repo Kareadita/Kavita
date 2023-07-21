@@ -63,18 +63,25 @@
                           <li [ngbNavItem]="TabID.TableOfContents">
                             <a ngbNavLink>Table of Contents</a>
                             <ng-template ngbNavContent>
-                                <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
-                                                       [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
+                              <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
+                                <li [ngbNavItem]="TabID.TableOfContents">
+                                  <a ngbNavLink>ToC</a>
+                                  <ng-template ngbNavContent>
+                                    <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
+                                                           [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
+                                  </ng-template>
+                                </li>
+                                <li [ngbNavItem]="TabID.PersonalTableOfContents">
+                                  <a ngbNavLink>Bookmarks</a>
+                                  <ng-template ngbNavContent>
+                                    <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
+                                                                    [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
+                                  </ng-template>
+                                </li>
+                              </ul>
+                              <div [ngbNavOutlet]="subnav" class="mt-3"></div>
                             </ng-template>
                           </li>
-
-                        <li [ngbNavItem]="TabID.PersonalTableOfContents">
-                          <a ngbNavLink>Bookmarks</a>
-                          <ng-template ngbNavContent>
-                            <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
-                                                            [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
-                          </ng-template>
-                        </li>
                     </ul>
                 </nav>
                 <div [ngbNavOutlet]="nav" class="mt-3"></div>
