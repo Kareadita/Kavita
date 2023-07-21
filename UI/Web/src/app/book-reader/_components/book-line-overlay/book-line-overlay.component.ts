@@ -14,7 +14,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
-import {ScrollService} from "../../../_services/scroll.service";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -49,7 +48,6 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
-  private readonly scrollService = inject(ScrollService);
 
   get BookLineOverlayMode() { return BookLineOverlayMode; }
   constructor(private elementRef: ElementRef) {}
@@ -59,22 +57,15 @@ export class BookLineOverlayComponent implements OnInit {
     if (this.parent) {
       fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup')
         .pipe(takeUntilDestroyed(this.destroyRef),
-          filter((evt: MouseEvent) => {
-            // Shouldn't be within the component
-            const xpath = this.readerService.getXPathTo(evt.target, true);
-            return !xpath.includes('APP-BOOK-LINE-OVERLAY');
-          }),
           tap((event: MouseEvent) => {
             const selection = window.getSelection();
             if (!event.target) return;
 
-            console.log('mouseup: ', event.target, selection);
-
-            if (this.mode !== BookLineOverlayMode.None && !selection) {
+            console.log('mouseup: ', selection);
+            if (this.mode !== BookLineOverlayMode.None && (!selection || selection.toString().trim() === '')) {
               this.reset();
               return;
             }
-
 
             this.selectedText = selection ? selection.toString().trim() : '';
 
@@ -84,25 +75,16 @@ export class BookLineOverlayComponent implements OnInit {
                 const range = selection!.getRangeAt(0)
                 const rect = range.getBoundingClientRect();
                 const box = getBoundingClientRect(event.target as Element);
-
-                console.log('box: ', box);
-                console.log('rect: ', rect);
-                console.log('range: ', range);
-                console.log('event:', event)
-
                 this.xPath = this.readerService.getXPathTo(event.target);
                 if (this.xPath !== '') {
                   this.xPath = '//' + this.xPath;
                 }
                 console.log('xPath: ', this.xPath)
 
-                this.scrollService.scrollPosition
                 this.overlayPosition = {
                   top: rect.top + window.scrollY - 64 - rect.height, // 64px is the top menu area
-                  //top: box.top + this.scrollService.scrollPosition, // 64px is the top menu area
                   left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
                 };
-                console.log('positioning at: ', this.overlayPosition);
               }
             }
             this.cdRef.markForCheck();
