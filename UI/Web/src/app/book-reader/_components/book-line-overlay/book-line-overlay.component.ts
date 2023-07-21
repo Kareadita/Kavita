@@ -14,6 +14,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
+import {ScrollService} from "../../../_services/scroll.service";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -48,6 +49,7 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly readerService = inject(ReaderService);
+  private readonly scrollService = inject(ScrollService);
 
   get BookLineOverlayMode() { return BookLineOverlayMode; }
   constructor(private elementRef: ElementRef) {}
@@ -95,10 +97,14 @@ export class BookLineOverlayComponent implements OnInit {
                   this.xPath = '//' + this.xPath;
                 }
                 console.log('xPath: ', this.xPath)
+
+                this.scrollService.scrollPosition
                 this.overlayPosition = {
-                  top: rect.top + (this.parent?.nativeElement || window).scrollY - 90, // Adjust for the height of the overlay
-                  left: rect.left + (this.parent?.nativeElement || window).scrollX + 30 // Adjust 10 to center the overlay box horizontally
+                  //top: rect.top + this.parent?.nativeElement.offsetTop + 65 - box.height, // 64px is the top menu area
+                  top: box.top + this.scrollService.scrollPosition, // 64px is the top menu area
+                  left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
                 };
+                console.log('positioning at: ', this.overlayPosition);
               }
             }
             this.cdRef.markForCheck();

@@ -9,3 +9,7 @@
 .chapter-title {
   padding-inline-start: 1rem;
 }
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

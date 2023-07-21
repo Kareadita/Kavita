@@ -3,12 +3,15 @@
     <em>Nothing Bookmarked yet</em>
   </div>
   <ul>
-    <li *ngFor="let page of Pages" (click)="loadChapterPage(page, '')">
-      Page {{page}}
+    <li *ngFor="let page of Pages">
+      <span (click)="loadChapterPage(page, '')">Page {{page}}</span>
       <ul class="chapter-title">
-        <li *ngFor="let bookmark of bookmarks[page]" (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId)">
+        <li class="ellipsis"
+            [ngbTooltip]="bookmark.title"
+            placement="right"
+            *ngFor="let bookmark of bookmarks[page]" (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId); $event.stopPropagation();">
           {{bookmark.title}}
-          <button class="btn btn-icon ms-1" (click)="removeBookmark(bookmark)">
+          <button class="btn btn-icon ms-1" (click)="removeBookmark(bookmark); $event.stopPropagation();">
             <i class="fa-solid fa-trash" aria-hidden="true"></i>
             <span class="visually-hidden">Delete {{bookmark.title}}</span>
         </button>

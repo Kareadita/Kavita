@@ -1016,7 +1016,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
       else {
-        this.reader.nativeElement.children
         // We need to check if we are paging back, because we need to adjust the scroll
         if (this.pagingDirection === PAGING_DIRECTION.BACKWARDS) {
           setTimeout(() => this.scrollService.scrollToX(this.bookContentElemRef.nativeElement.scrollWidth, this.bookContentElemRef.nativeElement));
