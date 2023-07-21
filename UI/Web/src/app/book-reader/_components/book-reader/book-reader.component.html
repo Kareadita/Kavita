@@ -106,15 +106,6 @@
                  [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
                  [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
                  [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
-
-            <app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
-                      [libraryId]="libraryId"
-                      [volumeId]="volumeId"
-                      [chapterId]="chapterId"
-                      [seriesId]="seriesId"
-                      [pageNumber]="pageNum"
-                      (refreshToC)="refreshPersonalToC()">
-            </app-book-line-overlay>
             <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
                  (click)="$event.stopPropagation();"
                  [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
@@ -122,7 +113,6 @@
             </div>
         </div>
     </div>
-
     <ng-template #actionBar>
         <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
             <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
@@ -156,3 +146,12 @@
     </ng-template>
 
 </div>
+
+<app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
+[libraryId]="libraryId"
+[volumeId]="volumeId"
+[chapterId]="chapterId"
+[seriesId]="seriesId"
+[pageNumber]="pageNum"
+(refreshToC)="refreshPersonalToC()">
+</app-book-line-overlay>

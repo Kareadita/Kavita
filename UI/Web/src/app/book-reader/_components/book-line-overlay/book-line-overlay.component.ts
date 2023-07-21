@@ -90,8 +90,6 @@ export class BookLineOverlayComponent implements OnInit {
                 console.log('range: ', range);
                 console.log('event:', event)
 
-
-
                 this.xPath = this.readerService.getXPathTo(event.target);
                 if (this.xPath !== '') {
                   this.xPath = '//' + this.xPath;
@@ -100,8 +98,8 @@ export class BookLineOverlayComponent implements OnInit {
 
                 this.scrollService.scrollPosition
                 this.overlayPosition = {
-                  //top: rect.top + this.parent?.nativeElement.offsetTop + 65 - box.height, // 64px is the top menu area
-                  top: box.top + this.scrollService.scrollPosition, // 64px is the top menu area
+                  top: rect.top + window.scrollY - 64 - rect.height, // 64px is the top menu area
+                  //top: box.top + this.scrollService.scrollPosition, // 64px is the top menu area
                   left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
                 };
                 console.log('positioning at: ', this.overlayPosition);
