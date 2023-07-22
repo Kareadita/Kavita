@@ -127,7 +127,13 @@ public class TaskScheduler : ITaskScheduler
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+            var schedule = CronConverter.ConvertToCronNotation(setting);
+            if (schedule == Cron.Daily())
+            {
+                // Override daily and make 2am so that everything on system has cleaned up and no blocking
+                schedule = Cron.Daily(2);
+            }
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => schedule, RecurringJobOptions);
         }
         else
         {
