@@ -6,6 +6,7 @@ using API.Data.ManualMigrations;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -164,9 +165,9 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                 (appUserProgresses, chapter) => new {appUserProgresses, chapter})
             .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
-            .Select(p => p.chapter.Number)
+            .Select(p => p.chapter.Range)
             .ToListAsync();
-        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(float.Parse(d)));
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(Parser.MaxNumberFromRange(d)));
     }
 
     public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
