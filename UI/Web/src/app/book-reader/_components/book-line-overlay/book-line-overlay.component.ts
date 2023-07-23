@@ -40,6 +40,7 @@ export class BookLineOverlayComponent implements OnInit {
 
   xPath: string = '';
   selectedText: string = '';
+  previousSelection: string = '';
   overlayPosition: { top: number; left: number } = { top: 0, left: 0 };
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
   bookmarkForm: FormGroup = new FormGroup({
@@ -72,7 +73,7 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (!event.target) return;
 
-    if (this.mode !== BookLineOverlayMode.None && (!selection || selection.toString().trim() === '')) {
+    if ((!selection || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
       this.reset();
       return;
     }
@@ -132,6 +133,10 @@ export class BookLineOverlayComponent implements OnInit {
     this.mode = BookLineOverlayMode.None;
     this.xPath = '';
     this.selectedText = '';
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
     this.cdRef.markForCheck();
   }
 
