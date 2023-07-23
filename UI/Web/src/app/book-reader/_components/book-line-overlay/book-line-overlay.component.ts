@@ -40,8 +40,6 @@ export class BookLineOverlayComponent implements OnInit {
 
   xPath: string = '';
   selectedText: string = '';
-  previousSelection: string = '';
-  overlayPosition: { top: number; left: number } = { top: 0, left: 0 };
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
   bookmarkForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -81,23 +79,13 @@ export class BookLineOverlayComponent implements OnInit {
     this.selectedText = selection ? selection.toString().trim() : '';
 
     if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
-      // Get x,y coord so we can position overlay
-      if (event.target) {
-        const range = selection!.getRangeAt(0)
-        const rect = range.getBoundingClientRect();
-        const box = getBoundingClientRect(event.target as Element);
-        this.xPath = this.readerService.getXPathTo(event.target);
-        if (this.xPath !== '') {
-          this.xPath = '//' + this.xPath;
-        }
-
-        this.overlayPosition = {
-          top: rect.top + window.scrollY - 64 - rect.height, // 64px is the top menu area
-          left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
-        };
-        event.preventDefault();
-        event.stopPropagation();
+      this.xPath = this.readerService.getXPathTo(event.target);
+      if (this.xPath !== '') {
+        this.xPath = '//' + this.xPath;
       }
+
+      event.preventDefault();
+      event.stopPropagation();
     }
     this.cdRef.markForCheck();
   }

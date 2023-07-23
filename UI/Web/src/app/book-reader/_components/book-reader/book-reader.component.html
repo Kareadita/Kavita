@@ -2,6 +2,14 @@
     <div class="fixed-top" #stickyTop>
         <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
         <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+        <app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
+                               [libraryId]="libraryId"
+                               [volumeId]="volumeId"
+                               [chapterId]="chapterId"
+                               [seriesId]="seriesId"
+                               [pageNumber]="pageNum"
+                               (refreshToC)="refreshPersonalToC()">
+      </app-book-line-overlay>
         <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [options]="{topOffset: topOffset}">
             <h5 header>
                 Book Settings
@@ -89,7 +97,7 @@
         </app-drawer>
     </div>
 
-    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading ? true : false">
+    <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading">
 
         <ng-container *ngIf="clickToPaginate">
             <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
@@ -144,14 +152,4 @@
             </button>
         </div>
     </ng-template>
-
 </div>
-
-<app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
-[libraryId]="libraryId"
-[volumeId]="volumeId"
-[chapterId]="chapterId"
-[seriesId]="seriesId"
-[pageNumber]="pageNum"
-(refreshToC)="refreshPersonalToC()">
-</app-book-line-overlay>

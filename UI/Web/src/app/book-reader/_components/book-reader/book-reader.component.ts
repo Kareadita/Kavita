@@ -1595,4 +1595,5 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.refreshPToC.emit();
   }
 
+  protected readonly undefined = undefined;
 }
