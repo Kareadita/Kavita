@@ -217,22 +217,14 @@ public class SeriesService : ISeriesService
             // Trigger code to cleanup tags, collections, people, etc
             await _taskScheduler.CleanupDbEntries();
 
-            if (updateSeriesMetadataDto.CollectionTags != null)
+            if (updateSeriesMetadataDto.CollectionTags == null) return true;
+            foreach (var tag in updateSeriesMetadataDto.CollectionTags)
             {
-                foreach (var tag in updateSeriesMetadataDto.CollectionTags)
-                {
-                    await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                        MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
-                            updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
-                }
-
-                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-                    MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
-
-                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-
-                return true;
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
+                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
+                        updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
             }
+            return true;
         }
         catch (Exception ex)
         {
