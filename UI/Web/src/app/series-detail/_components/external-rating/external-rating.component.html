@@ -30,5 +30,6 @@
 </ng-template>
 
 <ng-template #externalPopContent let-rating="rating">
-  <i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}
+  <div><i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}</div>
+  <a *ngIf="rating.providerUrl" [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">Entry</a>
 </ng-template>
