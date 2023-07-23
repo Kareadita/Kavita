@@ -4,7 +4,7 @@
         <div class="row g-0">
             <p>WebP/AVIF can drastically reduce space requirements for files. WebP/AVIF is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit <a href="https://caniuse.com/?search=webp" target="_blank" rel="noopener noreferrer">Can I Use WebP</a> or <a href="https://caniuse.com/?search=avif" target="_blank" rel="noopener noreferrer">Can I Use AVIF</a>.
             <b>You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.</b></p>
-            <div *ngIf="settingsForm.dirty" class="alert alert-danger" role="alert">You must trigger the media conversion task in Tasks Tab.</div>
+            <div *ngIf="settingsForm.get('encodeMediaAs')?.dirty" class="alert alert-danger" role="alert">You must trigger the media conversion task in Tasks Tab.</div>
             <div class="col-md-6 col-sm-12 mb-3">
                 <label for="settings-media-encodeMediaAs" class="form-label me-1">Save Media As</label>
                 <i class="fa fa-info-circle" placement="right" [ngbTooltip]="encodeMediaAsTooltip" role="button" tabindex="0"></i>
