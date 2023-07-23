@@ -74,7 +74,9 @@ export class SeriesMetadataDetailComponent implements OnChanges {
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
                                   this.seriesMetadata.publishers.length > 0 ||
+                                  this.seriesMetadata.characters.length > 0 ||
                                   this.seriesMetadata.translators.length > 0;
+
 
     if (this.seriesMetadata !== null) {
       this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
