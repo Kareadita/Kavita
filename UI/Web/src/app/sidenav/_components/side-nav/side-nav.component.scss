@@ -120,6 +120,10 @@
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
         }
+
+        &.no-donate {
+          height: calc((var(--vh)*100) - 56px);
+        }
     }
 
     .side-nav-overlay {

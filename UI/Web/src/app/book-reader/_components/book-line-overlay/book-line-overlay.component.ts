@@ -8,12 +8,13 @@ import {
   OnInit, Output,
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {fromEvent, of} from "rxjs";
+import {fromEvent, merge, of} from "rxjs";
 import {catchError, filter, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
+import {ToastrService} from "ngx-toastr";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -39,6 +40,7 @@ export class BookLineOverlayComponent implements OnInit {
 
   xPath: string = '';
   selectedText: string = '';
+  previousSelection: string = '';
   overlayPosition: { top: number; left: number } = { top: 0, left: 0 };
   mode: BookLineOverlayMode = BookLineOverlayMode.None;
   bookmarkForm: FormGroup = new FormGroup({
@@ -50,45 +52,54 @@ export class BookLineOverlayComponent implements OnInit {
   private readonly readerService = inject(ReaderService);
 
   get BookLineOverlayMode() { return BookLineOverlayMode; }
-  constructor(private elementRef: ElementRef) {}
+  constructor(private elementRef: ElementRef, private toastr: ToastrService) {}
 
 
   ngOnInit() {
     if (this.parent) {
-      fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup')
-        .pipe(takeUntilDestroyed(this.destroyRef),
-          tap((event: MouseEvent) => {
-            const selection = window.getSelection();
-            if (!event.target) return;
 
-            if (this.mode !== BookLineOverlayMode.None && (!selection || selection.toString().trim() === '')) {
-              this.reset();
-              return;
-            }
+      const mouseUp$ = fromEvent<MouseEvent>(this.parent.nativeElement, 'mouseup');
+      const touchEnd$ = fromEvent<TouchEvent>(this.parent.nativeElement, 'touchend');
 
-            this.selectedText = selection ? selection.toString().trim() : '';
-
-            if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
-              // Get x,y coord so we can position overlay
-              if (event.target) {
-                const range = selection!.getRangeAt(0)
-                const rect = range.getBoundingClientRect();
-                const box = getBoundingClientRect(event.target as Element);
-                this.xPath = this.readerService.getXPathTo(event.target);
-                if (this.xPath !== '') {
-                  this.xPath = '//' + this.xPath;
-                }
-
-                this.overlayPosition = {
-                  top: rect.top + window.scrollY - 64 - rect.height, // 64px is the top menu area
-                  left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
-                };
-              }
-            }
-            this.cdRef.markForCheck();
-          }))
-        .subscribe();
+      merge(mouseUp$, touchEnd$)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((event: MouseEvent | TouchEvent) => {
+          this.handleEvent(event);
+        });
     }
+  }
+
+  handleEvent(event: MouseEvent | TouchEvent) {
+    const selection = window.getSelection();
+    if (!event.target) return;
+
+    if ((!selection || selection.toString().trim() === '' || selection.toString().trim() === this.selectedText)) {
+      this.reset();
+      return;
+    }
+
+    this.selectedText = selection ? selection.toString().trim() : '';
+
+    if (this.selectedText.length > 0 && this.mode === BookLineOverlayMode.None) {
+      // Get x,y coord so we can position overlay
+      if (event.target) {
+        const range = selection!.getRangeAt(0)
+        const rect = range.getBoundingClientRect();
+        const box = getBoundingClientRect(event.target as Element);
+        this.xPath = this.readerService.getXPathTo(event.target);
+        if (this.xPath !== '') {
+          this.xPath = '//' + this.xPath;
+        }
+
+        this.overlayPosition = {
+          top: rect.top + window.scrollY - 64 - rect.height, // 64px is the top menu area
+          left: rect.left + window.scrollX + 30 // Adjust 10 to center the overlay box horizontally
+        };
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+    this.cdRef.markForCheck();
   }
 
   switchMode(mode: BookLineOverlayMode) {
@@ -122,7 +133,21 @@ export class BookLineOverlayComponent implements OnInit {
     this.mode = BookLineOverlayMode.None;
     this.xPath = '';
     this.selectedText = '';
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+    }
     this.cdRef.markForCheck();
   }
+
+  async copy() {
+    const selection = window.getSelection();
+    if (selection) {
+      await navigator.clipboard.writeText(selection.toString());
+      this.toastr.info('Copied to clipboard');
+    }
+    this.reset();
+  }
+
 
 }

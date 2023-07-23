@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.5.1"
+    "version": "0.7.5.2"
   },
   "servers": [
     {
@@ -14095,6 +14095,10 @@
             "type": "integer",
             "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
+          },
+          "providerUrl": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

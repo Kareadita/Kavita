@@ -10,7 +10,7 @@ import { NgIf, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
 
 /**
- * This is exclusivly used to register the first user on the server and nothing else
+ * This is exclusively used to register the first user on the server and nothing else
  */
 @Component({
     selector: 'app-register',
@@ -28,9 +28,9 @@ export class RegisterComponent {
     password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
   });
 
-  constructor(private router: Router, private accountService: AccountService, 
+  constructor(private router: Router, private accountService: AccountService,
     private toastr: ToastrService, private memberService: MemberService) {
-    
+
       this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       if (adminExists) {
         this.router.navigateByUrl('login');

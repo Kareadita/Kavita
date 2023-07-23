@@ -100,7 +100,7 @@ public static class Configuration
     {
         try
         {
-            return GetJwtToken(GetAppSettingFilename()) != "super secret unguessable key";
+            return !GetJwtToken(GetAppSettingFilename()).StartsWith("super secret unguessable key");
         }
         catch (Exception ex)
         {
