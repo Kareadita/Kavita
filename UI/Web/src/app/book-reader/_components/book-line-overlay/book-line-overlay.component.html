@@ -1,5 +1,4 @@
-<div #container class="overlay" *ngIf="selectedText.length > 0 || mode !== BookLineOverlayMode.None"
-     [ngStyle]="{ 'top.px': overlayPosition.top, 'left.px': overlayPosition.left }">
+<div class="overlay" *ngIf="selectedText.length > 0 || mode !== BookLineOverlayMode.None">
 
   <div class="row g-0 justify-content-between">
     <ng-container [ngSwitch]="mode">
