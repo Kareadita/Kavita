@@ -1715,7 +1715,7 @@ public class SeriesRepository : ISeriesRepository
     public async Task ClearOnDeckRemoval(int seriesId, int userId)
     {
         var existingEntry = await _context.AppUserOnDeckRemoval
-            .Where(u => u.Id == userId && u.SeriesId == seriesId)
+            .Where(u => u.AppUserId == userId && u.SeriesId == seriesId)
             .FirstOrDefaultAsync();
         if (existingEntry == null) return;
         _context.AppUserOnDeckRemoval.Remove(existingEntry);
