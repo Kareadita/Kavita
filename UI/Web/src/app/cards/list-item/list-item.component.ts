@@ -5,15 +5,14 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { map, Observable, Subject, takeUntil } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Download } from 'src/app/shared/_models/download';
 import { DownloadEvent, DownloadService } from 'src/app/shared/_services/download.service';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
@@ -103,8 +102,14 @@ export class ListItemComponent implements OnInit {
     return '';
   }
 
+  get ShowExtended() {
+    return this.utilityService.getActiveBreakpoint() === Breakpoint.Desktop;
+  }
 
-  constructor(private utilityService: UtilityService, private downloadService: DownloadService,
+  protected readonly Breakpoint = Breakpoint;
+
+
+  constructor(public utilityService: UtilityService, private downloadService: DownloadService,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {

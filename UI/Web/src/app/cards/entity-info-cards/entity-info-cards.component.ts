@@ -75,8 +75,6 @@ export class EntityInfoCardsComponent implements OnInit {
     return this.chapter.webLinks.split(',');
   }
 
-
-
   constructor(private utilityService: UtilityService, private seriesService: SeriesService, private readonly cdRef: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -125,10 +123,5 @@ export class EntityInfoCardsComponent implements OnInit {
       this.readingTime.avgHours = vol.avgHoursToRead;
     }
     this.cdRef.markForCheck();
-  }
-
-  getTimezone(timezone: string): string {
-    const localDate = new Date(timezone);
-    return localDate.toLocaleString('en-US', { timeZoneName: 'short' }).split(' ')[3];
   }
 }
