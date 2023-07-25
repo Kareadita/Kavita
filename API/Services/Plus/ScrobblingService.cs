@@ -39,7 +39,7 @@ public interface IScrobblingService
 {
     Task CheckExternalAccessTokens();
     Task<bool> HasTokenExpired(int userId, ScrobbleProvider provider);
-    Task ScrobbleRatingUpdate(int userId, int seriesId, int rating);
+    Task ScrobbleRatingUpdate(int userId, int seriesId, float rating);
     Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody);
     Task ScrobbleReadingUpdate(int userId, int seriesId);
     Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead);
@@ -223,7 +223,7 @@ public class ScrobblingService : IScrobblingService
         _logger.LogDebug("Added Scrobbling Review update on {SeriesName} with Userid {UserId} ", series.Name, userId);
     }
 
-    public async Task ScrobbleRatingUpdate(int userId, int seriesId, int rating)
+    public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
     {
         if (!await _licenseService.HasActiveLicense()) return;
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);

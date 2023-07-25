@@ -625,6 +625,7 @@ public class SeriesRepository : ISeriesRepository
             if (rating != null)
             {
                 s.UserRating = rating.Rating;
+                s.HasUserRated = rating.HasBeenRated;
             }
 
             if (userProgress.Count > 0)
@@ -1686,13 +1687,13 @@ public class SeriesRepository : ISeriesRepository
     {
         // If there is 0 or 1 rating and that rating is you, return 0 back
         var countOfRatingsThatAreUser = await _context.AppUserRating
-            .Where(r => r.SeriesId == seriesId).CountAsync(u => u.AppUserId == userId);
+            .Where(r => r.SeriesId == seriesId && r.HasBeenRated).CountAsync(u => u.AppUserId == userId);
         if (countOfRatingsThatAreUser == 1)
         {
             return 0;
         }
         var avg = (await _context.AppUserRating
-            .Where(r => r.SeriesId == seriesId)
+            .Where(r => r.SeriesId == seriesId && r.HasBeenRated)
             .AverageAsync(r => (int?) r.Rating));
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }

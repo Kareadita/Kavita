@@ -16,11 +16,13 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {AccountService} from "../../../_services/account.service";
 import {LibraryType} from "../../../_models/library";
 import {ProviderNamePipe} from "../../../pipe/provider-name.pipe";
+import {NgxStarsModule} from "ngx-stars";
+import {ThemeService} from "../../../_services/theme.service";
 
 @Component({
   selector: 'app-external-rating',
   standalone: true,
-  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe],
+  imports: [CommonModule, ProviderImagePipe, NgOptimizedImage, NgbRating, NgbPopover, LoadingComponent, ProviderNamePipe, NgxStarsModule],
   templateUrl: './external-rating.component.html',
   styleUrls: ['./external-rating.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,14 +31,18 @@ import {ProviderNamePipe} from "../../../pipe/provider-name.pipe";
 export class ExternalRatingComponent implements OnInit {
   @Input({required: true}) seriesId!: number;
   @Input({required: true}) userRating!: number;
+  @Input({required: true}) hasUserRated!: boolean;
   @Input({required: true}) libraryType!: LibraryType;
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly seriesService = inject(SeriesService);
   private readonly accountService = inject(AccountService);
+  private readonly themeService = inject(ThemeService);
 
   ratings: Array<Rating> = [];
   isLoading: boolean = false;
   overallRating: number = -1;
+
+  starColor = this.themeService.getCssVariable('--rating-star-color');
 
 
   ngOnInit() {
@@ -58,9 +64,11 @@ export class ExternalRatingComponent implements OnInit {
     });
   }
 
-  updateRating(rating: any) {
+  updateRating(rating: number) {
     this.seriesService.updateRating(this.seriesId, rating).subscribe(() => {
       this.userRating = rating;
+      this.hasUserRated = true;
+      this.cdRef.markForCheck();
     });
   }
 }

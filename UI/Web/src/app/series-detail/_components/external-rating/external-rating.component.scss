@@ -19,4 +19,19 @@
   }
 }
 
+.rating-star {
+  i {
+    position: relative;
+    display: inline-block;
+    padding-right: 0.1rem;
+    color: #d3d3d3;
+  }
 
+  .filled {
+    color: var(--primary-color);
+
+  }
+}
+::ng-deep .star {
+  background-color: var(--primary-color);
+}

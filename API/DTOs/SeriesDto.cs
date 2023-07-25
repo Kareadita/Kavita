@@ -30,9 +30,13 @@ public class SeriesDto : IHasReadTimeEstimate
     /// <summary>
     /// Rating from logged in user. Calculated at API-time.
     /// </summary>
-    public int UserRating { get; set; }
-    public MangaFormat Format { get; set; }
+    public float UserRating { get; set; }
+    /// <summary>
+    /// If the user has set the rating or not
+    /// </summary>
+    public bool HasUserRated { get; set; }
 
+    public MangaFormat Format { get; set; }
     public DateTime Created { get; set; }
 
     public bool NameLocked { get; set; }

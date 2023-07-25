@@ -294,7 +294,8 @@ public class SeriesService : ISeriesService
             new AppUserRating();
         try
         {
-            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0, 5);
+            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0f, 5f);
+            userRating.HasBeenRated = true;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
 
             if (userRating.Id == 0)
