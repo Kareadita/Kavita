@@ -30,30 +30,15 @@
 </ng-container>
 
 
-<div class="row g-0" *ngIf="seriesMetadata.genres && seriesMetadata.genres.length > 0">
-    <div class="col-md-4">
-        <h5>Genres</h5>
-    </div>
-    <div class="col-md-8">
-        <app-badge-expander [items]="seriesMetadata.genres">
-            <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Genres, item.id)" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
-            </ng-template>
-        </app-badge-expander>
-    </div>
-</div>
-<div class="row g-0" *ngIf="seriesMetadata.tags && seriesMetadata.tags.length > 0">
-    <div class="col-md-4">
-        <h5>Tags</h5>
-    </div>
-    <div class="col-md-8">
-        <app-badge-expander [items]="seriesMetadata.tags">
-            <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Tags, item.id)" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
-            </ng-template>
-        </app-badge-expander>
-    </div>
-</div>
+<app-metadata-detail [tags]="seriesMetadata.genres" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Genres" heading="Genres">
+  <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
+</app-metadata-detail>
+
+<app-metadata-detail [tags]="seriesMetadata.tags" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Tags" heading="Tags">
+  <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
+</app-metadata-detail>
+
+
 <div class="row g-0 mt-1" *ngIf="seriesMetadata.collectionTags && seriesMetadata.collectionTags.length > 0">
     <div class="col-md-4">
         <h5>Collections</h5>
@@ -68,6 +53,7 @@
         </app-badge-expander>
     </div>
 </div>
+
 <div class="row g-0 mt-1" *ngIf="readingLists && readingLists.length > 0">
     <div class="col-md-4">
         <h5>Reading Lists</h5>
@@ -86,135 +72,69 @@
         </app-badge-expander>
     </div>
 </div>
-<div class="row g-0 mt-1" *ngIf="seriesMetadata.writers && seriesMetadata.writers.length > 0">
-    <div class="col-md-4">
-        <h5>Writers/Authors</h5>
-    </div>
-    <div class="col-md-8">
-        <app-badge-expander [items]="seriesMetadata.writers">
-            <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Writers, item.id)" [person]="item"></app-person-badge>
-            </ng-template>
-        </app-badge-expander>
-    </div>
-</div>
+
+<app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Writers" heading="Writers/Authors">
+  <ng-template #itemTemplate let-item>
+    <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+  </ng-template>
+</app-metadata-detail>
+
 
 <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.coverArtists && seriesMetadata.coverArtists.length > 0">
-        <div class="col-md-4">
-            <h5>Cover Artists</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.coverArtists">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.CoverArtists, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.CoverArtists" heading="Cover Artists">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.characters && seriesMetadata.characters.length > 0">
-        <div class="col-md-4">
-            <h5>Characters</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.characters">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Character, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Character" heading="Characters">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.colorists && seriesMetadata.colorists.length > 0">
-        <div class="col-md-4">
-            <h5>Colorists</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.colorists">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Colorist, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Colorist" heading="Colorists">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.editors && seriesMetadata.editors.length > 0">
-        <div class="col-md-4">
-            <h5>Editors</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.editors">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Editor, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Editor" heading="Editors">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.inkers && seriesMetadata.inkers.length > 0">
-        <div class="col-md-4">
-            <h5>Inkers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.inkers">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Inker, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Inker" heading="Inkers">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.letterers && seriesMetadata.letterers.length > 0">
-        <div class="col-md-4">
-            <h5>Letterers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.letterers">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Letterer, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.translators && seriesMetadata.translators.length > 0">
-        <div class="col-md-4">
-            <h5>Translators</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.translators">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Translator, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Letterer" heading="Letterers">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.pencillers && seriesMetadata.pencillers.length > 0">
-        <div class="col-md-4">
-            <h5>Pencillers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.pencillers">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Penciller, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Translator" heading="Translators">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
 
-    <div class="row g-0 mt-1"  *ngIf="seriesMetadata.publishers && seriesMetadata.publishers.length > 0">
-        <div class="col-md-4">
-            <h5>Publishers</h5>
-        </div>
-        <div class="col-md-8">
-            <app-badge-expander [items]="seriesMetadata.publishers">
-                <ng-template #badgeExpanderItem let-item let-position="idx">
-                    <app-person-badge a11y-click="13,32" class="col-auto" (click)="goTo(FilterQueryParam.Publisher, item.id)" [person]="item"></app-person-badge>
-                </ng-template>
-            </app-badge-expander>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Penciller" heading="Pencillers">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
+
+  <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Publisher" heading="Publishers">
+    <ng-template #itemTemplate let-item>
+      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+    </ng-template>
+  </app-metadata-detail>
+
 </div>
 
 <div class="row g-0">
@@ -226,5 +146,4 @@
     </a>
 </div>
 
-<!-- This first row will have random information about the series-->
 <app-series-info-cards [series]="series" [seriesMetadata]="seriesMetadata" (goTo)="handleGoTo($event)" [hasReadingProgress]="hasReadingProgress"></app-series-info-cards>
