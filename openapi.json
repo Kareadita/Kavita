@@ -11306,9 +11306,13 @@
             "format": "int32"
           },
           "rating": {
-            "type": "integer",
-            "description": "A number between 0-5 that represents how good a series is.",
-            "format": "int32"
+            "type": "number",
+            "description": "A number between 0-5.0 that represents how good a series is.",
+            "format": "float"
+          },
+          "hasBeenRated": {
+            "type": "boolean",
+            "description": "If the rating has been explicitly set. Otherwise the 0.0 rating should be ignored as it's not rated"
           },
           "review": {
             "type": "string",
@@ -15362,9 +15366,13 @@
             "format": "date-time"
           },
           "userRating": {
-            "type": "integer",
+            "type": "number",
             "description": "Rating from logged in user. Calculated at API-time.",
-            "format": "int32"
+            "format": "float"
+          },
+          "hasUserRated": {
+            "type": "boolean",
+            "description": "If the user has set the rating or not"
           },
           "format": {
             "enum": [
@@ -17112,8 +17120,8 @@
             "format": "int32"
           },
           "userRating": {
-            "type": "integer",
-            "format": "int32"
+            "type": "number",
+            "format": "float"
           }
         },
         "additionalProperties": false

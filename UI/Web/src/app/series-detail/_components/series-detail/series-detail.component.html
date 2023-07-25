@@ -174,7 +174,7 @@
             <ng-template #storylineListLayout>
               <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackByStoryLineIdentity">
                 <ng-container *ngIf="!item.isChapter; else chapterListItem">
-                  <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)"
+                  <app-list-item [imageUrl]="imageService.getVolumeCoverImage(item.volume.id)" [libraryId]="libraryId"
                                  [seriesName]="series.name" [entity]="item.volume" *ngIf="item.volume.number !== 0"
                                  [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                  [pagesRead]="item.volume.pagesRead" [totalPages]="item.volume.pages" (read)="openVolume(item.volume)"
@@ -185,7 +185,7 @@
                   </app-list-item>
                 </ng-container>
                 <ng-template #chapterListItem>
-                  <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)"
+                  <app-list-item [imageUrl]="imageService.getChapterCoverImage(item.chapter.id)" [libraryId]="libraryId"
                                  [seriesName]="series.name" [entity]="item.chapter" *ngIf="!item.chapter.isSpecial"
                                  [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                  [pagesRead]="item.chapter.pagesRead" [totalPages]="item.chapter.pages" (read)="openChapter(item.chapter)"
@@ -219,7 +219,7 @@
             </ng-container>
             <ng-template #volumeListLayout>
               <ng-container *ngFor="let volume of scroll.viewPortItems; let idx = index; trackBy: trackByVolumeIdentity">
-                <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)"
+                <app-list-item [imageUrl]="imageService.getVolumeCoverImage(volume.id)" [libraryId]="libraryId"
                                [seriesName]="series.name" [entity]="volume"
                                [actions]="volumeActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                [pagesRead]="volume.pagesRead" [totalPages]="volume.pages" (read)="openVolume(volume)"
@@ -256,7 +256,7 @@
             </ng-container>
             <ng-template #chapterListLayout>
               <div *ngFor="let chapter of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)" [libraryId]="libraryId"
                                [seriesName]="series.name" [entity]="chapter" *ngIf="!chapter.isSpecial"
                                [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"
@@ -290,7 +290,7 @@
             </ng-container>
             <ng-template #specialListLayout>
               <ng-container *ngFor="let chapter of scroll.viewPortItems; let idx = index; trackBy: trackByChapterIdentity">
-                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)"
+                <app-list-item [imageUrl]="imageService.getChapterCoverImage(chapter.id)" [libraryId]="libraryId"
                                [seriesName]="series.name" [entity]="chapter"
                                [actions]="chapterActions" [libraryType]="libraryType" imageWidth="130px" imageHeight=""
                                [pagesRead]="chapter.pagesRead" [totalPages]="chapter.pages" (read)="openChapter(chapter)"
