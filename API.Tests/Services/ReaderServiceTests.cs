@@ -382,6 +382,49 @@ public class ReaderServiceTests
     }
 
     [Fact]
+    public async Task GetNextChapterIdAsync_ShouldGetNextVolume_OnlyFloats()
+    {
+        // V1 -> V2
+        await ResetDb();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1.0")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2.1")
+                .WithChapter(new ChapterBuilder("21").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("2.2")
+                .WithChapter(new ChapterBuilder("31").Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("3.1")
+                .WithChapter(new ChapterBuilder("31").Build())
+                .Build())
+
+
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Manga).Build();
+
+        _context.Series.Add(series);
+
+        _context.AppUser.Add(new AppUser()
+        {
+            UserName = "majora2007"
+        });
+
+        await _context.SaveChangesAsync();
+
+
+
+        var nextChapter = await _readerService.GetNextChapterIdAsync(1, 2, 2, 1);
+        var actualChapter = await _unitOfWork.ChapterRepository.GetChapterAsync(nextChapter);
+        Assert.Equal("31", actualChapter.Range);
+    }
+
+    [Fact]
     public async Task GetNextChapterIdAsync_ShouldRollIntoNextVolume()
     {
         await ResetDb();
