@@ -13,10 +13,10 @@
 <ng-container *ngIf="WebLinks as links">
   <app-metadata-detail [tags]="links" [libraryId]="series.libraryId" heading="Links">
     <ng-template #itemTemplate let-item>
-      <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
+      <a class="col me-1" [href]="item | safeHtml" target="_blank" rel="noopener noreferrer" [title]="item">
         <img width="24" height="24" class="lazyload img-placeholder"
              [src]="imageService.errorWebLinkImage"
-             [attr.data-src]="imageService.getWebLinkImage(link)"
+             [attr.data-src]="imageService.getWebLinkImage(item)"
              (error)="imageService.updateErroredWebLinkImage($event)"
              aria-hidden="true" alt="">
       </a>
@@ -45,10 +45,10 @@
 <app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" heading="Reading Lists">
   <ng-template #itemTemplate let-item>
     <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-                    <span *ngIf="item.promoted">
-                        <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
-                        <span class="visually-hidden">(promoted)</span>
-                    </span>
+        <span *ngIf="item.promoted">
+            <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
+            <span class="visually-hidden">(promoted)</span>
+        </span>
       {{item.title}}
     </app-tag-badge>
   </ng-template>
