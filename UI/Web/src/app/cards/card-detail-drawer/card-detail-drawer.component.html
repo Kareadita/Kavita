@@ -9,16 +9,16 @@
 
 <div class="offcanvas-body pb-3">
     <div class="d-flex">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical" style="max-width: 135px;">     
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="vertical" style="max-width: 135px;">
             <li [ngbNavItem]="tabs[TabID.General]">
                 <a ngbNavLink>General</a>
                 <ng-template ngbNavContent>
                     <div class="container-fluid" style="overflow: auto">
 
                         <div class="row g-0">
-                            <div class="d-none d-md-block col-md-2 col-lg-1">         
+                            <div class="d-none d-md-block col-md-2 col-lg-1">
                                 <app-image class="me-2" width="74px" [imageUrl]="coverImageUrl"></app-image>
-                            </div> 
+                            </div>
                             <div class="col-md-10 col-lg-11">
                                 <ng-container *ngIf="summary.length > 0; else noSummary">
                                     <app-read-more [text]="summary" [maxLength]="250"></app-read-more>
@@ -28,8 +28,8 @@
                                 </ng-template>
                             </div>
                         </div>
-                        
-                        <app-entity-info-cards [entity]="data"></app-entity-info-cards>
+
+                        <app-entity-info-cards [entity]="data" [libraryId]="libraryId"></app-entity-info-cards>
 
 
                         <!-- 2 rows to show some tags-->
@@ -41,7 +41,7 @@
                                         <app-badge-expander [items]="chapterMetadata.writers">
                                             <ng-template #badgeExpanderItem let-item let-position="idx">
                                                 <app-person-badge [person]="item"></app-person-badge>
-                                            </ng-template>  
+                                            </ng-template>
                                         </app-badge-expander>
                                     </ng-container>
                                 </div>
@@ -51,7 +51,7 @@
                                         <app-badge-expander [items]="chapterMetadata.genres">
                                             <ng-template #badgeExpanderItem let-item let-position="idx">
                                                 <app-tag-badge>{{item.title}}</app-tag-badge>
-                                            </ng-template>  
+                                            </ng-template>
                                         </app-badge-expander>
                                     </ng-container>
                                 </div>
@@ -63,7 +63,7 @@
                                         <app-badge-expander [items]="chapterMetadata.publishers">
                                             <ng-template #badgeExpanderItem let-item let-position="idx">
                                                 <app-person-badge [person]="item"></app-person-badge>
-                                            </ng-template>  
+                                            </ng-template>
                                         </app-badge-expander>
                                     </ng-container>
                                 </div>
@@ -73,7 +73,7 @@
                                         <app-badge-expander [items]="chapterMetadata.tags">
                                             <ng-template #badgeExpanderItem let-item let-position="idx">
                                                 <app-tag-badge>{{item.title}}</app-tag-badge>
-                                            </ng-template>  
+                                            </ng-template>
                                         </app-badge-expander>
                                     </ng-container>
                                 </div>
@@ -98,7 +98,7 @@
             <li [ngbNavItem]="tabs[TabID.Cover]" [disabled]="(isAdmin$ | async) === false">
                 <a ngbNavLink>{{tabs[TabID.Cover].title}}</a>
                 <ng-template ngbNavContent>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" 
+                    <app-cover-image-chooser [(imageUrls)]="imageUrls"
                         [showReset]="chapter.coverImageLocked"
                         [showApplyButton]="true"
                         (applyCover)="applyCoverImage($event)"
@@ -121,7 +121,7 @@
                                 <h5 class="mt-0 mb-1">
                                     <span >
                                         <span>
-                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions" 
+                                            <app-card-actionables (actionHandler)="performAction($event, chapter)" [actions]="chapterActions"
                                             [labelBy]="utilityService.formatChapterName(libraryType, true, true) + formatChapterNumber(chapter)"></app-card-actionables>
                                             <ng-container *ngIf="chapter.number !== '0'; else specialHeader">
                                                 {{utilityService.formatChapterName(libraryType, true, false) }} {{formatChapterNumber(chapter)}}
@@ -143,7 +143,7 @@
                                                 Pages: {{file.pages | number:''}}
                                             </div>
                                             <div class="col" *ngIf="data.hasOwnProperty('created')">
-                                                Added: 
+                                                Added:
                                                 <!-- TODO: This data.created can be removed after v0.5.5 release -->
                                                 <ng-container *ngIf="file.created === '0001-01-01T00:00:00'; else fileDate">
                                                     {{data.created | date: 'short' | defaultDate}}

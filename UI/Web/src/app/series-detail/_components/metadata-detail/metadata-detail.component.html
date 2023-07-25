@@ -1,4 +1,4 @@
-<div class="row g-0" *ngIf="tags.length > 0">
+<div class="row g-0 mb-1" *ngIf="tags.length > 0">
   <div class="col-md-4">
     <h5>{{heading}}</h5>
   </div>
@@ -6,9 +6,9 @@
     <app-badge-expander [items]="tags">
       <ng-template #badgeExpanderItem let-item let-position="idx">
         <ng-container *ngIf="itemTemplate; else useTitle">
-          <div (click)="goTo(queryParam, item.id)">
+          <span (click)="goTo(queryParam, item.id)">
             <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: position }"></ng-container>
-          </div>
+          </span>
         </ng-container>
         <ng-template #useTitle>
           <app-tag-badge a11y-click="13,32" class="col-auto" (click)="goTo(queryParam, item.id)" [selectionMode]="TagBadgeCursor.Clickable">

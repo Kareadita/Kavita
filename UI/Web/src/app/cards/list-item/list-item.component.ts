@@ -41,6 +41,7 @@ export class ListItemComponent implements OnInit {
    * Volume or Chapter to render
    */
   @Input({required: true}) entity!: Volume | Chapter;
+  @Input({required: true}) libraryId!: number;
   /**
    * Image to show
    */

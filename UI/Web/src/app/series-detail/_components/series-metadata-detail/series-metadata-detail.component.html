@@ -2,31 +2,26 @@
     <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
 </div>
 
-<div class="row g-0 mt-2 mb-2">
-  <div class="col-md-4">
-    <h5>Ratings</h5>
-  </div>
-  <div class="col-md-8">
+
+<app-metadata-detail [tags]="['']" [libraryId]="series.libraryId" heading="Ratings">
+  <ng-template #itemTemplate let-item>
     <app-external-rating [seriesId]="series.id" [userRating]="series.userRating" [hasUserRated]="series.hasUserRated" [libraryType]="libraryType"></app-external-rating>
-  </div>
-</div>
+  </ng-template>
+</app-metadata-detail>
 
 
 <ng-container *ngIf="WebLinks as links">
-    <div class="row g-0 mt-2 mb-2" *ngIf="links.length > 0">
-        <div class="col-md-4">
-            <h5>Links</h5>
-        </div>
-        <div class="col-md-8">
-            <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
-                <img width="24" height="24" class="lazyload img-placeholder"
-                    [src]="imageService.errorWebLinkImage"
-                    [attr.data-src]="imageService.getWebLinkImage(link)"
-                    (error)="imageService.updateErroredWebLinkImage($event)"
-                    aria-hidden="true" alt="">
-            </a>
-        </div>
-    </div>
+  <app-metadata-detail [tags]="links" [libraryId]="series.libraryId" heading="Links">
+    <ng-template #itemTemplate let-item>
+      <a class="col me-1" [href]="link | safeHtml" target="_blank" rel="noopener noreferrer" *ngFor="let link of links" [title]="link">
+        <img width="24" height="24" class="lazyload img-placeholder"
+             [src]="imageService.errorWebLinkImage"
+             [attr.data-src]="imageService.getWebLinkImage(link)"
+             (error)="imageService.updateErroredWebLinkImage($event)"
+             aria-hidden="true" alt="">
+      </a>
+    </ng-template>
+  </app-metadata-detail>
 </ng-container>
 
 
@@ -38,40 +33,27 @@
   <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
 </app-metadata-detail>
 
+<app-metadata-detail [tags]="seriesMetadata.collectionTags" [libraryId]="series.libraryId" heading="Collections">
+  <ng-template #itemTemplate let-item>
+    <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
+      {{item.title}}
+    </app-tag-badge>
+  </ng-template>
+</app-metadata-detail>
 
-<div class="row g-0 mt-1" *ngIf="seriesMetadata.collectionTags && seriesMetadata.collectionTags.length > 0">
-    <div class="col-md-4">
-        <h5>Collections</h5>
-    </div>
-    <div class="col-md-8">
-        <app-badge-expander [items]="seriesMetadata.collectionTags">
-            <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-                    {{item.title}}
-                </app-tag-badge>
-            </ng-template>
-        </app-badge-expander>
-    </div>
-</div>
 
-<div class="row g-0 mt-1" *ngIf="readingLists && readingLists.length > 0">
-    <div class="col-md-4">
-        <h5>Reading Lists</h5>
-    </div>
-    <div class="col-md-8">
-        <app-badge-expander [items]="readingLists">
-            <ng-template #badgeExpanderItem let-item let-position="idx">
-                <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
+<app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" heading="Reading Lists">
+  <ng-template #itemTemplate let-item>
+    <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
                     <span *ngIf="item.promoted">
                         <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
                         <span class="visually-hidden">(promoted)</span>
                     </span>
-                    {{item.title}}
-                </app-tag-badge>
-            </ng-template>
-        </app-badge-expander>
-    </div>
-</div>
+      {{item.title}}
+    </app-tag-badge>
+  </ng-template>
+</app-metadata-detail>
+
 
 <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Writers" heading="Writers/Authors">
   <ng-template #itemTemplate let-item>

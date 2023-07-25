@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ContentChild, inject, Input, OnInit, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, ContentChild, inject, Input, TemplateRef} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
@@ -14,23 +14,21 @@ import {Router} from "@angular/router";
   styleUrls: ['./metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataDetailComponent implements OnInit {
+export class MetadataDetailComponent {
 
   @Input({required: true}) tags: Array<any> = [];
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) heading!: string;
-  @Input({required: true}) queryParam!: FilterQueryParam;
+  @Input() queryParam: FilterQueryParam = FilterQueryParam.None;
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 
   private readonly router = inject(Router);
   protected readonly TagBadgeCursor = TagBadgeCursor;
 
-  ngOnInit() {
-    console.log(this.itemTemplate)
-  }
 
   goTo(queryParamName: FilterQueryParam, filter: any) {
+    if (queryParamName === FilterQueryParam.None) return;
     let params: any = {};
     params[queryParamName] = filter;
     params[FilterQueryParam.Page] = 1;

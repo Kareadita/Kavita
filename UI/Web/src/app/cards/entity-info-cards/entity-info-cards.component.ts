@@ -24,11 +24,13 @@ import {BytesPipe} from "../../pipe/bytes.pipe";
 import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
 import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
+import {FilterQueryParam} from "../../shared/_services/filter-utilities.service";
 
 @Component({
   selector: 'app-entity-info-cards',
   standalone: true,
-  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip],
+  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,6 +38,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 export class EntityInfoCardsComponent implements OnInit {
 
   @Input({required: true}) entity!: Volume | Chapter;
+  @Input({required: true}) libraryId!: number;
   /**
    * This will pull extra information
    */
@@ -124,4 +127,6 @@ export class EntityInfoCardsComponent implements OnInit {
     }
     this.cdRef.markForCheck();
   }
+
+  protected readonly FilterQueryParam = FilterQueryParam;
 }
