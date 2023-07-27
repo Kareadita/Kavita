@@ -1,0 +1,10 @@
+{
+    "login": {
+        "title": "Login",
+        "username": "Username",
+        "password": "Password",
+        "password-validation": "Password must be between {{min}} and {{max}} characters in length",
+        "forgot-password": "Forgot Password?",
+        "submit": "Submit"
+    }
+}
