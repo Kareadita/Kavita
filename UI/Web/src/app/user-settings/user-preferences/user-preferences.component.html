@@ -21,7 +21,7 @@
 
                 <form [formGroup]="settingsForm" *ngIf="user !== undefined">
                     <div ngbAccordion [closeOthers]="true" #acc="ngbAccordion">
-                      <div ngbAccordionItem [id]="AccordionPanelID.GlobalSettings" title="Global Settings" [collapsed]="false">
+                      <div ngbAccordionItem [id]="AccordionPanelID.GlobalSettings" [collapsed]="false">
                         <h2 class="accordion-header" ngbAccordionHeader>
                             <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.GlobalSettings)" aria-controls="collapseOne">
                                 Global Settings
@@ -32,13 +32,26 @@
                             <ng-template>
                               <div class="row g-0">
                                 <div class="col-md-6 col-sm-12 pe-2 mb-2">
-                                  <label for="settings-global-layoutmode" class="form-label">Page Layout Mode</label>&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
+                                  <label for="settings-global-layoutmode" class="form-label">Page Layout Mode</label>
+                                  <i class="fa fa-info-circle ms-1" aria-hidden="true" placement="right" [ngbTooltip]="layoutModeTooltip" role="button" tabindex="0"></i>
                                   <ng-template #layoutModeTooltip>Show items as cards or list view on Series Detail page</ng-template>
                                   <span class="visually-hidden" id="settings-global-layoutmode-help">Show items as cards or list view on Series Detail page</span>
                                   <select class="form-select" aria-describedby="manga-header" formControlName="globalPageLayoutMode" id="settings-global-layoutmode">
                                     <option *ngFor="let opt of pageLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
                                   </select>
                                 </div>
+
+                                <div class="col-md-6 col-sm-12 pe-2 mb-2">
+                                  <label for="settings-global-locale" class="form-label">Locale</label>
+                                  <i class="fa fa-info-circle ms-1"
+                                         aria-hidden="true" placement="right" [ngbTooltip]="localeTooltip" role="button" tabindex="0"></i>
+                                  <ng-template #localeTooltip>The language Kavita should use</ng-template>
+                                  <span class="visually-hidden" id="settings-global-locale-help">The language Kavita should use</span>
+                                  <select class="form-select" aria-describedby="manga-header" formControlName="locale" id="settings-global-locale">
+                                    <option *ngFor="let opt of locales" [value]="opt.isoCode">{{opt.title | titlecase}}</option>
+                                  </select>
+                                </div>
+
                               </div>
 
                               <div class="row g-0">
@@ -113,7 +126,7 @@
                         </div>
                       </div>
 
-                      <div ngbAccordionItem [id]="AccordionPanelID.ImageReader" title="Image Reader">
+                      <div ngbAccordionItem [id]="AccordionPanelID.ImageReader">
                         <h2 class="accordion-header" ngbAccordionHeader>
                           <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.ImageReader)" aria-controls="collapseOne">
                             Image Reader
@@ -227,7 +240,7 @@
                         </div>
                       </div>
 
-                      <div ngbAccordionItem [id]="AccordionPanelID.BookReader" title="Book Reader">
+                      <div ngbAccordionItem [id]="AccordionPanelID.BookReader">
                         <h2 class="accordion-header" ngbAccordionHeader>
                           <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded(AccordionPanelID.BookReader)" aria-controls="collapseOne">
                             Book Reader

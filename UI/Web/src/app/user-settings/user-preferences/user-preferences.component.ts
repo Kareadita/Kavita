@@ -27,7 +27,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { forkJoin } from 'rxjs';
+import {forkJoin} from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -46,6 +46,8 @@ import { ChangeEmailComponent } from '../change-email/change-email.component';
 import { NgFor, NgIf, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
 import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {LocalizationService} from "../../_services/localization.service";
+import {Language} from "../../_models/metadata/language";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -70,7 +72,10 @@ enum FragmentID {
     styleUrls: ['./user-preferences.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent, ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent, ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe]
+    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
+      ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
+      NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
+      ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -98,6 +103,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: 'Devices', fragment: FragmentID.Devices},
     {title: 'Stats', fragment: FragmentID.Stats},
   ];
+  locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
   opdsUrl: string = '';
@@ -115,12 +121,21 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef) {
+    private router: Router, private readonly cdRef: ChangeDetectorRef, public localizationService: LocalizationService) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
     this.accountService.getOpdsUrl().subscribe(res => {
       this.opdsUrl = res;
+      this.cdRef.markForCheck();
+    });
+
+    this.localizationService.getLocales().subscribe(res => {
+      this.locales = res;
+      // if (this.locales.length === 1) {
+      //   this.settingsForm.get('locale')?.disable();
+      // }
+      //this.settingsForm.get('locale')?.setValue(this.user?.preferences.locale || 'en');
       this.cdRef.markForCheck();
     });
 
@@ -195,6 +210,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
       this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
       this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
+      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale, []));
+      console.log('this.user.preferences.locale: ', this.user.preferences.locale);
+      console.log('locales: ', this.locales);
+      if (this.locales.length === 1) {
+        this.settingsForm.get('locale')?.disable();
+      }
 
       this.cdRef.markForCheck();
     });
@@ -241,6 +262,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
     this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
+    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -295,6 +317,4 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
   }
-
-  protected readonly undefined = undefined;
 }
