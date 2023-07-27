@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,6 +15,7 @@ public interface ILocalizationService
 {
     Task<Dictionary<string, string>> LoadLanguage(string languageCode);
     Task<string> Get(string locale, string key, params object[] args);
+    IEnumerable<string> GetLocales();
 }
 
 public class LocalizationService : ILocalizationService
@@ -31,13 +34,13 @@ public class LocalizationService : ILocalizationService
         {
             _localizationDirectory = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "..", "UI/Web/src/assets/i18n");
+                "..", "UI/Web/src/assets/langs");
         }
         else
         {
             _localizationDirectory = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "wwwroot", "assets/i18n");
+                "wwwroot", "assets/langs");
         }
     }
 
@@ -86,5 +89,11 @@ public class LocalizationService : ILocalizationService
         }
 
         return translatedString ?? key;
+    }
+
+    public IEnumerable<string> GetLocales()
+    {
+        return _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectory), @"\.json")
+            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
     }
 }

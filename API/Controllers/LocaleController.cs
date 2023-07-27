@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using API.Data;
+using API.DTOs.Filtering;
 using API.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +12,6 @@ public class LocaleController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILocalizationService _localizationService;
-    private static readonly IReadOnlyList<string> AllLocales = new List<string>() { "en" };
 
     public LocaleController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
     {
@@ -23,6 +22,13 @@ public class LocaleController : BaseApiController
     [HttpGet]
     public ActionResult<IEnumerable<string>> GetAllLocales()
     {
-        return Ok(AllLocales);
+        // TODO: cache this
+        var languages = _localizationService.GetLocales().Select(c => new CultureInfo(c)).Select(c =>
+            new LanguageDto()
+            {
+                Title = c.DisplayName,
+                IsoCode = c.IetfLanguageTag
+            }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
+        return Ok(languages);
     }
 }
