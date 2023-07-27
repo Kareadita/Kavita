@@ -33,6 +33,7 @@ export class AccountService {
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
   public lastLoginKey = 'kavita-lastlogin';
+  public localeKey = 'kavita-locale';
   private currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
@@ -147,14 +148,11 @@ export class AccountService {
     this.currentUser = user;
     this.currentUserSource.next(user);
 
-    if (user) {
-      this.messageHub.createHubConnection(user, this.hasAdminRole(user));
-      this.hasValidLicense().subscribe();
-    }
-
     this.stopRefreshTokenTimer();
 
-    if (this.currentUser !== undefined) {
+    if (this.currentUser) {
+      this.messageHub.createHubConnection(this.currentUser, this.hasAdminRole(this.currentUser));
+      this.hasValidLicense().subscribe();
       this.startRefreshTokenTimer();
     }
   }
@@ -269,6 +267,9 @@ export class AccountService {
       if (this.currentUser !== undefined && this.currentUser !== null) {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
+
+        // Update the locale on disk (for logout only)
+        localStorage.setItem(this.localeKey, this.currentUser.preferences.locale);
       }
       return settings;
     }), takeUntilDestroyed(this.destroyRef));

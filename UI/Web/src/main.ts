@@ -20,7 +20,6 @@ import {httpLoader} from "./httpLoader";
 const disableAnimations = !('animate' in document.documentElement);
 
 
-
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule, AppRoutingModule, BrowserAnimationsModule.withConfig({ disableAnimations }), ToastrModule.forRoot({
@@ -51,4 +50,4 @@ bootstrapApplication(AppComponent, {
         provideHttpClient(withInterceptorsFromDi())
     ]
 })
-    .catch(err => console.error(err));
+.catch(err => console.error(err));
