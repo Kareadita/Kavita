@@ -5,6 +5,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
+using API.Services;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -113,16 +114,17 @@ public class UsersController : BaseApiController
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+        if (LocalizationService.AllLocales.Contains(preferencesDto.Locale))
+        {
+            existingPreferences.Locale = preferencesDto.Locale;
+        }
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
-        if (await _unitOfWork.CommitAsync())
-        {
-            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
-            return Ok(preferencesDto);
-        }
+        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving preferences.");
 
-        return BadRequest("There was an issue saving preferences.");
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
+        return Ok(preferencesDto);
     }
 
     /// <summary>

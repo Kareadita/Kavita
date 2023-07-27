@@ -20,6 +20,7 @@ public class LocalizationService : ILocalizationService
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
     private readonly string _localizationDirectory;
+    public static readonly IReadOnlyList<string> AllLocales = new List<string>() { "en" };
 
 
     public LocalizationService(IDirectoryService directoryService, IHostEnvironment environment, IMemoryCache cache)
@@ -64,7 +65,7 @@ public class LocalizationService : ILocalizationService
             var translationData = await LoadLanguage(locale);
 
             // Find the translation for the given key
-            if (translationData.TryGetValue(key, out string value))
+            if (translationData.TryGetValue(key, out var value))
             {
                 translatedString = value;
 
@@ -84,6 +85,6 @@ public class LocalizationService : ILocalizationService
             translatedString = string.Format(translatedString, args);
         }
 
-        return translatedString;
+        return translatedString ?? key;
     }
 }

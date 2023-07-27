@@ -42,6 +42,7 @@ export interface Preferences {
     noTransitions: boolean;
     collapseSeriesRelationships: boolean;
     shareReviews: boolean;
+    locale: string;
 }
 
 export const readingDirections = [{text: 'Left to Right', value: ReadingDirection.LeftToRight}, {text: 'Right to Left', value: ReadingDirection.RightToLeft}];

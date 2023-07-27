@@ -275,7 +275,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       emulateBook: modelSettings.emulateBook,
       swipeToPaginate: modelSettings.swipeToPaginate,
       collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
-      shareReviews: modelSettings.shareReviews
+      shareReviews: modelSettings.shareReviews,
+      locale: modelSettings.locale
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {

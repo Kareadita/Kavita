@@ -102,6 +102,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(WritingStyle.Horizontal);
         builder.Entity<AppUserPreferences>()
             .Property(b => b.Locale)
+            .IsRequired(true)
             .HasDefaultValue("en");
 
         builder.Entity<Library>()

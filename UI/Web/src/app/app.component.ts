@@ -1,4 +1,4 @@
-import { Component, HostListener, Inject, OnInit } from '@angular/core';
+import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import { NavigationStart, Router, RouterOutlet } from '@angular/router';
 import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-root',
@@ -23,6 +25,9 @@ export class AppComponent implements OnInit {
 
   transitionState$!: Observable<boolean>;
 
+  destroyRef = inject(DestroyRef);
+  translocoService = inject(TranslocoService);
+
   constructor(private accountService: AccountService, public navService: NavService,
     private libraryService: LibraryService,
     private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
@@ -34,7 +39,7 @@ export class AppComponent implements OnInit {
 
     // Close any open modals when a route change occurs
     router.events
-      .pipe(filter(event => event instanceof NavigationStart))
+      .pipe(filter(event => event instanceof NavigationStart), takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (this.ngbModal.hasOpenModals()) {
           this.ngbModal.dismissAll();
@@ -44,7 +49,16 @@ export class AppComponent implements OnInit {
     this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
       if (!user) return false;
       return user.preferences.noTransitions;
-    }));
+    }), takeUntilDestroyed(this.destroyRef));
+
+    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+      if (user && user.preferences.locale) {
+        this.translocoService.setActiveLang(user.preferences.locale);
+      } else {
+        // If no user or locale is available, fallback to the default language ('en')
+        this.translocoService.setActiveLang('en');
+      }
+    });
   }
 
   @HostListener('window:resize', ['$event'])
