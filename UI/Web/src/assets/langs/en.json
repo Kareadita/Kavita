@@ -15,5 +15,17 @@
         "on-deck-title": "On Deck",
         "recently-updated-title": "Recently Updated Series",
         "recently-added-title": "Newly Added Series"
+    },
+
+    "edit-user": {
+        "edit": "Edit",
+        "close": "Close",
+        "username": "Username",
+        "required": "This field is required",
+        "email": "Email",
+        "not-valid-email": "This must be a valid email address",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "update": "Update"
     }
 }
