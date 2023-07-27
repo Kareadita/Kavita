@@ -5,7 +5,7 @@
         <ng-container *ngIf="libraries.length === 0 && !isLoading">
             <div class="mt-3" *ngIf="isAdmin$ | async as isAdmin">
                 <div *ngIf="isAdmin" class="d-flex justify-content-center">
-                    <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a></p>
+                    <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a>.</p>
                 </div>
                 <div *ngIf="!isAdmin" class="d-flex justify-content-center">
                     <p>{{t('not-granted')}}</p>

@@ -23,7 +23,6 @@ public class LocalizationService : ILocalizationService
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
     private readonly string _localizationDirectory;
-    public static readonly IReadOnlyList<string> AllLocales = new List<string>() { "en" };
 
 
     public LocalizationService(IDirectoryService directoryService, IHostEnvironment environment, IMemoryCache cache)

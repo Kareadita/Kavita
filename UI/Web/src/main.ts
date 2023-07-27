@@ -39,7 +39,11 @@ bootstrapApplication(AppComponent, {
             reRenderOnLangChange: true,
             availableLangs: ['en', 'es'],
             prodMode: environment.production,
-            defaultLang: 'en'
+            defaultLang: 'en',
+            fallbackLang: 'en',
+            missingHandler: {
+              useFallbackTranslation: true
+            }
           }
         },
         Title,

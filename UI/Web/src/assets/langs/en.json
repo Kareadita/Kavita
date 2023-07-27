@@ -10,7 +10,7 @@
 
     "dashboard": {
         "no-libraries": "There are no libraries setup yet. Configure some in",
-        "server-settings-link": "Server settings.",
+        "server-settings-link": "Server settings",
         "not-granted": "You haven't been granted access to any libraries.",
         "on-deck-title": "On Deck",
         "recently-updated-title": "Recently Updated Series",

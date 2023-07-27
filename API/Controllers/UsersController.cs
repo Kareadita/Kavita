@@ -19,12 +19,14 @@ public class UsersController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IEventHub _eventHub;
+    private readonly ILocalizationService _localizationService;
 
-    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub)
+    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _eventHub = eventHub;
+        _localizationService = localizationService;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -114,7 +116,7 @@ public class UsersController : BaseApiController
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
         existingPreferences.ShareReviews = preferencesDto.ShareReviews;
-        if (LocalizationService.AllLocales.Contains(preferencesDto.Locale))
+        if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;
         }

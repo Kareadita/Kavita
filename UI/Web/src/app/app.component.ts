@@ -56,6 +56,11 @@ export class AppComponent implements OnInit {
         this.translocoService.setActiveLang(user.preferences.locale);
       } else {
         // If no user or locale is available, fallback to the default language ('en')
+        const localStorageUser = this.accountService.getUserFromLocalStorage();
+        if (localStorageUser && localStorageUser.preferences.locale) {
+          this.translocoService.setActiveLang(localStorageUser.preferences.locale);
+          return;
+        }
         this.translocoService.setActiveLang('en');
       }
     });
