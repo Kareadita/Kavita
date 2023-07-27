@@ -149,9 +149,8 @@ export class AccountService {
 
     if (user) {
       this.messageHub.createHubConnection(user, this.hasAdminRole(user));
+      this.hasValidLicense().subscribe();
     }
-
-    this.hasValidLicense().subscribe();
 
     this.stopRefreshTokenTimer();
 
