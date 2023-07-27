@@ -10,9 +10,11 @@ import {catchError, distinctUntilChanged} from "rxjs/operators";
 export class HttpLoader implements TranslocoLoader {
   constructor(private http: HttpClient, private accountService: AccountService) {}
 
-  getTranslation(lang: string) {
-    console.log('loading language: ', lang);
-    return this.http.get<Translation>(`assets/langs/${lang}.json`);
+  getTranslation(langPath: string) {
+    console.log('loading language: ', langPath);
+    const tokens = langPath.split('/');
+    console.log('\ttokens: ', tokens);
+    return this.http.get<Translation>(`assets/langs/${tokens[tokens.length - 1]}.json`);
     // return this.accountService.currentUser$.pipe(
     //   distinctUntilChanged(),
     //   switchMap(user => {
