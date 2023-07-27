@@ -1,8 +1,5 @@
 /// <reference types="@angular/localize" />
-
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
-import {importProvidersFrom, Injectable} from '@angular/core';
+import {importProvidersFrom} from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ToastrModule } from 'ngx-toastr';
@@ -13,25 +10,49 @@ import { Title, BrowserModule, bootstrapApplication } from '@angular/platform-br
 import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient} from '@angular/common/http';
-import {Translation, TRANSLOCO_CONFIG, TRANSLOCO_LOADER, TranslocoModule} from "@ngneat/transloco";
+import {TRANSLOCO_CONFIG, TranslocoConfig, TranslocoModule} from "@ngneat/transloco";
 import {environment} from "./environments/environment";
-import {httpLoader} from "./httpLoader";
+import {HttpLoader, translocoLoader} from "./httpLoader";
+import {
+  TRANSLOCO_PERSIST_LANG_STORAGE,
+  TranslocoPersistLangModule,
+} from '@ngneat/transloco-persist-lang';
+import {PERSIST_TRANSLATIONS_STORAGE, TranslocoPersistTranslationsModule} from "@ngneat/transloco-persist-translations";
 
 const disableAnimations = !('animate' in document.documentElement);
 
 
 bootstrapApplication(AppComponent, {
     providers: [
-        importProvidersFrom(BrowserModule, AppRoutingModule, BrowserAnimationsModule.withConfig({ disableAnimations }), ToastrModule.forRoot({
+        importProvidersFrom(BrowserModule,
+          AppRoutingModule,
+          BrowserAnimationsModule.withConfig({ disableAnimations }),
+          ToastrModule.forRoot({
             positionClass: 'toast-bottom-right',
             preventDuplicates: true,
             timeOut: 6000,
             countDuplicates: true,
             autoDismiss: true
-        }), NgCircleProgressModule.forRoot(), TranslocoModule),
+          }),
+          NgCircleProgressModule.forRoot(),
+          TranslocoModule,
+          TranslocoPersistLangModule.forRoot({
+            storage: {
+              provide: TRANSLOCO_PERSIST_LANG_STORAGE,
+              useValue: localStorage,
+            },
+          }),
+          TranslocoPersistTranslationsModule.forRoot({
+            loader: HttpLoader,
+            storage: {
+              provide: PERSIST_TRANSLATIONS_STORAGE,
+                useValue: localStorage
+            }
+          })
+        ),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        httpLoader,
+        //translocoLoader,
         {
           provide: TRANSLOCO_CONFIG,
           useValue: {
@@ -41,9 +62,10 @@ bootstrapApplication(AppComponent, {
             defaultLang: 'en',
             fallbackLang: 'en',
             missingHandler: {
-              useFallbackTranslation: true
+              useFallbackTranslation: true,
+              allowEmpty: true,
             }
-          }
+          } as TranslocoConfig
         },
         Title,
         { provide: SAVER, useFactory: getSaver },

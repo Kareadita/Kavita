@@ -14,22 +14,22 @@
         </ng-container>
     </ng-container>
 
-    <app-carousel-reel [items]="inProgress" title="{{t('on-deck-title')}}" (sectionClick)="handleSectionClick('on deck')">
-        <ng-template #carouselItem let-item let-position="idx">
+    <app-carousel-reel [items]="inProgress" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick('on deck')">
+        <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" [isOnDeck]="true"
                             (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
         </ng-template>
     </app-carousel-reel>
 
-    <app-carousel-reel [items]="recentlyUpdatedSeries" title="{{t('recently-updated-title')}}" (sectionClick)="handleSectionClick('recently updated series')">
-        <ng-template #carouselItem let-item let-position="idx">
+    <app-carousel-reel [items]="recentlyUpdatedSeries" [title]="t('recently-updated-title')" (sectionClick)="handleSectionClick('recently updated series')">
+        <ng-template #carouselItem let-item>
             <app-card-item [entity]="item" [title]="item.seriesName" [suppressLibraryLink]="libraryId !== 0" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
             [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
         </ng-template>
     </app-carousel-reel>
 
-    <app-carousel-reel [items]="recentlyAddedSeries" title="{{t('recently-added-title')}}" (sectionClick)="handleSectionClick('newly added series')">
-        <ng-template #carouselItem let-item let-position="idx">
+    <app-carousel-reel [items]="recentlyAddedSeries" [title]="t('recently-added-title')" (sectionClick)="handleSectionClick('newly added series')">
+        <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (dataChanged)="loadRecentlyAddedSeries()"></app-series-card>
         </ng-template>
     </app-carousel-reel>
