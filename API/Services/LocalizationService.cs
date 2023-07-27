@@ -25,13 +25,13 @@ public class LocalizationService : ILocalizationService
         {
             _localizationDirectory = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "..", "UI/Web/src/assets/langs");
+                "..", "UI/Web/src/assets/i18n");
         }
         else
         {
             _localizationDirectory = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "wwwroot", "assets/langs");
+                "wwwroot", "assets/i18n");
         }
     }
 

@@ -36,6 +36,7 @@ bootstrapApplication(AppComponent, {
         {
           provide: TRANSLOCO_CONFIG,
           useValue: {
+
             reRenderOnLangChange: true,
             availableLangs: ['en', 'es'],
             prodMode: environment.production,

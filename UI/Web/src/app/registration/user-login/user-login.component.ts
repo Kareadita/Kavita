@@ -11,6 +11,7 @@ import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 @Component({
@@ -19,7 +20,7 @@ import { SplashContainerComponent } from '../_components/splash-container/splash
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink]
+  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoModule]
 })
 export class UserLoginComponent implements OnInit {
 
