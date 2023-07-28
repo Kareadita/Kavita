@@ -1,38 +1,41 @@
-<div class="card mt-2">
+<ng-container *transloco="let t; read:'change-age-restriction'">
+  <div class="card mt-2">
     <div class="card-body">
-        <div class="card-title">
-            <div class="container-fluid row mb-2">
-                <div class="col-10 col-sm-11"><h4 id="age-restriction">Age Restriction</h4></div>
-                <div class="col-1 text-end">
-                    <button class="btn btn-primary btn-sm" (click)="toggleViewMode()" *ngIf="(hasChangeAgeRestrictionAbility | async)">{{isViewMode ? 'Edit' : 'Cancel'}}</button>
-                </div>
-            </div>
+      <div class="card-title">
+        <div class="container-fluid row mb-2">
+          <div class="col-10 col-sm-11"><h4 id="age-restriction">{{t('age-restriction-label')}}</h4></div>
+          <div class="col-1 text-end">
+            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()" *ngIf="(hasChangeAgeRestrictionAbility | async)">{{isViewMode ? t('edit') : t('cancel')}}</button>
+          </div>
         </div>
+      </div>
 
-        <ng-container *ngIf="isViewMode">
-            <div class="container-fluid row">
+      <ng-container *ngIf="isViewMode">
+        <div class="container-fluid row">
                 <span class="col-12">{{user?.ageRestriction?.ageRating| ageRating | async}}
-                    <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
-                        <span class="ms-1 me-1">+</span> Unknowns
+                  <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
+                        <span class="ms-1 me-1">+</span> {{t('unknowns')}}
                     </ng-container>
                 </span>
-            </div>
-        </ng-container>
-
-        <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
-            <ng-container *ngIf="user">
-                <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset"></app-restriction-selector>
-                
-                <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
-                    <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">Reset</button>
-                    <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">Save</button>
-                </div>
-            </ng-container>
         </div>
+      </ng-container>
 
-        
+      <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+        <ng-container *ngIf="user">
+          <app-restriction-selector (selected)="updateRestrictionSelection($event)" [showContext]="false" [member]="user" [reset]="reset"></app-restriction-selector>
+
+          <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+            <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="age-restriction" (click)="resetForm()">{{t('reset')}}</button>
+            <button type="submit" class="flex-fill btn btn-primary" aria-describedby="age-restriction" (click)="saveForm()">{{t('save')}}</button>
+          </div>
+        </ng-container>
+      </div>
+
+
     </div>
-    
 
-</div>
 
+  </div>
+
+
+</ng-container>

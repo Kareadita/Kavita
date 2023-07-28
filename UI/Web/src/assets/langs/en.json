@@ -249,6 +249,16 @@
         "save": "{{common.save}}"
     },
 
+    "change-age-restriction": {
+        "age-restriction-label": "Age Restriction",
+        "unknowns": "Unknowns",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
