@@ -81,10 +81,18 @@
         "rating-percentage": "Rating {{r}}%"
     },
 
+    "want-to-read": {
+        "title": "Want To Read",
+        "series-count": "{{common.series-count}}",
+        "no-items": "There are no items. Try adding a series.",
+        "no-items-filtered": "No items match your current filter."
+    },
+
     "common": {
         "close": "Close",
         "cancel": "Cancel",
-        "save": "Save"
+        "save": "Save",
+        "series-count": "{{num}} Series"
     }
 
 }
