@@ -1,1 +1,46 @@
-{}
+{
+    "login": {
+        "title": "로그인",
+        "username": "아이디",
+        "password": "비밀번호",
+        "submit": "로그인",
+        "password-validation": "비밀번호는 길이는{{min}}에서 {{max}}자 사이여야 합니다",
+        "forgot-password": "비밀번호를 잊으셨나요?"
+    },
+    "dashboard": {
+        "no-libraries": "라이브러리가 아직 설정되지 않았습니다. 구성하기",
+        "server-settings-link": "서버 설정",
+        "recently-updated-title": "최근에 업데이트된 시리즈",
+        "recently-added-title": "새롭게 추가된 시리즈",
+        "not-granted": "라이브러리에 대한 접근 권한이 없습니다."
+    },
+    "edit-user": {
+        "edit": "수정",
+        "username": "사용자",
+        "required": "필수 항목입니다",
+        "not-valid-email": "유효한 메일 주소여야 합니다",
+        "update": "업데이트",
+        "email": "이메일",
+        "saving": "저장중…"
+    },
+    "user-scrobble-history": {
+        "filter-label": "필터",
+        "type-header": "유형",
+        "series-header": "시리즈",
+        "created-header": "생성됨",
+        "last-modified-header": "마지막으로 수정한 날짜",
+        "no-data": "데이터 없음",
+        "volume-and-chapter-num": "볼륨 {{v}} 챕터 {{n}}",
+        "rating": "평점 {{r}}",
+        "not-applicable": "해당 사항 없음",
+        "processed": "처리됨",
+        "not-processed": "처리되지 않음",
+        "description": "여기에 계정과 연결된 모든 scrobble  데이터베이스가 있습니다. 이벤트가 존재하려면 활성 상태가 있어야 합니다\n  scrobble 공급자가 구성되었습니다. 처리된 모든 이벤트는 한 달 후에 지워집니다. 만약 처리되지 않은 이벤트가 있다면, 그것은 삭제됩니다\n  이들은 업스트림에서 일치하는 항목을 형성할 수 없습니다. 관리자에게 연락하여 수정하십시오.",
+        "data-header": "데이터",
+        "is-processed-header": "처리됨"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "읽기 진행률",
+        "score-updated": "평점 업데이트"
+    }
+}
