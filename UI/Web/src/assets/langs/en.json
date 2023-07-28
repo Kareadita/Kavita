@@ -311,6 +311,11 @@
 
     },
 
+    "user-stats": {
+        "library-read-progress-title": "Library Read Progress",
+        "read-percentage": "% Read"
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"

@@ -21,6 +21,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { StatListComponent } from '../stat-list/stat-list.component';
 import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
 import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats-info-cards.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-user-stats',
@@ -34,6 +35,7 @@ import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats
         ReadingActivityComponent,
         StatListComponent,
         AsyncPipe,
+        TranslocoModule,
     ],
 })
 export class UserStatsComponent implements OnInit {
