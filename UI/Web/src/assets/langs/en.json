@@ -231,6 +231,24 @@
         "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
     },
 
+    "change-email": {
+        "email-label": "Email",
+        "current-password-label": "Current Password",
+        "email-not-confirmed": "This email is not confirmed",
+        "email-updated-title": "Email Updated",
+        "email-updated-description": "You can use the following link below to confirm the email for your account.\n            If your server is externally accessible, an email will have been sent to the email and the link can be used to confirm the email.",
+        "setup-user-account": "Setup user's account",
+        "invite-url-label": "Invite Url",
+        "invite-url-tooltip": "Copy this and paste in a new tab",
+
+        "permission-error": "You do not have permission to change your email. Reach out to the admin of the server.",
+        "required-field": "{{validation.required-field}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"

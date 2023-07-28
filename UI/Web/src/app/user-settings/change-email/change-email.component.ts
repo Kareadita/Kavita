@@ -9,6 +9,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { ApiKeyComponent } from '../api-key/api-key.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-email',
@@ -16,7 +17,7 @@ import { NgIf, NgFor } from '@angular/common';
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent]
+    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent, TranslocoModule]
 })
 export class ChangeEmailComponent implements OnInit {
 
