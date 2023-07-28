@@ -65,6 +65,13 @@
         "review-label": "Review",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
+    },
+
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "{{username}}'s Review",
+        "external-mod": "(external)",
+        "go-to-review": "Go To Review"
 
     },
 
