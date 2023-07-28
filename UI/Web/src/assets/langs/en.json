@@ -7,7 +7,6 @@
         "forgot-password": "Forgot Password?",
         "submit": "Submit"
     },
-
     "dashboard": {
         "no-libraries": "There are no libraries setup yet. Configure some in",
         "server-settings-link": "Server settings",
@@ -16,7 +15,6 @@
         "recently-updated-title": "Recently Updated Series",
         "recently-added-title": "Newly Added Series"
     },
-
     "edit-user": {
         "edit": "Edit",
         "close": "{{common.close}}",
@@ -25,10 +23,9 @@
         "email": "Email",
         "not-valid-email": "This must be a valid email address",
         "cancel": "{{common.cancel}}",
-        "saving": "Saving...",
+        "saving": "Saving…",
         "update": "Update"
     },
-
     "user-scrobble-history": {
         "title": "Scrobble History",
         "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active\n  scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it\n  is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
@@ -46,7 +43,6 @@
         "processed": "Processed",
         "not-processed": "Not Processed"
     },
-
     "scrobble-event-type-pipe": {
         "chapter-read": "Reading Progress",
         "score-updated": "Rating Update",
@@ -54,11 +50,9 @@
         "want-to-read-remove": "Want to Read: Remove",
         "review": "Review update"
     },
-
     "spoiler": {
         "click-to-show": "Spoiler, click to show"
     },
-
     "review-series-modal": {
         "title": "Edit Review",
         "tagline-label": "Tagline",
@@ -66,18 +60,15 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}"
     },
-
     "review-card-modal": {
         "close": "{{common.close}}",
         "user-review": "{{username}}'s Review",
         "external-mod": "(external)",
         "go-to-review": "Go To Review"
     },
-
     "common": {
         "close": "Close",
         "cancel": "Cancel",
         "save": "Save"
     }
-
 }
