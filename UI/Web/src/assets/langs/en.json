@@ -256,14 +256,20 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
+    },
 
+    "api-key": {
+        "copy": "Copy",
+        "regen-warning": "Regenerating your API key will invalidate any existing clients.",
+        "no-key": "ERROR - KEY NOT SET",
+        "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
+        "key-reset": "API Key reset"
     },
 
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
     },
-
 
     "common": {
         "close": "Close",
