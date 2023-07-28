@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-
+// TODO: Figure out how to handle culture based on localization setting
 const formatter = new Intl.NumberFormat('en-GB', {
   //@ts-ignore
   notation: 'compact', // https://github.com/microsoft/TypeScript/issues/36533

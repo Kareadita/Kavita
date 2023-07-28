@@ -416,6 +416,63 @@
         "edition": "Edition"
     },
 
+    "publication-status-pipe": {
+        "ongoing": "Ongoing",
+        "hiatus": "Hiatus",
+        "completed": "Completed",
+        "cancelled": "Cancelled",
+        "ended": "Ended"
+    },
+
+    "person-role-pipe": {
+        "artist": "Artist",
+        "character": "Character",
+        "colorist": "Colorist",
+        "cover-artist": "Cover Artist",
+        "editor": "Editor",
+        "inker": "Inker",
+        "letterer": "Letterer",
+        "penciller": "Penciller",
+        "publisher": "Publisher",
+        "writer": "Writer",
+        "other": "Other"
+    },
+
+    "manga-format-pipe": {
+        "epub": "EPUB",
+        "archive": "Archive",
+        "image": "Image",
+        "pdf": "PDF",
+        "unknown": "Unknown"
+    },
+
+    "library-type-pipe": {
+        "book": "Book",
+        "comic": "Comic",
+        "manga": "Manga"
+    },
+
+    "age-rating-pipe": {
+        "unknown": "Unknown",
+        "early-childhood": "Early Childhood",
+        "adults-only": "Adults Only 18+",
+        "everyone": "Everyone",
+        "everyone-10-plus": "Everyone 10+",
+        "g": "G",
+        "kids-to-adults": "Kids to Adults",
+        "mature": "Mature",
+        "ma15-plus": "MA15+",
+        "mature-17-plus": "Mature 17+",
+        "rating-pending": "Rating Pending",
+        "teen": "Teen",
+        "x18-plus": "X18+",
+        "not-applicable": "Not Applicable",
+        "pg": "PG",
+        "r18-plus": "R18+"
+    },
+
+
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
