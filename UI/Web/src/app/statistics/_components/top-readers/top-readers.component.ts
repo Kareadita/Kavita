@@ -13,8 +13,15 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
-export const TimePeriods: Array<{title: string, value: number}> = [{title: 'This Week', value: new Date().getDay() || 1}, {title: 'Last 7 Days', value: 7}, {title: 'Last 30 Days', value: 30}, {title: 'Last 90 Days', value: 90}, {title: 'Last Year', value: 365}, {title: 'All Time', value: 0}];
+export const TimePeriods: Array<{title: string, value: number}> =
+  [{title: 'this-week', value: new Date().getDay() || 1},
+    {title: 'last-7-days', value: 7},
+    {title: 'last-30-days', value: 30},
+    {title: 'last-90-days', value: 90},
+    {title: 'last-year', value: 365},
+    {title: 'all-time', value: 0}];
 
 @Component({
     selector: 'app-top-readers',
@@ -22,7 +29,7 @@ export const TimePeriods: Array<{title: string, value: number}> = [{title: 'This
     styleUrls: ['./top-readers.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, NgFor, AsyncPipe]
+  imports: [ReactiveFormsModule, NgFor, AsyncPipe, TranslocoModule]
 })
 export class TopReadersComponent implements OnInit {
 

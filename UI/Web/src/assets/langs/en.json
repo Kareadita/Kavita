@@ -316,6 +316,31 @@
         "read-percentage": "% Read"
     },
 
+    "top-readers": {
+        "title": "Top Readers",
+        "time-selection-label": "Timeframe",
+        "comics-label": "Comics: {{value}} hrs",
+        "manga-label": "Manga: {{value}} hrs",
+        "books-label": "Books: {{value}} hrs",
+
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
+    },
+
+    "time-periods": {
+        "this-week": "This Week",
+        "last-7-days": "Last 7 Days",
+        "last-30-days": "Last 30 Days",
+        "last-90-days": "Last 90 Days",
+        "last-year": "Last Year",
+        "all-time": "All Time"
+
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
