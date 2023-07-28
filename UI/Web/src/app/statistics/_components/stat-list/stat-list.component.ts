@@ -6,6 +6,7 @@ import { CompactNumberPipe } from '../../../pipe/compact-number.pipe';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-stat-list',
@@ -13,7 +14,7 @@ import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
     styleUrls: ['./stat-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, NgFor, NgClass, ImageComponent, AsyncPipe, CompactNumberPipe]
+    imports: [NgIf, NgbTooltip, NgFor, NgClass, ImageComponent, AsyncPipe, CompactNumberPipe, TranslocoModule]
 })
 export class StatListComponent {
 

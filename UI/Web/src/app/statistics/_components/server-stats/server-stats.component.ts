@@ -23,6 +23,7 @@ import { TopReadersComponent } from '../top-readers/top-readers.component';
 import { StatListComponent } from '../stat-list/stat-list.component';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-server-stats',
@@ -30,7 +31,7 @@ import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe]
+    imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent, PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe, CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoModule]
 })
 export class ServerStatsComponent {
 

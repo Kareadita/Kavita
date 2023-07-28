@@ -51,15 +51,15 @@ export class AppComponent implements OnInit {
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
 
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      if (user && user.preferences.locale) {
-        this.translocoService.setActiveLang(user.preferences.locale);
-      } else {
-        // If no user or locale is available, fallback to the default language ('en')
-        const localStorageLocale = localStorage.getItem(accountService.localeKey) || 'en';
-        this.translocoService.setActiveLang(localStorageLocale);
-      }
-    });
+    // this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+    //   if (user && user.preferences.locale) {
+    //     this.translocoService.setActiveLang(user.preferences.locale);
+    //   } else {
+    //     // If no user or locale is available, fallback to the default language ('en')
+    //     const localStorageLocale = localStorage.getItem(accountService.localeKey) || 'en';
+    //     this.translocoService.setActiveLang(localStorageLocale);
+    //   }
+    // });
   }
 
   @HostListener('window:resize', ['$event'])

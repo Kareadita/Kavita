@@ -1,6 +1,7 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
 import { CblBookResult } from 'src/app/_models/reading-list/cbl/cbl-book-result';
 import { CblImportReason } from 'src/app/_models/reading-list/cbl/cbl-import-reason.enum';
+import {TranslocoService} from "@ngneat/transloco";
 
 const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid fa-circle-xmark me-1"></i>';
 const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';
@@ -11,28 +12,30 @@ const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-
 })
 export class CblConflictReasonPipe implements PipeTransform {
 
+  translocoService = inject(TranslocoService);
+
   transform(result: CblBookResult): string {
     switch (result.reason) {
       case CblImportReason.AllSeriesMissing:
-        return failIcon + 'Your account is missing access to all series in the list or Kavita does not have anything present in the list.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.all-series-missing');
       case CblImportReason.ChapterMissing:
-        return failIcon + result.series + ': ' + 'Chapter ' + result.number + ' is missing from Kavita. This item will be skipped.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.chapter-missing', {series: result.series, chapter: result.number});
       case CblImportReason.EmptyFile:
-        return failIcon + 'The cbl file is empty, nothing to be done.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.empty-file');
       case CblImportReason.NameConflict:
-        return failIcon + 'A reading list (' + result.readingListName + ') already exists on your account that matches the cbl file.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.chapter-missing', {readingListName: result.readingListName});
       case CblImportReason.SeriesCollision:
-        return failIcon + 'The series, ' + `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>` + ', collides with another series of the same name in another library.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-collision', {seriesLink: `<a href="/library/${result.libraryId}/series/${result.seriesId}" target="_blank">${result.series}</a>`});
       case CblImportReason.SeriesMissing:
-        return failIcon + 'The series, ' + result.series + ', is missing from Kavita or your account does not have permission. All items with this series will be skipped from import.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.series-missing', {series: result.series});
       case CblImportReason.VolumeMissing:
-        return failIcon + result.series + ': ' + 'Volume ' + result.volume + ' is missing from Kavita. All items with this volume number will be skipped.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.volume-missing', {series: result.series, volume: result.volume});
       case CblImportReason.AllChapterMissing:
-        return failIcon + 'All chapters cannot be matched to Chapters in Kavita.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.all-chapter-missing');
       case CblImportReason.Success:
-        return successIcon + result.series + ' volume ' + result.volume + ' number ' + result.number + ' mapped successfully.';
+        return successIcon + this.translocoService.translate('cbl-conflict-reason-pipe.volume-missing', {series: result.series, volume: result.volume, chapter: result.number});
       case CblImportReason.InvalidFile:
-        return failIcon + 'The file is corrupted or not matching the expected tags/spec.';
+        return failIcon + this.translocoService.translate('cbl-conflict-reason-pipe.invalid-file');
     }
   }
 

@@ -104,7 +104,7 @@
         "page-layout-mode-label": "Page Layout Mode",
         "page-layout-mode-tooltip": "Show items as cards or list view on Series Detail page.",
         "locale-label": "Locale",
-        "local-tooltip": "The language Kavita should use",
+        "locale-tooltip": "The language Kavita should use",
         "blur-unread-summaries-label": "Blur Unread Summaries",
         "blur-unread-summaries-tooltip": "Blurs summary text on volumes or chapters that have no read progress (to avoid spoilers)",
         "prompt-on-download-label": "Prompt on Download",
@@ -331,6 +331,10 @@
         "all-time": "{{time-periods.all-time}}"
     },
 
+    "server-stats": {
+
+    },
+
     "time-periods": {
         "this-week": "This Week",
         "last-7-days": "Last 7 Days",
@@ -339,6 +343,77 @@
         "last-year": "Last Year",
         "all-time": "All Time"
 
+    },
+
+    "device-platform-pipe": {
+        "custom": "Custom"
+    },
+
+    "day-of-week-pipe": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+    },
+
+    "cbl-import-result-pipe": {
+        "success": "Success",
+        "partial": "Partial",
+        "failure": "Failure"
+    },
+
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "Your account is missing access to all series in the list or Kavita does not have anything present in the list.",
+        "chapter-missing": "{{series}}: Chapter {{chapter}} is missing from Kavita. This item will be skipped.",
+        "empty-file": "The cbl file is empty, nothing to be done.",
+        "name-conflict": "A reading list ({{readingListName}}) already exists on your account that matches the cbl file.",
+        "series-collision": "The series, {{seriesLink}}, collides with another series of the same name in another library.",
+        "series-missing": "The series, {{series}}, is missing from Kavita or your account does not have permission. All items with this series will be skipped from import.",
+        "volume-missing": "{{series}}: Volume {{volume}} is missing from Kavita or your account does not have permission. All items with this volume number will be skipped.",
+        "all-chapter-missing": "All chapters cannot be matched to Chapters in Kavita.",
+        "invalid-file": "The file is corrupted or not matching the expected tags/spec.",
+        "success": "{{series}} volume {{volume}} chapter {{chapter}} mapped successfully."
+    },
+
+    "time-duration-pipe": {
+        "hours": "{{value}} hours",
+        "minutes": "{{value}} minutes",
+        "days": "{{value}} days",
+        "months": "{{value}} months",
+        "years": "{{value}} years"
+    },
+
+    "time-ago-pipe": {
+        "just-now": "just now",
+        "min-ago": "a minute ago",
+        "mins-ago": "{{value}} minutes ago",
+        "hour-ago": "a hour ago",
+        "hours-ago": "{{value}} hours ago",
+        "day-ago": "a day ago",
+        "days-ago": "{{value}} days ago",
+        "month-ago": "a month ago",
+        "months-ago": "{{value}} months ago",
+        "year-ago": "a year ago",
+        "years-ago": "{[value}} years ago"
+    },
+
+    "relationship-pipe": {
+        "adaptation": "Adaptation",
+        "alternative-setting": "Alternative Setting",
+        "alternative-version": "Alternative Version",
+        "character": "Character",
+        "contains": "Contains",
+        "doujinshi": "Doujinshi",
+        "other": "Other",
+        "prequel": "Prequel",
+        "sequel": "Sequel",
+        "side-story": "Side Story",
+        "spin-off": "Spin Off",
+        "parent": "Parent",
+        "edition": "Edition"
     },
 
     "validation": {

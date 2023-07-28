@@ -1,5 +1,5 @@
 /// <reference types="@angular/localize" />
-import {importProvidersFrom} from '@angular/core';
+import {APP_INITIALIZER, importProvidersFrom} from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ToastrModule } from 'ngx-toastr';
@@ -10,7 +10,7 @@ import { Title, BrowserModule, bootstrapApplication } from '@angular/platform-br
 import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient} from '@angular/common/http';
-import {TRANSLOCO_CONFIG, TranslocoConfig, TranslocoModule} from "@ngneat/transloco";
+import {TRANSLOCO_CONFIG, TranslocoConfig, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {environment} from "./environments/environment";
 import {HttpLoader, translocoLoader} from "./httpLoader";
 import {
@@ -19,9 +19,33 @@ import {
 } from '@ngneat/transloco-persist-lang';
 import {PERSIST_TRANSLATIONS_STORAGE, TranslocoPersistTranslationsModule} from "@ngneat/transloco-persist-translations";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {AccountService} from "./app/_services/account.service";
+import {switchMap} from "rxjs";
 
 const disableAnimations = !('animate' in document.documentElement);
 
+export function preloadUser(userService: AccountService, transloco: TranslocoService) {
+  return function() {
+    return userService.currentUser$.pipe(switchMap((user) => {
+      if (user && user.preferences.locale) {
+        transloco.setActiveLang(user.preferences.locale);
+        return transloco.load(user.preferences.locale)
+      }
+
+      // If no user or locale is available, fallback to the default language ('en')
+      const localStorageLocale = localStorage.getItem(userService.localeKey) || 'en';
+      transloco.setActiveLang(localStorageLocale);
+      return transloco.load(localStorageLocale)
+    })).subscribe();
+  };
+}
+
+export const preLoad = {
+  provide: APP_INITIALIZER,
+  multi: true,
+  useFactory: preloadUser,
+  deps: [AccountService, TranslocoService]
+};
 
 bootstrapApplication(AppComponent, {
     providers: [
@@ -48,7 +72,7 @@ bootstrapApplication(AppComponent, {
             loader: HttpLoader,
             storage: {
               provide: PERSIST_TRANSLATIONS_STORAGE,
-                useValue: localStorage
+                useValue: sessionStorage
             }
           })
         ),
@@ -68,6 +92,7 @@ bootstrapApplication(AppComponent, {
             }
           } as TranslocoConfig
         },
+        preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
         provideHttpClient(withInterceptorsFromDi())
