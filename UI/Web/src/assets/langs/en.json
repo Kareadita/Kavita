@@ -178,7 +178,16 @@
         "applied": "Applied",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued"
+    },
 
+    "restriction-selector": {
+        "title": "Age Rating Restriction",
+        "description": "When selected, all series and reading lists that have at least one item that is greater than the selected restriction will be pruned from results.",
+        "not-applicable-for-admins": "This is not applicable for admins.",
+        "age-rating-label": "Age Rating",
+        "no-restriction": "No Restriction",
+        "include-unknowns-label": "Include Unknowns",
+        "include-unknowns-tooltip": "If true, Unknowns will be allowed with Age Restriction. This could lead to untagged media leaking to users with Age restrictions."
     },
 
     "site-theme-provider-pipe": {
