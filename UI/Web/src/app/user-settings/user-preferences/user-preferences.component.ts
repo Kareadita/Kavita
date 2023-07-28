@@ -48,6 +48,7 @@ import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccor
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -73,9 +74,9 @@ enum FragmentID {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
     imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
-      ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
-      NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
-      ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe]
+        ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
+        NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
+        ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe, TranslocoModule]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -96,12 +97,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'Account', fragment: FragmentID.Account},
-    {title: 'Preferences', fragment: FragmentID.Preferences},
-    {title: '3rd Party Clients', fragment: FragmentID.Clients},
-    {title: 'Theme', fragment: FragmentID.Theme},
-    {title: 'Devices', fragment: FragmentID.Devices},
-    {title: 'Stats', fragment: FragmentID.Stats},
+    {title: 'account-tab', fragment: FragmentID.Account},
+    {title: 'preferences-tab', fragment: FragmentID.Preferences},
+    {title: '3rd-party-clients-tab', fragment: FragmentID.Clients},
+    {title: 'theme-tab', fragment: FragmentID.Theme},
+    {title: 'devices-tab', fragment: FragmentID.Devices},
+    {title: 'stats-tab', fragment: FragmentID.Stats},
   ];
   locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
   active = this.tabs[1];
@@ -109,6 +110,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   private readonly destroyRef = inject(DestroyRef);
+  private readonly trasnlocoService = inject(TranslocoService);
 
   get AccordionPanelID() {
     return AccordionPanelID;
@@ -132,16 +134,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
     this.localizationService.getLocales().subscribe(res => {
       this.locales = res;
-      // if (this.locales.length === 1) {
-      //   this.settingsForm.get('locale')?.disable();
-      // }
-      //this.settingsForm.get('locale')?.setValue(this.user?.preferences.locale || 'en');
       this.cdRef.markForCheck();
     });
 
     this.accountService.hasValidLicense().subscribe(res => {
       if (res) {
-        this.tabs.push({title: 'Scrobbling', fragment: FragmentID.Scrobbling});
+        this.tabs.push({title: 'scrobbling-tab', fragment: FragmentID.Scrobbling});
         this.cdRef.markForCheck();
       }
 
@@ -301,7 +299,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('User preferences updated');
+      this.toastr.success(this.trasnlocoService.translate('user-preferences.success-toast'));
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();
