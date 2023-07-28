@@ -566,6 +566,7 @@
         "edit": "{{common.edit}}",
         "buy": "Buy",
         "activate": "Activate",
+        "renew": "Renew",
         "no-license-key": "No license key",
         "license-valid": "License is Valid",
         "license-not-valid": "License Not Valid",
@@ -576,8 +577,41 @@
         "activate-email-label": "{{common.email}}",
         "activate-delete": "Delete",
         "activate-save": "{{common.save}}"
+    },
 
+    "book-line-overlay": {
+        "copy": "Copy",
+        "bookmark": "Bookmark",
+        "close": "{{common.close}}",
+        "required-field": "{{common.required-field}}",
+        "bookmark-label": "Bookmark Name",
+        "save": "{{common.save}}"
+    },
 
+    "book-reader": {
+        "title": "Book Settings",
+        "page-label": "Page",
+
+        "pagination-header": "Section",
+        "go-to-page": "Go to page",
+        "go-to-last-page": "Go to last page",
+        "prev-page": "Prev Page",
+        "next-page": "Next Page",
+        "prev-chapter": "Prev Chapter/Volume",
+        "next-chapter": "Next Chapter/Volume",
+        "skip-header": "Skip to main content",
+        "virtual-pages": "virtual pages",
+
+        "settings-header": "Settings",
+        "table-of-contents-header": "Table of Contents",
+        "bookmarks-header": "Bookmarks",
+
+        "loading-books": "Loading book...",
+        "go-back": "Go Back",
+        "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
+        "incognito-mode-label": "Incognito Mode",
+        "next": "Next",
+        "previous": "Previous"
 
     },
 

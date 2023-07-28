@@ -51,6 +51,7 @@ import {
   PersonalTableOfContentsComponent,
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 enum TabID {
@@ -101,7 +102,7 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
     standalone: true,
-  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent]
+  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoModule]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
