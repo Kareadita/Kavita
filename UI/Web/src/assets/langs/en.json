@@ -55,6 +55,10 @@
         "review": "Review update"
     },
 
+    "spoiler": {
+        "click-to-show": "Spoiler, click to show"
+    },
+
     "common": {
 
     }
