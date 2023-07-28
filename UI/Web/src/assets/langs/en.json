@@ -167,6 +167,25 @@
         "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at\n    any time and the next Scrobble-able event (reading progress, rating, want to read status) will trigger events."
     },
 
+    "theme-manager": {
+        "title": "Theme Manager",
+        "looking-for-theme": "Looking for a light or e-ink theme? We have some custom themes you can use on our ",
+        "looking-for-theme-continued": "theme github.",
+        "scan": "Scan",
+        "site-themes": "Site Themes",
+        "set-default": "Set Default",
+        "apply": "Apply",
+        "applied": "Applied",
+        "updated-toastr": "Site default has been updated to {{name}}",
+        "scan-queued": "A site theme scan has been queued"
+
+    },
+
+    "site-theme-provider-pipe": {
+        "system": "System",
+        "user": "User"
+    },
+
     "common": {
         "close": "Close",
         "cancel": "Cancel",
