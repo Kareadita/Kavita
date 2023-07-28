@@ -74,6 +74,13 @@
         "go-to-review": "Go To Review"
     },
 
+    "review-card": {
+        "your-review": "This is your review",
+        "external-review": "External Review",
+        "local-review": "Review",
+        "rating-percentage": "Rating {{r}}%"
+    },
+
     "common": {
         "close": "Close",
         "cancel": "Cancel",
