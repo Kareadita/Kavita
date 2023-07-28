@@ -350,7 +350,17 @@
         "cancel": "{{common.cancel}}",
         "share": "Share",
         "help": "{{common.help}}"
+    },
 
+    "library-access-modal": {
+        "select-all": "Select All",
+        "deselect-all": "Deselect All",
+        "title": "Library Access",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "no-data": "There are no libraries setup yet."
     },
 
     "time-periods": {
