@@ -31,6 +31,7 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 
@@ -40,7 +41,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./all-series.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe]
+  imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoModule]
 })
 export class AllSeriesComponent implements OnInit {
 

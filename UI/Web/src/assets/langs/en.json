@@ -5,7 +5,7 @@
         "password": "Password",
         "password-validation": "Password must be between {{min}} and {{max}} characters in length",
         "forgot-password": "Forgot Password?",
-        "submit": "Submit"
+        "submit": "{{common.submit}}"
     },
 
     "dashboard": {
@@ -499,7 +499,40 @@
         "r18-plus": "R18+"
     },
 
+    "reset-password": {
+        "title": "Password Reset",
+        "description": "Enter the email of your account. Kavita will send you an email if a valid one on file, otherwise ask the admin for the link from logs.",
+        "email-label": "Email",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "submit": "{{common.submit}}"
+    },
 
+    "reset-password-modal": {
+        "title": "Reset {{username}}'s Password",
+        "new-password-label": "New Password",
+        "error-label": "Error: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+
+    "all-series": {
+        "series-count": "{{common.series-count}}"
+    },
+
+    "announcements": {
+        "title": "Announcements"
+    },
+
+    "changelog": {
+        "installed": "Installed",
+        "download": "Download",
+        "published-label": "Published: ",
+        "available": "Available",
+        "description": "If you do not see an {{installed}}",
+        "description-continued": "tag, you are on a nightly release. Only major versions will show as available."
+    },
 
     "validation": {
         "required-field": "This field is required",
@@ -515,6 +548,7 @@
         "delete": "Delete",
         "edit": "Edit",
         "help": "Help",
+        "submit": "Submit",
         "loading": "Loading...",
         "series-count": "{{num}} Series"
     }
