@@ -289,6 +289,28 @@
         "add-custom-item": ", type to add a custom item"
     },
 
+    "generic-list-modal": {
+        "close": "{{common.close}}",
+        "clear": "Clear",
+        "filter": "Filter",
+        "open-filtered-search": "Open a filtered search for {{item}}"
+    },
+
+    "user-stats-info-cards": {
+        "total-pages-read-label": "Total Pages Read",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-words-read-label": "Total Words Read",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "time-spent-reading-label": "Time Spent Reading",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "chapters-read-label": "Chapters Read",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "avg-reading-per-week-label": "Average Reading / Week",
+        "last-active-label": "Last Active",
+        "chapters": "{{value}} chapters"
+
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"

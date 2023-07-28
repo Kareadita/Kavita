@@ -3,13 +3,14 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FilterPipe } from '../../../../pipe/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-generic-list-modal',
     templateUrl: './generic-list-modal.component.html',
     styleUrls: ['./generic-list-modal.component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe]
+    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoModule]
 })
 export class GenericListModalComponent {
   @Input() items: Array<string> = [];
