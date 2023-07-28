@@ -18,12 +18,12 @@
     },
 
     "edit-user": {
-        "edit": "Edit",
+        "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "Username",
-        "required": "This field is required",
+        "required": "{{validation.required-field}}",
         "email": "Email",
-        "not-valid-email": "This must be a valid email address",
+        "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Saving...",
         "update": "Update"
@@ -206,6 +206,22 @@
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
     },
+
+    "edit-device": {
+        "device-name-label": "Device Name",
+        "email-label": "Email",
+        "email-tooltip": "This email will be used to accept the file via Send To",
+        "device-platform-label": "Device Platform",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}"
+    },
+
+    "validation": {
+        "required-field": "This field is required",
+        "valid-email": "This must be a valid email"
+    },
+
 
     "common": {
         "close": "Close",
