@@ -15,6 +15,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-password',
@@ -22,7 +23,7 @@ import { NgIf, NgFor, AsyncPipe } from '@angular/common';
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe]
+  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoModule]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 

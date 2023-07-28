@@ -6,14 +6,12 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output,
   SimpleChanges
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Subject, takeUntil } from 'rxjs';
 import { Device } from 'src/app/_models/device/device';
 import { DevicePlatform, devicePlatforms } from 'src/app/_models/device/device-platform';
 import { DeviceService } from 'src/app/_services/device.service';

@@ -217,6 +217,20 @@
         "valid-email": "{{validation.valid-email}}"
     },
 
+    "change-password": {
+        "password-label": "Password",
+        "current-password-label": "Current Password",
+        "new-password-label": "New Password",
+        "confirm-password-label": "Confirm Password",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "passwords-must-match": "Passwords must match",
+        "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
