@@ -1,10 +1,12 @@
-<h4>Roles</h4>
-<ul class="list-group">
+<ng-container *transloco="let t; read:'role-selector">
+  <h4>{{t('title')}}</h4>
+  <ul class="list-group">
     <li class="list-group-item" *ngFor="let role of selectedRoles; let i = index">
-        <div class="form-check">
-            <input id="role-{{i}}" type="checkbox" attr.aria-label="Role {{role.data}}" class="form-check-input" 
-                 [(ngModel)]="role.selected" [disabled]="role.disabled" name="role" (ngModelChange)="handleModelUpdate()">
-            <label attr.for="role-{{i}}" class="form-check-label">{{role.data}}</label>
-        </div>
+      <div class="form-check">
+        <input id="role-{{i}}" type="checkbox" class="form-check-input"
+               [(ngModel)]="role.selected" [disabled]="role.disabled" name="role" (ngModelChange)="handleModelUpdate()">
+        <label for="role-{{i}}" class="form-check-label">{{role.data}}</label>
+      </div>
     </li>
-</ul>
+  </ul>
+</ng-container>

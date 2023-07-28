@@ -335,6 +335,24 @@
 
     },
 
+    "role-selector": {
+        "title": "Roles"
+    },
+
+    "directory-picker": {
+        "title": "Choose a Directory",
+        "close": "{{common.close}}",
+        "path-label": "Path",
+        "path-placeholder": "Start typing or select path",
+        "instructions": "Select a folder to view breadcrumb. Don't see your directory? Try checking / first.",
+        "type-header": "Type",
+        "name-header": "Name",
+        "cancel": "{{common.cancel}}",
+        "share": "Share",
+        "help": "{{common.help}}"
+
+    },
+
     "time-periods": {
         "this-week": "This Week",
         "last-7-days": "Last 7 Days",
@@ -486,6 +504,7 @@
         "add": "Add",
         "delete": "Delete",
         "edit": "Edit",
+        "help": "Help",
         "loading": "Loading...",
         "series-count": "{{num}} Series"
     }
