@@ -4,11 +4,12 @@ import {NgbActiveModal, NgbRating} from '@ng-bootstrap/ng-bootstrap';
 import { SeriesService } from 'src/app/_services/series.service';
 import {UserReview} from "../review-card/user-review";
 import {CommonModule} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-review-series-modal',
   standalone: true,
-  imports: [CommonModule, NgbRating, ReactiveFormsModule],
+    imports: [CommonModule, NgbRating, ReactiveFormsModule, TranslocoModule],
   templateUrl: './review-series-modal.component.html',
   styleUrls: ['./review-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
