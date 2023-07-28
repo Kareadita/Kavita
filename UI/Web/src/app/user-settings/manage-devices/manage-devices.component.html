@@ -1,39 +1,42 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read:'manage-devices'">
+  <div class="container-fluid">
     <div class="row mb-2">
-        <div class="col-8"><h3>Device Manager</h3></div>
-        <div class="col-4">
-            <button class="btn btn-primary float-end" (click)="collapse.toggle()" [attr.aria-expanded]="!addDeviceIsCollapsed"
-            aria-controls="collapseExample">
-                <i class="fa fa-plus" aria-hidden="true"></i>&nbsp;Add
-            </button>
-        </div>
+      <div class="col-8"><h3>{{t('title')}}</h3></div>
+      <div class="col-4">
+        <button class="btn btn-primary float-end" (click)="collapse.toggle()" [attr.aria-expanded]="!addDeviceIsCollapsed"
+                aria-controls="collapseExample">
+          <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add')}}
+        </button>
+      </div>
     </div>
 
-    <p> 
-        This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files. 
+    <p>
+      {{t('description')}}
     </p>
 
     <div #collapse="ngbCollapse" [(ngbCollapse)]="addDeviceIsCollapsed">
-        <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
+      <app-edit-device [device]="device" (deviceAdded)="loadDevices()" (deviceUpdated)="loadDevices()"></app-edit-device>
     </div>
 
     <div class="row g-0 mt-2">
-        <h4>Devices</h4>
-        <p *ngIf="devices.length === 0">
-            There are no devices setup yet
-        </p>
-        <ng-container *ngFor="let device of devices">
-            <div class="card col-auto me-3 mb-3" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">{{device.name | sentenceCase}}</h5>
-                  Platform: <h6 class="card-subtitle mb-2 text-muted">{{device.platform | devicePlatform}}</h6>
-                  Email: <h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
+      <h4>{{t('devices-title')}}</h4>
+      <p *ngIf="devices.length === 0">
+        {{t('no-devices')}}
+      </p>
+      <ng-container *ngFor="let device of devices">
+        <div class="card col-auto me-3 mb-3" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">{{device.name | sentenceCase}}</h5>
+            {{t('platform-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.platform | devicePlatform}}</h6>
+            {{t('email-label')}}<h6 class="card-subtitle mb-2 text-muted">{{device.emailAddress}}</h6>
 
-                  <button class="btn btn-danger me-2" (click)="deleteDevice(device)">Delete</button>
-                  <button class="btn btn-primary" (click)="editDevice(device)">Edit</button>
-                </div>
-              </div>
-        </ng-container>
+            <button class="btn btn-danger me-2" (click)="deleteDevice(device)">{{t('delete')}}</button>
+            <button class="btn btn-primary" (click)="editDevice(device)">{{t('edit')}}</button>
+          </div>
+        </div>
+      </ng-container>
     </div>
-</div>
+  </div>
 
+
+</ng-container>

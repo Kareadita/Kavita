@@ -195,11 +195,26 @@
         "user": "User"
     },
 
+    "manage-devices": {
+        "title": "Device Manager",
+        "description": "This section is for you to setup devices that cannot connect to Kavita via a web browser and instead have an email address that accepts files.",
+        "devices-title": "Devices",
+        "no-devices": "There are no devices setup yet",
+        "platform-label": "Platform: ",
+        "email-label": "Email: ",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}"
+    },
+
     "common": {
         "close": "Close",
         "cancel": "Cancel",
         "save": "Save",
         "reset": "Reset",
+        "add": "Add",
+        "delete": "Delete",
+        "edit": "Edit",
         "series-count": "{{num}} Series"
     }
 
