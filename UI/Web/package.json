@@ -28,6 +28,7 @@
     "@microsoft/signalr": "^7.0.9",
     "@ng-bootstrap/ng-bootstrap": "^15.1.0",
     "@ngneat/transloco": "^4.3.0",
+    "@ngneat/transloco-locale": "^4.1.0",
     "@ngneat/transloco-persist-lang": "^4.0.0",
     "@ngneat/transloco-persist-translations": "^4.0.0",
     "@ngneat/transloco-preload-langs": "^4.0.1",

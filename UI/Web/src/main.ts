@@ -18,6 +18,7 @@ import {
   TranslocoPersistLangModule,
 } from '@ngneat/transloco-persist-lang';
 import {PERSIST_TRANSLATIONS_STORAGE, TranslocoPersistTranslationsModule} from "@ngneat/transloco-persist-translations";
+import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -42,6 +43,7 @@ bootstrapApplication(AppComponent, {
               useValue: localStorage,
             },
           }),
+          TranslocoLocaleModule.forRoot(),
           TranslocoPersistTranslationsModule.forRoot({
             loader: HttpLoader,
             storage: {
@@ -52,7 +54,6 @@ bootstrapApplication(AppComponent, {
         ),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        //translocoLoader,
         {
           provide: TRANSLOCO_CONFIG,
           useValue: {

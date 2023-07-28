@@ -14,6 +14,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {AccountService} from "../../_services/account.service";
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgOptimizedImage } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-anilist-key',
@@ -21,7 +22,7 @@ import { NgIf, NgOptimizedImage } from '@angular/common';
     styleUrls: ['./anilist-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgOptimizedImage, NgbTooltip, NgbCollapse, ReactiveFormsModule]
+    imports: [NgIf, NgOptimizedImage, NgbTooltip, NgbCollapse, ReactiveFormsModule, TranslocoModule]
 })
 export class AnilistKeyComponent implements OnInit {
 
