@@ -22,7 +22,6 @@ public class LocaleController : BaseApiController
     [HttpGet]
     public ActionResult<IEnumerable<string>> GetAllLocales()
     {
-        // TODO: cache this
         var languages = _localizationService.GetLocales().Select(c => new CultureInfo(c)).Select(c =>
             new LanguageDto()
             {

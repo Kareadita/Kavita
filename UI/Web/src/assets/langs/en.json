@@ -27,5 +27,36 @@
         "cancel": "Cancel",
         "saving": "Saving...",
         "update": "Update"
+    },
+
+    "user-scrobble-history": {
+        "title": "Scrobble History",
+        "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active\n  scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it\n  is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
+        "filter-label": "Filter",
+        "created-header": "Created",
+        "last-modified-header": "Last Modified",
+        "type-header": "Type",
+        "series-header": "Series",
+        "data-header": "Data",
+        "is-processed-header": "Is Processed",
+        "no-data": "No Data",
+        "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
+        "rating": "Rating {{r}}",
+        "not-applicable": "Not Applicable",
+        "processed": "Processed",
+        "not-processed": "Not Processed"
+    },
+
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Reading Progress",
+        "score-updated": "Rating Update",
+        "want-to-read-add": "Want to Read: Add",
+        "want-to-read-remove": "Want to Read: Remove",
+        "review": "Review update"
+    },
+
+    "common": {
+
     }
+
 }
