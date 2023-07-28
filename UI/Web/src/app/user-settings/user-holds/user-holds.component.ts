@@ -11,11 +11,12 @@ import {
   NgbAccordionDirective, NgbAccordionHeader,
   NgbAccordionItem
 } from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-user-holds',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody, NgbAccordionItem, NgbAccordionHeader],
+    imports: [CommonModule, ScrobbleEventTypePipe, NgbAccordionDirective, NgbAccordionCollapse, NgbAccordionBody, NgbAccordionItem, NgbAccordionHeader, TranslocoModule],
   templateUrl: './user-holds.component.html',
   styleUrls: ['./user-holds.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

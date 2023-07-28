@@ -1,11 +1,13 @@
-<h5>Scrobble Holds</h5>
-<p>This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at
-  any time and the next Scrobble-able event (reading progress, rating, want to read status) will trigger events.</p>
+<ng-container *transloco="let t; read:'user-holds'">
+  <h5>{{t('title')}}</h5>
+  <p>{{t('description')}}</p>
 
-<div class="row g-0">
-  <ul class="list-group mb-2">
-    <li class="list-group-item list-group-item-light" *ngFor="let hold of holds$ | async">
-      <a class="btn-link" href="/library/{{hold.libraryId}}/series/{{hold.seriesId}}" target="_blank">{{hold.seriesName}}</a>
-    </li>
-  </ul>
-</div>
+  <div class="row g-0">
+    <ul class="list-group mb-2">
+      <li class="list-group-item list-group-item-light" *ngFor="let hold of holds$ | async">
+        <a class="btn-link" href="/library/{{hold.libraryId}}/series/{{hold.seriesId}}" target="_blank">{{hold.seriesName}}</a>
+      </li>
+    </ul>
+  </div>
+
+</ng-container>

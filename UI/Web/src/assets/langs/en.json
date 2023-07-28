@@ -160,7 +160,11 @@
 
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
+    },
 
+    "user-holds": {
+        "title": "Scrobble Holds",
+        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at\n    any time and the next Scrobble-able event (reading progress, rating, want to read status) will trigger events."
     },
 
     "common": {
