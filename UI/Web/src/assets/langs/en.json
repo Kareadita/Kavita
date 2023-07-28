@@ -275,11 +275,18 @@
         "generate": "Generate",
         "instructions": "First time users should click on \"{{scrobbling-providers.generate}}\" below to allow Kavita+ to talk with {{service}}.\n          Once you authorize the program, copy and paste the token in the input below. You can regenerate your token at any time.",
         "token-input-label": "{{service}} Token Goes Here",
-
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
+    },
 
+    "typeahead": {
+        "locked-field": "Field is locked",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "add-item": "Add {{item}}...",
+        "no-data": "No data",
+        "add-custom-item": ", type to add a custom item"
     },
 
     "validation": {
@@ -295,6 +302,7 @@
         "add": "Add",
         "delete": "Delete",
         "edit": "Edit",
+        "loading": "Loading...",
         "series-count": "{{num}} Series"
     }
 

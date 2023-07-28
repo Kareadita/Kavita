@@ -25,6 +25,7 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 /**
@@ -152,7 +153,7 @@ const ANIMATION_SPEED = 200;
 @Component({
   selector: 'app-typeahead',
   standalone: true,
-  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule],
+  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoModule],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
