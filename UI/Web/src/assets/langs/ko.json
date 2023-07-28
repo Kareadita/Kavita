@@ -41,6 +41,30 @@
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
-        "score-updated": "평점 업데이트"
+        "score-updated": "평점 업데이트",
+        "want-to-read-add": "읽고 싶어요: 추가",
+        "want-to-read-remove": "읽고 싶어요: 제거",
+        "review": "후기 업데이트"
+    },
+    "spoiler": {
+        "click-to-show": "스포일러, 표시하려면 클릭"
+    },
+    "review-series-modal": {
+        "title": "후기 수정",
+        "tagline-label": "제목",
+        "review-label": "평가",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "{{username}}님의 리뷰",
+        "external-mod": "(external)",
+        "go-to-review": "리뷰로 이동"
+    },
+    "common": {
+        "close": "닫기",
+        "cancel": "취소",
+        "save": "저장"
     }
 }
