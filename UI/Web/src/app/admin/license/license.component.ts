@@ -15,6 +15,7 @@ import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-license',
@@ -22,7 +23,7 @@ import {environment} from "../../../environments/environment";
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule]
+  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoModule]
 })
 export class LicenseComponent implements OnInit {
 
