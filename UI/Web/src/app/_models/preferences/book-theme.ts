@@ -23,4 +23,8 @@
      * Inner HTML
      */
     content: string;
+    /**
+     * Key for translation
+     */
+    translationKey: string;
   }

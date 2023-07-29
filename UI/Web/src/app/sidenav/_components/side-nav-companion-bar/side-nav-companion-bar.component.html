@@ -1,20 +1,25 @@
-<div class="mt-0 d-flex justify-content-between align-items-center">
+<ng-container *transloco="let t; read: 'side-nav-companion-bar'">
+  <div class="mt-0 d-flex justify-content-between align-items-center">
     <div>
-        <ng-content select="[title]"></ng-content>
-        <ng-content select="[subtitle]"></ng-content>
+      <ng-content select="[title]"></ng-content>
+      <ng-content select="[subtitle]"></ng-content>
     </div>
     <div>
-        <ng-content select="[main]"></ng-content>
+      <ng-content select="[main]"></ng-content>
     </div>
     <div>
-        <button *ngIf="hasExtras" class="btn btn-secondary btn-small" (click)="openExtrasDrawer()" [attr.aria-expanded]="isExtrasOpen" placement="left" ngbTooltip="Page Settings">
-            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
-            <span class="visually-hidden">Page Settings</span>
-        </button>
-        <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()" [attr.aria-expanded]="filterOpen" placement="left" ngbTooltip="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting" attr.aria-label="{{filterOpen ? 'Open' : 'Close'}} Filtering and Sorting">
-            <i class="fa fa-filter" aria-hidden="true"></i>
-            <span class="visually-hidden">Sort / Filter</span>
-        </button>
+      <button *ngIf="hasExtras" class="btn btn-secondary btn-small" (click)="openExtrasDrawer()" [attr.aria-expanded]="isExtrasOpen" placement="left" [ngbTooltip]="t('page-settings-title')">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('page-settings-title')}}</span>
+      </button>
+      <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()"
+              [attr.aria-expanded]="filterOpen" placement="left"
+              ngbTooltip="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}"
+              attr.aria-label="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}">
+        <i class="fa fa-filter" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('filter-and-sort-alt')}}</span>
+      </button>
     </div>
 
-</div>
+  </div>
+</ng-container>

@@ -1,7 +1,15 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  HostListener,
+  inject,
+  OnInit
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { take, Subject } from 'rxjs';
+import { take } from 'rxjs';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -23,6 +31,7 @@ import { CardItemComponent } from '../../../cards/card-item/card-item.component'
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-bookmarks',
@@ -30,9 +39,9 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./bookmarks.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe]
+  imports: [SideNavCompanionBarComponent, BulkOperationsComponent, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoModule]
 })
-export class BookmarksComponent implements OnInit, OnDestroy {
+export class BookmarksComponent implements OnInit {
 
   bookmarks: Array<PageBookmark> = [];
   series: Array<Series> = [];
@@ -53,7 +62,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
 
-  private onDestroy: Subject<void> = new Subject<void>();
+  private readonly translocoService = inject(TranslocoService);
 
   constructor(private readerService: ReaderService, private seriesService: SeriesService,
     private downloadService: DownloadService, private toastr: ToastrService,
@@ -81,10 +90,6 @@ export class BookmarksComponent implements OnInit, OnDestroy {
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   @HostListener('document:keydown.shift', ['$event'])
   handleKeypress(event: KeyboardEvent) {
@@ -130,12 +135,12 @@ export class BookmarksComponent implements OnInit, OnDestroy {
         });
         break;
       case Action.Delete:
-        if (!await this.confirmService.confirm('Are you sure you want to clear all bookmarks for multiple series? This cannot be undone.')) {
+        if (!await this.confirmService.confirm(this.translocoService.translate('bookmarks.confirm-delete'))) {
           break;
         }
 
         this.readerService.clearMultipleBookmarks(seriesIds).subscribe(() => {
-          this.toastr.success('Bookmarks have been removed');
+          this.toastr.success(this.translocoService.translate('bookmarks.delete-success'));
           this.bulkSelectionService.deselectAll();
           this.loadBookmarks();
         });
@@ -183,7 +188,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
   }
 
   async clearBookmarks(series: Series) {
-    if (!await this.confirmService.confirm('Are you sure you want to clear all bookmarks for ' + series.name + '? This cannot be undone.')) {
+    if (!await this.confirmService.confirm(this.translocoService.translate('bookmarks.confirm-single-delete', {seriesName: series.name}))) {
       return;
     }
 
@@ -195,7 +200,7 @@ export class BookmarksComponent implements OnInit, OnDestroy {
         this.series.splice(index, 1);
       }
       this.clearingSeries[series.id] = false;
-      this.toastr.success(series.name + '\'s bookmarks have been removed');
+      this.toastr.success(this.translocoService.translate('delete-single-success', {seriesName: series.name}));
       this.refresh.emit();
       this.cdRef.markForCheck();
     });

@@ -26,11 +26,12 @@ import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {CardActionablesComponent} from "../../../cards/card-item/card-actionables/card-actionables.component";
 import {FilterPipe} from "../../../pipe/filter.pipe";
 import {FormsModule} from "@angular/forms";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule],
+  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoModule],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

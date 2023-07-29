@@ -16,6 +16,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ToggleService } from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -24,7 +25,7 @@ import {CommonModule} from "@angular/common";
 @Component({
   selector: 'app-side-nav-companion-bar',
   standalone: true,
-  imports: [CommonModule, NgbTooltip],
+  imports: [CommonModule, NgbTooltip, TranslocoModule],
   templateUrl: './side-nav-companion-bar.component.html',
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })

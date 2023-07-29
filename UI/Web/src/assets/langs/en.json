@@ -148,7 +148,7 @@
         "color-theme-book-label": "Color Theme",
         "color-theme-book-tooltip": "What color theme to apply to the book reader content and menu",
         "font-size-book-label": "Font Size",
-        "line-height-book-label": "Line Height",
+        "line-height-book-label": "Line Spacing",
         "line-height-book-tooltip": "How much spacing between the lines of the book",
         "margin-book-label": "Margin",
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
@@ -607,7 +607,7 @@
         "bookmarks-header": "Bookmarks",
         "toc-header": "ToC",
 
-        "loading-books": "Loading book…",
+        "loading-book": "Loading book…",
         "go-back": "Go Back",
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
@@ -667,7 +667,7 @@
     "series-detail": {
         "page-settings-title": "Page Settings",
         "close": "{{common.close}}",
-        "layout-mode-label": "Layout Mode",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
         "layout-mode-option-card": "Card",
         "layout-mode-option-list": "List",
         "continue-from": "Continue {{title}}",
@@ -691,6 +691,165 @@
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
         "no-chapters": "There are no chapters to this volume. Cannot read.",
         "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages."
+    },
+
+    "series-metadata-detail": {
+        "links-title": "Links",
+        "genres-title": "Genres",
+        "tags-title": "Tags",
+        "collections-title": "{{side-nav.collections}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+
+        "writers-title": "Writers/Authors",
+        "cover-artists-title": "Cover Artists",
+        "characters-title": "Characters",
+        "colorists-title": "Colorists",
+        "editors-title": "Editors",
+        "inkers-title": "Inkers",
+        "letterers-title": "Letterers",
+        "translators-title": "Translators",
+        "pencillers-title": "Pencillers",
+        "publishers-title": "Publishers",
+
+        "promoted": "Promoted",
+        "see-more": "See More",
+        "see-less": "See Less"
+
+    },
+
+    "badge-expander": {
+        "more-items": "and {{count}} more"
+    },
+
+    "read-more": {
+        "read-more": "Read More",
+        "read-less": "Read Less"
+    },
+
+    "update-notification-modal": {
+        "title": "New Update Available!",
+        "close": "{{common.close}}",
+        "help": "How to Update",
+        "download": "Download"
+    },
+
+    "side-nav-companion-bar": {
+        "page-settings-title": "{{series-detail.page-settings-title}}",
+        "open-filter-and-sort": "Open Filtering and Sorting",
+        "close-filter-and-sort": "Close Filtering and Sorting",
+        "filter-and-sort-alt": "Sort / Filter"
+    },
+
+    "side-nav": {
+        "home": "Home",
+        "want-to-read": "Want To Read",
+        "collections": "Collections",
+        "reading-lists": "Reading Lists",
+        "bookmarks": "Bookmarks",
+        "filter-label": "Filter",
+        "all-series": "All Series",
+        "clear": "Clear",
+        "donate": "Donate"
+    },
+
+    "library-settings-modal": {
+        "close": "{{common.close}}",
+        "edit-title": "Edit {{name}}",
+        "add-title": "Add Library",
+        "general-tab": "General",
+        "folder-tab": "Folder",
+        "cover-tab": "Cover",
+        "advanced-tab": "Advanced",
+        "name-label": "Name",
+        "library-name-unique": "Library name must be unique",
+        "last-scanned-label": "Last Scanned:",
+        "never": "Never",
+        "type-label": "Type",
+        "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.",
+        "folder-description": "Add folders to your library",
+        "browse": "Browse for Media Folders",
+        "help-us-part-1": "Help us out by following ",
+        "help-us-part-2": "our guide",
+        "help-us-part-3": "to naming and organizing your media.",
+        "naming-conventions-part-1": "Kavita has ",
+        "naming-conventions-part-2": "folder requirements.",
+        "naming-conventions-part-3": "Check this link to ensure you are following, else files my not show up in scan.",
+        "cover-description": "Custom library image icons are optional",
+        "cover-description-extra": "Library image should not be large. Aim for a small file, 32x32 pixels in size. Kavita does not perform validation on size.",
+        "manage-collection-label": "Manage Collections",
+        "manage-collection-tooltip": "Should Kavita create Collections from SeriesGroup tags found within ComicInfo.xml/opf files",
+        "manage-reading-list-label": "Manage Reading Lists",
+        "manage-reading-list-tooltip": "Should Kavita create Reading Lists from StoryArc/StoryArcNumber and AlternativeSeries/AlternativeCount tags found within ComicInfo.xml/opf files",
+        "allow-scrobbling-label": "Allow Scrobbling",
+        "allow-scrobbling-tooltip": "Should Kavita scrobble reading events, want to read status, ratings, and reviews to configured providers. This will only occur if the server has an active Kavita+ Subscription.",
+        "folder-watching-label": "Folder Watching",
+        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against.",
+        "include-in-dashboard-label": "Include in Dashboard",
+        "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
+        "include-in-recommendation-label": "Include in Recommended",
+        "include-in-recommendation-tooltip": "Should series from the library be included on the Recommended page.",
+        "include-in-search-label": "Include in Search",
+        "include-in-search-tooltip": "Should series and any derived information (genres, people, files) from the library be included in search results.",
+        "force-scan": "Force Scan",
+        "force-scan-tooltip": "This will force a scan on the library, treating like a fresh scan",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "next": "Next",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+
+    "reader-settings": {
+        "general-settings-title": "General Settings",
+        "font-family-label": "{{user-preferences.font-family-label}}",
+        "font-size-label": "{{user-preferences.font-size-book-label}}",
+        "line-spacing-label": "{{user-preferences.line-height-book-label}}",
+        "margin-label": "{{user-preferences.margin-book-label}}",
+        "reset-to-defaults": "Reset to Defaults",
+        "reader-settings-title": "Reader Settings",
+        "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
+        "right-to-left": "Right to Left",
+        "left-to-right": "Left to Right",
+        "horizontal": "Horizontal",
+        "vertical": "Vertical",
+        "writing-style-label": "{{user-preferences.writing-style-label}}",
+        "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
+        "tap-to-paginate-label": "Tap Pagination",
+        "tap-to-paginate-tooltip": "Click the edges of the screen to paginate",
+        "on": "On",
+        "off": "Off",
+        "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
+        "immersive-mode-tooltip": "This will hide the menu behind a click on the reader document and turn tap to paginate on",
+        "fullscreen-label": "Fullscreen",
+        "fullscreen-tooltip": "Put reader in fullscreen mode",
+        "exit": "Exit",
+        "enter": "Enter",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "layout-mode-tooltip": "Scroll: Mirrors epub file (usually one long scrolling page per chapter).<br/>1 Column: Creates a single virtual page at a time.<br/>2 Column: Creates two virtual pages at a time laid out side-by-side.",
+        "layout-mode-option-scroll": "Scroll",
+        "layout-mode-option-1col": "1 Column",
+        "layout-mode-option-2col": "2 Column",
+        "color-theme-title": "Color Theme",
+
+        "theme-dark": "Dark",
+        "theme-black": "Black",
+        "theme-white": "White",
+        "theme-paper": "Paper"
+    },
+
+    "table-of-contents": {
+        "no-data": "This book does not have Table of Contents set in the metadata or a toc file"
+    },
+
+    "bookmarks": {
+        "title": "{{side-nav.bookmarks}}",
+        "series-count": "{{common.series-count}}",
+        "no-data": "There are no bookmarks. Try creating",
+        "no-data-2": "one.",
+        "confirm-delete": "Are you sure you want to clear all bookmarks for multiple series? This cannot be undone.",
+        "confirm-single-delete": "Are you sure you want to clear all bookmarks for {{seriesName}}? This cannot be undone.",
+        "delete-success": "Bookmarks have been removed",
+        "delete-single-success": "{{seriesName}}'s bookmarks have been removed"
     },
 
     "errors": {
