@@ -1,9 +1,9 @@
 {
     "login": {
         "title": "Login",
-        "username": "Username",
-        "password": "Password",
-        "password-validation": "Password must be between 6 and 32 characters in length",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
         "submit": "{{common.submit}}"
     },
@@ -20,7 +20,7 @@
     "edit-user": {
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
-        "username": "Username",
+        "username": "{{common.username}}",
         "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
@@ -218,7 +218,7 @@
     },
 
     "change-password": {
-        "password-label": "Password",
+        "password-label": "{{common.password}}",
         "current-password-label": "Current Password",
         "new-password-label": "New Password",
         "confirm-password-label": "Confirm Password",
@@ -626,12 +626,12 @@
         "title": "Register",
         "description": "Complete the form to complete your registration",
         "error-label": "Errors: ",
-        "username-label": "Username",
-        "password-label": "Password",
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "valid-email": "{{common.valid-email}}",
-        "password-validation": "{{login.password-validation}}",
+        "password-validation": "{{validation.password-validation}}",
         "register": "Register"
     },
 
@@ -643,12 +643,32 @@
     },
 
     "confirm-reset-password": {
-
+        "title": "Password Reset",
+        "description": "Enter the new password",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "submit": "{{common.submit}}",
+        "password-validation": "{{validation.password-validation}}"
     },
+
+    "register": {
+        "title": "Register",
+        "description": "Complete the form to register an admin account",
+        "username-label": "{{common.username}}",
+        "email-label": "{{common.email}}",
+        "email-tooltip": "Email does not need to be a real address, but provides access to forgot password.\n            It is not sent outside the server unless forgot password is used without a custom email service host.",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Register"
+    },
+
 
     "validation": {
         "required-field": "This field is required",
-        "valid-email": "This must be a valid email"
+        "valid-email": "This must be a valid email",
+        "password-validation": "Password must be between 6 and 32 characters in length"
     },
 
     "common": {
@@ -663,6 +683,8 @@
         "submit": "Submit",
         "Email": "Email",
         "loading": "Loading…",
+        "username": "Username",
+        "password": "Password",
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series"
