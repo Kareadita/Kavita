@@ -642,6 +642,10 @@
         "success": "Success!"
     },
 
+    "confirm-reset-password": {
+
+    },
+
     "validation": {
         "required-field": "This field is required",
         "valid-email": "This must be a valid email"
