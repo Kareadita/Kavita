@@ -284,7 +284,7 @@
         "locked-field": "Field is locked",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "add-item": "Add {{item}}...",
+        "add-item": "Add {{item}}…",
         "no-data": "No data",
         "add-custom-item": ", type to add a custom item"
     },
@@ -546,7 +546,7 @@
         "setup-user-account-tooltip": "Copy this and paste in a new tab. You may need to log out.",
         "invite-url-label": "Invite Url",
         "invite": "Invite",
-        "inviting": "Inviting...",
+        "inviting": "Inviting…",
         "cancel": "{{common.cancel}}"
     },
 
@@ -607,7 +607,7 @@
         "bookmarks-header": "Bookmarks",
         "toc-header": "ToC",
 
-        "loading-books": "Loading book...",
+        "loading-books": "Loading book…",
         "go-back": "Go Back",
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
@@ -652,7 +652,7 @@
         "help": "Help",
         "submit": "Submit",
         "Email": "Email",
-        "loading": "Loading...",
+        "loading": "Loading…",
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series"
