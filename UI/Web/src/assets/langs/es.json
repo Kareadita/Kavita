@@ -1,19 +1,34 @@
 {
     "login": {
         "title": "Acceso",
-        "username": "Username",
-        "password": "Password",
-        "password-validation": "Password must be between {{min}} and {{max}} characters in length",
-        "forgot-password": "Forgot Password?",
-        "submit": "Submit"
+        "username": "Usuario",
+        "password": "Contraseña",
+        "password-validation": "La contraseña tiene que tener entre {{min}} y{{max}} caracteres",
+        "forgot-password": "Has olvidado la contraseña?",
+        "submit": "Enviar"
     },
-
     "dashboard": {
-        "no-libraries": "There are no libraries setup yet. Configure some in",
-        "server-settings-link": "Server settings",
-        "not-granted": "You haven't been granted access to any libraries.",
-        "on-deck-title": "On Decko",
+        "no-libraries": "No existen librerías configuradas. Configura algunas en",
+        "server-settings-link": "Ajustes del servidor",
+        "not-granted": "No has sido autorizado para ver ninguna librería.",
+        "on-deck-title": "On Deck",
         "recently-updated-title": "Recently Updated Series",
         "recently-added-title": "Newly Added Series"
+    },
+    "edit-user": {
+        "edit": "Editar",
+        "username": "Nombre de Usuario",
+        "not-valid-email": "El correo electronico tiene que ser válido",
+        "saving": "Guardando …",
+        "update": "Actualizar",
+        "required": "Este campo es obligatorio"
+    },
+    "user-scrobble-history": {
+        "data-header": "Datos",
+        "not-applicable": "No aplicable",
+        "filter-label": "Filtro",
+        "type-header": "Tipo",
+        "rating": "Puntuación {{r}}",
+        "no-data": "No hay datos"
     }
 }
