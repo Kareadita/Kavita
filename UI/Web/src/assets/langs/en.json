@@ -952,6 +952,37 @@
 
     },
 
+    "entity-title": {
+        "special": "Special",
+        "issue-num": "Issue #",
+        "chapter": "Chapter"
+    },
+
+    "external-series-card": {
+        "open-external": "Open External"
+    },
+
+    "list-item": {
+        "read": "Read"
+    },
+
+    "manage-alerts": {
+        "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
+        "description-part-2": "wiki.",
+        "filter-label": "Filter",
+        "clear-alerts": "Clear Alerts",
+        "extension-header": "Extension",
+        "file-header": "File",
+        "comment-header": "Comment",
+        "details-header": "Details"
+    },
+
+    "manage-email-settings": {
+        "title": "Email Services (SMTP)",
+        "description": "Kavita comes out of the box with an email service to power tasks like inviting users, password reset requests, etc. Emails sent via our service are deleted immediately. You can use your own email service by setting up the {{link}}  service. Set the URL of the email service and use the Test button to ensure it works. You can reset these settings to default at any time. There is no way to disable emails for authentication, although you are not required to use a valid email address for users. Confirmation links will always be saved to logs and presented in the UI. Registration/confirmation emails will not be sent if you are not accessing Kavita via a publicly reachable URL or unless the Host Name feature is configured."
+    },
+
+
     "errors": {
         "series-doesnt-exist": "This series no longer exists"
     },
@@ -959,7 +990,13 @@
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
-        "download-in-progress": "Download is already in progress. Please wait."
+        "download-in-progress": "Download is already in progress. Please wait.",
+        "scan-queued": "Scan queued for {{name}}"
+    },
+
+    "actionable": {
+        "remove-from-on-deck": "Remove From On Deck",
+        "others": "Others"
     },
 
 

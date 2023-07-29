@@ -1,45 +1,44 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read: 'manage-email-settings'">
+  <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <h4>Email Services (SMTP)</h4>
-        <p>Kavita comes out of the box with an email service to power tasks like inviting users, password reset requests, etc. Emails sent via our service are deleted immediately. You can use your own
-            email service by setting up the <a href="https://github.com/Kareadita/KavitaEmail" target="_blank" rel="noopener noreferrer">Kavita Email</a> service. Set the URL of the email service and use the Test button to ensure it works.
-            You can reset these settings to default at any time. There is no way to disable emails for authentication, although you are not required to use a
-            valid email address for users. Confirmation links will always be saved to logs and presented in the UI.
-            Registration/confirmation emails will not be sent if you are not accessing Kavita via a publicly reachable URL or unless the Host Name feature is configured.
-            <span class="text-warning">If you want Send to Device to work you must host your own email service.</span>
-        </p>
-        <div class="mb-3">
-            <label for="settings-emailservice" class="form-label">Email Service URL</label><i class="ms-1 fa fa-info-circle" placement="right" [ngbTooltip]="emailServiceTooltip" role="button" tabindex="0"></i>
-            <ng-template #emailServiceTooltip>Use fully qualified URL of the email service. Do not include ending slash.</ng-template>
-            <span class="visually-hidden" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
-            <div class="input-group">
-                <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="url" autocapitalize="off" inputmode="url">
-                <button class="btn btn-outline-secondary" (click)="resetEmailServiceUrl()">
-                    Reset
-                </button>
-                <button class="btn btn-outline-secondary" (click)="testEmailServiceUrl()">
-                    Test
-                </button>
-            </div>
+      <h4>Email Services (SMTP)</h4>
+      <p [innerHTML]="t('description', {link: link})">
+        <span class="text-warning">If you want Send to Device to work you must host your own email service.</span>
+      </p>
+      <div class="mb-3">
+        <label for="settings-emailservice" class="form-label">Email Service URL</label><i class="ms-1 fa fa-info-circle" placement="right" [ngbTooltip]="emailServiceTooltip" role="button" tabindex="0"></i>
+        <ng-template #emailServiceTooltip>Use fully qualified URL of the email service. Do not include ending slash.</ng-template>
+        <span class="visually-hidden" id="settings-emailservice-help"><ng-container [ngTemplateOutlet]="emailServiceTooltip"></ng-container></span>
+        <div class="input-group">
+          <input id="settings-emailservice" aria-describedby="settings-emailservice-help" class="form-control" formControlName="emailServiceUrl" type="url" autocapitalize="off" inputmode="url">
+          <button class="btn btn-outline-secondary" (click)="resetEmailServiceUrl()">
+            Reset
+          </button>
+          <button class="btn btn-outline-secondary" (click)="testEmailServiceUrl()">
+            Test
+          </button>
         </div>
+      </div>
 
-        <div class="mb-3">
-            <label for="settings-hostname" class="form-label">Host Name</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
-            <ng-template #hostNameTooltip>Domain Name (of Reverse Proxy). If set, email generation will always use this.</ng-template>
-            <span class="visually-hidden" id="settings-hostname-help">Domain Name (of Reverse Proxy). If set, email generation will always use this.</span>
-            <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
-            [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
-            <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-                <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
-                    Host name must start with http(s) and not end in /
-                </div>
-            </div>
+      <div class="mb-3">
+        <label for="settings-hostname" class="form-label">Host Name</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="hostNameTooltip" role="button" tabindex="0"></i>
+        <ng-template #hostNameTooltip>Domain Name (of Reverse Proxy). If set, email generation will always use this.</ng-template>
+        <span class="visually-hidden" id="settings-hostname-help">Domain Name (of Reverse Proxy). If set, email generation will always use this.</span>
+        <input id="settings-hostname" aria-describedby="settings-hostname-help" class="form-control" formControlName="hostName" type="text"
+               [class.is-invalid]="settingsForm.get('hostName')?.invalid && settingsForm.get('hostName')?.touched">
+        <div id="hostname-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+          <div *ngIf="settingsForm.get('hostName')?.errors?.pattern">
+            Host name must start with http(s) and not end in /
+          </div>
         </div>
+      </div>
 
-        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
-            <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">Save</button>
-        </div>
+      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
+        <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">Save</button>
+      </div>
     </form>
-</div>
+  </div>
+
+</ng-container>

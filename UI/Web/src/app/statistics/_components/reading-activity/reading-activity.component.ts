@@ -10,9 +10,9 @@ import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoService} from "@ngneat/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
-const mangaFormatPipe = new MangaFormatPipe();
 
 @Component({
     selector: 'app-reading-activity',
@@ -39,13 +39,15 @@ export class ReadingActivityComponent implements OnInit {
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
+  mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor(private statService: StatisticsService, private memberService: MemberService) {
     this.data$ = this.formGroup.valueChanges.pipe(
       switchMap(_ => this.statService.getReadCountByDay(this.formGroup.get('users')!.value, this.formGroup.get('days')!.value)),
       map(data => {
         const gList = data.reduce((formats, entry) => {
-          const formatTranslated = mangaFormatPipe.transform(entry.format);
+          const formatTranslated = this.mangaFormatPipe.transform(entry.format);
           if (!formats[formatTranslated]) {
             formats[formatTranslated] = {
               name: formatTranslated,

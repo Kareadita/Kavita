@@ -6,19 +6,21 @@ import { SettingsService, EmailTestResult } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-email-settings',
     templateUrl: './manage-email-settings.component.html',
     styleUrls: ['./manage-email-settings.component.scss'],
     standalone: true,
-    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
-  
+  link = '<a href="https://github.com/Kareadita/KavitaEmail" target="_blank" rel="noopener noreferrer">Kavita Email</a>';
+
   constructor(private settingsService: SettingsService, private toastr: ToastrService) { }
 
   ngOnInit(): void {
@@ -39,8 +41,8 @@ export class ManageEmailSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.emailServiceUrl = this.settingsForm.get('emailServiceUrl')?.value;
     modelSettings.hostName = this.settingsForm.get('hostName')?.value;
-    
-    
+
+
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
@@ -78,11 +80,11 @@ export class ManageEmailSettingsComponent implements OnInit {
       } else {
         this.toastr.error('Email Service Url did not respond. ' + result.errorMessage);
       }
-      
+
     }, (err: any) => {
       console.error('error: ', err);
     });
-    
+
   }
 
 }

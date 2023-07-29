@@ -7,7 +7,7 @@ import {TranslocoService} from "@ngneat/transloco";
   standalone: true
 })
 export class PublicationStatusPipe implements PipeTransform {
-  translocoService = inject(TranslocoService);
+  constructor(private translocoService: TranslocoService) {}
 
   transform(value: PublicationStatus): string {
     switch (value) {

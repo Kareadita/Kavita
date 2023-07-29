@@ -1,4 +1,4 @@
-import {inject, Pipe, PipeTransform} from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import { MangaFormat } from '../_models/manga-format';
 import {TranslocoService} from "@ngneat/transloco";
 
@@ -11,7 +11,8 @@ import {TranslocoService} from "@ngneat/transloco";
 })
 export class MangaFormatPipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  constructor(private translocoService: TranslocoService) {}
+
   transform(format: MangaFormat): string {
     switch (format) {
       case MangaFormat.EPUB:

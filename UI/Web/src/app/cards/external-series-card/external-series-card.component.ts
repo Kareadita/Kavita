@@ -11,11 +11,12 @@ import {RouterLinkActive} from "@angular/router";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ReactiveFormsModule} from "@angular/forms";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-external-series-card',
   standalone: true,
-  imports: [CommonModule, ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive],
+  imports: [CommonModule, ImageComponent, NgbProgressbar, NgbTooltip, ReactiveFormsModule, RouterLinkActive, TranslocoModule],
   templateUrl: './external-series-card.component.html',
   styleUrls: ['./external-series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
