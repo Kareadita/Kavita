@@ -1,10 +1,10 @@
 <ng-container *transloco="let t; read: 'confirm-email'">
   <app-splash-container>
-    <ng-container title><h2>Register</h2></ng-container>
+    <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
-      <p>Complete the form to complete your registration</p>
+      <p>{{t('description')}}</p>
       <div class="text-danger" *ngIf="errors.length > 0">
-        <p>Errors:</p>
+        <p>{{t('error-label')}}</p>
         <ul>
           <li *ngFor="let error of errors">{{error}}</li>
         </ul>

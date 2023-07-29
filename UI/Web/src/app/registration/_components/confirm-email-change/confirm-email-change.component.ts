@@ -6,6 +6,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This component just validates the email via API then redirects to login
@@ -16,7 +17,7 @@ import { SplashContainerComponent } from '../splash-container/splash-container.c
     styleUrls: ['./confirm-email-change.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SplashContainerComponent, NgIf]
+  imports: [SplashContainerComponent, NgIf, TranslocoModule]
 })
 export class ConfirmEmailChangeComponent implements OnInit {
 
@@ -25,8 +26,8 @@ export class ConfirmEmailChangeComponent implements OnInit {
 
   confirmed: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService, 
-    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService, 
+  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
+    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService,
     private readonly cdRef: ChangeDetectorRef) {
       this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);

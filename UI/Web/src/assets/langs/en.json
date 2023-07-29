@@ -633,7 +633,13 @@
         "valid-email": "{{common.valid-email}}",
         "password-validation": "{{login.password-validation}}",
         "register": "Register"
+    },
 
+    "confirm-email-change": {
+        "title": "Validate Email Change",
+        "non-confirm-description": "Please wait while your email update is validated.",
+        "confirm-description": "Your email has been validated and is now changed within Kavita. You will be redirected to login.",
+        "success": "Success!"
     },
 
     "validation": {
