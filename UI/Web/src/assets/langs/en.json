@@ -688,7 +688,7 @@
         "related-tab": "Related",
         "recommendations-tab": "Recommendations",
         "send-to": "File emailed to {{deviceName}}",
-        "no-pages": "There are no pages. Kavita was not able to read this archive.",
+        "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "There are no chapters to this volume. Cannot read.",
         "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages."
     },
@@ -852,9 +852,82 @@
         "delete-single-success": "{{seriesName}}'s bookmarks have been removed"
     },
 
+    "bulk-operations": {
+        "title": "Bulk Actions",
+        "items-selected": "{{num}} items selected",
+        "mark-as-unread": "Mark as Unread",
+        "mark-as-read": "Mark as Read",
+        "deselect-all": "Deselect All"
+    },
+
+    "card-detail-drawer": {
+        "general-tab": "General",
+        "metadata-tab": "Metadata",
+        "cover-tab": "Cover",
+        "info-tab": "Info",
+        "no-summary": "No Summary available.",
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "genres-title": "{{series-metadata-detail.genres-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "tags-title": "{{series-metadata-detail.tags-title}}",
+        "not-defined": "Not defined",
+        "read": "Read",
+        "unread": "Unread",
+        "files": "Files",
+        "pages": "Pages:",
+        "added": "Added:",
+        "size": "Size:"
+    },
+
+    "card-detail-layout": {
+        "total-items": "{{count}} total items"
+    },
+
+    "card-item": {
+        "cannot-read": "Cannot Read"
+
+    },
+
+    "chapter-metadata-detail": {
+        "no-data": "No metadata available",
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "translators-title": "{{series-metadata-detail.translators-title}}",
+        "letterers-title": "{{series-metadata-detail.letterers-title}}",
+        "colorists-title": "{{series-metadata-detail.colorists-title}}",
+        "inkers-title": "{{series-metadata-detail.inkers-title}}",
+        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
+        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
+        "editors-title": "{{series-metadata-detail.editors-title}}"
+    },
+
+    "cover-image-chooser": {
+        "drag-n-drop": "Drag and drop",
+        "upload": "Upload",
+        "upload-continued": "an image",
+        "url-label": "Url",
+        "load": "Load",
+        "back": "Back",
+        "reset-cover-tooltip": "Reset Cover Image",
+        "reset": "{{common.reset}}",
+        "image-num": "Image {{num}}",
+        "apply": "Apply",
+        "applied": "Applied"
+
+
+    },
+
     "errors": {
         "series-doesnt-exist": "This series no longer exists"
     },
+
+    "toasts": {
+        "regen-cover": "A job has been enqueued to regenerate the cover image",
+        "no-pages": "There are no pages. Kavita was not able to read this archive.",
+        "download-in-progress": "Download is already in progress. Please wait."
+    },
+
 
 
     "validation": {

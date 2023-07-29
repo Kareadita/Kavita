@@ -5,7 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "prod": "ng build --configuration production --aot --output-hashing=all",
+    "transloco:optimize": "transloco-optimize dist/assets/langs",
+    "prod": "ng build --configuration production --aot --output-hashing=all && npm run transloco:optimize",
     "explore": "ng build --stats-json && webpack-bundle-analyzer dist/stats.json",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -62,6 +63,7 @@
     "@angular-eslint/template-parser": "^16.1.0",
     "@angular/cli": "^16.1.5",
     "@angular/compiler-cli": "^16.1.6",
+    "@ngneat/transloco-optimize": "^3.0.2",
     "@types/d3": "^7.4.0",
     "@types/node": "^20.4.4",
     "@typescript-eslint/eslint-plugin": "^6.1.0",

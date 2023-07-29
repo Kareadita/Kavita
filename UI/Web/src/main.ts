@@ -1,5 +1,5 @@
 /// <reference types="@angular/localize" />
-import {APP_INITIALIZER, importProvidersFrom} from '@angular/core';
+import {APP_INITIALIZER, importProvidersFrom, isDevMode} from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ToastrModule } from 'ngx-toastr';
@@ -89,7 +89,11 @@ bootstrapApplication(AppComponent, {
             missingHandler: {
               useFallbackTranslation: true,
               allowEmpty: true,
+            },
+            flatten: {
+              aot: !isDevMode()
             }
+
           } as TranslocoConfig
         },
         preLoad,
