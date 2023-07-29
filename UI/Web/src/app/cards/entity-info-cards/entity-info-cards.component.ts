@@ -26,11 +26,12 @@ import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {FilterQueryParam} from "../../shared/_services/filter-utilities.service";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-entity-info-cards',
   standalone: true,
-  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent],
+  imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

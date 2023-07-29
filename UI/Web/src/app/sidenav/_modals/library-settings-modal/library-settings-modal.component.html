@@ -43,10 +43,7 @@
             </div>
             <div *ngIf="!isAddLibrary">
               {{t('last-scanned-label')}}
-              <span *ngIf="library.lastScanned === '0001-01-01T00:00:00'; else activeDate">{{t('never')}}</span>
-              <ng-template #activeDate>
-                {{library.lastScanned | date: 'short'}}
-              </ng-template>
+              <span>{{library.lastScanned | date: 'short' | defaultDate}}</span>
             </div>
           </ng-template>
         </li>

@@ -763,7 +763,6 @@
         "name-label": "Name",
         "library-name-unique": "Library name must be unique",
         "last-scanned-label": "Last Scanned:",
-        "never": "Never",
         "type-label": "Type",
         "type-tooltip": "Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.",
         "folder-description": "Add folders to your library",
@@ -912,9 +911,44 @@
         "reset-cover-tooltip": "Reset Cover Image",
         "reset": "{{common.reset}}",
         "image-num": "Image {{num}}",
-        "apply": "Apply",
-        "applied": "Applied"
+        "apply": "{{theme-manager.apply}}",
+        "applied": "{{theme-manager.applied}}"
+    },
 
+    "download-indicator": {
+        "progress": "{{percentage}}% downloaded"
+    },
+
+    "edit-series-relation": {
+        "description-part-1": "Not sure what relationship to add? See our",
+        "description-part-2": "wiki for hints.",
+        "target-series": "Target Series",
+        "relationship": "Relationship",
+        "remove": "Remove",
+        "add-relationship": "Add Relationship",
+        "parent": "{{relationship-pipe.parent}}"
+    },
+
+    "entity-info-cards": {
+        "tags-title": "{{series-metadata-detail.tags-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "release-date-title": "Release",
+        "release-date-tooltip": "Release Date",
+        "age-rating-title": "Age Rating",
+        "length-title": "Length",
+        "pages-count": "{{num}} Pages",
+        "words-count": "{{num}} Words",
+        "reading-time-title": "Read Time",
+        "date-added-title": "Date Added",
+        "size-title": "Size",
+        "id-title": "ID",
+        "links-title": "{{series-metadata-detail.links-title}}",
+        "isbn-title": "ISBN",
+        "last-read-title": "Last Read",
+        "less-than-hour": "<1 Hour",
+        "range-hours": "{{value}} {{hourWord}}",
+        "hour": "Hour",
+        "hours": "Hours"
 
     },
 

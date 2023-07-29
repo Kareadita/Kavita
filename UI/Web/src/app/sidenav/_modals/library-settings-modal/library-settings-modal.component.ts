@@ -29,6 +29,7 @@ import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
 
 enum TabID {
   General = 'general-tab',
@@ -47,7 +48,7 @@ enum StepID {
 @Component({
   selector: 'app-library-settings-modal',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule],
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
