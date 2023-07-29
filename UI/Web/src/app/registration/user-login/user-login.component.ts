@@ -4,7 +4,6 @@ import { Router, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { AddEmailToAccountMigrationModalComponent } from '../_modals/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
@@ -109,14 +108,7 @@ export class UserLoginComponent implements OnInit {
       this.isSubmitting = false;
       this.cdRef.markForCheck();
     }, err => {
-      if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
-        const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
-        modalRef.componentInstance.username = model.username;
-        modalRef.closed.pipe(take(1)).subscribe(() => {
-        });
-      } else {
-        this.toastr.error(err.error);
-      }
+      this.toastr.error(err.error);
       this.isSubmitting = false;
       this.cdRef.markForCheck();
     });
