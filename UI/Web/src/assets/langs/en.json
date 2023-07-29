@@ -25,7 +25,7 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "Saving...",
+        "saving": "Saving…",
         "update": "Update"
     },
 
