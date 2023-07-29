@@ -3,7 +3,7 @@
         "title": "Login",
         "username": "Username",
         "password": "Password",
-        "password-validation": "Password must be between {{min}} and {{max}} characters in length",
+        "password-validation": "Password must be between 6 and 32 characters in length",
         "forgot-password": "Forgot Password?",
         "submit": "{{common.submit}}"
     },
@@ -605,6 +605,7 @@
         "settings-header": "Settings",
         "table-of-contents-header": "Table of Contents",
         "bookmarks-header": "Bookmarks",
+        "toc-header": "ToC",
 
         "loading-books": "Loading book...",
         "go-back": "Go Back",
@@ -612,6 +613,26 @@
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
         "previous": "Previous"
+
+    },
+
+    "personal-table-of-contents": {
+        "no-data": "Nothing Bookmarked yet",
+        "page": "Page {{value}}",
+        "delete": "Delete {{bookmarkName}}"
+    },
+
+    "confirm-email": {
+        "title": "Register",
+        "description": "Complete the form to complete your registration",
+        "error-label": "Errors: ",
+        "username-label": "Username",
+        "password-label": "Password",
+        "email-label": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "valid-email": "{{common.valid-email}}",
+        "password-validation": "{{login.password-validation}}",
+        "register": "Register"
 
     },
 

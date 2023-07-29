@@ -17,7 +17,7 @@
                      id="password" type="password" pattern="^.{6,32}$" [placeholder]="t('password')">
               <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
                 <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
-                  {{t('password-validation', {min: 6, max: 32})}}
+                  {{t('password-validation')}}
                 </div>
               </div>
             </div>

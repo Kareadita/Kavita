@@ -74,14 +74,14 @@
                 <ng-template ngbNavContent>
                   <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
                     <li [ngbNavItem]="TabID.TableOfContents">
-                      <a ngbNavLink>ToC</a>
+                      <a ngbNavLink>{{t('toc-header')}}</a>
                       <ng-template ngbNavContent>
                         <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
                                                [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
                       </ng-template>
                     </li>
                     <li [ngbNavItem]="TabID.PersonalTableOfContents">
-                      <a ngbNavLink>Bookmarks</a>
+                      <a ngbNavLink>{{t('bookmarks-header')}}</a>
                       <ng-template ngbNavContent>
                         <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
                                                         [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
@@ -126,7 +126,7 @@
       <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
         <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
-                title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
+                title="{{readingDirection === ReadingDirection.LeftToRight ? t('previous') : t('next')}} Page">
           <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
         </button>
         <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" [title]="t('go-back')">
