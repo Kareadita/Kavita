@@ -664,6 +664,39 @@
         "register": "Register"
     },
 
+    "series-detail": {
+        "page-settings-title": "Page Settings",
+        "close": "{{common.close}}",
+        "layout-mode-label": "Layout Mode",
+        "layout-mode-option-card": "Card",
+        "layout-mode-option-list": "List",
+        "continue-from": "Continue {{title}}",
+        "read": "Read",
+        "continue": "Continue",
+        "read-options-alt": "Read options",
+        "incognito": "Incognito",
+        "remove-from-want-to-read": "Remove from Want to Read",
+        "add-to-want-to-read": "Add to Want to Read",
+        "edit-series-alt": "Edit Series Information",
+        "download-series--tooltip": "Download Series",
+        "downloading-status": "Downloading…",
+        "user-reviews-alt": "User Reviews",
+        "storyline-tab": "Storyline",
+        "books-tab": "Books",
+        "volumes-tab": "Volumes",
+        "specials-tab": "Specials",
+        "related-tab": "Related",
+        "recommendations-tab": "Recommendations",
+        "send-to": "File emailed to {{deviceName}}",
+        "no-pages": "There are no pages. Kavita was not able to read this archive.",
+        "no-chapters": "There are no chapters to this volume. Cannot read.",
+        "cover-change": "It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages."
+    },
+
+    "errors": {
+        "series-doesnt-exist": "This series no longer exists"
+    },
+
 
     "validation": {
         "required-field": "This field is required",

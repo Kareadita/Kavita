@@ -70,6 +70,7 @@ import { ImageComponent } from '../../../shared/image/image.component';
 import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component';
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -97,7 +98,7 @@ interface StoryLineItem {
     styleUrls: ['./series-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, ReactiveFormsModule, NgStyle, TagBadgeComponent, ImageComponent, NgbTooltip, NgbProgressbar, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, SeriesMetadataDetailComponent, CarouselReelComponent, ReviewCardComponent, BulkOperationsComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, NgFor, CardItemComponent, ListItemComponent, EntityTitleComponent, SeriesCardComponent, ExternalSeriesCardComponent, ExternalListItemComponent, NgbNavOutlet, LoadingComponent, DecimalPipe, TranslocoModule]
 })
 export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
@@ -192,7 +193,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     'renderMode': new FormControl(this.renderMode, []),
   });
 
-  isAscendingSort: boolean = false; // TODO: Get this from User preferences
   user: User | undefined;
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
@@ -295,7 +295,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
               public navService: NavService,
               private offcanvasService: NgbOffcanvas, @Inject(DOCUMENT) private document: Document,
               private cdRef: ChangeDetectorRef, private scrollService: ScrollService,
-              private deviceService: DeviceService
+              private deviceService: DeviceService, private translocoService: TranslocoService
               ) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
@@ -327,7 +327,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemovedEvent = event.payload as SeriesRemovedEvent;
         if (seriesRemovedEvent.seriesId === this.seriesId) {
-          this.toastr.info('This series no longer exists');
+          this.toastr.info(this.translocoService.translate('errors.series-doesnt-exist'));
           this.router.navigateByUrl('/libraries');
         }
       } else if (event.event === EVENTS.ScanSeries) {
@@ -474,7 +474,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
         {
           const device = (action._extra!.data as Device);
           this.deviceService.sendTo([chapter.id], device.id).subscribe(() => {
-            this.toastr.success('File emailed to ' + device.name);
+            this.toastr.success(this.translocoService.translate('series-detail.send-to', {deviceName: device.name}));
           });
           break;
         }
@@ -704,7 +704,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   openChapter(chapter: Chapter, incognitoMode = false) {
     if (this.bulkSelectionService.hasSelections()) return;
     if (chapter.pages === 0) {
-      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+      this.toastr.error(this.translocoService.translate('series-detail.no-pages'));
       return;
     }
     this.router.navigate(this.readerService.getNavigationArray(this.libraryId, this.seriesId, chapter.id, chapter.files[0].format), {queryParams: {incognitoMode}});
@@ -713,7 +713,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   openVolume(volume: Volume) {
     if (this.bulkSelectionService.hasSelections()) return;
     if (volume.chapters === undefined || volume.chapters?.length === 0) {
-      this.toastr.error('There are no chapters to this volume. Cannot read.');
+      this.toastr.error(this.translocoService.translate('series-detail.no-chapters'));
       return;
     }
 
@@ -731,10 +731,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
 
     // Sort the chapters, then grab first if no reading progress
     this.openChapter([...volume.chapters].sort(this.utilityService.sortChapters)[0]);
-  }
-
-  isNullOrEmpty(val: string) {
-    return val === null || val === undefined || val === ''; // TODO: Validate if this code is used
   }
 
   openViewInfo(data: Volume | Chapter) {
@@ -755,7 +751,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
 
       if (closeResult.coverImageUpdate) {
-        this.toastr.info('It can take up to a minute for your browser to refresh the image. Until then, the old image may be shown on some pages.');
+        this.toastr.info(this.translocoService.translate('series-detail.cover-change'));
       }
     });
   }
@@ -785,10 +781,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  preventClick(event: any) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {
@@ -805,18 +797,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       }
       this.cdRef.markForCheck();
     });
-  }
-
-  updateSortOrder() {
-    this.isAscendingSort = !this.isAscendingSort;
-    // if (this.filter.sortOptions === null) {
-    //   this.filter.sortOptions = {
-    //     isAscending: this.isAscendingSort,
-    //     sortField: SortField.SortName
-    //   }
-    // }
-
-    // this.filter.sortOptions.isAscending = this.isAscendingSort;
   }
 
   toggleWantToRead() {
