@@ -1,13 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
 import { ServerSettings } from '../_models/server-settings';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { NgIf, NgFor, TitleCasePipe } from '@angular/common';
+import {NgIf, NgFor, TitleCasePipe, NgTemplateOutlet} from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -16,7 +16,7 @@ const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:
     templateUrl: './manage-settings.component.html',
     styleUrls: ['./manage-settings.component.scss'],
     standalone: true,
-    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -24,6 +24,7 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
+  translocoService = inject(TranslocoService);
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
@@ -93,7 +94,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -103,7 +104,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -113,7 +114,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
       this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
-      this.toastr.success('IP Addresses Reset');
+      this.toastr.success(this.translocoService.translate('toasts.reset-ip-address'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -123,7 +124,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.baseUrl = settings.baseUrl;
       this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
-      this.toastr.success('Base Url Reset');
+      this.toastr.success(this.translocoService.translate('toasts.reset-base-url'));
     }, (err: any) => {
       console.error('error: ', err);
     });

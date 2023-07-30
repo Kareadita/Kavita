@@ -7,13 +7,14 @@ import { ServerSettings } from '../_models/server-settings';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 import {TranslocoModule} from "@ngneat/transloco";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 
 @Component({
     selector: 'app-manage-email-settings',
     templateUrl: './manage-email-settings.component.html',
     styleUrls: ['./manage-email-settings.component.scss'],
     standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule, SafeHtmlPipe]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

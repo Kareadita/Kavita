@@ -22,6 +22,8 @@ import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
 import { LibraryTypePipe } from '../../pipe/library-type.pipe';
 import { RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 
 @Component({
     selector: 'app-manage-library',
@@ -29,7 +31,7 @@ import { NgFor, NgIf } from '@angular/common';
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe]
+  imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 

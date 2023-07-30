@@ -1,42 +1,43 @@
-<div class="container-fluid">
-    <h3>About System</h3>
+<ng-container *transloco="let t; read: 'manage-system'">
+  <div class="container-fluid">
+    <h3>{{t('title')}}</h3>
     <hr/>
     <div class="mb-3" *ngIf="serverInfo">
-        <dl>
-            <dt>Version</dt>
-            <dd>{{serverInfo.kavitaVersion}}</dd>
+      <dl>
+        <dt>{{t('version-title')}}</dt>
+        <dd>{{serverInfo.kavitaVersion}}</dd>
 
-            <dt>Install ID</dt>
-            <dd>{{serverInfo.installId}}</dd>
-        </dl>
+        <dt>{{t('installId-title')}}</dt>
+        <dd>{{serverInfo.installId}}</dd>
+      </dl>
     </div>
 
-    <h3>More Info</h3>
+    <h3>{{t('more-info-title')}}</h3>
     <hr/>
-      <div class="row">
-            <div class="col-4">Home page:</div>
-            <div class="col"><a href="https://www.kavitareader.com" target="_blank" rel="noopener noreferrer">kavitareader.com</a></div>
-      </div>
-      <div class="row">
-          <div class="col-4">Wiki:</div>
-          <div class="col"><a href="https://wiki.kavitareader.com" target="_blank" rel="noopener noreferrer">wiki.kavitareader.com</a></div>
-      </div>
-      <div class="row">
-          <div class="col-4">Discord:</div>
-          <div class="col"><a href="https://discord.gg/b52wT37kt7" target="_blank" rel="noopener noreferrer">discord.gg/b52wT37kt7</a></div>
-      </div>
-      <div class="row">
-          <div class="col-4">Donations:</div>
-          <div class="col"><a href="https://opencollective.com/kavita" target="_blank" rel="noopener noreferrer">opencollective.com/kavita</a></div>
-      </div>
-      <div class="row">
-          <div class="col-4">Source:</div>
-          <div class="col"><a href="https://github.com/Kareadita/Kavita" target="_blank" rel="noopener noreferrer">github.com/Kareadita/Kavita</a></div>
-      </div>
-      <div class="row">
-          <div class="col-4">Feature Requests:</div>
-          <div class="col"><a href="https://feats.kavitareader.com" target="_blank" rel="noopener noreferrer">https://feats.kavitareader.com</a><br/>
-      </div>
+    <div class="row">
+      <div class="col-4">{{t('home-page-title')}}</div>
+      <div class="col"><a href="https://www.kavitareader.com" target="_blank" rel="noopener noreferrer">kavitareader.com</a></div>
+    </div>
+    <div class="row">
+      <div class="col-4">{{t('wiki-title')}}</div>
+      <div class="col"><a href="https://wiki.kavitareader.com" target="_blank" rel="noopener noreferrer">wiki.kavitareader.com</a></div>
+    </div>
+    <div class="row">
+      <div class="col-4">{{t('discord-title')}}</div>
+      <div class="col"><a href="https://discord.gg/b52wT37kt7" target="_blank" rel="noopener noreferrer">discord.gg/b52wT37kt7</a></div>
+    </div>
+    <div class="row">
+      <div class="col-4">{{t('donations-title')}}</div>
+      <div class="col"><a href="https://opencollective.com/kavita" target="_blank" rel="noopener noreferrer">opencollective.com/kavita</a></div>
+    </div>
+    <div class="row">
+      <div class="col-4">{{t('source-title')}}</div>
+      <div class="col"><a href="https://github.com/Kareadita/Kavita" target="_blank" rel="noopener noreferrer">github.com/Kareadita/Kavita</a></div>
+    </div>
+    <div class="row">
+      <div class="col-4">{{t('feature-requests-title')}}</div>
+      <div class="col"><a href="https://feats.kavitareader.com" target="_blank" rel="noopener noreferrer">https://feats.kavitareader.com</a><br/></div>
+    </div>
+  </div>
 
-</div>
-</div>
+</ng-container>

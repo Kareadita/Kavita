@@ -979,9 +979,173 @@
 
     "manage-email-settings": {
         "title": "Email Services (SMTP)",
-        "description": "Kavita comes out of the box with an email service to power tasks like inviting users, password reset requests, etc. Emails sent via our service are deleted immediately. You can use your own email service by setting up the {{link}}  service. Set the URL of the email service and use the Test button to ensure it works. You can reset these settings to default at any time. There is no way to disable emails for authentication, although you are not required to use a valid email address for users. Confirmation links will always be saved to logs and presented in the UI. Registration/confirmation emails will not be sent if you are not accessing Kavita via a publicly reachable URL or unless the Host Name feature is configured."
+        "description": "Kavita comes out of the box with an email service to power tasks like inviting users, password reset requests, etc. Emails sent via our service are deleted immediately. You can use your own email service by setting up the {{link}}  service. Set the URL of the email service and use the Test button to ensure it works. You can reset these settings to default at any time. There is no way to disable emails for authentication, although you are not required to use a valid email address for users. Confirmation links will always be saved to logs and presented in the UI. Registration/confirmation emails will not be sent if you are not accessing Kavita via a publicly reachable URL or unless the Host Name feature is configured.",
+        "send-to-warning": "If you want Send to Device to work you must host your own email service.",
+        "email-url-label": "Email Service URL",
+        "email-url-tooltip": "Use fully qualified URL of the email service. Do not include ending slash.",
+        "reset": "{{common.reset}}",
+        "test": "Test",
+        "host-name-label": "Host Name",
+        "host-name-tooltip": "Domain Name (of Reverse Proxy). If set, email generation will always use this.",
+        "host-name-validation": "Host name must start with http(s) and not end in /",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
     },
 
+    "manage-library": {
+        "title": "Libraries",
+        "add-library": "Add Library",
+        "no-data": "There are no libraries. Try creating one.",
+        "loading": "{{common.loading}}",
+        "last-scanned-title": "Last Scanned:",
+        "shared-folders-title": "Shared Folders:",
+        "type-title": "Type:",
+        "scan-library": "Scan Library",
+        "delete-library": "Delete Library",
+        "delete-library-by-name": "Delete {{name}}",
+        "edit-library": "Edit",
+        "edit-library-by-name": "Delete {{name}}"
+    },
+
+    "manage-media-settings": {
+        "encode-as-description-part-1": "WebP/AVIF can drastically reduce space requirements for files. WebP/AVIF is not supported on all browsers or versions. To learn if these settings are appropriate for your setup, visit ",
+        "encode-as-description-part-2": "Can I Use WebP?",
+        "encode-as-description-part-3": "Can I Use AVIF?",
+        "encode-as-warning": "You cannot convert back to PNG once you've gone to WebP/AVIF. You would need to refresh covers on your libraries to regenerate all covers. Bookmarks and favicons cannot be converted.",
+        "media-warning": "You must trigger the media conversion task in Tasks Tab.,",
+        "encode-as-label": "Save Media As",
+        "encode-as-tooltip": "All media Kavita manages (covers, bookmarks, favicons) will be encoded as this type.",
+        "bookmark-dir-label": "Bookmarks Directory",
+        "bookmark-dir-tooltip": "Location where bookmarks will be stored. Bookmarks are source files and can be large. Choose a location with adequate storage. Directory is managed; other files within directory will be deleted. If Docker, mount an additional volume and use that.",
+        "change": "Change",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+
+        "media-issue-title": "Media Issues",
+        "scrobble-issue-title": "Scrobble Issues"
+    },
+
+    "manage-scrobble-errors": {
+        "description": "This table contains issues found during scrobbling. This list is non-managed.\n    You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the\nseries name or localized series name or adding a weblink for the providers.",
+        "filter-label": "Filter",
+        "clear-errors": "Clear Errors",
+        "series-header": "Series",
+        "created-header": "Created",
+        "comment-header": "Comment",
+        "edit-header": "Edit",
+        "edit-item-alt": "Edit {{seriesName}}"
+    },
+
+    "default-date-pipe": {
+        "never": "Never"
+    },
+
+    "manage-settings": {
+        "notice": "Notice:",
+        "restart-required": "Changing Port, Base Url, Cache Size or IPs requires a manual restart of Kavita to take effect.",
+        "base-url-label": "Base Url",
+        "base-url-tooltip": "Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.",
+        "ip-address-label": "IP Addresses",
+        "ip-address-tooltip": "Comma separated list of Ip addresses the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.",
+        "port-label": "Port",
+        "port-tooltip": "Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.",
+        "backup-label": "Days of Backups",
+        "backup-tooltip": "The number of backups to maintain. Default is 30, minimum is 1, maximum is 30.",
+        "log-label": "Days of Logs",
+        "log-tooltip": "The number of logs to maintain. Default is 30, minimum is 1, maximum is 30.",
+        "logging-level-label": "Logging Level",
+        "logging-level-tooltip": "Use debug to help identify issues. Debug can eat up a lot of disk space.",
+        "cache-size-label": "Cache Size",
+        "cache-size-tooltip": "The amount of memory allowed for caching heavy APIs. Default is 75MB.",
+        "on-deck-last-progress-label": "On Deck Last Progress (days)",
+        "on-deck-last-progress-tooltip": "The number of days since last progress before kicking something off On Deck.",
+        "on-deck-last-chapter-add-label": "On Deck Last Chapter Add (days)",
+        "on-deck-last-chapter-add-tooltip": "The number of days since last chapter was added to include something On Deck.",
+        "allow-stats-label": "Allow Anonymous Usage Collection",
+        "allow-stats-tooltip-part-1": "Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, Kavita install version, CPU, and memory. We will use this information to prioritize features, bug fixes, and performance tuning. Requires restart to take effect. See the ",
+        "allow-stats-tooltip-part-2": "for what is collected.",
+        "send-data": "Send Data",
+        "opds-label": "OPDS",
+        "opds-tooltip": "OPDS support will allow all users to use OPDS to read and download content from the server.",
+        "enable-opds": "Enable OPDS",
+        "folder-watching-label": "Folder Watching",
+        "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans.",
+        "enable-folder-watching": "Enable Folder Watching",
+
+
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "cache-size-validation": "You must have at least 50 MB.",
+        "field-required": "{{validation.field-required}}",
+        "max-logs-validation": "You cannot have more than {{num}} logs",
+        "min-logs-validation": "You must have at least 1 log",
+        "min-days-validation": "Must be at least 1 day",
+        "min-cache-validation": "Must be at 50 MB.",
+        "max-backup-validation": "You cannot have more than {{num}} backup",
+        "min-backup-validation": "You must have at least 1 backup",
+        "ip-address-validation": "IP addresses can only contain valid IPv4 or IPv6 addresses",
+        "base-url-validation": "Base URL must start and end with /"
+    },
+
+    "manage-system": {
+        "title": "About System",
+        "version-title": "Version",
+        "installId-title": "Install ID",
+        "more-info-title": "More Info",
+        "home-page-title": "Home page:",
+        "wiki-title": "Wiki:",
+        "discord-title": "Discord:",
+        "donations-title": "Donations:",
+        "source-title": "Source:",
+        "feature-request-title": "Feature Requests"
+    },
+
+    "manage-tasks-settings": {
+        "title": "Recurring Tasks",
+        "library-scan-label": "Library Scan",
+        "library-scan-tooltip": "How often Kavita will scan and refresh metadata around library files.",
+        "library-database-backup-label": "Library Database Backup",
+        "library-database-backup-tooltip": "How often Kavita will backup the database.",
+        "adhoc-tasks-title": "Ad-hoc Tasks",
+        "job-title-header": "Job Title",
+        "description-header": "Description",
+        "action-header": "Action",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+
+        "convert-media-task": "Convert Media to Target Encoding",
+        "convert-media-task-desc": "Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).",
+        "convert-media-success": "Conversion of Media to Target Encoding has been queued",
+
+        "bust-cache-task": "Bust Cache",
+        "bust-cache-task-desc": "Busts the Kavita+ Cache - should only be used when debugging bad matches.",
+        "bust-cache-task-success": "Kavita+ Cache busted",
+
+        "clear-reading-cache-task": "Clear Reading Cache",
+        "clear-reading-cache-task-desc": "Clears cached files for reading. Useful when you've just updated a file that you were previously reading within the last 24 hours.",
+        "clear-reading-cache-task-success": "Cache has been cleared",
+
+        "clean-up-want-to-read-task": "Clean up Want to Read",
+        "clean-up-want-to-read-task-desc": "Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.",
+        "clean-up-want-to-read-task-success": "Want to Read has been cleaned up",
+
+        "backup-database-task": "Backup Database",
+        "backup-database-task-desc": "Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.",
+        "backup-database-task-success": "A job to backup the database has been queued",
+
+        "download-logs-task": "Download Logs",
+        "download-logs-task-desc": "Compiles all log files into a zip and downloads it.",
+
+        "analyze-files-task": "Analyze Files",
+        "analyze-files-task-desc": "Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.",
+        "analyze-files-task-success": "File analysis has been queued",
+
+        "check-for-updates-task": "Check for Updates",
+        "check-for-updates-task-desc": "See if there are any Stable releases ahead of your version."
+    },
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists"
@@ -991,7 +1155,13 @@
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
         "download-in-progress": "Download is already in progress. Please wait.",
-        "scan-queued": "Scan queued for {{name}}"
+        "scan-queued": "Scan queued for {{name}}",
+        "server-settings-updated": "Server settings updated",
+        "reset-ip-address": "IP Addresses Reset",
+        "reset-base-url": "Base Url Reset",
+        "unauthorized-1": "You are not authorized to view this page.",
+        "unauthorized-2": "Unauthorized",
+        "no-updates": "No updates available"
     },
 
     "actionable": {
@@ -1008,6 +1178,7 @@
     },
 
     "common": {
+        "reset-to-default": "Reset to Default",
         "close": "Close",
         "cancel": "Cancel",
         "save": "Save",

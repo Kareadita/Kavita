@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { SettingsService } from '../settings.service';
@@ -11,7 +11,8 @@ import { UpdateNotificationModalComponent } from 'src/app/shared/update-notifica
 import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { DownloadService } from 'src/app/shared/_services/download.service';
 import { DefaultValuePipe } from '../../pipe/default-value.pipe';
-import { NgIf, NgFor, AsyncPipe, TitleCasePipe, DatePipe } from '@angular/common';
+import {NgIf, NgFor, AsyncPipe, TitleCasePipe, DatePipe, NgTemplateOutlet} from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 interface AdhocTask {
   name: string;
@@ -26,10 +27,11 @@ interface AdhocTask {
     templateUrl: './manage-tasks-settings.component.html',
     styleUrls: ['./manage-tasks-settings.component.scss'],
     standalone: true,
-    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
+  translocoService = inject(TranslocoService);
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
@@ -39,55 +41,55 @@ export class ManageTasksSettingsComponent implements OnInit {
   // noinspection JSVoidFunctionReturnValueUsed
   adhocTasks: Array<AdhocTask> = [
     {
-      name: 'Convert Media to Target Encoding',
-      description: 'Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).',
+      name: 'convert-media-task',
+      description: 'convert-media-task-desc',
       api: this.serverService.convertMedia(),
-      successMessage: 'Conversion of Media to Target Encoding has been queued'
+      successMessage: 'convert-media-task-success'
     },
     {
-      name: 'Bust Cache',
-      description: 'Busts the Kavita+ Cache - should only be used when debugging bad matches.',
+      name: 'bust-cache-task',
+      description: 'bust-cache-task-desc',
       api: this.serverService.bustCache(),
-      successMessage: 'Kavita+ Cache busted'
+      successMessage: 'bust-cache-task-success'
     },
     {
-      name: 'Clear Reading Cache',
-      description: 'Clears cached files for reading. Useful when you\'ve just updated a file that you were previously reading within the last 24 hours.',
+      name: 'clear-reading-cache-task',
+      description: 'clear-reading-cache-task-desc',
       api: this.serverService.clearCache(),
-      successMessage: 'Cache has been cleared'
+      successMessage: 'clear-reading-cache-task-success'
     },
     {
-      name: 'Clean up Want to Read',
-      description: 'Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.',
+      name: 'clean-up-want-to-read-task',
+      description: 'clean-up-want-to-read-task-desc',
       api: this.serverService.cleanupWantToRead(),
-      successMessage: 'Want to Read has been cleaned up'
+      successMessage: 'clean-up-want-to-read-task-success'
     },
     {
-      name: 'Backup Database',
-      description: 'Takes a backup of the database, bookmarks, themes, manually uploaded covers, and config files.',
+      name: 'backup-database-task',
+      description: 'backup-database-task-desc',
       api: this.serverService.backupDatabase(),
-      successMessage: 'A job to backup the database has been queued'
+      successMessage: 'backup-database-task-success'
     },
     {
-      name: 'Download Logs',
-      description: 'Compiles all log files into a zip and downloads it.',
+      name: 'download-logs-task',
+      description: 'download-logs-task-desc',
       api: defer(() => of(this.downloadService.download('logs', undefined))),
       successMessage: ''
     },
     {
-      name: 'Analyze Files',
-      description: 'Runs a long-running task which will analyze files to generate extension and size. This should only be ran once for the v0.7 release. Not needed if you installed post v0.7.',
+      name: 'analyze-files-task',
+      description: 'analyze-files-task-desc',
       api: this.serverService.analyzeFiles(),
-      successMessage: 'File analysis has been queued'
+      successMessage: 'analyze-files-task-success'
     },
     {
-      name: 'Check for Updates',
-      description: 'See if there are any Stable releases ahead of your version.',
+      name: 'check-for-updates-task',
+      description: 'check-for-updates-task-desc',
       api: this.serverService.checkForUpdate(),
       successMessage: '',
       successFunction: (update) => {
         if (update === null) {
-          this.toastr.info('No updates available');
+          this.toastr.info(this.translocoService.translate('toasts.no-updates'));
           return;
         }
         const modalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
@@ -133,7 +135,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.serverSettings = settings;
       this.resetForm();
       this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -143,7 +145,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -152,7 +154,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   runAdhoc(task: AdhocTask) {
     task.api.subscribe((data: any) => {
       if (task.successMessage.length > 0) {
-        this.toastr.success(task.successMessage);
+        this.toastr.success(this.translocoService.translate('manage-tasks-settings.' + task.successMessage));
       }
 
       if (task.successFunction) {

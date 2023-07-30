@@ -25,11 +25,12 @@ import {EditSeriesModalComponent} from "../../cards/_modals/edit-series-modal/ed
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FilterPipe} from "../../pipe/filter.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

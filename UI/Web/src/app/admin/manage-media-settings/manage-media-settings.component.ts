@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs';
@@ -10,13 +10,14 @@ import { EncodeFormats } from '../_models/encode-format';
 import { ManageScrobbleErrorsComponent } from '../manage-scrobble-errors/manage-scrobble-errors.component';
 import { ManageAlertsComponent } from '../manage-alerts/manage-alerts.component';
 import { NgIf, NgTemplateOutlet, NgFor } from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-media-settings',
     templateUrl: './manage-media-settings.component.html',
     styleUrls: ['./manage-media-settings.component.scss'],
     standalone: true,
-    imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent, TranslocoModule]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -25,6 +26,8 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   alertCount: number = 0;
   scrobbleCount: number = 0;
+
+  private readonly translocoService = inject(TranslocoService);
 
   get EncodeFormats() { return EncodeFormats; }
 
@@ -52,7 +55,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -62,7 +65,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
