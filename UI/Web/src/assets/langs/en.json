@@ -1241,6 +1241,35 @@
         "recommended-tab": "Recommended"
     },
 
+    "library-recommended": {
+        "no-data": "Nothing to show here. Add some metadata to your library, read something or rate something. This library may also have recommendations turned off.",
+        "more-in-genre": "More In {{genre}}",
+        "discover": "Rediscover",
+        "highly-rated": "Highly Rated",
+        "quick-catchups": "Quick Catchups",
+        "quick-reads": "Quick Reads",
+        "on-deck": "{{dashboard.on-deck-title}}"
+    },
+
+    "admin-dashboard": {
+        "title": "Admin Dashboard",
+        "general-tab": "General",
+        "users-tab": "Users",
+        "libraries-tab": "Libraries",
+        "media-tab": "Media",
+        "logs-tab": "Logs",
+        "email-tab": "Email",
+        "tasks-tab": "Tasks",
+        "statistics-tab": "Statistics",
+        "system-tab": "System",
+        "kavita+-tab": "Kavita+",
+        "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
+        "kavita+-desc-part-2": "premium benefits",
+        "kavita+-desc-part-3": "today!"
+
+    },
+
+
     "errors": {
         "series-doesnt-exist": "This series no longer exists"
     },

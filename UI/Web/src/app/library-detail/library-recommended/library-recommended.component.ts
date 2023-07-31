@@ -1,14 +1,12 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { filter, map, merge, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { filter, map, merge, Observable, shareReplay } from 'rxjs';
 import { Genre } from 'src/app/_models/metadata/genre';
 import { Series } from 'src/app/_models/series';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -18,6 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
 import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import { NgIf, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-library-recommended',
@@ -25,7 +24,7 @@ import { NgIf, AsyncPipe } from '@angular/common';
     styleUrls: ['./library-recommended.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, CarouselReelComponent, SeriesCardComponent, AsyncPipe]
+  imports: [NgIf, CarouselReelComponent, SeriesCardComponent, AsyncPipe, TranslocoModule]
 })
 export class LibraryRecommendedComponent implements OnInit {
 
