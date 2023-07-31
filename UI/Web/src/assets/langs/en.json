@@ -671,7 +671,7 @@
         "layout-mode-option-card": "Card",
         "layout-mode-option-list": "List",
         "continue-from": "Continue {{title}}",
-        "read": "Read",
+        "read": "{{common.read}}",
         "continue": "Continue",
         "read-options-alt": "Read options",
         "incognito": "Incognito",
@@ -870,7 +870,7 @@
         "publishers-title": "{{series-metadata-detail.publishers-title}}",
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "not-defined": "Not defined",
-        "read": "Read",
+        "read": "{{common.read}}",
         "unread": "Unread",
         "files": "Files",
         "pages": "Pages:",
@@ -987,7 +987,7 @@
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
         "collection-label": "Collection",
-        "create": "Create"
+        "create": "{{common.create}}"
     },
 
     "entity-title": {
@@ -1001,7 +1001,7 @@
     },
 
     "list-item": {
-        "read": "Read"
+        "read": "{{common.read}}"
     },
 
     "manage-alerts": {
@@ -1266,12 +1266,163 @@
         "kavita+-desc-part-1": "Kavita+ is a premium subscription service which unlocks features for all users on this Kavita instance. Buy a subscription to unlock ",
         "kavita+-desc-part-2": "premium benefits",
         "kavita+-desc-part-3": "today!"
+    },
+
+    "collection-detail": {
+        "no-data": "There are no items. Try adding a series.",
+        "no-data-filtered": "No items match your current filter.",
+        "title-alt": "Kavita - {{collectionName}} Collection"
+    },
+
+    "all-collections": {
+        "title": "Collections",
+        "item-count": "{{common.item-count}}",
+        "no-data": "There are no collections.",
+        "create-one-part-1": "Try creating",
+        "create-one-part-2": "one"
+    },
+
+    "carousel-reel": {
+        "prev-items": "Previous Items",
+        "next-items": "Next Items"
+    },
+
+    "draggable-ordered-list": {
+        "instructions-alt": "When you put a number in the reorder input, the item will be inserted at that location and all other items will have their order updated.",
+        "reorder-label": "Reorder",
+        "remove-item-alt": "Remove item"
+    },
+
+    "reading-lists": {
+        "title": "Reading Lists",
+        "item-count": "{{common.item-count}}",
+        "no-data": "There are no reading lists.",
+        "create-one-part-1": "Try creating",
+        "create-one-part-2": "one"
+    },
+
+    "reading-list-item": {
+        "remove": "{{common.remove}}",
+        "read": "{{common.read}}"
+    },
+
+    "reading-list-detail": {
+        "item-count": "{{common.item-count}}",
+        "page-settings-title": "Page Settings",
+        "remove-read": "Remove Read",
+        "order-numbers-label": "Order Numbers",
+        "continue": "Continue",
+        "read": "{{common.read}}",
+        "read-options-alt": "Read options",
+        "incognito-alt": "(Incognito)",
+        "no-data": "Nothing added"
+    },
+
+    "events-widget": {
+        "title-alt": "Activity",
+        "dismiss-all": "Dismiss All",
+        "update-available": "Update available",
+        "downloading-item": "Downloading {{item}}",
+        "more-info": "Click for more information",
+        "close": "{{common.close}}",
+        "users-online-count": "{{num}} Users online",
+        "active-events-title": "Active Events:",
+        "no-data": "Not much going on here"
+    },
+
+    "shortcuts-modal": {
+        "title": "Keyboard Shortcuts",
+        "close": "{{common.close}}"
+    },
+
+    "grouped-typeahead": {
+        "files": "Files",
+        "chapters": "Chapters",
+        "people": "People",
+        "tags": "Tags",
+        "genres": "Genres",
+        "libraries": "Libraries",
+        "reading-lists": "Reading Lists",
+        "collections": "Collections",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}"
 
     },
 
+    "nav-header": {
+        "skip-alt": "Skip to main content",
+        "search-series-alt": "Search series",
+        "search-alt": "Search…",
+        "promoted": "(promoted)",
+        "no-data": "No results found",
+        "scroll-to-top-alt": "Scroll to Top",
+        "server-settings": "Server Settings",
+        "settings": "Settings",
+        "help": "Help",
+        "announcements": "Announcements",
+        "logout": "Logout"
+    },
+
+    "add-to-list-modal": {
+        "title": "Add to Reading List",
+        "close": "{{common.close}}",
+        "filter-label": "Filter",
+        "promoted-alt": "Promoted",
+        "no-data": "No lists created yet",
+        "loading": "{{common.loading}}",
+        "reading-list-label": "Reading List",
+        "create": "{{common.create}}"
+    },
+
+    "edit-reading-list-modal": {
+        "title": "Edit Reading List: {{name}}",
+        "general-tab": "General",
+        "cover-image-tab": "Cover Image",
+        "close": "{{common.close}}",
+        "save": "{common.save}}",
+        "year-validation": "Must be greater than 1000, 0 or blank",
+        "month-validation": "Must be between 1 and 12 or blank",
+        "name-unique-validation": "Name must be unique",
+        "required-field": "{{validation.required-field}}",
+        "summary-label": "Summary",
+        "year-label": "Year",
+        "month-label": "Month",
+        "ending-title": "Ending",
+        "starting-title": "Starting",
+        "promote-label": "Promote",
+        "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them."
+    },
+
+    "import-cbl-modal": {
+        "close": "{{common.close}}",
+        "title": "CBL Import",
+        "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
+        "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists have have failed will not move to the next step. Fix the CBL files and retry.",
+        "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
+        "validate-no-issue": "Looks good",
+        "validate-no-issue-description": "No issues found with CBL, press next.",
+        "dry-run-description": "This is a dry run and shows what will happen if you press Next and perform the import. All Failures will not be imported.",
+        "prev": "Prev",
+        "import": "Import",
+        "restart": "Restart",
+        "next": "Next",
+        "import-step": "Import CBLs",
+        "validate-cbl-step": "Validate CBL",
+        "dry-run-step": "Dry Run",
+        "final-import-step": "Final Step"
+    },
+
+    "pdf-reader": {
+        "loading-message": "Loading……PDFs may take longer than expected",
+        "incognito-mode": "Incognito Mode",
+        "light-theme-alt": "Light Theme",
+        "dark-theme-alt": "Dark Theme",
+        "close-reader-alt": "Close Reader"
+    },
 
     "errors": {
-        "series-doesnt-exist": "This series no longer exists"
+        "series-doesnt-exist": "This series no longer exists",
+        "collection-invalid-access": "You don't have access to any libraries this tag belongs to or this collection is invalid"
     },
 
     "toasts": {
@@ -1291,7 +1442,17 @@
         "click-email-link": "Please click this link to confirm your email. You must confirm to be able to login.",
         "series-added-to-collection": "Series added to {{collectionName}} collection",
         "no-series-collection-warning": "Warning! No series are selected, saving will delete the Collection. Are you sure you want to continue?",
-        "collection-updated": "Collection updated"
+        "collection-updated": "Collection updated",
+        "reading-list-deleted": "Reading list deleted",
+        "confirm-delete-reading-list": "'Are you sure you want to delete the reading list? This cannot be undone.'",
+        "item-removed": "Item removed",
+        "nothing-to-remove": "Nothing to remove",
+        "series-added-to-reading-list": "Series added to reading list",
+        "volumes-added-to-reading-list": "Volume added to reading list",
+        "chapter-added-to-reading-list": "Chapter added to reading list",
+        "multiple-added-to-reading-list": "Chapters and Volumes added to reading list",
+        "select-files-warning": "You need to select files to move forward",
+        "reading-list-imported": "Reading List imported"
     },
 
     "actionable": {
@@ -1311,6 +1472,7 @@
         "reset-to-default": "Reset to Default",
         "close": "Close",
         "cancel": "Cancel",
+        "create": "Create",
         "save": "Save",
         "reset": "Reset",
         "add": "Add",
@@ -1318,14 +1480,16 @@
         "edit": "Edit",
         "help": "Help",
         "submit": "Submit",
-        "Email": "Email",
+        "email": "Email",
+        "read": "Read",
         "loading": "Loading…",
         "username": "Username",
         "password": "Password",
         "promoted": "Promoted",
         "select-all": "Select All",
         "deselect-all": "Deselect All",
-        "series-count": "{{num}} Series"
+        "series-count": "{{num}} Series",
+        "item-count": "{{num}} Items"
     }
 
 }

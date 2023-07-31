@@ -4,13 +4,12 @@ import {
   Component, DestroyRef,
   EventEmitter,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { map, of, Subject, takeUntil } from 'rxjs';
+import { map, of} from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { EditCollectionTagsComponent } from 'src/app/cards/_modals/edit-collection-tags/edit-collection-tags.component';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -26,6 +25,7 @@ import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 @Component({
@@ -34,7 +34,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./all-collections.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe, TranslocoModule]
 })
 export class AllCollectionsComponent implements OnInit {
 
@@ -48,6 +48,7 @@ export class AllCollectionsComponent implements OnInit {
 
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
 
   constructor(private collectionService: CollectionTagService, private router: Router,
     private actionFactoryService: ActionFactoryService, private modalService: NgbModal,
@@ -55,7 +56,7 @@ export class AllCollectionsComponent implements OnInit {
     private readonly cdRef: ChangeDetectorRef, public imageSerivce: ImageService,
     public accountService: AccountService) {
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-    this.titleService.setTitle('Kavita - Collections');
+    this.titleService.setTitle('Kavita - ' + this.translocoService.translate('all-collections.title'));
   }
 
   ngOnInit() {

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  inject, OnDestroy,
+  OnInit
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
@@ -14,6 +21,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -21,7 +29,7 @@ import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
     styleUrls: ['./pdf-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe]
+  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoModule]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 
@@ -71,20 +79,20 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   /**
    * How much of the current document is loaded
    */
-  loadPrecent: number = 0;
+  loadPercent: number = 0;
 
   /**
-   * This can't be updated dynamically: 
+   * This can't be updated dynamically:
    * https://github.com/stephanrauh/ngx-extended-pdf-viewer/issues/1415
    */
   bookMode: PageViewModeType = 'multiple';
 
-  private readonly onDestroy = new Subject<void>();
+  private readonly translocoService = inject(TranslocoService);
 
   constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
     private navService: NavService, private toastr: ToastrService,
-    private bookService: BookService, private themeService: ThemeService, 
+    private bookService: BookService, private themeService: ThemeService,
     private readonly cdRef: ChangeDetectorRef, private pdfViewerService: NgxExtendedPdfViewerService) {
       this.navService.hideNavBar();
       this.themeService.clearThemes();
@@ -105,9 +113,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
-
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   ngOnInit(): void {
@@ -124,7 +129,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.seriesId = parseInt(seriesId, 10);
     this.chapterId = parseInt(chapterId, 10);
     this.incognitoMode = this.route.snapshot.queryParamMap.get('incognitoMode') === 'true';
-    
+
 
     const readingListId = this.route.snapshot.queryParamMap.get('readingListId');
     if (readingListId != null) {
@@ -173,7 +178,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
     this.saveProgress();
     this.cdRef.markForCheck();
   }
@@ -213,7 +218,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   updateLoadProgress(event: ProgressBarEvent) {
-    this.loadPrecent = event.percent;
+    this.loadPercent = event.percent;
     this.cdRef.markForCheck();
   }
 

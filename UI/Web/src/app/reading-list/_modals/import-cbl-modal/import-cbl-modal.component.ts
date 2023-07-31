@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FileUploadModule, FileUploadValidators} from '@iplab/ngx-file-upload';
 import {
@@ -21,6 +21,7 @@ import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../_pipes/cbl-import-result.pipe";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 interface FileStep {
   fileName: string;
@@ -43,7 +44,7 @@ enum Step {
     FileUploadModule,
     NgbAccordionModule,
     SafeHtmlPipe,
-    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle],
+    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle, TranslocoModule],
   templateUrl: './import-cbl-modal.component.html',
   styleUrls: ['./import-cbl-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -51,6 +52,8 @@ enum Step {
 export class ImportCblModalComponent {
 
   @ViewChild('fileUpload') fileUpload!: ElementRef<HTMLInputElement>;
+
+  translocoService = inject(TranslocoService);
 
   fileUploadControl = new FormControl<undefined | Array<File>>(undefined, [
     FileUploadValidators.accept(['.cbl']),
@@ -63,15 +66,16 @@ export class ImportCblModalComponent {
   isLoading: boolean = false;
 
   steps: Array<TimelineStep> = [
-    {title: 'Import CBLs', index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
-    {title: 'Validate CBL', index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
-    {title: 'Dry Run', index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
-    {title: 'Final Import', index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
+    {title: this.translocoService.translate('import-cbl-modal.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
+    {title: this.translocoService.translate('import-cbl-modal.validate-cbl-step'), index: Step.Validate, active: false, icon: 'fa-solid fa-spell-check'},
+    {title: this.translocoService.translate('import-cbl-modal.dry-run-step'), index: Step.DryRun, active: false, icon: 'fa-solid fa-gears'},
+    {title: this.translocoService.translate('import-cbl-final-import.import-step'), index: Step.Finalize, active: false, icon: 'fa-solid fa-floppy-disk'},
   ];
   currentStepIndex = this.steps[0].index;
 
   filesToProcess: Array<FileStep> = [];
   failedFiles: Array<FileStep> = [];
+
 
   get Breakpoint() { return Breakpoint; }
   get Step() { return Step; }
@@ -80,11 +84,11 @@ export class ImportCblModalComponent {
   get NextButtonLabel() {
     switch(this.currentStepIndex) {
       case Step.DryRun:
-        return 'Import';
+        return 'import';
       case Step.Finalize:
-        return 'Restart'
+        return 'restart'
       default:
-        return 'Next';
+        return 'next';
     }
   }
 
@@ -104,7 +108,7 @@ export class ImportCblModalComponent {
       case Step.Import:
         const files = this.uploadForm.get('files')?.value;
         if (!files) {
-          this.toastr.error('You need to select files to move forward');
+          this.toastr.error(this.translocoService.translate('toasts.select-files-warning'));
           return;
         }
         // Load each file into filesToProcess and group their data
@@ -237,7 +241,7 @@ export class ImportCblModalComponent {
 
       this.isLoading = false;
       this.currentStepIndex++;
-      this.toastr.success('Reading List imported');
+      this.toastr.success(this.translocoService.translate('toasts.reading-list-imported'));
       this.cdRef.markForCheck();
     });
   }

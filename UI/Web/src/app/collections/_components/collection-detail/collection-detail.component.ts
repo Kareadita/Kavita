@@ -47,6 +47,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-collection-detail',
@@ -54,7 +55,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
     styleUrls: ['./collection-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoModule]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
@@ -62,6 +63,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   @ViewChild('companionBar') companionBar: ElementRef<HTMLDivElement> | undefined;
 
   destroyRef = inject(DestroyRef);
+  translocoService = inject(TranslocoService);
 
   collectionTag!: CollectionTag;
   tagImage: string = '';
@@ -210,7 +212,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.collectionService.allTags().subscribe(tags => {
       const matchingTags = tags.filter(t => t.id === tagId);
       if (matchingTags.length === 0) {
-        this.toastr.error('You don\'t have access to any libraries this tag belongs to or this tag is invalid');
+        this.toastr.error(this.translocoService.translate('errors.collection-invalid-access'));
         this.router.navigateByUrl('/');
         return;
       }
@@ -218,7 +220,7 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
-      this.titleService.setTitle('Kavita - ' + this.collectionTag.title + ' Collection');
+      this.titleService.setTitle(this.translocoService.translate('errors.collection-invalid-access', {collectionName: this.collectionTag.title}));
       this.cdRef.markForCheck();
     });
   }

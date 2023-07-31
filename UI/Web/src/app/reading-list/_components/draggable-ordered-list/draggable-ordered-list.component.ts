@@ -1,7 +1,8 @@
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef, TrackByFunction, ViewChild } from '@angular/core';
-import { VirtualScrollerComponent, VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
+import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
 import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -20,7 +21,7 @@ export interface ItemRemoveEvent {
     styleUrls: ['./draggable-ordered-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle]
+  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle, TranslocoModule]
 })
 export class DraggableOrderedListComponent {
 
