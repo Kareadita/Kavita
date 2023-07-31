@@ -100,7 +100,7 @@
         </ng-template>
       </li>
       <li [ngbNavItem]="TabID.CoverImage">
-        <a ngbNavLink>{{t(TabID.CoverImage}}</a>
+        <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
         <ng-template ngbNavContent>
           <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
         </ng-template>

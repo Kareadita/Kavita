@@ -1420,6 +1420,45 @@
         "close-reader-alt": "Close Reader"
     },
 
+    "manga-reader": {
+        "back": "Back",
+        "save-globally": "Save Globally",
+        "incognito-alt": "Incognito mode is on. Toggle to turn off.",
+        "incognito-title": "Incognito Mode:",
+        "shortcuts-menu-alt": "Keyboard Shortcuts Modal",
+        "prev-page-tooltip": "Previous Page",
+        "next-page-tooltip": "Next Page",
+        "prev-chapter-tooltip": "Prev Chapter/Volume",
+        "next-chapter-tooltip": "Next Chapter/Volume",
+        "first-page-tooltip": "First Page",
+        "last-page-tooltip": "Last Page",
+        "left-to-right-alt": "Left to Right",
+        "right-to-left-alt": "Right to Left",
+        "reading-direction-tooltip": "Reading Direction: ",
+        "reading-mode-tooltip": "Reading Mode",
+        "collapse": "Collapse",
+        "fullscreen": "Fullscreen",
+        "settings-tooltip": "Settings",
+        "image-splitting-label": "Image Splitting",
+        "image-scaling-label": "Image Scaling",
+        "height": "Height",
+        "width": "Width",
+        "original": "Original",
+        "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
+        "swipe-enabled-label": "Swipe Enabled",
+        "enable-comic-book-label": "Emulate comic book",
+        "brightness-label": "Brightness"
+
+
+
+
+
+
+
+
+    },
+
+
     "errors": {
         "series-doesnt-exist": "This series no longer exists",
         "collection-invalid-access": "You don't have access to any libraries this tag belongs to or this collection is invalid"
@@ -1452,7 +1491,11 @@
         "chapter-added-to-reading-list": "Chapter added to reading list",
         "multiple-added-to-reading-list": "Chapters and Volumes added to reading list",
         "select-files-warning": "You need to select files to move forward",
-        "reading-list-imported": "Reading List imported"
+        "reading-list-imported": "Reading List imported",
+        "incognito-off": "Incognito mode is off. Progress will now start being tracked.",
+        "email-service-reset": "Email Service Reset",
+        "email-service-reachable": "Email Service was reachable",
+        "email-service-unresponsive": "Email Service Url did not respond."
     },
 
     "actionable": {

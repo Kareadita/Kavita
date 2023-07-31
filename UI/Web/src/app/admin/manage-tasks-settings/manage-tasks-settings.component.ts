@@ -1,17 +1,17 @@
-import {Component, inject, OnInit} from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { SettingsService } from '../settings.service';
-import { ServerSettings } from '../_models/server-settings';
-import { shareReplay, take } from 'rxjs/operators';
-import { defer, forkJoin, Observable, of } from 'rxjs';
-import { ServerService } from 'src/app/_services/server.service';
-import { Job } from 'src/app/_models/job/job';
-import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
-import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { DownloadService } from 'src/app/shared/_services/download.service';
-import { DefaultValuePipe } from '../../pipe/default-value.pipe';
-import {NgIf, NgFor, AsyncPipe, TitleCasePipe, DatePipe, NgTemplateOutlet} from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {SettingsService} from '../settings.service';
+import {ServerSettings} from '../_models/server-settings';
+import {shareReplay, take} from 'rxjs/operators';
+import {defer, forkJoin, Observable, of} from 'rxjs';
+import {ServerService} from 'src/app/_services/server.service';
+import {Job} from 'src/app/_models/job/job';
+import {UpdateNotificationModalComponent} from 'src/app/shared/update-notification/update-notification-modal.component';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {DownloadService} from 'src/app/shared/_services/download.service';
+import {DefaultValuePipe} from '../../pipe/default-value.pipe';
+import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 interface AdhocTask {
@@ -23,15 +23,17 @@ interface AdhocTask {
 }
 
 @Component({
-    selector: 'app-manage-tasks-settings',
-    templateUrl: './manage-tasks-settings.component.html',
-    styleUrls: ['./manage-tasks-settings.component.scss'],
-    standalone: true,
+  selector: 'app-manage-tasks-settings',
+  templateUrl: './manage-tasks-settings.component.html',
+  styleUrls: ['./manage-tasks-settings.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
   serverSettings!: ServerSettings;
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
@@ -107,23 +109,24 @@ export class ManageTasksSettingsComponent implements OnInit {
       frequencies: this.settingsService.getTaskFrequencies(),
       levels: this.settingsService.getLoggingLevels(),
       settings: this.settingsService.getServerSettings()
-    }
-
-    ).subscribe(result => {
+    }).subscribe(result => {
       this.taskFrequencies = result.frequencies;
       this.logLevels = result.levels;
       this.serverSettings = result.settings;
       this.settingsForm.addControl('taskScan', new FormControl(this.serverSettings.taskScan, [Validators.required]));
       this.settingsForm.addControl('taskBackup', new FormControl(this.serverSettings.taskBackup, [Validators.required]));
+      this.cdRef.markForCheck();
     });
 
     this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
+    this.cdRef.markForCheck();
   }
 
   resetForm() {
     this.settingsForm.get('taskScan')?.setValue(this.serverSettings.taskScan);
     this.settingsForm.get('taskBackup')?.setValue(this.serverSettings.taskBackup);
     this.settingsForm.markAsPristine();
+    this.cdRef.markForCheck();
   }
 
   async saveSettings() {
@@ -136,6 +139,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.resetForm();
       this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
       this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
+      this.cdRef.markForCheck();
     }, (err: any) => {
       console.error('error: ', err);
     });

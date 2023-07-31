@@ -1,21 +1,22 @@
-import {Component, inject, OnInit} from '@angular/core';
-import { FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { ServerService } from 'src/app/_services/server.service';
-import { SettingsService } from '../settings.service';
-import { ServerSettings } from '../_models/server-settings';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {NgIf, NgFor, TitleCasePipe, NgTemplateOutlet} from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {ServerService} from 'src/app/_services/server.service';
+import {SettingsService} from '../settings.service';
+import {ServerSettings} from '../_models/server-settings';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
-    selector: 'app-manage-settings',
-    templateUrl: './manage-settings.component.html',
-    styleUrls: ['./manage-settings.component.scss'],
-    standalone: true,
+  selector: 'app-manage-settings',
+  templateUrl: './manage-settings.component.html',
+  styleUrls: ['./manage-settings.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class ManageSettingsComponent implements OnInit {
@@ -24,7 +25,8 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
-  translocoService = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
@@ -32,9 +34,11 @@ export class ManageSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
       this.taskFrequencies = frequencies;
+      this.cdRef.markForCheck();
     });
     this.settingsService.getLoggingLevels().pipe(take(1)).subscribe(levels => {
       this.logLevels = levels;
+      this.cdRef.markForCheck();
     });
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
@@ -61,9 +65,12 @@ export class ManageSettingsComponent implements OnInit {
         if (info.isDocker) {
           this.settingsForm.get('ipAddresses')?.disable();
           this.settingsForm.get('port')?.disable();
+          this.cdRef.markForCheck();
         }
-      })
+      });
+      this.cdRef.markForCheck();
     });
+    this.cdRef.markForCheck();
   }
 
   resetForm() {
@@ -86,6 +93,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays);
     this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays);
     this.settingsForm.markAsPristine();
+    this.cdRef.markForCheck();
   }
 
   async saveSettings() {
@@ -125,10 +133,9 @@ export class ManageSettingsComponent implements OnInit {
       this.serverSettings.baseUrl = settings.baseUrl;
       this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
       this.toastr.success(this.translocoService.translate('toasts.reset-base-url'));
+      this.cdRef.markForCheck();
     }, (err: any) => {
       console.error('error: ', err);
     });
   }
-
-
 }
