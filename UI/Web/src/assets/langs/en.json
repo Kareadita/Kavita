@@ -711,7 +711,7 @@
         "pencillers-title": "Pencillers",
         "publishers-title": "Publishers",
 
-        "promoted": "Promoted",
+        "promoted": "{{common.promoted}}",
         "see-more": "See More",
         "see-less": "See Less"
 
@@ -856,7 +856,7 @@
         "items-selected": "{{num}} items selected",
         "mark-as-unread": "Mark as Unread",
         "mark-as-read": "Mark as Read",
-        "deselect-all": "Deselect All"
+        "deselect-all": "{{common.deselect-all}}"
     },
 
     "card-detail-drawer": {
@@ -949,7 +949,45 @@
         "range-hours": "{{value}} {{hourWord}}",
         "hour": "Hour",
         "hours": "Hours"
+    },
 
+    "series-info-cards": {
+        "release-date-title": "{{entity-info-cards.release-date-title}}",
+        "release-year-tooltip": "Release Year",
+        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
+        "language-title": "Language",
+        "publication-status-title": "Publication",
+        "publication-status-tooltip": "Publication Status",
+        "scrobbling-title": "Scrobbling",
+        "scrobbling-tooltip": "Scrobbling Status",
+        "on": "On",
+        "off": "Off",
+        "disabled": "Disabled",
+        "format-title": "Format",
+        "last-read-title": "Last Read",
+        "length-title": "Length",
+        "read-time-title": "Read Time",
+        "less-than-hour": "{{entity-info-cards.less-than-hour}}",
+        "hour": "{{entity-info-cards.hour}}",
+        "hours": "{{entity-info-cards.hours}}",
+        "time-left-title": "Time Left",
+
+
+        "ongoing": "{{publication-status-pipe.ongoing}}",
+        "pages-count": "{{entity-info-cards.pages-count}}",
+        "words-count": "{{entity-info-cards.words-count}}"
+    },
+
+    "bulk-add-to-collection": {
+        "title": "Add to Collection",
+        "promoted": "{{common.promoted}}",
+        "close": "{{common.close}}",
+        "filter-label": "Filter",
+        "clear": "{{common.clear}}",
+        "no-data": "No collections created yet",
+        "loading": "{{common.loading}}",
+        "collection-label": "Collection",
+        "create": "Create"
     },
 
     "entity-title": {
@@ -1116,6 +1154,11 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
 
+        "recurring-tasks-title": "{{title}}",
+        "last-executed-header": "Last Executed",
+        "cron-header": "Cron",
+
+
         "convert-media-task": "Convert Media to Target Encoding",
         "convert-media-task-desc": "Runs a long-running task which will convert all kavita-managed media to the target encoding. This is slow (especially on ARM devices).",
         "convert-media-success": "Conversion of Media to Target Encoding has been queued",
@@ -1147,6 +1190,57 @@
         "check-for-updates-task-desc": "See if there are any Stable releases ahead of your version."
     },
 
+    "manage-users": {
+        "title": "Active Users",
+        "invite": "Invite",
+        "you-alt": "(You)",
+        "pending-title": "Pending",
+        "delete-user-tooltip": "Delete User",
+        "delete-user-alt": "Delete User {{user}}",
+        "edit-user-tooltip": "Edit",
+        "edit-user-alt": "Edit User {{user}}",
+        "resend-invite-tooltip": "Resend Invite",
+        "resend-invite-alt": "Resend Invite {{user}}",
+        "setup-user-tooltip": "Setup User",
+        "setup-user-alt": "Setup User {{user}}",
+        "change-password-tooltip": "Change Password",
+        "change-password-alt": "Change Password {{user}}",
+        "resend": "Resend",
+        "setup": "Setup",
+        "last-active-title": "Last Active:",
+        "roles-title": "Roles:",
+        "none": "None",
+        "never": "Never",
+        "online-now-tooltip": "Online Now",
+        "sharing-title": "Sharing:",
+        "no-data": "There are no other users.",
+        "loading": "{{common.loading}}"
+    },
+
+    "edit-collection-tags": {
+        "title": "Edit {{collectionName}} Collection",
+        "required-field": "{{validation.required-field}}",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "general-tab": "General",
+        "cover-image-tab": "Cover Image",
+        "series-tab": "Series",
+        "name-label": "Name",
+        "name-validation": "Name must be unique",
+        "promote-label": "Promote",
+        "promote-tooltip": "Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.",
+        "summary-label": "Summary",
+        "series-title": "Applies to Series",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
+    },
+
+    "library-detail": {
+        "library-tab": "Library",
+        "recommended-tab": "Recommended"
+    },
+
     "errors": {
         "series-doesnt-exist": "This series no longer exists"
     },
@@ -1161,7 +1255,14 @@
         "reset-base-url": "Base Url Reset",
         "unauthorized-1": "You are not authorized to view this page.",
         "unauthorized-2": "Unauthorized",
-        "no-updates": "No updates available"
+        "no-updates": "No updates available",
+        "confirm-delete-user": "Are you sure you want to delete this user?",
+        "user-deleted": "{{user}} has been deleted",
+        "email-sent-to-user": "Email sent to {{user}}",
+        "click-email-link": "Please click this link to confirm your email. You must confirm to be able to login.",
+        "series-added-to-collection": "Series added to {{collectionName}} collection",
+        "no-series-collection-warning": "Warning! No series are selected, saving will delete the Collection. Are you sure you want to continue?",
+        "collection-updated": "Collection updated"
     },
 
     "actionable": {
@@ -1192,6 +1293,7 @@
         "loading": "Loading…",
         "username": "Username",
         "password": "Password",
+        "promoted": "Promoted",
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series"
