@@ -10,7 +10,7 @@ import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoService} from "@ngneat/transloco";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
 
@@ -20,7 +20,7 @@ const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
     styleUrls: ['./reading-activity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe]
+  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoModule]
 })
 export class ReadingActivityComponent implements OnInit {
   /**

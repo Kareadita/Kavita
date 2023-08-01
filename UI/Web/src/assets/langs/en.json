@@ -331,10 +331,6 @@
         "all-time": "{{time-periods.all-time}}"
     },
 
-    "server-stats": {
-
-    },
-
     "role-selector": {
         "title": "Roles"
     },
@@ -1543,8 +1539,123 @@
         "colorist-label": "Colorist",
         "character-label": "Character",
         "translator-label": "Translator",
+        "language-label": "Language",
+        "age-rating-label": "Age Rating",
+        "publication-status-label": "Publication Status",
         "required-field": "{{validation.required-field}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "name-label": "Name",
+        "sort-name-label": "Sort Name",
+        "localized-name-label": "Localized Name",
+        "summary-label": "Summary",
+        "release-year-label": "Release Year",
+        "web-link-description": "Here you can add many different links to external services.",
+        "web-link-label": "Web Link",
+        "add-link-alt": "Add Link",
+        "remove-link-alt": "Remove Link",
+        "cover-image-description": "Upload and choose a new cover image. Press Save to upload and override the cover.",
+        "save": "{{common.save}}",
+        "field-locked-alt": "Field is locked",
+        "info-title": "Information",
+        "library-title": "Library:",
+        "format-title": "Format:",
+        "created-title": "Created:",
+        "last-read-title": "Last Read:",
+        "last-added-title": "Last Added To:",
+        "last-scanned-title": "Last Scanned:",
+        "folder-path-title": "Folder Path:",
+        "publication-status-title": "Publication Status:",
+        "total-pages-title": "Total Pages:",
+        "total-items-title": "Total Items:",
+        "max-items-title": "Max Items:",
+        "size-title": "Size:",
+        "loading": "{{common.loading}}",
+        "added-title": "Added:",
+        "last-modified-title": "Last Modified:",
+        "view-files": "View Files",
+        "pages-title": "Pages:",
+        "chapter-title": "Chapter:",
+        "volume-num": "{{common.volume-num}}",
+        "highest-count-tooltip": "Highest Count found across all ComicInfo in the Series",
+        "max-issue-tooltip": "Max Issue or Volume field from all ComicInfo in the series"
+
+
+    },
+
+    "day-breakdown": {
+        "title": "Day Breakdown",
+        "x-axis-label": "Day of Week",
+        "y-axis-label": "Reading Events"
+    },
+
+    "file-breakdown-stats": {
+        "format-title": "Format",
+        "format-tooltip": "Not Classified means Kavita has not scanned some files. This occurs on old files existing prior to v0.7. You may need to run a forced scan via Library settings modal.",
+        "visualisation-label": "Visualisation",
+        "data-table-label": "Data Table",
+        "extension-header": "Extension",
+        "format-header": "Format",
+        "total-size-header": "Total Size",
+        "total-files-header": "Total Files",
+        "not-classified": "Not Classified",
+        "total-file-size-title": "Total File Size:"
+    },
+
+    "reading-activity": {
+        "title": "Reading Activity",
+        "legend-label": "Formats",
+        "x-axis-label": "Time",
+        "y-axis-label": "Hours Read",
+        "no-data": "No Reading Progress",
+        "time-frame-label": "Time Frame"
+    },
+
+    "manga-format-stats": {
+        "title": "Format",
+        "visualisation-label": "Visualisation",
+        "data-table-label": "Data Table",
+        "format-header": "Format",
+        "count-header": "Count"
+    },
+
+    "publication-status-stats": {
+        "title": "Publication Status",
+        "visualisation-label": "Visualisation",
+        "data-table-label": "Data Table",
+        "year-header": "Year",
+        "count-header": "Count"
+    },
+
+    "server-stats": {
+        "total-series-label": "Total Series",
+        "total-series-tooltip": "Total Series: {{count}}",
+        "total-volumes-label": "Total Volumes",
+        "total-volumes-tooltip": "Total Volumes: {{count}}",
+        "total-files-label": "Total Files",
+        "total-files-tooltip": "Total Files: {{count}}",
+        "total-size-label": "Total Size",
+        "total-genres-label": "Total Genres",
+        "total-genres-tooltip": "Total Genres: {{count}}",
+        "total-tags-label": "Total Tags",
+        "total-tags-tooltip": "Total Tags: {{count}}",
+        "total-people-label": "Total People",
+        "total-people-tooltip": "Total People: {{count}}",
+        "total-read-time-label": "Total Read Time",
+        "total-read-time-tooltip": "Total Read Time: {{count}}",
+        "series": "series",
+        "reads": "reads",
+        "release-years-title": "Release Years",
+        "most-active-users-title": "Most Active Users",
+        "popular-libraries-title": "Popular Libraries",
+        "popular-series-title": "Popular Series",
+        "recently-read-title": "Recently Read",
+        "genre-count": "{{num}} Genres",
+        "tag-count": "{{num}} Tags",
+        "people-count": "{{num}} People",
+        "tags": "Tags",
+        "people": "People",
+        "genres": "Genres",
+
     },
 
     "errors": {
@@ -1642,7 +1753,8 @@
         "book-num": "Book",
         "issue-hash-num": "Issue #",
         "issue-num": "Issue",
-        "chapter-num": "Chapter"
+        "chapter-num": "Chapter",
+        "volume-num": "Volume"
     }
 
 }

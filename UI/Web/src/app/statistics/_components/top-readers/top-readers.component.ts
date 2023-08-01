@@ -4,11 +4,10 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Observable, Subject, takeUntil, switchMap, shareReplay } from 'rxjs';
+import { Observable, switchMap, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";

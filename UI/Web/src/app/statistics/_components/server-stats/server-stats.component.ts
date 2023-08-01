@@ -1,7 +1,7 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {BehaviorSubject, map, Observable, ReplaySubject, shareReplay, Subject, takeUntil} from 'rxjs';
+import { map, Observable, ReplaySubject, shareReplay } from 'rxjs';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { Series } from 'src/app/_models/series';
@@ -23,7 +23,7 @@ import { TopReadersComponent } from '../top-readers/top-readers.component';
 import { StatListComponent } from '../stat-list/stat-list.component';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-server-stats',
@@ -59,6 +59,7 @@ export class ServerStatsComponent {
   }
 
 
+  translocoService = inject(TranslocoService);
   get Breakpoint() { return Breakpoint; }
 
   constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
@@ -109,7 +110,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllGenres().subscribe(genres => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = genres.map(t => t.title);
-      ref.componentInstance.title = 'Genres';
+      ref.componentInstance.title = this.translocoService.translate('server-stats.genres');
       ref.componentInstance.clicked = (item: string) => {
         const params: any = {};
         params[FilterQueryParam.Genres] = genres.filter(g => g.title === item)[0].id;
@@ -123,7 +124,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllTags().subscribe(tags => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = tags.map(t => t.title);
-      ref.componentInstance.title = 'Tags';
+      ref.componentInstance.title = this.translocoService.translate('server-stats.tags');
       ref.componentInstance.clicked = (item: string) => {
         const params: any = {};
         params[FilterQueryParam.Tags] = tags.filter(g => g.title === item)[0].id;
@@ -137,7 +138,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllPeople().subscribe(people => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = [...new Set(people.map(person => person.name))];
-      ref.componentInstance.title = 'People';
+      ref.componentInstance.title = this.translocoService.translate('server-stats.people');
     });
   }
 
