@@ -1604,7 +1604,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
@@ -1612,17 +1612,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   openShortcutModal() {
-    let ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
+    const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
-      {key: '⇽', description: 'Move to previous page'},
-      {key: '⇾', description: 'Move to next page'},
-      {key: '↑', description: 'Move to previous page'},
-      {key: '↓', description: 'Move to previous page'},
-      {key: 'G', description: 'Open Go to Page dialog'},
-      {key: 'B', description: 'Bookmark current page'},
-      {key: 'double click', description: 'Bookmark current page'},
-      {key: 'ESC', description: 'Close reader'},
-      {key: 'SPACE', description: 'Toggle Menu'},
+      {key: '⇽', description: 'prev-page'},
+      {key: '⇾', description: 'next-page'},
+      {key: '↑', description: 'prev-page'},
+      {key: '↓', description: 'next-page'},
+      {key: 'G', description: 'go-to'},
+      {key: 'B', description: 'bookmark'},
+      {key: this.translocoService.translate('shortcuts-modal.double-click'), description: 'bookmark'},
+      {key: 'ESC', description: 'close-reader'},
+      {key: 'SPACE', description: 'toggle-menu'},
     ];
   }
 
@@ -1642,7 +1642,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
 
       this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
-        this.toastr.success('User preferences updated');
+        this.toastr.success(this.translocoService.translate('manga-reader.user-preferences-updated'));
         if (this.user) {
           this.user.preferences = updatedPrefs;
           this.cdRef.markForCheck();

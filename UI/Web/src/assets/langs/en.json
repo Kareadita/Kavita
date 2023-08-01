@@ -1332,7 +1332,15 @@
 
     "shortcuts-modal": {
         "title": "Keyboard Shortcuts",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "prev-page": "Move to previous page",
+        "next-page": "Move to next page",
+        "go-to": "Open Go to Page dialog",
+        "bookmark": "Bookmark current page",
+        "double-click": "double click",
+        "close-reader": "Close reader",
+        "toggle-menu": "Toggle Menu"
+
     },
 
     "grouped-typeahead": {
@@ -1453,8 +1461,8 @@
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
-        "chapter-not-found": "Could not find {{direction}} {{title}}"
-
+        "chapter-not-found": "Could not find {{direction}} {{title}}",
+        "user-preferences-updated": "User preferences updated"
     },
 
 
@@ -1512,9 +1520,6 @@
         "email-service-reset": "Email Service Reset",
         "email-service-reachable": "Email Service was reachable",
         "email-service-unresponsive": "Email Service Url did not respond."
-
-
-
     },
 
     "actionable": {
