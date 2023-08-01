@@ -1,492 +1,495 @@
-<div class="modal-container" *ngIf="series !== undefined">
+<ng-container *transloco="let t; read: 'edit-series-modal'">
+  <div class="modal-container" *ngIf="series !== undefined">
     <div class="modal-header">
-        <h4 class="modal-title">
-            {{this.series.name}} Details</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+      <h4 class="modal-title">
+        {{t('title', {seriesName: this.series.name})}}</h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
-        </button>
+      </button>
     </div>
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-        <form [formGroup]="editSeriesForm">
-            <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+      <form [formGroup]="editSeriesForm">
+        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
-                <li [ngbNavItem]="tabs[TabID.General]">
-                    <a ngbNavLink>{{tabs[TabID.General]}}</a>
-                    <ng-template ngbNavContent>
-                        <div class="row g-0">
-                            <div class="mb-3" style="width: 100%">
-                                <label for="name" class="form-label">Name</label>
-                                <div class="input-group">
-                                    <input id="name" class="form-control" formControlName="name" type="text" readonly
-                                           [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
-                                    <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
-                                        <div class="invalid-feedback" *ngIf="errors.required">
-                                            This field is required
-                                        </div>
-                                    </ng-container>
-                                </div>
-                            </div>
-                        </div>
+          <li [ngbNavItem]="tabs[TabID.General]">
+            <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
+            <ng-template ngbNavContent>
+              <div class="row g-0">
+                <div class="mb-3" style="width: 100%">
+                  <label for="name" class="form-label">Name</label>
+                  <div class="input-group">
+                    <input id="name" class="form-control" formControlName="name" type="text" readonly
+                           [class.is-invalid]="editSeriesForm.get('name')?.invalid && editSeriesForm.get('name')?.touched">
+                    <ng-container *ngIf="editSeriesForm.get('name')?.errors as errors">
+                      <div class="invalid-feedback" *ngIf="errors.required">
+                        {{t('required-field')}}
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
 
-                        <div class="row g-0">
-                            <div class="mb-3" style="width: 100%">
-                                <label for="sort-name" class="form-label">Sort Name</label>
-                                <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
-                                    [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
-                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
-                                    <input id="sort-name" class="form-control" formControlName="sortName" type="text">
-                                    <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
-                                        <div class="invalid-feedback" *ngIf="errors.required">
-                                            This field is required
-                                        </div>
-                                    </ng-container>
-                                </div>
-                            </div>
-                        </div>
+              <div class="row g-0">
+                <div class="mb-3" style="width: 100%">
+                  <label for="sort-name" class="form-label">Sort Name</label>
+                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}"
+                       [class.is-invalid]="editSeriesForm.get('sortName')?.invalid && editSeriesForm.get('sortName')?.touched">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }"></ng-container>
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text">
+                    <ng-container *ngIf="editSeriesForm.get('sortName')?.errors as errors">
+                      <div class="invalid-feedback" *ngIf="errors.required">
+                        {{t('required-field')}}
+                      </div>
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
 
-                        <div class="row g-0">
-                            <div class="mb-3" style="width: 100%">
-                                <label for="localized-name" class="form-label">Localized Name</label>
-                                <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
-                                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
-                                </div>
-                            </div>
-                        </div>
+              <div class="row g-0">
+                <div class="mb-3" style="width: 100%">
+                  <label for="localized-name" class="form-label">Localized Name</label>
+                  <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }"></ng-container>
+                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                  </div>
+                </div>
+              </div>
 
-                        <div class="row g-0" *ngIf="metadata">
-                            <div class="mb-3" style="width: 100%">
-                                <label for="summary" class="form-label">Summary</label>
-                                <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
-                                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
-                                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
-                                </div>
-                            </div>
-                        </div>
+              <div class="row g-0" *ngIf="metadata">
+                <div class="mb-3" style="width: 100%">
+                  <label for="summary" class="form-label">Summary</label>
+                  <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }"></ng-container>
+                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                  </div>
+                </div>
+              </div>
 
-                    </ng-template>
-                </li>
+            </ng-template>
+          </li>
 
-                <li [ngbNavItem]="tabs[TabID.Metadata]" *ngIf="metadata">
-                    <a ngbNavLink>{{tabs[TabID.Metadata]}}</a>
-                    <ng-template ngbNavContent>
+          <li [ngbNavItem]="tabs[TabID.Metadata]" *ngIf="metadata">
+            <a ngbNavLink>{{t(tabs[TabID.Metadata])}}</a>
+            <ng-template ngbNavContent>
 
-                        <div class="row g-0">
-                            <div class="col-lg-8 col-md-12 pe-2">
-                                <div class="mb-3">
-                                    <label for="collections" class="form-label">Collections </label>
-                                    <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
-                                        <ng-template #badgeItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                        <ng-template #optionItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                    </app-typeahead>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-12">
-                                <div class="mb-3" style="width: 100%">
-                                    <label for="release-year" class="form-label">Release Year</label>
-                                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
-                                        <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
-                                        <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
-                                        <ng-container *ngIf="editSeriesForm.get('releaseYear')?.errors as errors">
-                                            <p class="invalid-feedback" *ngIf="errors.pattern">
-                                                This must be a valid year greater than 1000 and 4 characters long
-                                            </p>
-                                        </ng-container>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-0">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="genres" class="form-label">Genres</label>
-                                    <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings"
-                                        [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
-                                        (newItemAdded)="metadata.genresLocked = true" (selectedData)="metadata.genresLocked = true">
-                                        <ng-template #badgeItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                        <ng-template #optionItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                    </app-typeahead>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-0">
-                            <div class="col-md-12">
-                                <div class="mb-3">
-                                    <label for="tags" class="form-label">Tags</label>
-                                    <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsSettings"
-                                        [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
-                                        (newItemAdded)="metadata.tagsLocked = true" (selectedData)="metadata.tagsLocked = true">
-                                        <ng-template #badgeItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                        <ng-template #optionItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                    </app-typeahead>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-0">
-                            <div class="col-lg-4 col-md-12 pe-2">
-                                <div class="mb-3">
-                                    <label for="language" class="form-label">Language</label>
-                                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings"
-                                        [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
-                                        (newItemAdded)="metadata.languageLocked = true" (selectedData)="metadata.languageLocked = true">
-                                        <ng-template #badgeItem let-item let-position="idx">
-                                            {{item.title}}
-                                        </ng-template>
-                                        <ng-template #optionItem let-item let-position="idx">
-                                            {{item.title}} ({{item.isoCode}})
-                                        </ng-template>
-                                    </app-typeahead>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-12 pe-2">
-                                <div class="mb-3">
-                                    <label for="age-rating" class="form-label">Age Rating</label>
-                                    <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
-                                        <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }"></ng-container>
-                                        <select class="form-select"id="age-rating" formControlName="ageRating">
-                                            <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 col-md-12">
-                                <div class="mb-3">
-                                    <label for="publication-status" class="form-label">Publication Status</label>
-                                    <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
-                                        <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
-                                        <select class="form-select"id="publication-status" formControlName="publicationStatus">
-                                            <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </ng-template>
-                </li>
-
-                <li [ngbNavItem]="tabs[TabID.People]">
-                    <a ngbNavLink>{{tabs[TabID.People]}}</a>
-                    <ng-template ngbNavContent>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="writer" class="form-label">Writer</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)"
-                                    [(locked)]="metadata.writersLocked" (onUnlock)="metadata.writersLocked = false"
-                                    (newItemAdded)="metadata.writersLocked = true" (selectedData)="metadata.writersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="cover-artist" class="form-label">Cover Artist</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
-                                    [(locked)]="metadata.coverArtistsLocked" (onUnlock)="metadata.coverArtistsLocked = false"
-                                    (newItemAdded)="metadata.coverArtistsLocked = true" (selectedData)="metadata.coverArtistsLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-
-
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="publisher" class="form-label">Publisher</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)"
-                                    [(locked)]="metadata.publishersLocked" (onUnlock)="metadata.publishersLocked = false"
-                                    (newItemAdded)="metadata.publishersLocked = true" (selectedData)="metadata.publishersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="penciller" class="form-label">Penciller</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)"
-                                    [(locked)]="metadata.pencillersLocked" (onUnlock)="metadata.pencillersLocked = false"
-                                    (newItemAdded)="metadata.pencillersLocked = true" (selectedData)="metadata.pencillersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-
-
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="letterer" class="form-label">Letterer</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)"
-                                    [(locked)]="metadata.letterersLocked" (onUnlock)="metadata.letterersLocked = false"
-                                    (newItemAdded)="metadata.letterersLocked = true" (selectedData)="metadata.letterersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="inker" class="form-label">Inker</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)"
-                                    [(locked)]="metadata.inkersLocked" (onUnlock)="metadata.inkersLocked = false"
-                                    (newItemAdded)="metadata.inkersLocked = true" (selectedData)="metadata.inkersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-
-
-
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="editor" class="form-label">Editor</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)"
-                                    [(locked)]="metadata.editorsLocked" (onUnlock)="metadata.editorsLocked = false"
-                                    (newItemAdded)="metadata.editorsLocked = true" (selectedData)="metadata.editorsLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="colorist" class="form-label">Colorist</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)"
-                                    [(locked)]="metadata.coloristsLocked" (onUnlock)="metadata.coloristsLocked = false"
-                                    (newItemAdded)="metadata.coloristsLocked = true" (selectedData)="metadata.coloristsLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-
-
-
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="character" class="form-label">Character</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)"
-                                    [(locked)]="metadata.charactersLocked" (onUnlock)="metadata.charactersLocked = false"
-                                    (newItemAdded)="metadata.charactersLocked = true" (selectedData)="metadata.charactersLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-                        <div class="row g-0">
-                            <div class="mb-3">
-                                <label for="translator" class="form-label">Translators</label>
-                                <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)"
-                                    [(locked)]="metadata.translatorsLocked" (onUnlock)="metadata.translatorsLocked = false"
-                                    (newItemAdded)="metadata.translatorsLocked = true" (selectedData)="metadata.translatorsLocked = true">
-                                    <ng-template #badgeItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                    <ng-template #optionItem let-item let-position="idx">
-                                        {{item.name}}
-                                    </ng-template>
-                                </app-typeahead>
-                            </div>
-                        </div>
-
-                    </ng-template>
-                </li>
-
-                <li [ngbNavItem]="tabs[TabID.WebLinks]" *ngIf="metadata">
-                    <a ngbNavLink>{{tabs[TabID.WebLinks]}}</a>
-                    <ng-template ngbNavContent>
-                        <p>Here you can add many different links to external services.</p>
-                        <div class="row g-0 mb-3" *ngFor="let link of WebLinks; let i = index;">
-                            <div class="col-lg-8 col-md-12 pe-2">
-                                <div class="mb-3">
-                                    <label for="web-link--{{i}}" class="visually-hidden">Web Link</label>
-                                    <input type="text" class="form-control" formControlName="link{{i}}" attr.id="web-link--{{i}}">
-                                </div>
-                            </div>
-                            <div class="col-lg-2">
-                                <button class="btn btn-secondary me-1" (click)="addWebLink()">
-                                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
-                                    <span class="visually-hidden">Add Link</span>
-                                </button>
-                                <button class="btn btn-secondary" (click)="removeWebLink(i)">
-                                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                                    <span class="visually-hidden">Remove Link</span>
-                                </button>
-                            </div>
-                        </div>
-                    </ng-template>
-                </li>
-
-                <li [ngbNavItem]="tabs[TabID.CoverImage]">
-                  <a ngbNavLink>{{tabs[TabID.CoverImage]}}</a>
-                  <ng-template ngbNavContent>
-                    <p class="alert alert-primary" role="alert">
-                        Upload and choose a new cover image. Press Save to upload and override the cover.
-                    </p>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
-                  </ng-template>
-                </li>
-                <li [ngbNavItem]="tabs[TabID.Related]">
-                    <a ngbNavLink>{{tabs[TabID.Related]}}</a>
-                    <ng-template ngbNavContent>
-                      <app-edit-series-relation [series]="series" [save]="saveNestedComponents"></app-edit-series-relation>
-                    </ng-template>
-                  </li>
-                <li [ngbNavItem]="tabs[TabID.Info]">
-                  <a ngbNavLink>{{tabs[TabID.Info]}}</a>
-                  <ng-template ngbNavContent>
-                    <h4>Information</h4>
-                    <div class="row g-0 mb-2">
-                        <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
-                        <div class="col-md-6">Format: <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
+              <div class="row g-0">
+                <div class="col-lg-8 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <label for="collections" class="form-label">Collections </label>
+                    <app-typeahead (selectedData)="updateCollections($event)" [settings]="collectionTagSettings" [locked]="true">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                  <div class="mb-3" style="width: 100%">
+                    <label for="release-year" class="form-label">Release Year</label>
+                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }"></ng-container>
+                      <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear" maxlength="4" minlength="4" [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
+                      <ng-container *ngIf="editSeriesForm.get('releaseYear')?.errors as errors">
+                        <p class="invalid-feedback" *ngIf="errors.pattern">
+                          This must be a valid year greater than 1000 and 4 characters long
+                        </p>
+                      </ng-container>
                     </div>
-                    <div class="row g-0 mb-2">
-                        <div class="col-md-6">Created: {{series.created | date:'shortDate'}}</div>
-                        <div class="col-md-6">Last Read: {{series.latestReadDate | defaultDate | timeAgo}}</div>
-                        <div class="col-md-6">Last Added To: {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
-                        <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
-                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    <div class="row g-0 mb-2">
-                        <div class="col-auto">Folder Path: {{series.folderPath | defaultValue}}</div>
-                    </div>
-                    <div class="row g-0 mb-2" *ngIf="metadata">
-                        <div class="col-md-6">
-                            Max Items: {{metadata.maxCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Highest Count found across all ComicInfo in the Series" role="button" tabindex="0"></i>
-                        </div>
-                        <div class="col-md-6">
-                            Total Items: {{metadata.totalCount}}
-                            <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max Issue or Volume field from all ComicInfo in the series" role="button" tabindex="0"></i>
-                        </div>
-                        <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
-                        <div class="col-md-6">Total Pages: {{series.pages}}</div>
-                        <div class="col-md-6">Size: {{size | bytes}}</div>
-                    </div>
-                    <h4>Volumes</h4>
-                    <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
-                        <span class="invisible">Loading...</span>
-                    </div>
-                    <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
-                        <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
-                            <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
-                            <div class="flex-grow-1">
-                                <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
-                                <div>
-                                    <div class="row g-0">
-                                        <div class="col">
-                                            Added: {{volume.created | date: 'short'}}
-                                        </div>
-                                        <div class="col">
-                                            Last Modified: {{volume.lastModified | date: 'short'}}
-                                        </div>
-                                    </div>
-                                    <div class="row g-0">
-                                        <div class="col">
-                                            <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                                    [attr.aria-expanded]="!volumeCollapsed[volume.name]">
-                                                View Files
-                                            </button>
-                                        </div>
-                                        <div class="col">
-                                            Pages: {{volume.pages}}
-                                        </div>
-                                    </div>
+              <div class="row g-0">
+                <div class="col-md-12">
+                  <div class="mb-3">
+                    <label for="genres" class="form-label">Genres</label>
+                    <app-typeahead (selectedData)="updateGenres($event)" [settings]="genreSettings"
+                                   [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
+                                   (newItemAdded)="metadata.genresLocked = true" (selectedData)="metadata.genresLocked = true">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                </div>
+              </div>
 
-                                    <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
-                                        <ul class="list-group mt-2">
-                                            <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
-                                                <span>{{file.filePath}}</span>
-                                                <div class="row g-0">
-                                                    <div class="col">
-                                                        Chapter: {{file.chapter}}
-                                                    </div>
-                                                    <div class="col">
-                                                        Pages: {{file.pages}}
-                                                    </div>
-                                                    <div class="col">
-                                                        Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+              <div class="row g-0">
+                <div class="col-md-12">
+                  <div class="mb-3">
+                    <label for="tags" class="form-label">Tags</label>
+                    <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsSettings"
+                                   [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
+                                   (newItemAdded)="metadata.tagsLocked = true" (selectedData)="metadata.tagsLocked = true">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-0">
+                <div class="col-lg-4 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <label for="language" class="form-label">Language</label>
+                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings"
+                                   [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
+                                   (newItemAdded)="metadata.languageLocked = true" (selectedData)="metadata.languageLocked = true">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx">
+                        {{item.title}} ({{item.isoCode}})
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <label for="age-rating" class="form-label">Age Rating</label>
+                    <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }"></ng-container>
+                      <select class="form-select"id="age-rating" formControlName="ageRating">
+                        <option *ngFor="let opt of ageRatings" [value]="opt.value">{{opt.title | titlecase}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                  <div class="mb-3">
+                    <label for="publication-status" class="form-label">Publication Status</label>
+                    <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }"></ng-container>
+                      <select class="form-select"id="publication-status" formControlName="publicationStatus">
+                        <option *ngFor="let opt of publicationStatuses" [value]="opt.value">{{opt.title | titlecase}}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="tabs[TabID.People]">
+            <a ngbNavLink>{{t(tabs[TabID.People])}}</a>
+            <ng-template ngbNavContent>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="writer" class="form-label">Writer</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer)" [settings]="getPersonsSettings(PersonRole.Writer)"
+                                 [(locked)]="metadata.writersLocked" (onUnlock)="metadata.writersLocked = false"
+                                 (newItemAdded)="metadata.writersLocked = true" (selectedData)="metadata.writersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="cover-artist" class="form-label">Cover Artist</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist)" [settings]="getPersonsSettings(PersonRole.CoverArtist)"
+                                 [(locked)]="metadata.coverArtistsLocked" (onUnlock)="metadata.coverArtistsLocked = false"
+                                 (newItemAdded)="metadata.coverArtistsLocked = true" (selectedData)="metadata.coverArtistsLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="publisher" class="form-label">Publisher</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher)" [settings]="getPersonsSettings(PersonRole.Publisher)"
+                                 [(locked)]="metadata.publishersLocked" (onUnlock)="metadata.publishersLocked = false"
+                                 (newItemAdded)="metadata.publishersLocked = true" (selectedData)="metadata.publishersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="penciller" class="form-label">Penciller</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller)" [settings]="getPersonsSettings(PersonRole.Penciller)"
+                                 [(locked)]="metadata.pencillersLocked" (onUnlock)="metadata.pencillersLocked = false"
+                                 (newItemAdded)="metadata.pencillersLocked = true" (selectedData)="metadata.pencillersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="letterer" class="form-label">Letterer</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer)" [settings]="getPersonsSettings(PersonRole.Letterer)"
+                                 [(locked)]="metadata.letterersLocked" (onUnlock)="metadata.letterersLocked = false"
+                                 (newItemAdded)="metadata.letterersLocked = true" (selectedData)="metadata.letterersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="inker" class="form-label">Inker</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker)" [settings]="getPersonsSettings(PersonRole.Inker)"
+                                 [(locked)]="metadata.inkersLocked" (onUnlock)="metadata.inkersLocked = false"
+                                 (newItemAdded)="metadata.inkersLocked = true" (selectedData)="metadata.inkersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="editor" class="form-label">Editor</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor)" [settings]="getPersonsSettings(PersonRole.Editor)"
+                                 [(locked)]="metadata.editorsLocked" (onUnlock)="metadata.editorsLocked = false"
+                                 (newItemAdded)="metadata.editorsLocked = true" (selectedData)="metadata.editorsLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="colorist" class="form-label">Colorist</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist)" [settings]="getPersonsSettings(PersonRole.Colorist)"
+                                 [(locked)]="metadata.coloristsLocked" (onUnlock)="metadata.coloristsLocked = false"
+                                 (newItemAdded)="metadata.coloristsLocked = true" (selectedData)="metadata.coloristsLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+
+
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="character" class="form-label">Character</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character)" [settings]="getPersonsSettings(PersonRole.Character)"
+                                 [(locked)]="metadata.charactersLocked" (onUnlock)="metadata.charactersLocked = false"
+                                 (newItemAdded)="metadata.charactersLocked = true" (selectedData)="metadata.charactersLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+              <div class="row g-0">
+                <div class="mb-3">
+                  <label for="translator" class="form-label">Translators</label>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator)" [settings]="getPersonsSettings(PersonRole.Translator)"
+                                 [(locked)]="metadata.translatorsLocked" (onUnlock)="metadata.translatorsLocked = false"
+                                 (newItemAdded)="metadata.translatorsLocked = true" (selectedData)="metadata.translatorsLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              </div>
+
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="tabs[TabID.WebLinks]" *ngIf="metadata">
+            <a ngbNavLink>{{t(tabs[TabID.WebLinks])}}</a>
+            <ng-template ngbNavContent>
+              <p>Here you can add many different links to external services.</p>
+              <div class="row g-0 mb-3" *ngFor="let link of WebLinks; let i = index;">
+                <div class="col-lg-8 col-md-12 pe-2">
+                  <div class="mb-3">
+                    <label for="web-link--{{i}}" class="visually-hidden">Web Link</label>
+                    <input type="text" class="form-control" formControlName="link{{i}}" attr.id="web-link--{{i}}">
+                  </div>
+                </div>
+                <div class="col-lg-2">
+                  <button class="btn btn-secondary me-1" (click)="addWebLink()">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    <span class="visually-hidden">Add Link</span>
+                  </button>
+                  <button class="btn btn-secondary" (click)="removeWebLink(i)">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    <span class="visually-hidden">Remove Link</span>
+                  </button>
+                </div>
+              </div>
+            </ng-template>
+          </li>
+
+          <li [ngbNavItem]="tabs[TabID.CoverImage]">
+            <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
+            <ng-template ngbNavContent>
+              <p class="alert alert-primary" role="alert">
+                Upload and choose a new cover image. Press Save to upload and override the cover.
+              </p>
+              <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
+            </ng-template>
+          </li>
+          <li [ngbNavItem]="tabs[TabID.Related]">
+            <a ngbNavLink>{{t(tabs[TabID.Related])}}</a>
+            <ng-template ngbNavContent>
+              <app-edit-series-relation [series]="series" [save]="saveNestedComponents"></app-edit-series-relation>
+            </ng-template>
+          </li>
+          <li [ngbNavItem]="tabs[TabID.Info]">
+            <a ngbNavLink>{{t(tabs[TabID.Info])}}</a>
+            <ng-template ngbNavContent>
+              <h4>Information</h4>
+              <div class="row g-0 mb-2">
+                <div class="col-md-6" *ngIf="libraryName">Library: {{libraryName | sentenceCase}}</div>
+                <div class="col-md-6">Format: <app-tag-badge>{{series.format | mangaFormat}}</app-tag-badge></div>
+              </div>
+              <div class="row g-0 mb-2">
+                <div class="col-md-6">Created: {{series.created | date:'shortDate'}}</div>
+                <div class="col-md-6">Last Read: {{series.latestReadDate | defaultDate | timeAgo}}</div>
+                <div class="col-md-6">Last Added To: {{series.lastChapterAdded | defaultDate | timeAgo}}</div>
+                <div class="col-md-6">Last Scanned: {{series.lastFolderScanned | defaultDate | timeAgo}}</div>
+              </div>
+
+              <div class="row g-0 mb-2">
+                <div class="col-auto">Folder Path: {{series.folderPath | defaultValue}}</div>
+              </div>
+              <div class="row g-0 mb-2" *ngIf="metadata">
+                <div class="col-md-6">
+                  Max Items: {{metadata.maxCount}}
+                  <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Highest Count found across all ComicInfo in the Series" role="button" tabindex="0"></i>
+                </div>
+                <div class="col-md-6">
+                  Total Items: {{metadata.totalCount}}
+                  <i class="fa fa-info-circle ms-1" placement="right" ngbTooltip="Max Issue or Volume field from all ComicInfo in the series" role="button" tabindex="0"></i>
+                </div>
+                <div class="col-md-6">Publication Status: {{metadata.publicationStatus | publicationStatus}}</div>
+                <div class="col-md-6">Total Pages: {{series.pages}}</div>
+                <div class="col-md-6">Size: {{size | bytes}}</div>
+              </div>
+              <h4>Volumes</h4>
+              <div class="spinner-border text-secondary" role="status" *ngIf="isLoadingVolumes">
+                <span class="invisible">Loading...</span>
+              </div>
+              <ul class="list-unstyled" *ngIf="!isLoadingVolumes">
+                <li class="d-flex my-4" *ngFor="let volume of seriesVolumes">
+                  <app-image class="me-3" style="width: 74px;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)"></app-image>
+                  <div class="flex-grow-1">
+                    <h5 class="mt-0 mb-1">Volume {{volume.name}}</h5>
+                    <div>
+                      <div class="row g-0">
+                        <div class="col">
+                          Added: {{volume.created | date: 'short'}}
+                        </div>
+                        <div class="col">
+                          Last Modified: {{volume.lastModified | date: 'short'}}
+                        </div>
+                      </div>
+                      <div class="row g-0">
+                        <div class="col">
+                          <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
+                                  [attr.aria-expanded]="!volumeCollapsed[volume.name]">
+                            View Files
+                          </button>
+                        </div>
+                        <div class="col">
+                          Pages: {{volume.pages}}
+                        </div>
+                      </div>
+
+                      <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
+                        <ul class="list-group mt-2">
+                          <li *ngFor="let file of volume.volumeFiles.sort()" class="list-group-item">
+                            <span>{{file.filePath}}</span>
+                            <div class="row g-0">
+                              <div class="col">
+                                Chapter: {{file.chapter}}
+                              </div>
+                              <div class="col">
+                                Pages: {{file.pages}}
+                              </div>
+                              <div class="col">
+                                Format: <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                              </div>
                             </div>
-                        </li>
-                    </ul>
-                  </ng-template>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
                 </li>
-            </ul>
-        </form>
+              </ul>
+            </ng-template>
+          </li>
+        </ul>
+      </form>
 
-        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">Save</button>
+      <button type="button" class="btn btn-secondary" (click)="close()">Close</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">Save</button>
     </div>
-</div>
+  </div>
 
 
-<ng-template #lock let-item="item" let-field="field">
+  <ng-template #lock let-item="item" let-field="field">
     <span class="input-group-text clickable" (click)="unlock(item, field)">
         <i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">Field is locked</span>
     </span>
-</ng-template>
+  </ng-template>
 
+
+</ng-container>

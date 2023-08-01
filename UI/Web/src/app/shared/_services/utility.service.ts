@@ -6,6 +6,7 @@ import { MangaFormat } from 'src/app/_models/manga-format';
 import { PaginatedResult } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
 import { Volume } from 'src/app/_models/volume';
+import {TranslocoService} from "@ngneat/transloco";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -38,16 +39,8 @@ export class UtilityService {
 
   mangaFormatKeys: string[] = [];
 
-  constructor() { }
+  constructor(private translocoService: TranslocoService) { }
 
-  sortVolumes = (a: Volume, b: Volume) => {
-    if (a === b) { return 0; }
-    else if (a.number === 0) { return 1; }
-    else if (b.number === 0) { return -1; }
-    else {
-      return a.number < b.number ? -1 : 1;
-    }
-  }
 
   sortChapters = (a: Chapter, b: Chapter) => {
     return parseFloat(a.number) - parseFloat(b.number);
@@ -63,33 +56,25 @@ export class UtilityService {
 
   /**
    * Formats a Chapter name based on the library it's in
-   * @param libraryType 
+   * @param libraryType
    * @param includeHash For comics only, includes a # which is used for numbering on cards
    * @param includeSpace Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.
-   * @returns 
+   * @returns
    */
    formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false) {
     switch(libraryType) {
       case LibraryType.Book:
-        return 'Book' + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.book-num') + (includeSpace ? ' ' : '');
       case LibraryType.Comic:
         if (includeHash) {
-          return 'Issue #';
+          return this.translocoService.translate('common.issue-hash-num');
         }
-        return 'Issue' + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.issue-num') + (includeSpace ? ' ' : '');
       case LibraryType.Manga:
-        return 'Chapter' + (includeSpace ? ' ' : '');
+        return this.translocoService.translate('common.chapter-num') + (includeSpace ? ' ' : '');
     }
   }
 
-  cleanSpecialTitle(title: string) {
-    let cleaned = title.replace(/_/g, ' ').replace(/SP\d+/g, '').trim();
-    cleaned = cleaned.substring(0, cleaned.lastIndexOf('.'));
-    if (cleaned.trim() === '') {
-      return title;
-    }
-    return cleaned;
-  }
 
   filter(input: string, filter: string): boolean {
     if (input === null || filter === null || input === undefined || filter === undefined) return false;
@@ -131,7 +116,7 @@ export class UtilityService {
     if (window.innerWidth <= Breakpoint.Mobile) return Breakpoint.Mobile;
     else if (window.innerWidth > Breakpoint.Mobile && window.innerWidth <= Breakpoint.Tablet) return Breakpoint.Tablet;
     else if (window.innerWidth > Breakpoint.Tablet) return Breakpoint.Desktop
-    
+
     return Breakpoint.Desktop;
   }
 
@@ -150,7 +135,7 @@ export class UtilityService {
     if ((object2 === null || object2 === undefined) && (object1 !== null || object1 !== undefined)) return false;
     if (object1 === null && object2 === null) return true;
     if (object1 === undefined && object2 === undefined) return true;
-    
+
 
     const keys1 = Object.keys(object1);
     const keys2 = Object.keys(object2);

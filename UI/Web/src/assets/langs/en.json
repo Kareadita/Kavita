@@ -1251,6 +1251,7 @@
         "on-deck": "{{dashboard.on-deck-title}}"
     },
 
+
     "admin-dashboard": {
         "title": "Admin Dashboard",
         "general-tab": "General",
@@ -1520,6 +1521,31 @@
         "release-year": "Release Year"
     },
 
+    "edit-series-modal": {
+        "title": "{{seriesName}} Details",
+        "general-tab": "General",
+        "metadata-tab": "Metadata",
+        "people-tab": "People",
+        "web-links-tab": "Web Links",
+        "cover-image-tab": "Cover Image",
+        "related-tab": "Related",
+        "info-tab": "Info",
+        "collections-label": "Collections",
+        "genres-label": "Genres",
+        "tags-label": "Tags",
+        "cover-artist-label": "Cover Artist",
+        "writer-label": "Writer",
+        "publisher-label": "Publisher",
+        "penciller-label": "Penciller",
+        "letterer-label": "Letterer",
+        "inker-label": "Inker",
+        "editor-label": "Editor",
+        "colorist-label": "Colorist",
+        "character-label": "Character",
+        "translator-label": "Translator",
+        "required-field": "{{validation.required-field}}",
+        "close": "{{common.close}}"
+    },
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists",
@@ -1612,7 +1638,11 @@
         "select-all": "Select All",
         "deselect-all": "Deselect All",
         "series-count": "{{num}} Series",
-        "item-count": "{{num}} Items"
+        "item-count": "{{num}} Items",
+        "book-num": "Book",
+        "issue-hash-num": "Issue #",
+        "issue-num": "Issue",
+        "chapter-num": "Chapter"
     }
 
 }
