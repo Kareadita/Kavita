@@ -12,6 +12,7 @@ import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { switchMap, takeWhile, throttleTime } from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 import { BytesPipe } from 'src/app/pipe/bytes.pipe';
+import {translate} from "@ngneat/transloco";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -238,7 +239,8 @@ export class DownloadService {
   }
 
   private async confirmSize(size: number, entityType: DownloadEntityType) {
-    return (size < this.SIZE_WARNING || await this.confirmService.confirm('The ' + entityType + '  is ' + bytesPipe.transform(size) + '. Are you sure you want to continue?'));
+    return (size < this.SIZE_WARNING ||
+      await this.confirmService.confirm(translate('toasts.confirm-download-size', {entityType: 'entity-type.' + entityType, size: bytesPipe.transform(size)})));
   }
 
   private downloadBookmarks(bookmarks: PageBookmark[]) {

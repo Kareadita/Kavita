@@ -182,8 +182,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       model.type = parseInt(model.type, 10);
 
       if (model.type !== this.library.type) {
-        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to
-        series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?`)) return;
+        if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
       this.libraryService.update(model).subscribe(() => {

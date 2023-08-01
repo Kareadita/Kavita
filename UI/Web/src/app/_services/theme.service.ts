@@ -152,7 +152,7 @@ export class ThemeService {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {
-            await this.confirmService.alert('There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.');
+            await this.confirmService.alert(translate('toasts.alert-bad-theme'));
             this.setTheme('dark');
             return;
           }
