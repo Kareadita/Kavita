@@ -6,6 +6,7 @@ using API.Data.ManualMigrations;
 using API.DTOs;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,8 @@ public interface IAppUserProgressRepository
     Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
     Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
+    Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId);
+    Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId);
 }
 #nullable disable
 public class AppUserProgressRepository : IAppUserProgressRepository
@@ -162,9 +165,9 @@ public class AppUserProgressRepository : IAppUserProgressRepository
                 (appUserProgresses, chapter) => new {appUserProgresses, chapter})
             .Where(p => p.appUserProgresses.SeriesId == seriesId && p.appUserProgresses.AppUserId == userId &&
                         p.appUserProgresses.PagesRead >= p.chapter.Pages)
-            .Select(p => p.chapter.Number)
+            .Select(p => p.chapter.Range)
             .ToListAsync();
-        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(float.Parse(d)));
+        return list.Count == 0 ? 0 : list.DefaultIfEmpty().Where(d => d != null).Max(d => (int) Math.Floor(Parser.MaxNumberFromRange(d)));
     }
 
     public async Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId)
@@ -179,7 +182,23 @@ public class AppUserProgressRepository : IAppUserProgressRepository
         return list.Count == 0 ? 0 : list.DefaultIfEmpty().Max();
     }
 
-    #nullable enable
+    public async Task<DateTime?> GetLatestProgressForSeries(int seriesId, int userId)
+    {
+        var list = await _context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId)
+            .Select(p => p.LastModifiedUtc)
+            .ToListAsync();
+        return list.Count == 0 ? null : list.DefaultIfEmpty().Max();
+    }
+
+    public async Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId)
+    {
+        var list = await _context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId)
+            .Select(p => p.LastModifiedUtc)
+            .ToListAsync();
+        return list.Count == 0 ? null : list.DefaultIfEmpty().Min();
+    }
+
+#nullable enable
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses

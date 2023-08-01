@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.8");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -371,8 +371,11 @@ namespace API.Data.Migrations
                     b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Rating")
+                    b.Property<bool>("HasBeenRated")
                         .HasColumnType("INTEGER");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("Review")
                         .HasColumnType("TEXT");
@@ -405,6 +408,59 @@ namespace API.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserTableOfContent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BookScrollId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ChapterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PageNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VolumeId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ChapterId");
+
+                    b.HasIndex("SeriesId");
+
+                    b.ToTable("AppUserTableOfContent");
                 });
 
             modelBuilder.Entity("API.Entities.Chapter", b =>
@@ -1746,6 +1802,33 @@ namespace API.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserTableOfContent", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("TableOfContents")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.Series", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Chapter");
+
+                    b.Navigation("Series");
+                });
+
             modelBuilder.Entity("API.Entities.Chapter", b =>
                 {
                     b.HasOne("API.Entities.Volume", "Volume")
@@ -2129,6 +2212,8 @@ namespace API.Data.Migrations
                     b.Navigation("ReadingLists");
 
                     b.Navigation("ScrobbleHolds");
+
+                    b.Navigation("TableOfContents");
 
                     b.Navigation("UserPreferences");
 

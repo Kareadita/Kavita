@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.CollectionTags;
@@ -19,6 +20,10 @@ using API.Entities.Metadata;
 using API.Entities.Scrobble;
 using API.Helpers.Converters;
 using AutoMapper;
+using CollectionTag = API.Entities.CollectionTag;
+using MediaError = API.Entities.MediaError;
+using PublicationStatus = API.Entities.Enums.PublicationStatus;
+using SiteTheme = API.Entities.SiteTheme;
 
 namespace API.Helpers;
 
@@ -211,6 +216,7 @@ public class AutoMapperProfiles : Profile
             .ConvertUsing<ServerSettingConverter>();
 
         CreateMap<Device, DeviceDto>();
+        CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
     }
 }

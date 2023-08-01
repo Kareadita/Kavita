@@ -792,4 +792,59 @@ public class ReaderController : BaseApiController
         return _readerService.GetTimeEstimate(0, pagesLeft, false);
     }
 
+    /// <summary>
+    /// Returns the user's personal table of contents for the given chapter
+    /// </summary>
+    /// <param name="chapterId"></param>
+    /// <returns></returns>
+    [HttpGet("ptoc")]
+    public ActionResult<IEnumerable<PersonalToCDto>> GetPersonalToC(int chapterId)
+    {
+        return Ok(_unitOfWork.UserTableOfContentRepository.GetPersonalToC(User.GetUserId(), chapterId));
+    }
+
+    [HttpDelete("ptoc")]
+    public async Task<ActionResult> DeletePersonalToc([FromQuery] int chapterId, [FromQuery] int pageNum, [FromQuery] string title)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return BadRequest("Name cannot be empty");
+        if (pageNum < 0) return BadRequest("Must be valid page number");
+        var toc = await _unitOfWork.UserTableOfContentRepository.Get(User.GetUserId(), chapterId, pageNum, title);
+        if (toc == null) return Ok();
+        _unitOfWork.UserTableOfContentRepository.Remove(toc);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    /// <summary>
+    /// Create a new personal table of content entry for a given chapter
+    /// </summary>
+    /// <remarks>The title and page number must be unique to that book</remarks>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("create-ptoc")]
+    public async Task<ActionResult> CreatePersonalToC(CreatePersonalToCDto dto)
+    {
+        // Validate there isn't already an existing page title combo?
+        if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest("Name cannot be empty");
+        if (dto.PageNumber < 0) return BadRequest("Must be valid page number");
+        var userId = User.GetUserId();
+        if (await _unitOfWork.UserTableOfContentRepository.IsUnique(userId, dto.ChapterId, dto.PageNumber,
+                dto.Title.Trim()))
+        {
+            return BadRequest("Duplicate ToC entry already exists");
+        }
+
+        _unitOfWork.UserTableOfContentRepository.Attach(new AppUserTableOfContent()
+        {
+            Title = dto.Title.Trim(),
+            ChapterId = dto.ChapterId,
+            PageNumber = dto.PageNumber,
+            SeriesId = dto.SeriesId,
+            LibraryId = dto.LibraryId,
+            BookScrollId = dto.BookScrollId,
+            AppUserId = userId
+        });
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
 }

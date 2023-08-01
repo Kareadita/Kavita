@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
 using API.DTOs;
+using API.Extensions;
 using API.Services.Plus;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +70,7 @@ public class RatingController : BaseApiController
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId),
+            AverageScore = await _unitOfWork.SeriesRepository.GetAverageUserRating(seriesId, User.GetUserId()),
             FavoriteCount = 0
         });
     }

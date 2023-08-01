@@ -71,7 +71,7 @@ import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 
-interface RelatedSeris {
+interface RelatedSeriesPair {
   series: Series;
   relation: RelationKind;
 }
@@ -153,7 +153,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
    * Track by function for Chapter to tell when to refresh card data
    */
   trackByChapterIdentity = (index: number, item: Chapter) => `${item.title}_${item.number}_${item.volumeId}_${item.pagesRead}`;
-  trackByRelatedSeriesIdentify = (index: number, item: RelatedSeris) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
+  trackByRelatedSeriesIdentify = (index: number, item: RelatedSeriesPair) => `${item.series.name}_${item.series.libraryId}_${item.series.pagesRead}_${item.relation}`;
   trackBySeriesIdentify = (index: number, item: Series) => `${item.name}_${item.libraryId}_${item.pagesRead}`;
   trackByStoryLineIdentity = (index: number, item: StoryLineItem) => {
     if (item.isChapter) {
@@ -174,7 +174,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   /**
    * Related Series. Sorted by backend
    */
-  relations: Array<RelatedSeris> = [];
+  relations: Array<RelatedSeriesPair> = [];
   /**
    * Recommended Series
    */
@@ -342,7 +342,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.libraryId = parseInt(libraryId, 10);
     this.seriesImage = this.imageService.getSeriesCoverImage(this.seriesId);
     this.cdRef.markForCheck();
-    this.loadSeries(this.seriesId);
+    this.loadSeries(this.seriesId, true);
 
     this.pageExtrasGroup.get('renderMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val: PageLayoutMode | null) => {
       if (val == null) return;
@@ -493,7 +493,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  loadSeries(seriesId: number) {
+  loadSeries(seriesId: number, loadExternal: boolean = false) {
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata = metadata;
       this.cdRef.markForCheck();
@@ -517,7 +517,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
       this.libraryType = results.libType;
       this.series = results.series;
 
-      if (this.libraryType !== LibraryType.Comic) {
+      if (this.libraryType !== LibraryType.Comic && loadExternal) {
         this.loadReviews(true);
       }
 
@@ -591,7 +591,7 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
   }
 
   createRelatedSeries(series: Series, relation: RelationKind) {
-    return {series, relation} as RelatedSeris;
+    return {series, relation} as RelatedSeriesPair;
   }
 
   /**
@@ -751,11 +751,6 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     modalRef.closed.subscribe((closeResult: {success: boolean, series: Series, coverImageUpdate: boolean}) => {
       window.scrollTo(0, 0);
       if (closeResult.success) {
-        this.seriesService.getSeries(this.seriesId).subscribe(s => {
-          this.series = s;
-          this.cdRef.detectChanges();
-        });
-
         this.loadSeries(this.seriesId);
       }
 

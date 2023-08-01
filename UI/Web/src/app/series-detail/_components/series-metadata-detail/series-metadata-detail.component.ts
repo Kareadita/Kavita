@@ -19,12 +19,15 @@ import {PersonBadgeComponent} from "../../../shared/person-badge/person-badge.co
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-info-cards.component";
 import {LibraryType} from "../../../_models/library";
+import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.component";
 
 
 @Component({
   selector: 'app-series-metadata-detail',
   standalone: true,
-  imports: [CommonModule, TagBadgeComponent, BadgeExpanderComponent, SafeHtmlPipe, ExternalRatingComponent, ReadMoreComponent, A11yClickDirective, PersonBadgeComponent, NgbCollapse, SeriesInfoCardsComponent],
+  imports: [CommonModule, TagBadgeComponent, BadgeExpanderComponent, SafeHtmlPipe, ExternalRatingComponent,
+    ReadMoreComponent, A11yClickDirective, PersonBadgeComponent, NgbCollapse, SeriesInfoCardsComponent,
+    MetadataDetailComponent],
   templateUrl: './series-metadata-detail.component.html',
   styleUrls: ['./series-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -74,11 +77,11 @@ export class SeriesMetadataDetailComponent implements OnChanges {
                                   this.seriesMetadata.letterers.length > 0 ||
                                   this.seriesMetadata.pencillers.length > 0 ||
                                   this.seriesMetadata.publishers.length > 0 ||
+                                  this.seriesMetadata.characters.length > 0 ||
                                   this.seriesMetadata.translators.length > 0;
 
-    if (this.seriesMetadata !== null) {
-      this.seriesSummary = (this.seriesMetadata.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
-    }
+
+    this.seriesSummary = (this.seriesMetadata?.summary === null ? '' : this.seriesMetadata.summary).replace(/\n/g, '<br>');
     this.cdRef.markForCheck();
   }
 

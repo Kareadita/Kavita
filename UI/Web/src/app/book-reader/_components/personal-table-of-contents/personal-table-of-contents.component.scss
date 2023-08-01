@@ -1,0 +1,15 @@
+.table-of-contents li {
+  cursor: pointer;
+
+  &.active {
+    font-weight: bold;
+  }
+}
+
+.chapter-title {
+  padding-inline-start: 1rem;
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

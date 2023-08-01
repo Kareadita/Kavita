@@ -34,7 +34,11 @@ export enum FilterQueryParam {
   /**
    * This is a pagination control
    */
-  Page = 'page'
+  Page = 'page',
+  /**
+   * Special case for the UI. Does not trigger filtering
+   */
+  None = 'none'
 }
 
 @Injectable({
@@ -46,19 +50,19 @@ export class FilterUtilitiesService {
 
   /**
    * Updates the window location with a custom url based on filter and pagination objects
-   * @param pagination 
-   * @param filter 
+   * @param pagination
+   * @param filter
    */
   updateUrlFromFilter(pagination: Pagination, filter: SeriesFilter | undefined) {
     const params = '?page=' + pagination.currentPage;
-  
+
     const url = this.urlFromFilter(window.location.href.split('?')[0] + params, filter);
     window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
   }
 
   /**
-   * Patches the page query param in the window location.  
-   * @param pagination 
+   * Patches the page query param in the window location.
+   * @param pagination
    */
   updateUrlFromPagination(pagination: Pagination) {
     window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(window.location.href, pagination));
@@ -127,7 +131,7 @@ export class FilterUtilitiesService {
     if (filter.seriesNameQuery !== '') {
       params += `&${FilterQueryParam.Name}=${encodeURIComponent(filter.seriesNameQuery)}`;
     }
-    
+
     return currentUrl + params;
   }
 
@@ -262,7 +266,7 @@ export class FilterUtilitiesService {
       anyChanged = true;
     }
 
-    // Rating, seriesName, 
+    // Rating, seriesName,
     const rating = snapshot.queryParamMap.get(FilterQueryParam.Rating);
     if (rating !== undefined && rating !== null && parseInt(rating, 10) > 0) {
       filter.rating = parseInt(rating, 10);
@@ -301,7 +305,7 @@ export class FilterUtilitiesService {
       filter.seriesNameQuery = decodeURIComponent(searchNameQuery);
       anyChanged = true;
     }
-    
+
 
     return [filter, false]; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
   }

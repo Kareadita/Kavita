@@ -13,6 +13,8 @@ export class ProviderImagePipe implements PipeTransform {
         return 'assets/images/ExternalServices/AniList.png';
       case ScrobbleProvider.Mal:
         return 'assets/images/ExternalServices/MAL.png';
+      case ScrobbleProvider.GoogleBooks:
+        return 'assets/images/ExternalServices/GoogleBooks.png';
       case ScrobbleProvider.Kavita:
         return 'assets/images/logo-32.png';
     }

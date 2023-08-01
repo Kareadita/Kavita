@@ -26,6 +26,10 @@ a.read-more-link {
     }
 }
 
+td > a:not(.dark-exempt) {
+  color: var(--primary-color-darker-shade);
+}
+
 a {
   text-decoration: none;
 

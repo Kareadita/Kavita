@@ -65,7 +65,7 @@ public class PresenceTracker : IPresenceTracker
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // Swallow the exception
         }

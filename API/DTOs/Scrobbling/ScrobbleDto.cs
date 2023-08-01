@@ -66,8 +66,16 @@ public class ScrobbleDto
     /// </summary>
     public DateTime? StartedReadingDateUtc { get; set; }
     /// <summary>
+    /// The latest date the series was read. Will be null for non ReadingProgress events
+    /// </summary>
+    public DateTime? LatestReadingDateUtc { get; set; }
+    /// <summary>
     /// The date that the series was scrobbled. Will be null for non ReadingProgress events
     /// </summary>
     public DateTime? ScrobbleDateUtc { get; set; }
+    /// <summary>
+    /// Optional but can help with matching
+    /// </summary>
+    public string? Isbn { get; set; }
 
 }

@@ -217,22 +217,14 @@ public class SeriesService : ISeriesService
             // Trigger code to cleanup tags, collections, people, etc
             await _taskScheduler.CleanupDbEntries();
 
-            if (updateSeriesMetadataDto.CollectionTags != null)
+            if (updateSeriesMetadataDto.CollectionTags == null) return true;
+            foreach (var tag in updateSeriesMetadataDto.CollectionTags)
             {
-                foreach (var tag in updateSeriesMetadataDto.CollectionTags)
-                {
-                    await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
-                        MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
-                            updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
-                }
-
-                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
-                    MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false);
-
-                await _unitOfWork.CollectionTagRepository.RemoveTagsWithoutSeries();
-
-                return true;
+                await _eventHub.SendMessageAsync(MessageFactory.SeriesAddedToCollection,
+                    MessageFactory.SeriesAddedToCollectionEvent(tag.Id,
+                        updateSeriesMetadataDto.SeriesMetadata.SeriesId), false);
             }
+            return true;
         }
         catch (Exception ex)
         {
@@ -302,7 +294,8 @@ public class SeriesService : ISeriesService
             new AppUserRating();
         try
         {
-            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0, 5);
+            userRating.Rating = Math.Clamp(updateSeriesRatingDto.UserRating, 0f, 5f);
+            userRating.HasBeenRated = true;
             userRating.SeriesId = updateSeriesRatingDto.SeriesId;
 
             if (userRating.Id == 0)

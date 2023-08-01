@@ -247,6 +247,9 @@ public class Startup
                     // v0.7.4
                     await MigrateDisableScrobblingOnComicLibraries.Migrate(unitOfWork, dataContext, logger);
 
+                    // v0.7.6
+                    await MigrateExistingRatings.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();

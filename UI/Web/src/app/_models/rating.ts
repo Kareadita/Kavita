@@ -5,4 +5,5 @@ export interface Rating {
   meanScore: number;
   favoriteCount: number;
   provider: ScrobbleProvider;
+  providerUrl: string | undefined;
 }

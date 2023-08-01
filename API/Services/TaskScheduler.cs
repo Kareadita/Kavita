@@ -61,6 +61,7 @@ public class TaskScheduler : ITaskScheduler
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
     public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
+    public const string CheckForUpdateId = "check-updates";
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
     public const string BackupTaskId = "backup";
@@ -126,7 +127,13 @@ public class TaskScheduler : ITaskScheduler
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+            var schedule = CronConverter.ConvertToCronNotation(setting);
+            if (schedule == Cron.Daily())
+            {
+                // Override daily and make 2am so that everything on system has cleaned up and no blocking
+                schedule = Cron.Daily(2);
+            }
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => schedule, RecurringJobOptions);
         }
         else
         {
@@ -226,10 +233,8 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(5, 23)), new RecurringJobOptions()
-        {
-            TimeZone = TimeZoneInfo.Local
-        });
+        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
+        BackgroundJob.Enqueue(() => CheckForUpdate());
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)

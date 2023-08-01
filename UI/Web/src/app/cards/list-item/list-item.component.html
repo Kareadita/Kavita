@@ -22,7 +22,7 @@
                     <span class="d-none d-sm-inline-block">Read</span>
                 </button>
             </h5>
-            <!-- This isn't perfect, but it might work. TODO: Polish this-->
+
             <h6 class="text-muted" [ngClass]="{'subtitle-with-actionables' : actions.length > 0}" *ngIf="Title !== '' && showTitle">{{Title}}</h6>
             <ng-container *ngIf="summary.length > 0">
                 <div class="mt-2 ps-2">
@@ -30,7 +30,7 @@
                 </div>
             </ng-container>
             <div class="ps-2 d-none d-md-inline-block">
-                <app-entity-info-cards [entity]="entity" [showExtendedProperties]="false"></app-entity-info-cards>
+                <app-entity-info-cards [entity]="entity" [libraryId]="libraryId" [includeMetadata]="ShowExtended" [showExtendedProperties]="ShowExtended"></app-entity-info-cards>
             </div>
         </div>
     </div>

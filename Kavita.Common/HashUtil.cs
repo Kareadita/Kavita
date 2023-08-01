@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text;
-using System.Text.RegularExpressions;
-using DeviceId;
-using DeviceId.Components;
-using Kavita.Common.EnvironmentInfo;
 
 namespace Kavita.Common;
 
@@ -61,28 +56,5 @@ public static class HashUtil
         }
 
         return id.ToString();
-    }
-
-    private static string RunAndCapture(string filename, string args)
-    {
-        var p = new Process
-        {
-            StartInfo =
-            {
-                FileName = filename,
-                Arguments = args,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true
-            }
-        };
-
-        p.Start();
-
-        // To avoid deadlocks, always read the output stream first and then wait.
-        var output = p.StandardOutput.ReadToEnd();
-        p.WaitForExit(1000);
-
-        return output;
     }
 }
