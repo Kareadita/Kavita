@@ -1,46 +1,49 @@
+<ng-container *transloco="let t; read: 'infinite-scroller'">
 
-<div class="fixed-top overlay" *ngIf="showDebugBar()">
+  <div class="fixed-top overlay" *ngIf="showDebugBar()">
     <strong>Captures Scroll Events:</strong> {{!this.isScrolling && this.allImagesLoaded}}
     <strong>Is Scrolling:</strong> {{isScrollingForwards() ? 'Forwards' : 'Backwards'}} {{this.isScrolling}}
     <strong>All Images Loaded:</strong> {{this.allImagesLoaded}}
-    <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}} 
+    <strong>Prefetched</strong> {{minPageLoaded}}-{{maxPageLoaded}}
     <strong>Pages:</strong> {{pageNum}} / {{totalPages - 1}}
     <strong>At Top:</strong> {{atTop}}
     <strong>At Bottom:</strong> {{atBottom}}
     <strong>Total Height:</strong> {{getTotalHeight()}}
     <strong>Total Scroll:</strong> {{getTotalScroll()}}
     <strong>Scroll Top:</strong> {{getScrollTop()}}
-</div>
+  </div>
 
-<div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+  <div *ngIf="atTop" class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
     <div style="height: 200px"></div>
     <div>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="mx-auto text">Previous Chapter</span>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="visually-hidden">Scroll up to move to next chapter</span>
+      <button class="btn btn-icon mx-auto">
+        <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+      </button>
+      <span class="mx-auto text">{{t('continuous-reading-prev-chapter')}}</span>
+      <button class="btn btn-icon mx-auto">
+        <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
+      </button>
+      <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
     </div>
-</div>
-<ng-container *ngFor="let item of webtoonImages | async; let index = index;">
-    <img src="{{item.src}}" style="display: block" 
-    class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}" 
-    *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image" 
-    (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+  </div>
+  <ng-container *ngFor="let item of webtoonImages | async; let index = index;">
+    <img src="{{item.src}}" style="display: block"
+         class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}} {{initFinished ? '' : 'full-opacity'}}"
+         *ngIf="pageNum >= pageNum - bufferPages && pageNum <= pageNum + bufferPages" rel="nofollow" alt="image"
+         (load)="onImageLoad($event)" id="page-{{item.page}}" [attr.page]="item.page" ondragstart="return false;" onselectstart="return false;">
+  </ng-container>
+  <div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
+    <div>
+      <button class="btn btn-icon mx-auto">
+        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+      </button>
+      <span class="mx-auto text">{{t('continuous-reading-next-chapter')}}</span>
+      <button class="btn btn-icon mx-auto">
+        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
+      </button>
+      <span class="visually-hidden">{{t('continuous-reading-next-chapter-alt')}}</span>
+    </div>
+    <div style="height: 200px"></div>
+  </div>
+
 </ng-container>
-<div *ngIf="atBottom" class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
-    <div>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-        </button>
-        <span class="mx-auto text">Next Chapter</span>
-        <button class="btn btn-icon mx-auto">
-            <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-        </button>
-        <span class="visually-hidden">Scroll down to move to next chapter</span>
-    </div>
-    <div style="height: 200px"></div>
-</div>

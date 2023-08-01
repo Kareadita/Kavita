@@ -174,7 +174,7 @@
         "scan": "Scan",
         "site-themes": "Site Themes",
         "set-default": "Set Default",
-        "apply": "Apply",
+        "apply": "{{common.apply}}",
         "applied": "Applied",
         "updated-toastr": "Site default has been updated to {{name}}",
         "scan-queued": "A site theme scan has been queued"
@@ -911,7 +911,7 @@
         "reset-cover-tooltip": "Reset Cover Image",
         "reset": "{{common.reset}}",
         "image-num": "Image {{num}}",
-        "apply": "{{theme-manager.apply}}",
+        "apply": "{{common.apply}}",
         "applied": "{{theme-manager.applied}}"
     },
 
@@ -1244,7 +1244,7 @@
     "library-recommended": {
         "no-data": "Nothing to show here. Add some metadata to your library, read something or rate something. This library may also have recommendations turned off.",
         "more-in-genre": "More In {{genre}}",
-        "discover": "Rediscover",
+        "rediscover": "Rediscover",
         "highly-rated": "Highly Rated",
         "quick-catchups": "Quick Catchups",
         "quick-reads": "Quick Reads",
@@ -1428,6 +1428,13 @@
         "close-reader-alt": "Close Reader"
     },
 
+    "infinite-reader": {
+        "continuous-reading-prev-chapter-alt": "Scroll up to move to previous chapter",
+        "continuous-reading-prev-chapter": "Previous Chapter",
+        "continuous-reading-next-chapter-alt": "Scroll up to move to next chapter",
+        "continuous-reading-next-chapter": "Next Chapter"
+    },
+
     "manga-reader": {
         "back": "Back",
         "save-globally": "Save Globally",
@@ -1463,6 +1470,54 @@
         "no-prev-chapter": "No Previous Chapter",
         "chapter-not-found": "Could not find {{direction}} {{title}}",
         "user-preferences-updated": "User preferences updated"
+    },
+
+    "metadata-filter": {
+        "filter-title": "Filter",
+        "format-label": "Format",
+        "format-tooltip": "This is library agnostic",
+        "libraries-label": "Libraries",
+        "collections-label": "Collections",
+        "genres-label": "Genres",
+        "tags-label": "Tags",
+        "cover-artist-label": "Cover Artist",
+        "writer-label": "Writer",
+        "publisher-label": "Publisher",
+        "penciller-label": "Penciller",
+        "letterer-label": "Letterer",
+        "inker-label": "Inker",
+        "editor-label": "Editor",
+        "colorist-label": "Colorist",
+        "character-label": "Character",
+        "translator-label": "Translator",
+        "read-progress-label": "Read Progress",
+        "unread": "Unread",
+        "read": "Read",
+        "in-progress": "In Progress",
+        "rating-label": "Rating",
+        "age-rating-label": "Age Rating",
+        "language-label": "Language",
+        "publication-status-label": "Publication Status",
+        "series-name-label": "Series Name",
+        "series-name-tooltip": "Series name will filter against Name, Sort Name, or Localized Name",
+        "release-label": "Release",
+        "min": "Min",
+        "max": "Max",
+        "sort-by-label": "Sort By",
+        "ascending-alt": "Ascending",
+        "descending-alt": "Descending",
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}"
+
+    },
+
+    "sort-field-pipe": {
+        "sort-name": "Sort Name",
+        "created": "Created",
+        "last-modified": "Last Modified",
+        "last-chapter-added": "Item Added",
+        "time-to-read": "Time to Read",
+        "release-year": "Release Year"
     },
 
 
@@ -1543,6 +1598,7 @@
         "save": "Save",
         "reset": "Reset",
         "add": "Add",
+        "apply": "Apply",
         "delete": "Delete",
         "edit": "Edit",
         "help": "Help",
