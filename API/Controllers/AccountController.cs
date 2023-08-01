@@ -809,7 +809,7 @@ public class AccountController : BaseApiController
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
-            return Unauthorized("You are not permitted to this operation.");
+            return Unauthorized("This user is not permitted to this operation");
 
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
             return BadRequest("You do not have an email on account or it has not been confirmed");

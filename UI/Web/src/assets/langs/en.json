@@ -1447,14 +1447,13 @@
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "swipe-enabled-label": "Swipe Enabled",
         "enable-comic-book-label": "Emulate comic book",
-        "brightness-label": "Brightness"
+        "brightness-label": "Brightness",
 
-
-
-
-
-
-
+        "first-time-reading-manga": "Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.",
+        "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
+        "no-next-chapter": "No Next Chapter",
+        "no-prev-chapter": "No Previous Chapter",
+        "chapter-not-found": "Could not find {{direction}} {{title}}"
 
     },
 
@@ -1496,6 +1495,9 @@
         "email-service-reset": "Email Service Reset",
         "email-service-reachable": "Email Service was reachable",
         "email-service-unresponsive": "Email Service Url did not respond."
+
+
+
     },
 
     "actionable": {

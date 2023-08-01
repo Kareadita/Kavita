@@ -67,7 +67,7 @@ import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
 import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
 import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 const PREFETCH_PAGES = 10;
@@ -382,6 +382,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
+  private readonly translocoService = inject(TranslocoService);
+
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
@@ -589,7 +591,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
         if (!progress) {
           this.toggleMenu();
-          this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+          this.toastr.info(this.translocoService.translate('manga-reader.first-time-reading-manga'));
         }
       });
     });
@@ -721,7 +723,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
     this.generalSettingsForm.get('layoutMode')?.disable();
-    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
+    this.toastr.info(this.translocoService.translate('manga-reader.layout-mode-switched'));
     this.cdRef.markForCheck();
   }
 
@@ -1216,7 +1218,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Next Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1234,7 +1236,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPrevChapter() {
     if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Previous Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-prev-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1273,7 +1275,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
+      this.toastr.warning(this.translocoService.translate('manga-reader.chapter-not-found',
+        {direction: direction.toLowerCase(), title: this.utilityService.formatChapterName(this.libraryType).toLowerCase()}));
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;

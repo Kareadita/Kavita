@@ -12,7 +12,7 @@
 
       <ng-container *ngIf="isViewMode">
         <div class="container-fluid row">
-                <span class="col-12">{{user?.ageRestriction?.ageRating| ageRating | async}}
+                <span class="col-12">{{user?.ageRestriction?.ageRating | ageRating }}
                   <ng-container *ngIf="user?.ageRestriction?.ageRating !== AgeRating.NotApplicable && user?.ageRestriction?.includeUnknowns">
                         <span class="ms-1 me-1">+</span> {{t('unknowns')}}
                     </ng-container>
