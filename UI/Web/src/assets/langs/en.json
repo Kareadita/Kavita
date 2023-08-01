@@ -1465,7 +1465,6 @@
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
-        "chapter-not-found": "Could not find {{direction}} {{title}}",
         "user-preferences-updated": "User preferences updated"
     },
 
@@ -1654,8 +1653,7 @@
         "people-count": "{{num}} People",
         "tags": "Tags",
         "people": "People",
-        "genres": "Genres",
-
+        "genres": "Genres"
     },
 
     "errors": {
@@ -1676,8 +1674,11 @@
         "error-code": "{{num}} Error",
         "download": "There was an issue downloading this file or you do not have permissions",
         "not-found": "That url does not exist",
-        "generic": "Something unexpected went wrong"
-
+        "generic": "Something unexpected went wrong",
+        "rejected-cover-upload": "The image could not be fetched due to server refusing request. Please download and upload from file instead.",
+        "invalid-confirmation-url": "Invalid confirmation url",
+        "invalid-confirmation-email": "Invalid confirmation email",
+        "invalid-password-reset-url": "Invalid reset password url",
     },
 
     "toasts": {
@@ -1699,6 +1700,7 @@
         "no-series-collection-warning": "Warning! No series are selected, saving will delete the Collection. Are you sure you want to continue?",
         "collection-updated": "Collection updated",
         "reading-list-deleted": "Reading list deleted",
+        "reading-list-updated": "Reading list updated",
         "confirm-delete-reading-list": "'Are you sure you want to delete the reading list? This cannot be undone.'",
         "item-removed": "Item removed",
         "nothing-to-remove": "Nothing to remove",
@@ -1711,7 +1713,42 @@
         "incognito-off": "Incognito mode is off. Progress will now start being tracked.",
         "email-service-reset": "Email Service Reset",
         "email-service-reachable": "Email Service was reachable",
-        "email-service-unresponsive": "Email Service Url did not respond."
+        "email-service-unresponsive": "Email Service Url did not respond.",
+        "refresh-covers-queued": "Refresh covers queued for {{name}}",
+        "library-file-analysis-queued": "Library file analysis queued for {{name}}",
+        "entity-read": "{{name}} is now read",
+        "entity-unread": "{{name}} is now unread",
+        "mark-read": "Marked as Read",
+        "mark-unread": "Marked as Unread",
+        "series-removed-want-to-read": "Series removed from Want to Read list",
+        "series-deleted": "Series deleted",
+        "file-send-to": "File(s) emailed to {{name}}",
+        "theme-missing": "The active theme no longer exists. Please refresh the page.",
+        "email-sent": "Email sent to {{email}}",
+        "k+-license-saved": "License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.",
+        "k+-unlocked": "Kavita+ unlocked!",
+        "k+-error": "There was an error when activating your license. Please try again.",
+        "k+-delete-key": "This will only delete Kavita's license key and allow a buy link to show. This will not cancel your subscription! Use this only if directed by support!",
+        "library-deleted": "Library {{name}} has been removed",
+        "copied-to-clipboard": "Copied to clipboard",
+        "book-settings-info": "You can modify book settings, save those settings for all books, and view table of contents from the drawer."
+        "no-next-chapter": "Could not find next {{entity}}",
+        "no-prev-chapter": "Could not find previous {{entity}}",
+        "load-next-chapter": "Next {{entity}} loaded",
+        "load-prev-chapter": "Previous {{entity}} loaded",
+        "account-registration-complete": "Account registration complete",
+        "account-migration-complete": "Account migration complete",
+        "password-reset": "Password reset",
+        "password-updated": "Password has been updated",
+        "forced-scan-queued": "A forced scan has been started for {{name}}",
+        "library-created": "Library created successfully. A scan has been started.",
+        "anilist-token-updated": "AniList Token has been updated",
+        "age-restriction-updated": "Age Restriction has been updated",
+        "email-sent-to-no-existing": "An email has been sent to {{email}} for confirmation.",
+        "email-sent-to": "An email has been sent to your old email address for confirmation.",
+        "change-email-private": "The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs",
+        "device-updated": "Device updated",
+        "device-created": "Device created"
     },
 
     "actionable": {

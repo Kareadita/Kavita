@@ -6,7 +6,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This component just validates the email via API then redirects to login
@@ -36,7 +36,7 @@ export class ConfirmEmailChangeComponent implements OnInit {
 
       if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation url');
+        this.toastr.error(translate('errors.invalid-confirmation-url'));
         this.router.navigateByUrl('login');
         return;
       }

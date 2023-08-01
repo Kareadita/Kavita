@@ -28,7 +28,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
 
 enum TabID {
@@ -164,7 +164,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   forceScan() {
-    this.libraryService.scan(this.library.id, true).subscribe(() => this.toastr.info('A forced scan has been started for ' + this.library.name));
+    this.libraryService.scan(this.library.id, true)
+      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library.name})));
   }
 
   async save() {
@@ -192,7 +193,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
-        this.toastr.success('Library created successfully. A scan has been started.');
+        this.toastr.success(translate('toasts.library-created'));
         this.close(true);
       });
     }

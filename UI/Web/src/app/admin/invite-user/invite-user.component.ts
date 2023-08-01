@@ -12,7 +12,7 @@ import { RestrictionSelectorComponent } from '../../user-settings/restriction-se
 import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
 import { RoleSelectorComponent } from '../role-selector/role-selector.component';
 import { NgIf } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-invite-user',
@@ -62,7 +62,7 @@ export class InviteUserComponent implements OnInit {
       this.emailLink = data.emailLink;
       this.isSending = false;
       if (data.emailSent) {
-        this.toastr.info('Email sent to ' + email);
+        this.toastr.info(translate('toasts.email-sent', {email: email}));
         this.modal.close(true);
       }
     }, err => {

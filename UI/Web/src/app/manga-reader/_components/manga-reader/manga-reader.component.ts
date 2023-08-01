@@ -67,7 +67,7 @@ import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
 import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
 import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 const PREFETCH_PAGES = 10;
@@ -1272,11 +1272,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
-      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.info(msg, '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning(this.translocoService.translate('manga-reader.chapter-not-found',
-        {direction: direction.toLowerCase(), title: this.utilityService.formatChapterName(this.libraryType).toLowerCase()}));
+      const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter',
+        {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.warning(msg);
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;

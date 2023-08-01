@@ -79,14 +79,6 @@ export class UserLoginComponent implements OnInit {
     });
   }
 
-  onAdminCreated(user: User | null) {
-    if (user != null) {
-      this.firstTimeFlow = false;
-      this.cdRef.markForCheck();
-    } else {
-      this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
-    }
-  }
 
   login() {
     const model = this.loginForm.getRawValue();

@@ -8,7 +8,7 @@ import { MemberService } from 'src/app/_services/member.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This is exclusively used to register the first user on the server and nothing else
@@ -43,7 +43,7 @@ export class RegisterComponent {
   submit() {
     const model = this.registerForm.getRawValue();
     this.accountService.register(model).subscribe((user) => {
-      this.toastr.success('Account registration complete');
+      this.toastr.success(translate('toasts.account-registration-complete'));
       this.router.navigateByUrl('login');
     });
   }

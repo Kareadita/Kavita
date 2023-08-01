@@ -7,7 +7,7 @@ import { SettingsService } from '../settings.service';
 import {ServerInfoSlim} from '../_models/server-info';
 import { ServerSettings } from '../_models/server-settings';
 import { NgIf } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-system',
@@ -59,7 +59,7 @@ export class ManageSystemComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });

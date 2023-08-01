@@ -14,7 +14,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {AccountService} from "../../_services/account.service";
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgOptimizedImage } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-anilist-key',
@@ -66,7 +66,7 @@ export class AnilistKeyComponent implements OnInit {
 
   saveForm() {
     this.scrobblingService.updateAniListToken(this.formGroup.get('aniListToken')!.value).subscribe(() => {
-      this.toastr.success('AniList Token has been updated');
+      this.toastr.success(translate('toasts.anilist-token-updated'));
       this.token = this.formGroup.get('aniListToken')!.value;
       this.resetForm();
       this.isViewMode = true;

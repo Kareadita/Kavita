@@ -15,7 +15,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-password',
@@ -83,7 +83,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
     this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
-      this.toastr.success('Password has been updated');
+      this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
       this.isViewMode = true;
     }, err => {

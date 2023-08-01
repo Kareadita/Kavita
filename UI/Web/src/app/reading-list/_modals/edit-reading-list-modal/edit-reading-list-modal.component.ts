@@ -21,7 +21,7 @@ import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 enum TabID {
   General = 'general-tab',
@@ -121,7 +121,7 @@ export class EditReadingListModalComponent implements OnInit {
       this.readingList.coverImageLocked = this.coverImageLocked;
       this.readingList.promoted = model.promoted;
       this.ngModal.close(this.readingList);
-      this.toastr.success('Reading List updated');
+      this.toastr.success(translate('toasts.reading-list-updated'));
     });
   }
 

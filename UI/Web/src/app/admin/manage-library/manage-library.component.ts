@@ -22,7 +22,7 @@ import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
 import { LibraryTypePipe } from '../../pipe/library-type.pipe';
 import { RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 
 @Component({
@@ -124,14 +124,14 @@ export class ManageLibraryComponent implements OnInit {
         this.deletionInProgress = false;
         this.cdRef.markForCheck();
         this.getLibraries();
-        this.toastr.success('Library ' + library.name + ' has been removed');
+        this.toastr.success(translate('toasts.library-deleted', {name: library.name}));
       });
     }
   }
 
   scanLibrary(library: Library) {
     this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.info('A scan has been queued for ' + library.name);
+      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
     });
   }
 }

@@ -17,7 +17,7 @@ import { AgeRatingPipe } from '../../pipe/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-age-restriction',
@@ -69,7 +69,7 @@ export class ChangeAgeRestrictionComponent implements OnInit {
     if (this.user === undefined) { return; }
 
     this.accountService.updateAgeRestriction(this.selectedRestriction.ageRating, this.selectedRestriction.includeUnknowns).subscribe(() => {
-      this.toastr.success('Age Restriction has been updated');
+      this.toastr.success(translate('toasts.age-restriction-updated'));
       this.originalRestriction = this.selectedRestriction;
       if (this.user) {
         this.user.ageRestriction.ageRating = this.selectedRestriction.ageRating;

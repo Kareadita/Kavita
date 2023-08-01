@@ -19,7 +19,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { DevicePlatformPipe } from '../_pipes/device-platform.pipe';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import {NgIf, NgFor, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-edit-device',
@@ -75,7 +75,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
     if (this.device !== undefined) {
       this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
         this.settingsForm.reset();
-        this.toastr.success('Device updated');
+        this.toastr.success(translate('toasts.device-updated'));
         this.cdRef.markForCheck();
         this.deviceUpdated.emit();
       })
@@ -84,7 +84,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
 
     this.deviceService.createDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
       this.settingsForm.reset();
-      this.toastr.success('Device created');
+      this.toastr.success(translate('toasts.device-created'));
       this.cdRef.markForCheck();
       this.deviceAdded.emit();
     });

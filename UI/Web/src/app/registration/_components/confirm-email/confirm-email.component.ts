@@ -8,7 +8,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-confirm-email',
@@ -46,7 +46,7 @@ export class ConfirmEmailComponent {
       this.cdRef.markForCheck();
       if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation url');
+        this.toastr.error(translate('errors.invalid-confirmation-url'));
         this.router.navigateByUrl('login');
         return;
       }
@@ -63,7 +63,7 @@ export class ConfirmEmailComponent {
     const model = this.registerForm.getRawValue();
     model.token = this.token;
     this.accountService.confirmEmail(model).subscribe((user) => {
-      this.toastr.success('Account registration complete');
+      this.toastr.success(translate('toasts.account-registration-complete'));
       this.router.navigateByUrl('login');
     }, err => {
       console.error('Error from Confirming Email: ', err);
