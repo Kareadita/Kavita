@@ -82,19 +82,21 @@ public class AccountController : BaseApiController
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
 
         if (resetPasswordDto.UserName == User.GetUsername() && !(User.IsInRole(PolicyConstants.ChangePasswordRole) || isAdmin))
-            return Unauthorized("You are not permitted to this operation.");
+            return Unauthorized("errors.permission-denied");
 
         if (resetPasswordDto.UserName != User.GetUsername() && !isAdmin)
-            return Unauthorized("You are not permitted to this operation.");
+            return Unauthorized("errors.permission-denied");
 
         if (string.IsNullOrEmpty(resetPasswordDto.OldPassword) && !isAdmin)
-            return BadRequest(new ApiException(400, "You must enter your existing password to change your account unless you're an admin"));
+            return BadRequest(
+                new ApiException(400,
+                    "errors.password-required"));
 
         // If you're an admin and the username isn't yours, you don't need to validate the password
         var isResettingOtherUser = (resetPasswordDto.UserName != User.GetUsername() && isAdmin);
         if (!isResettingOtherUser && !await _userManager.CheckPasswordAsync(user, resetPasswordDto.OldPassword))
         {
-            return BadRequest("Invalid Password");
+            return BadRequest("errors.invalid-password");
         }
 
         var errors = await _accountService.ChangeUserPassword(user, resetPasswordDto.Password);
@@ -117,7 +119,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<UserDto>> RegisterFirstUser(RegisterDto registerDto)
     {
         var admins = await _userManager.GetUsersInRoleAsync("Admin");
-        if (admins.Count > 0) return BadRequest("Not allowed");
+        if (admins.Count > 0) return BadRequest("errors.denied");
 
         try
         {
@@ -135,7 +137,7 @@ public class AccountController : BaseApiController
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            if (string.IsNullOrEmpty(token)) return BadRequest("There was an issue generating a confirmation token.");
+            if (string.IsNullOrEmpty(token)) return BadRequest("errors.confirm-token-gen");
             if (!await ConfirmEmailToken(token, user)) return BadRequest($"There was an issue validating your email: {token}");
 
 
@@ -156,14 +158,14 @@ public class AccountController : BaseApiController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Something went wrong when registering user");
+            _logger.LogError(ex, "errors.register-user");
             // We need to manually delete the User as we've already committed
             var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(registerDto.Username);
             _unitOfWork.UserRepository.Delete(user);
             await _unitOfWork.CommitAsync();
         }
 
-        return BadRequest("Something went wrong when registering user");
+        return BadRequest("errors.register-user");
     }
 
 
@@ -180,9 +182,9 @@ public class AccountController : BaseApiController
             .Include(u => u.UserPreferences)
             .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
 
-        if (user == null) return Unauthorized("Your credentials are not correct");
+        if (user == null) return Unauthorized("errors.bad-credentials");
         var roles = await _userManager.GetRolesAsync(user);
-        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized("Your account is disabled. Contact the server admin.");
+        if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized("errors.disabled-account");
 
         var result = await _signInManager
             .CheckPasswordSignInAsync(user, loginDto.Password, true);
@@ -190,12 +192,12 @@ public class AccountController : BaseApiController
         if (result.IsLockedOut)
         {
             await _userManager.UpdateSecurityStampAsync(user);
-            return Unauthorized("You've been locked out from too many authorization attempts. Please wait 10 minutes.");
+            return Unauthorized("errors.locked-out");
         }
 
         if (!result.Succeeded)
         {
-            return Unauthorized(result.IsNotAllowed ? "You must confirm your email first" : "Your credentials are not correct");
+            return Unauthorized(result.IsNotAllowed ? "errors.confirm-email" : "errors.bad-credentials");
         }
 
         // Update LastActive on account

@@ -1460,7 +1460,24 @@
 
     "errors": {
         "series-doesnt-exist": "This series no longer exists",
-        "collection-invalid-access": "You don't have access to any libraries this tag belongs to or this collection is invalid"
+        "collection-invalid-access": "You don't have access to any libraries this tag belongs to or this collection is invalid",
+        "invalid-password": "Invalid Password",
+        "permission-denied": "You are not permitted to this operation",
+        "password-required": "You must enter your existing password to change your account unless you're an admin",
+        "denied": "Not allowed",
+        "confirm-token-gen": "There was an issue generating a confirmation token",
+        "register-user": "Something went wrong when registering user",
+        "bad-credentials": "Your credentials are not correct",
+        "disabled-account": "Your account is disabled. Contact the server admin.",
+        "locked-out": "You've been locked out from too many authorization attempts. Please wait 10 minutes.",
+        "confirm-email": "You must confirm your email first",
+        "unknown-crit": "There was an unknown critical error",
+        "user-not-auth": "User is not authenticated",
+        "error-code": "{{num}} Error",
+        "download": "There was an issue downloading this file or you do not have permissions",
+        "not-found": "That url does not exist",
+        "generic": "Something unexpected went wrong"
+
     },
 
     "toasts": {
