@@ -8547,7 +8547,7 @@
           "Server"
         ],
         "summary": "Returns non-sensitive information about the current system",
-        "description": "This is just for the UI and is extremly lightweight",
+        "description": "This is just for the UI and is extremely lightweight",
         "responses": {
           "200": {
             "description": "Success",

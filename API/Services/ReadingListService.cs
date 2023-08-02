@@ -124,13 +124,13 @@ public class ReadingListService : IReadingListService
         var hasExisting = userWithReadingList.ReadingLists.Any(l => l.Title.Equals(title));
         if (hasExisting)
         {
-            throw new KavitaException("A list of this name already exists");
+            throw new KavitaException("reading-list-name-exists");
         }
 
         var readingList = new ReadingListBuilder(title).Build();
         userWithReadingList.ReadingLists.Add(readingList);
 
-        if (!_unitOfWork.HasChanges()) throw new KavitaException("There was a problem creating list");
+        if (!_unitOfWork.HasChanges()) throw new KavitaException("generic-reading-list-create");
         await _unitOfWork.CommitAsync();
         return readingList;
     }
@@ -144,10 +144,10 @@ public class ReadingListService : IReadingListService
     public async Task UpdateReadingList(ReadingList readingList, UpdateReadingListDto dto)
     {
         dto.Title = dto.Title.Trim();
-        if (string.IsNullOrEmpty(dto.Title)) throw new KavitaException("Title must be set");
+        if (string.IsNullOrEmpty(dto.Title)) throw new KavitaException("reading-list-title-required");
 
         if (!dto.Title.Equals(readingList.Title) && await _unitOfWork.ReadingListRepository.ReadingListExists(dto.Title))
-            throw new KavitaException("Reading list already exists");
+            throw new KavitaException("reading-list-name-exists");
 
         readingList.Summary = dto.Summary;
         readingList.Title = dto.Title.Trim();

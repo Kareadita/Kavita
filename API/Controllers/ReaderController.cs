@@ -16,6 +16,7 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -313,7 +314,14 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
-        await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+        try
+        {
+            await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
@@ -376,7 +384,14 @@ public class ReaderController : BaseApiController
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         if (user == null) return Unauthorized();
-        await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+        try
+        {
+            await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
             MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));

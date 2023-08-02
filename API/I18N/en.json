@@ -95,6 +95,7 @@
     "reading-list-deleted": "Reading List was deleted",
     "generic-reading-list-delete": "There was an issue deleting the reading list",
     "generic-reading-list-update": "There was an issue updating the reading list",
+    "generic-reading-list-create": "There was an issue creating the reading list",
     "reading-list-doesnt-exist": "Reading list does not exist",
 
     "series-restricted": "User does not have access to this Series",
@@ -151,6 +152,25 @@
     "search": "Search",
     "search-description": "Search for Series, Collections, or Reading Lists",
     "favicon-doesnt-exist": "Favicon does not exist",
+
+    "not-authenticated": "User is not authenticated",
+    "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",
+    "anilist-cred-expired": "AniList Credentials have expired or not set",
+    "scrobble-bad-payload": "Bad payload from Scrobble Provider",
+    "theme-doesnt-exist": "Theme file missing or invalid",
+    "bad-copy-files-for-download": "Unable to copy files to temp directory archive download.",
+    "generic-create-temp-archive": "There was an issue creating temp archive",
+    "epub-malformed": "The file is malformed! Cannot read.",
+    "epub-html-missing": "Could not find the appropriate html for that page",
+    "collection-tag-title-required": "Collection Title cannot be empty",
+    "reading-list-title-required": "Reading List Title cannot be empty",
+    "collection-tag-duplicate": "A collection with this name already exists",
+    "device-duplicate": "A device with this name already exists",
+    "device-not-created": "This device doesn't exist yet. Please create first",
+    "send-to-permission": "Cannot Send non Epub or Pdf to devices as not supported on Kindle",
+    "progress-must-exist": "Progress must exist on user",
+    "reading-list-name-exists": "A reading list of this name already exists",
+
 
     "volume-num": "Volume {0}"
 

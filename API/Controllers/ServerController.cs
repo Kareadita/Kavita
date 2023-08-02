@@ -162,7 +162,7 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("logs")]
-    public ActionResult GetLogs()
+    public async Task<ActionResult> GetLogs()
     {
         var files = _backupService.GetLogFiles();
         try
@@ -173,7 +173,7 @@ public class ServerController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
     }
 

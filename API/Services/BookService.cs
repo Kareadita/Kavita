@@ -1121,7 +1121,7 @@ public class BookService : IBookService
                     if (doc.ParseErrors.Any())
                     {
                         LogBookErrors(book, contentFileRef, doc);
-                        throw new KavitaException("The file is malformed! Cannot read.");
+                        throw new KavitaException("epub-malformed");
                     }
                     _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
                     doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
@@ -1137,7 +1137,7 @@ public class BookService : IBookService
                 "There was an issue reading one of the pages for", ex);
         }
 
-        throw new KavitaException("Could not find the appropriate html for that page");
+        throw new KavitaException("epub-html-missing");
     }
 
     private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,

@@ -39,9 +39,19 @@ public class DeviceController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
-        var device = await _deviceService.Create(dto, user);
+        try
+        {
+            var device = await _deviceService.Create(dto, user);
+            if (device == null)
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-create"));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
 
-        if (device == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-device-create"));
+
+
 
         return Ok();
     }
@@ -101,7 +111,7 @@ public class DeviceController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
         finally
         {
@@ -141,7 +151,7 @@ public class DeviceController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
         finally
         {
