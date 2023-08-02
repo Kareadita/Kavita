@@ -21,11 +21,14 @@ public class ReadingListController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IReadingListService _readingListService;
+    private readonly ILocalizationService _localizationService;
 
-    public ReadingListController(IUnitOfWork unitOfWork, IReadingListService readingListService)
+    public ReadingListController(IUnitOfWork unitOfWork, IReadingListService readingListService,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _readingListService = readingListService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
