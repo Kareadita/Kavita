@@ -1,5 +1,16 @@
 {
     "errors": {
-
+        "confirm-email": "You must confirm your email first",
+        "bad-credentials": "Your credentials are not correct",
+        "locked-out": "You've been locked out from too many authorization attempts. Please wait 10 minutes.",
+        "disabled-account": "Your account is disabled. Contact the server admin.",
+        "register-user": "Something went wrong when registering user",
+        "validate-email": "There was an issue validating your email: {{email}}",
+        "confirm-token-gen": "There was an issue generating a confirmation token",
+        "denied": "Not allowed",
+        "permission-denied": "You are not permitted to this operation",
+        "password-required": "You must enter your existing password to change your account unless you're an admin",
+        "invalid-password": "Invalid Password",
+        "invalid-token": "Invalid token"
     }
 }
