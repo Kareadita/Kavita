@@ -88,6 +88,69 @@
     "valid-number": "Must be valid page number",
     "duplicate-bookmark": "Duplicate bookmark entry already exists",
 
+    "reading-list-permission": "You do not have permissions on this reading list or the list doesn't exist",
+    "reading-list-position": "Couldn't update position",
+    "reading-list-updated": "Updated",
+    "reading-list-item-delete": "Couldn't delete item(s)",
+    "reading-list-deleted": "Reading List was deleted",
+    "generic-reading-list-delete": "There was an issue deleting the reading list",
+    "generic-reading-list-update": "There was an issue updating the reading list",
+    "reading-list-doesnt-exist": "Reading list does not exist",
+
+    "series-restricted": "User does not have access to this Series",
+
+    "generic-scrobble-hold": "An error occurred while adding the hold",
+
+    "libraries-restricted": "User does not have access to any libraries",
+
+    "no-series": "Could not get series for Library",
+    "no-series-collection": "Could not get series for Collection",
+    "generic-series-delete": "There was an issue deleting the series",
+    "generic-series-update": "There was an error with updating the series",
+    "series-updated": "Successfully updated",
+    "update-metadata-fail": "Could not update metadata",
+    "age-restriction-not-applicable": "No Restriction",
+    "generic-relationship": "There was an issue updating relationships",
+
+    "job-already-running": "Job already running",
+    "encode-as-warning": "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.",
+
+    "ip-address-invalid": "IP Address '{0}' is invalid",
+    "bookmark-dir-permissions": "Bookmark Directory does not have correct permissions for Kavita to use",
+    "total-backups": "Total Backups must be between 1 and 30",
+    "total-logs": "Total Logs must be between 1 and 30",
+
+    "stats-permission-denied": "You are not authorized to view another user's statistics",
+
+    "url-not-valid": "Url does not return a valid image or requires authorization",
+    "url-required": "You must pass a url to use",
+    "generic-cover-series-save": "Unable to save cover image to Series",
+    "generic-cover-collection-save": "Unable to save cover image to Collection",
+    "generic-cover-reading-list-save": "Unable to save cover image to Reading List",
+    "generic-cover-chapter-save": "Unable to save cover image to Chapter",
+    "generic-cover-library-save": "Unable to save cover image to Library",
+    "access-denied": "You do not have access",
+    "reset-chapter-lock": "Unable to resetting cover lock for Chapter",
+
+    "generic-user-delete": "Could not delete the user",
+    "generic-user-pref": "There was an issue saving preferences",
+
+    "opds-disabled": "OPDS is not enabled on this server",
+    "on-deck": "On Deck",
+    "browse-on-deck": "Browse On Deck",
+    "recently-added": "Recently Added",
+    "browse-recently-added": "Browse Recently Added",
+    "reading-lists": "Reading Lists",
+    "browse-reading-lists": "Browse by Reading Lists",
+    "libraries": "All Libraries",
+    "browse-libraries": "Browse by Libraries",
+    "collections": "All Collections",
+    "browse-collections": "Browse by Collections",
+    "reading-list-restricted": "Reading list does not exist or you don't have access",
+    "query-required": "You must pass a query parameter",
+    "search": "Search",
+    "search-description": "Search for Series, Collections, or Reading Lists",
+    "favicon-doesnt-exist": "Favicon does not exist",
 
     "volume-num": "Volume {0}"
 

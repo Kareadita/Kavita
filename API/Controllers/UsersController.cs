@@ -21,7 +21,8 @@ public class UsersController : BaseApiController
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
 
-    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub, ILocalizationService localizationService)
+    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -41,7 +42,7 @@ public class UsersController : BaseApiController
 
         if (await _unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest("Could not delete the user.");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-delete"));
     }
 
     /// <summary>
@@ -69,7 +70,7 @@ public class UsersController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-        if (library == null) return BadRequest("Library does not exist");
+        if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
         return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
     }
 
@@ -123,7 +124,7 @@ public class UsersController : BaseApiController
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving preferences.");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-pref"));
 
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
         return Ok(preferencesDto);

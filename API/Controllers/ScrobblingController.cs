@@ -10,6 +10,7 @@ using API.Entities.Scrobble;
 using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
+using API.Services;
 using API.Services.Plus;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
@@ -26,12 +27,15 @@ public class ScrobblingController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILogger<ScrobblingController> _logger;
+    private readonly ILocalizationService _localizationService;
 
-    public ScrobblingController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService, ILogger<ScrobblingController> logger)
+    public ScrobblingController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService,
+        ILogger<ScrobblingController> logger, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _scrobblingService = scrobblingService;
         _logger = logger;
+        _localizationService = localizationService;
     }
 
     [HttpGet("anilist-token")]
@@ -153,7 +157,8 @@ public class ScrobblingController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
-        if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId)) return Ok("Nothing to do");
+        if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
+            return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         var seriesHold = new ScrobbleHoldBuilder().WithSeriesId(seriesId).Build();
         user.ScrobbleHolds.Add(seriesHold);
@@ -181,7 +186,8 @@ public class ScrobblingController : BaseApiController
         {
             // Handle other exceptions or log the error
             _logger.LogError(ex, "An error occurred while adding the hold");
-            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the hold");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
         }
     }
 

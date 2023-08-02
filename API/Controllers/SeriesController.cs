@@ -30,6 +30,7 @@ public class SeriesController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ISeriesService _seriesService;
     private readonly ILicenseService _licenseService;
+    private readonly ILocalizationService _localizationService;
     private readonly IEasyCachingProvider _ratingCacheProvider;
     private readonly IEasyCachingProvider _reviewCacheProvider;
     private readonly IEasyCachingProvider _recommendationCacheProvider;
@@ -37,13 +38,14 @@ public class SeriesController : BaseApiController
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
         ISeriesService seriesService, ILicenseService licenseService,
-        IEasyCachingProviderFactory cachingProviderFactory)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _seriesService = seriesService;
         _licenseService = licenseService;
+        _localizationService = localizationService;
 
         _ratingCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
         _reviewCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
@@ -58,7 +60,7 @@ public class SeriesController : BaseApiController
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest("Could not get series for library");
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
@@ -101,7 +103,7 @@ public class SeriesController : BaseApiController
 
         if (await _seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok();
 
-        return BadRequest("There was an issue deleting the series requested");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-delete"));
     }
 
     /// <summary>
@@ -149,7 +151,8 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult> UpdateSeriesRating(UpdateSeriesRatingDto updateSeriesRatingDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Ratings);
-        if (!await _seriesService.UpdateRating(user!, updateSeriesRatingDto)) return BadRequest("There was a critical error.");
+        if (!await _seriesService.UpdateRating(user!, updateSeriesRatingDto))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
         return Ok();
     }
 
@@ -162,8 +165,8 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
-
-        if (series == null) return BadRequest("Series does not exist");
+        if (series == null)
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
 
         series.NormalizedName = series.Name.ToNormalized();
         if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
@@ -199,7 +202,7 @@ public class SeriesController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("There was an error with updating the series");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-series-update"));
     }
 
     /// <summary>
@@ -218,7 +221,7 @@ public class SeriesController : BaseApiController
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest("Could not get series");
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
@@ -254,7 +257,7 @@ public class SeriesController : BaseApiController
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest("Could not get series");
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
@@ -370,10 +373,10 @@ public class SeriesController : BaseApiController
                 }
             }
 
-            return Ok("Successfully updated");
+            return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
         }
 
-        return BadRequest("Could not update metadata");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
     }
 
     /// <summary>
@@ -390,7 +393,7 @@ public class SeriesController : BaseApiController
             await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
-        if (series == null) return BadRequest("Could not get series for collection");
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series-collection"));
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
@@ -407,7 +410,7 @@ public class SeriesController : BaseApiController
     [HttpPost("series-by-ids")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
     {
-        if (dto.SeriesIds == null) return BadRequest("Must pass seriesIds");
+        if (dto.SeriesIds == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
     }
@@ -420,10 +423,11 @@ public class SeriesController : BaseApiController
     /// <remarks>This is cached for an hour</remarks>
     [ResponseCache(CacheProfileName = "Month", VaryByQueryKeys = new [] {"ageRating"})]
     [HttpGet("age-rating")]
-    public ActionResult<string> GetAgeRating(int ageRating)
+    public async Task<ActionResult<string>> GetAgeRating(int ageRating)
     {
         var val = (AgeRating) ageRating;
-        if (val == AgeRating.NotApplicable) return "No Restriction";
+        if (val == AgeRating.NotApplicable)
+            return await _localizationService.Translate(User.GetUserId(), "age-restriction-not-applicable");
 
         return Ok(val.ToDescription());
     }
@@ -485,7 +489,7 @@ public class SeriesController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("There was an issue updating relationships");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-relationship"));
     }
 
 
