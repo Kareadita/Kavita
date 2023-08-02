@@ -30,6 +30,7 @@ public interface ISeriesService
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
+    Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
 }
 
 public class SeriesService : ISeriesService
@@ -39,15 +40,17 @@ public class SeriesService : ISeriesService
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILocalizationService _localizationService;
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
         _scrobblingService = scrobblingService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -393,7 +396,6 @@ public class SeriesService : ISeriesService
         }
 
 
-
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
             .OrderBy(v => Tasks.Scanner.Parser.Parser.MinNumberFromRange(v.Name))
@@ -433,7 +435,7 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = FormatChapterTitle(chapter, libraryType);
+            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
             if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
@@ -510,7 +512,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    private static string FormatChapterTitle(bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
+    private async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
     {
         if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
 
@@ -522,24 +524,24 @@ public class SeriesService : ISeriesService
         var hashSpot = withHash ? "#" : string.Empty;
         return libraryType switch
         {
-            LibraryType.Book => $"Book {chapterTitle}",
-            LibraryType.Comic => $"Issue {hashSpot}{chapterTitle}",
-            LibraryType.Manga => $"Chapter {chapterTitle}",
-            _ => "Chapter "
+            LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
+            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
+            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
     }
 
-    public static string FormatChapterTitle(ChapterDto chapter, LibraryType libraryType, bool withHash = true)
+    public async Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true)
     {
-        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
-    public static string FormatChapterTitle(Chapter chapter, LibraryType libraryType, bool withHash = true)
+    public async Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true)
     {
-        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
-    public static string FormatChapterName(LibraryType libraryType, bool withHash = false)
+    public static string FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
     {
         return libraryType switch
         {

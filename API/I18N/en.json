@@ -175,7 +175,10 @@
 
 
 
-    "volume-num": "Volume {0}"
+    "volume-num": "Volume {0}",
+    "book-num": "Book {0}",
+    "issue-num": "Issue {0}{1}",
+    "chapter-num": "Chapter {0}"
 
 
 
