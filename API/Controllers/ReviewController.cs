@@ -65,7 +65,6 @@ public class ReviewController : BaseApiController
 
         var cacheKey = CacheKey + seriesId;
         IEnumerable<UserReviewDto> externalReviews;
-        var setCache = false;
 
         var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
         if (result.HasValue)
@@ -74,34 +73,14 @@ public class ReviewController : BaseApiController
         }
         else
         {
-            externalReviews = await _reviewService.GetReviewsForSeries(userId, seriesId);
-            setCache = true;
-        }
-        // if (_cache.TryGetValue(cacheKey, out string cachedData))
-        // {
-        //     externalReviews = JsonConvert.DeserializeObject<IEnumerable<UserReviewDto>>(cachedData);
-        // }
-        // else
-        // {
-        //     externalReviews = await _reviewService.GetReviewsForSeries(userId, seriesId);
-        //     setCache = true;
-        // }
-
-        // Fetch external reviews and splice them in
-        foreach (var r in externalReviews)
-        {
-            userRatings.Add(r);
-        }
-
-        if (setCache)
-        {
-            // var cacheEntryOptions = new MemoryCacheEntryOptions()
-            //     .SetSize(userRatings.Count)
-            //     .SetAbsoluteExpiration(TimeSpan.FromHours(10));
-            //_cache.Set(cacheKey, JsonConvert.SerializeObject(externalReviews), cacheEntryOptions);
+            externalReviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
             await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
             _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
         }
+
+
+        // Fetch external reviews and splice them in
+        userRatings.AddRange(externalReviews);
 
         return Ok(userRatings.Take(10));
     }
