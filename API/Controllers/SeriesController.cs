@@ -15,6 +15,7 @@ using API.Helpers;
 using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
+using Kavita.Common;
 using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -443,7 +444,14 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return await _seriesService.GetSeriesDetail(seriesId, userId);
+        try
+        {
+            return await _seriesService.GetSeriesDetail(seriesId, userId);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
     }
 
 

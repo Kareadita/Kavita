@@ -382,15 +382,17 @@ public class SeriesService : ISeriesService
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
-            throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
+            throw new UnauthorizedAccessException("user-no-access-library-from-series");
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user!.AgeRestriction != AgeRating.NotApplicable)
         {
             var seriesMetadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
             if (seriesMetadata!.AgeRating > user.AgeRestriction)
-                throw new UnauthorizedAccessException("User is not allowed to view this series due to age restrictions");
+                throw new UnauthorizedAccessException("series-restricted-age-restriction");
         }
+
+
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))

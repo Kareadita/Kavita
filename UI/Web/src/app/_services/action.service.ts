@@ -547,7 +547,7 @@ export class ActionService implements OnDestroy {
       return;
     }
     this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.series'));
+      this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
 
       if (callback) {
         callback(true);
@@ -565,7 +565,7 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success(this.translocoService.translate('toasts.series'));
+        this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
         callback(res);
       }
     });

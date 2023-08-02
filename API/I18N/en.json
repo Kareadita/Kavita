@@ -170,6 +170,9 @@
     "send-to-permission": "Cannot Send non Epub or Pdf to devices as not supported on Kindle",
     "progress-must-exist": "Progress must exist on user",
     "reading-list-name-exists": "A reading list of this name already exists",
+    "user-no-access-library-from-series": "User does not have access to the library this series belongs to",
+    "series-restricted-age-restriction": "User is not allowed to view this series due to age restrictions",
+
 
 
     "volume-num": "Volume {0}"
