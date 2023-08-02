@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Filtering;
 using API.Services;
@@ -20,8 +21,10 @@ public class LocaleController : BaseApiController
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<string>> GetAllLocales()
+    public async Task<ActionResult<IEnumerable<string>>> GetAllLocales()
     {
+        var translatedString = await _localizationService.Get("en", "validate-email", "joe");
+
         var languages = _localizationService.GetLocales().Select(c => new CultureInfo(c)).Select(c =>
             new LanguageDto()
             {

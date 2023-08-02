@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 
@@ -13,7 +14,7 @@ namespace API.Services;
 
 public interface ILocalizationService
 {
-    Task<Dictionary<string, string>> LoadLanguage(string languageCode);
+    Task<Dictionary<string, string>?> LoadLanguage(string languageCode);
     Task<string> Get(string locale, string key, params object[] args);
     IEnumerable<string> GetLocales();
 }
@@ -22,7 +23,12 @@ public class LocalizationService : ILocalizationService
 {
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
-    private readonly string _localizationDirectory;
+    /// <summary>
+    /// The locales for the UI
+    /// </summary>
+    private readonly string _localizationDirectoryUI;
+
+    private readonly MemoryCacheEntryOptions _cacheOptions;
 
 
     public LocalizationService(IDirectoryService directoryService, IHostEnvironment environment, IMemoryCache cache)
@@ -31,16 +37,20 @@ public class LocalizationService : ILocalizationService
         _cache = cache;
         if (environment.IsDevelopment())
         {
-            _localizationDirectory = directoryService.FileSystem.Path.Join(
+            _localizationDirectoryUI = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "..", "UI/Web/src/assets/langs");
+                "UI/Web/src/assets/langs");
         }
         else
         {
-            _localizationDirectory = directoryService.FileSystem.Path.Join(
+            _localizationDirectoryUI = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
                 "wwwroot", "assets/langs");
         }
+
+        _cacheOptions = new MemoryCacheEntryOptions()
+            .SetSize(1)
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));
     }
 
     /// <summary>
@@ -48,37 +58,43 @@ public class LocalizationService : ILocalizationService
     /// </summary>
     /// <param name="languageCode"></param>
     /// <returns></returns>
-    public async Task<Dictionary<string, string>> LoadLanguage(string languageCode)
+    public async Task<Dictionary<string, string>?> LoadLanguage(string languageCode)
     {
-        var languageFile = _directoryService.FileSystem.Path.Join(_localizationDirectory, languageCode + ".json");
+        var languageFile = _directoryService.FileSystem.Path.Join(_directoryService.LocalizationDirectory, languageCode + ".json");
         if (!_directoryService.FileSystem.FileInfo.New(languageFile).Exists)
             throw new ArgumentException($"Language {languageCode} does not exist");
 
         var json = await _directoryService.FileSystem.File.ReadAllTextAsync(languageFile);
-        return Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+        return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
     }
 
     public async Task<string> Get(string locale, string key, params object[] args)
     {
+
         // Check if the translation for the given locale is cached
-        if (!_cache.TryGetValue($"{locale}_{key}", out string translatedString))
+        if (!_cache.TryGetValue($"{locale}_{key}", out string? translatedString))
         {
             // Load the locale JSON file
             var translationData = await LoadLanguage(locale);
 
             // Find the translation for the given key
-            if (translationData.TryGetValue(key, out var value))
+            if (translationData != null && translationData.TryGetValue(key, out var value))
             {
                 translatedString = value;
 
                 // Cache the translation for subsequent requests
-                _cache.Set($"{locale}_{key}", translatedString, TimeSpan.FromMinutes(15)); // Cache for 15 minutes
+                _cache.Set($"{locale}_{key}", translatedString, _cacheOptions);
             }
-            else
+        }
+
+
+        if (string.IsNullOrEmpty(translatedString))
+        {
+            if (!locale.Equals("en"))
             {
-                // If the key is not found, use the key as the translated string
-                translatedString = key;
+                return await Get("en", key, args);
             }
+            return key;
         }
 
         // Format the translated string with arguments
@@ -87,12 +103,21 @@ public class LocalizationService : ILocalizationService
             translatedString = string.Format(translatedString, args);
         }
 
-        return translatedString ?? key;
+        return translatedString;
     }
 
+
+    /// <summary>
+    /// Returns all available locales that exist on both the Frontend and the Backend
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<string> GetLocales()
     {
-        return _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectory), @"\.json")
-            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
+        return
+            _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUI), @"\.json")
+                .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty))
+            .Union(_directoryService.GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json")
+                .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty)))
+                .Distinct();
     }
 }
