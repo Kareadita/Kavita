@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
@@ -16,6 +17,7 @@ public interface ILocalizationService
 {
     Task<Dictionary<string, string>?> LoadLanguage(string languageCode);
     Task<string> Get(string locale, string key, params object[] args);
+    Task<string> Translate(int userId, string key, params object[] args);
     IEnumerable<string> GetLocales();
 }
 
@@ -23,6 +25,8 @@ public class LocalizationService : ILocalizationService
 {
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
+    private readonly IUnitOfWork _unitOfWork;
+
     /// <summary>
     /// The locales for the UI
     /// </summary>
@@ -31,10 +35,12 @@ public class LocalizationService : ILocalizationService
     private readonly MemoryCacheEntryOptions _cacheOptions;
 
 
-    public LocalizationService(IDirectoryService directoryService, IHostEnvironment environment, IMemoryCache cache)
+    public LocalizationService(IDirectoryService directoryService,
+        IHostEnvironment environment, IMemoryCache cache, IUnitOfWork unitOfWork)
     {
         _directoryService = directoryService;
         _cache = cache;
+        _unitOfWork = unitOfWork;
         if (environment.IsDevelopment())
         {
             _localizationDirectoryUI = directoryService.FileSystem.Path.Join(
@@ -104,6 +110,19 @@ public class LocalizationService : ILocalizationService
         }
 
         return translatedString;
+    }
+
+    /// <summary>
+    /// Returns a translated string for a given user's locale, falling back to english or the key if missing
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="key"></param>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public async Task<string> Translate(int userId, string key, params object[] args)
+    {
+        var userLocale = await _unitOfWork.UserRepository.GetLocale(userId);
+        return await Get(userLocale, key, args);
     }
 
 

@@ -10,5 +10,37 @@
     "permission-denied": "You are not permitted to this operation",
     "password-required": "You must enter your existing password to change your account unless you're an admin",
     "invalid-password": "Invalid Password",
-    "invalid-token": "Invalid token"
+    "invalid-token": "Invalid token",
+    "unable-to-reset-key": "Something went wrong, unable to reset key",
+    "invalid-payload": "Invalid payload",
+    "nothing-to-do": "Nothing to do",
+    "share-multiple-emails": "You cannot share emails across multiple accounts",
+    "generate-token": "There was an issue generating a confirmation email token. See logs",
+    "age-restriction-update": "There was an error updating the age restriction",
+    "no-user": "User does not exist",
+    "username-taken": "Username already taken",
+    "user-already-confirmed": "User is already confirmed",
+    "generic-user-update": "There was an exception when updating the user",
+    "manual-setup-fail": "Manual setup is unable to be completed. Please cancel and recreate the invite",
+    "user-already-registered": "User is already registered as {0}",
+    "user-already-invited": "User is already invited under this email and has yet to accepted invite.",
+    "generic-invite-user": "There was an issue inviting the user. Please check logs.",
+    "invalid-email-confirmation": "Invalid email confirmation",
+    "generic-user-email-update": "Unable to update email for user. Check logs.",
+    "generic-password-update": "There was an unexpected error when confirming new password",
+    "password-updated": "Password Updated",
+    "forgot-password-generic": "An email will be sent to the email if it exists in our database",
+    "not-accessible-password": "Your server is not accessible. The link to reset your password is in the logs",
+    "not-accessible": "Your server is not accessible externally",
+    "email-sent": "Email sent",
+    "user-migration-needed": "This user needs to migrate. Have them log out and login to trigger a migration flow",
+    "generic-invite-email": "There was an issue resending invite email",
+    "admin-already-exists": "Admin already exists",
+    "invalid-username": "Invalid username",
+    "critical-email-migration": "There was an issue during email migration. Contact support"
+
+
+
+
+
 }

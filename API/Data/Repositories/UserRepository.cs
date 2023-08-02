@@ -73,7 +73,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId);
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
-
+    Task<string> GetLocale(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -289,6 +289,13 @@ public class UserRepository : IUserRepository
             .Where(s => s.AppUserId == userId)
             .ProjectTo<ScrobbleHoldDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<string> GetLocale(int userId)
+    {
+        return await _context.AppUserPreferences.Where(p => p.AppUserId == userId)
+            .Select(p => p.Locale)
+            .SingleAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
