@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using API.Comparators;
 using API.Data;
 using API.Data.Repositories;
@@ -17,7 +18,6 @@ using API.Services.Tasks.Scanner.Parser;
 using API.SignalR;
 using Kavita.Common;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace API.Services;
 
@@ -49,7 +49,7 @@ public interface IReadingListService
 /// <summary>
 /// Methods responsible for management of Reading Lists
 /// </summary>
-/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
+/// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, string)"/> to be called beforehand</remarks>
 public class ReadingListService : IReadingListService
 {
     private readonly IUnitOfWork _unitOfWork;
@@ -69,13 +69,13 @@ public class ReadingListService : IReadingListService
     public static string FormatTitle(ReadingListItemDto item)
     {
         var title = string.Empty;
-        if (item.ChapterNumber == Tasks.Scanner.Parser.Parser.DefaultChapter && item.VolumeNumber != Tasks.Scanner.Parser.Parser.DefaultVolume) {
+        if (item.ChapterNumber == Parser.DefaultChapter && item.VolumeNumber != Parser.DefaultVolume) {
             title = $"Volume {item.VolumeNumber}";
         }
 
         if (item.SeriesFormat == MangaFormat.Epub) {
-            var specialTitle = Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
-            if (specialTitle == Tasks.Scanner.Parser.Parser.DefaultChapter)
+            var specialTitle = Parser.CleanSpecialTitle(item.ChapterNumber);
+            if (specialTitle == Parser.DefaultChapter)
             {
                 if (!string.IsNullOrEmpty(item.ChapterTitleName))
                 {
@@ -83,7 +83,7 @@ public class ReadingListService : IReadingListService
                 }
                 else
                 {
-                    title = $"Volume {Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.VolumeNumber)}";
+                    title = $"Volume {Parser.CleanSpecialTitle(item.VolumeNumber)}";
                 }
             } else {
                 title = $"Volume {specialTitle}";
@@ -92,12 +92,12 @@ public class ReadingListService : IReadingListService
 
         var chapterNum = item.ChapterNumber;
         if (!string.IsNullOrEmpty(chapterNum) && !JustNumbers.Match(item.ChapterNumber).Success) {
-            chapterNum = Tasks.Scanner.Parser.Parser.CleanSpecialTitle(item.ChapterNumber);
+            chapterNum = Parser.CleanSpecialTitle(item.ChapterNumber);
         }
 
         if (title != string.Empty) return title;
 
-        if (item.ChapterNumber == Tasks.Scanner.Parser.Parser.DefaultChapter &&
+        if (item.ChapterNumber == Parser.DefaultChapter &&
             !string.IsNullOrEmpty(item.ChapterTitleName))
         {
             title = item.ChapterTitleName;
@@ -192,7 +192,7 @@ public class ReadingListService : IReadingListService
     /// <summary>
     /// Removes all entries that are fully read from the reading list. This commits
     /// </summary>
-    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, String)"/> to be called beforehand</remarks>
+    /// <remarks>If called from API layer, expected for <see cref="UserHasReadingListAccess(int, string)"/> to be called beforehand</remarks>
     /// <param name="readingListId">Reading List Id</param>
     /// <param name="user">User</param>
     /// <returns></returns>
@@ -404,7 +404,7 @@ public class ReadingListService : IReadingListService
 
         var existingChapterExists = readingList.Items.Select(rli => rli.ChapterId).ToHashSet();
         var chaptersForSeries = (await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds, ChapterIncludes.Volumes))
-            .OrderBy(c => Tasks.Scanner.Parser.Parser.MinNumberFromRange(c.Volume.Name))
+            .OrderBy(c => Parser.MinNumberFromRange(c.Volume.Name))
             .ThenBy(x => double.Parse(x.Number), _chapterSortComparerForInChapterSorting)
             .ToList();
 
@@ -529,7 +529,7 @@ public class ReadingListService : IReadingListService
     /// <param name="cblReading"></param>
     public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading)
     {
-        var importSummary = new CblImportSummaryDto()
+        var importSummary = new CblImportSummaryDto
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
@@ -542,20 +542,20 @@ public class ReadingListService : IReadingListService
         if (await _unitOfWork.ReadingListRepository.ReadingListExists(cblReading.Name))
         {
             importSummary.Success = CblImportResult.Fail;
-            importSummary.Results.Add(new CblBookResult()
+            importSummary.Results.Add(new CblBookResult
             {
                 Reason = CblImportReason.NameConflict,
                 ReadingListName = cblReading.Name
             });
         }
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
+        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
         if (!userSeries.Any())
         {
             // Report that no series exist in the reading list
-            importSummary.Results.Add(new CblBookResult()
+            importSummary.Results.Add(new CblBookResult
             {
                 Reason = CblImportReason.AllSeriesMissing
             });
@@ -569,7 +569,7 @@ public class ReadingListService : IReadingListService
         importSummary.Success = CblImportResult.Fail;
         foreach (var conflict in conflicts)
         {
-            importSummary.Results.Add(new CblBookResult()
+            importSummary.Results.Add(new CblBookResult
             {
                 Reason = CblImportReason.SeriesCollision,
                 Series = conflict.Name,
@@ -593,7 +593,7 @@ public class ReadingListService : IReadingListService
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
         _logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
-        var importSummary = new CblImportSummaryDto()
+        var importSummary = new CblImportSummaryDto
         {
             CblName = cblReading.Name,
             Success = CblImportResult.Success,
@@ -601,13 +601,13 @@ public class ReadingListService : IReadingListService
             SuccessfulInserts = new List<CblBookResult>()
         };
 
-        var uniqueSeries = cblReading.Books.Book.Select(b => Tasks.Scanner.Parser.Parser.Normalize(b.Series)).Distinct().ToList();
+        var uniqueSeries = cblReading.Books.Book.Select(b => Parser.Normalize(b.Series)).Distinct().ToList();
         var userSeries =
             (await _unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-        var allSeries = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.Name));
-        var allSeriesLocalized = userSeries.ToDictionary(s => Tasks.Scanner.Parser.Parser.Normalize(s.LocalizedName));
+        var allSeries = userSeries.ToDictionary(s => Parser.Normalize(s.Name));
+        var allSeriesLocalized = userSeries.ToDictionary(s => Parser.Normalize(s.LocalizedName));
 
-        var readingListNameNormalized = Tasks.Scanner.Parser.Parser.Normalize(cblReading.Name);
+        var readingListNameNormalized = Parser.Normalize(cblReading.Name);
         // Get all the user's reading lists
         var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
         if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
@@ -620,7 +620,7 @@ public class ReadingListService : IReadingListService
             // Reading List exists, check if we own it
             if (user.ReadingLists.All(l => l.NormalizedTitle != readingListNameNormalized))
             {
-                importSummary.Results.Add(new CblBookResult()
+                importSummary.Results.Add(new CblBookResult
                 {
                     Reason = CblImportReason.NameConflict
                 });
@@ -632,7 +632,7 @@ public class ReadingListService : IReadingListService
         readingList.Items ??= new List<ReadingListItem>();
         foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
         {
-            var normalizedSeries = Tasks.Scanner.Parser.Parser.Normalize(book.Series);
+            var normalizedSeries = Parser.Normalize(book.Series);
             if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
             {
                 importSummary.Results.Add(new CblBookResult(book)
@@ -644,7 +644,7 @@ public class ReadingListService : IReadingListService
             }
             // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
             var bookVolume = string.IsNullOrEmpty(book.Volume)
-                ? Tasks.Scanner.Parser.Parser.DefaultVolume
+                ? Parser.DefaultVolume
                 : book.Volume;
             var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name) ?? bookSeries.Volumes.Find(v => v.Number == 0);
             if (matchingVolume == null)
@@ -660,7 +660,7 @@ public class ReadingListService : IReadingListService
 
             // We need to handle chapter 0 or empty string when it's just a volume
             var bookNumber = string.IsNullOrEmpty(book.Number)
-                ? Tasks.Scanner.Parser.Parser.DefaultChapter
+                ? Parser.DefaultChapter
                 : book.Number;
             var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Number == bookNumber);
             if (chapter == null)
@@ -720,7 +720,7 @@ public class ReadingListService : IReadingListService
     private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
     {
         var dict = new HashSet<string>();
-        return userSeries.Where(series => !dict.Add(Tasks.Scanner.Parser.Parser.Normalize(series.Name))).ToList();
+        return userSeries.Where(series => !dict.Add(Parser.Normalize(series.Name))).ToList();
     }
 
     private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,
@@ -729,7 +729,7 @@ public class ReadingListService : IReadingListService
         readingListFromCbl = new CblImportSummaryDto();
         if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
         {
-            importSummary.Results.Add(new CblBookResult()
+            importSummary.Results.Add(new CblBookResult
             {
                 Reason = CblImportReason.EmptyFile
             });
@@ -755,7 +755,7 @@ public class ReadingListService : IReadingListService
 
     public static CblReadingList LoadCblFromPath(string path)
     {
-        var reader = new System.Xml.Serialization.XmlSerializer(typeof(CblReadingList));
+        var reader = new XmlSerializer(typeof(CblReadingList));
         using var file = new StreamReader(path);
         var cblReadingList = (CblReadingList) reader.Deserialize(file);
         file.Close();
