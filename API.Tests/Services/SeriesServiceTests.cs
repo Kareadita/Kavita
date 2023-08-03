@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Abstractions;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
@@ -19,11 +20,29 @@ using API.SignalR;
 using API.Tests.Helpers;
 using Hangfire;
 using Hangfire.InMemory;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
 namespace API.Tests.Services;
+
+internal class MockHostingEnvironment : IHostEnvironment {
+    public string ApplicationName { get => "API"; set => throw new NotImplementedException(); }
+    public IFileProvider ContentRootFileProvider { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+    public string ContentRootPath
+    {
+        get => throw new NotImplementedException();
+        set => throw new NotImplementedException();
+    }
+
+    public string EnvironmentName { get => "Testing"; set => throw new NotImplementedException(); }
+}
+
 
 public class SeriesServiceTests : AbstractDbTest
 {
@@ -31,9 +50,18 @@ public class SeriesServiceTests : AbstractDbTest
 
     public SeriesServiceTests() : base()
     {
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem()
+        {
+
+        });
+
+
+        var locService = new LocalizationService(ds, new MockHostingEnvironment(),
+            Substitute.For<IMemoryCache>(), Substitute.For<IUnitOfWork>());
+
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>());
+            Substitute.For<IScrobblingService>(), locService);
     }
     #region Setup
 
@@ -1194,9 +1222,19 @@ public class SeriesServiceTests : AbstractDbTest
     [InlineData(LibraryType.Comic, false, "Issue")]
     [InlineData(LibraryType.Comic, true, "Issue #")]
     [InlineData(LibraryType.Book, false, "Book")]
-    public void FormatChapterNameTest(LibraryType libraryType, bool withHash, string expected )
+    public async Task FormatChapterNameTest(LibraryType libraryType, bool withHash, string expected )
     {
-        Assert.Equal(expected, SeriesService.FormatChapterName(1, libraryType, withHash));
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
+
+        Assert.Equal(expected, await _seriesService.FormatChapterName(1, libraryType, withHash));
     }
 
     #endregion
@@ -1204,59 +1242,132 @@ public class SeriesServiceTests : AbstractDbTest
     #region FormatChapterTitle
 
     [Fact]
-    public void FormatChapterTitle_Manga_NonSpecial()
+    public async Task FormatChapterTitle_Manga_NonSpecial()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
+
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Chapter Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Manga, false));
+        Assert.Equal("Chapter Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
     }
 
     [Fact]
-    public void FormatChapterTitle_Manga_Special()
+    public async Task FormatChapterTitle_Manga_Special()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
-        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Manga, false));
+        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Manga, false));
     }
 
     [Fact]
-    public void FormatChapterTitle_Comic_NonSpecial_WithoutHash()
+    public async Task FormatChapterTitle_Comic_NonSpecial_WithoutHash()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Issue Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, false));
+        Assert.Equal("Issue Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
     }
 
     [Fact]
-    public void FormatChapterTitle_Comic_Special_WithoutHash()
+    public async Task FormatChapterTitle_Comic_Special_WithoutHash()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
-        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, false));
+        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, false));
     }
 
     [Fact]
-    public void FormatChapterTitle_Comic_NonSpecial_WithHash()
+    public async Task FormatChapterTitle_Comic_NonSpecial_WithHash()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Issue #Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, true));
+        Assert.Equal("Issue #Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, true));
     }
 
     [Fact]
-    public void FormatChapterTitle_Comic_Special_WithHash()
+    public async Task FormatChapterTitle_Comic_Special_WithHash()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
-        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Comic, true));
+        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Comic, true));
     }
 
     [Fact]
-    public void FormatChapterTitle_Book_NonSpecial()
+    public async Task FormatChapterTitle_Book_NonSpecial()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(false).Build();
-        Assert.Equal("Book Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Book, false));
+        Assert.Equal("Book Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
     }
 
     [Fact]
-    public void FormatChapterTitle_Book_Special()
+    public async Task FormatChapterTitle_Book_Special()
     {
+        await ResetDb();
+
+        _context.Library.Add(new LibraryBuilder("Test LIb")
+            .WithAppUser(new AppUserBuilder("majora2007", string.Empty)
+                .WithLocale("en")
+                .Build())
+            .Build());
+
+        await _context.SaveChangesAsync();
         var chapter = new ChapterBuilder("1").WithTitle("Some title").WithIsSpecial(true).Build();
-        Assert.Equal("Some title", SeriesService.FormatChapterTitle(chapter, LibraryType.Book, false));
+        Assert.Equal("Some title", await _seriesService.FormatChapterTitle(1, chapter, LibraryType.Book, false));
     }
 
     #endregion

@@ -31,6 +31,10 @@ public interface ISeriesService
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
+    Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
+
+    Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle,
+        bool withHash);
     Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
 }
 
@@ -514,7 +518,7 @@ public class SeriesService : ISeriesService
     }
 
 
-    private async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
+    public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
     {
         if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
 
@@ -546,13 +550,13 @@ public class SeriesService : ISeriesService
     public async Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
     {
         var hashSpot = withHash ? "#" : string.Empty;
-        return libraryType switch
+        return (libraryType switch
         {
             LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
             LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
             LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
             _ => await _localizationService.Translate(userId, "chapter-num", ' ')
-        };
+        }).Trim();
     }
 
     /// <summary>

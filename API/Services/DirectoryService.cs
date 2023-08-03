@@ -97,23 +97,23 @@ public class DirectoryService : IDirectoryService
     {
         _logger = logger;
         FileSystem = fileSystem;
-        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
-        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
-        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
-        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
-        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
-        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
-        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
-        LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
-
-        ExistOrCreate(SiteThemeDirectory);
+        ExistOrCreate(ConfigDirectory);
+        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
         ExistOrCreate(CoverImageDirectory);
+        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
         ExistOrCreate(CacheDirectory);
+        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
         ExistOrCreate(LogDirectory);
+        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ExistOrCreate(TempDirectory);
+        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
         ExistOrCreate(BookmarkDirectory);
+        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
+        ExistOrCreate(SiteThemeDirectory);
+        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
         ExistOrCreate(FaviconDirectory);
+        LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
     }
 
     /// <summary>

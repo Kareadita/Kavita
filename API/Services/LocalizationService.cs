@@ -43,6 +43,11 @@ public class LocalizationService : ILocalizationService
             _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
                 "UI/Web/src/assets/langs");
+        } else if (environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
+        {
+            _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
+                directoryService.FileSystem.Directory.GetCurrentDirectory(),
+                "/../../../../../UI/Web/src/assets/langs");
         }
         else
         {
@@ -57,12 +62,13 @@ public class LocalizationService : ILocalizationService
     }
 
     /// <summary>
-    /// Loads a language
+    /// Loads a language, if language is blank, falls back to english
     /// </summary>
     /// <param name="languageCode"></param>
     /// <returns></returns>
     public async Task<Dictionary<string, string>?> LoadLanguage(string languageCode)
     {
+        if (string.IsNullOrWhiteSpace(languageCode)) languageCode = "en";
         var languageFile = _directoryService.FileSystem.Path.Join(_directoryService.LocalizationDirectory, languageCode + ".json");
         if (!_directoryService.FileSystem.FileInfo.New(languageFile).Exists)
             throw new ArgumentException($"Language {languageCode} does not exist");
