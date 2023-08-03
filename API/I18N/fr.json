@@ -1,0 +1,11 @@
+{
+    "register-user": "Une erreur est survenue lors de l'enregistrement de l'usager",
+    "denied": "Interdit",
+    "permission-denied": "Vous n'avez pas les permissions requises pour effectuer cette opération",
+    "disabled-account": "Votre compte a été désactivé. Veuillez contacter un administrateur.",
+    "confirm-email": "Vous devez d'abord confirmer votre adresse courriel",
+    "locked-out": "Vous avez été bloqués suite à un nombre trop élevé de tentatives. Veuillez réessayer dans 10 minutes.",
+    "bad-credentials": "Vos codes d'accès sont invalides",
+    "validate-email": "Une erreur est survenue lors de la validation de votre courriel: {0}",
+    "confirm-token-gen": "Une erreur est survenue lors de la génération du code de confirmation"
+}
