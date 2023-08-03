@@ -180,6 +180,13 @@
         "scan-queued": "A site theme scan has been queued"
     },
 
+    "theme": {
+        "theme-dark": "Dark",
+        "theme-black": "Black",
+        "theme-paper": "Paper",
+        "theme-white": "White"
+    },
+
     "restriction-selector": {
         "title": "Age Rating Restriction",
         "description": "When selected, all series and reading lists that have at least one item that is greater than the selected restriction will be pruned from results.",
@@ -1794,12 +1801,9 @@
         "1-column": "1 Column",
         "2-column": "2 Column",
         "cards": "Cards",
-        "list": "List"
-
-
+        "list": "List",
+        "up-to-down": "Up to Down"
     },
-
-
 
 
     "validation": {

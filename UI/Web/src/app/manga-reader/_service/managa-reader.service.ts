@@ -30,7 +30,7 @@ export class ManagaReaderService {
     });
     this.pairs = chapterInfo.doublePairs!;
   }
-  
+
   adjustForDoubleReader(page: number) {
     if (!this.pairs.hasOwnProperty(page)) return page;
     return this.pairs[page];
@@ -61,10 +61,10 @@ export class ManagaReaderService {
 
 
   /**
-   * If pagenumber is 0 aka first page, which on double page rendering should always render as a single. 
-   * 
+   * If pageNumber is 0 aka first page, which on double page rendering should always render as a single.
+   *
    * @param pageNumber current page number
-   * @returns 
+   * @returns
    */
   isCoverImage(pageNumber: number) {
     return pageNumber === 0;
@@ -104,9 +104,9 @@ export class ManagaReaderService {
 
   /**
    * Should Canvas Renderer be used
-   * @param img 
-   * @param pageSplitOption 
-   * @returns 
+   * @param img
+   * @param pageSplitOption
+   * @returns
    */
   shouldSplit(img: HTMLImageElement, pageSplitOption: PageSplitOption) {
     const needsSplitting = this.isWidePage(this.readerService.imageUrlToPageNum(img?.src));

@@ -171,7 +171,7 @@
                 <div class="{{SplitIconClass}}"></div>
               </div>
               <select class="form-control" id="page-splitting" formControlName="pageSplitOption">
-                <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text}}</option>
+                <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text}}</option>
               </select>
             </div>
 
@@ -223,7 +223,7 @@
                 </ng-container>
               </ng-container>
               <select class="form-control" id="layout-mode" formControlName="layoutMode">
-                <option [value]="opt.value" *ngFor="let opt of layoutModes">{{opt.text}}</option>
+                <option [value]="opt.value" *ngFor="let opt of layoutModesTranslated">{{opt.text}}</option>
               </select>
             </div>
             <div class="col-md-3 col-sm-12">

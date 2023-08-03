@@ -80,15 +80,20 @@ enum FragmentID {
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
-  readingDirections = readingDirections.map(this.translatePrefOptions);
-  scalingOptions = scalingOptions.map(this.translatePrefOptions);
-  pageSplitOptions = pageSplitOptions;
-  readingModes = readingModes;
-  layoutModes = layoutModes;
-  bookLayoutModes = bookLayoutModes;
-  bookColorThemes = bookColorThemes;
-  pageLayoutModes = pageLayoutModes;
-  bookWritingStyles = bookWritingStyles;
+  readingDirectionsTranslated = readingDirections.map(this.translatePrefOptions);
+  scalingOptionsTranslated = scalingOptions.map(this.translatePrefOptions);
+  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
+  readingModesTranslated = readingModes.map(this.translatePrefOptions);
+  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
+  bookLayoutModesTranslated = bookLayoutModes.map(this.translatePrefOptions);
+  bookColorThemesTranslated = bookColorThemes.map(o => {
+    const d = {...o};
+    d.name = translate('theme.' + d.translationKey);
+    return d;
+  });
+
+  pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
+  bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -316,7 +321,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   }
 
   translatePrefOptions(o: {text: string, value: any}) {
-    o.text = translate('preferences.' + o.text);
-    return o;
+    const d = {...o};
+    d.text = translate('preferences.' + o.text);
+    return d;
   }
 }
