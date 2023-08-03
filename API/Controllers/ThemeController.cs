@@ -73,7 +73,7 @@ public class ThemeController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+            return BadRequest(await _localizationService.Get("en", ex.Message));
         }
     }
 }

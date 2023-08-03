@@ -36,7 +36,6 @@ public class ThemeService : IThemeService
     /// </summary>
     /// <param name="themeId"></param>
     /// <returns></returns>
-    [AllowAnonymous]
     public async Task<string> GetContent(int themeId)
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
