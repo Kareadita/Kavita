@@ -11,5 +11,13 @@
     "password-required": "Vous devez entrer votre mot de passe existant afin de le changer si vous n'êtes pas un administrateur",
     "invalid-password": "Mot de passe invalide",
     "invalid-token": "Code invalide",
-    "unable-to-reset-key": "Une erreur est survenue, impossible de regénérer la clé"
+    "unable-to-reset-key": "Une erreur est survenue, impossible de générer la clé",
+    "generate-token": "Une erreur est survenue lors de la génération du code de confirmation du courriel. Voir le journal",
+    "nothing-to-do": "Rien à faire",
+    "share-multiple-emails": "Vous ne pouvez partager une adresse courriel avec un autre compte",
+    "age-restriction-update": "Une erreur est survenue lors de la mise-à-jour de la restriction d'âge",
+    "no-user": "L'usager n'existe pas",
+    "username-taken": "Le nom d'usager existe déjà",
+    "user-already-confirmed": "L'usager à déjà été confirmé",
+    "generic-user-update": "Une erreur est survenue lors de la confirmation de l'usager"
 }
