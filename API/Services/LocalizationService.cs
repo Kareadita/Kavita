@@ -42,7 +42,7 @@ public class LocalizationService : ILocalizationService
         {
             _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
-                "UI/Web/src/assets/langs");
+                "../UI/Web/src/assets/langs");
         } else if (environment.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase))
         {
             _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
@@ -136,11 +136,12 @@ public class LocalizationService : ILocalizationService
     /// <returns></returns>
     public IEnumerable<string> GetLocales()
     {
-        return
-            _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json")
-                .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty))
-            .Union(_directoryService.GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json")
-                .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty)))
-                .Distinct();
+        var uiLanguages = _directoryService
+            .GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json")
+            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
+        var backendLanguages = _directoryService
+            .GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json")
+            .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty));
+        return uiLanguages.Intersect(backendLanguages).Distinct();
     }
 }

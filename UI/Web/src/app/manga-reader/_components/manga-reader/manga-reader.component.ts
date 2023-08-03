@@ -186,8 +186,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection$: Observable<PAGING_DIRECTION> = this.pagingDirectionSubject.asObservable();
 
 
-  pageSplitOptions = pageSplitOptions;
-  layoutModes = layoutModes;
+  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
+  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
 
   isLoading = true;
   hasBookmarkRights: boolean = false; // TODO: This can be an observable
@@ -458,9 +458,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
               private modalService: NgbModal, private readonly cdRef: ChangeDetectorRef,
               public mangaReaderService: ManagaReaderService) {
-                this.navService.hideNavBar();
-                this.navService.hideSideNav();
-                this.cdRef.markForCheck();
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
+    this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
@@ -1651,5 +1651,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       })
     });
+  }
+
+  translatePrefOptions(o: {text: string, value: any}) {
+    const d = {...o};
+    d.text = translate('preferences.' + o.text);
+    return d;
   }
 }

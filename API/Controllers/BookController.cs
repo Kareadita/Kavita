@@ -96,14 +96,14 @@ public class BookController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
     {
-        if (chapterId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+        if (chapterId <= 0) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
+        if (chapter == null) return BadRequest(await _localizationService.Get("en", "chapter-doesnt-exist"));
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
         var key = BookService.CoalesceKeyForAnyFile(book, file);
 
-        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "file-missing"));
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Get("en", "file-missing"));
 
         var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
         var content = await bookFile.ReadContentAsBytesAsync();

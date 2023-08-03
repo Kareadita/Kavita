@@ -40,7 +40,7 @@
                                       <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="globalPageLayoutMode" id="settings-global-layoutmode">
-                                      <option *ngFor="let opt of pageLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of pageLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
 
@@ -158,7 +158,7 @@
                                       <ng-container [ngTemplateOutlet]="readingDirectionTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="readingDirection" id="settings-reading-direction">
-                                      <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
 
@@ -169,7 +169,7 @@
                                       <ng-container [ngTemplateOutlet]="scalingOptionTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="scalingOption" id="settings-scaling-option">
-                                      <option *ngFor="let opt of scalingOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of scalingOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
                                 </div>
@@ -182,13 +182,13 @@
                                       <ng-container [ngTemplateOutlet]="pageSplitOptionTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="pageSplitOption" id="settings-pagesplit-option">
-                                      <option *ngFor="let opt of pageSplitOptions" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of pageSplitOptionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
                                   <div class="col-md-6 col-sm-12 pe-2 mb-2">
                                     <label for="settings-readingmode-option" class="form-label">{{t('reading-mode-label')}}</label>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="readerMode" id="settings-readingmode-option">
-                                      <option *ngFor="let opt of readingModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of readingModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
                                 </div>
@@ -201,7 +201,7 @@
                                       <ng-container [ngTemplateOutlet]="layoutModeTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="manga-header" formControlName="layoutMode" id="settings-layoutmode-option">
-                                      <option *ngFor="let opt of layoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of layoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
                                   <div class="col-md-6 col-sm-12 pe-2 mb-2">
@@ -309,7 +309,7 @@
                                       <ng-container [ngTemplateOutlet]="bookReadingDirectionTooltip"></ng-container>
                                     </span>
                                     <select id="settings-book-reading-direction" class="form-select" aria-describedby="settings-book-reading-direction-help" formControlName="bookReaderReadingDirection">
-                                      <option *ngFor="let opt of readingDirections" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of readingDirectionsTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
 
@@ -334,7 +334,7 @@
                                       <ng-container [ngTemplateOutlet]="bookWritingStyleToolTip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="settings-book-writing-style-help" formControlName="bookReaderWritingStyle" id="settings-book-writing-style" >
-                                      <option *ngFor="let opt of bookWritingStyles" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of bookWritingStylesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
 
@@ -345,7 +345,7 @@
                                       <ng-container [ngTemplateOutlet]="bookLayoutModeTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="settings-book-layout-mode-help" formControlName="bookReaderLayoutMode" id="settings-book-layout-mode">
-                                      <option *ngFor="let opt of bookLayoutModes" [value]="opt.value">{{opt.text | titlecase}}</option>
+                                      <option *ngFor="let opt of bookLayoutModesTranslated" [value]="opt.value">{{opt.text | titlecase}}</option>
                                     </select>
                                   </div>
                                 </div>
@@ -359,7 +359,7 @@
                                       <ng-container [ngTemplateOutlet]="bookColorThemeTooltip"></ng-container>
                                     </span>
                                     <select class="form-select" aria-describedby="settings-color-theme-option-help" formControlName="bookReaderThemeName" id="settings-color-theme-option">
-                                      <option *ngFor="let opt of bookColorThemes" [value]="opt.name">{{opt.name | titlecase}}</option>
+                                      <option *ngFor="let opt of bookColorThemesTranslated" [value]="opt.name">{{opt.name | titlecase}}</option>
                                     </select>
                                   </div>
                                 </div>

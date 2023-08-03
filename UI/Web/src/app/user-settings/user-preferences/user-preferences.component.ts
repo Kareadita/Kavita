@@ -48,7 +48,7 @@ import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccor
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -80,15 +80,20 @@ enum FragmentID {
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
-  readingDirections = readingDirections;
-  scalingOptions = scalingOptions;
-  pageSplitOptions = pageSplitOptions;
-  readingModes = readingModes;
-  layoutModes = layoutModes;
-  bookLayoutModes = bookLayoutModes;
-  bookColorThemes = bookColorThemes;
-  pageLayoutModes = pageLayoutModes;
-  bookWritingStyles = bookWritingStyles;
+  readingDirectionsTranslated = readingDirections.map(this.translatePrefOptions);
+  scalingOptionsTranslated = scalingOptions.map(this.translatePrefOptions);
+  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
+  readingModesTranslated = readingModes.map(this.translatePrefOptions);
+  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
+  bookLayoutModesTranslated = bookLayoutModes.map(this.translatePrefOptions);
+  bookColorThemesTranslated = bookColorThemes.map(o => {
+    const d = {...o};
+    d.name = translate('theme.' + d.translationKey);
+    return d;
+  });
+
+  pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
+  bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
@@ -313,5 +318,11 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsDirty();
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
+  }
+
+  translatePrefOptions(o: {text: string, value: any}) {
+    const d = {...o};
+    d.text = translate('preferences.' + o.text);
+    return d;
   }
 }

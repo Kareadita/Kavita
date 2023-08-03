@@ -107,7 +107,8 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> GetImage(int chapterId, int page, string apiKey, bool extractPdf = false)
     {
         if (page < 0) page = 0;
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, extractPdf);
         if (chapter == null) return NoContent();
 
@@ -115,7 +116,7 @@ public class ReaderController : BaseApiController
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
-                return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-image-for-page", page));
+                return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
@@ -139,7 +140,8 @@ public class ReaderController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
-        if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId == 0) return BadRequest();
         var chapter = await _cacheService.Ensure(chapterId, true);
         if (chapter == null) return NoContent();
         var images = _cacheService.GetCachedPages(chapterId);
@@ -175,7 +177,7 @@ public class ReaderController : BaseApiController
         try
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-image-for-page", page));
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));

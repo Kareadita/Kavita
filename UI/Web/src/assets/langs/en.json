@@ -180,6 +180,13 @@
         "scan-queued": "A site theme scan has been queued"
     },
 
+    "theme": {
+        "theme-dark": "Dark",
+        "theme-black": "Black",
+        "theme-paper": "Paper",
+        "theme-white": "White"
+    },
+
     "restriction-selector": {
         "title": "Age Rating Restriction",
         "description": "When selected, all series and reading lists that have at least one item that is greater than the selected restriction will be pruned from results.",
@@ -1750,10 +1757,53 @@
     },
 
     "actionable": {
+        "scan-library": "Scan Library",
+        "refresh-covers": "Refresh Covers",
+        "analyze-files": "Analyze Files",
+        "settings": "Settings",
+        "edit": "Edit",
+        "mark-as-read": "Mark as Read",
+        "mark-as-unread": "Mark as Unread",
+        "scan-series": "Scan Series",
+        "add-to": "Add to",
+        "add-to-want-to-read": "Add to Want to Read",
+        "remove-from-want-to-read": "Remove from Want to Read",
         "remove-from-on-deck": "Remove From On Deck",
-        "others": "Others"
+        "others": "Others",
+        "add-to-reading-list": "Add to Reading List",
+        "add-to-collection": "Add to Collection",
+        "send-to": "Send To",
+        "delete": "Delete",
+        "download": "Download",
+        "read-incognito": "Read Incognito",
+        "details": "Details",
+        "view-series": "View Series",
+        "clear": "Clear",
+        "import-cbl": "Import CBL"
     },
 
+    "preferences": {
+        "left-to-right": "Left to Right",
+        "right-to-left": "Right to Left",
+        "horizontal": "Horizontal",
+        "vertical": "Vertical",
+        "automatic": "Automatic",
+        "fit-to-height": "Fit to Height",
+        "fit-to-width": "Fit to Width",
+        "original": "Original",
+        "fit-to-screen": "Fit to Screen",
+        "no-split": "No Split",
+        "webtoon": "Webtoon",
+        "single": "Single",
+        "double": "Double",
+        "double-manga": "Double (Manga)",
+        "scroll": "Scroll",
+        "1-column": "1 Column",
+        "2-column": "2 Column",
+        "cards": "Cards",
+        "list": "List",
+        "up-to-down": "Up to Down"
+    },
 
 
     "validation": {

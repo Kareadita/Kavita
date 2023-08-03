@@ -279,7 +279,7 @@ public class LibraryController : BaseApiController
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!isAdmin) return BadRequest("API key must belong to an admin");
 
-        if (dto.FolderPath.Contains("..")) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-path"));
+        if (dto.FolderPath.Contains("..")) return BadRequest(await _localizationService.Translate(user.Id, "invalid-path"));
 
         dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
 
