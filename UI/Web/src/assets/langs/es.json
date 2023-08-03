@@ -1,8 +1,8 @@
 {
     "login": {
         "title": "Acceso",
-        "username": "Usuario",
-        "password": "Contraseña",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
         "password-validation": "La contraseña tiene que tener entre {{min}} y{{max}} caracteres",
         "forgot-password": "Has olvidado la contraseña?",
         "submit": "Enviar"
