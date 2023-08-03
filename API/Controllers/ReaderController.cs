@@ -261,7 +261,8 @@ public class ReaderController : BaseApiController
         }
         else
         {
-            info.Subtitle = await _localizationService.Translate(User.GetUserId(), "volume-num", info.VolumeNumber);
+            //info.Subtitle = await _localizationService.Translate(User.GetUserId(), "volume-num", info.VolumeNumber);
+            info.Subtitle = $"Volume {info.VolumeNumber}";
             if (!info.ChapterNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
             {
                 info.Subtitle += " " + ReaderService.FormatChapterName(info.LibraryType, true, true) +

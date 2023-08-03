@@ -506,10 +506,10 @@ public class SeriesService : ISeriesService
             {
                 volume.Name += $" - {firstChapter.TitleName}";
             }
-            else
-            {
-                volume.Name += $"";
-            }
+            // else
+            // {
+            //     volume.Name += $"";
+            // }
 
             return;
         }
