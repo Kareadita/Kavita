@@ -21,7 +21,10 @@
         "not-valid-email": "El correo electronico tiene que ser válido",
         "saving": "Guardando …",
         "update": "Actualizar",
-        "required": "Este campo es obligatorio"
+        "required": "Este campo es obligatorio",
+        "close": "Cerrar",
+        "email": "dirección de correo",
+        "cancel": "Cancelar"
     },
     "user-scrobble-history": {
         "data-header": "Datos",
@@ -29,6 +32,7 @@
         "filter-label": "Filtro",
         "type-header": "Tipo",
         "rating": "Puntuación {{r}}",
-        "no-data": "No hay datos"
+        "no-data": "No hay datos",
+        "last-modified-header": "Última Modificación"
     }
 }
