@@ -7,6 +7,7 @@ using API.DTOs.Filtering;
 using API.DTOs.WantToRead;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using API.Services.Plus;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
@@ -21,11 +22,14 @@ public class WantToReadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILocalizationService _localizationService;
 
-    public WantToReadController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService)
+    public WantToReadController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _scrobblingService = scrobblingService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -85,7 +89,7 @@ public class WantToReadController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("There was an issue updating Read List");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-reading-list-update"));
     }
 
     /// <summary>
@@ -113,6 +117,6 @@ public class WantToReadController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("There was an issue updating Read List");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-reading-list-update"));
     }
 }

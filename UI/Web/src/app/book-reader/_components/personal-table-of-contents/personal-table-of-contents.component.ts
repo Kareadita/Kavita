@@ -13,6 +13,7 @@ import {ReaderService} from "../../../_services/reader.service";
 import {PersonalToC} from "../../../_models/readers/personal-toc";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoModule} from "@ngneat/transloco";
 
 export interface PersonalToCEvent {
   pageNum: number;
@@ -22,7 +23,7 @@ export interface PersonalToCEvent {
 @Component({
   selector: 'app-personal-table-of-contents',
   standalone: true,
-  imports: [CommonModule, NgbTooltip],
+  imports: [CommonModule, NgbTooltip, TranslocoModule],
   templateUrl: './personal-table-of-contents.component.html',
   styleUrls: ['./personal-table-of-contents.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

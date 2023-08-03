@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  EventEmitter,
+  EventEmitter, inject,
   Input,
   OnChanges,
   OnInit,
@@ -22,6 +22,7 @@ import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../pipe/relationship.pipe";
 import {Device} from "../../_models/device/device";
+import {TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-series-card',
@@ -66,6 +67,8 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
 
+  private readonly translocoService = inject(TranslocoService);
+
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
               private modalService: NgbModal, private imageService: ImageService,
@@ -84,11 +87,12 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
       if (this.isOnDeck) {
-        const othersIndex = this.actions.findIndex(obj => obj.title === 'Others');
+        const otherStr = this.translocoService.translate('actionable.others');
+        const othersIndex = this.actions.findIndex(obj => obj.title === otherStr);
         if (this.actions[othersIndex].children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
           this.actions[othersIndex].children.push({
             action: Action.RemoveFromOnDeck,
-            title: 'Remove From On Deck',
+            title: this.translocoService.translate('actionable.remove-from-on-deck'),
             callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
             class: 'danger',
             requiresAdmin: false,
@@ -171,7 +175,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   async scanLibrary(series: Series) {
     this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
-      this.toastr.success('Scan queued for ' + series.name);
+      this.toastr.success(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
     });
   }
 

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Ev
 import { Swiper, SwiperEvents } from 'swiper/types';
 import { SwiperModule } from 'swiper/angular';
 import { NgIf, NgClass, NgFor, NgTemplateOutlet } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-carousel-reel',
@@ -9,7 +10,7 @@ import { NgIf, NgClass, NgFor, NgTemplateOutlet } from '@angular/common';
     styleUrls: ['./carousel-reel.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgClass, SwiperModule, NgFor, NgTemplateOutlet]
+  imports: [NgIf, NgClass, SwiperModule, NgFor, NgTemplateOutlet, TranslocoModule]
 })
 export class CarouselReelComponent {
 

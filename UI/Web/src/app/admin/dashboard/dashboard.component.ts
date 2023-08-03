@@ -1,23 +1,26 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { ServerService } from 'src/app/_services/server.service';
-import { Title } from '@angular/platform-browser';
-import { NavService } from '../../_services/nav.service';
-import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
-import { LicenseComponent } from '../license/license.component';
-import { ManageTasksSettingsComponent } from '../manage-tasks-settings/manage-tasks-settings.component';
-import { ServerStatsComponent } from '../../statistics/_components/server-stats/server-stats.component';
-import { ManageSystemComponent } from '../manage-system/manage-system.component';
-import { ManageLogsComponent } from '../manage-logs/manage-logs.component';
-import { ManageLibraryComponent } from '../manage-library/manage-library.component';
-import { ManageUsersComponent } from '../manage-users/manage-users.component';
-import { ManageMediaSettingsComponent } from '../manage-media-settings/manage-media-settings.component';
-import { ManageEmailSettingsComponent } from '../manage-email-settings/manage-email-settings.component';
-import { ManageSettingsComponent } from '../manage-settings/manage-settings.component';
-import { NgFor, NgIf } from '@angular/common';
-import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
-import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {ServerService} from 'src/app/_services/server.service';
+import {Title} from '@angular/platform-browser';
+import {NavService} from '../../_services/nav.service';
+import {SentenceCasePipe} from '../../pipe/sentence-case.pipe';
+import {LicenseComponent} from '../license/license.component';
+import {ManageTasksSettingsComponent} from '../manage-tasks-settings/manage-tasks-settings.component';
+import {ServerStatsComponent} from '../../statistics/_components/server-stats/server-stats.component';
+import {ManageSystemComponent} from '../manage-system/manage-system.component';
+import {ManageLogsComponent} from '../manage-logs/manage-logs.component';
+import {ManageLibraryComponent} from '../manage-library/manage-library.component';
+import {ManageUsersComponent} from '../manage-users/manage-users.component';
+import {ManageMediaSettingsComponent} from '../manage-media-settings/manage-media-settings.component';
+import {ManageEmailSettingsComponent} from '../manage-email-settings/manage-email-settings.component';
+import {ManageSettingsComponent} from '../manage-settings/manage-settings.component';
+import {NgFor, NgIf} from '@angular/common';
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
+import {
+  SideNavCompanionBarComponent
+} from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 enum TabID {
   General = '',
@@ -26,7 +29,6 @@ enum TabID {
   Users = 'users',
   Libraries = 'libraries',
   System = 'system',
-  Plugins = 'plugins',
   Tasks = 'tasks',
   Logs = 'logs',
   Statistics = 'statistics',
@@ -38,23 +40,27 @@ enum TabID {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent, ManageUsersComponent, ManageLibraryComponent, ManageLogsComponent, ManageSystemComponent, ServerStatsComponent, ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe]
+  imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ManageSettingsComponent, ManageEmailSettingsComponent, ManageMediaSettingsComponent, ManageUsersComponent, ManageLibraryComponent, ManageLogsComponent, ManageSystemComponent, ServerStatsComponent, ManageTasksSettingsComponent, LicenseComponent, NgbNavOutlet, SentenceCasePipe, TranslocoModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent implements OnInit {
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'General', fragment: TabID.General},
-    {title: 'Users', fragment: TabID.Users},
-    {title: 'Libraries', fragment: TabID.Libraries},
-    //{title: 'Logs', fragment: TabID.Logs},
-    {title: 'Media', fragment: TabID.Media},
-    {title: 'Email', fragment: TabID.Email},
-    {title: 'Tasks', fragment: TabID.Tasks},
-    {title: 'Statistics', fragment: TabID.Statistics},
-    {title: 'System', fragment: TabID.System},
-    {title: 'Kavita+', fragment: TabID.KavitaPlus},
+    {title: 'general-tab', fragment: TabID.General},
+    {title: 'users-tab', fragment: TabID.Users},
+    {title: 'libraries-tab', fragment: TabID.Libraries},
+    //{title: 'logs-tab', fragment: TabID.Logs},
+    {title: 'media-tab', fragment: TabID.Media},
+    {title: 'email-tab', fragment: TabID.Email},
+    {title: 'tasks-tab', fragment: TabID.Tasks},
+    {title: 'statistics-tab', fragment: TabID.Statistics},
+    {title: 'system-tab', fragment: TabID.System},
+    {title: 'kavita+-tab', fragment: TabID.KavitaPlus},
   ];
   active = this.tabs[0];
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly translocoService = inject(TranslocoService);
 
   get TabID() {
     return TabID;
@@ -69,11 +75,12 @@ export class DashboardComponent implements OnInit {
       } else {
         this.active = this.tabs[0]; // Default to first tab
       }
+      this.cdRef.markForCheck();
     });
 
   }
 
   ngOnInit() {
-    this.titleService.setTitle('Kavita - Admin Dashboard');
+    this.titleService.setTitle('Kavita - ' + this.translocoService.translate('admin-dashboard.title'));
   }
 }

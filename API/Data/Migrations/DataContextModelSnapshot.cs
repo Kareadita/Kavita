@@ -272,6 +272,12 @@ namespace API.Data.Migrations
                     b.Property<int>("LayoutMode")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Locale")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("en");
+
                     b.Property<bool>("NoTransitions")
                         .HasColumnType("INTEGER");
 

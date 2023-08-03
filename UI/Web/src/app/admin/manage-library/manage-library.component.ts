@@ -22,6 +22,8 @@ import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
 import { LibraryTypePipe } from '../../pipe/library-type.pipe';
 import { RouterLink } from '@angular/router';
 import { NgFor, NgIf } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 
 @Component({
     selector: 'app-manage-library',
@@ -29,7 +31,7 @@ import { NgFor, NgIf } from '@angular/common';
     styleUrls: ['./manage-library.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe]
+  imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -116,20 +118,20 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   async deleteLibrary(library: Library) {
-    if (await this.confirmService.confirm('Are you sure you want to delete the ' + library.name + ' library? You cannot undo this action.')) {
+    if (await this.confirmService.confirm(translate('toast.confirm-library-delete', {name: library.name}))) {
       this.deletionInProgress = true;
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
         this.cdRef.markForCheck();
         this.getLibraries();
-        this.toastr.success('Library ' + library.name + ' has been removed');
+        this.toastr.success(translate('toasts.library-deleted', {name: library.name}));
       });
     }
   }
 
   scanLibrary(library: Library) {
     this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.info('A scan has been queued for ' + library.name);
+      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
     });
   }
 }

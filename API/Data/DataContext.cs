@@ -100,6 +100,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserPreferences>()
             .Property(b => b.BookReaderWritingStyle)
             .HasDefaultValue(WritingStyle.Horizontal);
+        builder.Entity<AppUserPreferences>()
+            .Property(b => b.Locale)
+            .IsRequired(true)
+            .HasDefaultValue("en");
 
         builder.Entity<Library>()
             .Property(b => b.AllowScrobbling)

@@ -4,13 +4,15 @@ import { Chapter } from 'src/app/_models/chapter';
 import { LibraryType } from 'src/app/_models/library';
 import { Volume } from 'src/app/_models/volume';
 import {CommonModule, NgSwitch} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-entity-title',
   standalone: true,
   imports: [
     CommonModule,
-    NgSwitch
+    NgSwitch,
+    TranslocoModule
   ],
   templateUrl: './entity-title.component.html',
   styleUrls: ['./entity-title.component.scss'],

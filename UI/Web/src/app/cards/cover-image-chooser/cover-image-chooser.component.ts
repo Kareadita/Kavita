@@ -9,6 +9,7 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {ImageComponent} from "../../shared/image/image.component";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-cover-image-chooser',
@@ -17,7 +18,8 @@ import {ImageComponent} from "../../shared/image/image.component";
     ReactiveFormsModule,
     NgxFileDropModule,
     CommonModule,
-    ImageComponent
+    ImageComponent,
+    TranslocoModule
   ],
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss'],
@@ -116,7 +118,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       img.src = imgUrl;
       img.onload = (e) => this.handleUrlImageAdd(img, index);
       img.onerror = (e) => {
-        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.toastr.error(translate('errors.rejected-cover-upload'));
         this.form.get('coverImageUrl')?.setValue('');
         this.cdRef.markForCheck();
       };
@@ -156,7 +158,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       img.src = this.imageService.getCoverUploadImage(filename);
       img.onload = (e) => this.handleUrlImageAdd(img);
       img.onerror = (e) => {
-        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.toastr.error(translate('errors.rejected-cover-upload'));
         this.form.get('coverImageUrl')?.setValue('');
         this.cdRef.markForCheck();
       };

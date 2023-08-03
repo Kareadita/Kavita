@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -18,6 +18,7 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { NgIf, DecimalPipe } from '@angular/common';
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reading-lists',
@@ -25,7 +26,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./reading-lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoModule]
 })
 export class ReadingListsComponent implements OnInit {
 
@@ -37,6 +38,7 @@ export class ReadingListsComponent implements OnInit {
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
 
+  translocoService = inject(TranslocoService);
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private accountService: AccountService, private toastr: ToastrService, private router: Router, private actionService: ActionService,
     private jumpbarService: JumpbarService, private readonly cdRef: ChangeDetectorRef, private ngbModal: NgbModal) { }
@@ -77,7 +79,7 @@ export class ReadingListsComponent implements OnInit {
     switch(action.action) {
       case Action.Delete:
         this.readingListService.delete(readingList.id).subscribe(() => {
-          this.toastr.success('Reading list deleted');
+          this.toastr.success(this.translocoService.translate('toasts.reading-list-deleted'));
           this.loadPage();
         });
         break;

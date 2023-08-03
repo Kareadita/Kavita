@@ -1,102 +1,102 @@
-<ng-container *ngIf="chapter !== undefined">
-    <ng-container>
-        <span *ngIf="chapter.writers.length === 0 && chapter.coverArtists.length === 0 
+<ng-container *transloco="let t; read: 'chapter-metadata-detail'">
+  <ng-container *ngIf="chapter !== undefined">
+        <span *ngIf="chapter.writers.length === 0 && chapter.coverArtists.length === 0
         && chapter.pencillers.length === 0 && chapter.inkers.length === 0
         && chapter.colorists.length === 0 && chapter.letterers.length === 0
         && chapter.editors.length === 0 && chapter.publishers.length === 0
         && chapter.characters.length === 0 && chapter.translators.length === 0">
-            No metadata available
+            {{t('no-data')}}
         </span>
-        <div class="row g-0">
-            <div class="col-auto mt-2" *ngIf="chapter.writers && chapter.writers.length > 0">
-                <h6>Writers</h6>
-                <app-badge-expander [items]="chapter.writers">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.coverArtists && chapter.coverArtists.length > 0">
-                <h6>Cover Artists</h6>
-                <app-badge-expander [items]="chapter.coverArtists">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.pencillers && chapter.pencillers.length > 0">
-                <h6>Pencillers</h6>
-                <app-badge-expander [items]="chapter.pencillers">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.inkers && chapter.inkers.length > 0">
-                <h6>Inkers</h6>
-                <app-badge-expander [items]="chapter.inkers">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.colorists && chapter.colorists.length > 0">
-                <h6>Colorists</h6>
-                <app-badge-expander [items]="chapter.colorists">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-
-            <div class="col-auto mt-2" *ngIf="chapter.letterers && chapter.letterers.length > 0">
-                <h6>Letterers</h6>
-                <app-badge-expander [items]="chapter.letterers">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.editors && chapter.editors.length > 0">
-                <h6>Editors</h6>
-                <app-badge-expander [items]="chapter.editors">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.publishers && chapter.publishers.length > 0">
-                <h6>Publishers</h6>
-                <app-badge-expander [items]="chapter.publishers">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-
-            <div class="col-auto mt-2" *ngIf="chapter.characters && chapter.characters.length > 0">
-                <h6>Characters</h6>
-                <app-badge-expander [items]="chapter.characters">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
-            <div class="col-auto mt-2" *ngIf="chapter.translators && chapter.translators.length > 0">
-                <h6>Translators</h6>
-                <app-badge-expander [items]="chapter.translators">
-                    <ng-template #badgeExpanderItem let-item let-position="idx">
-                        <app-person-badge [person]="item"></app-person-badge>
-                    </ng-template>  
-                </app-badge-expander>
-            </div>
+      <div class="row g-0">
+        <div class="col-auto mt-2" *ngIf="chapter.writers && chapter.writers.length > 0">
+          <h6>{{t('writers-title')}}</h6>
+          <app-badge-expander [items]="chapter.writers">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
         </div>
-    </ng-container>
+
+        <div class="col-auto mt-2" *ngIf="chapter.coverArtists && chapter.coverArtists.length > 0">
+          <h6>{{t('cover-artists-title')}}</h6>
+          <app-badge-expander [items]="chapter.coverArtists">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.pencillers && chapter.pencillers.length > 0">
+          <h6>{{t('pencillers-title')}}</h6>
+          <app-badge-expander [items]="chapter.pencillers">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.inkers && chapter.inkers.length > 0">
+          <h6>{{t('inkers-title')}}</h6>
+          <app-badge-expander [items]="chapter.inkers">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.colorists && chapter.colorists.length > 0">
+          <h6>{{t('colorists-title')}}</h6>
+          <app-badge-expander [items]="chapter.colorists">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+
+        <div class="col-auto mt-2" *ngIf="chapter.letterers && chapter.letterers.length > 0">
+          <h6>{{t('letterers-title')}}</h6>
+          <app-badge-expander [items]="chapter.letterers">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.editors && chapter.editors.length > 0">
+          <h6>{{t('editors-title')}}</h6>
+          <app-badge-expander [items]="chapter.editors">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.publishers && chapter.publishers.length > 0">
+          <h6>{{t('publishers-title')}}</h6>
+          <app-badge-expander [items]="chapter.publishers">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+
+        <div class="col-auto mt-2" *ngIf="chapter.characters && chapter.characters.length > 0">
+          <h6>{{t('characters-title')}}</h6>
+          <app-badge-expander [items]="chapter.characters">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+        <div class="col-auto mt-2" *ngIf="chapter.translators && chapter.translators.length > 0">
+          <h6>{{t('translators-title')}}</h6>
+          <app-badge-expander [items]="chapter.translators">
+            <ng-template #badgeExpanderItem let-item let-position="idx">
+              <app-person-badge [person]="item"></app-person-badge>
+            </ng-template>
+          </app-badge-expander>
+        </div>
+      </div>
+  </ng-container>
 </ng-container>

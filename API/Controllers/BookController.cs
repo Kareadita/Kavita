@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Reader;
 using API.Entities.Enums;
+using API.Extensions;
 using API.Services;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +19,16 @@ public class BookController : BaseApiController
     private readonly IBookService _bookService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICacheService _cacheService;
+    private readonly ILocalizationService _localizationService;
 
     public BookController(IBookService bookService,
-        IUnitOfWork unitOfWork, ICacheService cacheService)
+        IUnitOfWork unitOfWork, ICacheService cacheService,
+        ILocalizationService localizationService)
     {
         _bookService = bookService;
         _unitOfWork = unitOfWork;
         _cacheService = cacheService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -37,7 +41,7 @@ public class BookController : BaseApiController
     public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
     {
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
-        if (dto == null) return BadRequest("Chapter does not exist");
+        if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var bookTitle = string.Empty;
         switch (dto.SeriesFormat)
         {
@@ -92,14 +96,14 @@ public class BookController : BaseApiController
     [AllowAnonymous]
     public async Task<ActionResult> GetBookPageResources(int chapterId, [FromQuery] string file)
     {
-        if (chapterId <= 0) return BadRequest("Chapter is not valid");
+        if (chapterId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest("Chapter is not valid");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         using var book = await EpubReader.OpenBookAsync(chapter.Files.ElementAt(0).FilePath, BookService.BookReaderOptions);
 
         var key = BookService.CoalesceKeyForAnyFile(book, file);
 
-        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest("File was not found in book");
+        if (!book.Content.AllFiles.ContainsLocalFileRefWithKey(key)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "file-missing"));
 
         var bookFile = book.Content.AllFiles.GetLocalFileRefByKey(key);
         var content = await bookFile.ReadContentAsBytesAsync();
@@ -118,9 +122,9 @@ public class BookController : BaseApiController
     [HttpGet("{chapterId}/chapters")]
     public async Task<ActionResult<ICollection<BookChapterItem>>> GetBookChapters(int chapterId)
     {
-        if (chapterId <= 0) return BadRequest("Chapter is not valid");
+        if (chapterId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest("Chapter is not valid");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
 
         try
         {
@@ -144,7 +148,7 @@ public class BookController : BaseApiController
     public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
     {
         var chapter = await _cacheService.Ensure(chapterId);
-        if (chapter == null) return BadRequest("Could not find Chapter");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
         var path = _cacheService.GetCachedFile(chapter);
 
         var baseUrl = "//" + Request.Host + Request.PathBase + "/api/";
@@ -155,7 +159,7 @@ public class BookController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
     }
 }

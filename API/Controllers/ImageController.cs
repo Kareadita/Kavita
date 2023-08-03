@@ -22,13 +22,16 @@ public class ImageController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDirectoryService _directoryService;
     private readonly IImageService _imageService;
+    private readonly ILocalizationService _localizationService;
 
     /// <inheritdoc />
-    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService, IImageService imageService)
+    public ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
+        IImageService imageService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _directoryService = directoryService;
         _imageService = imageService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -42,7 +45,7 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
@@ -59,7 +62,7 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.LibraryRepository.GetLibraryCoverImageAsync(libraryId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
@@ -76,7 +79,7 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));
@@ -93,7 +96,7 @@ public class ImageController : BaseApiController
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
         var path = Path.Join(_directoryService.CoverImageDirectory, await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId));
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"No cover image");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         Response.AddCacheHeader(path);
@@ -115,7 +118,7 @@ public class ImageController : BaseApiController
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
             var destFile = await GenerateCollectionCoverImage(collectionTagId);
-            if (string.IsNullOrEmpty(destFile)) return BadRequest("No cover image");
+            if (string.IsNullOrEmpty(destFile)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
             return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)), _directoryService.FileSystem.Path.GetFileName(destFile));
         }
         var format = _directoryService.FileSystem.Path.GetExtension(path);
@@ -137,7 +140,7 @@ public class ImageController : BaseApiController
         if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
         {
             var destFile = await GenerateReadingListCoverImage(readingListId);
-            if (string.IsNullOrEmpty(destFile)) return BadRequest("No cover image");
+            if (string.IsNullOrEmpty(destFile)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-cover-image"));
             return PhysicalFile(destFile, MimeTypeMap.GetMimeType(_directoryService.FileSystem.Path.GetExtension(destFile)), _directoryService.FileSystem.Path.GetFileName(destFile));
         }
 
@@ -199,7 +202,7 @@ public class ImageController : BaseApiController
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
         var bookmark = await _unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, userId);
-        if (bookmark == null) return BadRequest("Bookmark does not exist");
+        if (bookmark == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-doesnt-exist"));
 
         var bookmarkDirectory =
             (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
@@ -220,7 +223,7 @@ public class ImageController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
         if (userId == 0) return BadRequest();
-        if (string.IsNullOrEmpty(url)) return BadRequest("Url cannot be null");
+        if (string.IsNullOrEmpty(url)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "must-be-defined", "Url"));
         var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
         // Check if the domain exists
@@ -235,7 +238,7 @@ public class ImageController : BaseApiController
             }
             catch (Exception)
             {
-                return BadRequest("There was an issue fetching favicon for domain");
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-favicon"));
             }
         }
 
@@ -256,10 +259,11 @@ public class ImageController : BaseApiController
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
         if (await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey) == 0) return BadRequest();
-        if (filename.Contains("..")) return BadRequest("Invalid Filename");
+        if (filename.Contains("..")) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-filename"));
 
         var path = Path.Join(_directoryService.TempDirectory, filename);
-        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path)) return BadRequest($"File does not exist");
+        if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "file-doesnt-exist"));
         var format = _directoryService.FileSystem.Path.GetExtension(path);
 
         return PhysicalFile(path, MimeTypeMap.GetMimeType(format), _directoryService.FileSystem.Path.GetFileName(path));

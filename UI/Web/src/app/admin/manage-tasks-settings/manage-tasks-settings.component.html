@@ -1,73 +1,76 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read: 'manage-tasks-settings'">
+  <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <h4>Recurring Tasks</h4>
-        <div class="mb-3">
-            <label for="settings-tasks-scan" class="form-label">Library Scan</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
-            <ng-template #taskScanTooltip>How often Kavita will scan and refresh metadata around library files.</ng-template>
-            <span class="visually-hidden" id="settings-tasks-scan-help">How often Kavita will scan and refresh metadata around library files.</span>
-            <select class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
-                <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
-            </select>
-        </div>
+      <h4>{{t('title')}}</h4>
+      <div class="mb-3">
+        <label for="settings-tasks-scan" class="form-label">{{t('library-scan-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="taskScanTooltip" role="button" tabindex="0"></i>
+        <ng-template #taskScanTooltip>{{t('library-scan-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="settings-tasks-scan-help"><ng-container [ngTemplateOutlet]="taskScanTooltip"></ng-container></span>
+        <select class="form-select" aria-describedby="settings-tasks-scan-help" formControlName="taskScan" id="settings-tasks-scan">
+          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+        </select>
+      </div>
 
-        <div class="mb-3">
-            <label for="settings-tasks-backup" class="form-label">Library Database Backup</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
-            <ng-template #taskBackupTooltip>How often Kavita will backup the database.</ng-template>
-            <span class="visually-hidden" id="settings-tasks-backup-help">How often Kavita will backup the database.</span>
-            <select class="form-select" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
-                <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
-            </select>
-        </div>
+      <div class="mb-3">
+        <label for="settings-tasks-backup" class="form-label">{{t('library-database-backup-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="taskBackupTooltip" role="button" tabindex="0"></i>
+        <ng-template #taskBackupTooltip>{{t('library-database-backup-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="settings-tasks-backup-help"><ng-container [ngTemplateOutlet]="taskBackupTooltip"></ng-container></span>
+        <select class="form-select" aria-describedby="settings-tasks-backup-help" formControlName="taskBackup" id="settings-tasks-backup">
+          <option *ngFor="let freq of taskFrequencies" [value]="freq">{{freq | titlecase}}</option>
+        </select>
+      </div>
 
-        <h4>Ad-hoc Tasks</h4>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-              <th scope="col">Job Title</th>
-              <th scope="col">Description</th>
-              <th scope="col">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let task of adhocTasks; let idx = index;">
-              <td id="adhoctask--{{idx}}">
-                {{task.name}}
-              </td>
-              <td>
-                {{task.description}}
-              </td>
-              <td>
-                <button class="btn btn-primary" (click)="runAdhoc(task)" attr.aria-labelledby="adhoctask--{{idx}}">Run</button>
-              </td>
-            </tr>
-            </tbody>
-        </table>
+      <h4>{{t('adhoc-tasks-title')}}</h4>
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th scope="col">{{t('job-title-header')}}</th>
+          <th scope="col">{{t('description-header')}}</th>
+          <th scope="col">{{t('action-header')}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let task of adhocTasks; let idx = index;">
+          <td id="adhoctask--{{idx}}">
+            {{t(task.name)}}
+          </td>
+          <td>
+            {{t(task.description)}}
+          </td>
+          <td>
+            <button class="btn btn-primary" (click)="runAdhoc(task)" attr.aria-labelledby="adhoctask--{{idx}}">Run</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
 
-        <h4>Recurring Tasks</h4>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-              <th scope="col">Job Title</th>
-              <th scope="col">Last Executed</th>
-              <th scope="col">Cron</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let task of recurringTasks$ | async; index as i">
-              <td>
-                {{task.title | titlecase}}
-              </td>
-              <td>{{task.lastExecution | date:'short' | defaultValue }}</td>
-              <td>{{task.cron}}</td>
-            </tr>
-            </tbody>
-        </table>
+      <h4>{{t('recurring-tasks-title')}}</h4>
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th scope="col">{{t('job-title-header')}}</th>
+          <th scope="col">{{t('last-executed-header')}}</th>
+          <th scope="col">{{t('cron-header')}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let task of recurringTasks$ | async; index as i">
+          <td>
+            {{task.title | titlecase}}
+          </td>
+          <td>{{task.lastExecution | date:'short' | defaultValue }}</td>
+          <td>{{task.cron}}</td>
+        </tr>
+        </tbody>
+      </table>
 
 
-        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
-            <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">Save</button>
-        </div>
+      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">{{t('reset')}}</button>
+        <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+      </div>
     </form>
-</div>
+  </div>
+
+</ng-container>

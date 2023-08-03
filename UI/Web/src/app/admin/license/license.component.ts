@@ -15,6 +15,7 @@ import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-license',
@@ -22,7 +23,7 @@ import {environment} from "../../../environments/environment";
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule]
+  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoModule]
 })
 export class LicenseComponent implements OnInit {
 
@@ -71,9 +72,9 @@ export class LicenseComponent implements OnInit {
       this.accountService.hasValidLicense(true).subscribe(isValid => {
         this.hasValidLicense = isValid;
         if (!this.hasValidLicense) {
-          this.toastr.info("License Key saved, but it is not valid. Click check to revalidate the subscription. First time registration may take a min to propagate.");
+          this.toastr.info(translate('toasts.k+-license-saved'));
         } else {
-          this.toastr.success('Kavita+ unlocked!');
+          this.toastr.success(translate('toasts.k+-unlocked'));
         }
         this.hasLicense = this.formGroup.get('licenseKey')!.value.length > 0;
         this.resetForm();
@@ -85,7 +86,7 @@ export class LicenseComponent implements OnInit {
         if (err.hasOwnProperty('error')) {
           this.toastr.error(JSON.parse(err['error'])['message']);
         } else {
-          this.toastr.error("There was an error when activating your license. Please try again.");
+          this.toastr.error(translate('toasts.k+-error'));
         }
         this.isSaving = false;
         this.cdRef.markForCheck();
@@ -93,7 +94,7 @@ export class LicenseComponent implements OnInit {
   }
 
   async deleteLicense() {
-    if (!await this.confirmService.confirm('This will only delete Kavita\'s license key and allow a buy link to show. This will not cancel your subscription! Use this only if directed by support!')) {
+    if (!await this.confirmService.confirm(translate('k+-delete-key'))) {
       return;
     }
 

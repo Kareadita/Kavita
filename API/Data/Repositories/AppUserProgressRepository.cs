@@ -28,7 +28,7 @@ public interface IAppUserProgressRepository
     Task<IEnumerable<AppUserProgress>> GetUserProgressForSeriesAsync(int seriesId, int userId);
     Task<IEnumerable<AppUserProgress>> GetAllProgress();
     Task<DateTime> GetLatestProgress();
-    Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId);
+    Task<ProgressDto?> GetUserProgressDtoAsync(int chapterId, int userId);
     Task<bool> AnyUserProgressForSeriesAsync(int seriesId, int userId);
     Task<int> GetHighestFullyReadChapterForSeries(int seriesId, int userId);
     Task<int> GetHighestFullyReadVolumeForSeries(int seriesId, int userId);
@@ -143,7 +143,7 @@ public class AppUserProgressRepository : IAppUserProgressRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<ProgressDto> GetUserProgressDtoAsync(int chapterId, int userId)
+    public async Task<ProgressDto?> GetUserProgressDtoAsync(int chapterId, int userId)
     {
         return await _context.AppUserProgresses
             .Where(p => p.AppUserId == userId && p.ChapterId == chapterId)

@@ -164,7 +164,7 @@ public class LicenseService : ILicenseService
         var serverSetting = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
         var lic = await RegisterLicense(license, email);
         if (string.IsNullOrWhiteSpace(lic))
-            throw new KavitaException("Unable to register license due to error. Reach out to Kavita+ Support");
+            throw new KavitaException("unable-to-register-k+");
         serverSetting.Value = lic;
         _unitOfWork.SettingsRepository.Update(serverSetting);
         await _unitOfWork.CommitAsync();

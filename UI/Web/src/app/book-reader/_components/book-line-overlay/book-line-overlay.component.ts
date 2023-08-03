@@ -9,12 +9,12 @@ import {
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {fromEvent, merge, of} from "rxjs";
-import {catchError, filter, tap} from "rxjs/operators";
+import {catchError} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import getBoundingClientRect from "@popperjs/core/lib/dom-utils/getBoundingClientRect";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
 import {ToastrService} from "ngx-toastr";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -24,7 +24,7 @@ enum BookLineOverlayMode {
 @Component({
   selector: 'app-book-line-overlay',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, TranslocoModule],
   templateUrl: './book-line-overlay.component.html',
   styleUrls: ['./book-line-overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -132,7 +132,7 @@ export class BookLineOverlayComponent implements OnInit {
     const selection = window.getSelection();
     if (selection) {
       await navigator.clipboard.writeText(selection.toString());
-      this.toastr.info('Copied to clipboard');
+      this.toastr.info(translate('toasts.copied-to-clipboard'));
     }
     this.reset();
   }

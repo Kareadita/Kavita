@@ -8,6 +8,7 @@ using API.DTOs;
 using API.DTOs.Recommendation;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
 using API.Services.Plus;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
@@ -21,15 +22,18 @@ public class RecommendedController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRecommendationService _recommendationService;
     private readonly ILicenseService _licenseService;
+    private readonly ILocalizationService _localizationService;
     private readonly IEasyCachingProvider _cacheProvider;
     public const string CacheKey = "recommendation_";
 
     public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
-        ILicenseService licenseService, IEasyCachingProviderFactory cachingProviderFactory)
+        ILicenseService licenseService, IEasyCachingProviderFactory cachingProviderFactory,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _recommendationService = recommendationService;
         _licenseService = licenseService;
+        _localizationService = localizationService;
         _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
     }
 
@@ -50,7 +54,7 @@ public class RecommendedController : BaseApiController
 
         if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
         {
-            return BadRequest("User does not have access to this Series");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-restricted"));
         }
 
         var cacheKey = $"{CacheKey}-{seriesId}-{userId}";

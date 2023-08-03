@@ -41,11 +41,13 @@ public class ServerController : BaseApiController
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEasyCachingProviderFactory _cachingProviderFactory;
+    private readonly ILocalizationService _localizationService;
 
     public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
         ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory)
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -58,6 +60,7 @@ public class ServerController : BaseApiController
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
         _cachingProviderFactory = cachingProviderFactory;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -103,12 +106,12 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpPost("analyze-files")]
-    public ActionResult AnalyzeFiles()
+    public async Task<ActionResult> AnalyzeFiles()
     {
         _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
                 Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
-            return Ok("Job already running");
+            return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
 
         BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
         return Ok();
@@ -127,7 +130,7 @@ public class ServerController : BaseApiController
     /// <summary>
     /// Returns non-sensitive information about the current system
     /// </summary>
-    /// <remarks>This is just for the UI and is extremly lightweight</remarks>
+    /// <remarks>This is just for the UI and is extremely lightweight</remarks>
     /// <returns></returns>
     [HttpGet("server-info-slim")]
     public async Task<ActionResult<ServerInfoDto>> GetSlimVersion()
@@ -146,8 +149,7 @@ public class ServerController : BaseApiController
         var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
-            return BadRequest(
-                "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "encode-as-warning"));
         }
 
         _taskScheduler.CovertAllCoversToEncoding();
@@ -160,7 +162,7 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("logs")]
-    public ActionResult GetLogs()
+    public async Task<ActionResult> GetLogs()
     {
         var files = _backupService.GetLogFiles();
         try
@@ -171,7 +173,7 @@ public class ServerController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
     }
 

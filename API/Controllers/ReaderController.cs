@@ -16,6 +16,7 @@ using API.Services;
 using API.Services.Plus;
 using API.SignalR;
 using Hangfire;
+using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -37,13 +38,15 @@ public class ReaderController : BaseApiController
     private readonly IAccountService _accountService;
     private readonly IEventHub _eventHub;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILocalizationService _localizationService;
 
     /// <inheritdoc />
     public ReaderController(ICacheService cacheService,
         IUnitOfWork unitOfWork, ILogger<ReaderController> logger,
         IReaderService readerService, IBookmarkService bookmarkService,
         IAccountService accountService, IEventHub eventHub,
-        IScrobblingService scrobblingService)
+        IScrobblingService scrobblingService,
+        ILocalizationService localizationService)
     {
         _cacheService = cacheService;
         _unitOfWork = unitOfWork;
@@ -53,6 +56,7 @@ public class ReaderController : BaseApiController
         _accountService = accountService;
         _eventHub = eventHub;
         _scrobblingService = scrobblingService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -71,13 +75,13 @@ public class ReaderController : BaseApiController
         // Validate the user has access to the PDF
         var series = await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapter.Id,
             await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername()));
-        if (series == null) return BadRequest("Invalid Access");
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-access"));
 
         try
         {
 
             var path = _cacheService.GetCachedFile(chapter);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"Pdf doesn't exist when it should.");
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "pdf-doesnt-exist"));
 
             return PhysicalFile(path, MimeTypeMap.GetMimeType(Path.GetExtension(path)), Path.GetFileName(path), true);
         }
@@ -110,7 +114,8 @@ public class ReaderController : BaseApiController
         try
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}. Try refreshing to allow re-cache.");
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path), true);
@@ -170,7 +175,7 @@ public class ReaderController : BaseApiController
         try
         {
             var path = _cacheService.GetCachedBookmarkPagePath(seriesId, page);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {page}");
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-image-for-page", page));
             var format = Path.GetExtension(path);
 
             return PhysicalFile(path, MimeTypeMap.GetMimeType(format), Path.GetFileName(path));
@@ -217,7 +222,7 @@ public class ReaderController : BaseApiController
         if (chapter == null) return NoContent();
 
         var dto = await _unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
-        if (dto == null) return BadRequest("Please perform a scan on this series or library and try again");
+        if (dto == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "perform-scan"));
         var mangaFile = chapter.Files.First();
 
         var info = new ChapterInfoDto()
@@ -256,7 +261,8 @@ public class ReaderController : BaseApiController
         }
         else
         {
-            info.Subtitle = "Volume " + info.VolumeNumber;
+            //info.Subtitle = await _localizationService.Translate(User.GetUserId(), "volume-num", info.VolumeNumber);
+            info.Subtitle = $"Volume {info.VolumeNumber}";
             if (!info.ChapterNumber.Equals(Services.Tasks.Scanner.Parser.Parser.DefaultChapter))
             {
                 info.Subtitle += " " + ReaderService.FormatChapterName(info.LibraryType, true, true) +
@@ -309,9 +315,16 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
-        await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+        try
+        {
+            await _readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(markReadDto.SeriesId, user.Id));
@@ -331,7 +344,7 @@ public class ReaderController : BaseApiController
         if (user == null) return Unauthorized();
         await _readerService.MarkSeriesAsUnread(user, markReadDto.SeriesId);
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was an issue saving progress");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
         return Ok();
@@ -357,7 +370,7 @@ public class ReaderController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("Could not save progress");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
     }
 
     /// <summary>
@@ -372,12 +385,19 @@ public class ReaderController : BaseApiController
 
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         if (user == null) return Unauthorized();
-        await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+        try
+        {
+            await _readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
         await _eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
             MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("Could not save progress");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(markVolumeReadDto.SeriesId, user.Id));
@@ -405,7 +425,7 @@ public class ReaderController : BaseApiController
         var chapters = await _unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
         await _readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList());
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("Could not save progress");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
         BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
         BackgroundJob.Enqueue(() => _unitOfWork.SeriesRepository.ClearOnDeckRemoval(dto.SeriesId, user.Id));
         return Ok();
@@ -439,7 +459,7 @@ public class ReaderController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("Could not save progress");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
     }
 
     /// <summary>
@@ -460,7 +480,7 @@ public class ReaderController : BaseApiController
             await _readerService.MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
         }
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("Could not save progress");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
         foreach (var sId in dto.SeriesIds)
         {
@@ -497,7 +517,7 @@ public class ReaderController : BaseApiController
             return Ok();
         }
 
-        return BadRequest("Could not save progress");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
     }
 
     /// <summary>
@@ -529,7 +549,7 @@ public class ReaderController : BaseApiController
     {
         var userId = User.GetUserId();
         if (!await _readerService.SaveReadingProgress(progressDto, userId))
-            return BadRequest("Could not save progress");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-read-progress"));
 
 
         return Ok(true);
@@ -589,7 +609,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok("Nothing to remove");
+        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {
@@ -616,7 +636,7 @@ public class ReaderController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Could not clear bookmarks");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-clear-bookmarks"));
     }
 
     /// <summary>
@@ -629,7 +649,7 @@ public class ReaderController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername(), AppUserIncludes.Bookmarks);
         if (user == null) return Unauthorized();
-        if (user.Bookmarks == null) return Ok("Nothing to remove");
+        if (user.Bookmarks == null) return Ok(await _localizationService.Translate(User.GetUserId(), "nothing-to-do"));
 
         try
         {
@@ -653,7 +673,7 @@ public class ReaderController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Could not clear bookmarks");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-clear-bookmarks"));
     }
 
     /// <summary>
@@ -692,15 +712,16 @@ public class ReaderController : BaseApiController
         if (user == null) return new UnauthorizedResult();
 
         if (!await _accountService.HasBookmarkPermission(user))
-            return BadRequest("You do not have permission to bookmark");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
 
         var chapter = await _cacheService.Ensure(bookmarkDto.ChapterId);
-        if (chapter == null) return BadRequest("Could not find cached image. Reload and try again.");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "cache-file-find"));
 
         bookmarkDto.Page = _readerService.CapPageToChapter(chapter, bookmarkDto.Page);
         var path = _cacheService.GetCachedPagePath(chapter.Id, bookmarkDto.Page);
 
-        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path)) return BadRequest("Could not save bookmark");
+        if (!await _bookmarkService.BookmarkPage(user, bookmarkDto, path))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
 
         BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
         return Ok();
@@ -719,10 +740,10 @@ public class ReaderController : BaseApiController
         if (user.Bookmarks.IsNullOrEmpty()) return Ok();
 
         if (!await _accountService.HasBookmarkPermission(user))
-            return BadRequest("You do not have permission to unbookmark");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-permission"));
 
         if (!await _bookmarkService.RemoveBookmarkPage(user, bookmarkDto))
-            return BadRequest("Could not remove bookmark");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-save"));
         BackgroundJob.Enqueue(() => _cacheService.CleanupBookmarkCache(bookmarkDto.SeriesId));
         return Ok();
     }
@@ -806,9 +827,10 @@ public class ReaderController : BaseApiController
     [HttpDelete("ptoc")]
     public async Task<ActionResult> DeletePersonalToc([FromQuery] int chapterId, [FromQuery] int pageNum, [FromQuery] string title)
     {
-        if (string.IsNullOrWhiteSpace(title)) return BadRequest("Name cannot be empty");
-        if (pageNum < 0) return BadRequest("Must be valid page number");
-        var toc = await _unitOfWork.UserTableOfContentRepository.Get(User.GetUserId(), chapterId, pageNum, title);
+        var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(title)) return BadRequest(await _localizationService.Translate(userId, "name-required"));
+        if (pageNum < 0) return BadRequest(await _localizationService.Translate(userId, "valid-number"));
+        var toc = await _unitOfWork.UserTableOfContentRepository.Get(userId, chapterId, pageNum, title);
         if (toc == null) return Ok();
         _unitOfWork.UserTableOfContentRepository.Remove(toc);
         await _unitOfWork.CommitAsync();
@@ -825,13 +847,13 @@ public class ReaderController : BaseApiController
     public async Task<ActionResult> CreatePersonalToC(CreatePersonalToCDto dto)
     {
         // Validate there isn't already an existing page title combo?
-        if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest("Name cannot be empty");
-        if (dto.PageNumber < 0) return BadRequest("Must be valid page number");
         var userId = User.GetUserId();
+        if (string.IsNullOrWhiteSpace(dto.Title)) return BadRequest(await _localizationService.Translate(userId, "name-required"));
+        if (dto.PageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "valid-number"));
         if (await _unitOfWork.UserTableOfContentRepository.IsUnique(userId, dto.ChapterId, dto.PageNumber,
                 dto.Title.Trim()))
         {
-            return BadRequest("Duplicate ToC entry already exists");
+            return BadRequest(await _localizationService.Translate(userId, "duplicate-bookmark"));
         }
 
         _unitOfWork.UserTableOfContentRepository.Attach(new AppUserTableOfContent()

@@ -52,12 +52,12 @@ public class CollectionTagService : ICollectionTagService
     public async Task<bool> UpdateTag(CollectionTagDto dto)
     {
         var existingTag = await _unitOfWork.CollectionTagRepository.GetTagAsync(dto.Id);
-        if (existingTag == null) throw new KavitaException("This tag does not exist");
+        if (existingTag == null) throw new KavitaException("collection-doesnt-exist");
 
         var title = dto.Title.Trim();
-        if (string.IsNullOrEmpty(title)) throw new KavitaException("Title cannot be empty");
+        if (string.IsNullOrEmpty(title)) throw new KavitaException("collection-tag-title-required");
         if (!title.Equals(existingTag.Title) && await TagExistsByName(dto.Title))
-            throw new KavitaException("A tag with this name already exists");
+            throw new KavitaException("collection-tag-duplicate");
 
         existingTag.SeriesMetadatas ??= new List<SeriesMetadata>();
         existingTag.Title = title;

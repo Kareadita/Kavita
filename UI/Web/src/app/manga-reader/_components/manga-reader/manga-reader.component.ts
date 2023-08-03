@@ -67,6 +67,7 @@ import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
 import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
 import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 const PREFETCH_PAGES = 10;
@@ -120,7 +121,7 @@ enum KeyDirection {
         ])
     ],
     standalone: true,
-    imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe]
+  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe, TranslocoModule]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -381,6 +382,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
+  private readonly translocoService = inject(TranslocoService);
+
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
@@ -588,7 +591,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
         if (!progress) {
           this.toggleMenu();
-          this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+          this.toastr.info(this.translocoService.translate('manga-reader.first-time-reading-manga'));
         }
       });
     });
@@ -720,7 +723,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
     this.generalSettingsForm.get('layoutMode')?.disable();
-    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
+    this.toastr.info(this.translocoService.translate('manga-reader.layout-mode-switched'));
     this.cdRef.markForCheck();
   }
 
@@ -1215,7 +1218,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Next Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1233,7 +1236,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPrevChapter() {
     if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Previous Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-prev-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1269,10 +1272,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
-      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.info(msg, '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
+      const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter',
+        {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.warning(msg);
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;
@@ -1600,7 +1606,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
@@ -1608,17 +1614,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   openShortcutModal() {
-    let ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
+    const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
-      {key: '⇽', description: 'Move to previous page'},
-      {key: '⇾', description: 'Move to next page'},
-      {key: '↑', description: 'Move to previous page'},
-      {key: '↓', description: 'Move to previous page'},
-      {key: 'G', description: 'Open Go to Page dialog'},
-      {key: 'B', description: 'Bookmark current page'},
-      {key: 'double click', description: 'Bookmark current page'},
-      {key: 'ESC', description: 'Close reader'},
-      {key: 'SPACE', description: 'Toggle Menu'},
+      {key: '⇽', description: 'prev-page'},
+      {key: '⇾', description: 'next-page'},
+      {key: '↑', description: 'prev-page'},
+      {key: '↓', description: 'next-page'},
+      {key: 'G', description: 'go-to'},
+      {key: 'B', description: 'bookmark'},
+      {key: this.translocoService.translate('shortcuts-modal.double-click'), description: 'bookmark'},
+      {key: 'ESC', description: 'close-reader'},
+      {key: 'SPACE', description: 'toggle-menu'},
     ];
   }
 
@@ -1638,7 +1644,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
 
       this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
-        this.toastr.success('User preferences updated');
+        this.toastr.success(this.translocoService.translate('manga-reader.user-preferences-updated'));
         if (this.user) {
           this.user.preferences = updatedPrefs;
           this.cdRef.markForCheck();

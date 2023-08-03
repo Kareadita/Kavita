@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.5.7"
+    "version": "0.7.6.1"
   },
   "servers": [
     {
@@ -2851,6 +2851,44 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Locale": {
+      "get": {
+        "tags": [
+          "Locale"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8509,7 +8547,7 @@
           "Server"
         ],
         "summary": "Returns non-sensitive information about the current system",
-        "description": "This is just for the UI and is extremly lightweight",
+        "description": "This is just for the UI and is extremely lightweight",
         "responses": {
           "200": {
             "description": "Success",
@@ -11219,6 +11257,11 @@
           "shareReviews": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "locale": {
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user",
+            "nullable": true
           },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
@@ -17292,6 +17335,7 @@
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
+          "locale",
           "noTransitions",
           "pageSplitOption",
           "promptForDownloadSize",
@@ -17467,6 +17511,11 @@
           "shareReviews": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "locale": {
+            "minLength": 1,
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user"
           }
         },
         "additionalProperties": false

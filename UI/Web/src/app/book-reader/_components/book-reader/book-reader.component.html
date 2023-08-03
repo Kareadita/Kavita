@@ -1,155 +1,159 @@
-<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
+<ng-container *transloco="let t; read: 'book-reader'">
+  <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
     <div class="fixed-top" #stickyTop>
-        <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">Skip to main content</a>
-        <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
-        <app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
-                               [libraryId]="libraryId"
-                               [volumeId]="volumeId"
-                               [chapterId]="chapterId"
-                               [seriesId]="seriesId"
-                               [pageNumber]="pageNum"
-                               (refreshToC)="refreshPersonalToC()">
+      <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
+      <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
+      <app-book-line-overlay [parent]="bookContainerElemRef" *ngIf="page !== undefined"
+                             [libraryId]="libraryId"
+                             [volumeId]="volumeId"
+                             [chapterId]="chapterId"
+                             [seriesId]="seriesId"
+                             [pageNumber]="pageNum"
+                             (refreshToC)="refreshPersonalToC()">
       </app-book-line-overlay>
-        <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [options]="{topOffset: topOffset}">
-            <h5 header>
-                Book Settings
-            </h5>
-            <div subheader>
-                <div class="pagination-cont">
-                    <ng-container *ngIf="layoutMode !== BookPageLayoutMode.Default">
-                        <div class="virt-pagination-cont">
-                            <div class="g-0 text-center">
-                                Page
-                            </div>
-                            <div class="d-flex align-items-center justify-content-between text-center row g-0" *ngIf="getVirtualPage() as vp" >
-                                <button class="btn btn-small btn-icon col-1" (click)="prevPage()" title="Prev Page">
-                                    <i class="fa-solid fa-caret-left" aria-hidden="true"></i>
-                                </button>
-                                <div class="col-1">{{vp[0]}}</div>
-                                <div class="col-8">
-                                    <ngb-progressbar title="virtual pages" type="primary" height="5px" (click)="loadPage()" [value]="vp[0]" [max]="vp[1]"></ngb-progressbar>
-                                </div>
-                                <div class="col-1 btn-icon" (click)="loadPage()" title="Go to last page">{{vp[1]}}</div>
-                                <button class="btn btn-small btn-icon col-1" (click)="nextPage()" title="Next Page"><i class="fa-solid fa-caret-right" aria-hidden="true"></i></button>
-                            </div>
-                        </div>
-                    </ng-container>
-
-                    <div class="g-0 text-center">
-                        Section
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between text-center row g-0">
-                        <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" title="Prev Chapter/Volume"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
-                        <div class="col-1" (click)="goToPage(0)">{{pageNum}}</div>
-                        <div class="col-8">
-                            <ngb-progressbar style="cursor: pointer" title="Go to page" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
-                        </div>
-                        <div class="col-1 btn-icon" (click)="goToPage(maxPages - 1)" title="Go to last page">{{maxPages - 1}}</div>
-                        <button class="btn btn-small btn-icon col-1"  [disabled]="nextChapterDisabled" (click)="loadNextChapter()" title="Next Chapter/Volume"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
-                    </div>
+      <app-drawer #commentDrawer="drawer" [(isOpen)]="drawerOpen" [options]="{topOffset: topOffset}">
+        <h5 header>
+          {{t('title')}}
+        </h5>
+        <div subheader>
+          <div class="pagination-cont">
+            <ng-container *ngIf="layoutMode !== BookPageLayoutMode.Default">
+              <div class="virt-pagination-cont">
+                <div class="g-0 text-center">
+                  {{t('page')}}
                 </div>
-            </div>
-            <div body class="drawer-body">
-                <nav role="navigation">
-                    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
-                        <li [ngbNavItem]="TabID.Settings">
-                            <a ngbNavLink>Settings</a>
-                            <ng-template ngbNavContent>
-                                <app-reader-settings
-                                    (colorThemeUpdate)="updateColorTheme($event)"
-                                    (styleUpdate)="updateReaderStyles($event)"
-                                    (clickToPaginateChanged)="showPaginationOverlay($event)"
-                                    (fullscreen)="toggleFullscreen()"
-                                    (bookReaderWritingStyle)="updateWritingStyle($event)"
-                                    (layoutModeUpdate)="updateLayoutMode($event)"
-                                    (readingDirection)="updateReadingDirection($event)"
-                                    (immersiveMode)="updateImmersiveMode($event)"
-                                ></app-reader-settings>
-                            </ng-template>
-                          </li>
+                <div class="d-flex align-items-center justify-content-between text-center row g-0" *ngIf="getVirtualPage() as vp" >
+                  <button class="btn btn-small btn-icon col-1" (click)="prevPage()" [title]="t('prev-page')">
+                    <i class="fa-solid fa-caret-left" aria-hidden="true"></i>
+                  </button>
+                  <div class="col-1">{{vp[0]}}</div>
+                  <div class="col-8">
+                    <ngb-progressbar [title]="t('virtual-pages')" type="primary" height="5px" (click)="loadPage()" [value]="vp[0]" [max]="vp[1]"></ngb-progressbar>
+                  </div>
+                  <div class="col-1 btn-icon" (click)="loadPage()" [title]="t('go-to-last-page')">{{vp[1]}}</div>
+                  <button class="btn btn-small btn-icon col-1" (click)="nextPage()" [title]="t('next-page')"><i class="fa-solid fa-caret-right" aria-hidden="true"></i></button>
+                </div>
+              </div>
+            </ng-container>
 
-                          <li [ngbNavItem]="TabID.TableOfContents">
-                            <a ngbNavLink>Table of Contents</a>
-                            <ng-template ngbNavContent>
-                              <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
-                                <li [ngbNavItem]="TabID.TableOfContents">
-                                  <a ngbNavLink>ToC</a>
-                                  <ng-template ngbNavContent>
-                                    <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
-                                                           [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
-                                  </ng-template>
-                                </li>
-                                <li [ngbNavItem]="TabID.PersonalTableOfContents">
-                                  <a ngbNavLink>Bookmarks</a>
-                                  <ng-template ngbNavContent>
-                                    <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
-                                                                    [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
-                                  </ng-template>
-                                </li>
-                              </ul>
-                              <div [ngbNavOutlet]="subnav" class="mt-3"></div>
-                            </ng-template>
-                          </li>
-                    </ul>
-                </nav>
-                <div [ngbNavOutlet]="nav" class="mt-3"></div>
+            <div class="g-0 text-center">
+              {{t('pagination-header')}}
             </div>
-        </app-drawer>
+            <div class="d-flex align-items-center justify-content-between text-center row g-0">
+              <button class="btn btn-small btn-icon col-1" [disabled]="prevChapterDisabled" (click)="loadPrevChapter()" [title]="t('prev-chapter')"><i class="fa fa-fast-backward" aria-hidden="true"></i></button>
+              <div class="col-1" (click)="goToPage(0)">{{pageNum}}</div>
+              <div class="col-8">
+                <ngb-progressbar style="cursor: pointer" [title]="t('go-to-page')" (click)="goToPage()" type="primary" height="5px" [value]="pageNum" [max]="maxPages - 1"></ngb-progressbar>
+              </div>
+              <div class="col-1 btn-icon" (click)="goToPage(maxPages - 1)" [title]="t('go-to-last-page')">{{maxPages - 1}}</div>
+              <button class="btn btn-small btn-icon col-1"  [disabled]="nextChapterDisabled" (click)="loadNextChapter()" [title]="t('next-chapter')"><i class="fa fa-fast-forward" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+        <div body class="drawer-body">
+          <nav role="navigation">
+            <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
+              <li [ngbNavItem]="TabID.Settings">
+                <a ngbNavLink>{{t('settings-header')}}</a>
+                <ng-template ngbNavContent>
+                  <app-reader-settings
+                    (colorThemeUpdate)="updateColorTheme($event)"
+                    (styleUpdate)="updateReaderStyles($event)"
+                    (clickToPaginateChanged)="showPaginationOverlay($event)"
+                    (fullscreen)="toggleFullscreen()"
+                    (bookReaderWritingStyle)="updateWritingStyle($event)"
+                    (layoutModeUpdate)="updateLayoutMode($event)"
+                    (readingDirection)="updateReadingDirection($event)"
+                    (immersiveMode)="updateImmersiveMode($event)"
+                  ></app-reader-settings>
+                </ng-template>
+              </li>
+
+              <li [ngbNavItem]="TabID.TableOfContents">
+                <a ngbNavLink>{{t('table-of-contents-header')}}</a>
+                <ng-template ngbNavContent>
+                  <ul #subnav="ngbNav" ngbNav [(activeId)]="tocId" class="reader-pills nav nav-pills mb-2" [destroyOnHide]="false">
+                    <li [ngbNavItem]="TabID.TableOfContents">
+                      <a ngbNavLink>{{t('toc-header')}}</a>
+                      <ng-template ngbNavContent>
+                        <app-table-of-contents [chapters]="chapters" [chapterId]="chapterId" [pageNum]="pageNum"
+                                               [currentPageAnchor]="currentPageAnchor" (loadChapter)="loadChapterPage($event)"></app-table-of-contents>
+                      </ng-template>
+                    </li>
+                    <li [ngbNavItem]="TabID.PersonalTableOfContents">
+                      <a ngbNavLink>{{t('bookmarks-header')}}</a>
+                      <ng-template ngbNavContent>
+                        <app-personal-table-of-contents [chapterId]="chapterId" [pageNum]="pageNum" (loadChapter)="loadChapterPart($event)"
+                                                        [tocRefresh]="refreshPToC"></app-personal-table-of-contents>
+                      </ng-template>
+                    </li>
+                  </ul>
+                  <div [ngbNavOutlet]="subnav" class="mt-3"></div>
+                </ng-template>
+              </li>
+            </ul>
+          </nav>
+          <div [ngbNavOutlet]="nav" class="mt-3"></div>
+        </div>
+      </app-drawer>
     </div>
 
     <div #readingSection class="reading-section {{ColumnLayout}} {{WritingStyleClass}}" [ngStyle]="{'width': PageWidthForPagination}" [ngClass]="{'immersive' : immersiveMode || !actionBarVisible}" [@isLoading]="isLoading">
 
-        <ng-container *ngIf="clickToPaginate">
-            <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
-                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-                 tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
-            <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-                [ngClass]="{'immersive' : immersiveMode}"
-                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-                 tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
-        </ng-container>
-        <div #bookContainer class="book-container {{WritingStyleClass}}" [ngClass]="{'immersive' : immersiveMode}">
+      <ng-container *ngIf="clickToPaginate">
+        <div class="left {{clickOverlayClass('left')}} no-observe" [ngClass]="{'immersive' : immersiveMode}"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+             tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
+        <div class="{{scrollbarNeeded ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
+             [ngClass]="{'immersive' : immersiveMode}"
+             (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
+             tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
+      </ng-container>
+      <div #bookContainer class="book-container {{WritingStyleClass}}" [ngClass]="{'immersive' : immersiveMode}">
 
-            <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
-                 [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
-                 [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
-                 [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
-            <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
-                 (click)="$event.stopPropagation();"
-                 [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
-                <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
-            </div>
+        <div #readingHtml class="book-content {{ColumnLayout}} {{WritingStyleClass}}"
+             [ngStyle]="{'max-height': ColumnHeight, 'max-width': VerticalBookContentWidth, 'width': VerticalBookContentWidth, 'column-width': ColumnWidth}"
+             [ngClass]="{'immersive': immersiveMode && actionBarVisible}"
+             [innerHtml]="page" *ngIf="page !== undefined" (click)="toggleMenu($event)" (mousedown)="mouseDown($event)" (wheel)="onWheel($event)"></div>
+        <div *ngIf="page !== undefined && (scrollbarNeeded || layoutMode !== BookPageLayoutMode.Default) && !(writingStyle === WritingStyle.Vertical && layoutMode === BookPageLayoutMode.Default)"
+             (click)="$event.stopPropagation();"
+             [ngClass]="{'bottom-bar': layoutMode !== BookPageLayoutMode.Default}">
+          <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
         </div>
+      </div>
     </div>
     <ng-template #actionBar>
-        <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
-            <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
+      <div class="action-bar row g-0 justify-content-between" *ngIf="!immersiveMode || drawerOpen || actionBarVisible">
+        <button class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
                 [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsPrevDisabled : IsNextDisabled"
-                title="{{readingDirection === ReadingDirection.LeftToRight ? 'Previous' : 'Next'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
-            </button>
-            <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" title="Go Back">
-                <i class="fa fa-reply" aria-hidden="true"></i>
-            </button>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()">
-                <i class="fa fa-bars" aria-hidden="true"></i></button>
-            <div class="book-title col-2 d-none d-sm-block">
-                <ng-container *ngIf="isLoading; else showTitle">
-                    <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
-                        <span class="visually-hidden">Loading book...</span>
-                    </div>
-                </ng-container>
-                <ng-template #showTitle>
-                    <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" aria-label="Incognito mode is on. Toggle to turn off.">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>)</span>
-                    <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
-                </ng-template>
+                title="{{readingDirection === ReadingDirection.LeftToRight ? t('previous') : t('next')}} Page">
+          <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsPrevChapter : IsNextChapter) ? 'fa-angle-double-left' : 'fa-angle-left'}} {{readingDirection === ReadingDirection.RightToLeft ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+        </button>
+        <button *ngIf="!this.adhocPageHistory.isEmpty()" class="btn btn-outline-secondary btn-icon col-2 col-xs-1" (click)="goBack()" [title]="t('go-back')">
+          <i class="fa fa-reply" aria-hidden="true"></i>
+        </button>
+        <button class="btn btn-secondary col-2 col-xs-1" (click)="toggleDrawer()">
+          <i class="fa fa-bars" aria-hidden="true"></i></button>
+        <div class="book-title col-2 d-none d-sm-block">
+          <ng-container *ngIf="isLoading; else showTitle">
+            <div class="spinner-border spinner-border-sm text-primary" style="border-radius: 50%;" role="status">
+              <span class="visually-hidden">{{t('loading-book')}}</span>
             </div>
-            <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-            <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
-                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
-                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" title="{{readingDirection === ReadingDirection.LeftToRight ? 'Next' : 'Previous'}} Page">
-                <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
-            </button>
+          </ng-container>
+          <ng-template #showTitle>
+            <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
+              (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode-label')}}</span>)</span>
+            <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
+          </ng-template>
         </div>
+        <button class="btn btn-secondary col-2 col-xs-1" (click)="closeReader()"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+        <button class="btn btn-outline-secondary btn-icon col-2  col-xs-1"
+                [disabled]="readingDirection === ReadingDirection.LeftToRight ? IsNextDisabled : IsPrevDisabled"
+                (click)="movePage(readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)" title="{{readingDirection === ReadingDirection.LeftToRight ? t('next') : t('previous')}} Page">
+          <i class="fa {{(readingDirection === ReadingDirection.LeftToRight ? IsNextChapter : IsPrevChapter) ? 'fa-angle-double-right' : 'fa-angle-right'}} {{readingDirection === ReadingDirection.LeftToRight ? 'next-page-highlight' : ''}}" aria-hidden="true"></i>
+        </button>
+      </div>
     </ng-template>
-</div>
+  </div>
+
+</ng-container>

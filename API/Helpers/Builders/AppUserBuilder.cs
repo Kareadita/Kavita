@@ -37,4 +37,11 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
         _appUser.Libraries.Add(library);
         return this;
     }
+
+    public AppUserBuilder WithLocale(string locale)
+    {
+        _appUser.UserPreferences.Locale = locale;
+        return this;
+    }
+
 }

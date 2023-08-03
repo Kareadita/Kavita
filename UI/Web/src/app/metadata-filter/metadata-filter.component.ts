@@ -6,7 +6,6 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
@@ -35,6 +34,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { TypeaheadComponent } from '../typeahead/_components/typeahead.component';
 import { DrawerComponent } from '../shared/drawer/drawer.component';
 import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
+import {SortFieldPipe} from "../pipe/sort-field.pipe";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -42,7 +43,8 @@ import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
     styleUrls: ['./metadata-filter.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent, ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe]
+  imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe]
 })
 export class MetadataFilterComponent implements OnInit {
 

@@ -1,33 +1,36 @@
+<ng-container *transloco="let t; read:'library-access-modal'">
 
-<div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Library Access</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-    
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
+
     </button>
-</div>
-<div class="modal-body">
+  </div>
+  <div class="modal-body">
     <div class="list-group">
-        <div class="form-check">
-            <input id="selectall" type="checkbox" class="form-check-input" 
-                [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-            <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
-        </div>
-        <ul>
-            <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">
-                <div class="form-check">
-                    <input id="library-{{i}}" type="checkbox" class="form-check-input" attr.aria-label="Library {{library.name}}"
-                        [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
-                    <label attr.for="library-{{i}}" class="form-check-label">{{library.name}}</label>
-                </div>
-            </li>
-            <li class="list-group-item" *ngIf="allLibraries.length === 0">
-                There are no libraries setup yet.
-            </li>
-        </ul>
+      <div class="form-check">
+        <input id="select-all" type="checkbox" class="form-check-input"
+               [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+        <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+      </div>
+      <ul>
+        <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">
+          <div class="form-check">
+            <input id="library-{{i}}" type="checkbox" class="form-check-input"
+                   [ngModel]="selections.isSelected(library)" (change)="handleSelection(library)">
+            <label for="library-{{i}}" class="form-check-label">{{library.name}}</label>
+          </div>
+        </li>
+        <li class="list-group-item" *ngIf="allLibraries.length === 0">
+          {{t('no-data')}}
+        </li>
+      </ul>
     </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
-    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-    <button type="button" class="btn btn-primary" (click)="save()">Save</button>
-</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+  </div>
+
+</ng-container>

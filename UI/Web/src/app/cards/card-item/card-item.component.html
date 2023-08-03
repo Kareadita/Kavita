@@ -1,4 +1,5 @@
-<div class="card {{selected ? 'selected-highlight' : ''}}">
+<ng-container *transloco="let t; read: 'card-item'">
+  <div class="card {{selected ? 'selected-highlight' : ''}}">
     <div class="overlay" (click)="handleClick($event)">
       <ng-container *ngIf="total > 0 || suppressArchiveWarning">
         <app-image borderRadius=".25rem .25rem 0 0" height="230px" width="158px" [imageUrl]="imageUrl"></app-image>
@@ -16,12 +17,12 @@
         </span>
       </div>
       <div class="error-banner" *ngIf="total === 0 && !suppressArchiveWarning">
-        Cannot Read
+        {{t('cannot-read')}}
       </div>
 
       <ng-container *ngIf="read === 0 && total > 0">
         <div class="badge-container">
-          <div class="not-read-badge" ></div>
+          <div class="not-read-badge"></div>
         </div>
       </ng-container>
 
@@ -62,4 +63,6 @@
         {{libraryName | sentenceCase}}
       </a>
     </div>
-</div>
+  </div>
+
+</ng-container>

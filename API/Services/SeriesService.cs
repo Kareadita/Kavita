@@ -30,6 +30,12 @@ public interface ISeriesService
     Task<bool> DeleteMultipleSeries(IList<int> seriesIds);
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
+    Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
+    Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true);
+
+    Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle,
+        bool withHash);
+    Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
 }
 
 public class SeriesService : ISeriesService
@@ -39,15 +45,17 @@ public class SeriesService : ISeriesService
     private readonly ITaskScheduler _taskScheduler;
     private readonly ILogger<SeriesService> _logger;
     private readonly IScrobblingService _scrobblingService;
+    private readonly ILocalizationService _localizationService;
 
     public SeriesService(IUnitOfWork unitOfWork, IEventHub eventHub, ITaskScheduler taskScheduler,
-        ILogger<SeriesService> logger, IScrobblingService scrobblingService)
+        ILogger<SeriesService> logger, IScrobblingService scrobblingService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _taskScheduler = taskScheduler;
         _logger = logger;
         _scrobblingService = scrobblingService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -382,15 +390,16 @@ public class SeriesService : ISeriesService
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryIds = _unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
         if (!libraryIds.Contains(series.LibraryId))
-            throw new UnauthorizedAccessException("User does not have access to the library this series belongs to");
+            throw new UnauthorizedAccessException("user-no-access-library-from-series");
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user!.AgeRestriction != AgeRating.NotApplicable)
         {
             var seriesMetadata = await _unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId);
             if (seriesMetadata!.AgeRating > user.AgeRestriction)
-                throw new UnauthorizedAccessException("User is not allowed to view this series due to age restrictions");
+                throw new UnauthorizedAccessException("series-restricted-age-restriction");
         }
+
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId))
@@ -401,13 +410,14 @@ public class SeriesService : ISeriesService
         var processedVolumes = new List<VolumeDto>();
         if (libraryType == LibraryType.Book)
         {
+            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             foreach (var volume in volumes)
             {
                 volume.Chapters = volume.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
-                RenameVolumeName(firstChapter, volume, libraryType);
+                RenameVolumeName(firstChapter, volume, libraryType, volumeLabel);
                 processedVolumes.Add(volume);
             }
         }
@@ -431,7 +441,7 @@ public class SeriesService : ISeriesService
 
         foreach (var chapter in chapters)
         {
-            chapter.Title = FormatChapterTitle(chapter, libraryType);
+            chapter.Title = await FormatChapterTitle(userId, chapter, libraryType);
             if (!chapter.IsSpecial) continue;
 
             if (!string.IsNullOrEmpty(chapter.TitleName)) chapter.Title = chapter.TitleName;
@@ -481,7 +491,7 @@ public class SeriesService : ISeriesService
         return !chapter.IsSpecial && !chapter.Number.Equals(Tasks.Scanner.Parser.Parser.DefaultChapter);
     }
 
-    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)
+    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
         if (libraryType == LibraryType.Book)
         {
@@ -496,19 +506,19 @@ public class SeriesService : ISeriesService
             {
                 volume.Name += $" - {firstChapter.TitleName}";
             }
-            else
-            {
-                volume.Name += $"";
-            }
+            // else
+            // {
+            //     volume.Name += $"";
+            // }
 
             return;
         }
 
-        volume.Name = $"Volume {volume.Name}";
+        volume.Name = $"{volumeLabel} {volume.Name}".Trim();
     }
 
 
-    private static string FormatChapterTitle(bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
+    public async Task<string> FormatChapterTitle(int userId, bool isSpecial, LibraryType libraryType, string? chapterTitle, bool withHash)
     {
         if (string.IsNullOrEmpty(chapterTitle)) throw new ArgumentException("Chapter Title cannot be null");
 
@@ -520,32 +530,33 @@ public class SeriesService : ISeriesService
         var hashSpot = withHash ? "#" : string.Empty;
         return libraryType switch
         {
-            LibraryType.Book => $"Book {chapterTitle}",
-            LibraryType.Comic => $"Issue {hashSpot}{chapterTitle}",
-            LibraryType.Manga => $"Chapter {chapterTitle}",
-            _ => "Chapter "
+            LibraryType.Book => await _localizationService.Translate(userId, "book-num", chapterTitle),
+            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, chapterTitle),
+            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", chapterTitle),
+            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
     }
 
-    public static string FormatChapterTitle(ChapterDto chapter, LibraryType libraryType, bool withHash = true)
+    public async Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true)
     {
-        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
-    public static string FormatChapterTitle(Chapter chapter, LibraryType libraryType, bool withHash = true)
+    public async Task<string> FormatChapterTitle(int userId, Chapter chapter, LibraryType libraryType, bool withHash = true)
     {
-        return FormatChapterTitle(chapter.IsSpecial, libraryType, chapter.Title, withHash);
+        return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
-    public static string FormatChapterName(LibraryType libraryType, bool withHash = false)
+    public async Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
     {
-        return libraryType switch
+        var hashSpot = withHash ? "#" : string.Empty;
+        return (libraryType switch
         {
-            LibraryType.Manga => "Chapter",
-            LibraryType.Comic => withHash ? "Issue #" : "Issue",
-            LibraryType.Book => "Book",
-            _ => "Chapter"
-        };
+            LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
+            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
+            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
+            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
+        }).Trim();
     }
 
     /// <summary>

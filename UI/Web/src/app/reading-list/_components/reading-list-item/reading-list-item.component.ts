@@ -8,6 +8,7 @@ import { MangaFormatPipe } from '../../../pipe/manga-format.pipe';
 import { NgbProgressbar } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, DatePipe } from '@angular/common';
 import { ImageComponent } from '../../../shared/image/image.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reading-list-item',
@@ -15,7 +16,7 @@ import { ImageComponent } from '../../../shared/image/image.component';
     styleUrls: ['./reading-list-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ImageComponent, NgIf, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe]
+  imports: [ImageComponent, NgIf, NgbProgressbar, DatePipe, MangaFormatPipe, MangaFormatIconPipe, TranslocoModule]
 })
 export class ReadingListItemComponent {
 

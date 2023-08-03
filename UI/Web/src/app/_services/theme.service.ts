@@ -19,6 +19,7 @@ import { SiteTheme, ThemeProvider } from '../_models/preferences/site-theme';
 import { TextResonse } from '../_types/text-response';
 import { EVENTS, MessageHubService } from './message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {translate} from "@ngneat/transloco";
 
 
 @Injectable({
@@ -98,7 +99,7 @@ export class ThemeService {
       this.currentTheme$.pipe(take(1)).subscribe(theme => {
         if (themes.filter(t => t.id === theme.id).length === 0) {
           this.setTheme(this.defaultTheme);
-          this.toastr.info('The active theme no longer exists. Please refresh the page.');
+          this.toastr.info(translate('toasts.theme-missing'));
         }
       });
       return themes;
@@ -151,7 +152,7 @@ export class ThemeService {
         // We need to load the styles into the browser
         this.fetchThemeContent(theme.id).subscribe(async (content) => {
           if (content === null) {
-            await this.confirmService.alert('There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.');
+            await this.confirmService.alert(translate('toasts.alert-bad-theme'));
             this.setTheme('dark');
             return;
           }

@@ -301,7 +301,7 @@ public class ArchiveService : IArchiveService
 
         if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
         {
-            throw new KavitaException("Unable to copy files to temp directory archive download.");
+            throw new KavitaException("bad-copy-files-for-download");
         }
 
         var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
@@ -314,7 +314,7 @@ public class ArchiveService : IArchiveService
         catch (AggregateException ex)
         {
             _logger.LogError(ex, "There was an issue creating temp archive");
-            throw new KavitaException("There was an issue creating temp archive");
+            throw new KavitaException("generic-create-temp-archive");
         }
 
         return zipPath;

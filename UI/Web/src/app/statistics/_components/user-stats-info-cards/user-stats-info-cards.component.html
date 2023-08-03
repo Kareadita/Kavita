@@ -1,54 +1,60 @@
-<div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
+<ng-container *transloco="let t; read:'user-stats-info-cards'">
+  <div class="row g-0 mt-4 mb-3 d-flex justify-content-around">
     <ng-container>
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Total Pages Read" [clickable]="true" fontClasses="fa-regular fa-file-lines" title="Total Pages Read: {{totalPagesRead | number}}" (click)="openPageByYearList();$event.stopPropagation();">
-                {{totalPagesRead | compactNumber}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('total-pages-read-label')" [clickable]="true" fontClasses="fa-regular fa-file-lines"
+                            [title]="t('total-pages-read-tooltip', {value: totalPagesRead | number})" (click)="openPageByYearList();$event.stopPropagation();">
+          {{totalPagesRead | compactNumber}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container>
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Total Words Read" [clickable]="true" fontClasses="fa-regular fa-file-lines" title="Total Words Read: {{totalWordsRead | number}}" (click)="openWordByYearList();$event.stopPropagation();">
-                {{totalWordsRead | compactNumber}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('total-words-read-label')" [clickable]="true" fontClasses="fa-regular fa-file-lines"
+                            [title]="t('total-words-read-tooltip', {value: totalWordsRead | number})" (click)="openWordByYearList();$event.stopPropagation();">
+          {{totalWordsRead | compactNumber}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container >
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Time Spent Reading" [clickable]="false" fontClasses="fas fa-eye" title="Time Spent Reading: {{timeSpentReading | number}}">
-                {{timeSpentReading | timeDuration}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('time-spent-reading-label')" [clickable]="false" fontClasses="fas fa-eye"
+                            [title]="t('time-spent-reading-tooltip', {value: timeSpentReading | number})">
+          {{timeSpentReading | timeDuration}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container>
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Average Reading / Week" [clickable]="false" fontClasses="fas fa-eye">
-                {{avgHoursPerWeekSpentReading | timeDuration}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('avg-reading-per-week-label')" [clickable]="false" fontClasses="fas fa-eye">
+          {{avgHoursPerWeekSpentReading | timeDuration}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container>
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Chapters Read" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Chapters Read: {{chaptersRead | number}}">
-                {{chaptersRead | compactNumber}} Chapters
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('chapters-read-label')" [clickable]="false" fontClasses="fa-regular fa-file-lines"
+                            [title]="t('chapters-read-tooltip', {value: (chaptersRead | number)})">
+          {{t('chapters', {value: (chaptersRead | compactNumber)})}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container>
-        <div class="col-auto mb-2">
-            <app-icon-and-title label="Last Active" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Last Active">
-                {{lastActive | timeAgo}}
-            </app-icon-and-title>
-        </div>
+      <div class="col-auto mb-2">
+        <app-icon-and-title [label]="t('last-active-label')" [clickable]="false" fontClasses="fa-regular fa-calendar">
+          {{lastActive | timeAgo}}
+        </app-icon-and-title>
+      </div>
     </ng-container>
-</div>
+  </div>
+</ng-container>

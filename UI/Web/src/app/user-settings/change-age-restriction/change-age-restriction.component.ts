@@ -4,11 +4,10 @@ import {
   Component, DestroyRef,
   EventEmitter,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { Observable, of, Subject, takeUntil, shareReplay, map, take } from 'rxjs';
+import { Observable, of, shareReplay, map, take } from 'rxjs';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { User } from 'src/app/_models/user';
@@ -18,6 +17,7 @@ import { AgeRatingPipe } from '../../pipe/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, AsyncPipe } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-age-restriction',
@@ -25,7 +25,7 @@ import { NgIf, AsyncPipe } from '@angular/common';
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe]
+    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoModule]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 
@@ -69,7 +69,7 @@ export class ChangeAgeRestrictionComponent implements OnInit {
     if (this.user === undefined) { return; }
 
     this.accountService.updateAgeRestriction(this.selectedRestriction.ageRating, this.selectedRestriction.includeUnknowns).subscribe(() => {
-      this.toastr.success('Age Restriction has been updated');
+      this.toastr.success(translate('toasts.age-restriction-updated'));
       this.originalRestriction = this.selectedRestriction;
       if (this.user) {
         this.user.ageRestriction.ageRating = this.selectedRestriction.ageRating;

@@ -20,6 +20,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../pipe/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-alerts',
@@ -27,7 +28,7 @@ import { NgIf, NgFor } from '@angular/common';
     styleUrls: ['./manage-alerts.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader]
+  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader, TranslocoModule]
 })
 export class ManageAlertsComponent implements OnInit {
 

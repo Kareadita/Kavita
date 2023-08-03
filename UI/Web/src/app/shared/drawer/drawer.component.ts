@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
 import {CommonModule} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
 
 export class DrawerOptions {
   /**
@@ -11,7 +12,7 @@ export class DrawerOptions {
 @Component({
   selector: 'app-drawer',
   standalone: true,
-  imports: [CommonModule],
+    imports: [CommonModule, TranslocoModule],
   templateUrl: './drawer.component.html',
   styleUrls: ['./drawer.component.scss'],
   exportAs: "drawer",

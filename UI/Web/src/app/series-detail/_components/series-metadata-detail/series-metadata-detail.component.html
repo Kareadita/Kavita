@@ -1,131 +1,134 @@
-<div class="row g-0 mt-2 mb-2">
+<ng-container *transloco="let t; read: 'series-metadata-detail'">
+  <div class="row g-0 mt-2 mb-2">
     <app-read-more [text]="seriesSummary" [maxLength]="250"></app-read-more>
-</div>
+  </div>
 
 
-<app-metadata-detail [tags]="['']" [libraryId]="series.libraryId" heading="Ratings">
-  <ng-template #itemTemplate let-item>
-    <app-external-rating [seriesId]="series.id" [userRating]="series.userRating" [hasUserRated]="series.hasUserRated" [libraryType]="libraryType"></app-external-rating>
-  </ng-template>
-</app-metadata-detail>
-
-
-<ng-container *ngIf="WebLinks as links">
-  <app-metadata-detail [tags]="links" [libraryId]="series.libraryId" heading="Links">
+  <app-metadata-detail [tags]="['']" [libraryId]="series.libraryId" heading="Ratings">
     <ng-template #itemTemplate let-item>
-      <a class="col me-1" [href]="item | safeHtml" target="_blank" rel="noopener noreferrer" [title]="item">
-        <img width="24" height="24" class="lazyload img-placeholder"
-             [src]="imageService.errorWebLinkImage"
-             [attr.data-src]="imageService.getWebLinkImage(item)"
-             (error)="imageService.updateErroredWebLinkImage($event)"
-             aria-hidden="true" alt="">
-      </a>
+      <app-external-rating [seriesId]="series.id" [userRating]="series.userRating" [hasUserRated]="series.hasUserRated" [libraryType]="libraryType"></app-external-rating>
     </ng-template>
   </app-metadata-detail>
-</ng-container>
 
 
-<app-metadata-detail [tags]="seriesMetadata.genres" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Genres" heading="Genres">
-  <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
-</app-metadata-detail>
-
-<app-metadata-detail [tags]="seriesMetadata.tags" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Tags" heading="Tags">
-  <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
-</app-metadata-detail>
-
-<app-metadata-detail [tags]="seriesMetadata.collectionTags" [libraryId]="series.libraryId" heading="Collections">
-  <ng-template #itemTemplate let-item>
-    <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
-      {{item.title}}
-    </app-tag-badge>
-  </ng-template>
-</app-metadata-detail>
+  <ng-container *ngIf="WebLinks as links">
+    <app-metadata-detail [tags]="links" [libraryId]="series.libraryId" [heading]="t('links-title')">
+      <ng-template #itemTemplate let-item>
+        <a class="col me-1" [href]="item | safeHtml" target="_blank" rel="noopener noreferrer" [title]="item">
+          <img width="24" height="24" class="lazyload img-placeholder"
+               [src]="imageService.errorWebLinkImage"
+               [attr.data-src]="imageService.getWebLinkImage(item)"
+               (error)="imageService.updateErroredWebLinkImage($event)"
+               aria-hidden="true" alt="">
+        </a>
+      </ng-template>
+    </app-metadata-detail>
+  </ng-container>
 
 
-<app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" heading="Reading Lists">
-  <ng-template #itemTemplate let-item>
-    <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
+  <app-metadata-detail [tags]="seriesMetadata.genres" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Genres" [heading]="t('genres-title')">
+    <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
+  </app-metadata-detail>
+
+  <app-metadata-detail [tags]="seriesMetadata.tags" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Tags" [heading]="t('tags-title')">
+    <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
+  </app-metadata-detail>
+
+  <app-metadata-detail [tags]="seriesMetadata.collectionTags" [libraryId]="series.libraryId" [heading]="t('collections-title')">
+    <ng-template #itemTemplate let-item>
+      <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('collections', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
+        {{item.title}}
+      </app-tag-badge>
+    </ng-template>
+  </app-metadata-detail>
+
+
+  <app-metadata-detail [tags]="readingLists" [libraryId]="series.libraryId" [heading]="t('reading-lists-title')">
+    <ng-template #itemTemplate let-item>
+      <app-tag-badge a11y-click="13,32" class="col-auto" (click)="navigate('lists', item.id)" [selectionMode]="TagBadgeCursor.Clickable">
         <span *ngIf="item.promoted">
             <i class="fa fa-angle-double-up" aria-hidden="true"></i>&nbsp;
-            <span class="visually-hidden">(promoted)</span>
+            <span class="visually-hidden">({{t('promoted')}})</span>
         </span>
-      {{item.title}}
-    </app-tag-badge>
-  </ng-template>
-</app-metadata-detail>
+        {{item.title}}
+      </app-tag-badge>
+    </ng-template>
+  </app-metadata-detail>
 
 
-<app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Writers" heading="Writers/Authors">
-  <ng-template #itemTemplate let-item>
-    <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-  </ng-template>
-</app-metadata-detail>
-
-
-<div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
-  <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.CoverArtists" heading="Cover Artists">
+  <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Writers" [heading]="t('writers-title')">
     <ng-template #itemTemplate let-item>
       <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
     </ng-template>
   </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Character" heading="Characters">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Colorist" heading="Colorists">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+  <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
+    <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.CoverArtists" [heading]="t('cover-artists-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Editor" heading="Editors">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Character" [heading]="t('characters-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Inker" heading="Inkers">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Colorist" [heading]="t('colorists-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Letterer" heading="Letterers">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Editor" [heading]="t('editors-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Translator" heading="Translators">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Inker" [heading]="t('inkers-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Penciller" heading="Pencillers">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Letterer" [heading]="t('letterers-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Publisher" heading="Publishers">
-    <ng-template #itemTemplate let-item>
-      <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
-    </ng-template>
-  </app-metadata-detail>
+    <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Translator" [heading]="t('translators-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-</div>
+    <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Penciller" [heading]="t('pencillers-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
 
-<div class="row g-0">
+    <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Publisher" [heading]="t('publishers-title')">
+      <ng-template #itemTemplate let-item>
+        <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+      </ng-template>
+    </app-metadata-detail>
+
+  </div>
+
+  <div class="row g-0">
     <hr class="col mt-3" *ngIf="hasExtendedProperties" >
     <a [class.hidden]="hasExtendedProperties" *ngIf="hasExtendedProperties"
        class="col col-md-auto align-self-end read-more-link" (click)="toggleView()">
-            <i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}} me-1" aria-controls="extended-series-metadata"></i>
-            See {{isCollapsed ? 'More' : 'Less'}}
+      <i aria-hidden="true" class="fa fa-caret-{{isCollapsed ? 'down' : 'up'}} me-1" aria-controls="extended-series-metadata"></i>
+      {{isCollapsed ? t('see-more') : t('see-less')}}
     </a>
-</div>
+  </div>
 
-<app-series-info-cards [series]="series" [seriesMetadata]="seriesMetadata" (goTo)="handleGoTo($event)" [hasReadingProgress]="hasReadingProgress"></app-series-info-cards>
+  <app-series-info-cards [series]="series" [seriesMetadata]="seriesMetadata" (goTo)="handleGoTo($event)" [hasReadingProgress]="hasReadingProgress"></app-series-info-cards>
+
+</ng-container>

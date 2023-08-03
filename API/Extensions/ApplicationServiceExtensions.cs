@@ -66,6 +66,8 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPresenceTracker, PresenceTracker>();
         services.AddScoped<IImageService, ImageService>();
 
+        services.AddScoped<ILocalizationService, LocalizationService>();
+
 
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();

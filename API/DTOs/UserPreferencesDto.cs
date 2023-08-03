@@ -147,4 +147,9 @@ public class UserPreferencesDto
     /// </summary>
     [Required]
     public bool ShareReviews { get; set; } = false;
+    /// <summary>
+    /// UI Site Global Setting: The language locale that should be used for the user
+    /// </summary>
+    [Required]
+    public string Locale { get; set; }
 }

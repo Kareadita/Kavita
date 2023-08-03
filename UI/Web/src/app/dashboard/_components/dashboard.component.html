@@ -1,34 +1,36 @@
 <app-side-nav-companion-bar></app-side-nav-companion-bar>
 
-<ng-container *ngIf="libraries$ | async as libraries">
-    <ng-container *ngIf="libraries.length === 0 && !isLoading">
-        <div class="mt-3" *ngIf="isAdmin$ | async as isAdmin">
-            <div *ngIf="isAdmin" class="d-flex justify-content-center">
-                <p>There are no libraries setup yet. Configure some in <a routerLink="/admin/dashboard" fragment="libraries">Server settings</a>.</p>
+<ng-container *transloco="let t; read: 'dashboard'">
+    <ng-container *ngIf="libraries$ | async as libraries">
+        <ng-container *ngIf="libraries.length === 0 && !isLoading">
+            <div class="mt-3" *ngIf="isAdmin$ | async as isAdmin">
+                <div *ngIf="isAdmin" class="d-flex justify-content-center">
+                    <p>{{t('no-libraries')}} <a routerLink="/admin/dashboard" fragment="libraries">{{t('server-settings-link')}}</a>.</p>
+                </div>
+                <div *ngIf="!isAdmin" class="d-flex justify-content-center">
+                    <p>{{t('not-granted')}}</p>
+                </div>
             </div>
-            <div *ngIf="!isAdmin" class="d-flex justify-content-center">
-                <p>You haven't been granted access to any libraries.</p>
-            </div>
-        </div>
+        </ng-container>
     </ng-container>
+
+    <app-carousel-reel [items]="inProgress" [title]="t('on-deck-title')" (sectionClick)="handleSectionClick('on deck')">
+        <ng-template #carouselItem let-item>
+            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" [isOnDeck]="true"
+                            (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+        </ng-template>
+    </app-carousel-reel>
+
+    <app-carousel-reel [items]="recentlyUpdatedSeries" [title]="t('recently-updated-title')" (sectionClick)="handleSectionClick('recently updated series')">
+        <ng-template #carouselItem let-item>
+            <app-card-item [entity]="item" [title]="item.seriesName" [suppressLibraryLink]="libraryId !== 0" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
+            [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
+        </ng-template>
+    </app-carousel-reel>
+
+    <app-carousel-reel [items]="recentlyAddedSeries" [title]="t('recently-added-title')" (sectionClick)="handleSectionClick('newly added series')">
+        <ng-template #carouselItem let-item>
+            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (dataChanged)="loadRecentlyAddedSeries()"></app-series-card>
+        </ng-template>
+    </app-carousel-reel>
 </ng-container>
-
-<app-carousel-reel [items]="inProgress" title="On Deck" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" [isOnDeck]="true"
-                         (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-    </ng-template>
-</app-carousel-reel>
-
-<app-carousel-reel [items]="recentlyUpdatedSeries" title="Recently Updated Series" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-card-item [entity]="item" [title]="item.seriesName" [suppressLibraryLink]="libraryId !== 0" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
-        [suppressArchiveWarning]="true" (clicked)="handleRecentlyAddedChapterClick(item)" [count]="item.count"></app-card-item>
-    </ng-template>
-</app-carousel-reel>
-
-<app-carousel-reel [items]="recentlyAddedSeries" title="Newly Added Series" (sectionClick)="handleSectionClick($event)">
-    <ng-template #carouselItem let-item let-position="idx">
-        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (dataChanged)="loadRecentlyAddedSeries()"></app-series-card>
-    </ng-template>
-</app-carousel-reel>

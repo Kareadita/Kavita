@@ -5,7 +5,6 @@ import {
   NgbAccordionBody,
   NgbAccordionButton, NgbAccordionCollapse,
   NgbAccordionDirective, NgbAccordionHeader, NgbAccordionItem,
-  NgbAccordionModule, NgbAccordionToggle,
   NgbCollapseModule,
   NgbNavModule,
   NgbTooltipModule

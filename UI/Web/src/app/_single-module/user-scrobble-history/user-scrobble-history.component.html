@@ -1,51 +1,50 @@
-<h5>Scrobble History</h5>
-<p>Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active
-  scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it
-  is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.</p>
-<div class="row g-0 mb-2">
-  <div class="col-md-10">
-    <form [formGroup]="formGroup">
-      <div class="form-group pe-1">
-        <label for="filter">Filter</label>
-        <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off"/>
-      </div>
-    </form>
+<ng-container *transloco="let t; read:'user-scrobble-history'">
+  <h5>{{t('title')}}</h5>
+  <p>{{t('description')}}</p>
+  <div class="row g-0 mb-2">
+    <div class="col-md-10">
+      <form [formGroup]="formGroup">
+        <div class="form-group pe-1">
+          <label for="filter">{{t('filter-label')}}</label>
+          <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off"/>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-2 mt-4">
+      <ngb-pagination *ngIf="pagination"
+                      [(page)]="pagination.currentPage"
+                      [pageSize]="pagination.itemsPerPage"
+                      [collectionSize]="pagination.totalItems"
+                      (pageChange)="onPageChange($event)"
+      ></ngb-pagination>
+    </div>
   </div>
-  <div class="col-md-2 mt-4">
-    <ngb-pagination *ngIf="pagination"
-                    [(page)]="pagination.currentPage"
-                    [pageSize]="pagination.itemsPerPage"
-                    [collectionSize]="pagination.totalItems"
-                    (pageChange)="onPageChange($event)"
-    ></ngb-pagination>
-  </div>
-</div>
   <table class="table table-striped table-hover table-sm scrollable">
     <thead>
     <tr>
       <th scope="col" sortable="created" (sort)="updateSort($event)">
-        Created
+        {{t('created-header')}}
       </th>
       <th scope="col" sortable="lastModified" (sort)="updateSort($event)" direction="desc">
-        Last Modified
+        {{t('last-modified-header')}}
       </th>
       <th scope="col">
-        Type
+        {{t('type-header')}}
       </th>
       <th scope="col" sortable="seriesName" (sort)="updateSort($event)">
-        Series
+        {{t('series-header')}}
       </th>
       <th scope="col">
-        Data
+        {{t('data-header')}}
       </th>
       <th scope="col">
-        Is Processed
+        {{t('is-processed-header')}}
       </th>
     </tr>
     </thead>
     <tbody>
     <tr *ngIf="events.length === 0">
-      <td colspan="6">No Data</td>
+      <td colspan="6">{{t('no-data')}}/td>
     </tr>
     <tr *ngFor="let item of events; let idx = index;">
       <td>
@@ -63,22 +62,24 @@
       <td>
         <ng-container [ngSwitch]="item.scrobbleEventType">
           <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
-            Volume {{item.volumeNumber}} Chapter {{item.chapterNumber}}
+            {{t('volume-and-chapter-num', {v: item.volumeNumber, c: item.chapterNumber})}}
           </ng-container>
           <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
-            Rating {{item.rating}}
+            {{t('rating', {r: item.rating})}}
           </ng-container>
           <ng-container *ngSwitchDefault>
-            Not Applicable
+            {{t('not-applicable')}}
           </ng-container>
         </ng-container>
       </td>
       <td>
         <i class="fa-regular fa-circle icon" aria-hidden="true" *ngIf="!item.isProcessed"></i>
         <i class="fa-solid fa-check-circle icon" aria-hidden="true" *ngIf="item.isProcessed"></i>
-        <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">{{item.isProcessed ? 'Processed' : 'Not Processed'}}</span>
+        <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
+          {{item.isProcessed ? t('processed') : t('not-processed')}}
+        </span>
       </td>
     </tr>
     </tbody>
   </table>
-
+</ng-container>

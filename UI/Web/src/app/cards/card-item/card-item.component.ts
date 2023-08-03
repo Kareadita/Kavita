@@ -40,6 +40,7 @@ import {CardActionablesComponent} from "./card-actionables/card-actionables.comp
 import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-card-item',
@@ -55,7 +56,8 @@ import {RouterLink} from "@angular/router";
     MangaFormatIconPipe,
     CardActionablesComponent,
     SentenceCasePipe,
-    RouterLink
+    RouterLink,
+    TranslocoModule
   ],
   templateUrl: './card-item.component.html',
   styleUrls: ['./card-item.component.scss'],

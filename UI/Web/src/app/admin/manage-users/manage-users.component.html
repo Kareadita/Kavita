@@ -1,56 +1,64 @@
+<ng-container *transloco="let t; read: 'manage-users'">
 
 
-<div class="container-fluid">
+  <div class="container-fluid">
     <div class="row mb-2">
-        <div class="col-8"><h3>Active Users</h3></div>
-        <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;Invite</span></button></div>
+      <div class="col-8"><h3>{{t('title')}}</h3></div>
+      <div class="col-4"><button class="btn btn-primary float-end" (click)="inviteUser()"><i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden">&nbsp;{{t('invite')}}</span></button></div>
     </div>
-    
-    <ul class="list-group">
-        <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
-            <div>
-                <h4>
-                    <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
-                    <span *ngIf="member.username === loggedInUsername">
-                        <i class="fas fa-star" aria-hidden="true"></i>
-                        <span class="visually-hidden">(You)</span>
-                    </span>
-                    <span class="badge bg-secondary text-dark" *ngIf="member.isPending">Pending</span>
-                    <div class="float-end" *ngIf="canEditMember(member)">
-                        <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)" placement="top" ngbTooltip="Delete User" attr.aria-label="Delete User {{member.username | titlecase}}"><i class="fa fa-trash" aria-hidden="true"></i></button>
-                        <button class="btn btn-primary btn-sm me-2" (click)="openEditUser(member)" placement="top" ngbTooltip="Edit" attr.aria-label="Edit {{member.username | titlecase}}"><i class="fa fa-pen" aria-hidden="true"></i></button>
 
-                        <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)" placement="top" ngbTooltip="Resend Invite" attr.aria-label="Delete Invite {{member.username | titlecase}}">Resend</button>
-                        <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="setup(member)" placement="top" ngbTooltip="Setup User" attr.aria-label="Setup User {{member.username | titlecase}}">Setup</button>
-                        <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)" placement="top" ngbTooltip="Change Password" attr.aria-label="Change Password for {{member.username | titlecase}}"><i class="fa fa-key" aria-hidden="true"></i></button>
-                    </div>
-                </h4>
-                <div class="user-info">
-                    <div>Last Active:
-                        <span *ngIf="member.lastActive === '0001-01-01T00:00:00'; else activeDate">Never</span>
-                        <ng-template #activeDate>
-                            {{member.lastActive | date: 'short'}} <i class="presence fa fa-circle ms-1" title="Online Now" aria-hidden="true" *ngIf="(messageHub.onlineUsers$ | async)?.includes(member.username)"></i>
-                        </ng-template>
-                    </div>
-                    <div *ngIf="!hasAdminRole(member)">Sharing: {{formatLibraries(member)}}</div>
-                    <div class="row g-0">
-                        <div>
-                            Roles: <span *ngIf="getRoles(member).length === 0; else showRoles">None</span>
-                            <ng-template #showRoles>
-                                <app-tag-badge *ngFor="let role of getRoles(member)" class="col-auto">{{role}}</app-tag-badge>
-                            </ng-template>
-                        </div>
-                    </div>
-                </div>
+    <ul class="list-group">
+      <li *ngFor="let member of members; let idx = index;" class="list-group-item no-hover">
+        <div>
+          <h4>
+            <span id="member-name--{{idx}}">{{member.username | titlecase}} </span>
+            <span *ngIf="member.username === loggedInUsername">
+                        <i class="fas fa-star" aria-hidden="true"></i>
+                        <span class="visually-hidden">{{t('you-alt')}}</span>
+                    </span>
+            <span class="badge bg-secondary text-dark" *ngIf="member.isPending">{{t('pending-title')}}</span>
+            <div class="float-end" *ngIf="canEditMember(member)">
+              <button class="btn btn-danger btn-sm me-2" (click)="deleteUser(member)"
+                      placement="top" [ngbTooltip]="t('delete-user-tooltip')" [attr.aria-label]="t('delete-user-alt', {user: member.username | titlecase})">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </button>
+              <button class="btn btn-primary btn-sm me-2" (click)="openEditUser(member)"
+                      placement="top" [ngbTooltip]="t('edit-user-tooltip')" [attr.aria-label]="t('edit-user-alt', {user: member.username | titlecase})">
+                <i class="fa fa-pen" aria-hidden="true"></i>
+              </button>
+
+              <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)"
+                      placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})">{{t('resend')}}}</button>
+              <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="setup(member)"
+                      placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})">Setup</button>
+              <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)"
+                      placement="top" [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})"><i class="fa fa-key" aria-hidden="true"></i></button>
             </div>
-        </li>
-        <li *ngIf="loadingMembers" class="list-group-item">
-            <div class="spinner-border text-secondary" role="status">
-                <span class="invisible">Loading...</span>
+          </h4>
+          <div class="user-info">
+            <div>{{t('last-active-title')}}
+              <span>{{member.lastActive | date: 'short' | defaultDate}} <i class="presence fa fa-circle ms-1" [title]="t('online-now-tooltip')" aria-hidden="true" *ngIf="(messageHub.onlineUsers$ | async)?.includes(member.username)"></i></span>
             </div>
-        </li>
-        <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
-            There are no other users.
-        </li>
+            <div *ngIf="!hasAdminRole(member)">{{t('sharing-title')}} {{formatLibraries(member)}}</div>
+            <div class="row g-0">
+              <div>
+                {{t('roles-title')}} <span *ngIf="getRoles(member).length === 0; else showRoles">{{t('none')}}</span>
+                <ng-template #showRoles>
+                  <app-tag-badge *ngFor="let role of getRoles(member)" class="col-auto">{{role}}</app-tag-badge>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li *ngIf="loadingMembers" class="list-group-item">
+        <div class="spinner-border text-secondary" role="status">
+          <span class="visually-hidden">{{t('loading')}}</span>
+        </div>
+      </li>
+      <li class="list-group-item" *ngIf="members.length === 0 && !loadingMembers">
+        {{t('no-data')}}
+      </li>
     </ul>
-</div>
+  </div>
+</ng-container>

@@ -1,19 +1,22 @@
-<div class="container-fluid" *ngIf="userId">
+<ng-container *transloco="let t; read:'user-stats'">
+  <div class="container-fluid" *ngIf="userId">
 
     <div class="row g-0 d-flex justify-content-around">
-        <ng-container *ngIf="userStats$ | async as userStats">
-            <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
-             [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading"></app-user-stats-info-cards>
-        </ng-container>
+      <ng-container *ngIf="userStats$ | async as userStats">
+        <app-user-stats-info-cards [totalPagesRead]="userStats.totalPagesRead" [totalWordsRead]="userStats.totalWordsRead" [timeSpentReading]="userStats.timeSpentReading"
+                                   [chaptersRead]="userStats.chaptersRead" [lastActive]="userStats.lastActive" [avgHoursPerWeekSpentReading]="userStats.avgHoursPerWeekSpentReading"></app-user-stats-info-cards>
+      </ng-container>
     </div>
 
     <div class="row g-0 pt-4 pb-2 " style="height: 242px">
-        <div class="col-md-12 col-sm-12 mt-4 pt-2">
-            <app-reading-activity [userId]="userId" [isAdmin]="(isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
-        </div>
+      <div class="col-md-12 col-sm-12 mt-4 pt-2">
+        <app-reading-activity [userId]="userId" [isAdmin]="(isAdmin$ | async) || false" [individualUserMode]="true"></app-reading-activity>
+      </div>
     </div>
 
     <div class="row g-0 pt-4 pb-2 " style="height: 242px">
-        <app-stat-list [data$]="percentageRead$" label="% Read" title="Library Read Progress"></app-stat-list>
+      <app-stat-list [data$]="percentageRead$" [label]="t('read-percentage')" [title]="t('library-read-progress-title')"></app-stat-list>
     </div>
-</div>
+  </div>
+
+</ng-container>

@@ -15,6 +15,7 @@ import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-password',
@@ -22,7 +23,7 @@ import { NgIf, NgFor, AsyncPipe } from '@angular/common';
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe]
+  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoModule]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
@@ -82,7 +83,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     const model = this.passwordChangeForm.value;
     this.resetPasswordErrors = [];
     this.observableHandles.push(this.accountService.resetPassword(this.user?.username, model.confirmPassword, model.oldPassword).subscribe(() => {
-      this.toastr.success('Password has been updated');
+      this.toastr.success(translate('toasts.password-updated'));
       this.resetPasswordForm();
       this.isViewMode = true;
     }, err => {

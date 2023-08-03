@@ -1,5 +1,6 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
 import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
+import {TranslocoService} from "@ngneat/transloco";
 
 @Pipe({
   name: 'cblImportResult',
@@ -7,14 +8,16 @@ import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-res
 })
 export class CblImportResultPipe implements PipeTransform {
 
+  translocoService = inject(TranslocoService);
+
   transform(result: CblImportResult): string {
     switch (result) {
       case CblImportResult.Success:
-        return 'Success';
+        return this.translocoService.translate('cbl-import-result-pipe.success');
       case CblImportResult.Partial:
-        return 'Partial';
+        return this.translocoService.translate('cbl-import-result-pipe.partial');
       case CblImportResult.Fail:
-        return 'Failure';
+        return this.translocoService.translate('cbl-import-result-pipe.failure');
     }
   }
 }

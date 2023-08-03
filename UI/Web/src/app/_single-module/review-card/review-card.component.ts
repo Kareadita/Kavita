@@ -9,11 +9,12 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {DefaultValuePipe} from "../../pipe/default-value.pipe";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ProviderImagePipe} from "../../pipe/provider-image.pipe";
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe],
+  imports: [CommonModule, ReadMoreComponent, DefaultValuePipe, ImageComponent, NgOptimizedImage, ProviderImagePipe, TranslocoModule],
   templateUrl: './review-card.component.html',
   styleUrls: ['./review-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

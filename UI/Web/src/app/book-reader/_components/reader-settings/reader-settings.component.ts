@@ -26,6 +26,7 @@ import { BookWhiteTheme } from '../../_models/book-white-theme';
 import { BookPaperTheme } from '../../_models/book-paper-theme';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {TranslocoModule} from "@ngneat/transloco";
 
 /**
  * Used for book reader. Do not use for other components
@@ -46,7 +47,8 @@ export const bookColorThemes = [
     isDefault: true,
     provider: ThemeProvider.System,
     selector: 'brtheme-dark',
-    content: BookDarkTheme
+    content: BookDarkTheme,
+    translationKey: 'theme-dark'
   },
   {
     name: 'Black',
@@ -55,7 +57,8 @@ export const bookColorThemes = [
     isDefault: false,
     provider: ThemeProvider.System,
     selector: 'brtheme-black',
-    content: BookBlackTheme
+    content: BookBlackTheme,
+    translationKey: 'theme-black'
   },
   {
     name: 'White',
@@ -64,7 +67,8 @@ export const bookColorThemes = [
     isDefault: false,
     provider: ThemeProvider.System,
     selector: 'brtheme-white',
-    content: BookWhiteTheme
+    content: BookWhiteTheme,
+    translationKey: 'theme-white'
   },
   {
     name: 'Paper',
@@ -73,7 +77,8 @@ export const bookColorThemes = [
     isDefault: false,
     provider: ThemeProvider.System,
     selector: 'brtheme-paper',
-    content: BookPaperTheme
+    content: BookPaperTheme,
+    translationKey: 'theme-paper'
   },
 ];
 
@@ -85,7 +90,7 @@ const mobileBreakpointMarginOverride = 700;
     styleUrls: ['./reader-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe]
+  imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgFor, NgbTooltip, NgTemplateOutlet, NgIf, NgClass, NgStyle, TitleCasePipe, TranslocoModule]
 })
 export class ReaderSettingsComponent implements OnInit {
   /**

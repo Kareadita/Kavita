@@ -8,6 +8,7 @@ import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
 import { CompactNumberPipe as CompactNumberPipe_1 } from '../../../pipe/compact-number.pipe';
 import { DecimalPipe } from '@angular/common';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-user-stats-info-cards',
@@ -15,7 +16,7 @@ import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-t
     styleUrls: ['./user-stats-info-cards.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe_1, TimeDurationPipe, TimeAgoPipe]
+    imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe_1, TimeDurationPipe, TimeAgoPipe, TranslocoModule]
 })
 export class UserStatsInfoCardsComponent {
 

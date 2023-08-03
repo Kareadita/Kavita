@@ -1,28 +1,30 @@
-<div>
-    <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Edit Review</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
+<ng-container *transloco="let t; read:'review-series-modal'">
+  <div>
+      <div class="modal-header">
+          <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+          <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
-        </button>
-    </div>
-    <div class="modal-body">
-        <form [formGroup]="reviewGroup">
-            <div class="row g-0">
-                <label for="tagline" class="form-label">Tagline</label>
-                <input id="tagline" class="form-control" formControlName="tagline" />
-            </div>
+          </button>
+      </div>
+      <div class="modal-body">
+          <form [formGroup]="reviewGroup">
+              <div class="row g-0">
+                  <label for="tagline" class="form-label">{{t('tagline-label')}}</label>
+                  <input id="tagline" class="form-control" formControlName="tagline" />
+              </div>
 
-            <div class="row g-0 mt-2">
-                <label for="review" class="form-label">Review</label>
-                <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" ></textarea>
-            </div>
-        </form>
+              <div class="row g-0 mt-2">
+                  <label for="review" class="form-label">{{t('review-label')}}</label>
+                  <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" ></textarea>
+              </div>
+          </form>
 
-    </div>
-    <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="close()">Close</button>
-        <button type="submit" class="btn btn-primary" (click)="save()">Save</button>
-    </div>
-</div>
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+          <button type="submit" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+      </div>
+  </div>
+</ng-container>
 
 
