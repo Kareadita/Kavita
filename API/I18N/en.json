@@ -167,7 +167,7 @@
     "collection-tag-duplicate": "A collection with this name already exists",
     "device-duplicate": "A device with this name already exists",
     "device-not-created": "This device doesn't exist yet. Please create first",
-    "send-to-permission": "Cannot Send non Epub or Pdf to devices as not supported on Kindle",
+    "send-to-permission": "Cannot Send non-EPUB or PDF to devices as not supported on Kindle",
     "progress-must-exist": "Progress must exist on user",
     "reading-list-name-exists": "A reading list of this name already exists",
     "user-no-access-library-from-series": "User does not have access to the library this series belongs to",

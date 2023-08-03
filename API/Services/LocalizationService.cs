@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
-using API.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 
@@ -15,7 +13,6 @@ namespace API.Services;
 
 public interface ILocalizationService
 {
-    Task<Dictionary<string, string>?> LoadLanguage(string languageCode);
     Task<string> Get(string locale, string key, params object[] args);
     Task<string> Translate(int userId, string key, params object[] args);
     IEnumerable<string> GetLocales();
@@ -30,7 +27,7 @@ public class LocalizationService : ILocalizationService
     /// <summary>
     /// The locales for the UI
     /// </summary>
-    private readonly string _localizationDirectoryUI;
+    private readonly string _localizationDirectoryUi;
 
     private readonly MemoryCacheEntryOptions _cacheOptions;
 
@@ -43,13 +40,13 @@ public class LocalizationService : ILocalizationService
         _unitOfWork = unitOfWork;
         if (environment.IsDevelopment())
         {
-            _localizationDirectoryUI = directoryService.FileSystem.Path.Join(
+            _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
                 "UI/Web/src/assets/langs");
         }
         else
         {
-            _localizationDirectoryUI = directoryService.FileSystem.Path.Join(
+            _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
                 directoryService.FileSystem.Directory.GetCurrentDirectory(),
                 "wwwroot", "assets/langs");
         }
@@ -78,7 +75,8 @@ public class LocalizationService : ILocalizationService
     {
 
         // Check if the translation for the given locale is cached
-        if (!_cache.TryGetValue($"{locale}_{key}", out string? translatedString))
+        var cacheKey = $"{locale}_{key}";
+        if (!_cache.TryGetValue(cacheKey, out string? translatedString))
         {
             // Load the locale JSON file
             var translationData = await LoadLanguage(locale);
@@ -89,7 +87,7 @@ public class LocalizationService : ILocalizationService
                 translatedString = value;
 
                 // Cache the translation for subsequent requests
-                _cache.Set($"{locale}_{key}", translatedString, _cacheOptions);
+                _cache.Set(cacheKey, translatedString, _cacheOptions);
             }
         }
 
@@ -133,7 +131,7 @@ public class LocalizationService : ILocalizationService
     public IEnumerable<string> GetLocales()
     {
         return
-            _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUI), @"\.json")
+            _directoryService.GetFilesWithExtension(_directoryService.FileSystem.Path.GetFullPath(_localizationDirectoryUi), @"\.json")
                 .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty))
             .Union(_directoryService.GetFilesWithExtension(_directoryService.LocalizationDirectory, @"\.json")
                 .Select(f => _directoryService.FileSystem.Path.GetFileName(f).Replace(".json", string.Empty)))

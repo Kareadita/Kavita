@@ -610,9 +610,9 @@ public class OpdsController : BaseApiController
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(userId, libraryType)}s ",
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(userId, libraryType)}s");
+        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
         foreach (var chapter in chapters)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
@@ -641,9 +641,9 @@ public class OpdsController : BaseApiController
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(userId, libraryType)}s",
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s",
             $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
+        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{_seriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
             feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey, prefix, baseUrl));
@@ -801,7 +801,8 @@ public class OpdsController : BaseApiController
 
         if (volume!.Chapters.Count == 1)
         {
-            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
+            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
+            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType, volumeLabel);
             if (volume.Name != "0")
             {
                 title += $" - {volume.Name}";

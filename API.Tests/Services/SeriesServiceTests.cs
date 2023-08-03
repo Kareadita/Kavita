@@ -33,7 +33,7 @@ public class SeriesServiceTests : AbstractDbTest
     {
         _seriesService = new SeriesService(_unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(),
-            Substitute.For<IScrobblingService>());
+            Substitute.For<IScrobblingService>(), Substitute.For<ILocalizationService>());
     }
     #region Setup
 
@@ -1196,7 +1196,7 @@ public class SeriesServiceTests : AbstractDbTest
     [InlineData(LibraryType.Book, false, "Book")]
     public void FormatChapterNameTest(LibraryType libraryType, bool withHash, string expected )
     {
-        Assert.Equal(expected, SeriesService.FormatChapterName(libraryType, withHash));
+        Assert.Equal(expected, SeriesService.FormatChapterName(1, libraryType, withHash));
     }
 
     #endregion

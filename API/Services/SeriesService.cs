@@ -31,6 +31,7 @@ public interface ISeriesService
     Task<bool> UpdateRelatedSeries(UpdateRelatedSeriesDto dto);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId);
     Task<string> FormatChapterTitle(int userId, ChapterDto chapter, LibraryType libraryType, bool withHash = true);
+    Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false);
 }
 
 public class SeriesService : ISeriesService
@@ -405,13 +406,14 @@ public class SeriesService : ISeriesService
         var processedVolumes = new List<VolumeDto>();
         if (libraryType == LibraryType.Book)
         {
+            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
             foreach (var volume in volumes)
             {
                 volume.Chapters = volume.Chapters.OrderBy(d => double.Parse(d.Number), ChapterSortComparer.Default).ToList();
                 var firstChapter = volume.Chapters.First();
                 // On Books, skip volumes that are specials, since these will be shown
                 if (firstChapter.IsSpecial) continue;
-                RenameVolumeName(firstChapter, volume, libraryType);
+                RenameVolumeName(firstChapter, volume, libraryType, volumeLabel);
                 processedVolumes.Add(volume);
             }
         }
@@ -485,7 +487,7 @@ public class SeriesService : ISeriesService
         return !chapter.IsSpecial && !chapter.Number.Equals(Tasks.Scanner.Parser.Parser.DefaultChapter);
     }
 
-    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType)
+    public static void RenameVolumeName(ChapterDto firstChapter, VolumeDto volume, LibraryType libraryType, string volumeLabel = "Volume")
     {
         if (libraryType == LibraryType.Book)
         {
@@ -508,7 +510,7 @@ public class SeriesService : ISeriesService
             return;
         }
 
-        volume.Name = $"Volume {volume.Name}";
+        volume.Name = $"{volumeLabel} {volume.Name}".Trim();
     }
 
 
@@ -541,14 +543,15 @@ public class SeriesService : ISeriesService
         return await FormatChapterTitle(userId, chapter.IsSpecial, libraryType, chapter.Title, withHash);
     }
 
-    public static string FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
+    public async Task<string> FormatChapterName(int userId, LibraryType libraryType, bool withHash = false)
     {
+        var hashSpot = withHash ? "#" : string.Empty;
         return libraryType switch
         {
-            LibraryType.Manga => "Chapter",
-            LibraryType.Comic => withHash ? "Issue #" : "Issue",
-            LibraryType.Book => "Book",
-            _ => "Chapter"
+            LibraryType.Book => await _localizationService.Translate(userId, "book-num", string.Empty),
+            LibraryType.Comic => await _localizationService.Translate(userId, "issue-num", hashSpot, string.Empty),
+            LibraryType.Manga => await _localizationService.Translate(userId, "chapter-num", string.Empty),
+            _ => await _localizationService.Translate(userId, "chapter-num", ' ')
         };
     }
 
