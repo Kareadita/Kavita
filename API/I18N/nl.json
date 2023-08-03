@@ -98,5 +98,6 @@
     "generic-reading-list-create": "Er is een probleem opgetreden bij het maken van de leeslijst",
     "series-restricted": "Gebruiker heeft geen toegang tot deze serie",
     "libraries-restricted": "Gebruiker heeft geen toegang tot de bibliotheken",
-    "no-series": "Kan series van bibliotheek niet ophalen"
+    "no-series": "Kan series van bibliotheek niet ophalen",
+    "generic-user-update": "Er was een uitzondering bij het updaten van de gebruiker"
 }
