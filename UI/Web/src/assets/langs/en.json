@@ -1775,6 +1775,31 @@
         "import-cbl": "Import CBL"
     },
 
+    "preferences": {
+        "left-to-right": "Left to Right",
+        "right-to-left": "Right to Left",
+        "horizontal": "Horizontal",
+        "vertical": "Vertical",
+        "automatic": "Automatic",
+        "fit-to-height": "Fit to Height",
+        "fit-to-width": "Fit to Width",
+        "original": "Original",
+        "fit-to-screen": "Fit to Screen",
+        "no-split": "No Split",
+        "webtoon": "Webtoon",
+        "single": "Single",
+        "double": "Double",
+        "double-manga": "Double (Manga)",
+        "scroll": "Scroll",
+        "1-column": "1 Column",
+        "2-column": "2 Column",
+        "cards": "Cards",
+        "list": "List"
+
+
+    },
+
+
 
 
     "validation": {

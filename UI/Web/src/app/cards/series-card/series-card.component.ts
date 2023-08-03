@@ -87,8 +87,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
     if (this.data) {
       this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
       if (this.isOnDeck) {
-        const otherStr = this.translocoService.translate('actionable.others');
-        const othersIndex = this.actions.findIndex(obj => obj.title === otherStr);
+        const othersIndex = this.actions.findIndex(obj => obj.title === 'others');
         if (this.actions[othersIndex].children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
           this.actions[othersIndex].children.push({
             action: Action.RemoveFromOnDeck,

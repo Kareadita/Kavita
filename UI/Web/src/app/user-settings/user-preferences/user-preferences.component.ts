@@ -48,7 +48,7 @@ import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccor
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -80,8 +80,8 @@ enum FragmentID {
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
-  readingDirections = readingDirections;
-  scalingOptions = scalingOptions;
+  readingDirections = readingDirections.map(this.translatePrefOptions);
+  scalingOptions = scalingOptions.map(this.translatePrefOptions);
   pageSplitOptions = pageSplitOptions;
   readingModes = readingModes;
   layoutModes = layoutModes;
@@ -313,5 +313,10 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.markAsDirty();
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
+  }
+
+  translatePrefOptions(o: {text: string, value: any}) {
+    o.text = translate('preferences.' + o.text);
+    return o;
   }
 }

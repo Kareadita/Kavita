@@ -71,7 +71,6 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <param name="resetPasswordDto"></param>
     /// <returns></returns>
-    [AllowAnonymous]
     [HttpPost("reset-password")]
     public async Task<ActionResult> UpdatePassword(ResetPasswordDto resetPasswordDto)
     {
@@ -807,15 +806,15 @@ public class AccountController : BaseApiController
         if (user == null)
         {
             _logger.LogError("There are no users with email: {Email} but user is requesting password reset", email);
-            return Ok(await _localizationService.Translate(User.GetUserId(), "forgot-password-generic"));
+            return Ok("An email will be sent to the email if it exists in our database");
         }
 
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Any(r => r is PolicyConstants.AdminRole or PolicyConstants.ChangePasswordRole))
-            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
+            return Unauthorized(await _localizationService.Translate(user.Id, "permission-denied"));
 
         if (string.IsNullOrEmpty(user.Email) || !user.EmailConfirmed)
-            return BadRequest(await _localizationService.Translate(User.GetUserId(), "confirm-email"));
+            return BadRequest(await _localizationService.Translate(user.Id, "confirm-email"));
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var emailLink = await _accountService.GenerateEmailLink(Request, token, "confirm-reset-password", user.Email);
@@ -828,10 +827,10 @@ public class AccountController : BaseApiController
                 ServerConfirmationLink = emailLink,
                 InstallId = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value
             });
-            return Ok(await _localizationService.Translate(User.GetUserId(), "email-sent"));
+            return Ok(await _localizationService.Translate(user.Id, "email-sent"));
         }
 
-        return Ok(await _localizationService.Translate(User.GetUserId(), "not-accessible-password"));
+        return Ok(await _localizationService.Translate(user.Id, "not-accessible-password"));
     }
 
     [HttpGet("email-confirmed")]
