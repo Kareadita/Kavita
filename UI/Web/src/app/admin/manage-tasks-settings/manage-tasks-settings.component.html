@@ -58,7 +58,7 @@
           <td>
             {{task.title | titlecase}}
           </td>
-          <td>{{task.lastExecution | date:'short' | defaultValue }}</td>
+          <td>{{task.lastExecutionUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium' } | defaultValue }}</td>
           <td>{{task.cron}}</td>
         </tr>
         </tbody>

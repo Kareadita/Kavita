@@ -12822,16 +12822,6 @@
             "type": "integer",
             "description": "Platform (ie) Windows 10",
             "format": "int32"
-          },
-          "lastUsed": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
-          },
-          "lastUsedUtc": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -16438,22 +16428,6 @@
             "type": "integer",
             "description": "Where did the theme come from",
             "format": "int32"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
           },
           "selector": {
             "type": "string",
