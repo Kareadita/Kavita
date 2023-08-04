@@ -1,30 +1,30 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "เข้าสู่ระบบ",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "ลืมรหัสผ่าน?",
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "no-libraries": "ยังไม่ได้ตั้งค่ารายการหนังสือ กรุณาตั้งค่าใน",
+        "server-settings-link": "ตั้งค่าเซิฟเวอร์",
+        "not-granted": "คุณไม่ได้มีสิทธิ์ในการเข้าถึงรายการหนังสือ",
+        "on-deck-title": "กำลังอ่าน",
+        "recently-updated-title": "ซีรี่ย์ที่เพิ่งอัพเดท",
+        "recently-added-title": "ซีรี่ย์ใหม่"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
-        "username": "",
-        "required": "",
-        "email": "",
-        "not-valid-email": "",
-        "cancel": "",
-        "saving": "",
-        "update": ""
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "cancel": "{{common.cancel}}",
+        "saving": "กำลังบันทึก…",
+        "update": "อัปเดท"
     },
     "user-scrobble-history": {
         "title": "",
