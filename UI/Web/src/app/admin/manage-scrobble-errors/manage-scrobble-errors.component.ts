@@ -26,11 +26,14 @@ import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {FilterPipe} from "../../pipe/filter.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule, DefaultDatePipe, DefaultValuePipe, TranslocoLocaleModule],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
