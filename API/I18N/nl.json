@@ -47,7 +47,7 @@
     "send-to-kavita-email": "Verzenden naar apparaat kan niet worden gebruikt met de e-mailservice van Kavita. Configureer uw eigen.",
     "send-to-device-status": "Bestanden overzetten naar uw apparaat",
     "generic-send-to": "Er is een fout opgetreden bij het verzenden van de bestanden naar het apparaat",
-    "volume-doesnt-exist": "Volume bestaat niet",
+    "volume-doesnt-exist": "Deel bestaat niet",
     "series-doesnt-exist": "Serie bestaat niet",
     "bookmarks-empty": "Bladwijzers kunnen niet leeg zijn",
     "reading-list-updated": "Bijgewerkt",
@@ -150,8 +150,9 @@
     "send-to-permission": "Kan alleen EPUB of pdf naar apparaten verzenden omdat andere formaten niet worden ondersteund op de Kindle",
     "progress-must-exist": "Er moet voortgang zijn op de gebruiker",
     "series-restricted-age-restriction": "Gebruiker mag deze serie niet bekijken vanwege leeftijdsbeperkingen",
-    "volume-num": "Volume {0}",
+    "volume-num": "Deel {0}",
     "book-num": "Boek {0}",
     "issue-num": "Uitgave {0}{1}",
-    "chapter-num": "Hoofdstuk {0}"
+    "chapter-num": "Hoofdstuk {0}",
+    "generic-scrobble-hold": "Er is een fout opgetreden bij het toevoegen van de bewaarplicht"
 }
