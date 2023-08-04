@@ -27,7 +27,7 @@
         "update": "อัปเดท"
     },
     "user-scrobble-history": {
-        "title": "",
+        "title": "ประวัติการทำ Scrobble",
         "description": "",
         "filter-label": "ตัวกรอง",
         "created-header": "สร้างแล้ว",
@@ -41,55 +41,55 @@
         "rating": "เรตติ้ง {{r}}",
         "not-applicable": "ไม่สามารถใช้ได้",
         "processed": "ดำเนินการ",
-        "not-processed": ""
+        "not-processed": "ยังไม่ได้ประมวลผล"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "",
-        "score-updated": "",
-        "want-to-read-add": "",
-        "want-to-read-remove": "",
-        "review": ""
+        "chapter-read": "ความคืบหน้าการอ่าน",
+        "score-updated": "อัปเดทเรตติ้ง",
+        "want-to-read-add": "ต้องการอ่าน: เพิ่ม",
+        "want-to-read-remove": "ต้องการอ่าน: นำออก",
+        "review": "อัปเดทรีวิว"
     },
     "spoiler": {
-        "click-to-show": ""
+        "click-to-show": "คลิกเพื่อแสดง"
     },
     "review-series-modal": {
-        "title": "",
-        "tagline-label": "",
-        "review-label": "",
-        "close": "",
-        "save": ""
+        "title": "แก้ไขรีวิว",
+        "tagline-label": "สโลแกน",
+        "review-label": "รีวิว",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
-        "close": "",
-        "user-review": "",
-        "external-mod": "",
-        "go-to-review": ""
+        "close": "{{common.close}}",
+        "user-review": "รีวิวของ {{username}}",
+        "external-mod": "(ภายนอก)",
+        "go-to-review": "ไปที่รีวิว"
     },
     "review-card": {
-        "your-review": "",
-        "external-review": "",
-        "local-review": "",
-        "rating-percentage": ""
+        "your-review": "นี่คือรีวิวของคุณ",
+        "external-review": "รีวิวจากภายนอก",
+        "local-review": "รีวิว",
+        "rating-percentage": "เรตติ้ง {{r}}%"
     },
     "want-to-read": {
-        "title": "",
-        "series-count": "",
-        "no-items": "",
-        "no-items-filtered": ""
+        "title": "ต้องการอ่าน",
+        "series-count": "{{common.series-count}}",
+        "no-items": "ไม่มีอะไรที่นี่... ลองเพิ่มซีรี่ย์ดูสิ",
+        "no-items-filtered": "ไม่พบเนื้อหาที่คุณค้นหา"
     },
     "user-preferences": {
-        "title": "",
-        "pref-description": "",
-        "account-tab": "",
-        "preferences-tab": "",
-        "3rd-party-clients-tab": "",
-        "theme-tab": "",
-        "devices-tab": "",
-        "stats-tab": "",
-        "scrobbling-tab": "",
-        "success-toast": "",
-        "global-settings-title": "",
+        "title": "แดชบอร์ดผู้ใช้งาน",
+        "pref-description": "นี่คือการตั้งค่าส่วนกลางที่ผูกกับบัญชีของคุณ",
+        "account-tab": "บัญชี",
+        "preferences-tab": "ตั้งค่าทั่วไป",
+        "3rd-party-clients-tab": "ไคลเอนต์บุคคลที่สาม",
+        "theme-tab": "ธีม",
+        "devices-tab": "อุปกรณ์",
+        "stats-tab": "สถิติ",
+        "scrobbling-tab": "การดึงข้อมูลภายนอก",
+        "success-toast": "อัปเดทการตั้งค่าแล้ว",
+        "global-settings-title": "ตั้งค่าส่วนกลาง",
         "page-layout-mode-label": "",
         "page-layout-mode-tooltip": "",
         "locale-label": "",
