@@ -34,53 +34,53 @@
         "last-modified-header": "Laatst gewijzigd",
         "type-header": "Type",
         "series-header": "Series",
-        "data-header": "",
-        "is-processed-header": "",
-        "no-data": "",
-        "volume-and-chapter-num": "",
-        "rating": "",
-        "not-applicable": "",
-        "processed": "",
-        "not-processed": ""
+        "data-header": "Data",
+        "is-processed-header": "Is verwerkt",
+        "no-data": "Geen data",
+        "volume-and-chapter-num": "Deel {{v}} Hoofdstuk {{n}}",
+        "rating": "Beoordeling {{r}}",
+        "not-applicable": "Niet toepasbaar",
+        "processed": "Verwerkt",
+        "not-processed": "Niet Verwerkt"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "",
+        "chapter-read": "Leesvoortgang",
         "score-updated": "",
         "want-to-read-add": "",
         "want-to-read-remove": "",
-        "review": ""
+        "review": "Review update"
     },
     "spoiler": {
-        "click-to-show": ""
+        "click-to-show": "Spoiler, klik om te tonen"
     },
     "review-series-modal": {
-        "title": "",
+        "title": "Beoordeling bewerken",
         "tagline-label": "",
-        "review-label": "",
-        "close": "",
-        "save": ""
+        "review-label": "Beoordeling",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
-        "close": "",
-        "user-review": "",
-        "external-mod": "",
-        "go-to-review": ""
+        "close": "{{common.close}}",
+        "user-review": "{{username}}s Beoordeling",
+        "external-mod": "(extern)",
+        "go-to-review": "Ga naar recensie"
     },
     "review-card": {
-        "your-review": "",
-        "external-review": "",
-        "local-review": "",
-        "rating-percentage": ""
+        "your-review": "Dit is jouw recensie",
+        "external-review": "Externe recensie",
+        "local-review": "Recensie",
+        "rating-percentage": "Beoordeling {{r}}%"
     },
     "want-to-read": {
         "title": "",
-        "series-count": "",
-        "no-items": "",
-        "no-items-filtered": ""
+        "series-count": "{{common.series-count}}",
+        "no-items": "Er zijn geen items. Probeer een serie toe te voegen.",
+        "no-items-filtered": "Er komen geen items overeen met uw huidige filter."
     },
     "user-preferences": {
-        "title": "",
-        "pref-description": "",
+        "title": "Gebruikersdashboard",
+        "pref-description": "Dit zijn algemene instellingen die aan he account zijn gekoppeld.",
         "account-tab": "",
         "preferences-tab": "",
         "3rd-party-clients-tab": "",
