@@ -1,10 +1,10 @@
 {
     "login": {
-        "title": "",
+        "title": "Giriş",
         "username": "",
         "password": "",
         "password-validation": "",
-        "forgot-password": "",
+        "forgot-password": "Şifremi Unuttum?",
         "submit": ""
     },
     "dashboard": {
