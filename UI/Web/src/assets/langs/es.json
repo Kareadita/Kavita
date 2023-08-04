@@ -33,6 +33,73 @@
         "type-header": "Tipo",
         "rating": "Puntuación {{r}}",
         "no-data": "No hay datos",
-        "last-modified-header": "Última Modificación"
+        "last-modified-header": "Última Modificación",
+        "processed": "Procesado",
+        "volume-and-chapter-num": "Volumen {{v}} Capítulo {{n}}",
+        "not-processed": "Sin procesar"
+    },
+    "edit-reading-list-modal": {
+        "year-label": "Año",
+        "month-label": "Mes",
+        "promote-label": "Promocionar",
+        "promote-tooltip": "La promoción significa que la etiqueta puede ser vista en todo el servidor, no solo por los usuarios administradores. Todas las series que tengan esta etiqueta aún tendrán restricciones de acceso para los usuarios."
+    },
+    "metadata-filter": {
+        "penciller-label": "Dibujante",
+        "filter-title": "Filtro",
+        "format-label": "Formato",
+        "libraries-label": "Librerías",
+        "genres-label": "Géneros",
+        "tags-label": "Etiquetas",
+        "writer-label": "Escritor",
+        "publisher-label": "Editorial",
+        "character-label": "Personaje",
+        "letterer-label": "Rotulista",
+        "inker-label": "Entintador",
+        "editor-label": "Redactor",
+        "colorist-label": "Colorista",
+        "translator-label": "Traductor",
+        "collections-label": "Colecciones"
+    },
+    "manga-reader": {
+        "incognito-title": "Modo incógnito:",
+        "back": "Volver",
+        "first-page-tooltip": "Primera página",
+        "left-to-right-alt": "Izquierda a derecha",
+        "settings-tooltip": "Ajustes",
+        "enable-comic-book-label": "Emular a un cómic",
+        "user-preferences-updated": "Preferencias de usuario actualizadas",
+        "save-globally": "Guardar globalmente",
+        "next-page-tooltip": "Página siguiente",
+        "next-chapter-tooltip": "Capítulo/Volumen siguiente",
+        "last-page-tooltip": "Última página",
+        "right-to-left-alt": "Derecha a izquierda",
+        "reading-direction-tooltip": "Dirección de lectura: ",
+        "reading-mode-tooltip": "Modo de lectura",
+        "image-splitting-label": "Separación de imágenes",
+        "image-scaling-label": "Escalado de imágenes",
+        "original": "Original",
+        "brightness-label": "Brillo",
+        "height": "Alto",
+        "width": "Ancho"
+    },
+    "import-cbl-modal": {
+        "import": "Importar",
+        "next": "Siguiente"
+    },
+    "pdf-reader": {
+        "incognito-mode": "Modo incógnito",
+        "light-theme-alt": "Tema claro",
+        "dark-theme-alt": "Tema oscuro"
+    },
+    "infinite-reader": {
+        "continuous-reading-prev-chapter": "Capítulo anterior",
+        "continuous-reading-next-chapter": "Capítulo siguiente"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Progreso de lectura"
+    },
+    "common": {
+        "volume-num": "Volumen"
     }
 }
