@@ -45,9 +45,9 @@
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Leesvoortgang",
-        "score-updated": "",
-        "want-to-read-add": "",
-        "want-to-read-remove": "",
+        "score-updated": "Beoordeling bijwerken",
+        "want-to-read-add": "Wil lezen: toevoegen",
+        "want-to-read-remove": "Wil lezen: verwijderen",
         "review": "Recensie update"
     },
     "spoiler": {
@@ -73,7 +73,7 @@
         "rating-percentage": "Beoordeling {{r}}%"
     },
     "want-to-read": {
-        "title": "",
+        "title": "Wil lezen",
         "series-count": "{{common.series-count}}",
         "no-items": "Er zijn geen items. Probeer een serie toe te voegen.",
         "no-items-filtered": "Er komen geen items overeen met uw huidige filter."
@@ -81,16 +81,16 @@
     "user-preferences": {
         "title": "Gebruikersdashboard",
         "pref-description": "Dit zijn algemene instellingen die aan he account zijn gekoppeld.",
-        "account-tab": "",
-        "preferences-tab": "",
+        "account-tab": "Account",
+        "preferences-tab": "Voorkeuren",
         "3rd-party-clients-tab": "",
-        "theme-tab": "",
-        "devices-tab": "",
-        "stats-tab": "",
+        "theme-tab": "Thema",
+        "devices-tab": "Apparaten",
+        "stats-tab": "Statistieken",
         "scrobbling-tab": "Scrobbling",
-        "success-toast": "",
-        "global-settings-title": "",
-        "page-layout-mode-label": "",
+        "success-toast": "Gebruikersvoorkeuren bijgewerkt",
+        "global-settings-title": "Algemene instellingen",
+        "page-layout-mode-label": "Pagina-indelingsmodus",
         "page-layout-mode-tooltip": "",
         "locale-label": "",
         "locale-tooltip": "",
@@ -183,8 +183,8 @@
         "platform-label": "",
         "email-label": "",
         "add": "",
-        "delete": "",
-        "edit": ""
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}"
     },
     "edit-device": {
         "device-name-label": "",
@@ -582,20 +582,20 @@
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "",
-        "password-label": "",
-        "required-field": "",
-        "valid-email": "",
-        "password-validation": "",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "password-validation": "{{validation.password-validation}}",
         "register": ""
     },
     "series-detail": {
         "page-settings-title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "layout-mode-label": "",
-        "layout-mode-option-card": "",
-        "layout-mode-option-list": "",
+        "layout-mode-option-card": "Kaart",
+        "layout-mode-option-list": "Lijst",
         "continue-from": "",
-        "read": "",
+        "read": "{{common.read}}",
         "continue": "",
         "read-options-alt": "",
         "incognito": "",
@@ -606,7 +606,7 @@
         "downloading-status": "",
         "user-reviews-alt": "",
         "storyline-tab": "",
-        "books-tab": "",
+        "books-tab": "Boeken",
         "volumes-tab": "",
         "specials-tab": "",
         "related-tab": "",
@@ -620,7 +620,7 @@
         "links-title": "",
         "genres-title": "",
         "tags-title": "",
-        "collections-title": "",
+        "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "",
         "writers-title": "",
         "cover-artists-title": "",
@@ -894,11 +894,11 @@
         "open-external": ""
     },
     "list-item": {
-        "read": ""
+        "read": "{{common.read}}"
     },
     "manage-alerts": {
         "description-part-1": "",
-        "description-part-2": "",
+        "description-part-2": "wiki.",
         "filter-label": "",
         "clear-alerts": "",
         "extension-header": "",
@@ -912,19 +912,19 @@
         "send-to-warning": "",
         "email-url-label": "",
         "email-url-tooltip": "",
-        "reset": "",
+        "reset": "{{common.reset}}",
         "test": "",
         "host-name-label": "",
         "host-name-tooltip": "",
         "host-name-validation": "",
-        "reset-to-default": "",
-        "save": ""
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
     },
     "manage-library": {
         "title": "",
         "add-library": "",
         "no-data": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "last-scanned-title": "",
         "shared-folders-title": "",
         "type-title": "",
