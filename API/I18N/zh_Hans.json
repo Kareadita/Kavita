@@ -1,0 +1,21 @@
+{
+    "bad-credentials": "你的用户信息不匹配",
+    "validate-email": "验证你的邮件时出了点问题: {0}",
+    "confirm-token-gen": "生成认证令牌时出现问题",
+    "denied": "未被允许",
+    "password-required": "除非您是管理员，否则您必须输入现有密码才能更改帐户信息",
+    "invalid-token": "无效令牌",
+    "unable-to-reset-key": "出错了，无法重置",
+    "confirm-email": "你必须先确认你的邮箱",
+    "disabled-account": "你的账号已被关闭。联系服务器的管理员。",
+    "register-user": "注册用户时出现一些错误",
+    "locked-out": "您因多次错误登陆已被阻止。请稍等 10 分钟。",
+    "permission-denied": "您无权执行此操作",
+    "invalid-password": "无效密码",
+    "generate-token": "生成确认电子邮件令牌时出现问题。参见日志",
+    "generic-user-update": "更新用户时出现了异常",
+    "share-multiple-emails": "不能在多个账户间共享电子邮件",
+    "age-restriction-update": "年龄限制更新出错",
+    "no-user": "用户不存在",
+    "username-taken": "用户名已被使用"
+}
