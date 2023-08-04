@@ -36,7 +36,11 @@
         "last-modified-header": "Última Modificación",
         "processed": "Procesado",
         "volume-and-chapter-num": "Volumen {{v}} Capítulo {{n}}",
-        "not-processed": "Sin procesar"
+        "not-processed": "Sin procesar",
+        "description": "Aquí encontrarás cualquier evento de scrobble vinculado a tu cuenta. Para que existan eventos, debes tener configurado\n  un proveedor de scrobble activo. Todos los eventos que hayan sido procesados se eliminarán después de un mes. Si hay eventos no procesados, es\n  probable que estos no puedan formar coincidencias en un nivel superior. Por favor, ponte en contacto con tu administrador para corregirlos.",
+        "title": "Historial de Scrobble",
+        "series-header": "Series",
+        "created-header": "Creado"
     },
     "edit-reading-list-modal": {
         "year-label": "Año",
@@ -56,10 +60,17 @@
         "character-label": "Personaje",
         "letterer-label": "Rotulista",
         "inker-label": "Entintador",
-        "editor-label": "Redactor",
+        "editor-label": "Corrector",
         "colorist-label": "Colorista",
         "translator-label": "Traductor",
-        "collections-label": "Colecciones"
+        "collections-label": "Colecciones",
+        "in-progress": "En progreso",
+        "language-label": "Idioma",
+        "read-progress-label": "Progreso de lectura",
+        "unread": "Sin leer",
+        "read": "Leído",
+        "rating-label": "Calificación",
+        "age-rating-label": "Clasificación de edad"
     },
     "manga-reader": {
         "incognito-title": "Modo incógnito:",
@@ -97,9 +108,123 @@
         "continuous-reading-next-chapter": "Capítulo siguiente"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "Progreso de lectura"
+        "chapter-read": "Progreso de lectura",
+        "score-updated": "Actualización de calificación",
+        "want-to-read-add": "Quiero leer: Añadir",
+        "want-to-read-remove": "Quiero leer: Eliminar",
+        "review": "Actualización de reseña"
     },
     "common": {
         "volume-num": "Volumen"
+    },
+    "user-preferences": {
+        "share-series-reviews-label": "Compartir reseñas de series",
+        "reading-direction-tooltip": "Dirección para hacer clic para pasar a la siguiente página. De derecha a izquierda significa que haces clic en el lado izquierdo de la pantalla para pasar a la siguiente página.",
+        "writing-style-tooltip": "Cambia la dirección del texto. Horizontal es de izquierda a derecha, vertical es de arriba a abajo.",
+        "reading-direction-book-tooltip": "Dirección para hacer clic para pasar a la siguiente página. De derecha a izquierda significa que haces clic en el lado izquierdo de la pantalla para pasar a la siguiente página.",
+        "auto-close-menu-label": "Cerrar menú automáticamente",
+        "immersive-mode-tooltip": "Esto ocultará el menú detrás de un clic en el documento del lector y activará tocar para paginar",
+        "layout-mode-book-tooltip": "Cómo se debe organizar el contenido. Desplazable es tal como el libro se empaqueta. 1 o 2 columnas se ajusta a la altura del dispositivo y ajusta 1 o 2 columnas de texto por página.",
+        "line-height-book-tooltip": "Cuánto espacio habrá entre las líneas del libro.",
+        "title": "Panel de usuario",
+        "pref-description": "Estos son ajustes globales vinculados a tu cuenta.",
+        "account-tab": "Cuenta",
+        "preferences-tab": "Preferencias",
+        "3rd-party-clients-tab": "Clientes de terceros",
+        "theme-tab": "Tema",
+        "devices-tab": "Dispositivos",
+        "stats-tab": "Estadísticas",
+        "success-toast": "Preferencias de usuario actualizadas",
+        "global-settings-title": "Ajustes globales",
+        "page-layout-mode-label": "Modo de diseño de página",
+        "page-layout-mode-tooltip": "Mostrar elementos como tarjetas o en vista de lista en la página de detalles de la serie.",
+        "locale-label": "Localización",
+        "locale-tooltip": "El idioma que debería usar Kavita",
+        "blur-unread-summaries-label": "Desenfocar resúmenes no leídos",
+        "blur-unread-summaries-tooltip": "Desenfoca el texto del resumen en volúmenes o capítulos que no tienen progreso de lectura (para evitar spoilers)",
+        "disable-animations-label": "Deshabilitar animaciones",
+        "prompt-on-download-tooltip": "Aviso cuando una descarga supera los {{size}} MB",
+        "prompt-on-download-label": "Avisar al descargar",
+        "disable-animations-tooltip": "Desactiva las animaciones en el sitio. Útil para lectores de tinta electrónica.",
+        "collapse-series-relationships-label": "Colapsar relaciones de series",
+        "collapse-series-relationships-tooltip": "Kavita debería mostrar series que no tienen relaciones o es la serie madre/secuela",
+        "share-series-reviews-tooltip": "Kavita debería incluir tus reseñas de series para otros usuarios",
+        "image-reader-settings-title": "Lector de imágenes",
+        "reading-direction-label": "Dirección de lectura",
+        "scaling-option-label": "Opciones de escalado",
+        "scaling-option-tooltip": "Cómo ajustar la imagen a tu pantalla.",
+        "page-splitting-label": "Separación de página",
+        "page-splitting-tooltip": "Cómo separar una imagen de ancho completo (es decir, ambas imágenes izquierda y derecha están combinadas)",
+        "reading-mode-label": "Modo de lectura",
+        "layout-mode-label": "Modo de diseño",
+        "layout-mode-tooltip": "Renderizar una única imagen en la pantalla o dos imágenes una al lado de la otra",
+        "background-color-label": "Color de fondo",
+        "show-screen-hints-label": "Mostrar sugerencias en pantalla",
+        "emulate-comic-book-label": "Emular a un cómic",
+        "swipe-to-paginate-label": "Deslizar para paginar",
+        "book-reader-settings-title": "Lector de libros",
+        "tap-to-paginate-label": "Tocar para paginar",
+        "tap-to-paginate-tooltip": "Los lados de la pantalla del lector de libros deben permitir tocar para pasar a la página anterior/siguiente",
+        "immersive-mode-label": "Modo inmersivo",
+        "reading-direction-book-label": "Dirección de lectura",
+        "font-family-label": "Familia de fuentes",
+        "font-family-tooltip": "Familia de fuentes para cargar. Por defecto cargará la fuente predeterminada del libro.",
+        "writing-style-label": "Estilo de escritura",
+        "layout-mode-book-label": "Modo de diseño",
+        "color-theme-book-label": "Tema de color",
+        "color-theme-book-tooltip": "Qué tema de color aplicar al contenido del lector de libros y al menú.",
+        "font-size-book-label": "Tamaño de fuente",
+        "margin-book-label": "Margen",
+        "margin-book-tooltip": "Cuánto espacio habrá en cada lado de la pantalla. Esto se anulará a 0 en los dispositivos móviles sin importar esta configuración.",
+        "clients-opds-alert": "OPDS no está habilitado en este servidor. Esto no afectará a los usuarios de Tachiyomi.",
+        "clients-opds-description": "Todos los clientes de terceros usarán la clave API o la URL de conexión a continuación. Estos son como contraseñas, mantenlo en privado.",
+        "clients-api-key-tooltip": "La clave API es como una contraseña. Mantenlo en secreto, mantenlo seguro.",
+        "clients-opds-url-tooltip": "URL de OPDS",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "line-height-book-label": "Espaciado entre líneas"
+    },
+    "user-holds": {
+        "description": "Esta es una lista gestionada por el usuario de series que no serán scrobbleadas a los proveedores de flujo ascendente. Puedes eliminar una serie en\n    cualquier momento y el siguiente evento Scrobble-able (progreso de lectura, calificación, estado de lectura deseado) activará eventos.",
+        "title": "Retenciones de scrobble"
+    },
+    "theme-manager": {
+        "site-themes": "Temas del sitio",
+        "title": "Gestor de temas",
+        "looking-for-theme": "¿Buscas un tema claro o de tinta electrónica? Tenemos algunos temas personalizados que puedes usar en nuestro ",
+        "looking-for-theme-continued": "github de temas.",
+        "scan": "Escanear",
+        "set-default": "Establecer por defecto",
+        "applied": "Aplicado",
+        "updated-toastr": "El tema por defecto del sitio ha sido actualizado a {{name}}",
+        "apply": "{{common.apply}}"
+    },
+    "spoiler": {
+        "click-to-show": "Alerta de spoiler, haz clic para mostrar"
+    },
+    "review-series-modal": {
+        "title": "Editar reseña",
+        "review-label": "Reseña",
+        "tagline-label": "Titular",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "Reseña de {{username}}",
+        "external-mod": "(externa)",
+        "go-to-review": "Ir a la reseña"
+    },
+    "review-card": {
+        "your-review": "Esta es tu reseña",
+        "external-review": "Reseña externa",
+        "local-review": "Reseña",
+        "rating-percentage": "Calificación {{r}}%"
+    },
+    "want-to-read": {
+        "series-count": "{{common.series-count}}",
+        "title": "Quiero leer",
+        "no-items": "No hay elementos. Prueba añadir una serie.",
+        "no-items-filtered": "Ningún elemento coincide con tu filtro actual."
     }
 }
