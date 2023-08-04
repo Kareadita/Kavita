@@ -258,7 +258,7 @@ public class ScannerService : IScannerService
                 return;
             }
 
-            await _processSeries.ProcessSeriesAsync(parsedFiles, library);
+            await _processSeries.ProcessSeriesAsync(parsedFiles, library, bypassFolderOptimizationChecks);
             parsedSeries.Add(foundParsedSeries, parsedFiles);
         }
 

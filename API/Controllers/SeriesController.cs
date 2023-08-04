@@ -322,7 +322,7 @@ public class SeriesController : BaseApiController
     [HttpPost("scan")]
     public ActionResult ScanSeries(RefreshSeriesDto refreshSeriesDto)
     {
-        _taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, refreshSeriesDto.ForceUpdate);
+        _taskScheduler.ScanSeries(refreshSeriesDto.LibraryId, refreshSeriesDto.SeriesId, true);
         return Ok();
     }
 

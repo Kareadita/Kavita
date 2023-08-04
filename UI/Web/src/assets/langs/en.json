@@ -951,7 +951,8 @@
         "less-than-hour": "<1 Hour",
         "range-hours": "{{value}} {{hourWord}}",
         "hour": "Hour",
-        "hours": "Hours"
+        "hours": "Hours",
+        "read-time-title": "{{series-info-cards.read-time-title}}"
     },
 
     "series-info-cards": {

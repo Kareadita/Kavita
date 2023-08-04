@@ -455,17 +455,32 @@ public class BookService : IBookService
             };
             ComicInfo.CleanComicInfo(info);
 
-            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => !string.IsNullOrEmpty(id.Scheme) && id.Scheme.Equals("ISBN")))
+            var weblinks = new List<string>();
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
             {
                 if (string.IsNullOrEmpty(identifier.Identifier)) continue;
-                var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
-                if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                if (!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
-                    continue;
+                    var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
+                    if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                    {
+                        _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+                        continue;
+                    }
+                    info.Isbn = isbn;
                 }
-                info.Isbn = isbn;
-                break;
+
+                if ((!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
+                     identifier.Identifier.StartsWith("url:"))
+                {
+                    var url = identifier.Identifier.Replace("url:", string.Empty);
+                    weblinks.Add(url.Trim());
+                }
+            }
+
+            if (weblinks.Count > 0)
+            {
+                info.Web = string.Join(',', weblinks.Distinct());
             }
 
             // Parse tags not exposed via Library
