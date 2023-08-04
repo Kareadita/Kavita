@@ -30,7 +30,7 @@
           <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
         </ng-template>
         {{(isMyReview ? '' : review.username | defaultValue:'')}}
-        <span style="float: right" *ngIf="review.isExternal">{{t('rating-percentage', {r: review.score})}}%</span>
+        <span style="float: right" *ngIf="review.isExternal">{{t('rating-percentage', {r: review.score})}}</span>
       </div>
     </div>
   </div>
