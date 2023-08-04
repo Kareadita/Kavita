@@ -91,7 +91,7 @@
         "success-toast": "Gebruikersvoorkeuren bijgewerkt",
         "global-settings-title": "Algemene instellingen",
         "page-layout-mode-label": "Pagina-indelingsmodus",
-        "page-layout-mode-tooltip": "",
+        "page-layout-mode-tooltip": "Toon items als kaarten of lijstweergave op de seriedetailpagina.",
         "locale-label": "",
         "locale-tooltip": "",
         "blur-unread-summaries-label": "",
