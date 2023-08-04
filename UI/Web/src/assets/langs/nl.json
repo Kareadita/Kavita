@@ -11,7 +11,7 @@
         "no-libraries": "Er zijn nog geen bibliotheken ingesteld. Configureer wat in",
         "server-settings-link": "Serverinstellingen",
         "not-granted": "U heeft geen toegang gekregen tot bibliotheken.",
-        "on-deck-title": "On Deck",
+        "on-deck-title": "Aan Het Lezen",
         "recently-updated-title": "Onlangs bijgewerkte series",
         "recently-added-title": "Nieuw toegevoegde series"
     },
@@ -48,21 +48,21 @@
         "score-updated": "",
         "want-to-read-add": "",
         "want-to-read-remove": "",
-        "review": "Review update"
+        "review": "Recensie update"
     },
     "spoiler": {
         "click-to-show": "Spoiler, klik om te tonen"
     },
     "review-series-modal": {
         "title": "Beoordeling bewerken",
-        "tagline-label": "",
+        "tagline-label": "Slogan",
         "review-label": "Beoordeling",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
-        "user-review": "{{username}}s Beoordeling",
+        "user-review": "{{username}}s Recensie",
         "external-mod": "(extern)",
         "go-to-review": "Ga naar recensie"
     },
@@ -87,7 +87,7 @@
         "theme-tab": "",
         "devices-tab": "",
         "stats-tab": "",
-        "scrobbling-tab": "",
+        "scrobbling-tab": "Scrobbling",
         "success-toast": "",
         "global-settings-title": "",
         "page-layout-mode-label": "",
@@ -99,15 +99,15 @@
         "prompt-on-download-label": "",
         "prompt-on-download-tooltip": "",
         "disable-animations-label": "",
-        "disable-animations-tooltip": "",
-        "collapse-series-relationships-label": "",
-        "collapse-series-relationships-tooltip": "",
-        "share-series-reviews-label": "",
-        "share-series-reviews-tooltip": "",
-        "image-reader-settings-title": "",
-        "reading-direction-label": "",
-        "reading-direction-tooltip": "",
-        "scaling-option-label": "",
+        "disable-animations-tooltip": "Schakelt animaties op de site uit.\nHandig voor e-ink-lezers.",
+        "collapse-series-relationships-label": "Serierelaties samenvouwen",
+        "collapse-series-relationships-tooltip": "Moet Kavita series laten zien die geen relaties hebben of die geen ouder / prequel is",
+        "share-series-reviews-label": "Deel serierecensies",
+        "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken?",
+        "image-reader-settings-title": "Afbeeldingslezer",
+        "reading-direction-label": "Leesrichting",
+        "reading-direction-tooltip": "Richting om te klikken om naar de volgende pagina te gaan.\nRechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
+        "scaling-option-label": "Schaal opties",
         "scaling-option-tooltip": "",
         "page-splitting-label": "",
         "page-splitting-tooltip": "",
