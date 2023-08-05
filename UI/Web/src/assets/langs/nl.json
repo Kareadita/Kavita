@@ -421,15 +421,15 @@
         "unknown": ""
     },
     "library-type-pipe": {
-        "book": "",
-        "comic": "",
-        "manga": ""
+        "book": "Boek",
+        "comic": "Stripboek",
+        "manga": "Manga"
     },
     "age-rating-pipe": {
-        "unknown": "",
+        "unknown": "Onbekend",
         "early-childhood": "",
         "adults-only": "",
-        "everyone": "",
+        "everyone": "Iedereen",
         "everyone-10-plus": "",
         "g": "",
         "kids-to-adults": "",
@@ -496,7 +496,7 @@
     },
     "license": {
         "title": "",
-        "manage": "",
+        "manage": "Beheer",
         "invalid-license-tooltip": "",
         "check": "Controleer",
         "cancel": "{{common.cancel}}",
@@ -1126,7 +1126,7 @@
         "logs-tab": "",
         "email-tab": "",
         "tasks-tab": "",
-        "statistics-tab": "",
+        "statistics-tab": "Statistieken",
         "system-tab": "",
         "kavita+-tab": "",
         "kavita+-desc-part-1": "",
