@@ -1614,7 +1614,13 @@
         "x-axis-label": "Time",
         "y-axis-label": "Hours Read",
         "no-data": "No Reading Progress",
-        "time-frame-label": "Time Frame"
+        "time-frame-label": "Time Frame",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
     },
 
     "manga-format-stats": {

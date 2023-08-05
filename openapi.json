@@ -13381,18 +13381,6 @@
             "description": "Human Readable title for the Job",
             "nullable": true
           },
-          "createdAt": {
-            "type": "string",
-            "description": "When the job was created",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastExecution": {
-            "type": "string",
-            "description": "Last time the job was run",
-            "format": "date-time",
-            "nullable": true
-          },
           "createdAtUtc": {
             "type": "string",
             "description": "When the job was created",
@@ -13869,14 +13857,6 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false

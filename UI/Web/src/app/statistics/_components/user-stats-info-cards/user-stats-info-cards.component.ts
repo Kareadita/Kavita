@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { CompactNumberPipe } from 'src/app/pipe/compact-number.pipe';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
 import { TimeAgoPipe } from '../../../pipe/time-ago.pipe';
 import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
-import { CompactNumberPipe as CompactNumberPipe_1 } from '../../../pipe/compact-number.pipe';
 import { DecimalPipe } from '@angular/common';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import {TranslocoModule} from "@ngneat/transloco";
+import {AccountService} from "../../../_services/account.service";
+import {CompactNumberPipe} from "../../../pipe/compact-number.pipe";
 
 @Component({
     selector: 'app-user-stats-info-cards',
@@ -16,7 +16,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./user-stats-info-cards.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe_1, TimeDurationPipe, TimeAgoPipe, TranslocoModule]
+    imports: [IconAndTitleComponent, DecimalPipe, CompactNumberPipe, TimeDurationPipe, TimeAgoPipe, TranslocoModule]
 })
 export class UserStatsInfoCardsComponent {
 
@@ -27,7 +27,7 @@ export class UserStatsInfoCardsComponent {
   @Input() lastActive: string = '';
   @Input() avgHoursPerWeekSpentReading: number = 0;
 
-  constructor(private statsService: StatisticsService, private modalService: NgbModal) { }
+  constructor(private statsService: StatisticsService, private modalService: NgbModal, private accountService: AccountService) { }
 
   openPageByYearList() {
     const numberPipe = new CompactNumberPipe();
@@ -46,5 +46,4 @@ export class UserStatsInfoCardsComponent {
       ref.componentInstance.title = 'Words Read By Year';
     });
   }
-
 }
