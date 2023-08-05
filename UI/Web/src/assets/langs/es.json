@@ -40,7 +40,8 @@
         "description": "Aquí encontrarás cualquier evento de scrobble vinculado a tu cuenta. Para que existan eventos, debes tener configurado\n  un proveedor de scrobble activo. Todos los eventos que hayan sido procesados se eliminarán después de un mes. Si hay eventos no procesados, es\n  probable que estos no puedan formar coincidencias en un nivel superior. Por favor, ponte en contacto con tu administrador para corregirlos.",
         "title": "Historial de Scrobble",
         "series-header": "Series",
-        "created-header": "Creado"
+        "created-header": "Creado",
+        "is-processed-header": "Está procesado"
     },
     "edit-reading-list-modal": {
         "year-label": "Año",
@@ -197,7 +198,8 @@
         "set-default": "Establecer por defecto",
         "applied": "Aplicado",
         "updated-toastr": "El tema por defecto del sitio ha sido actualizado a {{name}}",
-        "apply": "{{common.apply}}"
+        "apply": "{{common.apply}}",
+        "scan-queued": "Escaneo de Temas añadido a la cola"
     },
     "spoiler": {
         "click-to-show": "Alerta de spoiler, haz clic para mostrar"
@@ -226,5 +228,182 @@
         "title": "Quiero leer",
         "no-items": "No hay elementos. Prueba añadir una serie.",
         "no-items-filtered": "Ningún elemento coincide con tu filtro actual."
+    },
+    "manage-devices": {
+        "title": "Administrador de dispositivos",
+        "description": "Esta sección es para configurar los dispositivos que solo pueden recibir archivos a través de un correo electronico.",
+        "edit": "{{common.edit}}",
+        "no-devices": "No hay ningún dispositivo configurado todavía",
+        "devices-title": "Dispositivos",
+        "platform-label": "Plataforma: ",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}"
+    },
+    "edit-device": {
+        "device-name-label": "Nombre del dispositivo",
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "device-platform-label": "Plataforma del dispositivo",
+        "save": "{{common.save}}"
+    },
+    "restriction-selector": {
+        "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
+        "title": "Clasificación por edad",
+        "description": "Cuando está seleccionado, las series y las listas de lectura que tengan una clasificación mayor serán ocultadas en los resultados.",
+        "not-applicable-for-admins": "No se aplica a los administradores.",
+        "age-rating-label": "Clasificación por edad",
+        "no-restriction": "Sin restricción",
+        "include-unknowns-label": "Incluir desconocidos"
+    },
+    "change-password": {
+        "cancel": "{{common.cancel}}",
+        "current-password-label": "Contraseña actual",
+        "new-password-label": "Nueva contraseña",
+        "confirm-password-label": "Confirmar contraseña",
+        "permission-error": "No tienes permiso para cambiar la contraseña. Contacta con el administrador del servidor.",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "password-label": "{{common.password}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "passwords-must-match": "Las contraseñas deben coincidir"
+    },
+    "change-email": {
+        "current-password-label": "Contraseña actual",
+        "email-not-confirmed": "La dirección de correo electrónico no se ha confirmado",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "email-updated-title": "Correo electrónico actualizado",
+        "email-label": "{{common.email}}",
+        "email-updated-description": "Puedes usar el siguiente enlace para confirmar el correo. Si el servidor es accesible externamente, se enviará un correo electrónico para confirmarlo.",
+        "edit": "{{common.edit}}",
+        "invite-url-label": "Enlace de invitación",
+        "invite-url-tooltip": "Copia y pégalo en una nueva ventana",
+        "permission-error": "No tienes permiso para cambiar tu dirección de correo electrónico. Contacta a un administrador del servidor.",
+        "required-field": "{{validation.required-field}}",
+        "reset": "{{common.reset}}"
+    },
+    "change-age-restriction": {
+        "save": "{{common.save}}",
+        "age-restriction-label": "Clasificación por edad",
+        "reset": "{{common.reset}}",
+        "unknowns": "Desconocido",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}"
+    },
+    "api-key": {
+        "copy": "Copiar",
+        "key-reset": "Resetear Clave de API",
+        "no-key": "ERROR - KEY NOT SET",
+        "confirm-reset": "Esto invalidará cualquier configuración de OPDS. Estás seguro que quieres continuar?",
+        "regen-warning": "Regenerar tu Clave de API invalidará los clientes conectados."
+    },
+    "scrobbling-providers": {
+        "generate": "Generar",
+        "edit": "{{common.edit}}",
+        "requires": "Esta característica requiere una licencia de {{product}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
+    },
+    "user-stats-info-cards": {
+        "total-words-read-label": "Total de palabras leídas",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "last-active-label": "Última vez activo",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "total-pages-read-label": "Páginas leídas totales",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "time-spent-reading-label": "Tiempo invertido leyendo",
+        "chapters": "{{value}} capítulos",
+        "chapters-read-label": "Capítulos leídos",
+        "avg-reading-per-week-label": "Media de leídos por semana"
+    },
+    "top-readers": {
+        "comics-label": "Comics: {{value}} hrs",
+        "books-label": "Libros: {{value}} hrs",
+        "manga-label": "Manga: {{value}} hrs",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}"
+    },
+    "directory-picker": {
+        "path-placeholder": "Comienza a escribir o selecciona una ruta",
+        "title": "Escoge un directorio",
+        "close": "{{common.close}}",
+        "path-label": "Ruta",
+        "type-header": "Tipo",
+        "name-header": "Nombre",
+        "cancel": "{{common.cancel}}",
+        "share": "Compartir",
+        "help": "{{common.help}}"
+    },
+    "theme": {
+        "theme-dark": "Oscuro",
+        "theme-black": "Negro",
+        "theme-paper": "Papel",
+        "theme-white": "Blanco"
+    },
+    "site-theme-provider-pipe": {
+        "user": "Usuario",
+        "system": "Sistema"
+    },
+    "generic-list-modal": {
+        "close": "{{common.close}}",
+        "open-filtered-search": "Abierta una búsqueda filtrada para {{item}}",
+        "filter": "Filtrar"
+    },
+    "user-stats": {
+        "read-percentage": "% Leído"
+    },
+    "typeahead": {
+        "locked-field": "El campo está bloqueado",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "no-data": "No existen datos",
+        "add-item": "Añadir {{item}}…"
+    },
+    "library-access-modal": {
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Acceso a librería",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "no-data": "No hay librerías configuradas todavía."
+    },
+    "time-periods": {
+        "this-week": "Esta semana",
+        "last-7-days": "Últimos 7 días",
+        "last-30-days": "Últimos 30 días",
+        "last-90-days": "Últimos 90 días",
+        "last-year": "Último año"
+    },
+    "device-platform-pipe": {
+        "custom": "Personalizado"
+    },
+    "day-of-week-pipe": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miercoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Satisfactorio",
+        "partial": "Parcial",
+        "failure": ""
+    },
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "Tu cuenta no tiene acceso a todas las series de la lista o Kavita no tiene nada presente en la lista.",
+        "chapter-missing": "{{series}}: Capítulo {{chapter}} no presente en Kavita. Este item será saltado.",
+        "empty-file": "El archivo CBL está vacío. Ninguna acción realizada.",
+        "name-conflict": "Una lista de lectura que coincide con el archivo CBL ({{readingListName}}) ya existe en tu cuenta."
     }
 }
