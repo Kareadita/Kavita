@@ -13,6 +13,7 @@ import {DownloadService} from 'src/app/shared/_services/download.service';
 import {DefaultValuePipe} from '../../pipe/default-value.pipe';
 import {AsyncPipe, DatePipe, NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 
 interface AdhocTask {
   name: string;
@@ -28,7 +29,7 @@ interface AdhocTask {
   styleUrls: ['./manage-tasks-settings.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe, TranslocoModule, NgTemplateOutlet]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, AsyncPipe, TitleCasePipe, DatePipe, DefaultValuePipe, TranslocoModule, NgTemplateOutlet, TranslocoLocaleModule]
 })
 export class ManageTasksSettingsComponent implements OnInit {
 

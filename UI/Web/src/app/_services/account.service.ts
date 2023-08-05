@@ -32,8 +32,8 @@ export class AccountService {
   private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
   userKey = 'kavita-user';
-  public lastLoginKey = 'kavita-lastlogin';
-  public localeKey = 'kavita-locale';
+  public static lastLoginKey = 'kavita-lastlogin';
+  public static localeKey = 'kavita-locale';
   private currentUser: User | undefined;
 
   // Stores values, when someone subscribes gives (1) of last values seen.
@@ -135,7 +135,7 @@ export class AccountService {
       Array.isArray(roles) ? user.roles = roles : user.roles.push(roles);
 
       localStorage.setItem(this.userKey, JSON.stringify(user));
-      localStorage.setItem(this.lastLoginKey, user.username);
+      localStorage.setItem(AccountService.lastLoginKey, user.username);
       if (user.preferences && user.preferences.theme) {
         this.themeService.setTheme(user.preferences.theme.name);
       } else {
@@ -268,8 +268,8 @@ export class AccountService {
         this.currentUser.preferences = settings;
         this.setCurrentUser(this.currentUser);
 
-        // Update the locale on disk (for logout only)
-        localStorage.setItem(this.localeKey, this.currentUser.preferences.locale);
+        // Update the locale on disk (for logout and compact-number pipe)
+        localStorage.setItem(AccountService.localeKey, this.currentUser.preferences.locale);
       }
       return settings;
     }), takeUntilDestroyed(this.destroyRef));

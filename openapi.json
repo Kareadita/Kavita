@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.6.5"
+    "version": "0.7.6.6"
   },
   "servers": [
     {
@@ -12822,16 +12822,6 @@
             "type": "integer",
             "description": "Platform (ie) Windows 10",
             "format": "int32"
-          },
-          "lastUsed": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
-          },
-          "lastUsedUtc": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -13391,18 +13381,6 @@
             "description": "Human Readable title for the Job",
             "nullable": true
           },
-          "createdAt": {
-            "type": "string",
-            "description": "When the job was created",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastExecution": {
-            "type": "string",
-            "description": "Last time the job was run",
-            "format": "date-time",
-            "nullable": true
-          },
           "createdAtUtc": {
             "type": "string",
             "description": "When the job was created",
@@ -13879,14 +13857,6 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -14850,11 +14820,11 @@
             "format": "int32",
             "nullable": true
           },
-          "lastModified": {
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
-          "created": {
+          "createdUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -16438,22 +16408,6 @@
             "type": "integer",
             "description": "Where did the theme come from",
             "format": "int32"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
           },
           "selector": {
             "type": "string",

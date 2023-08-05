@@ -12,11 +12,13 @@ import {PaginatedResult, Pagination} from "../../_models/pagination";
 import {SortableHeader, SortEvent} from "../table/_directives/sortable-header.directive";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {TranslocoModule} from "@ngneat/transloco";
+import {DefaultValuePipe} from "../../pipe/default-value.pipe";
+import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,7 +38,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   get ScrobbleEventType() { return ScrobbleEventType; }
 
   ngOnInit() {
-    this.loadPage({column: 'created', direction: 'desc'});
+    this.loadPage({column: 'createdUtc', direction: 'desc'});
 
     this.formGroup.get('filter')?.valueChanges.pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(query => {
       this.loadPage();
@@ -81,9 +83,9 @@ export class UserScrobbleHistoryComponent implements OnInit {
 
   private mapSortColumnField(column: string | undefined) {
     switch (column) {
-      case 'created': return ScrobbleEventSortField.Created;
+      case 'createdUtc': return ScrobbleEventSortField.Created;
       case 'isProcessed': return ScrobbleEventSortField.IsProcessed;
-      case 'lastModified': return ScrobbleEventSortField.LastModified;
+      case 'lastModifiedUtc': return ScrobbleEventSortField.LastModified;
       case 'seriesName': return ScrobbleEventSortField.Series;
     }
     return ScrobbleEventSortField.None;

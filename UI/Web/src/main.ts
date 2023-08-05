@@ -33,7 +33,7 @@ export function preloadUser(userService: AccountService, transloco: TranslocoSer
       }
 
       // If no user or locale is available, fallback to the default language ('en')
-      const localStorageLocale = localStorage.getItem(userService.localeKey) || 'en';
+      const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
       transloco.setActiveLang(localStorageLocale);
       return transloco.load(localStorageLocale)
     })).subscribe();
@@ -71,7 +71,7 @@ const languageCodes = [
   'syr', 'syr-SY', 'ta', 'ta-IN', 'te', 'te-IN', 'th', 'th-TH', 'tl', 'tl-PH', 'tn',
   'tn-ZA', 'tr', 'tr-TR', 'tt', 'tt-RU', 'ts', 'uk', 'uk-UA', 'ur', 'ur-PK', 'uz',
   'uz-UZ', 'uz-UZ', 'vi', 'vi-VN', 'xh', 'xh-ZA', 'zh', 'zh-CN', 'zh-HK', 'zh-MO',
-  'zh-SG', 'zh-TW', 'zu', 'zu-ZA'
+  'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans'
 ];
 
 bootstrapApplication(AppComponent, {
@@ -109,13 +109,13 @@ bootstrapApplication(AppComponent, {
           provide: TRANSLOCO_CONFIG,
           useValue: {
             reRenderOnLangChange: true,
-            availableLangs: languageCodes, // TODO: Derive this from the directory
+            availableLangs: languageCodes,
             prodMode: environment.production,
             defaultLang: 'en',
             fallbackLang: 'en',
             missingHandler: {
               useFallbackTranslation: true,
-              allowEmpty: true,
+              allowEmpty: false,
             },
             flatten: {
               aot: !isDevMode()

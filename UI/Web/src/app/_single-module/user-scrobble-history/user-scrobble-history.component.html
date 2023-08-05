@@ -22,10 +22,10 @@
   <table class="table table-striped table-hover table-sm scrollable">
     <thead>
     <tr>
-      <th scope="col" sortable="created" (sort)="updateSort($event)">
+      <th scope="col" sortable="createdUtc" (sort)="updateSort($event)">
         {{t('created-header')}}
       </th>
-      <th scope="col" sortable="lastModified" (sort)="updateSort($event)" direction="desc">
+      <th scope="col" sortable="lastModifiedUtc" (sort)="updateSort($event)" direction="desc">
         {{t('last-modified-header')}}
       </th>
       <th scope="col">
@@ -48,10 +48,10 @@
     </tr>
     <tr *ngFor="let item of events; let idx = index;">
       <td>
-        {{item.created | date:'MM/dd/yy h:mm a' }}
+        {{item.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium',  } | defaultValue }}
       </td>
       <td>
-        {{item.lastModified | date:'MM/dd/yy h:mm a' }}
+        {{item.lastModifiedUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium' } | defaultValue }}
       </td>
       <td>
         {{item.scrobbleEventType | scrobbleEventType}}

@@ -91,7 +91,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
         if (this.actions[othersIndex].children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
           this.actions[othersIndex].children.push({
             action: Action.RemoveFromOnDeck,
-            title: this.translocoService.translate('actionable.remove-from-on-deck'),
+            title: 'remove-from-on-deck',
             callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
             class: 'danger',
             requiresAdmin: false,

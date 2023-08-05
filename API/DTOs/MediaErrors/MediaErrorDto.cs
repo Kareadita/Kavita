@@ -20,6 +20,4 @@ public class MediaErrorDto
     /// Exception message
     /// </summary>
     public string Details { get; set; }
-    public DateTime Created { get; set; }
-    public DateTime CreatedUtc { get; set; }
 }

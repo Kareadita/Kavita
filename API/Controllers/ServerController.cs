@@ -222,8 +222,7 @@ public class ServerController : BaseApiController
                     Id = dto.Id,
                     Title = dto.Id.Replace('-', ' '),
                     Cron = dto.Cron,
-                    CreatedAt = dto.CreatedAt,
-                    LastExecution = dto.LastExecution,
+                    LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
                 });
 
         return Ok(recurringJobs);
