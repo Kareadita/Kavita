@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
-import {TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@ngneat/transloco";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
@@ -41,8 +41,9 @@ export class ErrorInterceptor implements HttpInterceptor {
             break;
           default:
             // Don't throw multiple Something unexpected went wrong
-            if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.' && this.toastr.previousToastMessage !== 'errors.generic') {
-              this.toast('errors.generic');
+            const genericError = this.translocoService.translate('errors.generic');
+            if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.' && this.toastr.previousToastMessage !== genericError) {
+              this.toast(genericError);
             }
             break;
         }

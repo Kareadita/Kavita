@@ -953,7 +953,7 @@
         "range-hours": "{{value}} {{hourWord}}",
         "hour": "Hour",
         "hours": "Hours",
-        "read-time-title": "{{series-info-cards.read-time-title}}",
+        "read-time-title": "{{series-info-cards.read-time-title}}"
     },
 
     "series-info-cards": {
@@ -1706,7 +1706,7 @@
         "collection-updated": "Collection updated",
         "reading-list-deleted": "Reading list deleted",
         "reading-list-updated": "Reading list updated",
-        "confirm-delete-reading-list": "'Are you sure you want to delete the reading list? This cannot be undone.'",
+        "confirm-delete-reading-list": "Are you sure you want to delete the reading list? This cannot be undone.",
         "item-removed": "Item removed",
         "nothing-to-remove": "Nothing to remove",
         "series-added-to-reading-list": "Series added to reading list",
