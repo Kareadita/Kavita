@@ -21,7 +21,8 @@ export interface Chapter {
     pagesRead: number; // Attached for the given user when requesting from API
     isSpecial: boolean;
     title: string;
-    created: string;
+    //created: string;
+    createdUtc: string;
     /**
      * Actual name of the Chapter if populated in underlying metadata
      */

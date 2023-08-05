@@ -33,7 +33,7 @@
 
       <ng-container *ngIf="totalPages > 0">
         <div class="col-auto mb-2">
-          <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-regular fa-file-lines" [title]="t('pages-title')">
+          <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-regular fa-file-lines">
             {{t('pages-count', {num: totalPages | compactNumber})}}
           </app-icon-and-title>
         </div>
@@ -60,11 +60,11 @@
         </div>
       </ng-container>
 
-      <ng-container *ngIf="showExtendedProperties && chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
+      <ng-container *ngIf="showExtendedProperties && chapter.createdUtc && chapter.createdUtc !== '' && (chapter.createdUtc | date: 'shortDate') !== '1/1/01'">
         <div class="vr d-none d-lg-block m-2"></div>
         <div class="col-auto">
           <app-icon-and-title [label]="t('date-added-title')" [clickable]="false" fontClasses="fa-solid fa-file-import" [title]="t('date-added-title')">
-            {{chapter.created | date:'short' | defaultDate}}
+            {{chapter.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
           </app-icon-and-title>
         </div>
       </ng-container>

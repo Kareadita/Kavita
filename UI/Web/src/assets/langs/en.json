@@ -941,6 +941,7 @@
         "length-title": "Length",
         "pages-count": "{{num}} Pages",
         "words-count": "{{num}} Words",
+
         "reading-time-title": "Read Time",
         "date-added-title": "Date Added",
         "size-title": "Size",
@@ -952,7 +953,7 @@
         "range-hours": "{{value}} {{hourWord}}",
         "hour": "Hour",
         "hours": "Hours",
-        "read-time-title": "{{series-info-cards.read-time-title}}"
+        "read-time-title": "{{series-info-cards.read-time-title}}",
     },
 
     "series-info-cards": {
