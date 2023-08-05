@@ -1,6 +1,6 @@
 {
     "login": {
-        "title": "",
+        "title": "ログイン",
         "username": "",
         "password": "",
         "password-validation": "",
@@ -9,11 +9,11 @@
     },
     "dashboard": {
         "no-libraries": "",
-        "server-settings-link": "",
+        "server-settings-link": "サーバー設定",
         "not-granted": "",
         "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "recently-updated-title": "最近更新されたシリーズ",
+        "recently-added-title": "最近追加されたシリーズ"
     },
     "edit-user": {
         "edit": "",
@@ -23,7 +23,7 @@
         "email": "",
         "not-valid-email": "",
         "cancel": "",
-        "saving": "",
+        "saving": "保存中。。。",
         "update": ""
     },
     "user-scrobble-history": {
@@ -33,7 +33,7 @@
         "created-header": "",
         "last-modified-header": "",
         "type-header": "",
-        "series-header": "",
+        "series-header": "シリーズ",
         "data-header": "",
         "is-processed-header": "",
         "no-data": "",
@@ -46,7 +46,7 @@
     "scrobble-event-type-pipe": {
         "chapter-read": "",
         "score-updated": "",
-        "want-to-read-add": "",
+        "want-to-read-add": "読みたい：追加",
         "want-to-read-remove": "",
         "review": ""
     },
