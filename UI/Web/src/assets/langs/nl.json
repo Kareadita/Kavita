@@ -275,76 +275,76 @@
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
         "chapters-read-label": "Hoofdstukken gelezen",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "",
-        "last-active-label": "",
-        "chapters": ""
+        "avg-reading-per-week-label": "Gemiddelde lezing / week",
+        "last-active-label": "Laatst actief",
+        "chapters": "{{value}} hoofdstukken"
     },
     "user-stats": {
-        "library-read-progress-title": "",
-        "read-percentage": ""
+        "library-read-progress-title": "Leesvoortgang bibliotheek",
+        "read-percentage": "% gelezen"
     },
     "top-readers": {
-        "title": "",
-        "time-selection-label": "",
-        "comics-label": "",
-        "manga-label": "",
-        "books-label": "",
-        "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
-        "all-time": ""
+        "title": "Toplezers",
+        "time-selection-label": "Tijdsbestek",
+        "comics-label": "Strips: {{value}} uur",
+        "manga-label": "Manga: {{value}} uur",
+        "books-label": "Boeken: {{value}} uur",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": ""
+        "title": "Rollen"
     },
     "directory-picker": {
-        "title": "",
-        "close": "",
-        "path-label": "",
-        "path-placeholder": "",
-        "instructions": "",
-        "type-header": "",
-        "name-header": "",
-        "cancel": "",
-        "share": "",
-        "help": ""
+        "title": "Kies een map",
+        "close": "{{common.close}}",
+        "path-label": "Pad",
+        "path-placeholder": "Begin met typen of selecteer pad",
+        "instructions": "Selecteer een map om breadcrumb te bekijken. Zie je je directory niet? Probeer eerst / te controleren.",
+        "type-header": "Type",
+        "name-header": "Naam",
+        "cancel": "{{common.cancel}}",
+        "share": "Deel",
+        "help": "{{common.help}}"
     },
     "library-access-modal": {
-        "select-all": "",
-        "deselect-all": "",
-        "title": "",
-        "close": "",
-        "reset": "",
-        "cancel": "",
-        "save": "",
-        "no-data": ""
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Bibliotheek toegang",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "no-data": "Er zijn nog geen bibliotheken ingesteld."
     },
     "time-periods": {
-        "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
-        "all-time": ""
+        "this-week": "Deze Week",
+        "last-7-days": "Laatste 7 dagen",
+        "last-30-days": "Laatste 30 dagen",
+        "last-90-days": "Laatste 90 dagen",
+        "last-year": "Vorig jaar",
+        "all-time": "Altijd"
     },
     "device-platform-pipe": {
-        "custom": ""
+        "custom": "Op maat"
     },
     "day-of-week-pipe": {
-        "monday": "",
-        "tuesday": "",
-        "wednesday": "",
-        "thursday": "",
-        "friday": "",
-        "saturday": "",
-        "sunday": ""
+        "monday": "Maandag",
+        "tuesday": "Dinsdag",
+        "wednesday": "Woensdag",
+        "thursday": "Donderdag",
+        "friday": "Vrijdag",
+        "saturday": "Zaterdag",
+        "sunday": "Zondag"
     },
     "cbl-import-result-pipe": {
-        "success": "",
-        "partial": "",
-        "failure": ""
+        "success": "Succes",
+        "partial": "Gedeeltelijk",
+        "failure": "Mislukt"
     },
     "cbl-conflict-reason-pipe": {
         "all-series-missing": "",
