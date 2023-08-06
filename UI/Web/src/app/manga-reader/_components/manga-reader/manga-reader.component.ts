@@ -1497,7 +1497,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   promptForPage() {
-    const goToPageNum = window.prompt('There are ' + this.maxPages + ' pages. What page would you like to go to?', '');
+    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages});
+    const goToPageNum = window.prompt(question, '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }

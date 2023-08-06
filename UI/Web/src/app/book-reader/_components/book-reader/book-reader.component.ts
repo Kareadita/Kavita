@@ -855,7 +855,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   promptForPage() {
-    const question = 'There are ' + (this.maxPages - 1) + ' pages. What page do you want to go to?';
+    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
     const goToPageNum = window.prompt(question, '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
