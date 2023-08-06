@@ -113,7 +113,9 @@ bootstrapApplication(AppComponent, {
           NgCircleProgressModule.forRoot(),
         ),
         provideTransloco(translocoOptions),
-        provideTranslocoLocale,
+        provideTranslocoLocale({
+          defaultLocale: 'en'
+        }),
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
           storage: { useValue: localStorage }
