@@ -154,5 +154,7 @@
     "epub-html-missing": "Die entsprechende HTML-Datei für diese Seite konnte nicht gefunden werden",
     "collection-tag-title-required": "Titel der Sammlung darf nicht leer sein",
     "reading-list-title-required": "Leselisten Titel darf nicht leer sein",
-    "volume-num": "Band {0}"
+    "volume-num": "Band {0}",
+    "on-deck": "On Deck",
+    "browse-on-deck": "On Deck durchsuchen"
 }
