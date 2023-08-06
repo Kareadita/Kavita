@@ -47,7 +47,7 @@
         "chapter-read": "",
         "score-updated": "",
         "want-to-read-add": "読みたい：追加",
-        "want-to-read-remove": "",
+        "want-to-read-remove": "読みたい：消除",
         "review": ""
     },
     "spoiler": {
@@ -56,7 +56,7 @@
     "review-series-modal": {
         "title": "",
         "tagline-label": "",
-        "review-label": "",
+        "review-label": "レビュー",
         "close": "",
         "save": ""
     },
@@ -69,7 +69,7 @@
     "review-card": {
         "your-review": "",
         "external-review": "",
-        "local-review": "",
+        "local-review": "レビュー",
         "rating-percentage": ""
     },
     "want-to-read": {
@@ -239,7 +239,7 @@
         "save": ""
     },
     "api-key": {
-        "copy": "",
+        "copy": "コピー",
         "regen-warning": "",
         "no-key": "",
         "confirm-reset": "",
@@ -312,7 +312,7 @@
         "path-placeholder": "",
         "instructions": "",
         "type-header": "",
-        "name-header": "",
+        "name-header": "名前",
         "cancel": "",
         "share": "",
         "help": ""
@@ -339,13 +339,13 @@
         "custom": ""
     },
     "day-of-week-pipe": {
-        "monday": "",
-        "tuesday": "",
-        "wednesday": "",
-        "thursday": "",
-        "friday": "",
-        "saturday": "",
-        "sunday": ""
+        "monday": "月曜日",
+        "tuesday": "火曜日",
+        "wednesday": "水曜日",
+        "thursday": "木曜日",
+        "friday": "金曜日",
+        "saturday": "土曜日",
+        "sunday": "日曜日"
     },
     "cbl-import-result-pipe": {
         "success": "",
@@ -388,9 +388,9 @@
         "adaptation": "",
         "alternative-setting": "",
         "alternative-version": "",
-        "character": "",
+        "character": "キャラクター",
         "contains": "",
-        "doujinshi": "",
+        "doujinshi": "同人誌",
         "other": "",
         "prequel": "",
         "sequel": "",
@@ -540,7 +540,7 @@
         "next-chapter": "",
         "skip-header": "",
         "virtual-pages": "",
-        "settings-header": "",
+        "settings-header": "設定",
         "table-of-contents-header": "",
         "bookmarks-header": "",
         "toc-header": "",
@@ -548,7 +548,7 @@
         "go-back": "",
         "incognito-mode-alt": "",
         "incognito-mode-label": "",
-        "next": "",
+        "next": "次へ",
         "previous": ""
     },
     "personal-table-of-contents": {
@@ -583,7 +583,7 @@
         "password-validation": ""
     },
     "register": {
-        "title": "",
+        "title": "登録",
         "description": "",
         "username-label": "",
         "email-label": "",
@@ -609,7 +609,7 @@
         "add-to-want-to-read": "",
         "edit-series-alt": "",
         "download-series--tooltip": "",
-        "downloading-status": "",
+        "downloading-status": "ダウンロード中。。。",
         "user-reviews-alt": "",
         "storyline-tab": "",
         "books-tab": "",
@@ -1472,7 +1472,7 @@
         "title": "",
         "visualisation-label": "",
         "data-table-label": "",
-        "year-header": "",
+        "year-header": "年",
         "count-header": ""
     },
     "server-stats": {
@@ -1601,7 +1601,7 @@
         "refresh-covers": "",
         "analyze-files": "",
         "settings": "",
-        "edit": "",
+        "edit": "編集",
         "mark-as-read": "",
         "mark-as-unread": "",
         "scan-series": "",
@@ -1613,8 +1613,8 @@
         "add-to-reading-list": "",
         "add-to-collection": "",
         "send-to": "",
-        "delete": "",
-        "download": "",
+        "delete": "削除",
+        "download": "ダウンロード",
         "read-incognito": "",
         "details": "",
         "view-series": "",
@@ -1670,7 +1670,7 @@
         "submit": "",
         "email": "",
         "read": "",
-        "loading": "",
+        "loading": "読み込み中。。。",
         "username": "",
         "password": "",
         "promoted": "",
