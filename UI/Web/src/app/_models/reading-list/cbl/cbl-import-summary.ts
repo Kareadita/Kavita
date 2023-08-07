@@ -1,4 +1,3 @@
-import { Series } from "../../series";
 import { CblBookResult } from "./cbl-book-result";
 import { CblImportResult } from "./cbl-import-result.enum";
 

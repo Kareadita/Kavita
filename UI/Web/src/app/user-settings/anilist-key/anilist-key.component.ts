@@ -4,8 +4,6 @@ import {
   Component,
   DestroyRef,
   inject,
-  Input,
-  OnChanges,
   OnInit
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
@@ -14,7 +12,7 @@ import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.se
 import {AccountService} from "../../_services/account.service";
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgOptimizedImage } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-anilist-key',
@@ -22,7 +20,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./anilist-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgOptimizedImage, NgbTooltip, NgbCollapse, ReactiveFormsModule, TranslocoModule]
+    imports: [NgIf, NgOptimizedImage, NgbTooltip, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class AnilistKeyComponent implements OnInit {
 

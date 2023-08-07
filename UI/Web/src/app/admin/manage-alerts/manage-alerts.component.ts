@@ -10,7 +10,7 @@ import {
   inject,
   DestroyRef
 } from '@angular/core';
-import { BehaviorSubject, Observable, Subject, combineLatest, filter, map, shareReplay, takeUntil } from 'rxjs';
+import { BehaviorSubject, Observable, filter, shareReplay } from 'rxjs';
 import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
@@ -20,7 +20,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { FilterPipe } from '../../pipe/filter.pipe';
 import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-alerts',
@@ -28,7 +28,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./manage-alerts.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader, TranslocoModule]
+  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader, TranslocoDirective]
 })
 export class ManageAlertsComponent implements OnInit {
 

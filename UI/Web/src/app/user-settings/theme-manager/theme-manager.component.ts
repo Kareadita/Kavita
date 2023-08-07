@@ -8,14 +8,14 @@ import {
 import { ToastrService } from 'ngx-toastr';
 import { distinctUntilChanged, take } from 'rxjs';
 import { ThemeService } from 'src/app/_services/theme.service';
-import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme';
+import { SiteTheme } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SiteThemeProviderPipe } from '../_pipes/site-theme-provider.pipe';
 import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-theme-manager',
@@ -23,7 +23,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./theme-manager.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoModule]
+    imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoDirective]
 })
 export class ThemeManagerComponent {
 

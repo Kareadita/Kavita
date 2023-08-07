@@ -6,7 +6,7 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { FilterPipe } from '../../../pipe/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 export enum ADD_FLOW {
   Series = 0,
@@ -21,7 +21,7 @@ export enum ADD_FLOW {
     templateUrl: './add-to-list-modal.component.html',
     styleUrls: ['./add-to-list-modal.component.scss'],
     standalone: true,
-  imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoModule]
+  imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
 

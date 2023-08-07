@@ -26,12 +26,12 @@ import {DownloadIndicatorComponent} from "../download-indicator/download-indicat
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
 import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-list-item',
   standalone: true,
-  imports: [CommonModule, ReadMoreComponent, ImageComponent, DownloadIndicatorComponent, EntityInfoCardsComponent, CardActionablesComponent, NgbProgressbar, NgbTooltip, TranslocoModule],
+  imports: [CommonModule, ReadMoreComponent, ImageComponent, DownloadIndicatorComponent, EntityInfoCardsComponent, CardActionablesComponent, NgbProgressbar, NgbTooltip, TranslocoDirective],
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,5 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, OnInit, ChangeDetectorRef } from '@angular/core';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import {CommonModule} from "@angular/common";
 
 

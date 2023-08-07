@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, importProvidersFrom, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
 import {CommonModule} from "@angular/common";
-import {NgCircleProgressModule, CircleProgressOptions } from "ng-circle-progress";
+import {NgCircleProgressModule } from "ng-circle-progress";
 
 @Component({
   selector: 'app-circular-loader',

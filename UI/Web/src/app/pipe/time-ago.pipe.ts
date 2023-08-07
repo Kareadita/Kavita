@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, inject, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import {ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from "@ngneat/transloco";
 
 /**

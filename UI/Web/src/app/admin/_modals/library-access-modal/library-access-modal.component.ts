@@ -6,14 +6,14 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {SelectionModel} from 'src/app/typeahead/_components/typeahead.component';
 import {NgFor, NgIf} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-library-access-modal',
   templateUrl: './library-access-modal.component.html',
   styleUrls: ['./library-access-modal.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, TranslocoModule],
+  imports: [ReactiveFormsModule, FormsModule, NgFor, NgIf, TranslocoDirective],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LibraryAccessModalComponent implements OnInit {

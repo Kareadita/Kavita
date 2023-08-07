@@ -9,7 +9,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgxExtendedPdfViewerService, PageViewModeType, ProgressBarEvent, NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { ToastrService } from 'ngx-toastr';
-import { Subject, take } from 'rxjs';
+import { take } from 'rxjs';
 import { BookService } from 'src/app/book-reader/_services/book.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
@@ -21,7 +21,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -29,7 +29,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./pdf-reader.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoModule]
+  imports: [NgIf, NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
 

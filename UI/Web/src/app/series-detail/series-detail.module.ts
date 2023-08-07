@@ -37,7 +37,6 @@ import {
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
-import {RouterLink, RouterModule} from "@angular/router";
 
 
 @NgModule({

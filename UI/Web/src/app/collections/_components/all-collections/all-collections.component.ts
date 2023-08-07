@@ -25,7 +25,7 @@ import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 
 @Component({
@@ -34,7 +34,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./all-collections.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, CardDetailLayoutComponent, CardItemComponent, NgIf, AsyncPipe, DecimalPipe, TranslocoDirective]
 })
 export class AllCollectionsComponent implements OnInit {
 

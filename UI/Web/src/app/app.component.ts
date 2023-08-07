@@ -12,7 +12,7 @@ import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-root',
@@ -51,15 +51,11 @@ export class AppComponent implements OnInit {
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
 
-    // this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-    //   if (user && user.preferences.locale) {
-    //     this.translocoService.setActiveLang(user.preferences.locale);
-    //   } else {
-    //     // If no user or locale is available, fallback to the default language ('en')
-    //     const localStorageLocale = localStorage.getItem(accountService.localeKey) || 'en';
-    //     this.translocoService.setActiveLang(localStorageLocale);
-    //   }
-    // });
+    this.translocoService.events$.subscribe(event => {
+      if (event.type === 'translationLoadSuccess') {
+        console.log('Language has fully loaded!', translate('login.title'));
+      }
+    });
   }
 
   @HostListener('window:resize', ['$event'])

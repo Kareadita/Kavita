@@ -8,7 +8,7 @@ import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
 import { NgIf, NgFor } from '@angular/common';
 import { EditDeviceComponent } from '../edit-device/edit-device.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-devices',
@@ -16,7 +16,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./manage-devices.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoModule]
+    imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoDirective]
 })
 export class ManageDevicesComponent implements OnInit, OnDestroy {
 

@@ -2,7 +2,7 @@
 import {
   APP_INITIALIZER, ApplicationConfig,
   importProvidersFrom,
-  isDevMode,
+
 } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
@@ -35,13 +35,13 @@ export function preloadUser(userService: AccountService, transloco: TranslocoSer
     return userService.currentUser$.pipe(switchMap((user) => {
       if (user && user.preferences.locale) {
         transloco.setActiveLang(user.preferences.locale);
-        return transloco.load(user.preferences.locale)
+        return transloco.load(user.preferences.locale, {fallbackLangs: ['en']})
       }
 
       // If no user or locale is available, fallback to the default language ('en')
       const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
       transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale)
+      return transloco.load(localStorageLocale, {fallbackLangs: ['en']})
     })).subscribe();
   };
 }
@@ -93,7 +93,7 @@ const translocoOptions = {
       allowEmpty: false,
     },
     flatten: {
-      aot: !isDevMode()
+      aot: environment.production
     }
   }
 };

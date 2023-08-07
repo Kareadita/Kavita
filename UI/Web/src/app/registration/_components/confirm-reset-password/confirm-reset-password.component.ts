@@ -7,7 +7,7 @@ import { NavService } from 'src/app/_services/nav.service';
 import { NgTemplateOutlet, NgIf } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-confirm-reset-password',
@@ -15,7 +15,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./confirm-reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgIf, TranslocoModule]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgIf, TranslocoDirective]
 })
 export class ConfirmResetPasswordComponent {
 

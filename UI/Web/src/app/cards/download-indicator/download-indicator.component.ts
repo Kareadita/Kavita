@@ -4,12 +4,12 @@ import { Download } from 'src/app/shared/_models/download';
 import { DownloadEvent } from 'src/app/shared/_services/download.service';
 import {CommonModule} from "@angular/common";
 import {CircularLoaderComponent} from "../../shared/circular-loader/circular-loader.component";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-download-indicator',
   standalone: true,
-  imports: [CommonModule, CircularLoaderComponent, TranslocoModule],
+  imports: [CommonModule, CircularLoaderComponent, TranslocoDirective],
   templateUrl: './download-indicator.component.html',
   styleUrls: ['./download-indicator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

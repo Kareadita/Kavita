@@ -28,7 +28,7 @@ import { ImageComponent } from '../../../shared/image/image.component';
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { NgIf, NgClass, AsyncPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reading-list-detail',
@@ -36,7 +36,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective]
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
