@@ -306,7 +306,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingHtml', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('reader', {static: true}) reader!: ElementRef;
+  @ViewChild('reader', {static: false}) reader!: ElementRef;
 
 
   get BookPageLayoutMode() {
@@ -1597,6 +1597,4 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshPersonalToC() {
     this.refreshPToC.emit();
   }
-
-  protected readonly undefined = undefined;
 }
