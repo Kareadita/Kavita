@@ -24,6 +24,30 @@ import {RelationshipPipe} from "../../pipe/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {TranslocoService} from "@ngneat/transloco";
 
+function deepClone(obj: any): any {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Array) {
+    return obj.map(item => deepClone(item));
+  }
+
+  const clonedObj: any = {};
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        clonedObj[key] = deepClone(obj[key]);
+      } else {
+        clonedObj[key] = obj[key];
+      }
+    }
+  }
+
+  return clonedObj;
+}
+
 @Component({
   selector: 'app-series-card',
   standalone: true,
@@ -85,11 +109,12 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.actions = [...this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series))];
       if (this.isOnDeck) {
         const othersIndex = this.actions.findIndex(obj => obj.title === 'others');
-        if (this.actions[othersIndex].children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
-          this.actions[othersIndex].children.push({
+        const othersAction = deepClone(this.actions[othersIndex]) as ActionItem<Series>;
+        if (othersAction.children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
+          othersAction.children.push({
             action: Action.RemoveFromOnDeck,
             title: 'remove-from-on-deck',
             callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
@@ -97,6 +122,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
             requiresAdmin: false,
             children: [],
           });
+          this.actions[othersIndex] = othersAction;
         }
       }
       this.cdRef.markForCheck();

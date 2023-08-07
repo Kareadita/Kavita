@@ -1,5 +1,5 @@
-<ng-container *transloco="let t; read: 'book-reader'">
-  <div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
+<div class="container-flex {{darkMode ? 'dark-mode' : ''}} reader-container {{ColumnLayout}} {{WritingStyleClass}}" tabindex="0" #reader>
+  <ng-container *transloco="let t; read: 'book-reader'">
     <div class="fixed-top" #stickyTop>
       <a class="visually-hidden-focusable focus-visible" href="javascript:void(0);" (click)="moveFocus()">{{t('skip-header')}}</a>
       <ng-container [ngTemplateOutlet]="actionBar"></ng-container>
@@ -141,8 +141,8 @@
             </div>
           </ng-container>
           <ng-template #showTitle>
-            <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
-              (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode-label')}}</span>)</span>
+              <span *ngIf="incognitoMode" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-mode-alt')">
+                (<i class="fa fa-glasses" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode-label')}}</span>)</span>
             <span class="book-title-text ms-1" [ngbTooltip]="bookTitle">{{bookTitle}}</span>
           </ng-template>
         </div>
@@ -154,6 +154,5 @@
         </button>
       </div>
     </ng-template>
-  </div>
-
-</ng-container>
+  </ng-container>
+</div>

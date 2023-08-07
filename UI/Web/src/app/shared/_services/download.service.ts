@@ -1,18 +1,27 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable } from '@angular/core';
+import {DestroyRef, inject, Inject, Injectable} from '@angular/core';
 import { Series } from 'src/app/_models/series';
 import { environment } from 'src/environments/environment';
 import { ConfirmService } from '../confirm.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { Volume } from 'src/app/_models/volume';
-import { asyncScheduler, BehaviorSubject, Observable, tap, finalize, of, filter } from 'rxjs';
+import {
+  asyncScheduler,
+  BehaviorSubject,
+  Observable,
+  tap,
+  finalize,
+  of,
+  filter,
+} from 'rxjs';
 import { SAVER, Saver } from '../_providers/saver.provider';
 import { download, Download } from '../_models/download';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
-import { switchMap, takeWhile, throttleTime } from 'rxjs/operators';
+import {switchMap, take, takeWhile, throttleTime} from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 import { BytesPipe } from 'src/app/pipe/bytes.pipe';
 import {translate} from "@ngneat/transloco";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -42,6 +51,7 @@ export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 
  */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | undefined;
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -56,9 +66,11 @@ export class DownloadService {
   private downloadsSource: BehaviorSubject<DownloadEvent[]> = new BehaviorSubject<DownloadEvent[]>([]);
   public activeDownloads$ = this.downloadsSource.asObservable();
 
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(private httpClient: HttpClient, private confirmService: ConfirmService,
     @Inject(SAVER) private save: Saver, private accountService: AccountService) { }
+
 
   /**
    * Returns the entity subtitle (for the event widget) for a given entity
@@ -117,7 +129,7 @@ export class DownloadService {
     }
 
 
-    this.accountService.currentUser$.pipe(switchMap(user => {
+    this.accountService.currentUser$.pipe(take(1), switchMap(user => {
       if (user && user.preferences.promptForDownloadSize) {
         return sizeCheckCall;
       }
@@ -138,7 +150,8 @@ export class DownloadService {
         finalize(() => {
           if (callback) callback(undefined);
         }))
-    })).subscribe(() => {});
+    }), takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {});
   }
 
   private downloadSeriesSize(seriesId: number) {

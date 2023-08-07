@@ -405,5 +405,11 @@
         "chapter-missing": "{{series}}: Capítulo {{chapter}} no presente en Kavita. Este item será saltado.",
         "empty-file": "El archivo CBL está vacío. Ninguna acción realizada.",
         "name-conflict": "Una lista de lectura que coincide con el archivo CBL ({{readingListName}}) ya existe en tu cuenta."
+    },
+    "library-type-pipe": {
+        "manga": "Manga"
+    },
+    "age-rating-pipe": {
+        "unknown": "Desconocido"
     }
 }

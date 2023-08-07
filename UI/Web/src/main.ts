@@ -1,5 +1,9 @@
 /// <reference types="@angular/localize" />
-import {APP_INITIALIZER, importProvidersFrom, isDevMode} from '@angular/core';
+import {
+  APP_INITIALIZER, ApplicationConfig,
+  importProvidersFrom,
+  isDevMode,
+} from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { ToastrModule } from 'ngx-toastr';
@@ -9,18 +13,20 @@ import { SAVER, getSaver } from './app/shared/_providers/saver.provider';
 import { Title, BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
-import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient, HttpClient} from '@angular/common/http';
-import {TRANSLOCO_CONFIG, TranslocoConfig, TranslocoModule, TranslocoService} from "@ngneat/transloco";
-import {environment} from "./environments/environment";
-import {HttpLoader, translocoLoader} from "./httpLoader";
+import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient} from '@angular/common/http';
 import {
-  TRANSLOCO_PERSIST_LANG_STORAGE,
-  TranslocoPersistLangModule,
+  provideTransloco,
+  TranslocoService
+} from "@ngneat/transloco";
+import {environment} from "./environments/environment";
+import {HttpLoader} from "./httpLoader";
+import {
+  provideTranslocoPersistLang,
 } from '@ngneat/transloco-persist-lang';
-import {PERSIST_TRANSLATIONS_STORAGE, TranslocoPersistTranslationsModule} from "@ngneat/transloco-persist-translations";
-import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {AccountService} from "./app/_services/account.service";
 import {switchMap} from "rxjs";
+import {provideTranslocoLocale} from "@ngneat/transloco-locale";
+import {provideTranslocoPersistTranslations} from "@ngneat/transloco-persist-translations";
 
 const disableAnimations = !('animate' in document.documentElement);
 
@@ -39,6 +45,7 @@ export function preloadUser(userService: AccountService, transloco: TranslocoSer
     })).subscribe();
   };
 }
+
 
 export const preLoad = {
   provide: APP_INITIALIZER,
@@ -74,6 +81,23 @@ const languageCodes = [
   'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans'
 ];
 
+const translocoOptions = {
+  config: {
+    reRenderOnLangChange: true,
+    availableLangs: languageCodes,
+    prodMode: environment.production,
+    defaultLang: 'en',
+    fallbackLang: 'en',
+    missingHandler: {
+      useFallbackTranslation: true,
+      allowEmpty: false,
+    },
+    flatten: {
+      aot: !isDevMode()
+    }
+  }
+};
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
@@ -87,46 +111,26 @@ bootstrapApplication(AppComponent, {
             autoDismiss: true
           }),
           NgCircleProgressModule.forRoot(),
-          TranslocoModule,
-          TranslocoPersistLangModule.forRoot({
-            storage: {
-              provide: TRANSLOCO_PERSIST_LANG_STORAGE,
-              useValue: localStorage,
-            },
-          }),
-          TranslocoLocaleModule.forRoot(),
-          TranslocoPersistTranslationsModule.forRoot({
-            loader: HttpLoader,
-            storage: {
-              provide: PERSIST_TRANSLATIONS_STORAGE,
-                useValue: sessionStorage
-            }
-          })
         ),
+        provideTransloco(translocoOptions),
+        provideTranslocoLocale({
+          defaultLocale: 'en'
+        }),
+        provideTranslocoPersistTranslations({
+          loader: HttpLoader,
+          storage: { useValue: localStorage }
+        }),
+        provideTranslocoPersistLang({
+          storage: {
+            useValue: localStorage,
+          },
+        }),
         { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-        {
-          provide: TRANSLOCO_CONFIG,
-          useValue: {
-            reRenderOnLangChange: true,
-            availableLangs: languageCodes,
-            prodMode: environment.production,
-            defaultLang: 'en',
-            fallbackLang: 'en',
-            missingHandler: {
-              useFallbackTranslation: true,
-              allowEmpty: false,
-            },
-            flatten: {
-              aot: !isDevMode()
-            }
-
-          } as TranslocoConfig
-        },
         preLoad,
         Title,
         { provide: SAVER, useFactory: getSaver },
         provideHttpClient(withInterceptorsFromDi())
     ]
-})
+} as ApplicationConfig)
 .catch(err => console.error(err));

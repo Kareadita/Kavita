@@ -15,7 +15,7 @@ export class DevicePlatformPipe implements PipeTransform {
       case DevicePlatform.Kindle: return 'Kindle';
       case DevicePlatform.Kobo: return 'Kobo';
       case DevicePlatform.PocketBook: return 'PocketBook';
-      case DevicePlatform.Custom: return this.translocoService.translate('device.platform-pipe.custom');
+      case DevicePlatform.Custom: return this.translocoService.translate('device-platform-pipe.custom');
       default: return value + '';
     }
   }

@@ -103,8 +103,12 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 ## Palace-Designs
 We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono.
 
-## Weblate
-Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to help localize Kavita, please visit them.
+## Localization
+Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to see Kavita in your language, please help us localize.
+
+<a href="https://hosted.weblate.org/engage/kavita/">
+    <img src="https://hosted.weblate.org/widgets/kavita/-/horizontal-blue.svg" alt="Translation status" />
+</a>
 
 ## Huntr
 We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 

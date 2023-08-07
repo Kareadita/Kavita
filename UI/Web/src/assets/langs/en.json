@@ -615,8 +615,8 @@
         "incognito-mode-alt": "Incognito mode is on. Toggle to turn off.",
         "incognito-mode-label": "Incognito Mode",
         "next": "Next",
-        "previous": "Previous"
-
+        "previous": "Previous",
+        "go-to-page-prompt": "There are {{totalPages}} pages. What page do you want to go to?"
     },
 
     "personal-table-of-contents": {
@@ -1474,7 +1474,8 @@
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
         "no-next-chapter": "No Next Chapter",
         "no-prev-chapter": "No Previous Chapter",
-        "user-preferences-updated": "User preferences updated"
+        "user-preferences-updated": "User preferences updated",
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
     },
 
     "metadata-filter": {
@@ -1787,7 +1788,8 @@
         "details": "Details",
         "view-series": "View Series",
         "clear": "Clear",
-        "import-cbl": "Import CBL"
+        "import-cbl": "Import CBL",
+        "read": "Read"
     },
 
     "preferences": {
