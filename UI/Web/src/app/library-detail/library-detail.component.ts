@@ -173,6 +173,7 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
+          if (this.series.filter(sObj => s.id === sObj.id).length > 0) return;
           this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
             if (s1.sortName < s2.sortName) return -1;
             if (s1.sortName > s2.sortName) return 1;
