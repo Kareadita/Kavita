@@ -371,6 +371,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> GetRateLimit(string license, string aniListToken)
     {
+        if (string.IsNullOrWhiteSpace(aniListToken)) return 0;
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)
