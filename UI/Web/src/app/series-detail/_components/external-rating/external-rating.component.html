@@ -1,0 +1,34 @@
+<div class="row">
+  <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
+       popoverTitle="Your Rating + Overall" popoverClass="md-popover">
+    <span class="badge rounded-pill me-1">
+      <img class="me-1" ngSrc="assets/images/logo-32.png" width="24" height="24" alt="">
+      <ng-container *ngIf="hasUserRated; else notYetRated">{{userRating * 20}}</ng-container>
+      <ng-template #notYetRated>N/A</ng-template>
+      <ng-container *ngIf="overallRating > 0"> + {{overallRating}}</ng-container>
+      <ng-container *ngIf="hasUserRated || overallRating > 0">%</ng-container>
+    </span>
+  </div>
+
+  <div class="col-auto custom-col clickable" *ngFor="let rating of ratings" [ngbPopover]="externalPopContent" [popoverContext]="{rating: rating}"
+       [popoverTitle]="rating.provider | providerName" popoverClass="sm-popover">
+    <span class="badge rounded-pill me-1">
+      <img class="me-1" [ngSrc]="rating.provider | providerImage" width="24" height="24" alt="">
+      {{rating.averageScore}}%
+    </span>
+  </div>
+  <div class="col-auto" style="padding-top: 8px">
+    <app-loading [loading]="isLoading" size="spinner-border-sm"></app-loading>
+  </div>
+</div>
+
+<ng-template #popContent>
+  <ngx-stars [initialStars]="userRating" (ratingOutput)="updateRating($event)"
+             [maxStars]="5" [color]="starColor"></ngx-stars>
+  {{userRating * 20}}%
+</ng-template>
+
+<ng-template #externalPopContent let-rating="rating">
+  <div><i class="fa-solid fa-heart" aria-hidden="true"></i> {{rating.favoriteCount}}</div>
+  <a *ngIf="rating.providerUrl" [href]="rating.providerUrl" target="_blank" rel="noreferrer nofollow">Entry</a>
+</ng-template>

@@ -1,23 +1,62 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
-import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { Series } from 'src/app/_models/series';
-import { ImageService } from 'src/app/_services/image.service';
-import { ActionFactoryService, Action, ActionItem } from 'src/app/_services/action-factory.service';
-import { SeriesService } from 'src/app/_services/series.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { EditSeriesModalComponent } from '../_modals/edit-series-modal/edit-series-modal.component';
-import { Subject } from 'rxjs';
-import { RelationKind } from 'src/app/_models/series-detail/relation-kind';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter, inject,
+  Input,
+  OnChanges,
+  OnInit,
+  Output
+} from '@angular/core';
+import {Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {Series} from 'src/app/_models/series';
+import {ImageService} from 'src/app/_services/image.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {SeriesService} from 'src/app/_services/series.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {EditSeriesModalComponent} from '../_modals/edit-series-modal/edit-series-modal.component';
+import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
+import {CommonModule} from "@angular/common";
+import {CardItemComponent} from "../card-item/card-item.component";
+import {RelationshipPipe} from "../../pipe/relationship.pipe";
+import {Device} from "../../_models/device/device";
+import {TranslocoService} from "@ngneat/transloco";
+
+function deepClone(obj: any): any {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Array) {
+    return obj.map(item => deepClone(item));
+  }
+
+  const clonedObj: any = {};
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (typeof obj[key] === 'object' && obj[key] !== null) {
+        clonedObj[key] = deepClone(obj[key]);
+      } else {
+        clonedObj[key] = obj[key];
+      }
+    }
+  }
+
+  return clonedObj;
+}
 
 @Component({
   selector: 'app-series-card',
+  standalone: true,
+  imports: [CommonModule, CardItemComponent, RelationshipPipe],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
+export class SeriesCardComponent implements OnInit, OnChanges {
   @Input({required: true}) data!: Series;
   @Input() libraryId = 0;
   @Input() suppressLibraryLink = false;
@@ -33,6 +72,10 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
    * If the Series has a relationship to display
    */
   @Input() relation: RelationKind | undefined = undefined;
+  /**
+   * When a series card is shown on deck, a special actionable is added to the list
+   */
+  @Input() isOnDeck: boolean = false;
 
   @Output() clicked = new EventEmitter<Series>();
   /**
@@ -43,11 +86,12 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * When the card is selected.
    */
-   @Output() selection = new EventEmitter<boolean>();
+  @Output() selection = new EventEmitter<boolean>();
 
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
-  onDestroy: Subject<void> = new Subject<void>();
+
+  private readonly translocoService = inject(TranslocoService);
 
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
@@ -65,14 +109,24 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: any) {
     if (this.data) {
-      this.actions = this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series));
+      this.actions = [...this.actionFactoryService.getSeriesActions((action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series))];
+      if (this.isOnDeck) {
+        const othersIndex = this.actions.findIndex(obj => obj.title === 'others');
+        const othersAction = deepClone(this.actions[othersIndex]) as ActionItem<Series>;
+        if (othersAction.children.findIndex(o => o.action === Action.RemoveFromOnDeck) < 0) {
+          othersAction.children.push({
+            action: Action.RemoveFromOnDeck,
+            title: 'remove-from-on-deck',
+            callback: (action: ActionItem<Series>, series: Series) => this.handleSeriesActionCallback(action, series),
+            class: 'danger',
+            requiresAdmin: false,
+            children: [],
+          });
+          this.actions[othersIndex] = othersAction;
+        }
+      }
       this.cdRef.markForCheck();
     }
-  }
-
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
   }
 
   handleSeriesActionCallback(action: ActionItem<Series>, series: Series) {
@@ -87,7 +141,7 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
         this.scanLibrary(series);
         break;
       case(Action.RefreshMetadata):
-        this.refreshMetdata(series);
+        this.refreshMetadata(series);
         break;
       case(Action.Delete):
         this.deleteSeries(series);
@@ -113,6 +167,13 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
       case (Action.AnalyzeFiles):
         this.actionService.analyzeFilesForSeries(series);
         break;
+      case Action.SendTo:
+        const device = (action._extra!.data as Device);
+        this.actionService.sendSeriesToDevice(series.id, device);
+        break;
+      case Action.RemoveFromOnDeck:
+        this.seriesService.removeFromOnDeck(series.id).subscribe(() => this.reload.emit(series.id));
+        break;
       default:
         break;
     }
@@ -133,18 +194,18 @@ export class SeriesCardComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  async refreshMetdata(series: Series) {
-    this.actionService.refreshMetdata(series);
+  async refreshMetadata(series: Series) {
+    await this.actionService.refreshMetdata(series);
   }
 
   async scanLibrary(series: Series) {
     this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
-      this.toastr.success('Scan queued for ' + series.name);
+      this.toastr.success(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
     });
   }
 
   async deleteSeries(series: Series) {
-    this.actionService.deleteSeries(series, (result: boolean) => {
+    await this.actionService.deleteSeries(series, (result: boolean) => {
       if (result) {
         this.reload.emit(series.id);
       }

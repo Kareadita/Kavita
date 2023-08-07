@@ -109,6 +109,20 @@ public class Startup
                     Location = ResponseCacheLocation.Client,
                     NoStore = false
                 });
+            options.CacheProfiles.Add(ResponseCacheProfiles.LicenseCache,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromHours(4).Seconds,
+                    Location = ResponseCacheLocation.Client,
+                    NoStore = false
+                });
+            options.CacheProfiles.Add(ResponseCacheProfiles.KavitaPlus,
+                new CacheProfile()
+                {
+                    Duration = TimeSpan.FromDays(30).Seconds,
+                    Location = ResponseCacheLocation.Any,
+                    NoStore = false
+                });
         });
         services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -173,7 +187,7 @@ public class Startup
             options.Providers.Add<GzipCompressionProvider>();
             options.MimeTypes =
                 ResponseCompressionDefaults.MimeTypes.Concat(
-                    new[] { "image/jpeg", "image/jpg" });
+                    new[] { "image/jpeg", "image/jpg", "image/png", "image/avif", "image/gif", "image/webp", "image/tiff" });
             options.EnableForHttps = true;
         });
         services.Configure<BrotliCompressionProviderOptions>(options =>
@@ -219,33 +233,10 @@ public class Startup
                     // Apply all migrations on startup
                     var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
                     var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
-                    var themeService = serviceProvider.GetRequiredService<IThemeService>();
                     var dataContext = serviceProvider.GetRequiredService<DataContext>();
-                    var readingListService = serviceProvider.GetRequiredService<IReadingListService>();
 
 
                     logger.LogInformation("Running Migrations");
-
-                    // Only run this if we are upgrading
-                    await MigrateChangePasswordRoles.Migrate(unitOfWork, userManager);
-                    await MigrateRemoveExtraThemes.Migrate(unitOfWork, themeService);
-
-                    // only needed for v0.5.4 and v0.6.0
-                    await MigrateNormalizedEverything.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.6.0
-                    await MigrateChangeRestrictionRoles.Migrate(unitOfWork, userManager, logger);
-                    await MigrateReadingListAgeRating.Migrate(unitOfWork, dataContext, readingListService, logger);
-
-                    // v0.6.2 or v0.7
-                    await MigrateSeriesRelationsImport.Migrate(dataContext, logger);
-
-                    // v0.6.8 or v0.7
-                    await MigrateUserProgressLibraryId.Migrate(unitOfWork, logger);
-                    await MigrateToUtcDates.Migrate(unitOfWork, dataContext, logger);
-
-                    // v0.7
-                    await MigrateBrokenGMT1Dates.Migrate(unitOfWork, dataContext, logger);
 
                     // v0.7.2
                     await MigrateLoginRoles.Migrate(unitOfWork, userManager, logger);
@@ -253,13 +244,19 @@ public class Startup
                     // v0.7.3
                     await MigrateRemoveWebPSettingRows.Migrate(unitOfWork, logger);
 
+                    // v0.7.4
+                    await MigrateDisableScrobblingOnComicLibraries.Migrate(unitOfWork, dataContext, logger);
+
+                    // v0.7.6
+                    await MigrateExistingRatings.Migrate(dataContext, logger);
+
                     //  Update the version in the DB after all migrations are run
                     var installVersion = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion);
                     installVersion.Value = BuildInfo.Version.ToString();
                     unitOfWork.SettingsRepository.Update(installVersion);
 
                     await unitOfWork.CommitAsync();
-                    logger.LogInformation("Running Migrations - done");
+                    logger.LogInformation("Running Migrations - complete");
                 }).GetAwaiter()
                 .GetResult();
         }

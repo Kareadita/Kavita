@@ -1,103 +1,126 @@
-<div class="row g-0 mb-4 mt-3">
+<ng-container *transloco="let t; read: 'series-info-cards'">
+  <div class="row g-0 mt-3">
     <ng-container *ngIf="seriesMetadata.releaseYear > 0">
-        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-            <app-icon-and-title label="Release" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release Year">
-                {{seriesMetadata.releaseYear}}
-            </app-icon-and-title>
-        </div>
-        <div class="vr d-none d-lg-block m-2"></div>
+      <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+        <app-icon-and-title [label]="t('release-date-title')" [clickable]="false" fontClasses="fa-regular fa-calendar" [title]="t('release-year-tooltip')">
+          {{seriesMetadata.releaseYear}}
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container *ngIf="seriesMetadata">
-        <ng-container *ngIf="seriesMetadata.ageRating">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-                <app-icon-and-title label="Age Rating" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterField.AgeRating, seriesMetadata.ageRating)" title="Age Rating">
-                    {{this.seriesMetadata.ageRating | ageRating | async}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
+      <ng-container *ngIf="seriesMetadata.ageRating">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('age-rating-title')" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterField.AgeRating, seriesMetadata.ageRating)" [title]="t('age-rating-title')">
+            {{this.seriesMetadata.ageRating | ageRating}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
 
-        <ng-container *ngIf="seriesMetadata.language !== null">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-3">
-                <app-icon-and-title label="Language" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterField.Languages, seriesMetadata.language)" title="Language">
-                    {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
+      <ng-container *ngIf="seriesMetadata.language !== null">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('language-title')" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterField.Languages, seriesMetadata.language)" [title]="t('language-title')">
+            {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
     </ng-container>
 
     <ng-container>
-        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-            <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
-                <app-icon-and-title label="Publication" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === 'Ongoing' ? 'empty' : 'end'}}"
-                                    (click)="handleGoTo(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
-                                    ngbTooltip="Publication Status ({{seriesMetadata.maxCount}} / {{seriesMetadata.totalCount}})">
-                    {{pubStatus}}
-                </app-icon-and-title>
-            </ng-container>
-        </div>
-        <div class="vr m-2 d-none d-lg-block"></div>
+      <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+        <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
+          <app-icon-and-title [label]="t('publication-status-title')" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === t('ongoing') ? 'empty' : 'end'}}"
+                              (click)="handleGoTo(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
+                              [ngbTooltip]="t('publication-status-tooltip') + ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')'">
+            {{pubStatus}}
+          </app-icon-and-title>
+        </ng-container>
+      </div>
+      <div class="vr m-2 d-none d-lg-block"></div>
+    </ng-container>
+
+    <ng-container *ngIf="accountService.hasValidLicense$ | async">
+      <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+        <app-icon-and-title [label]="t('scrobbling-title')" [clickable]="libraryAllowsScrobbling"
+                            fontClasses="fa-solid fa-tower-{{(isScrobbling && libraryAllowsScrobbling) ? 'broadcast' : 'observation'}}"
+                            (click)="toggleScrobbling($event)"
+                            [ngbTooltip]="t('scrobbling-tooltip')">
+          <ng-container *ngIf="libraryAllowsScrobbling; else noScrobble">
+            {{ isScrobbling ? t('on') : t('off') }}
+          </ng-container>
+          <ng-template #noScrobble>
+            {{t('disabled')}}
+          </ng-template>
+
+        </app-icon-and-title>
+      </div>
+      <div class="vr d-none d-lg-block m-2"></div>
     </ng-container>
 
     <ng-container *ngIf="series">
-        <ng-container>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Format" [clickable]="true" [fontClasses]="'fa ' + (series.format | mangaFormatIcon)" (click)="handleGoTo(FilterField.Formats, series.format)" title="Format">
-                    {{series.format | mangaFormat}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
+      <ng-container>
+        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('format-title')" [clickable]="true"
+                              [fontClasses]="'fa ' + (series.format | mangaFormatIcon)"
+                              (click)="handleGoTo(FilterField.Formats, series.format)" [title]="t('format-title')">
+            {{series.format | mangaFormat}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+
+      <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
+        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('last-read-title')" [clickable]="false" fontClasses="fa-regular fa-clock" [title]="t('last-read-title')">
+            {{series.latestReadDate | timeAgo}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-container>
+
+      <ng-container *ngIf="series.format === MangaFormat.EPUB; else showPages">
+        <ng-container *ngIf="series.wordCount > 0">
+          <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+            <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-solid fa-book-open">
+              {{t('words-count', {num: series.wordCount | compactNumber})}}
+            </app-icon-and-title>
+          </div>
+          <div class="vr d-none d-lg-block m-2"></div>
         </ng-container>
 
-        <ng-container *ngIf="series.latestReadDate && series.latestReadDate !== '' && (series.latestReadDate | date: 'shortDate') !== '1/1/01'">
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Last Read" [clickable]="false" fontClasses="fa-regular fa-clock" title="Last Read">
-                    {{series.latestReadDate | timeAgo}}
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-container>
+      </ng-container>
+      <ng-template #showPages>
+        <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-regular fa-file-lines">
+            {{t('pages-count', {num: series.pages | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+      </ng-template>
 
-        <ng-container *ngIf="series.format === MangaFormat.EPUB; else showPages">
-            <ng-container *ngIf="series.wordCount > 0">
-                <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                    <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                        {{series.wordCount | compactNumber}} Words
-                    </app-icon-and-title>
-                </div>
-                <div class="vr d-none d-lg-block m-2"></div>
-            </ng-container>
+      <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title [label]="t('read-time-title')" [clickable]="false" fontClasses="fa-regular fa-clock">
+            <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">{{t('less-than-hour')}}</ng-container>
+            <ng-template #normalReadTime>
+              {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} {{readingTime.minHours > 1 ? t('hours') : t('hour')}}
+            </ng-template>
+          </app-icon-and-title>
+        </div>
+      </ng-container>
 
-        </ng-container>
-        <ng-template #showPages>
-            <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-regular fa-file-lines">
-                    {{series.pages | compactNumber}} Pages
-                </app-icon-and-title>
-            </div>
-            <div class="vr d-none d-lg-block m-2"></div>
-        </ng-template>
-
-        <ng-container *ngIf="series.format === MangaFormat.EPUB && series.wordCount > 0 || series.format !== MangaFormat.EPUB">
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                    <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
-                    <ng-template #normalReadTime>
-                        {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
-                    </ng-template>
-                </app-icon-and-title>
-            </div>
-        </ng-container>
-
-        <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft && readingTimeLeft.avgHours !== 0">
-            <div class="vr d-none d-lg-block m-2"></div>
-            <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-                <app-icon-and-title label="Time Left" [clickable]="false" fontClasses="fa-solid fa-clock">
-                    ~{{readingTimeLeft.avgHours}} Hour{{readingTimeLeft.avgHours > 1 ? 's' : ''}}
-                </app-icon-and-title>
-            </div>
-        </ng-container>
+      <ng-container *ngIf="hasReadingProgress && showReadingTimeLeft && readingTimeLeft && readingTimeLeft.avgHours !== 0">
+        <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
+          <app-icon-and-title label="Time Left" [clickable]="false" fontClasses="fa-solid fa-clock">
+            ~{{readingTimeLeft.avgHours}} {{readingTimeLeft.avgHours > 1 ? t('hours') : t('hour')}}
+          </app-icon-and-title>
+        </div>
+      </ng-container>
     </ng-container>
-</div>
+  </div>
+
+</ng-container>

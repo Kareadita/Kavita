@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using API.Data;
 using API.DTOs.Theme;
+using API.Extensions;
 using API.Services;
 using API.Services.Tasks;
 using Kavita.Common;
@@ -15,12 +16,15 @@ public class ThemeController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IThemeService _themeService;
     private readonly ITaskScheduler _taskScheduler;
+    private readonly ILocalizationService _localizationService;
 
-    public ThemeController(IUnitOfWork unitOfWork, IThemeService themeService, ITaskScheduler taskScheduler)
+    public ThemeController(IUnitOfWork unitOfWork, IThemeService themeService, ITaskScheduler taskScheduler,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _themeService = themeService;
         _taskScheduler = taskScheduler;
+        _localizationService = localizationService;
     }
 
     [ResponseCache(CacheProfileName = "10Minute")]
@@ -43,7 +47,15 @@ public class ThemeController : BaseApiController
     [HttpPost("update-default")]
     public async Task<ActionResult> UpdateDefault(UpdateDefaultThemeDto dto)
     {
-        await _themeService.UpdateDefault(dto.ThemeId);
+        try
+        {
+            await _themeService.UpdateDefault(dto.ThemeId);
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "theme-doesnt-exist"));
+        }
+
         return Ok();
     }
 
@@ -61,7 +73,7 @@ public class ThemeController : BaseApiController
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Get("en", ex.Message));
         }
     }
 }

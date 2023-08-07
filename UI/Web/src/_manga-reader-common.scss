@@ -15,7 +15,7 @@ img {
 
   &.full-height {
     height: calc(100vh); // We need to  - $scrollbarHeight when there is a horizontal scroll on macos
-    display: flex; 
+    display: flex;
     align-content: center;
   }
 
@@ -26,8 +26,9 @@ img {
 
   .full-height {
     width: auto;
-    margin: 0 auto;
+    margin: auto;
     max-height: calc(var(--vh)*100);
+    overflow: hidden; // This technically will crop and make it just fit
     vertical-align: top;
       &.wide {
         height: 100vh;
@@ -49,6 +50,7 @@ img {
   }
 
   .fit-to-screen.full-width {
+    width: 100%;
     max-height: calc(var(--vh)*100);
   }
 }

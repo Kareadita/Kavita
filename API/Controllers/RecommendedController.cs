@@ -1,19 +1,72 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs;
+using API.DTOs.Recommendation;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
+using API.Services.Plus;
+using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 
 namespace API.Controllers;
 
 public class RecommendedController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IRecommendationService _recommendationService;
+    private readonly ILicenseService _licenseService;
+    private readonly ILocalizationService _localizationService;
+    private readonly IEasyCachingProvider _cacheProvider;
+    public const string CacheKey = "recommendation_";
 
-    public RecommendedController(IUnitOfWork unitOfWork)
+    public RecommendedController(IUnitOfWork unitOfWork, IRecommendationService recommendationService,
+        ILicenseService licenseService, IEasyCachingProviderFactory cachingProviderFactory,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
+        _recommendationService = recommendationService;
+        _licenseService = licenseService;
+        _localizationService = localizationService;
+        _cacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+    }
+
+    /// <summary>
+    /// For Kavita+ users, this will return recommendations on the server.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("recommendations")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.KavitaPlus, VaryByQueryKeys = new []{"seriesId"})]
+    public async Task<ActionResult<RecommendationDto>> GetRecommendations(int seriesId)
+    {
+        var userId = User.GetUserId();
+        if (!await _licenseService.HasActiveLicense())
+        {
+            return Ok(new RecommendationDto());
+        }
+
+        if (!await _unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId))
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-restricted"));
+        }
+
+        var cacheKey = $"{CacheKey}-{seriesId}-{userId}";
+        var results = await _cacheProvider.GetAsync<RecommendationDto>(cacheKey);
+        if (results.HasValue)
+        {
+            return Ok(results.Value);
+        }
+
+        var ret = await _recommendationService.GetRecommendationsForSeries(userId, seriesId);
+        await _cacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromHours(10));
+        return Ok(ret);
     }
 
 
@@ -26,7 +79,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("quick-reads")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams userParams)
     {
-        userParams ??= new UserParams();
+        userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetQuickReads(User.GetUserId(), libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
@@ -42,7 +95,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("quick-catchup-reads")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams userParams)
     {
-        userParams ??= new UserParams();
+        userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetQuickCatchupReads(User.GetUserId(), libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
@@ -58,8 +111,8 @@ public class RecommendedController : BaseApiController
     [HttpGet("highly-rated")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams userParams)
     {
-        var userId = User.GetUserId()!;
-        userParams ??= new UserParams();
+        var userId = User.GetUserId();
+        userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
@@ -78,7 +131,7 @@ public class RecommendedController : BaseApiController
     {
         var userId = User.GetUserId();
 
-        userParams ??= new UserParams();
+        userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
 
@@ -95,7 +148,7 @@ public class RecommendedController : BaseApiController
     [HttpGet("rediscover")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams userParams)
     {
-        userParams ??= new UserParams();
+        userParams ??= UserParams.Default;
         var series = await _unitOfWork.SeriesRepository.GetRediscover(User.GetUserId(), libraryId, userParams);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);

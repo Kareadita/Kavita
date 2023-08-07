@@ -5,7 +5,6 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
@@ -30,16 +29,28 @@ import { FilterSettings } from '../metadata-filter/filter-settings';
 import { JumpKey } from '../_models/jumpbar/jump-key';
 import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../pipe/sentence-case.pipe';
+import { BulkOperationsComponent } from '../cards/bulk-operations/bulk-operations.component';
+import { SeriesCardComponent } from '../cards/series-card/series-card.component';
+import { CardDetailLayoutComponent } from '../cards/card-detail-layout/card-detail-layout.component';
+import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
+import { NgFor, NgIf, DecimalPipe } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {MetadataService} from "../_services/metadata.service";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../_models/metadata/v2/filter-field";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 @Component({
-  selector: 'app-library-detail',
-  templateUrl: './library-detail.component.html',
-  styleUrls: ['./library-detail.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-library-detail',
+    templateUrl: './library-detail.component.html',
+    styleUrls: ['./library-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoModule]
 })
 export class LibraryDetailComponent implements OnInit {
 
@@ -59,9 +70,11 @@ export class LibraryDetailComponent implements OnInit {
 
   jumpKeys: Array<JumpKey> = [];
 
+  translocoService = inject(TranslocoService);
+
   tabs: Array<{title: string, fragment: string, icon: string}> = [
-    {title: 'Library', fragment: '', icon: 'fa-landmark'},
-    {title: 'Recommended', fragment: 'recommended', icon: 'fa-award'},
+    {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
+    {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
   private readonly destroyRef = inject(DestroyRef);
@@ -215,6 +228,7 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
+          if (this.series.filter(sObj => s.id === sObj.id).length > 0) return;
           this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
             if (s1.sortName < s2.sortName) return -1;
             if (s1.sortName > s2.sortName) return 1;
@@ -276,6 +290,8 @@ export class LibraryDetailComponent implements OnInit {
         break;
     }
   }
+
+
 
   performAction(action: ActionItem<any>) {
     if (typeof action.callback === 'function') {

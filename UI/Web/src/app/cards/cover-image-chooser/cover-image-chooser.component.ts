@@ -1,18 +1,26 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { NgxFileDropEntry, FileSystemFileEntry } from 'ngx-file-drop';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {NgxFileDropEntry, FileSystemFileEntry, NgxFileDropModule} from 'ngx-file-drop';
 import { fromEvent, Subject } from 'rxjs';
 import { takeWhile } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
 import { ImageService } from 'src/app/_services/image.service';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { UploadService } from 'src/app/_services/upload.service';
-import { DOCUMENT } from '@angular/common';
-
-export type SelectCoverFunction = (selectedCover: string) => void;
+import {CommonModule, DOCUMENT} from '@angular/common';
+import {ImageComponent} from "../../shared/image/image.component";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-cover-image-chooser',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgxFileDropModule,
+    CommonModule,
+    ImageComponent,
+    TranslocoModule
+  ],
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -82,8 +90,8 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
 
   /**
    * Generates a base64 encoding for an Image. Used in manual file upload flow.
-   * @param img 
-   * @returns 
+   * @param img
+   * @returns
    */
   getBase64Image(img: HTMLImageElement) {
     const canvas = document.createElement("canvas");
@@ -110,7 +118,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       img.src = imgUrl;
       img.onload = (e) => this.handleUrlImageAdd(img, index);
       img.onerror = (e) => {
-        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.toastr.error(translate('errors.rejected-cover-upload'));
         this.form.get('coverImageUrl')?.setValue('');
         this.cdRef.markForCheck();
       };
@@ -150,7 +158,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
       img.src = this.imageService.getCoverUploadImage(filename);
       img.onload = (e) => this.handleUrlImageAdd(img);
       img.onerror = (e) => {
-        this.toastr.error('The image could not be fetched due to server refusing request. Please download and upload from file instead.');
+        this.toastr.error(translate('errors.rejected-cover-upload'));
         this.form.get('coverImageUrl')?.setValue('');
         this.cdRef.markForCheck();
       };
@@ -206,7 +214,7 @@ export class CoverImageChooserComponent implements OnInit, OnDestroy {
     } else {
       this.imageUrls.push(url);
     }
-    
+
     this.imageUrlsChange.emit(this.imageUrls);
     this.cdRef.markForCheck();
 

@@ -1,12 +1,15 @@
 ﻿using System.IO.Abstractions;
+using API.Constants;
 using API.Data;
 using API.Helpers;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using API.Services.Tasks.Scanner;
 using API.SignalR;
 using API.SignalR.Presence;
+using Kavita.Common;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +51,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IStatisticService, StatisticService>();
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
@@ -60,20 +64,46 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDirectoryService, DirectoryService>();
         services.AddScoped<IEventHub, EventHub>();
         services.AddScoped<IPresenceTracker, PresenceTracker>();
-
         services.AddScoped<IImageService, ImageService>();
 
-        services.AddSqLite(env);
+        services.AddScoped<ILocalizationService, LocalizationService>();
+
+
+        services.AddScoped<IScrobblingService, ScrobblingService>();
+        services.AddScoped<ILicenseService, LicenseService>();
+        services.AddScoped<IReviewService, ReviewService>();
+        services.AddScoped<IRatingService, RatingService>();
+
+        services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
 
         services.AddEasyCaching(options =>
         {
-            options.UseInMemory("favicon");
-            options.UseInMemory("filter");
+            options.UseInMemory(EasyCacheProfiles.Favicon);
+            options.UseInMemory(EasyCacheProfiles.License);
+            options.UseInMemory(EasyCacheProfiles.Library);
+            options.UseInMemory(EasyCacheProfiles.RevokedJwt);
+            options.UseInMemory("filter"); // TODO: Refactor this
+
+            // KavitaPlus stuff
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
+        });
+
+        services.AddMemoryCache(options =>
+        {
+            options.SizeLimit = Configuration.CacheSize * 1024 * 1024; // 50 MB
+            options.CompactionPercentage = 0.1; // LRU compaction (10%)
+        });
+
+        services.AddSwaggerGen(g =>
+        {
+            g.UseInlineDefinitionsForEnums();
         });
     }
 
-    private static void AddSqLite(this IServiceCollection services, IHostEnvironment env)
+    private static void AddSqLite(this IServiceCollection services)
     {
         services.AddDbContext<DataContext>(options =>
         {

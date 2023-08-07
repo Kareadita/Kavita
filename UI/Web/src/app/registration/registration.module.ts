@@ -4,7 +4,6 @@ import { ConfirmEmailComponent } from './_components/confirm-email/confirm-email
 import { RegistrationRoutingModule } from './registration.router.module';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AddEmailToAccountMigrationModalComponent } from './_modals/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { ConfirmEmailChangeComponent } from './_components/confirm-email-change/confirm-email-change.component';
 import { ConfirmMigrationEmailComponent } from './_components/confirm-migration-email/confirm-migration-email.component';
@@ -12,29 +11,28 @@ import { ConfirmResetPasswordComponent } from './_components/confirm-reset-passw
 import { RegisterComponent } from './_components/register/register.component';
 import { ResetPasswordComponent } from './_components/reset-password/reset-password.component';
 import { SplashContainerComponent } from './_components/splash-container/splash-container.component';
+import {TRANSLOCO_SCOPE, TranslocoModule} from "@ngneat/transloco";
 
 
 
 @NgModule({
-  declarations: [
-    ConfirmEmailComponent,
-    SplashContainerComponent,
-    RegisterComponent,
-    AddEmailToAccountMigrationModalComponent,
-    ConfirmMigrationEmailComponent,
-    ResetPasswordComponent,
-    ConfirmResetPasswordComponent,
-    UserLoginComponent,
-    ConfirmEmailChangeComponent
-  ],
-  imports: [
-    CommonModule,
-    RegistrationRoutingModule,
-    NgbTooltipModule,
-    ReactiveFormsModule
-  ],
-  exports: [
-    SplashContainerComponent
-  ]
+    imports: [
+        CommonModule,
+        RegistrationRoutingModule,
+        NgbTooltipModule,
+        ReactiveFormsModule,
+        ConfirmEmailComponent,
+        SplashContainerComponent,
+        RegisterComponent,
+        ConfirmMigrationEmailComponent,
+        ResetPasswordComponent,
+        ConfirmResetPasswordComponent,
+        UserLoginComponent,
+        ConfirmEmailChangeComponent,
+        TranslocoModule
+    ],
+    exports: [
+        SplashContainerComponent
+    ],
 })
 export class RegistrationModule { }

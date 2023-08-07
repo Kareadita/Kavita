@@ -203,9 +203,9 @@ public class ArchiveService : IArchiveService
     /// <param name="archivePath"></param>
     /// <param name="fileName">File name to use based on context of entity.</param>
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
-    /// <param name="encodeFormat">When saving the file, use encoding</param>
+    /// <param name="format">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format)
     {
         if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
         try
@@ -221,7 +221,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -232,7 +232,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -274,7 +274,7 @@ public class ArchiveService : IArchiveService
     {
         // Sometimes ZipArchive will list the directory and others it will just keep it in the FullName
         return archive.Entries.Count > 0 &&
-               !Path.HasExtension(archive.Entries.ElementAt(0).FullName) ||
+               !Path.HasExtension(archive.Entries[0].FullName) ||
                archive.Entries.Any(e => e.FullName.Contains(Path.AltDirectorySeparatorChar) && !Tasks.Scanner.Parser.Parser.HasBlacklistedFolderInPath(e.FullName));
     }
 
@@ -301,7 +301,7 @@ public class ArchiveService : IArchiveService
 
         if (!_directoryService.CopyFilesToDirectory(files, tempLocation))
         {
-            throw new KavitaException("Unable to copy files to temp directory archive download.");
+            throw new KavitaException("bad-copy-files-for-download");
         }
 
         var zipPath = Path.Join(_directoryService.TempDirectory, $"kavita_{tempFolder}_{dateString}.zip");
@@ -314,7 +314,7 @@ public class ArchiveService : IArchiveService
         catch (AggregateException ex)
         {
             _logger.LogError(ex, "There was an issue creating temp archive");
-            throw new KavitaException("There was an issue creating temp archive");
+            throw new KavitaException("generic-create-temp-archive");
         }
 
         return zipPath;

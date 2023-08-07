@@ -1,18 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { TagBadgeCursor } from 'src/app/shared/tag-badge/tag-badge.component';
-import { ServerService } from 'src/app/_services/server.service';
-import { SettingsService } from '../settings.service';
-import { ServerSettings } from '../_models/server-settings';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {ServerService} from 'src/app/_services/server.service';
+import {SettingsService} from '../settings.service';
+import {ServerSettings} from '../_models/server-settings';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {NgFor, NgIf, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
 @Component({
   selector: 'app-manage-settings',
   templateUrl: './manage-settings.component.html',
-  styleUrls: ['./manage-settings.component.scss']
+  styleUrls: ['./manage-settings.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgFor, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class ManageSettingsComponent implements OnInit {
 
@@ -20,10 +25,8 @@ export class ManageSettingsComponent implements OnInit {
   settingsForm: FormGroup = new FormGroup({});
   taskFrequencies: Array<string> = [];
   logLevels: Array<string> = [];
-
-  get TagBadgeCursor() {
-    return TagBadgeCursor;
-  }
+  private readonly translocoService = inject(TranslocoService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
@@ -31,9 +34,11 @@ export class ManageSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.settingsService.getTaskFrequencies().pipe(take(1)).subscribe(frequencies => {
       this.taskFrequencies = frequencies;
+      this.cdRef.markForCheck();
     });
     this.settingsService.getLoggingLevels().pipe(take(1)).subscribe(levels => {
       this.logLevels = levels;
+      this.cdRef.markForCheck();
     });
     this.settingsService.getServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
@@ -48,18 +53,24 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('emailServiceUrl', new FormControl(this.serverSettings.emailServiceUrl, [Validators.required]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
+      this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
       this.settingsForm.addControl('totalLogs', new FormControl(this.serverSettings.totalLogs, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('enableFolderWatching', new FormControl(this.serverSettings.enableFolderWatching, [Validators.required]));
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, []));
       this.settingsForm.addControl('hostName', new FormControl(this.serverSettings.hostName, [Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
+      this.settingsForm.addControl('onDeckProgressDays', new FormControl(this.serverSettings.onDeckProgressDays, [Validators.required]));
+      this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
       this.serverService.getServerInfo().subscribe(info => {
         if (info.isDocker) {
           this.settingsForm.get('ipAddresses')?.disable();
           this.settingsForm.get('port')?.disable();
+          this.cdRef.markForCheck();
         }
-      })
+      });
+      this.cdRef.markForCheck();
     });
+    this.cdRef.markForCheck();
   }
 
   resetForm() {
@@ -78,7 +89,11 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableFolderWatching')?.setValue(this.serverSettings.enableFolderWatching);
     this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
     this.settingsForm.get('hostName')?.setValue(this.serverSettings.hostName);
+    this.settingsForm.get('cacheSize')?.setValue(this.serverSettings.cacheSize);
+    this.settingsForm.get('onDeckProgressDays')?.setValue(this.serverSettings.onDeckProgressDays);
+    this.settingsForm.get('onDeckUpdateDays')?.setValue(this.serverSettings.onDeckUpdateDays);
     this.settingsForm.markAsPristine();
+    this.cdRef.markForCheck();
   }
 
   async saveSettings() {
@@ -87,7 +102,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -97,7 +112,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetServerSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(this.translocoService.translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -107,7 +122,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetIPAddressesSettings().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.ipAddresses = settings.ipAddresses;
       this.settingsForm.get('ipAddresses')?.setValue(this.serverSettings.ipAddresses);
-      this.toastr.success('IP Addresses Reset');
+      this.toastr.success(this.translocoService.translate('toasts.reset-ip-address'));
     }, (err: any) => {
       console.error('error: ', err);
     });
@@ -117,11 +132,10 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsService.resetBaseUrl().pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings.baseUrl = settings.baseUrl;
       this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl);
-      this.toastr.success('Base Url Reset');
+      this.toastr.success(this.translocoService.translate('toasts.reset-base-url'));
+      this.cdRef.markForCheck();
     }, (err: any) => {
       console.error('error: ', err);
     });
   }
-
-  
 }

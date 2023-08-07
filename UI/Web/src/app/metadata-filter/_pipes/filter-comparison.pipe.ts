@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
 
 @Pipe({
-  name: 'filterComparison'
+  name: 'filterComparison',
+  standalone: true
 })
 export class FilterComparisonPipe implements PipeTransform {
 

@@ -1,11 +1,12 @@
-<app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+<ng-container *transloco="let t; read: 'bookmarks'">
+  <app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
-        Bookmarks
+      {{t('title')}}
     </h2>
-    <h6 subtitle>{{series.length | number}} Series</h6>
-</app-side-nav-companion-bar>
-<app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-<app-card-detail-layout 
+    <h6 subtitle>{{t('series-count', {num: series.length | number})}}</h6>
+  </app-side-nav-companion-bar>
+  <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+  <app-card-detail-layout
     [isLoading]="loadingBookmarks"
     [items]="series"
     [filterSettings]="filterSettings"
@@ -13,16 +14,17 @@
     [refresh]="refresh"
     [jumpBarKeys]="jumpbarKeys"
     (applyFilter)="updateFilter($event)"
-    >
+  >
     <ng-template #cardItem let-item let-position="idx">
-        <app-card-item [entity]="item" (reload)="loadBookmarks()" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
-        [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true" 
-        [actions]="actions"
-        [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
-        ></app-card-item>
+      <app-card-item [entity]="item" [title]="item.name" [imageUrl]="imageService.getSeriesCoverImage(item.id)"
+                     [suppressArchiveWarning]="true" (clicked)="viewBookmarks(item)" [count]="seriesIds[item.id]" [allowSelection]="true"
+                     [actions]="actions"
+                     [selected]="bulkSelectionService.isCardSelected('bookmark', position)" (selection)="bulkSelectionService.handleCardSelection('bookmark', position, series.length, $event)"
+      ></app-card-item>
     </ng-template>
 
     <ng-template #noData>
-        There are no bookmarks. Try creating <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/bookmarks" rel="noopener noreferrer" target="_blank">one&nbsp;<i class="fa fa-external-link-alt" aria-hidden="true"></i></a>.
+      {{t('no-data')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/bookmarks" rel="noopener noreferrer" target="_blank">{{t('no-data-2')}}<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>
     </ng-template>
-</app-card-detail-layout>
+  </app-card-detail-layout>
+</ng-container>

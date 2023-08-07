@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Jobs;
 using API.DTOs.MediaErrors;
@@ -13,12 +14,15 @@ using API.Extensions;
 using API.Helpers;
 using API.Services;
 using API.Services.Tasks;
+using EasyCaching.Core;
 using Hangfire;
 using Hangfire.Storage;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using MimeTypes;
 using TaskScheduler = API.Services.TaskScheduler;
 
 namespace API.Controllers;
@@ -32,16 +36,18 @@ public class ServerController : BaseApiController
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IStatsService _statsService;
     private readonly ICleanupService _cleanupService;
-    private readonly IBookmarkService _bookmarkService;
     private readonly IScannerService _scannerService;
     private readonly IAccountService _accountService;
     private readonly ITaskScheduler _taskScheduler;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEasyCachingProviderFactory _cachingProviderFactory;
+    private readonly ILocalizationService _localizationService;
 
     public ServerController(ILogger<ServerController> logger,
         IBackupService backupService, IArchiveService archiveService, IVersionUpdaterService versionUpdaterService, IStatsService statsService,
-        ICleanupService cleanupService, IBookmarkService bookmarkService, IScannerService scannerService, IAccountService accountService,
-        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork)
+        ICleanupService cleanupService, IScannerService scannerService, IAccountService accountService,
+        ITaskScheduler taskScheduler, IUnitOfWork unitOfWork, IEasyCachingProviderFactory cachingProviderFactory,
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _backupService = backupService;
@@ -49,11 +55,12 @@ public class ServerController : BaseApiController
         _versionUpdaterService = versionUpdaterService;
         _statsService = statsService;
         _cleanupService = cleanupService;
-        _bookmarkService = bookmarkService;
         _scannerService = scannerService;
         _accountService = accountService;
         _taskScheduler = taskScheduler;
         _unitOfWork = unitOfWork;
+        _cachingProviderFactory = cachingProviderFactory;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -99,12 +106,12 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpPost("analyze-files")]
-    public ActionResult AnalyzeFiles()
+    public async Task<ActionResult> AnalyzeFiles()
     {
         _logger.LogInformation("{UserName} is performing file analysis from admin dashboard", User.GetUsername());
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
                 Array.Empty<object>(), TaskScheduler.DefaultQueue, true))
-            return Ok("Job already running");
+            return Ok(await _localizationService.Translate(User.GetUserId(), "job-already-running"));
 
         BackgroundJob.Enqueue(() => _scannerService.AnalyzeFiles());
         return Ok();
@@ -120,6 +127,17 @@ public class ServerController : BaseApiController
         return Ok(await _statsService.GetServerInfo());
     }
 
+    /// <summary>
+    /// Returns non-sensitive information about the current system
+    /// </summary>
+    /// <remarks>This is just for the UI and is extremely lightweight</remarks>
+    /// <returns></returns>
+    [HttpGet("server-info-slim")]
+    public async Task<ActionResult<ServerInfoDto>> GetSlimVersion()
+    {
+        return Ok(await _statsService.GetServerInfoSlim());
+    }
+
 
     /// <summary>
     /// Triggers the scheduling of the convert media job. This will convert all media to the target encoding (except for PNG). Only one job will run at a time.
@@ -131,10 +149,10 @@ public class ServerController : BaseApiController
         var encoding = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
-            return BadRequest(
-                "You cannot convert to PNG. For covers, use Refresh Covers. Bookmarks and favicons cannot be encoded back.");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "encode-as-warning"));
         }
-        BackgroundJob.Enqueue(() => _taskScheduler.CovertAllCoversToEncoding());
+
+        _taskScheduler.CovertAllCoversToEncoding();
 
         return Ok();
     }
@@ -144,18 +162,18 @@ public class ServerController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("logs")]
-    public ActionResult GetLogs()
+    public async Task<ActionResult> GetLogs()
     {
         var files = _backupService.GetLogFiles();
         try
         {
             var zipPath =  _archiveService.CreateZipForDownload(files, "logs");
-            return PhysicalFile(zipPath, "application/zip",
+            return PhysicalFile(zipPath, MimeTypeMap.GetMimeType(Path.GetExtension(zipPath)),
                 System.Web.HttpUtility.UrlEncode(Path.GetFileName(zipPath)), true);
         }
         catch (KavitaException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
         }
     }
 
@@ -167,6 +185,7 @@ public class ServerController : BaseApiController
     {
         return Ok(await _versionUpdaterService.CheckForUpdate());
     }
+
 
     /// <summary>
     /// Pull the Changelog for Kavita from Github and display
@@ -203,8 +222,7 @@ public class ServerController : BaseApiController
                     Id = dto.Id,
                     Title = dto.Id.Replace('-', ' '),
                     Cron = dto.Cron,
-                    CreatedAt = dto.CreatedAt,
-                    LastExecution = dto.LastExecution,
+                    LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
                 });
 
         return Ok(recurringJobs);
@@ -230,6 +248,25 @@ public class ServerController : BaseApiController
     public async Task<ActionResult> ClearMediaErrors()
     {
         await _unitOfWork.MediaErrorRepository.DeleteAll();
+        return Ok();
+    }
+
+
+    /// <summary>
+    /// Bust Kavita+ Cache
+    /// </summary>
+    /// <returns></returns>
+    [Authorize("RequireAdminRole")]
+    [HttpPost("bust-review-and-rec-cache")]
+    public async Task<ActionResult> BustReviewAndRecCache()
+    {
+        _logger.LogInformation("Busting Kavita+ Cache");
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+        await provider.FlushAsync();
+        provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
+        await provider.FlushAsync();
         return Ok();
     }
 

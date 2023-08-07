@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgClass, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -7,11 +7,10 @@ import {
   inject,
   Inject,
   Input,
-  OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { Observable, of, Subject, map, takeUntil, tap, shareReplay, filter, combineLatest } from 'rxjs';
+import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
 import { ReaderService } from 'src/app/_services/reader.service';
@@ -19,17 +18,20 @@ import { LayoutMode } from '../../_models/layout-mode';
 import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
 import { ReaderSetting } from '../../_models/reader-setting';
 import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
+import { ManagaReaderService } from '../../_service/managa-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SafeStylePipe } from '../../../pipe/safe-style.pipe';
 
 /**
  * Renders 2 pages except on first page, last page, and before a wide image
  */
 @Component({
-  selector: 'app-double-renderer',
-  templateUrl: './double-renderer.component.html',
-  styleUrls: ['./double-renderer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-double-renderer',
+    templateUrl: './double-renderer.component.html',
+    styleUrls: ['./double-renderer.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgClass, AsyncPipe, SafeStylePipe]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {
 
@@ -75,7 +77,6 @@ export class DoubleRendererComponent implements OnInit, ImageRenderer {
 
 
   get ReaderMode() {return ReaderMode;}
-  get FITTING_OPTION() {return FITTING_OPTION;}
   get LayoutMode() {return LayoutMode;}
 
 

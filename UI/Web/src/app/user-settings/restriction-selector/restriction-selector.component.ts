@@ -1,17 +1,22 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AgeRestriction } from 'src/app/_models/metadata/age-restriction';
 import { Member } from 'src/app/_models/auth/member';
 import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { AgeRatingDto } from 'src/app/_models/metadata/age-rating-dto';
 import { User } from 'src/app/_models/user';
 import { MetadataService } from 'src/app/_services/metadata.service';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {NgIf, NgFor, TitleCasePipe, NgTemplateOutlet} from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-restriction-selector',
-  templateUrl: './restriction-selector.component.html',
-  styleUrls: ['./restriction-selector.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-restriction-selector',
+    templateUrl: './restriction-selector.component.html',
+    styleUrls: ['./restriction-selector.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [NgIf, ReactiveFormsModule, NgFor, NgbTooltip, TitleCasePipe, TranslocoModule, NgTemplateOutlet]
 })
 export class RestrictionSelectorComponent implements OnInit, OnChanges {
 
@@ -23,7 +28,7 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
   @Input() showContext: boolean = true;
   @Input() reset: EventEmitter<AgeRestriction> | undefined;
   @Output() selected: EventEmitter<AgeRestriction> = new EventEmitter<AgeRestriction>();
-  
+
 
   ageRatings: Array<AgeRatingDto> = [];
   restrictionForm: FormGroup | undefined;
@@ -35,7 +40,7 @@ export class RestrictionSelectorComponent implements OnInit, OnChanges {
     this.restrictionForm = new FormGroup({
       'ageRating': new FormControl(this.member?.ageRestriction.ageRating || AgeRating.NotApplicable || AgeRating.NotApplicable, []),
       'ageRestrictionIncludeUnknowns': new FormControl(this.member?.ageRestriction.includeUnknowns || false, []),
-      
+
     });
 
     if (this.isAdmin) {

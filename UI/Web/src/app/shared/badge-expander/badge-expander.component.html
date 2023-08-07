@@ -1,8 +1,10 @@
-<div class="badge-expander">
+<ng-container *transloco="let t; read: 'badge-expander'">
+  <div class="badge-expander">
     <div class="content">
-        <ng-container *ngFor="let item of visibleItems; index as i;" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-        <button type="button" *ngIf="!isCollapsed && itemsLeft !== 0" class="btn btn-sm btn-outline-primary" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
-            and {{itemsLeft}} more
-        </button>
+      <ng-container *ngFor="let item of visibleItems; index as i;" [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+      <button type="button" *ngIf="!isCollapsed && itemsLeft !== 0" class="btn btn-sm btn-outline-primary" (click)="toggleVisible()" [attr.aria-expanded]="!isCollapsed">
+        {{t('more-items', {count: itemsLeft})}}
+      </button>
     </div>
-</div>
+  </div>
+</ng-container>

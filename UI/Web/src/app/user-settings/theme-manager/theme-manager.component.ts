@@ -4,22 +4,26 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
-  OnInit
 } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
-import { distinctUntilChanged, Subject, take, takeUntil } from 'rxjs';
+import { distinctUntilChanged, take } from 'rxjs';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { SiteTheme, ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SiteThemeProviderPipe } from '../_pipes/site-theme-provider.pipe';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-theme-manager',
-  templateUrl: './theme-manager.component.html',
-  styleUrls: ['./theme-manager.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-theme-manager',
+    templateUrl: './theme-manager.component.html',
+    styleUrls: ['./theme-manager.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgFor, AsyncPipe, SentenceCasePipe, SiteThemeProviderPipe, TranslocoModule]
 })
 export class ThemeManagerComponent {
 
@@ -27,10 +31,8 @@ export class ThemeManagerComponent {
   isAdmin: boolean = false;
   user: User | undefined;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocService = inject(TranslocoService);
 
-  get ThemeProvider() {
-    return ThemeProvider;
-  }
 
   constructor(public themeService: ThemeService, private accountService: AccountService,
     private toastr: ToastrService, private readonly cdRef: ChangeDetectorRef) {
@@ -67,13 +69,13 @@ export class ThemeManagerComponent {
 
   updateDefault(theme: SiteTheme) {
     this.themeService.setDefault(theme.id).subscribe(() => {
-      this.toastr.success('Site default has been updated to ' + theme.name);
+      this.toastr.success(this.translocService.translate('theme-manager.updated-toastr', {name: theme.name}));
     });
   }
 
   scan() {
     this.themeService.scan().subscribe(() => {
-      this.toastr.info('A site theme scan has been queued');
+      this.toastr.info(this.translocService.translate('theme-manager.scan-queued'));
     });
   }
 }

@@ -1,34 +1,37 @@
-<app-splash-container>
-  <ng-container title><h2>Login</h2></ng-container>
-  <ng-container body>
-    <ng-container *ngIf="isLoaded">
-      <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
-        <div class="card-text">
-          <div class="mb-3">
-            <label for="username" class="form-label visually-hidden">Username</label>
-            <input class="form-control custom-input" formControlName="username" id="username" type="text" autofocus placeholder="Username">
-          </div>
+<ng-container *transloco="let t; read: 'login'">
+  <app-splash-container>
+    <ng-container title><h2>{{t('title')}}</h2></ng-container>
+    <ng-container body>
+      <ng-container *ngIf="isLoaded">
+        <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation" *ngIf="!firstTimeFlow">
+          <div class="card-text">
+            <div class="mb-3">
+              <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
+              <input class="form-control custom-input" formControlName="username" id="username"
+                     type="text" autofocus [placeholder]="t('username')">
+            </div>
 
-          <div class="mb-2">
-            <label for="password" class="form-label visually-hidden">Password</label>
-            <input class="form-control custom-input" formControlName="password" name="password"
-                   id="password" type="password" pattern="^.{6,32}$" placeholder="Password">
-            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
-              <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
-                Password must be between 6 and 32 characters in length
+            <div class="mb-2">
+              <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
+              <input class="form-control custom-input" formControlName="password" name="password"
+                     id="password" type="password" pattern="^.{6,32}$" [placeholder]="t('password')">
+              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="loginForm.get('password')?.errors?.pattern"  >
+                <div class="" *ngIf="loginForm.get('password')?.errors?.pattern">
+                  {{t('password-validation')}}
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <a routerLink="/registration/reset-password" style="color: white">Forgot Password?</a>
-          </div>
+            <div class="mb-3">
+              <a routerLink="/registration/reset-password" style="color: white">{{t('forgot-password')}}</a>
+            </div>
 
-          <div>
-            <button class="btn btn-secondary alt" type="submit">Submit</button>
+            <div>
+              <button class="btn btn-secondary alt" type="submit" [disabled]="isSubmitting">{{t('submit')}}</button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </ng-container>
     </ng-container>
-  </ng-container>
-</app-splash-container>
+  </app-splash-container>
+</ng-container>

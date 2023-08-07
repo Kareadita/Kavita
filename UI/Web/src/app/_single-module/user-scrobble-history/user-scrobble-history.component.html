@@ -1,0 +1,85 @@
+<ng-container *transloco="let t; read:'user-scrobble-history'">
+  <h5>{{t('title')}}</h5>
+  <p>{{t('description')}}</p>
+  <div class="row g-0 mb-2">
+    <div class="col-md-10">
+      <form [formGroup]="formGroup">
+        <div class="form-group pe-1">
+          <label for="filter">{{t('filter-label')}}</label>
+          <input id="filter" type="text" class="form-control" formControlName="filter" autocomplete="off"/>
+        </div>
+      </form>
+    </div>
+    <div class="col-md-2 mt-4">
+      <ngb-pagination *ngIf="pagination"
+                      [(page)]="pagination.currentPage"
+                      [pageSize]="pagination.itemsPerPage"
+                      [collectionSize]="pagination.totalItems"
+                      (pageChange)="onPageChange($event)"
+      ></ngb-pagination>
+    </div>
+  </div>
+  <table class="table table-striped table-hover table-sm scrollable">
+    <thead>
+    <tr>
+      <th scope="col" sortable="createdUtc" (sort)="updateSort($event)">
+        {{t('created-header')}}
+      </th>
+      <th scope="col" sortable="lastModifiedUtc" (sort)="updateSort($event)" direction="desc">
+        {{t('last-modified-header')}}
+      </th>
+      <th scope="col">
+        {{t('type-header')}}
+      </th>
+      <th scope="col" sortable="seriesName" (sort)="updateSort($event)">
+        {{t('series-header')}}
+      </th>
+      <th scope="col">
+        {{t('data-header')}}
+      </th>
+      <th scope="col">
+        {{t('is-processed-header')}}
+      </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngIf="events.length === 0">
+      <td colspan="6">{{t('no-data')}}/td>
+    </tr>
+    <tr *ngFor="let item of events; let idx = index;">
+      <td>
+        {{item.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium',  } | defaultValue }}
+      </td>
+      <td>
+        {{item.lastModifiedUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium' } | defaultValue }}
+      </td>
+      <td>
+        {{item.scrobbleEventType | scrobbleEventType}}
+      </td>
+      <td id="scrobble-history--{{idx}}">
+        <a href="/library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.seriesName}}</a>
+      </td>
+      <td>
+        <ng-container [ngSwitch]="item.scrobbleEventType">
+          <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
+            {{t('volume-and-chapter-num', {v: item.volumeNumber, c: item.chapterNumber})}}
+          </ng-container>
+          <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
+            {{t('rating', {r: item.rating})}}
+          </ng-container>
+          <ng-container *ngSwitchDefault>
+            {{t('not-applicable')}}
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <i class="fa-regular fa-circle icon" aria-hidden="true" *ngIf="!item.isProcessed"></i>
+        <i class="fa-solid fa-check-circle icon" aria-hidden="true" *ngIf="item.isProcessed"></i>
+        <span class="visually-hidden" attr.aria-labelledby="scrobble-history--{{idx}}">
+          {{item.isProcessed ? t('processed') : t('not-processed')}}
+        </span>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</ng-container>

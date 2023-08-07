@@ -1,17 +1,20 @@
-<ng-container *ngIf="loading">
-  <ng-container *ngIf="absolute; else relative">
-    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 999">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+<ng-container *transloco="let t; read: 'common'">
+  <ng-container *ngIf="loading">
+    <ng-container *ngIf="absolute; else relative">
+      <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 999">
+        <div class="spinner-border {{size}} text-primary" role="status">
+          <span class="visually-hidden">{{t('loading')}}</span>
+        </div>
       </div>
-  </div>
+    </ng-container>
+
+    <ng-template #relative>
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border {{size}} text-primary" role="status">
+          <span class="visually-hidden">{{t('loading')}}</span>
+        </div>
+      </div>
+    </ng-template>
   </ng-container>
 
-  <ng-template #relative>
-    <div class="d-flex justify-content-center">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  </ng-template> 
 </ng-container>

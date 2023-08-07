@@ -1,21 +1,30 @@
-<div class="carousel-container" *ngIf="items.length > 0 ">
+<ng-container *transloco="let t; read: 'carousel-reel'">
+  <div class="carousel-container" *ngIf="items.length > 0 || alwaysShow">
     <div>
-        <h3>
-            <a href="javascript:void(0)" (click)="sectionClicked($event)" class="section-title" [ngClass]="{'non-selectable': !clickableTitle}">{{title}}</a>
-        </h3>
-        <div class="float-end" *ngIf="swiper">
-            <button class="btn btn-icon" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">Previous Items</span></button>
-            <button class="btn btn-icon" [disabled]="swiper.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">Next Items</span></button>
-        </div>
+      <h3 (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
+        <a href="javascript:void(0)"  class="section-title" >{{title}}</a>
+        <i *ngIf="iconClasses !== ''" class="{{iconClasses}} title-icon ms-1" aria-hidden="true"></i>
+      </h3>
+      <div class="float-end" *ngIf="swiper">
+        <button class="btn btn-icon" [disabled]="swiper.isBeginning" (click)="prevPage()"><i class="fa fa-angle-left" aria-hidden="true"></i><span class="visually-hidden">{{t('prev-items')}}</span></button>
+        <button class="btn btn-icon" [disabled]="swiper.isEnd" (click)="nextPage()"><i class="fa fa-angle-right" aria-hidden="true"></i><span class="visually-hidden">{{t('next-items')}}</span></button>
+      </div>
     </div>
     <div>
-        <swiper
-            [slidesPerView]="'auto'"
-            (init)="onSwiper($event)"
-            [freeMode]="true">
-            <ng-template *ngFor="let item of items; index as i;" swiperSlide>
-                <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-            </ng-template>
-        </swiper>
+      <swiper
+        [slidesPerView]="'auto'"
+        (init)="onSwiper($event)"
+        [freeMode]="true">
+        <ng-template *ngFor="let item of items; index as i;" swiperSlide>
+          <ng-container [ngTemplateOutlet]="carouselItemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
+        </ng-template>
+        <ng-container *ngIf="alwaysShow && items.length === 0">
+          <ng-template swiperSlide>
+            <ng-container [ngTemplateOutlet]="promptToAddTemplate"></ng-container>
+          </ng-template>
+        </ng-container>
+      </swiper>
     </div>
-</div>
+  </div>
+
+</ng-container>

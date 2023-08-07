@@ -25,10 +25,12 @@ public class UploadController : BaseApiController
     private readonly IDirectoryService _directoryService;
     private readonly IEventHub _eventHub;
     private readonly IReadingListService _readingListService;
+    private readonly ILocalizationService _localizationService;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
-        ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService)
+        ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _imageService = imageService;
@@ -37,6 +39,7 @@ public class UploadController : BaseApiController
         _directoryService = directoryService;
         _eventHub = eventHub;
         _readingListService = readingListService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -57,9 +60,9 @@ public class UploadController : BaseApiController
                 .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-                return BadRequest($"Could not download file");
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
 
-            if (!await _imageService.IsImage(path)) return BadRequest("Url does not return a valid image");
+            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
 
             return $"coverupload_{dateString}.{format}";
         }
@@ -67,10 +70,10 @@ public class UploadController : BaseApiController
         {
             // Unauthorized
             if (ex.StatusCode == 401)
-                return BadRequest("The server requires authentication to load the url externally");
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
         }
 
-        return BadRequest("Unable to download image, please use another url or upload by file");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-not-valid"));
     }
 
     /// <summary>
@@ -87,13 +90,13 @@ public class UploadController : BaseApiController
         // See if we can do this all in memory without touching underlying system
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
-            return BadRequest("You must pass a url to use");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
         }
 
         try
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
-            if (series == null) return BadRequest("Invalid Series");
+            if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "series-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetSeriesFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -118,7 +121,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to save cover image to Series");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-series-save"));
     }
 
     /// <summary>
@@ -135,13 +138,13 @@ public class UploadController : BaseApiController
         // See if we can do this all in memory without touching underlying system
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
-            return BadRequest("You must pass a url to use");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
         }
 
         try
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(uploadFileDto.Id);
-            if (tag == null) return BadRequest("Invalid Tag id");
+            if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -166,7 +169,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to save cover image to Collection Tag");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-collection-save"));
     }
 
     /// <summary>
@@ -183,16 +186,16 @@ public class UploadController : BaseApiController
         // See if we can do this all in memory without touching underlying system
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
-            return BadRequest("You must pass a url to use");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
         }
 
         if (_readingListService.UserHasReadingListAccess(uploadFileDto.Id, User.GetUsername()) == null)
-            return Unauthorized("You do not have access");
+            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "access-denied"));
 
         try
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
-            if (readingList == null) return BadRequest("Reading list is not valid");
+            if (readingList == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "reading-list-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -217,7 +220,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to save cover image to Reading List");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-reading-list-save"));
     }
 
     private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename, int thumbnailSize = 0)
@@ -247,13 +250,13 @@ public class UploadController : BaseApiController
         // See if we can do this all in memory without touching underlying system
         if (string.IsNullOrEmpty(uploadFileDto.Url))
         {
-            return BadRequest("You must pass a url to use");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "url-required"));
         }
 
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            if (chapter == null) return BadRequest("Invalid Chapter");
+            if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
             var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
 
             if (!string.IsNullOrEmpty(filePath))
@@ -286,7 +289,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to save cover image to Chapter");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-chapter-save"));
     }
 
     /// <summary>
@@ -320,7 +323,9 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}", ImageService.LibraryThumbnailWidth);
+            var filePath = await CreateThumbnail(uploadFileDto,
+                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}",
+                ImageService.LibraryThumbnailWidth);
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -343,7 +348,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to save cover image to Library");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-cover-library-save"));
     }
 
     /// <summary>
@@ -358,7 +363,7 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
-            if (chapter == null) return BadRequest("Chapter no longer exists");
+            if (chapter == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "chapter-doesnt-exist"));
             var originalFile = chapter.CoverImage;
             chapter.CoverImage = string.Empty;
             chapter.CoverImageLocked = false;
@@ -383,7 +388,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest("Unable to resetting cover lock for Chapter");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "reset-chapter-lock"));
     }
 
 }

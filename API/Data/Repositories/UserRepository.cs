@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,6 +8,8 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Filtering;
 using API.DTOs.Reader;
+using API.DTOs.Scrobbling;
+using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -29,6 +32,7 @@ public enum AppUserIncludes
     WantToRead = 64,
     ReadingListsWithItems = 128,
     Devices = 256,
+    ScrobbleHolds = 512
 
 }
 
@@ -44,6 +48,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
     Task<AppUserRating?> GetUserRatingAsync(int seriesId, int userId);
+    Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId);
     Task<AppUserPreferences?> GetPreferencesAsync(string username);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
@@ -60,9 +65,15 @@ public interface IUserRepository
     Task<AppUser?> GetUserByEmailAsync(string email);
     Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByThemeAsync(int themeId);
     Task<bool> HasAccessToLibrary(int libraryId, int userId);
+    Task<bool> HasAccessToSeries(int userId, int seriesId);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None);
     Task<AppUser?> GetUserByConfirmationToken(string token);
     Task<AppUser> GetDefaultAdminUser();
+    Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId);
+    Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId);
+    Task<bool> HasHoldOnSeries(int userId, int seriesId);
+    Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
+    Task<string> GetLocale(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -134,7 +145,7 @@ public class UserRepository : IUserRepository
         return await _context.Users
             .Where(x => x.Id == userId)
             .Includes(includeFlags)
-            .SingleOrDefaultAsync();
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync()
@@ -205,7 +216,22 @@ public class UserRepository : IUserRepository
         return await _context.Library
             .Include(l => l.AppUsers)
             .AsSplitQuery()
-            .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId));
+            .AnyAsync(library => library.AppUsers.Any(user => user.Id == userId) && library.Id == libraryId);
+    }
+
+    /// <summary>
+    /// Does the user have library and age restriction access to a given series
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> HasAccessToSeries(int userId, int seriesId)
+    {
+        var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.Series
+            .Include(s => s.Library)
+            .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
+            .RestrictAgainstAgeRestriction(userRating)
+            .AsSplitQuery()
+            .AnyAsync(s => s.Id == seriesId);
     }
 
     public async Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None)
@@ -232,6 +258,46 @@ public class UserRepository : IUserRepository
             .First();
     }
 
+    public async Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId)
+    {
+        return await _context.AppUserRating
+            .Where(u => u.AppUserId == userId && u.Rating > 0)
+            .Include(u => u.Series)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId)
+    {
+        return await _context.AppUserRating
+            .Where(u => u.AppUserId == userId && !string.IsNullOrEmpty(u.Review))
+            .Include(u => u.Series)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+
+    public async Task<bool> HasHoldOnSeries(int userId, int seriesId)
+    {
+        return await _context.AppUser
+            .AsSplitQuery()
+            .AnyAsync(u => u.ScrobbleHolds.Select(s => s.SeriesId).Contains(seriesId) && u.Id == userId);
+    }
+
+    public async Task<IList<ScrobbleHoldDto>> GetHolds(int userId)
+    {
+        return await _context.ScrobbleHold
+            .Where(s => s.AppUserId == userId)
+            .ProjectTo<ScrobbleHoldDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<string> GetLocale(int userId)
+    {
+        return await _context.AppUserPreferences.Where(p => p.AppUserId == userId)
+            .Select(p => p.Locale)
+            .SingleAsync();
+    }
+
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {
         return await _userManager.GetUsersInRoleAsync(PolicyConstants.AdminRole);
@@ -248,6 +314,19 @@ public class UserRepository : IUserRepository
         return await _context.AppUserRating
             .Where(r => r.SeriesId == seriesId && r.AppUserId == userId)
             .SingleOrDefaultAsync();
+    }
+
+    public async Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId)
+    {
+        return await _context.AppUserRating
+            .Include(r => r.AppUser)
+            .Where(r => r.SeriesId == seriesId)
+            .Where(r => r.AppUser.UserPreferences.ShareReviews || r.AppUserId == userId)
+            .OrderBy(r => r.AppUserId == userId)
+            .ThenBy(r => r.Rating)
+            .AsSplitQuery()
+            .ProjectTo<UserReviewDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     public async Task<AppUserPreferences?> GetPreferencesAsync(string username)

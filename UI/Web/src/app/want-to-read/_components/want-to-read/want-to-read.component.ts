@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgStyle, NgIf, DecimalPipe } from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -32,13 +32,20 @@ import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SeriesCardComponent } from '../../../cards/series-card/series-card.component';
+import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
+import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
+import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 @Component({
-  selector: 'app-want-to-read',
-  templateUrl: './want-to-read.component.html',
-  styleUrls: ['./want-to-read.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-want-to-read',
+    templateUrl: './want-to-read.component.html',
+    styleUrls: ['./want-to-read.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, NgIf, DecimalPipe, TranslocoModule]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
 

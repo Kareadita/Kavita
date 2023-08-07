@@ -5,13 +5,20 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { forkJoin, Observable, of, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  NgbActiveModal, NgbCollapse,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
 import { Chapter } from 'src/app/_models/chapter';
@@ -31,6 +38,20 @@ import { MetadataService } from 'src/app/_services/metadata.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
+import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-series-relation.component";
+import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {MangaFormatPipe} from "../../../pipe/manga-format.pipe";
+import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
+import {TimeAgoPipe} from "../../../pipe/time-ago.pipe";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {PublicationStatusPipe} from "../../../pipe/publication-status.pipe";
+import {BytesPipe} from "../../../pipe/bytes.pipe";
+import {ImageComponent} from "../../../shared/image/image.component";
+import {DefaultValuePipe} from "../../../pipe/default-value.pipe";
+import {TranslocoModule} from "@ngneat/transloco";
 
 enum TabID {
   General = 0,
@@ -44,6 +65,32 @@ enum TabID {
 
 @Component({
   selector: 'app-edit-series-modal',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    NgbNav,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLink,
+    CommonModule,
+    TypeaheadComponent,
+    CoverImageChooserComponent,
+    EditSeriesRelationComponent,
+    SentenceCasePipe,
+    MangaFormatPipe,
+    DefaultDatePipe,
+    TimeAgoPipe,
+    TagBadgeComponent,
+    PublicationStatusPipe,
+    NgbTooltip,
+    BytesPipe,
+    ImageComponent,
+    NgbCollapse,
+    NgbNavOutlet,
+    DefaultValuePipe,
+    TranslocoModule,
+
+  ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -58,29 +105,27 @@ export class EditSeriesModalComponent implements OnInit {
    */
   initSeries!: Series;
 
-  isCollapsed = true;
   volumeCollapsed: any = {};
-  tabs = ['General', 'Metadata', 'People', 'Web Links', 'Cover Image', 'Related', 'Info'];
+  tabs = ['general-tab', 'metadata-tab', 'people-tab', 'web-links-tab', 'cover-image-tab', 'related-tab', 'info-tab'];
   active = this.tabs[0];
-  activeTabId = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
   private readonly destroyRef = inject(DestroyRef);
 
   // Typeaheads
-  ageRatingSettings: TypeaheadSettings<AgeRatingDto> = new TypeaheadSettings();
-  publicationStatusSettings: TypeaheadSettings<PublicationStatusDto> = new TypeaheadSettings();
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
   languageSettings: TypeaheadSettings<Language> = new TypeaheadSettings();
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   collectionTagSettings: TypeaheadSettings<CollectionTag> = new TypeaheadSettings();
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
-
   collectionTags: CollectionTag[] = [];
   tags: Tag[] = [];
   genres: Genre[] = [];
+  ageRatings: Array<AgeRatingDto> = [];
+  publicationStatuses: Array<PublicationStatusDto> = [];
+  validLanguages: Array<Language> = [];
 
   metadata!: SeriesMetadata;
   imageUrls: Array<string> = [];
@@ -88,11 +133,6 @@ export class EditSeriesModalComponent implements OnInit {
    * Selected Cover for uploading
    */
   selectedCover: string = '';
-
-  ageRatings: Array<AgeRatingDto> = [];
-  publicationStatuses: Array<PublicationStatusDto> = [];
-  validLanguages: Array<Language> = [];
-
   coverImageReset = false;
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
@@ -490,7 +530,7 @@ export class EditSeriesModalComponent implements OnInit {
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
     this.metadata.webLinks = Object.keys(this.editSeriesForm.controls)
       .filter(key => key.startsWith('link'))
-      .map(key => this.editSeriesForm.get(key)?.value)
+      .map(key => this.editSeriesForm.get(key)?.value.replace(',', '%2C'))
       .filter(v => v !== null && v !== '')
       .join(',');
 

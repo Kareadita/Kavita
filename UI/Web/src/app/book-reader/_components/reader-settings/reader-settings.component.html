@@ -1,163 +1,172 @@
-<!-- IDEA: Move the whole reader drawer into this component and have it self contained -->
-<form [formGroup]="settingsForm">
-    <ngb-accordion [closeOthers]="false" #acc="ngbAccordion" [activeIds]="['general-panel', 'reader-panel', 'color-panel']">
-        <ngb-panel id="general-panel" title="General Settings">
-            <ng-template ngbPanelHeader>
-                <h2 class="accordion-header">
-                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('general-panel')" aria-controls="collapseOne">
-                        General Settings
-                    </button>
-                </h2>
-            </ng-template>
-            <ng-template ngbPanelContent>
-                <div class="control-container">
-                    <div class="controls">
-                        <div class="mb-3">
-                            <label for="library-type" class="form-label">Font Family</label>
-                            <select class="form-select" id="library-type" formControlName="bookReaderFontFamily">
-                                <option [value]="opt" *ngFor="let opt of fontOptions; let i = index">{{opt | titlecase}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row g-0 controls">
-                        <label for="fontsize" class="form-label col-6">Font Size</label>
-                        <span class="col-6 float-end" style="display: inline-flex;">
+<ng-container *transloco="let t; read: 'reader-settings'">
+  <!-- IDEA: Move the whole reader drawer into this component and have it self contained -->
+  <form [formGroup]="settingsForm">
+    <div ngbAccordion [closeOthers]="false" #acc="ngbAccordion">
+      <div ngbAccordionItem id="general-panel" title="General Settings" [collapsed]="false">
+        <h2 class="accordion-header" ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-button" type="button" [attr.aria-expanded]="acc.isExpanded('general-panel')" aria-controls="collapseOne">
+            {{t('general-settings-title')}}
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <div class="control-container" >
+                <div class="controls">
+                  <div class="mb-3">
+                    <label for="library-type" class="form-label">{{t('font-family-label')}}</label>
+                    <select class="form-select" id="library-type" formControlName="bookReaderFontFamily">
+                      <option [value]="opt" *ngFor="let opt of fontOptions; let i = index">{{opt | titlecase}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row g-0 controls">
+                  <label for="fontsize" class="form-label col-6">{{t('font-size-label')}}</label>
+                  <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-font"  style="font-size: 12px;"></i>
                             <input type="range" class="form-range ms-2 me-2" id="fontsize" min="50" max="300" step="10" formControlName="bookReaderFontSize" [ngbTooltip]="settingsForm.get('bookReaderFontSize')?.value + '%'">
                             <i class="fa-solid fa-font" style="font-size: 24px;"></i>
                         </span>
-                    </div>
+                </div>
 
-                    <div class="row g-0 controls">
-                        <label for="linespacing" class="form-label col-6">Line Spacing</label>
-                        <span class="col-6 float-end" style="display: inline-flex;">
+                <div class="row g-0 controls">
+                  <label for="linespacing" class="form-label col-6">{{t('line-spacing-label')}}</label>
+                  <span class="col-6 float-end" style="display: inline-flex;">
                             1x
                             <input type="range" class="form-range ms-2 me-2" id="linespacing" min="100" max="200" step="10" formControlName="bookReaderLineSpacing" [ngbTooltip]="settingsForm.get('bookReaderLineSpacing')?.value + '%'">
                             2.5x
                         </span>
-                    </div>
+                </div>
 
-                    <div class="row g-0 controls">
-                        <label for="margin" class="form-label col-6">Margin</label>
-                        <span class="col-6 float-end" style="display: inline-flex;">
+                <div class="row g-0 controls">
+                  <label for="margin" class="form-label col-6">{{t('margin-label')}}</label>
+                  <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-outdent"></i>
                             <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
                             <i class="fa-solid fa-indent"></i>
                         </span>
-                    </div>
-
-                    <div class="row g-0 justify-content-between mt-2">
-                        <button (click)="resetSettings()" class="btn btn-primary col">Reset to Defaults</button>
-                    </div>
                 </div>
+
+                <div class="row g-0 justify-content-between mt-2">
+                  <button (click)="resetSettings()" class="btn btn-primary col">{{t('reset-to-defaults')}}</button>
+                </div>
+              </div>
             </ng-template>
+          </div>
 
-        </ngb-panel>
+        </div>
 
-        <ngb-panel id="reader-panel" title="Reader Settings">
-            <ng-template ngbPanelHeader>
-                <h2 class="accordion-header">
-                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('reader-panel')" aria-controls="collapseOne">
-                        Reader Settings
-                    </button>
-                </h2>
-            </ng-template>
-            <ng-template ngbPanelContent>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
-                    <label id="readingdirection" class="form-label">Reading Direction</label>
-                    <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}">
-                        <i class="fa {{readingDirectionModel === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
-                        <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? 'Left to Right' : 'Right to Left'}}</span>
-                    </button>
-                </div>
-                <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
-                    <label for="writing-style" class="form-label">Writing Style <i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
-                    <ng-template #writingStyleTooltip>Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.</ng-template>
-                    <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip"></ng-container></span>
-                    <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel === WritingStyle.Horizontal ? 'Horizontal' : 'Vertical'}}">
-                        <i class="fa {{writingStyleModel === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
-                        <span class="phone-hidden"> {{writingStyleModel === WritingStyle.Horizontal ? 'Horizontal' : 'Vertical' }}</span>
-                    </button>
+      </div>
 
+      <div ngbAccordionItem id="reader-panel" title="Reader Settings" [collapsed]="false">
+        <h2 class="accordion-header" ngbAccordionHeader>
+          <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded('reader-panel')" aria-controls="collapseOne">
+            {{t('reader-settings-title')}}
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <label id="readingdirection" class="form-label">{{t('reading-direction-label')}}</label>
+                <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}">
+                  <i class="fa {{readingDirectionModel === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
+                  <span class="phone-hidden">&nbsp;{{readingDirectionModel === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}</span>
+                </button>
+              </div>
+              <div class="controls" style="display: flex; justify-content: space-between; align-items: center; ">
+                <label for="writing-style" class="form-label">{{t('writing-style-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="writingStyleTooltip" role="button" tabindex="0" aria-describedby="writingStyle-help"></i></label>
+                <ng-template #writingStyleTooltip>{{t('writing-style-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="writingStyle-help"><ng-container [ngTemplateOutlet]="writingStyleTooltip"></ng-container></span>
+                <button (click)="toggleWritingStyle()" id="writing-style" class="btn btn-icon" aria-labelledby="writingStyle-help" title="{{writingStyleModel === WritingStyle.Horizontal ? t('horizontal') : t('vertical')}}">
+                  <i class="fa {{writingStyleModel === WritingStyle.Horizontal ? 'fa-arrows-left-right' : 'fa-arrows-up-down' }}" aria-hidden="true"></i>
+                  <span class="phone-hidden"> {{writingStyleModel === WritingStyle.Horizontal ? t('horizontal') : t('vertical') }}</span>
+                </button>
+
+              </div>
+              <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="tap-pagination" class="form-label">{{t('tap-to-paginate-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
+                <ng-template #tapPaginationTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="tapPagination-help">
+                  <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
+                </span>
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help">
+                  <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? t('on') : t('off')}} </label>
                 </div>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
-                    <label for="tap-pagination" class="form-label">Tap Pagination&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
-                    <ng-template #tapPaginationTooltip>Click the edges of the screen to paginate</ng-template>
-                    <span class="visually-hidden" id="tapPagination-help">
-                        <ng-container [ngTemplateOutlet]="tapPaginationTooltip"></ng-container>
-                    </span>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" id="tap-pagination" formControlName="bookReaderTapToPaginate" class="form-check-input" aria-labelledby="tapPagination-help">
-                        <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? 'On' : 'Off'}} </label>
-                    </div>
-                </div>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
-                    <label for="immersive-mode" class="form-label">Immersive Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
-                    <ng-template #immersiveModeTooltip>This will hide the menu behind a click on the reader document and turn tap to paginate on</ng-template>
-                    <span class="visually-hidden" id="immersiveMode-help">
+              </div>
+              <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="immersive-mode" class="form-label">{{t('immersive-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
+                <ng-template #immersiveModeTooltip>{{t('immersive-mode-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="immersiveMode-help">
                         <ng-container [ngTemplateOutlet]="immersiveModeTooltip"></ng-container>
                     </span>
-                    <div class="form-check form-switch">
-                        <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help">
-                        <label>{{settingsForm.get('bookReaderImmersiveMode')?.value ? 'On' : 'Off'}} </label>
-                    </div>
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="immersive-mode" formControlName="bookReaderImmersiveMode" class="form-check-input" aria-labelledby="immersiveMode-help">
+                  <label>{{settingsForm.get('bookReaderImmersiveMode')?.value ? t('on') : t('off')}} </label>
                 </div>
-                <!-- TODO: move this inline style into a class -->
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
-                    <label id="fullscreen" class="form-label">Fullscreen&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top"
-                         [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
-                    <ng-template #fullscreenTooltip>Put reader in fullscreen mode</ng-template>
-                    <span class="visually-hidden" id="fullscreen-help">
-                        <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
-                    </span>
-                    <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
-                        <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
-                        <span *ngIf="activeTheme?.isDarkTheme">&nbsp;{{isFullscreen ? 'Exit' : 'Enter'}}</span>
-                    </button>
+              </div>
+
+              <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <label id="fullscreen" class="form-label">{{t('fullscreen-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top"
+                                                                             [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
+                <ng-template #fullscreenTooltip>{{t('fullscreen-tooltip')}}</ng-template>
+                <span class="visually-hidden" id="fullscreen-help">
+                    <ng-container [ngTemplateOutlet]="fullscreenTooltip"></ng-container>
+                </span>
+                <button (click)="toggleFullscreen()" class="btn btn-icon" aria-labelledby="fullscreen">
+                  <i class="fa {{this.isFullscreen ? 'fa-compress-alt' : 'fa-expand-alt'}} {{isFullscreen ? 'icon-primary-color' : ''}}" aria-hidden="true"></i>
+                  <span *ngIf="activeTheme?.isDarkTheme">&nbsp;{{isFullscreen ? t('exit') : t('enter')}}</span>
+                </button>
+              </div>
+
+              <div class="controls">
+                <label id="layout-mode" class="form-label" style="margin-bottom:0.5rem">{{t('layout-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
+                <ng-template #layoutTooltip><span [innerHTML]="t('layout-mode-tooltip')"></span></ng-template>
+                <span class="visually-hidden" id="layout-help">
+                    <ng-container [ngTemplateOutlet]="layoutTooltip"></ng-container>
+                </span>
+                <br>
+                <div class="btn-group d-flex justify-content-center" role="group" [attr.aria-label]="t('layout-mode-label')">
+                  <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Default" class="btn-check" id="layout-mode-default" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="layout-mode-default">{{t('layout-mode-option-scroll')}}</label>
+
+                  <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column1" class="btn-check" id="layout-mode-col1" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="layout-mode-col1">{{t('layout-mode-option-1col')}}</label>
+
+                  <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
+                  <label class="btn btn-outline-primary" for="layout-mode-col2">{{t('layout-mode-option-2col')}}</label>
                 </div>
-
-                <div class="controls">
-                    <label id="layout-mode" class="form-label" style="margin-bottom:0.5rem">Layout Mode&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="top" [ngbTooltip]="layoutTooltip" role="button" tabindex="1" aria-describedby="layout-help"></i></label>
-                    <ng-template #layoutTooltip>Scroll: Mirrors epub file (usually one long scrolling page per chapter).<br/>1 Column: Creates a single virtual page at a time.<br/>2 Column: Creates two virtual pages at a time laid out side-by-side.</ng-template>
-                    <span class="visually-hidden" id="layout-help">
-                        <ng-container [ngTemplateOutlet]="layoutTooltip"></ng-container>
-                    </span>
-                    <br>
-                    <div class="btn-group d-flex justify-content-center" role="group" aria-label="Layout Mode">
-                        <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Default" class="btn-check" id="layout-mode-default" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="layout-mode-default">Scroll</label>
-
-                        <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column1" class="btn-check" id="layout-mode-col1" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="layout-mode-col1">1 Column</label>
-
-                        <input type="radio" formControlName="layoutMode" [value]="BookPageLayoutMode.Column2" class="btn-check" id="layout-mode-col2" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="layout-mode-col2">2 Column</label>
-                    </div>
-                </div>
+              </div>
 
 
             </ng-template>
-        </ngb-panel>
+          </div>
+        </div>
+      </div>
 
-        <ngb-panel id="color-panel" title="Color Theme">
-            <ng-template ngbPanelHeader>
-                <h2 class="accordion-header">
-                    <button class="accordion-button" ngbPanelToggle type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
-                        Color Theme
-                    </button>
-                </h2>
+      <div ngbAccordionItem id="color-panel" [title]="t('color-theme-title')" [collapsed]="false">
+        <h2 class="accordion-header" ngbAccordionHeader>
+          <button class="accordion-button" ngbAccordionButton type="button" [attr.aria-expanded]="acc.isExpanded('color-panel')" aria-controls="collapseOne">
+            {{t('color-theme-title')}}
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <div class="controls">
+                <ng-container *ngFor="let theme of themes">
+                  <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
+                    <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
+                    {{t(theme.translationKey)}}
+                  </button>
+                </ng-container>
+              </div>
             </ng-template>
-            <ng-template ngbPanelContent>
-                <div class="controls">
-                    <ng-container *ngFor="let theme of themes">
-                        <button class="btn btn-icon color" (click)="setTheme(theme.name)" [ngClass]="{'active': activeTheme?.name === theme.name}">
-                            <div class="dot" [ngStyle]="{'background-color': theme.colorHash}"></div>
-                            {{theme.name}}
-                        </button>
-                    </ng-container>
-                </div>
-            </ng-template>
-        </ngb-panel>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 
-    </ngb-accordion>
-</form>
+</ng-container>

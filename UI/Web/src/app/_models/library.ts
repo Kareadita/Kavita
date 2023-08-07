@@ -17,5 +17,6 @@ export interface Library {
     includeInSearch: boolean;
     manageCollections: boolean;
     manageReadingLists: boolean;
+    allowScrobbling: boolean;
     collapseSeriesRelationships: boolean;
 }

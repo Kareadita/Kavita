@@ -1,31 +1,38 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { take } from 'rxjs/operators';
-import { MemberService } from 'src/app/_services/member.service';
-import { Member } from 'src/app/_models/auth/member';
-import { AccountService } from 'src/app/_services/account.service';
-import { ToastrService } from 'ngx-toastr';
-import { ResetPasswordModalComponent } from '../_modals/reset-password-modal/reset-password-modal.component';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { Subject } from 'rxjs';
-import { MessageHubService } from 'src/app/_services/message-hub.service';
-import { InviteUserComponent } from '../invite-user/invite-user.component';
-import { EditUserComponent } from '../edit-user/edit-user.component';
-import { ServerService } from 'src/app/_services/server.service';
-import { Router } from '@angular/router';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {take} from 'rxjs/operators';
+import {MemberService} from 'src/app/_services/member.service';
+import {Member} from 'src/app/_models/auth/member';
+import {AccountService} from 'src/app/_services/account.service';
+import {ToastrService} from 'ngx-toastr';
+import {ResetPasswordModalComponent} from '../_modals/reset-password-modal/reset-password-modal.component';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {MessageHubService} from 'src/app/_services/message-hub.service';
+import {InviteUserComponent} from '../invite-user/invite-user.component';
+import {EditUserComponent} from '../edit-user/edit-user.component';
+import {ServerService} from 'src/app/_services/server.service';
+import {Router} from '@angular/router';
+import {TagBadgeComponent} from '../../shared/tag-badge/tag-badge.component';
+import {AsyncPipe, DatePipe, NgFor, NgIf, TitleCasePipe} from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 
 @Component({
-  selector: 'app-manage-users',
-  templateUrl: './manage-users.component.html',
-  styleUrls: ['./manage-users.component.scss']
+    selector: 'app-manage-users',
+    templateUrl: './manage-users.component.html',
+    styleUrls: ['./manage-users.component.scss'],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [NgFor, NgIf, NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, DatePipe, TranslocoModule, DefaultDatePipe]
 })
-export class ManageUsersComponent implements OnInit, OnDestroy {
+export class ManageUsersComponent implements OnInit {
 
   members: Member[] = [];
   loggedInUsername = '';
   loadingMembers = false;
 
-  private onDestroy = new Subject<void>();
+  translocoService = inject(TranslocoService);
+  cdRef = inject(ChangeDetectorRef);
 
   constructor(private memberService: MemberService,
               private accountService: AccountService,
@@ -38,6 +45,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.accountService.currentUser$.pipe(take(1)).subscribe((user) => {
       if (user) {
         this.loggedInUsername = user.username;
+        this.cdRef.markForCheck();
       }
     });
 
@@ -47,16 +55,13 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     this.loadMembers();
   }
 
-  ngOnDestroy() {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
 
   loadMembers() {
     this.loadingMembers = true;
+    this.cdRef.markForCheck();
     this.memberService.getMembers(true).subscribe(members => {
       this.members = members;
-      // Show logged in user at the top of the list
+      // Show logged-in user at the top of the list
       this.members.sort((a: Member, b: Member) => {
         if (a.username === this.loggedInUsername) return 1;
         if (b.username === this.loggedInUsername) return 1;
@@ -68,6 +73,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
         return 0;
       })
       this.loadingMembers = false;
+      this.cdRef.markForCheck();
     });
   }
 
@@ -82,15 +88,15 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
       this.loadMembers();
     });
   }
-  
+
 
   async deleteUser(member: Member) {
-    if (await this.confirmService.confirm('Are you sure you want to delete this user?')) {
+    if (await this.confirmService.confirm(this.translocoService.translate('toasts.confirm-delete-user'))) {
       this.memberService.deleteMember(member.username).subscribe(() => {
         setTimeout(() => {
           this.loadMembers();
-          this.toastr.success(member.username + ' has been deleted.');
-        }, 30); // SetTimeout because I've noticed this can run super fast and not give enough time for data to flush
+          this.toastr.success(this.translocoService.translate('toasts.user-deleted', {user: member.username}));
+        }, 30); // SetTimeout because I've noticed this can run superfast and not give enough time for data to flush
       });
     }
   }
@@ -102,17 +108,15 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
     });
   }
 
-  log(o: any) {console.log(o)}
-
   resendEmail(member: Member) {
     this.serverService.isServerAccessible().subscribe(canAccess => {
       this.accountService.resendConfirmationEmail(member.id).subscribe(async (email) => {
         if (canAccess) {
-          this.toastr.info('Email sent to ' + member.username);
+          this.toastr.info(this.translocoService.translate('toasts.email-sent-to-user', {user: member.username}));
           return;
         }
         await this.confirmService.alert(
-          'Please click this link to confirm your email. You must confirm to be able to login. You may need to log out of the current account before clicking. <br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
+          this.translocoService.translate('toasts.click-email-link') + '<br/> <a href="' + email + '" target="_blank" rel="noopener noreferrer">' + email + '</a>');
       });
     });
   }
@@ -132,7 +136,7 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
 
   formatLibraries(member: Member) {
     if (member.libraries.length === 0) {
-      return 'None';
+      return this.translocoService.translate('manage-users.none');
     }
 
     return member.libraries.map(item => item.name).join(', ');
@@ -145,5 +149,5 @@ export class ManageUsersComponent implements OnInit, OnDestroy {
   getRoles(member: Member) {
     return member.roles.filter(item => item != 'Pleb');
   }
-  
+
 }

@@ -1,60 +1,62 @@
-
-<app-splash-container>
-    <ng-container title><h2>Register</h2></ng-container>
+<ng-container *transloco="let t; read: 'confirm-email'">
+  <app-splash-container>
+    <ng-container title><h2>{{t('title')}}</h2></ng-container>
     <ng-container body>
-        <p>Complete the form to complete your registration</p>
-        <div class="text-danger" *ngIf="errors.length > 0">
-            <p>Errors:</p>
-            <ul>
-                <li *ngFor="let error of errors">{{error}}</li>
-            </ul>
+      <p>{{t('description')}}</p>
+      <div class="text-danger" *ngIf="errors.length > 0">
+        <p>{{t('error-label')}}</p>
+        <ul>
+          <li *ngFor="let error of errors">{{error}}</li>
+        </ul>
+      </div>
+      <form [formGroup]="registerForm" (ngSubmit)="submit()">
+        <div class="mb-3">
+          <label for="username" class="form-label">{{t('username-label')}}</label>
+          <input id="username" class="form-control" formControlName="username" type="text"
+                 aria-describeby="inviteForm-username-validations"
+                 [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
+          <div id="inviteForm-username-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+            <div *ngIf="registerForm.get('username')?.errors?.required">
+              {{t('required-field')}}
+            </div>
+          </div>
         </div>
-        <form [formGroup]="registerForm" (ngSubmit)="submit()">
-            <div class="mb-3">
-                <label for="username" class="form-label">Username</label>
-                <input id="username" class="form-control" formControlName="username" type="text" 
-                    [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-                    <div *ngIf="registerForm.get('username')?.errors?.required">
-                        This field is required
-                    </div>
-                </div>
-            </div>
 
-            <div class="mb-3" style="width:100%">
-                <label for="email" class="form-label">Email</label>
-                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required readonly
-                    [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-                    <div *ngIf="registerForm.get('email')?.errors?.required">
-                        This field is required
-                    </div>
-                    <div *ngIf="registerForm.get('email')?.errors?.email">
-                        This must be a valid email address
-                    </div>
-                </div>
+        <div class="mb-3" style="width:100%">
+          <label for="email" class="form-label">{{t('email-label')}}</label>
+          <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required readonly
+                 [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+          <div id="inviteForm-email-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+            <div *ngIf="registerForm.get('email')?.errors?.required">
+              {{t('required-field')}}
             </div>
-            
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
-                <ng-template #passwordTooltip>
-                    Password must be between 6 and 32 characters in length
-                </ng-template>
-                <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
-                <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password" type="password" aria-describedby="password-help">
-                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
-                    <div *ngIf="registerForm.get('password')?.errors?.required">
-                        This field is required
-                    </div>
-                    <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
-                        Password must be between 6 and 32 characters in length
-                    </div>
-                </div>
+            <div *ngIf="registerForm.get('email')?.errors?.email">
+              {{t('valid-email')}}
             </div>
-        
-            <div class="float-end">
-                <button class="btn btn-secondary alt" type="submit">Register</button>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">{{t('password-label')}}</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="passwordTooltip" role="button" tabindex="0"></i>
+          <ng-template #passwordTooltip>
+            {{t('password-validation')}}
+          </ng-template>
+          <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip"></ng-container></span>
+          <input id="password" class="form-control" maxlength="32" minlength="6" pattern="^.{6,32}$" formControlName="password" type="password" aria-describedby="password-help">
+          <div id="inviteForm-password-validations" class="invalid-feedback" *ngIf="registerForm.dirty || registerForm.touched">
+            <div *ngIf="registerForm.get('password')?.errors?.required">
+              {{t('required-field')}}
             </div>
-        </form>
+            <div *ngIf="registerForm.get('password')?.errors?.minlength || registerForm.get('password')?.errors?.maxLength || registerForm.get('password')?.errors?.pattern">
+              {{t('password-validation')}}
+            </div>
+          </div>
+        </div>
+
+        <div class="float-end">
+          <button class="btn btn-secondary alt" type="submit">{{t('register')}}</button>
+        </div>
+      </form>
     </ng-container>
-</app-splash-container>
+  </app-splash-container>
+</ng-container>

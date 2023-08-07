@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgIf, NgOptimizedImage, AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -6,13 +6,12 @@ import {
   ElementRef,
   inject,
   Inject,
-  OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { fromEvent, Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { fromEvent } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -28,12 +27,22 @@ import { NavService } from 'src/app/_services/nav.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import { SearchService } from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { PersonRolePipe } from '../../../pipe/person-role.pipe';
+import { NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
+import { EventsWidgetComponent } from '../events-widget/events-widget.component';
+import { SeriesFormatComponent } from '../../../shared/series-format/series-format.component';
+import { ImageComponent } from '../../../shared/image/image.component';
+import { GroupedTypeaheadComponent } from '../grouped-typeahead/grouped-typeahead.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-nav-header',
-  templateUrl: './nav-header.component.html',
-  styleUrls: ['./nav-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-nav-header',
+    templateUrl: './nav-header.component.html',
+    styleUrls: ['./nav-header.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoModule]
 })
 export class NavHeaderComponent implements OnInit {
 
@@ -42,19 +51,8 @@ export class NavHeaderComponent implements OnInit {
 
   isLoading = false;
   debounceTime = 300;
-  imageStyles = {width: '24px', 'margin-top': '5px'};
   searchResults: SearchResultGroup = new SearchResultGroup();
   searchTerm = '';
-  customFilter: (items: SearchResult[], query: string) => SearchResult[] = (items: SearchResult[], query: string) => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const matches = items.filter(item => {
-      const normalizedSeriesName = item.name.toLowerCase().trim();
-      const normalizedOriginalName = item.originalName.toLowerCase().trim();
-      const normalizedLocalizedName = item.localizedName.toLowerCase().trim();
-      return normalizedSeriesName.indexOf(normalizedQuery) >= 0 || normalizedOriginalName.indexOf(normalizedQuery) >= 0 || normalizedLocalizedName.indexOf(normalizedQuery) >= 0;
-    });
-    return matches;
-  };
 
 
   backToTopNeeded = false;
@@ -65,7 +63,7 @@ export class NavHeaderComponent implements OnInit {
     public imageService: ImageService, @Inject(DOCUMENT) private document: Document,
     private scrollService: ScrollService, private searchService: SearchService, private readonly cdRef: ChangeDetectorRef) {
       this.scrollElem = this.document.body;
-    }
+  }
 
   ngOnInit(): void {
     this.scrollService.scrollContainer$.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap((scrollContainer) => {
@@ -119,7 +117,7 @@ export class NavHeaderComponent implements OnInit {
         this.searchResults = results;
         this.isLoading = false;
         this.cdRef.markForCheck();
-      }, err => {
+      }, () => {
         this.searchResults.reset();
         this.isLoading = false;
         this.searchTerm = '';

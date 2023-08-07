@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Entities.Enums;
 using API.Extensions;
 using EasyCaching.Core;
@@ -15,6 +16,7 @@ using NetVips;
 using Image = NetVips.Image;
 
 namespace API.Services;
+#nullable enable
 
 public interface IImageService
 {
@@ -53,6 +55,7 @@ public interface IImageService
     /// </summary>
     /// <param name="filePath">Full path to the image to convert</param>
     /// <param name="outputPath">Where to output the file</param>
+    /// <param name="encodeFormat">Encoding Format</param>
     /// <returns>File of written encoded image</returns>
     Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat);
     Task<bool> IsImage(string filePath);
@@ -75,6 +78,10 @@ public class ImageService : IImageService
     /// Width of the Thumbnail generation
     /// </summary>
     private const int ThumbnailWidth = 320;
+    /// <summary>
+    /// Height of the Thumbnail generation
+    /// </summary>
+    private const int ThumbnailHeight = 455;
     /// <summary>
     /// Width of a cover for Library
     /// </summary>
@@ -123,7 +130,7 @@ public class ImageService : IImageService
 
         try
         {
-            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth);
+            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
@@ -147,7 +154,7 @@ public class ImageService : IImageService
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
     public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
-        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth);
+        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -160,7 +167,7 @@ public class ImageService : IImageService
 
     public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat)
     {
-        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth);
+        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -212,7 +219,7 @@ public class ImageService : IImageService
         var baseUrl = uri.Scheme + "://" + uri.Host;
 
 
-        var provider = _cacheFactory.GetCachingProvider("favicon");
+        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Favicon);
         var res = await provider.GetAsync<string>(baseUrl);
         if (res.HasValue)
         {
@@ -239,7 +246,7 @@ public class ImageService : IImageService
                 .Where(href => href.Split("?")[0].EndsWith(".png", StringComparison.InvariantCultureIgnoreCase))
                 .ToList();
 
-            correctSizeLink = (pngLinks?.FirstOrDefault(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
+            correctSizeLink = (pngLinks?.Find(pngLink => pngLink.Contains("32")) ?? pngLinks?.FirstOrDefault());
         }
         catch (Exception ex)
         {
@@ -248,7 +255,10 @@ public class ImageService : IImageService
 
         try
         {
-            correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+            if (string.IsNullOrEmpty(correctSizeLink))
+            {
+                correctSizeLink = FallbackToKavitaReaderFavicon(baseUrl);
+            }
             if (string.IsNullOrEmpty(correctSizeLink))
             {
                 throw new KavitaException($"Could not grab favicon from {baseUrl}");
@@ -410,17 +420,22 @@ public class ImageService : IImageService
     }
 
 
-    public static string CreateMergedImage(List<string> coverImages, string dest)
+    public static string CreateMergedImage(IList<string> coverImages, string dest)
     {
-        // Currently this doesn't work due to non-standard cover image sizes and dimensions
-        var image = Image.Black(320*4, 160*4);
+        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 320x455
+
+        var thumbnailWidth = image.Width / 2;
+        var thumbnailHeight = image.Height / 2;
 
         for (var i = 0; i < coverImages.Count; i++)
         {
             var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
 
-            var x = (i % 2) * (image.Width / 2);
-            var y = (i / 2) * (image.Height / 2);
+            // Resize the tile to fit the thumbnail size
+            tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
+
+            var x = (i % 2) * thumbnailWidth;
+            var y = (i / 2) * thumbnailHeight;
 
             image = image.Insert(tile, x, y);
         }

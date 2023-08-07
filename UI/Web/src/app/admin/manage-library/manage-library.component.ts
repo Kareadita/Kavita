@@ -4,13 +4,11 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { Subject } from 'rxjs';
-import { distinctUntilChanged, filter, take, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, take } from 'rxjs/operators';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { LibrarySettingsModalComponent } from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
 import { NotificationProgressEvent } from 'src/app/_models/events/notification-progress-event';
@@ -19,12 +17,21 @@ import { Library } from 'src/app/_models/library';
 import { LibraryService } from 'src/app/_services/library.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { TimeAgoPipe } from '../../pipe/time-ago.pipe';
+import { LibraryTypePipe } from '../../pipe/library-type.pipe';
+import { RouterLink } from '@angular/router';
+import { NgFor, NgIf } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 
 @Component({
-  selector: 'app-manage-library',
-  templateUrl: './manage-library.component.html',
-  styleUrls: ['./manage-library.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-library',
+    templateUrl: './manage-library.component.html',
+    styleUrls: ['./manage-library.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [NgFor, RouterLink, NgbTooltip, NgIf, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 
@@ -84,8 +91,8 @@ export class ManageLibraryComponent implements OnInit {
   getLibraries() {
     this.loading = true;
     this.cdRef.markForCheck();
-    this.libraryService.getLibraries().pipe(take(1)).subscribe(libraries => {
-      this.libraries = libraries;
+    this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef)).subscribe(libraries => {
+      this.libraries = [...libraries];
       this.loading = false;
       this.cdRef.markForCheck();
     });
@@ -111,20 +118,20 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   async deleteLibrary(library: Library) {
-    if (await this.confirmService.confirm('Are you sure you want to delete this library? You cannot undo this action.')) {
+    if (await this.confirmService.confirm(translate('toast.confirm-library-delete', {name: library.name}))) {
       this.deletionInProgress = true;
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
         this.cdRef.markForCheck();
         this.getLibraries();
-        this.toastr.success('Library has been removed');
+        this.toastr.success(translate('toasts.library-deleted', {name: library.name}));
       });
     }
   }
 
   scanLibrary(library: Library) {
     this.libraryService.scan(library.id).pipe(take(1)).subscribe(() => {
-      this.toastr.info('A scan has been queued for ' + library.name);
+      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
     });
   }
 }

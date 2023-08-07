@@ -1,15 +1,16 @@
-<div class="modal-header">
-    <h4 class="modal-title">New Update Available!</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-        
-    </button>
-</div>
-<div class="modal-body">
+<ng-container *transloco="let t; read: 'update-notification-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
     <h5>{{updateData.updateTitle}}</h5>
     <pre class="update-body" [innerHtml]="updateData.updateBody | safeHtml"></pre>
-</div>
+  </div>
 
-<div class="modal-footer">
-    <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">Close</button>
-    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">Download</a>
-</div>
+  <div class="modal-footer">
+    <a class="btn btn-icon" [href]="updateUrl" target="_blank" rel="noopener noreferrer">{{t('help')}}</a>
+    <button type="button" class="btn {{updateData.isDocker ? 'btn-primary' : 'btn-secondary'}}" (click)="close()">{{t('close')}}</button>
+    <a *ngIf="!updateData.isDocker" href="{{updateData.updateUrl}}" class="btn btn-primary" target="_blank" rel="noopener noreferrer" (click)="close()">{{t('download')}}</a>
+  </div>
+</ng-container>

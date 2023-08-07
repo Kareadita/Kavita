@@ -1,7 +1,9 @@
-<app-side-nav-companion-bar>
+<ng-container *transloco="let t; read: 'announcements'">
+  <app-side-nav-companion-bar>
     <h2 title>
-        Announcements
+      {{t('title')}}
     </h2>
-</app-side-nav-companion-bar>
+  </app-side-nav-companion-bar>
 
-<app-changelog></app-changelog>
+  <app-changelog></app-changelog>
+</ng-container>

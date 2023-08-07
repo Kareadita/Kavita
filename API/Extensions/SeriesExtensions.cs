@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+using System.Collections.Generic;
 using System.Linq;
 using API.Comparators;
 using API.Entities;
+using API.Services.Tasks.Scanner.Parser;
 
 namespace API.Extensions;
 
@@ -15,18 +17,48 @@ public static class SeriesExtensions
     /// <remarks>This is under the assumption that the Volume already has a Cover Image calculated and set</remarks>
     public static string? GetCoverImage(this Series series)
     {
-        var volumes = series.Volumes ?? new List<Volume>();
+        var volumes = (series.Volumes ?? new List<Volume>())
+            .OrderBy(v => v.Number, ChapterSortComparer.Default)
+            .ToList();
         var firstVolume = volumes.GetCoverImage(series.Format);
         if (firstVolume == null) return null;
-        string? coverImage = null;
 
-        var chapters = firstVolume.Chapters.OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default).ToList();
-        if (chapters.Count > 1 && chapters.Any(c => c.IsSpecial))
+        var chapters = firstVolume.Chapters
+            .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+            .ToList();
+
+        if (chapters.Count > 1 && chapters.Exists(c => c.IsSpecial))
         {
-            coverImage = chapters.FirstOrDefault(c => !c.IsSpecial)?.CoverImage ?? chapters.First().CoverImage;
-            firstVolume = null;
+            return chapters.Find(c => !c.IsSpecial)?.CoverImage ?? chapters[0].CoverImage;
         }
 
-        return firstVolume?.CoverImage ?? coverImage;
+        // just volumes
+        if (volumes.TrueForAll(v => $"{v.Number}" != Parser.DefaultVolume))
+        {
+            return firstVolume.CoverImage;
+        }
+        // If we have loose leaf chapters
+
+        // if loose leaf chapters AND volumes, just return first volume
+        if (volumes.Count >= 1 && $"{volumes[0].Number}" != Parser.DefaultVolume)
+        {
+            var looseLeafChapters = volumes.Where(v => $"{v.Number}" == Parser.DefaultVolume)
+                .SelectMany(c => c.Chapters.Where(c => !c.IsSpecial))
+                .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+                .ToList();
+            if (looseLeafChapters.Count > 0 && (1.0f * volumes[0].Number) > float.Parse(looseLeafChapters[0].Number))
+            {
+                return looseLeafChapters[0].CoverImage;
+            }
+            return firstVolume.CoverImage;
+        }
+
+        var firstLooseLeafChapter = volumes
+            .Where(v => $"{v.Number}" == Parser.DefaultVolume)
+            .SelectMany(v => v.Chapters)
+            .OrderBy(c => double.Parse(c.Number), ChapterSortComparerZeroFirst.Default)
+            .FirstOrDefault(c => !c.IsSpecial);
+
+        return firstLooseLeafChapter?.CoverImage ?? firstVolume.CoverImage;
     }
 }

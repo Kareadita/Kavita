@@ -70,6 +70,15 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.HostName:
                     destination.HostName = row.Value;
                     break;
+                case ServerSettingKey.CacheSize:
+                    destination.CacheSize = long.Parse(row.Value);
+                    break;
+                case ServerSettingKey.OnDeckProgressDays:
+                    destination.OnDeckProgressDays = int.Parse(row.Value);
+                    break;
+                case ServerSettingKey.OnDeckUpdateDays:
+                    destination.OnDeckUpdateDays = int.Parse(row.Value);
+                    break;
             }
         }
 

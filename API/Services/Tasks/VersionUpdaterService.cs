@@ -72,13 +72,11 @@ public class VersionUpdaterService : IVersionUpdaterService
     /// <summary>
     /// Fetches the latest release from Github
     /// </summary>
-    /// <returns>Latest update or null if current version is greater than latest update</returns>
-    public async Task<UpdateNotificationDto?> CheckForUpdate()
+    /// <returns>Latest update</returns>
+    public async Task<UpdateNotificationDto> CheckForUpdate()
     {
         var update = await GetGithubRelease();
-        var dto = CreateDto(update);
-        if (dto == null) return null;
-        return new Version(dto.UpdateVersion) <= new Version(dto.CurrentVersion) ? null : dto;
+        return CreateDto(update);
     }
 
     public async Task<IEnumerable<UpdateNotificationDto>> GetAllReleases()

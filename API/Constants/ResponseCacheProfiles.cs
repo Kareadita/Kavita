@@ -15,4 +15,6 @@ public static class ResponseCacheProfiles
     /// </summary>
     public const string Instant = "Instant";
     public const string Month = "Month";
+    public const string LicenseCache = "LicenseCache";
+    public const string KavitaPlus = "KavitaPlus";
 }

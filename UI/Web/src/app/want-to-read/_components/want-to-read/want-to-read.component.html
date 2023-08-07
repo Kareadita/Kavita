@@ -1,45 +1,47 @@
-<div #companionBar>
-    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
-        <ng-container title>
-            <h2>
-                Want To Read
-            </h2>
-        </ng-container>
-        <h6 subtitle>{{seriesPagination.totalItems | number}} Series</h6>
-    </app-side-nav-companion-bar>
-</div>
+<ng-container *transloco="let t; read:'want-to-read'">
+  <div #companionBar>
+      <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+          <ng-container title>
+              <h2>
+                  {{t('title')}}
+              </h2>
+          </ng-container>
+          <h6 subtitle>{{t('series-count', {num: (seriesPagination.totalItems | number)})}}</h6>
+      </app-side-nav-companion-bar>
+  </div>
 
-<div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+  <div [ngStyle]="{'height': ScrollingBlockHeight}" class="main-container container-fluid pt-2" #scrollingBlock>
+      <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
 
-    <app-card-detail-layout
-        [isLoading]="isLoading"
-        [items]="series"
-        [pagination]="seriesPagination"
-        [filterSettings]="filterSettings"
-        [filterOpen]="filterOpen"
-        [jumpBarKeys]="jumpbarKeys"
-        [trackByIdentity]="trackByIdentity"
-        [refresh]="refresh"
-        (applyFilter)="updateFilter($event)">
-        <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)" 
-            (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)" 
-            [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
-            ></app-series-card>
-        </ng-template>
-    
-        <div *ngIf="!filterActive && series.length === 0">
-            <ng-template #noData>
-                There are no items. Try adding a series.
-            </ng-template>
-        </div>
+      <app-card-detail-layout
+          [isLoading]="isLoading"
+          [items]="series"
+          [pagination]="seriesPagination"
+          [filterSettings]="filterSettings"
+          [filterOpen]="filterOpen"
+          [jumpBarKeys]="jumpbarKeys"
+          [trackByIdentity]="trackByIdentity"
+          [refresh]="refresh"
+          (applyFilter)="updateFilter($event)">
+          <ng-template #cardItem let-item let-position="idx">
+              <app-series-card [data]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)"
+              (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
+              [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+              ></app-series-card>
+          </ng-template>
 
-        <div *ngIf="filterActive && series.length === 0">
-            <ng-template #noData>
-                No items match your current filter.
-            </ng-template>
-        </div>
+          <div *ngIf="!filterActive && series.length === 0">
+              <ng-template #noData>
+                  {{t('no-items')}}
+              </ng-template>
+          </div>
 
-    </app-card-detail-layout>
-</div>
+          <div *ngIf="filterActive && series.length === 0">
+              <ng-template #noData>
+                {{t('no-items-filtered')}}
+              </ng-template>
+          </div>
+
+      </app-card-detail-layout>
+  </div>
+</ng-container>

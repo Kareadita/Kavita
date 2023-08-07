@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace API.DTOs.OPDS;
+#nullable enable
 
 public class FeedEntry
 {

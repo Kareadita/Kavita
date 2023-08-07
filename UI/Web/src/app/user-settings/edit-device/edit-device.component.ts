@@ -6,24 +6,28 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output,
   SimpleChanges
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Subject, takeUntil } from 'rxjs';
 import { Device } from 'src/app/_models/device/device';
 import { DevicePlatform, devicePlatforms } from 'src/app/_models/device/device-platform';
 import { DeviceService } from 'src/app/_services/device.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { DevicePlatformPipe } from '../_pipes/device-platform.pipe';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import {NgIf, NgFor, NgTemplateOutlet} from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-edit-device',
-  templateUrl: './edit-device.component.html',
-  styleUrls: ['./edit-device.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-device',
+    templateUrl: './edit-device.component.html',
+    styleUrls: ['./edit-device.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [ReactiveFormsModule, NgIf, NgbTooltip, NgFor, DevicePlatformPipe, TranslocoModule, NgTemplateOutlet]
 })
 export class EditDeviceComponent implements OnInit, OnChanges {
 
@@ -71,7 +75,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
     if (this.device !== undefined) {
       this.deviceService.updateDevice(this.device.id, this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
         this.settingsForm.reset();
-        this.toastr.success('Device updated');
+        this.toastr.success(translate('toasts.device-updated'));
         this.cdRef.markForCheck();
         this.deviceUpdated.emit();
       })
@@ -80,7 +84,7 @@ export class EditDeviceComponent implements OnInit, OnChanges {
 
     this.deviceService.createDevice(this.settingsForm.value.name, parseInt(this.settingsForm.value.platform, 10), this.settingsForm.value.email).subscribe(() => {
       this.settingsForm.reset();
-      this.toastr.success('Device created');
+      this.toastr.success(translate('toasts.device-created'));
       this.cdRef.markForCheck();
       this.deviceAdded.emit();
     });

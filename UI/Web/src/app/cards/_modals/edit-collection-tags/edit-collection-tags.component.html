@@ -1,92 +1,98 @@
+<ng-container *transloco="let t; read: 'edit-collection-tags'">
 
-<div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Edit {{tag.title}} Collection</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
-</div>
-<div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" 
-    orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-        <li [ngbNavItem]="TabID.General">
-        <a ngbNavLink>{{TabID.General}}</a>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title', {collectionName: tag.title})}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
+        orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+      <li [ngbNavItem]="TabID.General">
+        <a ngbNavLink>{{t(TabID.General)}}</a>
         <ng-template ngbNavContent>
-            <form [formGroup]="collectionTagForm">
-                <div class="row g-0 mb-3">
-                    <div class="col-md-8 col-sm-12">
-                        <label for="library-name" class="form-label">Name</label>
-                        <input id="library-name" class="form-control" formControlName="title" type="text" [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="collectionTagForm.dirty || collectionTagForm.touched">
-                            <div *ngIf="collectionTagForm.get('title')?.errors?.required">
-                                This field is required
-                            </div>
-                            <div *ngIf="collectionTagForm.get('title')?.errors?.duplicateName">
-                                Name must be unique
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-12 ms-2">
-                        <div class="form-check form-switch">
-                            <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input"
-                                aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
-                            <label class="form-check-label me-1" for="tag-promoted">Promote</label>
-                            <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
-                            <ng-template #promotedTooltip>Promotion means that the tag can be seen server-wide, not just for admin users. All series that have this tag will still have user-access restrictions placed on them.</ng-template>
-                            <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
-                        </div>
-                    </div>
+          <form [formGroup]="collectionTagForm">
+            <div class="row g-0 mb-3">
+              <div class="col-md-8 col-sm-12">
+                <label for="library-name" class="form-label">{{t('name-label')}}</label>
+                <input id="library-name" class="form-control" formControlName="title" type="text"
+                       [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
+                <div id="inviteForm-validations" class="invalid-feedback" *ngIf="collectionTagForm.dirty || collectionTagForm.touched">
+                  <div *ngIf="collectionTagForm.get('title')?.errors?.required">
+                    {{t('required-field')}}
+                  </div>
+                  <div *ngIf="collectionTagForm.get('title')?.errors?.duplicateName">
+                    {{t('name-validation')}}
+                  </div>
                 </div>
-
-                <div class="row g-0 mb-3">
-                    <label for="summary" class="form-label">Summary</label>
-                    <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+              </div>
+              <div class="col-md-3 col-sm-12 ms-2">
+                <div class="form-check form-switch">
+                  <input type="checkbox" id="tag-promoted" role="switch" formControlName="promoted" class="form-check-input"
+                         aria-labelledby="auto-close-label" aria-describedby="tag-promoted-help">
+                  <label class="form-check-label me-1" for="tag-promoted">{{t('promote-label')}}</label>
+                  <i class="fa fa-info-circle" aria-hidden="true" placement="left" [ngbTooltip]="promotedTooltip" role="button" tabindex="0"></i>
+                  <ng-template #promotedTooltip>{{t('promote-tooltip')}}</ng-template>
+                  <span class="visually-hidden" id="tag-promoted-help"><ng-container [ngTemplateOutlet]="promotedTooltip"></ng-container></span>
                 </div>
+              </div>
+            </div>
 
-            </form>
+            <div class="row g-0 mb-3">
+              <label for="summary" class="form-label">{{t('summary-label')}}</label>
+              <textarea id="summary" class="form-control" formControlName="summary" rows="3"></textarea>
+            </div>
+
+          </form>
         </ng-template>
-        </li>
+      </li>
 
-        <li [ngbNavItem]="TabID.Series">
-            <a ngbNavLink>{{TabID.Series}}</a>
-            <ng-template ngbNavContent>
-                <div class="list-group" *ngIf="!isLoading">
-                    <h6>Applies to Series</h6>
-                    <div class="form-check">
-                        <input id="selectall" type="checkbox" class="form-check-input" 
-                            [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-                        <label for="selectall" class="form-check-label">{{selectAll ? 'Deselect' : 'Select'}} All</label>
-                    </div>
-                    <ul>
-                        <li class="list-group-item" *ngFor="let item of series; let i = index">
-                            <div class="form-check">
-                                <input id="series-{{i}}" type="checkbox" class="form-check-input" 
-                                    [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
-                                <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
-                            </div>
-                        </li>
-                    </ul>
-                    <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
-                        <ngb-pagination
-                            *ngIf="pagination.totalPages > 1"
-                            [(page)]="pagination.currentPage"
-                            [pageSize]="pagination.itemsPerPage"
-                            (pageChange)="onPageChange($event)"
-                            [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
-                            [collectionSize]="pagination.totalItems"></ngb-pagination>
-                    </div>
+      <li [ngbNavItem]="TabID.Series">
+        <a ngbNavLink>{{t(TabID.Series)}}</a>
+        <ng-template ngbNavContent>
+          <div class="list-group" *ngIf="!isLoading">
+            <h6>{{t('series-title')}}</h6>
+            <div class="form-check">
+              <input id="selectall" type="checkbox" class="form-check-input"
+                     [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
+              <label for="selectall" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
+            </div>
+            <ul>
+              <li class="list-group-item" *ngFor="let item of series; let i = index">
+                <div class="form-check">
+                  <input id="series-{{i}}" type="checkbox" class="form-check-input"
+                         [ngModel]="selections.isSelected(item)" (change)="handleSelection(item)">
+                  <label attr.for="series-{{i}}" class="form-check-label">{{item.name}} ({{libraryName(item.libraryId)}})</label>
                 </div>
-            </ng-template>
-        </li>
+              </li>
+            </ul>
+            <div class="d-flex justify-content-center" *ngIf="pagination && series.length !== 0">
+              <ngb-pagination
+                *ngIf="pagination.totalPages > 1"
+                [(page)]="pagination.currentPage"
+                [pageSize]="pagination.itemsPerPage"
+                (pageChange)="onPageChange($event)"
+                [rotate]="false" [ellipses]="false" [boundaryLinks]="true"
+                [collectionSize]="pagination.totalItems"></ngb-pagination>
+            </div>
+          </div>
+        </ng-template>
+      </li>
 
-        <li [ngbNavItem]="TabID.CoverImage">
-            <a ngbNavLink>{{TabID.CoverImage}}</a>
-            <ng-template ngbNavContent>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked" (resetClicked)="handleReset()"></app-cover-image-chooser>
-            </ng-template>
-        </li>
+      <li [ngbNavItem]="TabID.CoverImage">
+        <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+        <ng-template ngbNavContent>
+          <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
+                                   (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag.coverImageLocked"
+                                   (resetClicked)="handleReset()"></app-cover-image-chooser>
+        </ng-template>
+      </li>
     </ul>
 
     <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-    <button type="button" class="btn btn-primary" [disabled]="collectionTagForm.invalid" (click)="save()">Save</button>
-</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button type="button" class="btn btn-primary" [disabled]="collectionTagForm.invalid" (click)="save()">{{t('save')}}</button>
+  </div>
+
+</ng-container>

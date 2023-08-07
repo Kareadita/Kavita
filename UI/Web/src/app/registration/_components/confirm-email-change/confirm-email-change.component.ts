@@ -4,15 +4,20 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ThemeService } from 'src/app/_services/theme.service';
+import { NgIf } from '@angular/common';
+import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This component just validates the email via API then redirects to login
  */
 @Component({
-  selector: 'app-confirm-email-change',
-  templateUrl: './confirm-email-change.component.html',
-  styleUrls: ['./confirm-email-change.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-confirm-email-change',
+    templateUrl: './confirm-email-change.component.html',
+    styleUrls: ['./confirm-email-change.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [SplashContainerComponent, NgIf, TranslocoModule]
 })
 export class ConfirmEmailChangeComponent implements OnInit {
 
@@ -21,8 +26,8 @@ export class ConfirmEmailChangeComponent implements OnInit {
 
   confirmed: boolean = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService, 
-    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService, 
+  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
+    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService,
     private readonly cdRef: ChangeDetectorRef) {
       this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);
@@ -31,7 +36,7 @@ export class ConfirmEmailChangeComponent implements OnInit {
 
       if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation url');
+        this.toastr.error(translate('errors.invalid-confirmation-url'));
         this.router.navigateByUrl('login');
         return;
       }

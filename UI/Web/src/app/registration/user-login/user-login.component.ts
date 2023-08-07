@@ -1,21 +1,31 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { AddEmailToAccountMigrationModalComponent } from '../_modals/add-email-to-account-migration-modal/add-email-to-account-migration-modal.component';
 import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
+import { NgIf } from '@angular/common';
+import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
+import {TRANSLOCO_SCOPE, TranslocoModule} from "@ngneat/transloco";
 
 
 @Component({
-  selector: 'app-user-login',
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-login',
+    templateUrl: './user-login.component.html',
+    styleUrls: ['./user-login.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoModule],
+  providers: [
+    {
+      provide: TRANSLOCO_SCOPE,
+      useValue: 'login'
+    }
+  ]
 })
 export class UserLoginComponent implements OnInit {
 
@@ -33,9 +43,10 @@ export class UserLoginComponent implements OnInit {
    * Used for first time the page loads to ensure no flashing
    */
   isLoaded: boolean = false;
+  isSubmitting = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal, 
+    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal,
     private readonly cdRef: ChangeDetectorRef) {
       this.navService.showNavBar();
       this.navService.hideSideNav();
@@ -53,7 +64,7 @@ export class UserLoginComponent implements OnInit {
         this.router.navigateByUrl('/libraries');
       }
     });
-    
+
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
@@ -68,17 +79,11 @@ export class UserLoginComponent implements OnInit {
     });
   }
 
-  onAdminCreated(user: User | null) {
-    if (user != null) {
-      this.firstTimeFlow = false;
-      this.cdRef.markForCheck();
-    } else {
-      this.toastr.error('There was an issue creating the new user. Please refresh and try again.');
-    }
-  }
 
   login() {
     const model = this.loginForm.getRawValue();
+    this.isSubmitting = true;
+    this.cdRef.markForCheck();
     this.accountService.login(model).subscribe(() => {
       this.loginForm.reset();
       this.navService.showNavBar();
@@ -92,15 +97,12 @@ export class UserLoginComponent implements OnInit {
       } else {
         this.router.navigateByUrl('/libraries');
       }
+      this.isSubmitting = false;
+      this.cdRef.markForCheck();
     }, err => {
-      if (err.error === 'You are missing an email on your account. Please wait while we migrate your account.') {
-        const modalRef = this.modalService.open(AddEmailToAccountMigrationModalComponent, { scrollable: true, size: 'md' });
-        modalRef.componentInstance.username = model.username;
-        modalRef.closed.pipe(take(1)).subscribe(() => {
-        });
-      } else {
-        this.toastr.error(err.error);
-      }
+      this.toastr.error(err.error);
+      this.isSubmitting = false;
+      this.cdRef.markForCheck();
     });
   }
 }

@@ -25,10 +25,6 @@ public class MediaError : IEntityDate
     /// Exception message
     /// </summary>
     public string Details { get; set; }
-    /// <summary>
-    /// Was the file imported or not
-    /// </summary>
-    //public bool Imported { get; set; }
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

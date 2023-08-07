@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.DTOs.ReadingLists;
+#nullable enable
 
 public class ReadingListItemDto
 {

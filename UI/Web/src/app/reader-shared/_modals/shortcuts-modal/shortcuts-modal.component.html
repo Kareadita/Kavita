@@ -1,14 +1,17 @@
-<div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Keyboard Shortcuts</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
-</div>
-<div class="modal-body">
+<ng-container *transloco="let t; read: 'shortcuts-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
     <div class="row g-0">
-        <div class="col-md-6  mb-2" *ngFor="let shortcut of shortcuts">
-            <span><code>{{shortcut.key}}</code> {{shortcut.description}}</span>
-        </div>
+      <div class="col-md-6  mb-2" *ngFor="let shortcut of shortcuts">
+        <span><code>{{shortcut.key}}</code> {{t(shortcut.description)}}</span>
+      </div>
     </div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="close()">Close</button>
-</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+
+</ng-container>

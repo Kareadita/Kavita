@@ -7,9 +7,9 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { take, takeUntil } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import {
   readingDirections,
@@ -24,14 +24,31 @@ import {
 } from 'src/app/_models/preferences/preferences';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SettingsService } from 'src/app/admin/settings.service';
 import { BookPageLayoutMode } from 'src/app/_models/readers/book-page-layout-mode';
-import { forkJoin, Subject } from 'rxjs';
+import {forkJoin} from 'rxjs';
 import { bookColorThemes } from 'src/app/book-reader/_components/reader-settings/reader-settings.component';
 import { BookService } from 'src/app/book-reader/_services/book.service';
-import { environment } from 'src/environments/environment';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { UserHoldsComponent } from '../user-holds/user-holds.component';
+import { UserScrobbleHistoryComponent } from '../../_single-module/user-scrobble-history/user-scrobble-history.component';
+import { UserStatsComponent } from '../../statistics/_components/user-stats/user-stats.component';
+import { ManageDevicesComponent } from '../manage-devices/manage-devices.component';
+import { ThemeManagerComponent } from '../theme-manager/theme-manager.component';
+import { ApiKeyComponent } from '../api-key/api-key.component';
+import { ColorPickerModule } from 'ngx-color-picker';
+import { AnilistKeyComponent } from '../anilist-key/anilist-key.component';
+import { ChangeAgeRestrictionComponent } from '../change-age-restriction/change-age-restriction.component';
+import { ChangePasswordComponent } from '../change-password/change-password.component';
+import { ChangeEmailComponent } from '../change-email/change-email.component';
+import { NgFor, NgIf, NgTemplateOutlet, TitleCasePipe } from '@angular/common';
+import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
+import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {LocalizationService} from "../../_services/localization.service";
+import {Language} from "../../_models/metadata/language";
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -41,54 +58,64 @@ enum AccordionPanelID {
 
 enum FragmentID {
   Account = 'account',
-  Prefernces = '',
+  Preferences = '',
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
+  Scrobbling = 'scrobbling'
 
 }
 
 @Component({
-  selector: 'app-user-preferences',
-  templateUrl: './user-preferences.component.html',
-  styleUrls: ['./user-preferences.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-user-preferences',
+    templateUrl: './user-preferences.component.html',
+    styleUrls: ['./user-preferences.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
+        ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
+        NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
+        ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe, TranslocoModule]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
-  readingDirections = readingDirections;
-  scalingOptions = scalingOptions;
-  pageSplitOptions = pageSplitOptions;
-  readingModes = readingModes;
-  layoutModes = layoutModes;
-  bookLayoutModes = bookLayoutModes;
-  bookColorThemes = bookColorThemes;
-  pageLayoutModes = pageLayoutModes;
-  bookWritingStyles = bookWritingStyles;
+  readingDirectionsTranslated = readingDirections.map(this.translatePrefOptions);
+  scalingOptionsTranslated = scalingOptions.map(this.translatePrefOptions);
+  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
+  readingModesTranslated = readingModes.map(this.translatePrefOptions);
+  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
+  bookLayoutModesTranslated = bookLayoutModes.map(this.translatePrefOptions);
+  bookColorThemesTranslated = bookColorThemes.map(o => {
+    const d = {...o};
+    d.name = translate('theme.' + d.translationKey);
+    return d;
+  });
+
+  pageLayoutModesTranslated = pageLayoutModes.map(this.translatePrefOptions);
+  bookWritingStylesTranslated = bookWritingStyles.map(this.translatePrefOptions);
 
   settingsForm: FormGroup = new FormGroup({});
   user: User | undefined = undefined;
-
-  passwordsMatch = false;
-  resetPasswordErrors: string[] = [];
 
   observableHandles: Array<any> = [];
   fontFamilies: Array<string> = [];
 
   tabs: Array<{title: string, fragment: string}> = [
-    {title: 'Account', fragment: FragmentID.Account},
-    {title: 'Preferences', fragment: FragmentID.Prefernces},
-    {title: '3rd Party Clients', fragment: FragmentID.Clients},
-    {title: 'Theme', fragment: FragmentID.Theme},
-    {title: 'Devices', fragment: FragmentID.Devices},
-    {title: 'Stats', fragment: FragmentID.Stats},
+    {title: 'account-tab', fragment: FragmentID.Account},
+    {title: 'preferences-tab', fragment: FragmentID.Preferences},
+    {title: '3rd-party-clients-tab', fragment: FragmentID.Clients},
+    {title: 'theme-tab', fragment: FragmentID.Theme},
+    {title: 'devices-tab', fragment: FragmentID.Devices},
+    {title: 'stats-tab', fragment: FragmentID.Stats},
   ];
+  locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
   active = this.tabs[1];
   opdsEnabled: boolean = false;
-  baseUrl: string = '';
-  makeUrl: (val: string) => string = (val: string) => {return this.transformKeyToOpdsUrl(val)};
+  opdsUrl: string = '';
+  makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   private readonly destroyRef = inject(DestroyRef);
+  private readonly trasnlocoService = inject(TranslocoService);
 
   get AccordionPanelID() {
     return AccordionPanelID;
@@ -101,21 +128,37 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
 
   constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
     private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef) {
+    private router: Router, private readonly cdRef: ChangeDetectorRef, public localizationService: LocalizationService) {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
-    this.route.fragment.subscribe(frag => {
-      const tab = this.tabs.filter(item => item.fragment === frag);
-      if (tab.length > 0) {
-        this.active = tab[0];
-      } else {
-        this.active = this.tabs[1]; // Default to preferences
-      }
+    this.accountService.getOpdsUrl().subscribe(res => {
+      this.opdsUrl = res;
       this.cdRef.markForCheck();
     });
 
-    this.settingsService.getBaseUrl().subscribe(url => this.baseUrl = url);
+    this.localizationService.getLocales().subscribe(res => {
+      this.locales = res;
+      this.cdRef.markForCheck();
+    });
+
+    this.accountService.hasValidLicense().subscribe(res => {
+      if (res) {
+        this.tabs.push({title: 'scrobbling-tab', fragment: FragmentID.Scrobbling});
+        this.cdRef.markForCheck();
+      }
+
+      this.route.fragment.subscribe(frag => {
+        const tab = this.tabs.filter(item => item.fragment === frag);
+        if (tab.length > 0) {
+          this.active = tab[0];
+        } else {
+          this.active = this.tabs[1]; // Default to preferences
+        }
+        this.cdRef.markForCheck();
+      });
+    })
+
 
     this.settingsService.getOpdsEnabled().subscribe(res => {
       this.opdsEnabled = res;
@@ -169,6 +212,12 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('promptForDownloadSize', new FormControl(this.user.preferences.promptForDownloadSize, []));
       this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
       this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
+      this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
+      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale, []));
+
+      if (this.locales.length === 1) {
+        this.settingsForm.get('locale')?.disable();
+      }
 
       this.cdRef.markForCheck();
     });
@@ -214,6 +263,8 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     this.settingsForm.get('emulateBook')?.setValue(this.user.preferences.emulateBook);
     this.settingsForm.get('swipeToPaginate')?.setValue(this.user.preferences.swipeToPaginate);
     this.settingsForm.get('collapseSeriesRelationships')?.setValue(this.user.preferences.collapseSeriesRelationships);
+    this.settingsForm.get('shareReviews')?.setValue(this.user.preferences.shareReviews);
+    this.settingsForm.get('locale')?.setValue(this.user.preferences.locale);
     this.cdRef.markForCheck();
     this.settingsForm.markAsPristine();
   }
@@ -247,11 +298,13 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       noTransitions: modelSettings.noTransitions,
       emulateBook: modelSettings.emulateBook,
       swipeToPaginate: modelSettings.swipeToPaginate,
-      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships
+      collapseSeriesRelationships: modelSettings.collapseSeriesRelationships,
+      shareReviews: modelSettings.shareReviews,
+      locale: modelSettings.locale
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success('User preferences updated');
+      this.toastr.success(this.trasnlocoService.translate('user-preferences.success-toast'));
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();
@@ -261,17 +314,15 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   }
 
 
-  transformKeyToOpdsUrl(key: string) {
-    if (environment.production) {
-      return `${location.origin}` + `${this.baseUrl}${environment.apiUrl}opds/${key}`.replace('//', '/');
-    }
-
-    return `${location.origin}${this.baseUrl.replace('//', '/')}api/opds/${key}`;
-  }
-
   handleBackgroundColorChange() {
     this.settingsForm.markAsDirty();
     this.settingsForm.markAsTouched();
     this.cdRef.markForCheck();
+  }
+
+  translatePrefOptions(o: {text: string, value: any}) {
+    const d = {...o};
+    d.text = translate('preferences.' + o.text);
+    return d;
   }
 }

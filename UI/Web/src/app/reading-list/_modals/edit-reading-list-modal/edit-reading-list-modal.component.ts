@@ -8,10 +8,10 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
+import { NgbActiveModal, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbTooltip, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
-import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, switchMap, tap } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { ReadingList } from 'src/app/_models/reading-list';
 import { AccountService } from 'src/app/_services/account.service';
@@ -19,17 +19,22 @@ import { ImageService } from 'src/app/_services/image.service';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
+import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 enum TabID {
-  General = 'General',
-  CoverImage = 'Cover Image'
+  General = 'general-tab',
+  CoverImage = 'cover-image-tab'
 }
 
 @Component({
-  selector: 'app-edit-reading-list-modal',
-  templateUrl: './edit-reading-list-modal.component.html',
-  styleUrls: ['./edit-reading-list-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-edit-reading-list-modal',
+    templateUrl: './edit-reading-list-modal.component.html',
+    styleUrls: ['./edit-reading-list-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoModule]
 })
 export class EditReadingListModalComponent implements OnInit {
 
@@ -116,7 +121,7 @@ export class EditReadingListModalComponent implements OnInit {
       this.readingList.coverImageLocked = this.coverImageLocked;
       this.readingList.promoted = model.promoted;
       this.ngModal.close(this.readingList);
-      this.toastr.success('Reading List updated');
+      this.toastr.success(translate('toasts.reading-list-updated'));
     });
   }
 

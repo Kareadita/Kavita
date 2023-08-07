@@ -12,12 +12,17 @@ import {ConfirmService} from 'src/app/shared/confirm.service';
 import {AccountService} from 'src/app/_services/account.service';
 import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf } from '@angular/common';
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-api-key',
-  templateUrl: './api-key.component.html',
-  styleUrls: ['./api-key.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-api-key',
+    templateUrl: './api-key.component.html',
+    styleUrls: ['./api-key.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgIf, NgbTooltip, TranslocoModule]
 })
 export class ApiKeyComponent implements OnInit {
 
@@ -28,6 +33,7 @@ export class ApiKeyComponent implements OnInit {
   @ViewChild('apiKey') inputElem!: ElementRef;
   key: string = '';
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
 
 
   constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard,
@@ -39,7 +45,7 @@ export class ApiKeyComponent implements OnInit {
       if (user) {
         key = user.apiKey;
       } else {
-        key = 'ERROR - KEY NOT SET';
+        key = this.translocoService.translate('api-key.no-key');
       }
 
       if (this.transform != undefined) {
@@ -57,13 +63,13 @@ export class ApiKeyComponent implements OnInit {
   }
 
   async refresh() {
-    if (!await this.confirmService.confirm('This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?')) {
+    if (!await this.confirmService.confirm(this.translocoService.translate('api-key.confirm-reset'))) {
       return;
     }
     this.accountService.resetApiKey().subscribe(newKey => {
       this.key = newKey;
       this.cdRef.markForCheck();
-      this.toastr.success('API Key reset');
+      this.toastr.success(this.translocoService.translate('api-key.key-reset'));
     });
   }
 

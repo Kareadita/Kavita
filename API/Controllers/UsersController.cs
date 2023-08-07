@@ -5,6 +5,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.Extensions;
+using API.Services;
 using API.SignalR;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -18,12 +19,15 @@ public class UsersController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IEventHub _eventHub;
+    private readonly ILocalizationService _localizationService;
 
-    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub)
+    public UsersController(IUnitOfWork unitOfWork, IMapper mapper, IEventHub eventHub,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _eventHub = eventHub;
+        _localizationService = localizationService;
     }
 
     [Authorize(Policy = "RequireAdminRole")]
@@ -38,7 +42,7 @@ public class UsersController : BaseApiController
 
         if (await _unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest("Could not delete the user.");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-delete"));
     }
 
     /// <summary>
@@ -66,14 +70,14 @@ public class UsersController : BaseApiController
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-        if (library == null) return BadRequest("Library does not exist");
+        if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
         return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
     }
 
     [HttpGet("has-library-access")]
-    public async Task<ActionResult<bool>> HasLibraryAccess(int libraryId)
+    public ActionResult<bool> HasLibraryAccess(int libraryId)
     {
-        var libs = await _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
+        var libs = _unitOfWork.LibraryRepository.GetLibraryDtosForUsernameAsync(User.GetUsername());
         return Ok(libs.Any(x => x.Id == libraryId));
     }
 
@@ -112,16 +116,18 @@ public class UsersController : BaseApiController
         existingPreferences.NoTransitions = preferencesDto.NoTransitions;
         existingPreferences.SwipeToPaginate = preferencesDto.SwipeToPaginate;
         existingPreferences.CollapseSeriesRelationships = preferencesDto.CollapseSeriesRelationships;
+        existingPreferences.ShareReviews = preferencesDto.ShareReviews;
+        if (_localizationService.GetLocales().Contains(preferencesDto.Locale))
+        {
+            existingPreferences.Locale = preferencesDto.Locale;
+        }
 
         _unitOfWork.UserRepository.Update(existingPreferences);
 
-        if (await _unitOfWork.CommitAsync())
-        {
-            await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
-            return Ok(preferencesDto);
-        }
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-user-pref"));
 
-        return BadRequest("There was an issue saving preferences.");
+        await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
+        return Ok(preferencesDto);
     }
 
     /// <summary>

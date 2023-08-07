@@ -1,44 +1,45 @@
+<ng-container *transloco="let t; read: 'add-to-list-modal'">
 
-<div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Add to Reading List</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-    
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
+
     </button>
-</div>
-<form style="width: 100%" [formGroup]="listForm">
-<div class="modal-body scrollable-modal">
-    <div class="mb-3" *ngIf="lists.length >= 5">
-        <label for="filter" class="form-label">Filter</label>
+  </div>
+  <form style="width: 100%" [formGroup]="listForm">
+    <div class="modal-body scrollable-modal">
+      <div class="mb-3" *ngIf="lists.length >= 5">
+        <label for="filter" class="form-label">{{t('filter-label')}}</label>
         <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
+          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">Clear</button>
         </div>
-    </div>
-    <ul class="list-group">
-        <li class="list-group-item clickable" tabindex="0" role="button" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
-            {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" title="Promoted"></i>
+      </div>
+      <ul class="list-group">
+        <li class="list-group-item clickable" tabindex="0" role="option" *ngFor="let readingList of lists | filter: filterList; let i = index" (click)="addToList(readingList)">
+          {{readingList.title}} <i class="fa fa-angle-double-up" *ngIf="readingList.promoted" [title]="t('promoted-alt')"></i>
         </li>
-        <li class="list-group-item" *ngIf="lists.length === 0 && !loading">No lists created yet</li>
+        <li class="list-group-item" *ngIf="lists.length === 0 && !loading">{{t('no-data')}}</li>
         <li class="list-group-item" *ngIf="loading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </li>
-    </ul>
-</div>
-<div class="modal-footer" style="justify-content: normal">
-    <div style="width: 100%;">
-        <div class="d-flex">
-            <div class="col-9 col-lg-10">
-              <label class="form-label visually-hidden" for="add-rlist">Reading List</label>
-              <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
-            </div>
-            <div class="col-2 ps-2">
-              <button type="submit" class="btn btn-primary" (click)="create()">Create</button>
-            </div>
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">{{t('loading')}}</span>
           </div>
+        </li>
+      </ul>
     </div>
-</div>
-</form>
+    <div class="modal-footer" style="justify-content: normal">
+      <div style="width: 100%;">
+        <div class="d-flex">
+          <div class="col-9 col-lg-10">
+            <label class="form-label visually-hidden" for="add-rlist">{{t('reading-list-label')}}</label>
+            <input width="100%" #title ngbAutofocus type="text" class="form-control mb-2" id="add-rlist" formControlName="title">
+          </div>
+          <div class="col-2 ps-2">
+            <button type="submit" class="btn btn-primary" (click)="create()">{{t('create')}}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 
-
+</ng-container>

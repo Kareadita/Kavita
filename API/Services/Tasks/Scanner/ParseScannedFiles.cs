@@ -403,7 +403,7 @@ public class ParseScannedFiles
             .Select(i => i.Series).DistinctBy(Parser.Parser.Normalize).ToList();
         if (nonLocalizedSeriesFound.Count == 1)
         {
-            nonLocalizedSeries = nonLocalizedSeriesFound.First();
+            nonLocalizedSeries = nonLocalizedSeriesFound[0];
         }
         else
         {
@@ -412,7 +412,7 @@ public class ParseScannedFiles
             {
                 _logger.LogError("[ScannerService] There are multiple series within one folder that contain localized series. This will cause them to group incorrectly. Please separate series into their own dedicated folder or ensure there is only 2 potential series (localized and series):  {LocalizedSeries}", string.Join(", ", nonLocalizedSeriesFound));
             }
-            nonLocalizedSeries = nonLocalizedSeriesFound.FirstOrDefault(s => !s.Equals(localizedSeries));
+            nonLocalizedSeries = nonLocalizedSeriesFound.Find(s => !s.Equals(localizedSeries));
         }
 
         if (nonLocalizedSeries == null) return;

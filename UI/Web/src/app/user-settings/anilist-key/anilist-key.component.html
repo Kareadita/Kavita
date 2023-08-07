@@ -1,0 +1,53 @@
+<ng-container *transloco="let t; read:'scrobbling-providers'">
+  <div class="card mt-2">
+    <div class="card-body">
+      <div class="card-title">
+        <div class="container-fluid row mb-2">
+          <div class="col-10 col-sm-11"><h4 id="anilist-token-header">{{t('title')}}</h4></div>
+          <div class="col-1 text-end">
+            <button class="btn btn-primary btn-sm" [disabled]="!hasValidLicense" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
+          </div>
+        </div>
+      </div>
+
+      <ng-container *ngIf="isViewMode">
+        <div class="container-fluid row">
+          <span class="col-12">
+            <ng-container *ngIf="!hasValidLicense; else showToken">
+              {{t('requires', {product: 'Kavita+'})}}
+            </ng-container>
+            <ng-template #showToken>
+              <ng-container *ngIf="token && token.length > 0; else noToken">
+                <img class="me-2" width="32" height="32" ngSrc="assets/images/ExternalServices/AniList.png" alt="AniList" ngbTooltip="AniList"> {{t('token-set')}}
+                <i class="error fa-solid fa-exclamation-circle" [ngbTooltip]="t('token-expired')" *ngIf="tokenExpired">
+                  <span class="visually-hidden">{{t('token-expired')}}</span>
+                </i>
+              </ng-container>
+              <ng-template #noToken>{{t('no-token-set')}}</ng-template>
+            </ng-template>
+          </span>
+        </div>
+      </ng-container>
+
+      <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+        <p>{{t('instructions', {service: 'AniList'})}}</p>
+        <form [formGroup]="formGroup">
+          <div class="form-group mb-3">
+            <label for="anilist-token">{{t('token-input-label', {service: 'AniList'})}}</label>
+            <textarea id="anilist-token" rows="2" cols="3" class="form-control" formControlName="aniListToken"></textarea>
+          </div>
+        </form>
+        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+          <a class="flex-fill btn btn-secondary me-2"
+             href="https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token"
+             target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="anilist-token-header" (click)="saveForm()">{{t('save')}}</button>
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+
+</ng-container>

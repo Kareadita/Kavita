@@ -16,14 +16,27 @@ import { MemberService } from 'src/app/_services/member.service';
 import { AccountService } from 'src/app/_services/account.service';
 import { PieDataItem } from '../../_models/pie-data-item';
 import { LibraryService } from 'src/app/_services/library.service';
-import { PercentPipe } from '@angular/common';
+import { PercentPipe, NgIf, AsyncPipe } from '@angular/common';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { StatListComponent } from '../stat-list/stat-list.component';
+import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
+import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats-info-cards.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-user-stats',
-  templateUrl: './user-stats.component.html',
-  styleUrls: ['./user-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+    selector: 'app-user-stats',
+    templateUrl: './user-stats.component.html',
+    styleUrls: ['./user-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [
+        NgIf,
+        UserStatsInfoCardsComponent,
+        ReadingActivityComponent,
+        StatListComponent,
+        AsyncPipe,
+        TranslocoModule,
+    ],
 })
 export class UserStatsComponent implements OnInit {
 

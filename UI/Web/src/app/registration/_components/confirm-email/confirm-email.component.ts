@@ -1,16 +1,22 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-confirm-email',
-  templateUrl: './confirm-email.component.html',
-  styleUrls: ['./confirm-email.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-confirm-email',
+    templateUrl: './confirm-email.component.html',
+    styleUrls: ['./confirm-email.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [SplashContainerComponent, NgIf, NgFor, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoModule]
 })
 export class ConfirmEmailComponent {
   /**
@@ -30,8 +36,8 @@ export class ConfirmEmailComponent {
   errors: Array<string> = [];
 
 
-  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService, 
-    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService, 
+  constructor(private route: ActivatedRoute, private router: Router, private accountService: AccountService,
+    private toastr: ToastrService, private themeService: ThemeService, private navService: NavService,
     private readonly cdRef: ChangeDetectorRef) {
       this.navService.hideSideNav();
       this.themeService.setTheme(this.themeService.defaultTheme);
@@ -40,7 +46,7 @@ export class ConfirmEmailComponent {
       this.cdRef.markForCheck();
       if (this.isNullOrEmpty(token) || this.isNullOrEmpty(email)) {
         // This is not a valid url, redirect to login
-        this.toastr.error('Invalid confirmation url');
+        this.toastr.error(translate('errors.invalid-confirmation-url'));
         this.router.navigateByUrl('login');
         return;
       }
@@ -57,7 +63,7 @@ export class ConfirmEmailComponent {
     const model = this.registerForm.getRawValue();
     model.token = this.token;
     this.accountService.confirmEmail(model).subscribe((user) => {
-      this.toastr.success('Account registration complete');
+      this.toastr.success(translate('toasts.account-registration-complete'));
       this.router.navigateByUrl('login');
     }, err => {
       console.error('Error from Confirming Email: ', err);

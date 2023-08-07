@@ -14,20 +14,22 @@ your reading collection with your friends and family!
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Kareadita_Kavita&metric=security_rating)](https://sonarcloud.io/dashboard?id=Kareadita_Kavita)
 [![Backers on Open Collective](https://opencollective.com/kavita/backers/badge.svg)](#backers)
 [![Sponsors on Open Collective](https://opencollective.com/kavita/sponsors/badge.svg)](#sponsors)
+<a href="https://hosted.weblate.org/engage/kavita/">
+<img src="https://hosted.weblate.org/widgets/kavita/-/ui/svg-badge.svg" alt="Translation status" />
+</a>
 </div>
 
-## Goals
-- [x] Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
-- [x] First class responsive readers that work great on any device (phone, tablet, desktop)
-- [x] Dark mode and customizable theming support
-- [ ] Provide a plugin system to allow external metadata integration and scrobbling for read status, ratings, and reviews
-- [x] Rich Metadata support with filtering and searching
-- [x] Ways to group reading material: Collections, Reading Lists, Want to Read
-- [x] Ability to manage users, access, and ratings
-- [x] Fully Accessible with active accessibility audits
-- [x] Dedicated webtoon reading mode
-- [ ] Full localization support
-- [ ] And so much [more...](https://github.com/Kareadita/Kavita/projects)
+## What Kavita Provides
+- Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
+- First class responsive readers that work great on any device (phone, tablet, desktop)
+- Dark mode and customizable theming support
+- External metadata integration and scrobbling for read status, ratings, and reviews (available via Kavita+) 
+- Rich Metadata support with filtering and searching
+- Ways to group reading material: Collections, Reading Lists (CBL Import), Want to Read
+- Ability to manage users with rich Role-based management for age restrictions, abilities within the app, etc
+- Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
+- Full Localization Support
+
 
 ## Support
 [![Reddit](https://img.shields.io/badge/reddit-discussion-FF4500.svg?maxAge=60)](https://www.reddit.com/r/KavitaManga/)
@@ -61,6 +63,13 @@ vision. You may lose data and have to restart. The Kavita team strives to avoid 
 If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
 expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below.
 
+## Kavita+
+[Kavita+](https://wiki.kavitareader.com/en/kavita-plus) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
+
+If you are interested, you can use the promo code `FIRSTTIME` for your initial signup for a 50% discount on the first month (2$). This can be thought of as donating to Kavita's development and getting some sweet features out of it.
+
+**If you already contribute via OpenCollective, please reach out to me for a provisioned license.**
+
 
 ## Contributors
 
@@ -93,6 +102,13 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 
 ## Palace-Designs
 We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono.
+
+## Localization
+Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to see Kavita in your language, please help us localize.
+
+<a href="https://hosted.weblate.org/engage/kavita/">
+    <img src="https://hosted.weblate.org/widgets/kavita/-/horizontal-blue.svg" alt="Translation status" />
+</a>
 
 ## Huntr
 We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 

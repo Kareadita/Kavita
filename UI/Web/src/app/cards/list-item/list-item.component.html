@@ -1,36 +1,40 @@
-<div class="list-item-container d-flex flex-row g-0 mb-2 p-2">
+<ng-container *transloco="let t; read: 'list-item'">
+  <div class="list-item-container d-flex flex-row g-0 mb-2 p-2">
     <div class="pe-2">
-        <app-image [imageUrl]="imageUrl" [height]="imageHeight" maxHeight="200px" [width]="imageWidth"></app-image>
-        <div class="not-read-badge" *ngIf="pagesRead === 0 && totalPages > 0"></div>
-        <span class="download">
+      <app-image [imageUrl]="imageUrl" [height]="imageHeight" maxHeight="200px" [width]="imageWidth"></app-image>
+      <div class="not-read-badge" *ngIf="pagesRead === 0 && totalPages > 0"></div>
+      <span class="download">
             <app-download-indicator [download$]="download$"></app-download-indicator>
         </span>
-        <div class="progress-banner" *ngIf="pagesRead < totalPages && totalPages > 0 && pagesRead !== totalPages"> 
-            <p><ngb-progressbar type="primary" height="5px" [value]="pagesRead" [max]="totalPages"></ngb-progressbar></p>
-        </div>
+      <div class="progress-banner" *ngIf="pagesRead < totalPages && totalPages > 0 && pagesRead !== totalPages"
+           ngbTooltip="{{(pagesRead / totalPages) | number:'1.0-1'}}% Read">
+        <p><ngb-progressbar type="primary" height="5px" [value]="pagesRead" [max]="totalPages"></ngb-progressbar></p>
+      </div>
     </div>
     <div class="flex-grow-1">
-        <div class="g-0">
-            <h5 class="mb-0">
-                <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="seriesName" iconClass="fa-ellipsis-v"></app-card-actionables>
-                <ng-content select="[title]"></ng-content>
-                <button class="btn btn-primary float-end" (click)="read.emit()">
+      <div class="g-0">
+        <h5 class="mb-0">
+          <app-card-actionables [disabled]="actionInProgress" (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="seriesName" iconClass="fa-ellipsis-v"></app-card-actionables>
+          <ng-content select="[title]"></ng-content>
+          <button class="btn btn-primary float-end" (click)="read.emit()">
                     <span>
                         <i class="fa fa-book me-1" aria-hidden="true"></i>
                     </span>
-                    <span class="d-none d-sm-inline-block">Read</span>
-                </button>
-            </h5>
-            <!-- This isn't perfect, but it might work. TODO: Polish this-->
-            <h6 class="text-muted" [ngClass]="{'subtitle-with-actionables' : actions.length > 0}" *ngIf="Title !== '' && showTitle">{{Title}}</h6>
-            <ng-container *ngIf="summary.length > 0">
-                <div class="mt-2 ps-2">
-                    <app-read-more [text]="summary" [blur]="pagesRead === 0 && blur" [maxLength]="250"></app-read-more>
-                </div>
-            </ng-container>
-            <div class="ps-2 d-none d-md-inline-block">
-                <app-entity-info-cards [entity]="entity" [showExtendedProperties]="false"></app-entity-info-cards>
-            </div>
+            <span class="d-none d-sm-inline-block">{{t('read')}}</span>
+          </button>
+        </h5>
+
+        <h6 class="text-muted" [ngClass]="{'subtitle-with-actionables' : actions.length > 0}" *ngIf="Title !== '' && showTitle">{{Title}}</h6>
+        <ng-container *ngIf="summary.length > 0">
+          <div class="mt-2 ps-2">
+            <app-read-more [text]="summary" [blur]="pagesRead === 0 && blur" [maxLength]="250"></app-read-more>
+          </div>
+        </ng-container>
+        <div class="ps-2 d-none d-md-inline-block">
+          <app-entity-info-cards [entity]="entity" [libraryId]="libraryId" [includeMetadata]="ShowExtended" [showExtendedProperties]="ShowExtended"></app-entity-info-cards>
         </div>
+      </div>
     </div>
-</div>
+  </div>
+
+</ng-container>

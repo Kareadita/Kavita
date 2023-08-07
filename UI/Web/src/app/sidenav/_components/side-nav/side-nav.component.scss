@@ -7,7 +7,7 @@
     font-size: 12px;
     transition: width var(--side-nav-openclose-transition);
     z-index: 999;
-    
+
     &.closed {
         width: 50px;
         overflow-x: hidden;
@@ -72,6 +72,10 @@
     overflow: auto;
     border: var(--side-nav-border);
 
+    &.no-donate {
+        height: calc((var(--vh)*100) - 82px);
+    }
+
     &.hidden {
         display: none;
         opacity: 0;
@@ -105,7 +109,7 @@
         z-index: 999;
         overflow: auto;
         border: var(--side-nav-mobile-border);
-    
+
         &.closed {
             width: 0;
             overflow: hidden;
@@ -115,6 +119,10 @@
         .side-nav-item:first {
             border-top-left-radius: var(--side-nav-border-radius);
             border-top-right-radius: var(--side-nav-border-radius);
+        }
+
+        &.no-donate {
+          height: calc((var(--vh)*100) - 56px);
         }
     }
 

@@ -1,60 +1,62 @@
+<ng-container *transloco="let t; read: 'card-detail-layout'">
 
-<div class="row mt-2 g-0 pb-2" *ngIf="header !== undefined && header.length > 0">
+  <div class="row mt-2 g-0 pb-2" *ngIf="header !== undefined && header.length > 0">
     <div class="col me-auto">
-        <h2>
+      <h2>
             <span *ngIf="actions.length > 0" class="">
                 <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
             </span>
-            <span *ngIf="header !== undefined && header.length > 0">
+        <span *ngIf="header !== undefined && header.length > 0">
                 {{header}}&nbsp;
-                <span class="badge bg-primary rounded-pill" attr.aria-label="{{pagination.totalItems}} total items" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
+                <span class="badge bg-primary rounded-pill" [attr.aria-label]="t('total-items', {count: pagination.totalItems})" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
             </span>
-        </h2>
+      </h2>
     </div>
-</div>
-<app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
-<div class="viewport-container" [ngClass]="{'empty': items.length === 0 && !isLoading}">
+  </div>
+  <app-metadata-filter [filterSettings]="filterSettings" [filterOpen]="filterOpen" (applyFilter)="applyMetadataFilter($event)"></app-metadata-filter>
+  <div class="viewport-container" [ngClass]="{'empty': items.length === 0 && !isLoading}">
     <div class="content-container">
-        <div class="card-container mt-2 mb-2">
-            <p *ngIf="items.length === 0 && !isLoading">
-                <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-            </p>
-            <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="1" [parentScroll]="parentScroll">
-                <div class="grid row g-0" #container>
-                    <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-                        <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
-                    </div>
-                </div>
-            </virtual-scroller>
-        </div>
+      <div class="card-container mt-2 mb-2">
+        <p *ngIf="items.length === 0 && !isLoading">
+          <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+        </p>
+        <virtual-scroller [ngClass]="{'empty': items.length === 0 && !isLoading}" #scroll [items]="items" [bufferAmount]="1" [parentScroll]="parentScroll">
+          <div class="grid row g-0" #container>
+            <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: scroll.viewPortInfo.startIndexWithBuffer + i }"></ng-container>
+            </div>
+          </div>
+        </virtual-scroller>
+      </div>
     </div>
 
     <ng-container *ngIf="jumpBarKeysToRender.length >= 4 && items.length > 0 && scroll.viewPortInfo.maxScrollPosition > 0" [ngTemplateOutlet]="jumpBar" [ngTemplateOutletContext]="{ id: 'jumpbar' }"></ng-container>
-</div>
-<ng-template #cardTemplate>
+  </div>
+  <ng-template #cardTemplate>
     <virtual-scroller #scroll [items]="items" [bufferAmount]="1">
-        <div class="grid row g-0" #container>
-            <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
-                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
-            </div>
+      <div class="grid row g-0" #container>
+        <div class="card col-auto mt-2 mb-2" (click)="tryToSaveJumpKey(item)" *ngFor="let item of scroll.viewPortItems; trackBy:trackByIdentity; index as i" id="jumpbar-index--{{i}}" [attr.jumpbar-index]="i">
+          <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
         </div>
+      </div>
     </virtual-scroller>
 
     <div class="mx-auto" *ngIf="items.length === 0 && !isLoading" style="width: 200px;">
-        <p>
-            <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
-        </p>
+      <p>
+        <ng-container [ngTemplateOutlet]="noDataTemplate"></ng-container>
+      </p>
     </div>
-</ng-template>
+  </ng-template>
 
-<app-loading [loading]="isLoading"></app-loading>
+  <app-loading [loading]="isLoading"></app-loading>
 
-<ng-template #jumpBar>
+  <ng-template #jumpBar>
     <div class="jump-bar">
-        <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
-            <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="jumpKey.size + ' Series'" placement="left">
-                {{jumpKey.title}}
-            </button>
-        </ng-container>
+      <ng-container *ngFor="let jumpKey of jumpBarKeysToRender; let i = index;">
+        <button class="btn btn-link" [ngClass]="{'disabled': hasCustomSort()}" (click)="scrollTo(jumpKey)" [ngbTooltip]="jumpKey.size + ' Series'" placement="left">
+          {{jumpKey.title}}
+        </button>
+      </ng-container>
     </div>
-</ng-template>
+  </ng-template>
+</ng-container>

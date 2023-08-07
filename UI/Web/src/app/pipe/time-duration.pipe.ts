@@ -1,25 +1,30 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
+import {TranslocoService} from "@ngneat/transloco";
 
 /**
  * Converts hours -> days, months, years, etc
  */
 @Pipe({
-  name: 'timeDuration'
+  name: 'timeDuration',
+  standalone: true
 })
 export class TimeDurationPipe implements PipeTransform {
 
+  translocoService = inject(TranslocoService);
+
   transform(hours: number): string {
-    if (hours === 0) return `${hours} hours`;
+    if (hours === 0)
+      return this.translocoService.translate('time-duration-pipe.hours', {value: hours});
     if (hours < 1) {
-      return `${(hours * 60).toFixed(1)} minutes`;
+      return this.translocoService.translate('time-duration-pipe.minutes', {value: (hours * 60).toFixed(1)});
     } else if (hours < 24) {
-      return `${hours.toFixed(1)} hours`;
+      return this.translocoService.translate('time-duration-pipe.hours', {value: hours.toFixed(1)});
     } else if (hours < 720) {
-      return `${(hours / 24).toFixed(1)} days`;
+      return this.translocoService.translate('time-duration-pipe.days', {value: (hours / 24).toFixed(1)});
     } else if (hours < 8760) {
-      return `${(hours / 720).toFixed(1)} months`;
+      return this.translocoService.translate('time-duration-pipe.months', {value: (hours / 720).toFixed(1)});
     } else {
-      return `${(hours / 8760).toFixed(1)} years`;
+      return this.translocoService.translate('time-duration-pipe.years', {value: (hours / 8760).toFixed(1)});
     }
   }
 

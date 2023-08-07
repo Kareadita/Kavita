@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { LayoutMode } from '../_models/layout-mode';
 
 @Pipe({
-  name: 'layoutModeIcon'
+  name: 'layoutModeIcon',
+  standalone: true,
 })
 export class LayoutModeIconPipe implements PipeTransform {
 

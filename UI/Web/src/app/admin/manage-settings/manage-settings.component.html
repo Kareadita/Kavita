@@ -1,140 +1,205 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read: 'manage-settings'">
+  <div class="container-fluid">
     <form [formGroup]="settingsForm" *ngIf="serverSettings !== undefined">
-        <div class="alert alert-warning" role="alert">
-            <strong>Notice:</strong> Changing Port or Base Url requires a manual restart of Kavita to take effect.
-        </div>
-        <!-- <div class="mb-3">
-            <label for="settings-cachedir" class="form-label">Cache Directory</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="cacheDirectoryTooltip" role="button" tabindex="0"></i>
-            <ng-template #cacheDirectoryTooltip>Where the server places temporary files when reading. This will be cleaned up on a regular basis.</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Where the server places temporary files when reading. This will be cleaned up on a regular basis.</span>
-            <input readonly id="settings-cachedir" aria-describedby="settings-cachedir-help" class="form-control" formControlName="cacheDirectory" type="text">
-        </div> -->
+      <div class="alert alert-warning" role="alert">
+        <strong>{{t('notice')}}</strong> {{t('restart-required')}}
+      </div>
 
-        <div class="mb-3">
-            <label for="settings-baseurl" class="form-label">Base Url</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
-            <ng-template #baseUrlTooltip>Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</ng-template>
-            <span class="visually-hidden" id="settings-cachedir-help">Use this if you want to host Kavita on a base url ie) yourdomain.com/kavita. Not supported on Docker using non-root user.</span>
-            <div class="input-group">
-                <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
-                [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
-                <button class="btn btn-outline-secondary" (click)="resetBaseUrl()">Reset</button>
+      <div class="mb-3">
+        <label for="settings-baseurl" class="form-label">{{t('base-url-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="baseUrlTooltip" role="button" tabindex="0"></i>
+        <ng-template #baseUrlTooltip>{{t('base-url-tooltip')}}</ng-template>
+        <span class="visually-hidden" id="settings-cachedir-help">
+          <ng-container [ngTemplateOutlet]="baseUrlTooltip"></ng-container>
+        </span>
+        <div class="input-group">
+          <input id="settings-baseurl" aria-describedby="settings-baseurl-help" class="form-control" formControlName="baseUrl" type="text"
+                 [class.is-invalid]="settingsForm.get('baseUrl')?.invalid && settingsForm.get('baseUrl')?.touched">
+          <button class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
+        </div>
+        <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+          <div *ngIf="settingsForm.get('baseUrl')?.errors?.pattern">
+            {{t('base-url-validation')}}
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-0 mb-2">
+        <div class="col-md-8 col-sm-12 pe-2">
+          <label for="settings-ipaddresses" class="form-label">{{t('ip-address-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
+          <ng-template #ipAddressesTooltip>{{t('ip-address-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="settings-ipaddresses-help">
+            <ng-container [ngTemplateOutlet]="ipAddressesTooltip"></ng-container>
+          </span>
+          <div class="input-group">
+            <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
+                   [class.is-invalid]="settingsForm.get('ipAddresses')?.invalid && settingsForm.get('ipAddresses')?.touched">
+            <button class="btn btn-outline-secondary" (click)="resetIPAddresses()">Reset</button>
+          </div>
+          <div id="ipaddresses-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
+            <div *ngIf="settingsForm.get('ipAddresses')?.errors?.pattern">
+              {{t('ip-address-validation')}}
             </div>
-            <div id="baseurl-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-              <div *ngIf="settingsForm.get('baseUrl')?.errors?.pattern">
-                  Base URL must start and end with /
-              </div>
           </div>
         </div>
 
-        <div class="row g-0 mb-2">
-            <div class="col-md-8 col-sm-12 pe-2">
-                <label for="settings-ipaddresses" class="form-label">IP Addresses</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="ipAddressesTooltip" role="button" tabindex="0"></i>
-                <ng-template #ipAddressesTooltip>This does not apply to Docker</ng-template>
-                <span class="visually-hidden" id="settings-ipaddresses-help">Comma separated list of Ip addresses the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
-                <div class="input-group">
-                    <input id="settings-ipaddresses" aria-describedby="settings-ipaddresses-help" class="form-control" formControlName="ipAddresses" type="text"
-                    [class.is-invalid]="settingsForm.get('ipAddresses')?.invalid && settingsForm.get('ipAddresses')?.touched">
-                    <button class="btn btn-outline-secondary" (click)="resetIPAddresses()">Reset</button>
-                </div>
-                <div id="ipaddresses-validations" class="invalid-feedback" *ngIf="settingsForm.dirty || settingsForm.touched">
-                    <div *ngIf="settingsForm.get('ipAddresses')?.errors?.pattern">
-                        IP addresses can only contain valid IPv4 or IPv6 addresses
-                    </div>
-                </div>
-            </div>
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="settings-port" class="form-label">{{t('port-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
+          <ng-template #portTooltip>{{t('port-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="settings-port-help">
+            <ng-container [ngTemplateOutlet]="portTooltip"></ng-container>
+          </span>
+          <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+        </div>
+      </div>
 
-            <div class="col-md-4 col-sm-12 pe-2">
-                <label for="settings-port" class="form-label">Port</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="portTooltip" role="button" tabindex="0"></i>
-                <ng-template #portTooltip>Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</ng-template>
-                <span class="visually-hidden" id="settings-port-help">Port the server listens on. This is fixed if you are running on Docker. Requires restart to take effect.</span>
-                <input id="settings-port" aria-describedby="settings-port-help" class="form-control" formControlName="port" type="number" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-            </div>
+      <div class="row g-0 mb-2">
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="backup-tasks" class="form-label">{{t('backup-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
+          <ng-template #backupTasksTooltip>{{t('backup-tooltip')}}.</ng-template>
+          <span class="visually-hidden" id="backup-tasks-help">
+            <ng-container [ngTemplateOutlet]="backupTasksTooltip"></ng-container>
+          </span>
+          <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups"
+                 type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                 [class.is-invalid]="settingsForm.get('totalBackups')?.invalid && settingsForm.get('totalBackups')?.touched">
+          <ng-container *ngIf="settingsForm.get('totalBackups')?.errors as errors">
+            <p class="invalid-feedback" *ngIf="errors.min">
+              {{t('min-backup-validation')}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.max">
+              {{t('max-backup-validation', {num: errors.max.max})}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.required">
+              {{t('field-required')}}
+            </p>
+          </ng-container>
         </div>
 
-        <div class="row g-0 mb-2">
-            <div class="col-md-4 col-sm-12 pe-2">
-                <label for="backup-tasks" class="form-label">Days of Backups</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="backupTasksTooltip" role="button" tabindex="0"></i>
-                <ng-template #backupTasksTooltip>The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
-                <span class="visually-hidden" id="backup-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
-                <input id="backup-tasks" aria-describedby="backup-tasks-help" class="form-control" formControlName="totalBackups"
-                type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                [class.is-invalid]="settingsForm.get('totalBackups')?.invalid && settingsForm.get('totalBackups')?.touched">
-                <ng-container *ngIf="settingsForm.get('totalBackups')?.errors as errors">
-                    <p class="invalid-feedback" *ngIf="errors.min">
-                        You must have at least 1 backup
-                    </p>
-                    <p class="invalid-feedback" *ngIf="errors.max">
-                        You cannot have more than {{errors.max.max}} backups
-                    </p>
-                    <p class="invalid-feedback" *ngIf="errors.required">
-                        This field is required
-                    </p>
-                </ng-container>
-            </div>
-
-            <div class="col-md-4 col-sm-12 pe-2">
-                <label for="log-tasks" class="form-label">Days of Logs</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="logTasksTooltip" role="button" tabindex="0"></i>
-                <ng-template #logTasksTooltip>The number of logs to maintain. Default is 30, minumum is 1, maximum is 30.</ng-template>
-                <span class="visually-hidden" id="log-tasks-help">The number of backups to maintain. Default is 30, minumum is 1, maximum is 30.</span>
-                <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs"
-                type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                [class.is-invalid]="settingsForm.get('totalLogs')?.invalid && settingsForm.get('totalLogs')?.touched">
-                <ng-container *ngIf="settingsForm.get('totalLogs')?.errors as errors">
-                    <p class="invalid-feedback" *ngIf="errors.min">
-                        You must have at least 1 log
-                    </p>
-                    <p class="invalid-feedback" *ngIf="errors.max">
-                        You cannot have more than {{errors.max.max}} logs
-                    </p>
-                    <p class="invalid-feedback" *ngIf="errors.required">
-                        This field is required
-                    </p>
-                </ng-container>
-            </div>
-
-            <div class="col-md-4 col-sm-12">
-                <label for="logging-level-port" class="form-label">Logging Level</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
-                <ng-template #loggingLevelTooltip>Use debug to help identify issues. Debug can eat up a lot of disk space.</ng-template>
-                <span class="visually-hidden" id="logging-level-port-help">Port the server listens on.</span>
-                <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-select" formControlName="loggingLevel"
-                [class.is-invalid]="settingsForm.get('loggingLevel')?.invalid && settingsForm.get('loggingLevel')?.touched">
-                    <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
-                </select>
-            </div>
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="log-tasks" class="form-label">{{t('log-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="logTasksTooltip" role="button" tabindex="0"></i>
+          <ng-template #logTasksTooltip>{{t('log-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="log-tasks-help">
+            <ng-container [ngTemplateOutlet]="logTasksTooltip"></ng-container>
+          </span>
+          <input id="log-tasks" aria-describedby="log-tasks-help" class="form-control" formControlName="totalLogs"
+                 type="number" inputmode="numeric" step="1" min="1" max="30" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                 [class.is-invalid]="settingsForm.get('totalLogs')?.invalid && settingsForm.get('totalLogs')?.touched">
+          <ng-container *ngIf="settingsForm.get('totalLogs')?.errors as errors">
+            <p class="invalid-feedback" *ngIf="errors.min">
+              {{t('min-log-validation')}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.max">
+              {{t('max-logs-validation', {num: errors.max.max})}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.required">
+              {{t('field-required')}}
+            </p>
+          </ng-container>
         </div>
 
-        <div class="mb-3">
-            <label for="stat-collection"  class="form-label" aria-describedby="collection-info">Allow Anonymous Usage Collection</label>
-            <p class="accent" id="collection-info">Send anonymous usage data to Kavita's servers. This includes information on certain features used, number of files, OS version, Kavita install version, CPU, and memory. We will use this information to prioritize features, bug fixes, and performance tuning. Requires restart to take effect. See the <a href="https://wiki.kavitareader.com/en/faq" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> for what is collected.</p>
-            <div class="form-check form-switch">
-                <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
-                <label for="stat-collection" class="form-check-label">Send Data</label>
-            </div>
+        <div class="col-md-4 col-sm-12">
+          <label for="logging-level-port" class="form-label">{{t('logging-level-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="loggingLevelTooltip" role="button" tabindex="0"></i>
+          <ng-template #loggingLevelTooltip>{{t('logging-level-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="logging-level-port-help">
+            <ng-container [ngTemplateOutlet]="loggingLevelTooltip"></ng-container>
+          </span>
+          <select id="logging-level-port" aria-describedby="logging-level-port-help" class="form-select" formControlName="loggingLevel"
+                  [class.is-invalid]="settingsForm.get('loggingLevel')?.invalid && settingsForm.get('loggingLevel')?.touched">
+            <option *ngFor="let level of logLevels" [value]="level">{{level | titlecase}}</option>
+          </select>
         </div>
+      </div>
 
-        <!-- TODO: Move this to Plugins tab once we build out some basic tables -->
-        <div class="mb-3">
-            <label for="opds" aria-describedby="opds-info" class="form-label">OPDS</label>
-            <p class="accent" id="opds-info">OPDS support will allow all users to use OPDS to read and download content from the server.</p>
-            <div class="form-check form-switch">
-                <input id="opds" type="checkbox" aria-label="OPDS Support" class="form-check-input" formControlName="enableOpds">
-                <label for="opds" class="form-check-label">Enable OPDS</label>
-            </div>
+      <div class="row g-0 mb-2 mt-3">
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="cache-size" class="form-label">{{t('cache-size-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="cacheSizeTooltip" role="button" tabindex="0"></i>
+          <ng-template #cacheSizeTooltip>{{t('cache-size-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="cache-size-help">
+            <ng-container [ngTemplateOutlet]="cacheSizeTooltip"></ng-container>
+          </span>
+          <input id="cache-size" aria-describedby="cache-size-help" class="form-control" formControlName="cacheSize"
+                 type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                 [class.is-invalid]="settingsForm.get('cacheSize')?.invalid && settingsForm.get('cacheSize')?.touched">
+          <ng-container *ngIf="settingsForm.get('cacheSize')?.errors as errors">
+            <p class="invalid-feedback" *ngIf="errors.min">
+              {{t('min-cache-validation')}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.required">
+              {{t('field-required')}}
+            </p>
+          </ng-container>
         </div>
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="on-deck-progress-days" class="form-label">{{t('on-deck-last-progress-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="onDeckProgressDaysTooltip" role="button" tabindex="0"></i>
+          <ng-template #onDeckProgressDaysTooltip>{{t('on-deck-last-progress-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="on-deck-progress-days-help">
+            <ng-container [ngTemplateOutlet]="onDeckProgressDaysTooltip"></ng-container>
+          </span>
+          <input id="on-deck-progress-days" aria-describedby="on-deck-progress-days-help" class="form-control" formControlName="onDeckProgressDays"
+                 type="number" inputmode="numeric" step="1" min="1"
+                 [class.is-invalid]="settingsForm.get('onDeckProgressDays')?.invalid && settingsForm.get('onDeckProgressDays')?.touched">
+          <ng-container *ngIf="settingsForm.get('onDeckProgressDays')?.errors as errors">
+            <p class="invalid-feedback" *ngIf="errors.min">
+              {{t('min-days-validation')}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.required">
+              {{t('field-required')}}
+            </p>
+          </ng-container>
+        </div>
+        <div class="col-md-4 col-sm-12 pe-2">
+          <label for="on-deck-update-days" class="form-label">{{t('on-deck-last-chapter-add-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="onDeckUpdateDaysTooltip" role="button" tabindex="0"></i>
+          <ng-template #onDeckUpdateDaysTooltip>{{t('on-deck-last-chapter-add-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="on-deck-update-days-help">
+            <ng-container [ngTemplateOutlet]="onDeckUpdateDaysTooltip"></ng-container>
+          </span>
+          <input id="on-deck-update-days" aria-describedby="on-deck-update-days-help" class="form-control" formControlName="onDeckUpdateDays"
+                 type="number" inputmode="numeric" step="1" min="1"
+                 [class.is-invalid]="settingsForm.get('onDeckUpdateDays')?.invalid && settingsForm.get('onDeckUpdateDays')?.touched">
+          <ng-container *ngIf="settingsForm.get('onDeckUpdateDays')?.errors as errors">
+            <p class="invalid-feedback" *ngIf="errors.min">
+              {{t('min-days-validation')}}
+            </p>
+            <p class="invalid-feedback" *ngIf="errors.required">
+              {{t('field-required')}}
+            </p>
+          </ng-container>
+        </div>
+      </div>
 
-        <div class="mb-3">
-            <label for="folder-watching" class="form-label" aria-describedby="folder-watching-info">Folder Watching</label>
-            <p class="accent" id="folder-watching-info">Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans.</p>
-            <div class="form-check form-switch">
-                <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
-                <label for="folder-watching" class="form-check-label">Enable Folder Watching</label>
-            </div>
+      <div class="mb-3 mt-3">
+        <label for="stat-collection" class="form-label" aria-describedby="collection-info">{{t('allow-stats-label')}}</label>
+        <p class="accent" id="collection-info">{{t('allow-stats-tooltip-part-1')}}<a href="https://wiki.kavitareader.com/en/faq" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">wiki</a> {{t('allow-stats-tooltip-part-2')}}</p>
+        <div class="form-check form-switch">
+          <input id="stat-collection" type="checkbox" aria-label="Stat Collection" class="form-check-input" formControlName="allowStatCollection" role="switch">
+          <label for="stat-collection" class="form-check-label">{{t('send-data')}}</label>
         </div>
+      </div>
 
-        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">Reset to Default</button>
-            <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">Reset</button>
-            <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">Save</button>
+      <div class="mb-3">
+        <label for="opds" aria-describedby="opds-info" class="form-label">{{t('opds-label')}}</label>
+        <p class="accent" id="opds-info">{{t('opds-tooltip')}}</p>
+        <div class="form-check form-switch">
+          <input id="opds" type="checkbox" aria-label="OPDS Support" class="form-check-input" formControlName="enableOpds">
+          <label for="opds" class="form-check-label">{{t('enable-opds')}}</label>
         </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="folder-watching" class="form-label" aria-describedby="folder-watching-info">{{t('folder-watching-label')}}</label>
+        <p class="accent" id="folder-watching-info">{{t('folder-watching-tooltip')}}</p>
+        <div class="form-check form-switch">
+          <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
+          <label for="folder-watching" class="form-check-label">{{t('enable-folder-watching')}}</label>
+        </div>
+      </div>
+
+      <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end">
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetToDefaults()">{{t('reset-to-default')}}</button>
+        <button type="button" class="flex-fill btn btn-secondary me-2" (click)="resetForm()">{{t('reset')}}</button>
+        <button type="submit" class="flex-fill btn btn-primary" (click)="saveSettings()" [disabled]="!settingsForm.dirty">{{t('save')}}</button>
+      </div>
     </form>
-</div>
+  </div>
+
+</ng-container>

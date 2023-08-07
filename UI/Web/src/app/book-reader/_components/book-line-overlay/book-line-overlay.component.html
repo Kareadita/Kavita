@@ -1,0 +1,46 @@
+<ng-container *transloco="let t; read: 'book-line-overlay'">
+  <div class="overlay" *ngIf="selectedText.length > 0 || mode !== BookLineOverlayMode.None">
+
+    <div class="row g-0 justify-content-between">
+      <ng-container [ngSwitch]="mode">
+        <ng-container *ngSwitchCase="BookLineOverlayMode.None">
+          <div class="col-auto">
+            <button class="btn btn-icon btn-sm" (click)="copy()">
+              <i class="fa-solid fa-copy" aria-hidden="true"></i>
+              <div>{{t('copy')}}</div>
+            </button>
+          </div>
+          <div class="col-auto">
+            <button class="btn btn-icon btn-sm" (click)="switchMode(BookLineOverlayMode.Bookmark)">
+              <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
+              <div>{{t('bookmark')}}</div>
+            </button>
+          </div>
+
+          <div class="col-auto">
+            <button class="btn btn-icon btn-sm" (click)="reset()">
+              <i class="fa-solid fa-times-circle" aria-hidden="true"></i>
+              <div>{{t('close')}}</div>
+            </button>
+          </div>
+        </ng-container>
+        <ng-container *ngSwitchCase="BookLineOverlayMode.Bookmark">
+          <form [formGroup]="bookmarkForm">
+            <div class="input-group">
+              <input id="bookmark-name" class="form-control" formControlName="name" type="text" [placeholder]="t('book-label')"
+                     [class.is-invalid]="bookmarkForm.get('name')?.invalid && bookmarkForm.get('name')?.touched" aria-describedby="bookmark-name-btn">
+              <button class="btn btn-outline-primary" id="bookmark-name-btn" (click)="createPTOC()">{{t('save')}}</button>
+              <div id="bookmark-name-validations" class="invalid-feedback" *ngIf="bookmarkForm.dirty || bookmarkForm.touched">
+                <div *ngIf="bookmarkForm.get('name')?.errors?.required" role="status">
+                  {{t('required-field')}}
+                </div>
+              </div>
+            </div>
+          </form>
+        </ng-container>
+      </ng-container>
+    </div>
+
+
+  </div>
+</ng-container>

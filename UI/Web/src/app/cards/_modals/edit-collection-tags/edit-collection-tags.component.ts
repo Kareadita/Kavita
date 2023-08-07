@@ -8,8 +8,16 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  NgbActiveModal,
+  NgbNav,
+  NgbNavContent,
+  NgbNavItem,
+  NgbNavLink,
+  NgbNavOutlet,
+  NgbPagination, NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { debounceTime, distinctUntilChanged, forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ConfirmService } from 'src/app/shared/confirm.service';
@@ -24,16 +32,21 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
+import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 enum TabID {
-  General = 'General',
-  CoverImage = 'Cover Image',
-  Series = 'Series'
+  General = 'general-tab',
+  CoverImage = 'cover-image-tab',
+  Series = 'series-tab'
 }
 
 @Component({
   selector: 'app-edit-collection-tags',
+  standalone: true,
+  imports: [CommonModule, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination, CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoModule],
   templateUrl: './edit-collection-tags.component.html',
   styleUrls: ['./edit-collection-tags.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -53,6 +66,7 @@ export class EditCollectionTagsComponent implements OnInit {
   imageUrls: Array<string> = [];
   selectedCover: string = '';
   private readonly destroyRef = inject(DestroyRef);
+  translocoService = inject(TranslocoService);
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
@@ -68,7 +82,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
   constructor(public modal: NgbActiveModal, private seriesService: SeriesService,
     private collectionService: CollectionTagService, private toastr: ToastrService,
-    private confirmSerivce: ConfirmService, private libraryService: LibraryService,
+    private confirmService: ConfirmService, private libraryService: LibraryService,
     private imageService: ImageService, private uploadService: UploadService,
     public utilityService: UtilityService, private readonly cdRef: ChangeDetectorRef) { }
 
@@ -158,7 +172,8 @@ export class EditCollectionTagsComponent implements OnInit {
     const tag = this.collectionTagForm.value;
     tag.id = this.tag.id;
 
-    if (unselectedIds.length == this.series.length && !await this.confirmSerivce.confirm('Warning! No series are selected, saving will delete the tag. Are you sure you want to continue?')) {
+    if (unselectedIds.length == this.series.length &&
+      !await this.confirmService.confirm(this.translocoService.translate('toasts.no-series-collection-warning'))) {
       return;
     }
 
@@ -173,7 +188,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
     forkJoin(apis).subscribe(() => {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
-      this.toastr.success('Tag updated');
+      this.toastr.success(this.translocoService.translate('toasts.collection-updated'));
     });
   }
 

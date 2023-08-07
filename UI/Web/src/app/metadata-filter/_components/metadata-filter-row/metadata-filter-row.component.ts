@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, inject, OnInit, Output, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
 import { BehaviorSubject, Subject, distinctUntilChanged, filter, map, merge, of, startWith, switchMap, takeUntil, tap } from 'rxjs';
 import { MetadataService } from 'src/app/_services/metadata.service';
@@ -9,6 +9,9 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
 import { allFields, FilterField } from 'src/app/_models/metadata/v2/filter-field';
+import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
+import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
+import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 
 enum PredicateType {
   Text = 1,
@@ -47,6 +50,17 @@ const DropdownComparisons = [FilterComparison.Equal,
   selector: 'app-metadata-row-filter',
   templateUrl: './metadata-filter-row.component.html',
   styleUrls: ['./metadata-filter-row.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    AsyncPipe,
+    FilterFieldPipe,
+    FilterComparisonPipe,
+    NgSwitch,
+    NgSwitchCase,
+    NgForOf,
+    NgIf
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit, OnDestroy {

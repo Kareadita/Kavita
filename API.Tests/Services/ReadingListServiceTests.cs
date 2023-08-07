@@ -16,6 +16,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.SignalR;
 using API.Tests.Helpers;
@@ -55,7 +56,8 @@ public class ReadingListServiceTests
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IScrobblingService>());
     }
 
     #region Setup
@@ -804,7 +806,7 @@ public class ReadingListServiceTests
         }
         catch (Exception ex)
         {
-            Assert.Equal("A list of this name already exists", ex.Message);
+            Assert.Equal("reading-list-name-exists", ex.Message);
         }
         Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
             .ReadingLists);
@@ -832,7 +834,7 @@ public class ReadingListServiceTests
         }
         catch (Exception ex)
         {
-            Assert.Equal("A list of this name already exists", ex.Message);
+            Assert.Equal("reading-list-name-exists", ex.Message);
         }
     }
 
@@ -858,7 +860,7 @@ public class ReadingListServiceTests
         }
         catch (Exception ex)
         {
-            Assert.Equal("A list of this name already exists", ex.Message);
+            Assert.Equal("reading-list-name-exists", ex.Message);
         }
         Assert.Single((await _unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.ReadingLists))
             .ReadingLists);

@@ -15,6 +15,7 @@ using API.Extensions;
 using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.SignalR;
 using Microsoft.Extensions.Logging;
@@ -38,7 +39,7 @@ public class CleanupServiceTests : AbstractDbTest
 
         _readerService = new ReaderService(_unitOfWork, Substitute.For<ILogger<ReaderService>>(), Substitute.For<IEventHub>(),
             Substitute.For<IImageService>(),
-            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()), Substitute.For<IScrobblingService>());
     }
 
     #region Setup

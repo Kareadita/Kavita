@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using NetVips;
 
 namespace API.Services;
+#nullable enable
 
 public interface ICacheService
 {
@@ -133,7 +134,7 @@ public class CacheService : ICacheService
         }
 
         // Since array is 0 based, we need to keep that in account (only affects last image)
-        return page == files.Length ? files.ElementAt(page - 1) : files.ElementAt(page);
+        return page == files.Length ? files[page - 1] : files[page];
     }
 
     /// <summary>
@@ -346,7 +347,7 @@ public class CacheService : ICacheService
         }
 
         // Since array is 0 based, we need to keep that in account (only affects last image)
-        return pageNum >= files.Length ? files.ElementAt(Math.Min(pageNum - 1, files.Length - 1)) : files.ElementAt(pageNum);
+        return pageNum >= files.Length ? files[Math.Min(pageNum - 1, files.Length - 1)] : files[pageNum];
     }
 
 

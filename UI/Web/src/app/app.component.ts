@@ -1,36 +1,45 @@
-import { Component, HostListener, Inject, OnInit } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
-import { map, take } from 'rxjs/operators';
+import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
+import { NavigationStart, Router, RouterOutlet } from '@angular/router';
+import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
-import { MessageHubService } from './_services/message-hub.service';
 import { NavService } from './_services/nav.service';
 import { filter } from 'rxjs/operators';
 import { NgbModal, NgbRatingConfig } from '@ng-bootstrap/ng-bootstrap';
-import { DOCUMENT } from '@angular/common';
+import { DOCUMENT, NgClass, NgIf, AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
+import {ThemeService} from "./_services/theme.service";
+import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
+import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TranslocoService} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: true,
+  imports: [NgClass, NgIf, SideNavComponent, RouterOutlet, AsyncPipe, NavHeaderComponent]
 })
 export class AppComponent implements OnInit {
 
   transitionState$!: Observable<boolean>;
 
-  constructor(private accountService: AccountService, public navService: NavService, 
-    private messageHub: MessageHubService, private libraryService: LibraryService, 
-    router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig, 
-    @Inject(DOCUMENT) private document: Document) {
+  destroyRef = inject(DestroyRef);
+  translocoService = inject(TranslocoService);
+
+  constructor(private accountService: AccountService, public navService: NavService,
+    private libraryService: LibraryService,
+    private router: Router, private ngbModal: NgbModal, ratingConfig: NgbRatingConfig,
+    @Inject(DOCUMENT) private document: Document, private themeService: ThemeService) {
 
     // Setup default rating config
     ratingConfig.max = 5;
     ratingConfig.resettable = true;
-    
+
     // Close any open modals when a route change occurs
     router.events
-      .pipe(filter(event => event instanceof NavigationStart))
+      .pipe(filter(event => event instanceof NavigationStart), takeUntilDestroyed(this.destroyRef))
       .subscribe((event) => {
         if (this.ngbModal.hasOpenModals()) {
           this.ngbModal.dismissAll();
@@ -40,7 +49,17 @@ export class AppComponent implements OnInit {
     this.transitionState$ = this.accountService.currentUser$.pipe(map((user) => {
       if (!user) return false;
       return user.preferences.noTransitions;
-    }));
+    }), takeUntilDestroyed(this.destroyRef));
+
+    // this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
+    //   if (user && user.preferences.locale) {
+    //     this.translocoService.setActiveLang(user.preferences.locale);
+    //   } else {
+    //     // If no user or locale is available, fallback to the default language ('en')
+    //     const localStorageLocale = localStorage.getItem(accountService.localeKey) || 'en';
+    //     this.translocoService.setActiveLang(localStorageLocale);
+    //   }
+    // });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -52,8 +71,8 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.setCurrentUser();
     this.setDocHeight();
+    this.setCurrentUser();
   }
 
   setCurrentUser() {
@@ -61,8 +80,9 @@ export class AppComponent implements OnInit {
     this.accountService.setCurrentUser(user);
 
     if (user) {
-      this.messageHub.createHubConnection(user, this.accountService.hasAdminRole(user));
-      this.libraryService.getLibraryNames().pipe(take(1)).subscribe(() => {/* No Operation */});
-    } 
+      // Bootstrap anything that's needed
+      this.themeService.getThemes().subscribe();
+      this.libraryService.getLibraryNames().pipe(take(1), shareReplay()).subscribe();
+    }
   }
 }

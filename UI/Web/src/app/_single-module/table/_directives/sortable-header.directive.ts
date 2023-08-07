@@ -11,12 +11,13 @@ export interface SortEvent<T> {
 }
 
 @Directive({
-	selector: 'th[sortable]',
-	host: {
-		'[class.asc]': 'direction === "asc"',
-		'[class.desc]': 'direction === "desc"',
-		'(click)': 'rotate()',
-	},
+    selector: 'th[sortable]',
+    host: {
+        '[class.asc]': 'direction === "asc"',
+        '[class.desc]': 'direction === "desc"',
+        '(click)': 'rotate()',
+    },
+    standalone: true,
 })
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
 export class SortableHeader<T> {

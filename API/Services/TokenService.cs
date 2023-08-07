@@ -23,6 +23,8 @@ public interface ITokenService
     Task<string> CreateToken(AppUser user);
     Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request);
     Task<string> CreateRefreshToken(AppUser user);
+    Task<string> GetJwtFromUser(AppUser user);
+    bool HasTokenExpired(string token);
 }
 
 
@@ -58,7 +60,7 @@ public class TokenService : ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(14),
+            Expires = DateTime.UtcNow.AddDays(10),
             SigningCredentials = credentials
         };
 
@@ -102,8 +104,16 @@ public class TokenService : ITokenService
                 return null;
             }
 
-            user.UpdateLastActive();
-            await _unitOfWork.CommitAsync();
+            try
+            {
+                user.UpdateLastActive();
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an error updating last active for the user");
+            }
 
             return new TokenRequestDto()
             {
@@ -122,5 +132,19 @@ public class TokenService : ITokenService
             _logger.LogError(ex, "Failed to validate refresh token");
             return null;
         }
+    }
+
+    public async Task<string> GetJwtFromUser(AppUser user)
+    {
+        var userClaims = await _userManager.GetClaimsAsync(user);
+        var jwtClaim = userClaims.FirstOrDefault(claim => claim.Type == "jwt");
+        return jwtClaim?.Value;
+    }
+
+    public bool HasTokenExpired(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var tokenContent = tokenHandler.ReadJwtToken(token);
+        return tokenContent.ValidTo <= DateTime.UtcNow;
     }
 }

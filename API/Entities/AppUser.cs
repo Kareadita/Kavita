@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using API.Entities.Enums;
 using API.Entities.Interfaces;
+using API.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -36,6 +37,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// </summary>
     public ICollection<Device> Devices { get; set; } = null!;
     /// <summary>
+    /// A list of Table of Contents for a given Chapter
+    /// </summary>
+    public ICollection<AppUserTableOfContent> TableOfContents { get; set; } = null!;
+    /// <summary>
     /// An API Key to interact with external services, like OPDS
     /// </summary>
     public string? ApiKey { get; set; }
@@ -51,6 +56,17 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// If an age rating restriction is applied to the account, if Unknowns should be allowed for the user. Defaults to false.
     /// </summary>
     public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
+
+    /// <summary>
+    /// The JWT for the user's AniList account. Expires after a year.
+    /// </summary>
+    /// <remarks>Requires Kavita+ Subscription</remarks>
+    public string? AniListAccessToken { get; set; }
+
+    /// <summary>
+    /// A list of Series the user doesn't want scrobbling for
+    /// </summary>
+    public ICollection<ScrobbleHold> ScrobbleHolds { get; set; } = null!;
 
 
     /// <inheritdoc />

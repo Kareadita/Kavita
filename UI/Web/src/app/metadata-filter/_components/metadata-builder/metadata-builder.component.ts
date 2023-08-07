@@ -4,12 +4,21 @@ import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { SeriesFilterV2 } from 'src/app/_models/metadata/v2/series-filter-v2';
 import { SortField } from 'src/app/_models/metadata/series-filter';
-import {ComparisonOption} from "../metadata-filter-row-group/metadata-filter-row-group.component";
+import {
+  ComparisonOption,
+  MetadataFilterRowGroupComponent
+} from "../metadata-filter-row-group/metadata-filter-row-group.component";
+import {NgIf} from "@angular/common";
 
 @Component({
   selector: 'app-metadata-builder',
   templateUrl: './metadata-builder.component.html',
   styleUrls: ['./metadata-builder.component.scss'],
+  standalone: true,
+  imports: [
+    MetadataFilterRowGroupComponent,
+    NgIf
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataBuilderComponent implements OnInit {

@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { Subject } from 'rxjs';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { ChapterMetadata } from 'src/app/_models/metadata/chapter-metadata';
@@ -10,16 +16,31 @@ import { AgeRating } from 'src/app/_models/metadata/age-rating';
 import { Volume } from 'src/app/_models/volume';
 import { SeriesService } from 'src/app/_services/series.service';
 import { ImageService } from 'src/app/_services/image.service';
+import {CommonModule} from "@angular/common";
+import {IconAndTitleComponent} from "../../shared/icon-and-title/icon-and-title.component";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {DefaultDatePipe} from "../../pipe/default-date.pipe";
+import {BytesPipe} from "../../pipe/bytes.pipe";
+import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
+import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
+import {FilterQueryParam} from "../../shared/_services/filter-utilities.service";
+import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 
 @Component({
   selector: 'app-entity-info-cards',
+  standalone: true,
+    imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule, CompactNumberPipe, TranslocoLocaleModule],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EntityInfoCardsComponent implements OnInit, OnDestroy {
+export class EntityInfoCardsComponent implements OnInit {
 
   @Input({required: true}) entity!: Volume | Chapter;
+  @Input({required: true}) libraryId!: number;
   /**
    * This will pull extra information
    */
@@ -40,7 +61,6 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
   readingTime: HourEstimateRange = {maxHours: 1, minHours: 1, avgHours: 1};
   size: number = 0;
 
-  private readonly onDestroy: Subject<void> = new Subject();
   imageService = inject(ImageService);
 
   get LibraryType() {
@@ -110,8 +130,5 @@ export class EntityInfoCardsComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
-  }
+  protected readonly FilterQueryParam = FilterQueryParam;
 }

@@ -3,7 +3,8 @@ import { Subscription } from 'rxjs';
 import { createSwipeSubscription, SwipeEvent } from './ag-swipe.core';
 
 @Directive({
-  selector: '[ngSwipe]'
+    selector: '[ngSwipe]',
+    standalone: true
 })
 export class SwipeDirective implements OnInit, OnDestroy {
   private swipeSubscription: Subscription | undefined;

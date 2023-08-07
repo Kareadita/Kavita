@@ -33,6 +33,8 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
     private readonly ICacheHelper _cacheHelper;
     private readonly IReaderService _readerService;
 
+    private const int AverageCharactersPerWord = 5;
+
     public WordCountAnalyzerService(ILogger<WordCountAnalyzerService> logger, IUnitOfWork unitOfWork, IEventHub eventHub,
         ICacheHelper cacheHelper, IReaderService readerService)
     {
@@ -244,10 +246,7 @@ public class WordCountAnalyzerService : IWordCountAnalyzerService
         doc.LoadHtml(await bookFile.ReadContentAsync());
 
         var textNodes = doc.DocumentNode.SelectNodes("//body//text()[not(parent::script)]");
-        if (textNodes == null) return 0;
-        return textNodes
-            .Select(node => node.InnerText.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Where(s => char.IsLetter(s[0])))
-            .Sum(words => words.Count());
+        return textNodes?.Sum(node => node.InnerText.Count(char.IsLetter)) / AverageCharactersPerWord ?? 0;
     }
+
 }

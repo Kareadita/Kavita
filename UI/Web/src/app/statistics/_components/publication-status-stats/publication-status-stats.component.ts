@@ -3,23 +3,27 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   QueryList,
   ViewChildren
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { LegendPosition } from '@swimlane/ngx-charts';
-import { Observable, Subject, map, takeUntil, combineLatest, BehaviorSubject } from 'rxjs';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { LegendPosition, PieChartModule } from '@swimlane/ngx-charts';
+import { Observable, map, combineLatest, BehaviorSubject } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { compare, SortableHeader, SortEvent } from 'src/app/_single-module/table/_directives/sortable-header.directive';
 import { PieDataItem } from '../../_models/pie-data-item';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
+import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-publication-status-stats',
-  templateUrl: './publication-status-stats.component.html',
-  styleUrls: ['./publication-status-stats.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-publication-status-stats',
+    templateUrl: './publication-status-stats.component.html',
+    styleUrls: ['./publication-status-stats.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, TranslocoModule]
 })
 export class PublicationStatusStatsComponent {
 
@@ -31,14 +35,6 @@ export class PublicationStatusStatsComponent {
   currentSort$: Observable<SortEvent<PieDataItem>> = this.currentSort.asObservable();
 
   view: [number, number] = [700, 400];
-  gradient: boolean = true;
-  showLegend: boolean = true;
-  showLabels: boolean = true;
-  isDoughnut: boolean = false;
-  legendPosition: LegendPosition = LegendPosition.Right;
-  colorScheme = {
-    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
-  };
 
   private readonly destroyRef = inject(DestroyRef);
 

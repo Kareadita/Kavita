@@ -36,7 +36,7 @@ public interface IProcessSeries
     void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -107,13 +107,13 @@ public class ProcessSeries : IProcessSeries
 
         var seriesAdded = false;
         var scanWatch = Stopwatch.StartNew();
-        var seriesName = parsedInfos.First().Series;
+        var seriesName = parsedInfos[0].Series;
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.LibraryScanProgressEvent(library.Name, ProgressEventType.Updated, seriesName));
         _logger.LogInformation("[ScannerService] Beginning series update on {SeriesName}", seriesName);
 
         // Check if there is a Series
-        var firstInfo = parsedInfos.First();
+        var firstInfo = parsedInfos[0];
         Series? series;
         try
         {
@@ -266,8 +266,7 @@ public class ProcessSeries : IProcessSeries
     public void UpdateSeriesMetadata(Series series, Library library)
     {
         series.Metadata ??= new SeriesMetadataBuilder().Build();
-        var isBook = library.Type == LibraryType.Book;
-        var firstChapter = SeriesService.GetFirstChapterForMetadata(series, isBook);
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
 
         var firstFile = firstChapter?.Files.FirstOrDefault();
         if (firstFile == null) return;
@@ -323,7 +322,7 @@ public class ProcessSeries : IProcessSeries
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
         {
             _logger.LogDebug("Collection tag(s) found for {SeriesName}, updating collections", series.Name);
-            foreach (var collection in firstChapter.SeriesGroup.Split(','))
+            foreach (var collection in firstChapter.SeriesGroup.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
             {
                 var normalizedName = Parser.Parser.Normalize(collection);
                 if (!_collectionTags.TryGetValue(normalizedName, out var tag))
@@ -535,11 +534,11 @@ public class ProcessSeries : IProcessSeries
             foreach (var chapter in volume.Chapters)
             {
                 var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
+                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
                 try
                 {
                     var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-                    UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo);
+                    UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -661,12 +660,12 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
     {
         if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
-            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
+            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
         _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 
@@ -846,7 +845,7 @@ public class ProcessSeries : IProcessSeries
             foreach (var name in names)
             {
                 var normalizedName = name.ToNormalized();
-                var person = allPeopleTypeRole.FirstOrDefault(p =>
+                var person = allPeopleTypeRole.Find(p =>
                     p.NormalizedName != null && p.NormalizedName.Equals(normalizedName));
 
                 if (person == null)

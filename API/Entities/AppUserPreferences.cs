@@ -123,6 +123,14 @@ public class AppUserPreferences
     /// UI Site Global Setting: When showing series, only parent series or series with no relationships will be returned
     /// </summary>
     public bool CollapseSeriesRelationships { get; set; } = false;
+    /// <summary>
+    /// UI Site Global Setting: Should series reviews be shared with all users in the server
+    /// </summary>
+    public bool ShareReviews { get; set; } = false;
+    /// <summary>
+    /// UI Site Global Setting: The language locale that should be used for the user
+    /// </summary>
+    public string Locale { get; set; }
 
     public AppUser AppUser { get; set; } = null!;
     public int AppUserId { get; set; }

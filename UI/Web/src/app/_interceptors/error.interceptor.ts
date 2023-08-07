@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {
   HttpRequest,
   HttpHandler,
@@ -10,11 +10,13 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { catchError } from 'rxjs/operators';
 import { AccountService } from '../_services/account.service';
+import {translate, TranslocoService} from "@ngneat/transloco";
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-
-  constructor(private router: Router, private toastr: ToastrService, private accountService: AccountService) {}
+  constructor(private router: Router, private toastr: ToastrService,
+              private accountService: AccountService,
+              private translocoService: TranslocoService) {}
 
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -38,9 +40,10 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.handleServerException(error);
             break;
           default:
-            // Don't throw multiple Something undexpected went wrong
-            if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.') {
-              this.toastr.error('Something unexpected went wrong.');
+            // Don't throw multiple Something unexpected went wrong
+            let genericError = translate('errors.generic');
+            if (this.toastr.previousToastMessage !== 'Something unexpected went wrong.' && this.toastr.previousToastMessage !== genericError) {
+              this.toast(genericError);
             }
             break;
         }
@@ -50,7 +53,7 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleValidationError(error: any) {
-    // This 400 can also be a bad request 
+    // This 400 can also be a bad request
     if (Array.isArray(error.error)) {
       const modalStateErrors: any[] = [];
       if (error.error.length > 0 && error.error[0].hasOwnProperty('message')) {
@@ -82,35 +85,36 @@ export class ErrorInterceptor implements HttpInterceptor {
       console.error('error:', error);
       if (error.statusText === 'Bad Request') {
         if (error.error instanceof Blob) {
-          this.toastr.error('There was an issue downloading this file or you do not have permissions', error.status);         
-          return; 
+          this.toast('errors.download', error.status);
+          return;
         }
-        this.toastr.error(error.error, error.status + ' Error');
+        this.toast(error.error, this.translocoService.translate('errors.error-code', {num: error.status}));
       } else {
-        this.toastr.error(error.statusText === 'OK' ? error.error : error.statusText, error.status + ' Error');
+        this.toast(error.statusText === 'OK' ? error.error : error.statusText, this.translocoService.translate('errors.error-code', {num: error.status}));
       }
     }
   }
 
   private handleNotFound(error: any) {
-    this.toastr.error('That url does not exist.'); 
+    this.toast('errors.not-found');
   }
 
   private handleServerException(error: any) {
     const err = error.error;
     if (err.hasOwnProperty('message') && err.message.trim() !== '') {
-      if (err.message != 'User is not authenticated') {
+      if (err.message != 'User is not authenticated' && error.message !== 'errors.user-not-auth') {
         console.error('500 error: ', error);
       }
-      this.toastr.error(err.message);
+      this.toast(err.message);
     } else if (error.hasOwnProperty('message') && error.message.trim() !== '') {
-      if (error.message != 'User is not authenticated') {
+      if (error.message !== 'User is not authenticated' && error.message !== 'errors.user-not-auth') {
         console.error('500 error: ', error);
       }
-      this.toastr.error(error.message);
+      // This just throws duplicate errors for no reason
+      //this.toast(error.message);
     }
      else {
-      this.toastr.error('There was an unknown critical error.');
+      this.toast('errors.unknown-crit');
       console.error('500 error:', error);
     }
   }
@@ -121,9 +125,18 @@ export class ErrorInterceptor implements HttpInterceptor {
     if (location.href.includes('/registration/confirm-email?token=')) {
       return;
     }
-    // NOTE: Signin has error.error or error.statusText available. 
+    // NOTE: Signin has error.error or error.statusText available.
     // if statement is due to http/2 spec issue: https://github.com/angular/angular/issues/23334
     this.accountService.logout();
-    this.router.navigateByUrl('/login');
   }
+
+  // Assume the title is already translated
+  private toast(message: string, title?: string) {
+    if (message.startsWith('errors.')) {
+      this.toastr.error(this.translocoService.translate(message), title);
+    } else {
+      this.toastr.error(message, title);
+    }
+  }
+
 }

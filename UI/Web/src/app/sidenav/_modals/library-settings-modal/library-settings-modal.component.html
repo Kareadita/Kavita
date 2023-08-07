@@ -1,193 +1,210 @@
-<div class="modal-header">
+<ng-container *transloco="let t; read: 'library-settings-modal'">
+  <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
-        <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
-            Edit {{library.name | sentenceCase}}
-        </ng-container>
-        <ng-template #addLibraryTitle>
-            Add Library
-        </ng-template>
+      <ng-container *ngIf="!isAddLibrary; else addLibraryTitle">
+        {{t('edit-title', {name: library.name | sentenceCase})}}
+      </ng-container>
+      <ng-template #addLibraryTitle>
+        {{t('add-title')}}
+      </ng-template>
     </h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
-</div>
-<form [formGroup]="libraryForm">
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <form [formGroup]="libraryForm">
     <div class="modal-body scrollable-modal {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? '' : 'd-flex'}}">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" 
-            orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
-        
-            <li [ngbNavItem]="TabID.General">
-                <a ngbNavLink>{{TabID.General}}</a>
-                <ng-template ngbNavContent>
-                    <div class="mb-3">
-                        <label for="library-name" class="form-label">Name</label>
-                        <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="libraryForm.dirty || libraryForm.touched">
-                            <div *ngIf="libraryForm.get('name')?.errors?.required">
-                                This field is required
-                            </div>
-                            <div *ngIf="libraryForm.get('name')?.errors?.duplicateName">
-                                Library name must be unique
-                            </div>
-                        </div>
-                    </div>
+      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
+          orientation="{{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
 
-                    <div class="mb-3">
-                        <label for="library-type" class="form-label">Type</label>&nbsp;<i class="fa fa-info-circle" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
-                        <ng-template #typeTooltip>Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.</ng-template>
-                        <span class="visually-hidden" id="library-type-help">Library type determines how filenames are parsed and if the UI shows Chapters (Manga) vs Issues (Comics). Book work the same way as Manga but have different naming in the UI.</span>
-                        <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
-                            <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
-                        </select>
-                    </div>
-                    <div *ngIf="!isAddLibrary">
-                        Last Scanned: 
-                        <span *ngIf="library.lastScanned === '0001-01-01T00:00:00'; else activeDate">Never</span>
-                        <ng-template #activeDate>
-                            {{library.lastScanned | date: 'short'}}
-                        </ng-template>
-                    </div>
-                </ng-template>
-            </li>
+        <li [ngbNavItem]="TabID.General">
+          <a ngbNavLink>{{t(TabID.General)}}</a>
+          <ng-template ngbNavContent>
+            <div class="mb-3">
+              <label for="library-name" class="form-label">{{t('name-label')}}</label>
+              <input id="library-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="libraryForm.get('name')?.invalid && libraryForm.get('name')?.touched">
+              <div id="inviteForm-validations" class="invalid-feedback" *ngIf="libraryForm.dirty || libraryForm.touched">
+                <div *ngIf="libraryForm.get('name')?.errors?.required">
+                  {{t('required-field')}}
+                </div>
+                <div *ngIf="libraryForm.get('name')?.errors?.duplicateName">
+                  {{t('library-name-unique')}}
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="library-type" class="form-label">{{t('type-label')}}</label><i class="fa fa-info-circle ms-1" placement="right" [ngbTooltip]="typeTooltip" role="button" tabindex="0"></i>
+              <ng-template #typeTooltip>{{t('type-tooltip')}}</ng-template>
+              <span class="visually-hidden" id="library-type-help">
+                <ng-container [ngTemplateOutlet]="typeTooltip"></ng-container>
+              </span>
+              <select class="form-select" id="library-type" formControlName="type" aria-describedby="library-type-help">
+                <option [value]="i" *ngFor="let opt of libraryTypes; let i = index">{{opt}}</option>
+              </select>
+            </div>
+            <div *ngIf="!isAddLibrary">
+              {{t('last-scanned-label')}}
+              <span>{{library.lastScanned | date: 'short' | defaultDate}}</span>
+            </div>
+          </ng-template>
+        </li>
 
 
-            <li [ngbNavItem]="TabID.Folder" [disabled]="isAddLibrary && setupStep < 1">
-                <a ngbNavLink>{{TabID.Folder}}</a>
-                <ng-template ngbNavContent>
-                    <p>Add folders to your library</p>
-                    <ul class="list-group" style="width: 100%">
-                        <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
-                            {{folder}}
-                            <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
-                        </li>
-                    </ul>
-                    <div class="row mt-2">
-                        <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
-                            <i class="fa fa-plus" aria-hidden="true"></i>
-                            Browse for Media Folders
-                        </button>
-                    </div>
-                    <div class="row mt-2">
-                        <p>Help us out by following <a href="https://wiki.kavitareader.com/en/guides/managing-your-files" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">our guide</a> to naming and organizing your media.</p>
-                    </div>
-                    <div class="row mt-2">
-                        <p>Kavita has <a href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#introduction" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">folder requirements</a>. Check this link to ensure you are following, else files my not show up in scan.</p>
-                    </div>
-                </ng-template>
-            </li>
+        <li [ngbNavItem]="TabID.Folder" [disabled]="isAddLibrary && setupStep < 1">
+          <a ngbNavLink>{{t(TabID.Folder)}}</a>
+          <ng-template ngbNavContent>
+            <p>{{t('folder-description')}}</p>
+            <ul class="list-group" style="width: 100%">
+              <li class="list-group-item" *ngFor="let folder of selectedFolders; let i = index">
+                {{folder}}
+                <button class="btn float-end btn-sm" (click)="removeFolder(folder)"><i class="fa fa-times-circle" aria-hidden="true"></i></button>
+              </li>
+            </ul>
+            <div class="row mt-2">
+              <button class="btn btn-secondary float-end btn-sm" (click)="openDirectoryPicker()">
+                <i class="fa fa-plus" aria-hidden="true"></i>
+                {{t('browse')}}
+              </button>
+            </div>
+            <div class="row mt-2">
+              <p>{{t('help-us-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">{{t('help-us-part-2')}}</a> {{t('help-us-part-3')}}</p>
+            </div>
+            <div class="row mt-2">
+              <p>{{t('naming-conventions-part-1')}}<a href="https://wiki.kavitareader.com/en/guides/managing-your-files/scanner#introduction" rel="noopener noreferrer" target="_blank" referrerpolicy="no-refer">{{t('naming-conventions-part-2')}}</a> {{t('naming-conventions-part-3')}}</p>
+            </div>
+          </ng-template>
+        </li>
 
-            <li [ngbNavItem]="TabID.Cover" [disabled]="isAddLibrary && setupStep < 2">
-                <a ngbNavLink>{{TabID.Cover}}</a>
-                <ng-template ngbNavContent>
-                    <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">Custom library image icons are optional</p>
-                    <p>Library image should not be large. Aim for a small file, 32x32 pixels in size. Kavita does not perform validation on size.</p>
-                    <app-cover-image-chooser [(imageUrls)]="imageUrls" 
-                            [showReset]="false"
-                            [showApplyButton]="true"
-                            (applyCover)="applyCoverImage($event)"
-                            (resetCover)="resetCoverImage()"
-                            >
-                        </app-cover-image-chooser>
-                </ng-template>
-            </li>
+        <li [ngbNavItem]="TabID.Cover" [disabled]="isAddLibrary && setupStep < 2">
+          <a ngbNavLink>{{t(TabID.Cover)}}</a>
+          <ng-template ngbNavContent>
+            <p *ngIf="isAddLibrary" class="alert alert-secondary" role="alert">{{t('cover-description')}}</p>
+            <p>{{t('cover-description-extra')}}</p>
+            <app-cover-image-chooser [(imageUrls)]="imageUrls"
+                                     [showReset]="false"
+                                     [showApplyButton]="true"
+                                     (applyCover)="applyCoverImage($event)"
+                                     (resetCover)="resetCoverImage()"
+            >
+            </app-cover-image-chooser>
+          </ng-template>
+        </li>
 
-            <li [ngbNavItem]="TabID.Advanced" [disabled]="isAddLibrary && setupStep < 3">
-                <a ngbNavLink>{{TabID.Advanced}}</a>
-                <ng-template ngbNavContent>
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
-                                    <label class="form-check-label" for="manage-collections">Manage Collections</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Should Kavita create Collections from SeriesGroup tags found within ComicInfo.xml files
-                            </p>
-                        </div>
-                    </div>
+        <li [ngbNavItem]="TabID.Advanced" [disabled]="isAddLibrary && setupStep < 3">
+          <a ngbNavLink>{{t(TabID.Advanced)}}</a>
+          <ng-template ngbNavContent>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="manage-collections" role="switch" formControlName="manageCollections" class="form-check-input">
+                    <label class="form-check-label" for="manage-collections">{{t('manage-collection-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('manage-collection-tooltip')}}
+                </p>
+              </div>
+            </div>
 
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="manage-readinglists" role="switch" formControlName="manageReadingLists" class="form-check-input">
-                                    <label class="form-check-label" for="manage-readinglists">Manage Reading Lists</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Should Kavita create Reading Lists from StoryArc/StoryArcNumber and AlternativeSeries/AlternativeCount tags found within ComicInfo.xml files
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="lib-folder-watching" role="switch" formControlName="folderWatching" class="form-check-input" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="lib-folder-watching">Folder Watching</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="include-dashboard" role="switch" formControlName="includeInDashboard" class="form-check-input" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="include-dashboard">Include in Dashboard</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="include-recommended" role="switch" formControlName="includeInRecommended" class="form-check-input" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="include-recommended">Include in Recommended</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Should series from the library be included on the Recommended page.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 col-sm-12 pe-2 mb-2">
-                            <div class="mb-3 mt-1">
-                                <div class="form-check form-switch">
-                                    <input type="checkbox" id="include-search" role="switch" formControlName="includeInSearch" class="form-check-input" aria-labelledby="auto-close-label">
-                                    <label class="form-check-label" for="include-search">Include in Search</label>
-                                </div>
-                            </div>
-                            <p class="accent">
-                                Should series and any derived information (genres, people, files) from the library be included in search results.
-                            </p>
-                        </div>
-                    </div>
-                </ng-template>
-            </li>
-        </ul>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="manage-readinglists" role="switch" formControlName="manageReadingLists" class="form-check-input">
+                    <label class="form-check-label" for="manage-readinglists">{{t('manage-reading-list-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('manage-reading-list-tooltip')}}
+                </p>
+              </div>
+            </div>
 
-        <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="scrobbling" role="switch" formControlName="allowScrobbling" class="form-check-input">
+                    <label class="form-check-label" for="scrobbling">{{t('allow-scrobbling-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('allow-scrobbling-tooltip')}}
+                </p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="lib-folder-watching" role="switch" formControlName="folderWatching" class="form-check-input" aria-labelledby="auto-close-label">
+                    <label class="form-check-label" for="lib-folder-watching">{{t('folder-watching-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('folder-watching-tooltip')}}
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="include-dashboard" role="switch" formControlName="includeInDashboard" class="form-check-input" aria-labelledby="auto-close-label">
+                    <label class="form-check-label" for="include-dashboard">{{t('include-in-dashboard-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('include-in-dashboard-tooltip')}}
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="include-recommended" role="switch" formControlName="includeInRecommended" class="form-check-input" aria-labelledby="auto-close-label">
+                    <label class="form-check-label" for="include-recommended">{{t('include-in-recommendation-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('include-in-recommendation-tooltip')}}
+                </p>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 pe-2 mb-2">
+                <div class="mb-3 mt-1">
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="include-search" role="switch" formControlName="includeInSearch" class="form-check-input" aria-labelledby="auto-close-label">
+                    <label class="form-check-label" for="include-search">{{t('include-in-search-label')}}</label>
+                  </div>
+                </div>
+                <p class="accent">
+                  {{t('include-in-search-tooltip')}}
+                </p>
+              </div>
+            </div>
+          </ng-template>
+        </li>
+      </ul>
+
+      <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
     </div>
-</form>
-<div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="forceScan()" position="above" ngbTooltip="This will force a scan on the library, treating like a fresh scan">Force Scan</button>
-    <button type="button" class="btn btn-light" (click)="reset()">Reset</button>
-    <button type="button" class="btn btn-secondary" (click)="close()">Cancel</button>
-    
+  </form>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="forceScan()" position="above"
+            [ngbTooltip]="t('force-scan-tooltip')">{{t('force-scan')}}</button>
+    <button type="button" class="btn btn-light" (click)="reset()">{{t('reset')}}</button>
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+
     <ng-container *ngIf="isAddLibrary && setupStep !== 3; else editLibraryButton">
-        <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">Next</button>
+      <button type="button" class="btn btn-primary" (click)="nextStep()" [disabled]="isNextDisabled() || libraryForm.invalid">{{t('next')}}</button>
     </ng-container>
     <ng-template #editLibraryButton>
-        <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">Save</button>
+      <button type="button" class="btn btn-primary" [disabled]="isDisabled()" (click)="save()">{{t('save')}}</button>
     </ng-template>
-</div>
+  </div>
+
+</ng-container>

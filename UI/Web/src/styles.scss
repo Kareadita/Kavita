@@ -1,12 +1,13 @@
 @import '../node_modules/swiper/swiper';
 
+@import './theme/variables';
 
 // Import themes which define the css variables we use to customize the app
 @import './theme/themes/dark';
 
 // Import colors for overrides of bootstrap theme
 @import './theme/toastr';
-@import './theme/variables';
+
 
 // Bootstrap must be after _colors since we define the colors there
 @import '../node_modules/bootstrap/scss/bootstrap';
@@ -49,13 +50,13 @@
 // Global Styles
 @font-face {
   font-family: "EBGarmond";
-  src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.ttf") format("truetype");
+  src: url("assets/fonts/EBGarmond/EBGaramond-VariableFont_wght.woff2") format("woff2");
   font-display: swap;
 }
 
 @font-face {
   font-family: "Spartan";
-  src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.ttf");
+  src: url("assets/fonts/Spartan/Spartan-VariableFont_wght.woff2") format("woff2");
   font-display: swap;
 }
 
@@ -70,7 +71,7 @@ label, select, .clickable {
 // Needed for fullscreen
 app-root {
   background-color: transparent;
-  scrollbar-width: 14px;
+  scrollbar-width: thin;
   scrollbar-color: var(--primary-color-scrollbar);
 }
 

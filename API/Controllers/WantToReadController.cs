@@ -7,6 +7,9 @@ using API.DTOs.Filtering;
 using API.DTOs.WantToRead;
 using API.Extensions;
 using API.Helpers;
+using API.Services;
+using API.Services.Plus;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -18,10 +21,15 @@ namespace API.Controllers;
 public class WantToReadController : BaseApiController
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IScrobblingService _scrobblingService;
+    private readonly ILocalizationService _localizationService;
 
-    public WantToReadController(IUnitOfWork unitOfWork)
+    public WantToReadController(IUnitOfWork unitOfWork, IScrobblingService scrobblingService,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
+        _scrobblingService = scrobblingService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -72,9 +80,16 @@ public class WantToReadController : BaseApiController
         }
 
         if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync()) return Ok();
+        if (await _unitOfWork.CommitAsync())
+        {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleWantToReadUpdate(user.Id, sId, true));
+            }
+            return Ok();
+        }
 
-        return BadRequest("There was an issue updating Read List");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-reading-list-update"));
     }
 
     /// <summary>
@@ -92,8 +107,16 @@ public class WantToReadController : BaseApiController
         user.WantToRead = user.WantToRead.Where(s => !dto.SeriesIds.Contains(s.Id)).ToList();
 
         if (!_unitOfWork.HasChanges()) return Ok();
-        if (await _unitOfWork.CommitAsync()) return Ok();
+        if (await _unitOfWork.CommitAsync())
+        {
+            foreach (var sId in dto.SeriesIds)
+            {
+                BackgroundJob.Enqueue(() => _scrobblingService.ScrobbleWantToReadUpdate(user.Id, sId, false));
+            }
 
-        return BadRequest("There was an issue updating Read List");
+            return Ok();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-reading-list-update"));
     }
 }

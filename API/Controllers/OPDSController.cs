@@ -24,6 +24,8 @@ using MimeTypes;
 
 namespace API.Controllers;
 
+#nullable enable
+
 [AllowAnonymous]
 public class OpdsController : BaseApiController
 {
@@ -34,6 +36,7 @@ public class OpdsController : BaseApiController
     private readonly IReaderService _readerService;
     private readonly ISeriesService _seriesService;
     private readonly IAccountService _accountService;
+    private readonly ILocalizationService _localizationService;
 
 
     private readonly XmlSerializer _xmlSerializer;
@@ -68,7 +71,7 @@ public class OpdsController : BaseApiController
     public OpdsController(IUnitOfWork unitOfWork, IDownloadService downloadService,
         IDirectoryService directoryService, ICacheService cacheService,
         IReaderService readerService, ISeriesService seriesService,
-        IAccountService accountService)
+        IAccountService accountService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _downloadService = downloadService;
@@ -77,6 +80,7 @@ public class OpdsController : BaseApiController
         _readerService = readerService;
         _seriesService = seriesService;
         _accountService = accountService;
+        _localizationService = localizationService;
 
         _xmlSerializer = new XmlSerializer(typeof(Feed));
         _xmlOpenSearchSerializer = new XmlSerializer(typeof(OpenSearchDescription));
@@ -87,20 +91,21 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> Get(string apiKey)
     {
+        var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
 
         var (baseUrl, prefix) = await GetPrefix();
 
-        var feed = CreateFeed("Kavita", string.Empty, apiKey, prefix, baseUrl);
+        var feed = CreateFeed("Kavita", string.Empty, apiKey, prefix);
         SetFeedId(feed, "root");
         feed.Entries.Add(new FeedEntry()
         {
             Id = "onDeck",
-            Title = "On Deck",
+            Title = await _localizationService.Translate(userId, "on-deck"),
             Content = new FeedEntryContent()
             {
-                Text = "Browse by On Deck"
+                Text = await _localizationService.Translate(userId, "browse-on-deck")
             },
             Links = new List<FeedLink>()
             {
@@ -110,10 +115,10 @@ public class OpdsController : BaseApiController
         feed.Entries.Add(new FeedEntry()
         {
             Id = "recentlyAdded",
-            Title = "Recently Added",
+            Title = await _localizationService.Translate(userId, "recently-added"),
             Content = new FeedEntryContent()
             {
-                Text = "Browse by Recently Added"
+                Text = await _localizationService.Translate(userId, "browse-recently-added")
             },
             Links = new List<FeedLink>()
             {
@@ -123,10 +128,10 @@ public class OpdsController : BaseApiController
         feed.Entries.Add(new FeedEntry()
         {
             Id = "readingList",
-            Title = "Reading Lists",
+            Title = await _localizationService.Translate(userId, "reading-lists"),
             Content = new FeedEntryContent()
             {
-                Text = "Browse by Reading Lists"
+                Text = await _localizationService.Translate(userId, "browse-reading-lists")
             },
             Links = new List<FeedLink>()
             {
@@ -136,10 +141,10 @@ public class OpdsController : BaseApiController
         feed.Entries.Add(new FeedEntry()
         {
             Id = "allLibraries",
-            Title = "All Libraries",
+            Title = await _localizationService.Translate(userId, "libraries"),
             Content = new FeedEntryContent()
             {
-                Text = "Browse by Libraries"
+                Text = await _localizationService.Translate(userId, "browse-libraries")
             },
             Links = new List<FeedLink>()
             {
@@ -149,10 +154,10 @@ public class OpdsController : BaseApiController
         feed.Entries.Add(new FeedEntry()
         {
             Id = "allCollections",
-            Title = "All Collections",
+            Title = await _localizationService.Translate(userId, "collections"),
             Content = new FeedEntryContent()
             {
-                Text = "Browse by Collections"
+                Text = await _localizationService.Translate(userId, "browse-collections")
             },
             Links = new List<FeedLink>()
             {
@@ -180,12 +185,12 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetLibraries(string apiKey)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
-        var feed = CreateFeed("All Libraries", $"{prefix}{apiKey}/libraries", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "libraries"), $"{prefix}{apiKey}/libraries", apiKey, prefix);
         SetFeedId(feed, "libraries");
         foreach (var library in libraries)
         {
@@ -207,10 +212,10 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetCollections(string apiKey)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -219,7 +224,7 @@ public class OpdsController : BaseApiController
             : (await _unitOfWork.CollectionTagRepository.GetAllPromotedTagDtosAsync(userId));
 
 
-        var feed = CreateFeed("All Collections", $"{prefix}{apiKey}/collections", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
         foreach (var tag in tags)
         {
@@ -245,10 +250,10 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetCollection(int collectionId, string apiKey, [FromQuery] int pageNumber = 0)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user == null) return Unauthorized();
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
@@ -272,7 +277,7 @@ public class OpdsController : BaseApiController
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, GetUserParams(pageNumber));
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
-        var feed = CreateFeed(tag.Title + " Collection", $"{prefix}{apiKey}/collections/{collectionId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(tag.Title + " Collection", $"{prefix}{apiKey}/collections/{collectionId}", apiKey, prefix);
         SetFeedId(feed, $"collections-{collectionId}");
         AddPagination(feed, series, $"{prefix}{apiKey}/collections/{collectionId}");
 
@@ -289,16 +294,16 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetReadingLists(string apiKey, [FromQuery] int pageNumber = 0)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
 
         var readingLists = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId,
             true, GetUserParams(pageNumber), false);
 
 
-        var feed = CreateFeed("All Reading Lists", $"{prefix}{apiKey}/reading-list", apiKey, prefix, baseUrl);
+        var feed = CreateFeed("All Reading Lists", $"{prefix}{apiKey}/reading-list", apiKey, prefix);
         SetFeedId(feed, "reading-list");
         foreach (var readingListDto in readingLists)
         {
@@ -330,10 +335,10 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetReadingListItems(int readingListId, string apiKey)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
         var userWithLists = await _unitOfWork.UserRepository.GetUserByUsernameAsync(user!.UserName!, AppUserIncludes.ReadingListsWithItems);
@@ -341,10 +346,10 @@ public class OpdsController : BaseApiController
         var readingList = userWithLists.ReadingLists.SingleOrDefault(t => t.Id == readingListId);
         if (readingList == null)
         {
-            return BadRequest("Reading list does not exist or you don't have access");
+            return BadRequest(await _localizationService.Translate(userId, "reading-list-restricted"));
         }
 
-        var feed = CreateFeed(readingList.Title + " Reading List", $"{prefix}{apiKey}/reading-list/{readingListId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(readingList.Title + " " + await _localizationService.Translate(userId, "reading-list"), $"{prefix}{apiKey}/reading-list/{readingListId}", apiKey, prefix);
         SetFeedId(feed, $"reading-list-{readingListId}");
 
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemDtosByIdAsync(readingListId, userId)).ToList();
@@ -361,22 +366,22 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetSeriesForLibrary(int libraryId, string apiKey, [FromQuery] int pageNumber = 0)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var library =
             (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).SingleOrDefault(l =>
                 l.Id == libraryId);
         if (library == null)
         {
-            return BadRequest("User does not have access to this library");
+            return BadRequest(await _localizationService.Translate(userId, "no-library-access"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, GetUserParams(pageNumber), _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
-        var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix);
         SetFeedId(feed, $"library-{library.Name}");
         AddPagination(feed, series, $"{prefix}{apiKey}/libraries/{libraryId}");
 
@@ -392,14 +397,14 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetRecentlyAdded(string apiKey, [FromQuery] int pageNumber = 1)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, userId, GetUserParams(pageNumber), _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id));
 
-        var feed = CreateFeed("Recently Added", $"{prefix}{apiKey}/recently-added", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "recently-added"), $"{prefix}{apiKey}/recently-added", apiKey, prefix);
         SetFeedId(feed, "recently-added");
         AddPagination(feed, recentlyAdded, $"{prefix}{apiKey}/recently-added");
 
@@ -415,19 +420,19 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetOnDeck(string apiKey, [FromQuery] int pageNumber = 1)
     {
+        var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
 
         var (baseUrl, prefix) = await GetPrefix();
 
-        var userId = await GetUser(apiKey);
         var userParams = GetUserParams(pageNumber);
         var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, 0, userParams, _filterDto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(pagedList.Select(s => s.Id));
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
-        var feed = CreateFeed("On Deck", $"{prefix}{apiKey}/on-deck", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "on-deck"), $"{prefix}{apiKey}/on-deck", apiKey, prefix);
         SetFeedId(feed, "on-deck");
         AddPagination(feed, pagedList, $"{prefix}{apiKey}/on-deck");
 
@@ -443,26 +448,26 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> SearchSeries(string apiKey, [FromQuery] string query)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
 
         if (string.IsNullOrEmpty(query))
         {
-            return BadRequest("You must pass a query parameter");
+            return BadRequest(await _localizationService.Translate(userId, "query-required"));
         }
         query = query.Replace(@"%", string.Empty);
         // Get libraries user has access to
         var libraries = (await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId)).ToList();
-        if (!libraries.Any()) return BadRequest("User does not have access to any libraries");
+        if (!libraries.Any()) return BadRequest(await _localizationService.Translate(userId, "libraries-restricted"));
 
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
 
         var series = await _unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin, libraries.Select(l => l.Id).ToArray(), query);
 
-        var feed = CreateFeed(query, $"{prefix}{apiKey}/series?query=" + query, apiKey, prefix, baseUrl);
+        var feed = CreateFeed(query, $"{prefix}{apiKey}/series?query=" + query, apiKey, prefix);
         SetFeedId(feed, "search-series");
         foreach (var seriesDto in series.Series)
         {
@@ -515,13 +520,14 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetSearchDescriptor(string apiKey)
     {
+        var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (_, prefix) = await GetPrefix();
         var feed = new OpenSearchDescription()
         {
-            ShortName = "Search",
-            Description = "Search for Series, Collections, or Reading Lists",
+            ShortName = await _localizationService.Translate(userId, "search"),
+            Description = await _localizationService.Translate(userId, "search-description"),
             Url = new SearchLink()
             {
                 Type = FeedLinkType.AtomAcquisition,
@@ -539,13 +545,13 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetSeries(string apiKey, int seriesId)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
 
-        var feed = CreateFeed(series.Name + " - Storyline", $"{prefix}{apiKey}/series/{series.Id}", apiKey, prefix, baseUrl);
+        var feed = CreateFeed(series!.Name + " - Storyline", $"{prefix}{apiKey}/series/{series.Id}", apiKey, prefix);
         SetFeedId(feed, $"series-{series.Id}");
         feed.Links.Add(CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/series-cover?seriesId={seriesId}&apiKey={apiKey}"));
 
@@ -561,7 +567,7 @@ public class OpdsController : BaseApiController
                 var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
                 foreach (var mangaFile in files)
                 {
-                    feed.Entries.Add(await CreateChapterWithFile(seriesId, volume.Id, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                    feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volume.Id, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
                 }
             }
 
@@ -573,7 +579,7 @@ public class OpdsController : BaseApiController
             var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(storylineChapter.Id);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, storylineChapter.VolumeId, storylineChapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
             }
         }
 
@@ -583,7 +589,7 @@ public class OpdsController : BaseApiController
             var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(special.Id);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, special.VolumeId, special.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, special.VolumeId, special.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
             }
         }
 
@@ -594,26 +600,26 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetVolume(string apiKey, int seriesId, int volumeId)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var chapters =
             (await _unitOfWork.ChapterRepository.GetChaptersAsync(volumeId)).OrderBy(x => double.Parse(x.Number),
                 _chapterSortComparer);
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s ",
-            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix, baseUrl);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{SeriesService.FormatChapterName(libraryType)}s");
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s ",
+            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}", apiKey, prefix);
+        SetFeedId(feed, $"series-{series.Id}-volume-{volume.Id}-{_seriesService.FormatChapterName(userId, libraryType)}s");
         foreach (var chapter in chapters)
         {
             var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapter.Id);
             var chapterTest = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapter.Id);
             foreach (var mangaFile in files)
             {
-                feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
+                feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapter.Id, mangaFile, series, chapterTest, apiKey, prefix, baseUrl));
             }
         }
 
@@ -624,23 +630,23 @@ public class OpdsController : BaseApiController
     [Produces("application/xml")]
     public async Task<IActionResult> GetChapter(string apiKey, int seriesId, int volumeId, int chapterId)
     {
-        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
-        var (baseUrl, prefix) = await GetPrefix();
         var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId);
         var chapter = await _unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId);
-        if (chapter == null) return BadRequest("Chapter doesn't exist");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "chapter-doesnt-exist"));
         var volume = await _unitOfWork.VolumeRepository.GetVolumeAsync(volumeId);
         var files = await _unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
 
-        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {SeriesService.FormatChapterName(libraryType)}s",
-            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix, baseUrl);
-        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{SeriesService.FormatChapterName(libraryType)}-{chapterId}-files");
+        var feed = CreateFeed(series.Name + " - Volume " + volume!.Name + $" - {_seriesService.FormatChapterName(userId, libraryType)}s",
+            $"{prefix}{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}", apiKey, prefix);
+        SetFeedId(feed, $"series-{series.Id}-volume-{volumeId}-{_seriesService.FormatChapterName(userId, libraryType)}-{chapterId}-files");
         foreach (var mangaFile in files)
         {
-            feed.Entries.Add(await CreateChapterWithFile(seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey, prefix, baseUrl));
+            feed.Entries.Add(await CreateChapterWithFile(userId, seriesId, volumeId, chapterId, mangaFile, series, chapter, apiKey, prefix, baseUrl));
         }
 
         return CreateXmlResult(SerializeXml(feed));
@@ -658,8 +664,9 @@ public class OpdsController : BaseApiController
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
+        var userId = await GetUser(apiKey);
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
-            return BadRequest("OPDS is not enabled on this server");
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(await GetUser(apiKey));
         if (!await _accountService.HasDownloadPermission(user))
         {
@@ -778,7 +785,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private async Task<FeedEntry> CreateChapterWithFile(int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey, string prefix, string baseUrl)
+    private async Task<FeedEntry> CreateChapterWithFile(int userId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, SeriesDto series, ChapterDto chapter, string apiKey, string prefix, string baseUrl)
     {
         var fileSize =
             mangaFile.Bytes > 0 ? DirectoryService.GetHumanReadableBytes(mangaFile.Bytes) :
@@ -794,7 +801,8 @@ public class OpdsController : BaseApiController
 
         if (volume!.Chapters.Count == 1)
         {
-            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType);
+            var volumeLabel = await _localizationService.Translate(userId, "volume-num", string.Empty);
+            SeriesService.RenameVolumeName(volume.Chapters.First(), volume, libraryType, volumeLabel);
             if (volume.Name != "0")
             {
                 title += $" - {volume.Name}";
@@ -802,11 +810,11 @@ public class OpdsController : BaseApiController
         }
         else if (volume.Number != 0)
         {
-            title = $"{series.Name} - Volume {volume.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+            title = $"{series.Name} - Volume {volume.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }
         else
         {
-            title = $"{series.Name} - {SeriesService.FormatChapterTitle(chapter, libraryType)}";
+            title = $"{series.Name} - {await _seriesService.FormatChapterTitle(userId, chapter, libraryType)}";
         }
 
         // Chunky requires a file at the end. Our API ignores this
@@ -854,14 +862,16 @@ public class OpdsController : BaseApiController
     [HttpGet("{apiKey}/image")]
     public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
     {
-        if (pageNumber < 0) return BadRequest("Page cannot be less than 0");
+        var userId = await GetUser(apiKey);
+        if (pageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "Page"));
         var chapter = await _cacheService.Ensure(chapterId);
-        if (chapter == null) return BadRequest("There was an issue finding image file for reading");
+        if (chapter == null) return BadRequest(await _localizationService.Translate(userId, "cache-file-find"));
 
         try
         {
             var path = _cacheService.GetCachedPagePath(chapter.Id, pageNumber);
-            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path)) return BadRequest($"No such image for page {pageNumber}");
+            if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
+                return BadRequest(await _localizationService.Translate(userId, "no-image-for-page", pageNumber));
 
             var content = await _directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path);
@@ -892,8 +902,9 @@ public class OpdsController : BaseApiController
     [ResponseCache(Duration = 60 * 60, Location = ResponseCacheLocation.Client, NoStore = false)]
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
+        var userId = await GetUser(apiKey);
         var files = _directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
-        if (files.Length == 0) return BadRequest("Cannot find icon");
+        if (files.Length == 0) return BadRequest(await _localizationService.Translate(userId, "favicon-doesnt-exist"));
         var path = files[0];
         var content = await _directoryService.ReadFileAsync(path);
         var format = Path.GetExtension(path);
@@ -916,7 +927,7 @@ public class OpdsController : BaseApiController
         {
             /* Do nothing */
         }
-        throw new KavitaException("User does not exist");
+        throw new KavitaException(await _localizationService.Get("en", "user-doesnt-exist"));
     }
 
     private async Task<FeedLink> CreatePageStreamLink(int libraryId, int seriesId, int volumeId, int chapterId, MangaFile mangaFile, string apiKey, string prefix)
@@ -948,7 +959,7 @@ public class OpdsController : BaseApiController
         };
     }
 
-    private static Feed CreateFeed(string title, string href, string apiKey, string prefix, string baseUrl)
+    private static Feed CreateFeed(string title, string href, string apiKey, string prefix)
     {
         var link = CreateLink(FeedLinkRelation.Self, string.IsNullOrEmpty(href) ?
             FeedLinkType.AtomNavigation :

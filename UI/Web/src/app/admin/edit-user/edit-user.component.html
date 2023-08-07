@@ -1,66 +1,70 @@
-<div class="modal-container">
-    <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Edit {{member.username | sentenceCase}}</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()">
-        
-        </button>
-    </div>
-    <div class="modal-body scrollable-modal">
+<ng-container *transloco="let t; read: 'edit-user'">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">{{t('edit')}} {{member.username | sentenceCase}}</h4>
+            <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()">
 
-        <form [formGroup]="userForm">
-            <div class="row g-0">
-                <div class="col-md-6 col-sm-12 pe-2">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input id="username" class="form-control" formControlName="username" type="text" [class.is-invalid]="userForm.get('username')?.invalid && userForm.get('username')?.touched">
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="userForm.dirty || userForm.touched">
-                            <div *ngIf="userForm.get('username')?.errors?.required">
-                                This field is required
+            </button>
+        </div>
+        <div class="modal-body scrollable-modal">
+
+            <form [formGroup]="userForm">
+                <div class="row g-0">
+                    <div class="col-md-6 col-sm-12 pe-2">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">{{t('username')}}</label>
+                            <input id="username" class="form-control" formControlName="username" type="text"
+                                [class.is-invalid]="userForm.get('username')?.invalid && userForm.get('username')?.touched" aria-describedby="username-validations">
+                            <div id="username-validations" class="invalid-feedback" *ngIf="userForm.dirty || userForm.touched">
+                                <div *ngIf="userForm.get('username')?.errors?.required">
+                                    {{t('required')}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-12">
+                        <div class="mb-3" style="width:100%">
+                            <label for="email" class="form-label">{{t('email')}}</label>
+                            <input class="form-control" inputmode="email" type="email" id="email" formControlName="email" aria-describedby="email-validations">
+                            <div id="email-validations" class="invalid-feedback"
+                                *ngIf="userForm.dirty || userForm.touched" [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+                                <div *ngIf="userForm.get('email')?.errors?.required">
+                                    {{t('required')}}
+                                </div>
+                                <div *ngIf="userForm.get('email')?.errors?.email">
+                                    {{t('not-valid-email')}}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 col-sm-12">
-                    <div class="mb-3" style="width:100%">
-                        <label for="email" class="form-label">Email</label>
-                        <input class="form-control" inputmode="email" type="email" id="email" formControlName="email">
-                        <div id="inviteForm-validations" class="invalid-feedback" *ngIf="userForm.dirty || userForm.touched" [class.is-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched">
-                            <div *ngIf="userForm.get('email')?.errors?.required">
-                                This field is required
-                            </div>
-                            <div *ngIf="userForm.get('email')?.errors?.email">
-                                This must be a valid email address
-                            </div>
-                        </div>
+
+                <div class="row g-0">
+                    <div class="col-md-6">
+                        <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
+                    </div>
+
+                    <div class="col-md-6">
+                        <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
                     </div>
                 </div>
-            </div>
 
-            <div class="row g-0">
-                <div class="col-md-6">
-                    <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true" [member]="member"></app-role-selector>
+                <div class="row g-0">
+                    <div class="col-md-12">
+                        <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
+                    </div>
                 </div>
+            </form>
 
-                <div class="col-md-6">
-                    <app-library-selector (selected)="updateLibrarySelection($event)" [member]="member"></app-library-selector>
-                </div>
-            </div>
-
-            <div class="row g-0">
-                <div class="col-md-12">
-                    <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected" [member]="member"></app-restriction-selector>
-                </div>
-            </div>
-        </form>
-
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="close()">
+                {{t('cancel')}}
+            </button>
+            <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving || !userForm.valid">
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>{{isSaving ? t('saving') : t('update')}}</span>
+            </button>
+        </div>
     </div>
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">
-            Cancel
-        </button>
-        <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving || !userForm.valid">
-            <span *ngIf="isSaving" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <span>{{isSaving ? 'Saving...' : 'Update'}}</span>
-        </button>
-    </div>
-</div>
+</ng-container>

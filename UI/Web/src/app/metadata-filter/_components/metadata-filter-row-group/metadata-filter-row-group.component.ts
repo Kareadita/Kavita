@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { FilterGroup } from 'src/app/_models/metadata/v2/filter-group';
 import { FilterStatement } from 'src/app/_models/metadata/v2/filter-statement';
 import { Action, ActionFactoryService } from 'src/app/_services/action-factory.service';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { MetadataService } from 'src/app/_services/metadata.service';
+import {NgForOf, NgIf, NgStyle, NgSwitchCase, NgTemplateOutlet, UpperCasePipe} from "@angular/common";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 export enum ComparisonOption {
   AND = 'and',
@@ -18,6 +22,18 @@ export type FilterGrouping = {group: ComparisonOption, filterGroup: FilterGroup}
   selector: 'app-metadata-filter-row-group',
   templateUrl: './metadata-filter-row-group.component.html',
   styleUrls: ['./metadata-filter-row-group.component.scss'],
+  standalone: true,
+  imports: [
+    ReactiveFormsModule,
+    UpperCasePipe,
+    CardActionablesComponent,
+    NgTemplateOutlet,
+    NgStyle,
+    MetadataFilterRowComponent,
+    NgIf,
+    NgForOf,
+    NgbTooltip,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowGroupComponent implements OnInit, OnDestroy {

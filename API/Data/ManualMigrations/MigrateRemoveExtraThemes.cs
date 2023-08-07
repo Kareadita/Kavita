@@ -15,7 +15,7 @@ public static class MigrateRemoveExtraThemes
     {
         var themes = (await unitOfWork.SiteThemeRepository.GetThemes()).ToList();
 
-        if (themes.FirstOrDefault(t => t.Name.Equals("Light")) == null)
+        if (themes.Find(t => t.Name.Equals("Light")) == null)
         {
             return;
         }

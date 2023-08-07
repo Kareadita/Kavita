@@ -1,18 +1,20 @@
-<div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
-[ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
-  <div class="offcanvas-header">
-    <div class="offcanvas-title" id="offcanvasLabel">
-      <ng-content select="[header]"></ng-content>
+<ng-container *transloco="let t">
+  <div class="offcanvas offcanvas-{{position}}" [class.show]="isOpen" tabindex="-1" id="offcanvas" aria-labelledby="offcanvasLabel"
+  [ngStyle]="{'top': options.topOffset + 'px', 'visibility': isOpen ? 'visible' : 'hidden'}" role="dialog">
+    <div class="offcanvas-header">
+      <div class="offcanvas-title" id="offcanvasLabel">
+        <ng-content select="[header]"></ng-content>
+      </div>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" [attr.aria-label]="t('common.close')" (click)="close()"></button>
     </div>
-    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close" (click)="close()"></button>
+    <div class="offcanvas-header row hide-if-empty">
+      <ng-content select="[subheader]"></ng-content>
+    </div>
+
+    <div class="offcanvas-body">
+      <ng-content select="[body]"></ng-content>
+    </div>
   </div>
-  <div class="offcanvas-header row hide-if-empty">
-    <ng-content select="[subheader]"></ng-content>
-  </div>
-  
-  <div class="offcanvas-body">
-    <ng-content select="[body]"></ng-content>
-  </div>
-</div>
-<!-- TODO: Replace this with official component when released. This is some hacky solution to mimic Bootstrap 5 Javascript code -->
-<div class="offcanvas-backdrop fade show" *ngIf="isOpen" (click)="close()"></div>
+  <!-- TODO: Replace this with official component when released. This is some hacky solution to mimic Bootstrap 5 Javascript code -->
+  <div class="offcanvas-backdrop fade show" *ngIf="isOpen" (click)="close()"></div>
+</ng-container>

@@ -1,42 +1,42 @@
 @font-face {
     font-family: "Fira_Sans";
-    src: url(../../../../assets/fonts/Fira_Sans/FiraSans-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/Fira_Sans/FiraSans-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "Lato";
-    src: url(../../../../assets/fonts/Lato/Lato-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/Lato/Lato-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "Libre_Baskerville";
-    src: url(../../../../assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/Libre_Baskerville/LibreBaskerville-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "Merriweather";
-    src: url(../../../../assets/fonts/Merriweather/Merriweather-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/Merriweather/Merriweather-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "Nanum_Gothic";
-    src: url(../../../../assets/fonts/Nanum_Gothic/NanumGothic-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/Nanum_Gothic/NanumGothic-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "RocknRoll_One";
-    src: url(../../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.ttf) format("truetype");
+    src: url(../../../../assets/fonts/RocknRoll_One/RocknRollOne-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
 @font-face {
     font-family: "OpenDyslexic2";
-    src: url(../../../../assets/fonts/OpenDyslexic2/OpenDyslexic-Regular.otf) format("opentype");
+    src: url(../../../../assets/fonts/OpenDyslexic2/OpenDyslexic-Regular.woff2) format("woff2");
     font-display: swap;
 }
 
@@ -184,8 +184,7 @@ $action-bar-height: 38px;
     position: relative;
     height: 100%;
 
-
-    //background-color: purple !important;
+   // background-color: purple !important;
 
     &.column-layout-1 {
         height: calc((var(--vh, 1vh) * 100) - $action-bar-height);
@@ -203,18 +202,17 @@ $action-bar-height: 38px;
 }
 
 .book-content {
-    position: relative;
-    padding: 20px 0;
-    margin: 0px 0px;
-    //background-color: red !important;
+  position: relative;
+  margin: 0 0;
+  padding: 20px 0px;
 
-    &.column-layout-1 {
-        height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
+  &.column-layout-1 {
+      height: calc((var(--vh) * 100) - calc($action-bar-height)); //  * 2
 
-        &.writing-style-vertical {
-            padding: 0 10px 0 0;
-            margin: 20px 0;
-        }
+      &.writing-style-vertical {
+          padding: 0 10px 0 0;
+          margin: 20px 0;
+      }
     }
 
     &.column-layout-2 {
@@ -275,8 +273,6 @@ $action-bar-height: 38px;
         word-break: break-word;
         overflow-wrap: break-word;
     }
-
-
 }
 
 .column-layout-2 {
@@ -287,9 +283,6 @@ $action-bar-height: 38px;
         word-break: break-word;
         overflow-wrap: break-word;
     }
-
-
-
 }
 
 // A bunch of resets so books render correctly
@@ -336,7 +329,6 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 20vw;
     z-index: 3;
-    cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -345,6 +337,10 @@ $action-bar-height: 38px;
 
     &.immersive {
         top: 0px;
+    }
+
+    &:hover {
+        cursor: pointer;
     }
 }
 
@@ -355,7 +351,6 @@ $action-bar-height: 38px;
     top: $action-bar-height;
     width: 18%;
     z-index: 3;
-    cursor: pointer;
     background: transparent;
     border-color: transparent;
     border: none !important;
@@ -364,6 +359,9 @@ $action-bar-height: 38px;
 
     &.immersive {
         top: 0px;
+    }
+    &:hover {
+      cursor: pointer;
     }
 }
 
@@ -376,7 +374,6 @@ $action-bar-height: 38px;
     border-color: transparent;
     border: none !important;
     z-index: 3;
-    cursor: pointer;
     opacity: 0;
     outline: none;
 
@@ -384,6 +381,9 @@ $action-bar-height: 38px;
         top: 0px;
     }
 
+    &:hover {
+      cursor: pointer;
+    }
 }
 
 

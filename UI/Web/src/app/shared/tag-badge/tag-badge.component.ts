@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {CommonModule} from "@angular/common";
 
 /**
  * What type of cursor to apply to the tag badge
@@ -6,7 +7,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 export enum TagBadgeCursor {
   /**
    * Allows the user to select text
-   * cursor: default 
+   * cursor: default
    */
   Selectable,
   /**
@@ -23,6 +24,8 @@ export enum TagBadgeCursor {
 
 @Component({
   selector: 'app-tag-badge',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './tag-badge.component.html',
   styleUrls: ['./tag-badge.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

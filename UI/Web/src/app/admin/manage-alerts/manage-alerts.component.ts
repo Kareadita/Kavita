@@ -15,14 +15,20 @@ import { SortEvent, SortableHeader, compare } from 'src/app/_single-module/table
 import { KavitaMediaError } from '../_models/media-error';
 import { ServerService } from 'src/app/_services/server.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { FilterPipe } from '../../pipe/filter.pipe';
+import { LoadingComponent } from '../../shared/loading/loading.component';
+import { NgIf, NgFor } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-manage-alerts',
-  templateUrl: './manage-alerts.component.html',
-  styleUrls: ['./manage-alerts.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-alerts',
+    templateUrl: './manage-alerts.component.html',
+    styleUrls: ['./manage-alerts.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [ReactiveFormsModule, NgIf, LoadingComponent, NgFor, FilterPipe, SortableHeader, TranslocoModule]
 })
 export class ManageAlertsComponent implements OnInit {
 

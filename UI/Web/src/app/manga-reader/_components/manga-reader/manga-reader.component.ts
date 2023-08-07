@@ -2,7 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -10,44 +11,63 @@ import {
   Inject,
   OnDestroy,
   OnInit,
-  SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { DOCUMENT } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, forkJoin, fromEvent, map, merge, Observable, ReplaySubject, Subject, take, takeUntil, tap } from 'rxjs';
-import { LabelType, ChangeContext, Options } from 'ngx-slider-v2';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-import { FormGroup, FormBuilder, FormControl } from '@angular/forms';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { ToastrService } from 'ngx-toastr';
-import { ShortcutsModalComponent } from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
-import { Stack } from 'src/app/shared/data-structures/stack';
-import { Breakpoint, UtilityService, KEY_CODES } from 'src/app/shared/_services/utility.service';
-import { LibraryType } from 'src/app/_models/library';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { scalingOptions, pageSplitOptions, layoutModes } from 'src/app/_models/preferences/preferences';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReadingDirection } from 'src/app/_models/preferences/reading-direction';
-import { ScalingOption } from 'src/app/_models/preferences/scaling-option';
-import { User } from 'src/app/_models/user';
-import { AccountService } from 'src/app/_services/account.service';
-import { MemberService } from 'src/app/_services/member.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LayoutMode } from '../../_models/layout-mode';
-import { PAGING_DIRECTION, FITTING_OPTION } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { ManagaReaderService } from '../../_series/managa-reader.service';
-import { CanvasRendererComponent } from '../canvas-renderer/canvas-renderer.component';
-import { DoubleRendererComponent } from '../double-renderer/double-renderer.component';
-import { DoubleReverseRendererComponent } from '../double-reverse-renderer/double-reverse-renderer.component';
-import { SingleRendererComponent } from '../single-renderer/single-renderer.component';
-import { ChapterInfo } from '../../_models/chapter-info';
-import { DoubleNoCoverRendererComponent } from '../double-renderer-no-cover/double-no-cover-renderer.component';
-import { SwipeEvent } from 'src/app/ng-swipe/ag-swipe.core';
+import { DOCUMENT, NgStyle, NgIf, NgFor, NgSwitch, NgSwitchCase } from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  forkJoin,
+  fromEvent,
+  map,
+  merge,
+  Observable,
+  ReplaySubject,
+  Subject,
+  take,
+  tap
+} from 'rxjs';
+import { ChangeContext, LabelType, Options, NgxSliderModule } from 'ngx-slider-v2';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {ToastrService} from 'ngx-toastr';
+import {ShortcutsModalComponent} from 'src/app/reader-shared/_modals/shortcuts-modal/shortcuts-modal.component';
+import {Stack} from 'src/app/shared/data-structures/stack';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {LibraryType} from 'src/app/_models/library';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
+import {layoutModes, pageSplitOptions} from 'src/app/_models/preferences/preferences';
+import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
+import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
+import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
+import {User} from 'src/app/_models/user';
+import {AccountService} from 'src/app/_services/account.service';
+import {MemberService} from 'src/app/_services/member.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {ManagaReaderService} from '../../_service/managa-reader.service';
+import {CanvasRendererComponent} from '../canvas-renderer/canvas-renderer.component';
+import {DoubleRendererComponent} from '../double-renderer/double-renderer.component';
+import {DoubleReverseRendererComponent} from '../double-reverse-renderer/double-reverse-renderer.component';
+import {SingleRendererComponent} from '../single-renderer/single-renderer.component';
+import {ChapterInfo} from '../../_models/chapter-info';
+import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
+import {SwipeEvent} from 'src/app/ng-swipe/ag-swipe.core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { FullscreenIconPipe } from '../../_pipes/fullscreen-icon.pipe';
+import { ReaderModeIconPipe } from '../../_pipes/reader-mode-icon.pipe';
+import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
+import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
+import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
+import { LoadingComponent } from '../../../shared/loading/loading.component';
+import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
 
 
 const PREFETCH_PAGES = 10;
@@ -73,33 +93,35 @@ enum KeyDirection {
 }
 
 @Component({
-  selector: 'app-manga-reader',
-  templateUrl: './manga-reader.component.html',
-  styleUrls: ['./manga-reader.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ManagaReaderService],
-  animations: [
-    trigger('slideFromTop', [
-      state('in', style({ transform: 'translateY(0)'})),
-      transition('void => *', [
-        style({ transform: 'translateY(-100%)' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
-      ])
-    ]),
-    trigger('slideFromBottom', [
-      state('in', style({ transform: 'translateY(0)'})),
-      transition('void => *', [
-        style({ transform: 'translateY(100%)' }),
-        animate(ANIMATION_SPEED)
-      ]),
-      transition('* => void', [
-        animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
-      ])
-    ])
-  ]
+    selector: 'app-manga-reader',
+    templateUrl: './manga-reader.component.html',
+    styleUrls: ['./manga-reader.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [ManagaReaderService],
+    animations: [
+        trigger('slideFromTop', [
+            state('in', style({ transform: 'translateY(0)' })),
+            transition('void => *', [
+                style({ transform: 'translateY(-100%)' }),
+                animate(ANIMATION_SPEED)
+            ]),
+            transition('* => void', [
+                animate(ANIMATION_SPEED, style({ transform: 'translateY(-100%)' })),
+            ])
+        ]),
+        trigger('slideFromBottom', [
+            state('in', style({ transform: 'translateY(0)' })),
+            transition('void => *', [
+                style({ transform: 'translateY(100%)' }),
+                animate(ANIMATION_SPEED)
+            ]),
+            transition('* => void', [
+                animate(ANIMATION_SPEED, style({ transform: 'translateY(100%)' })),
+            ])
+        ])
+    ],
+    standalone: true,
+  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe, TranslocoModule]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -148,7 +170,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   user!: User;
   generalSettingsForm!: FormGroup;
 
-  scalingOptions = scalingOptions;
   readingDirection = ReadingDirection.LeftToRight;
   scalingOption = ScalingOption.FitToHeight;
   pageSplitOption = PageSplitOption.FitSplit;
@@ -165,8 +186,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   pagingDirection$: Observable<PAGING_DIRECTION> = this.pagingDirectionSubject.asObservable();
 
 
-  pageSplitOptions = pageSplitOptions;
-  layoutModes = layoutModes;
+  pageSplitOptionsTranslated = pageSplitOptions.map(this.translatePrefOptions);
+  layoutModesTranslated = layoutModes.map(this.translatePrefOptions);
 
   isLoading = true;
   hasBookmarkRights: boolean = false; // TODO: This can be an observable
@@ -317,11 +338,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   rightPaginationOffset = 0;
 
   /**
-   * Previous amount of scroll left. Used for swipe to paginate functionaliy.
+   * Previous amount of scroll left. Used for swipe to paginate functionality.
    */
   prevScrollLeft = 0;
   /**
-   * Previous amount of scroll top. Used for swipe to paginate functionaliy.
+   * Previous amount of scroll top. Used for swipe to paginate functionality.
    */
   prevScrollTop = 0;
 
@@ -361,16 +382,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
-
-  bookmarkPageHandler = this.bookmarkPage.bind(this);
+  private readonly translocoService = inject(TranslocoService);
 
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
-  }
-
-  get PageNumber() {
-    return Math.max(Math.min(this.pageNum, this.maxPages - 1), 0);
   }
 
 
@@ -426,9 +442,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get ReaderMode() { return ReaderMode; }
   get LayoutMode() { return LayoutMode; }
   get ReadingDirection() { return ReadingDirection; }
-  get PageSplitOption() { return PageSplitOption; }
   get Breakpoint() { return Breakpoint; }
-  get FITTING_OPTION() { return FITTING_OPTION; }
   get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
   get ReadingAreaWidth() {
     return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
@@ -444,9 +458,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               public utilityService: UtilityService, @Inject(DOCUMENT) private document: Document,
               private modalService: NgbModal, private readonly cdRef: ChangeDetectorRef,
               public mangaReaderService: ManagaReaderService) {
-                this.navService.hideNavBar();
-                this.navService.hideSideNav();
-                this.cdRef.markForCheck();
+    this.navService.hideNavBar();
+    this.navService.hideSideNav();
+    this.cdRef.markForCheck();
   }
 
   ngOnInit(): void {
@@ -525,10 +539,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         distinctUntilChanged(),
         tap(mode => {
           this.readerMode = mode;
+          this.disableDoubleRendererIfScreenTooSmall();
           this.cdRef.markForCheck();
         }),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => {});
+
+
 
 
       this.generalSettingsForm.get('layoutMode')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
@@ -557,7 +574,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
 
-      this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((changes: SimpleChanges) => {
+      this.generalSettingsForm.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.autoCloseMenu = this.generalSettingsForm.get('autoCloseMenu')?.value;
         this.pageSplitOption = parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10);
 
@@ -574,7 +591,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
         if (!progress) {
           this.toggleMenu();
-          this.toastr.info('Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.');
+          this.toastr.info(this.translocoService.translate('manga-reader.first-time-reading-manga'));
         }
       });
     });
@@ -583,7 +600,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef)).subscribe(evt => {
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.readerMode === ReaderMode.Webtoon) return;
       if (this.readerMode === ReaderMode.LeftRight && this.FittingOption === FITTING_OPTION.HEIGHT) {
         this.rightPaginationOffset = (this.readingArea.nativeElement.scrollLeft) * -1;
@@ -599,7 +616,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.toggleMenu();
     });
 
-    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe((event: MouseEvent | any) => {
+    fromEvent(this.readingArea.nativeElement, 'scroll').pipe(debounceTime(200), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
       this.prevScrollTop = this.readingArea?.nativeElement?.scrollTop || 0;
       this.hasScrolledX = true;
@@ -701,12 +718,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.generalSettingsForm.get('layoutMode')?.enable();
       this.cdRef.markForCheck();
       return;
-    };
+    }
     if (this.layoutMode === LayoutMode.Single || this.readerMode === ReaderMode.Webtoon) return;
 
     this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
     this.generalSettingsForm.get('layoutMode')?.disable();
-    this.toastr.info('Layout mode switched to Single due to insufficient space to render double layout');
+    this.toastr.info(this.translocoService.translate('manga-reader.layout-mode-switched'));
     this.cdRef.markForCheck();
   }
 
@@ -719,7 +736,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
 
-    let img = undefined;
+    let img;
     if (this.bookmarkMode) img =  this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
@@ -749,7 +766,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Is there any room to scroll in the direction we are giving? If so, return false. Otherwise return true.
+   * Is there any room to scroll in the direction we are giving? If so, return false. Otherwise, return true.
    * @param direction
    * @returns
    */
@@ -813,7 +830,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.goToPageEvent) {
-      // There was a bug where goToPage was emitting old values into infinite scroller between chapter loads. We explicity clear it out between loads
+      // There was a bug where goToPage was emitting old values into infinite scroller between chapter loads. We explicitly clear it out between loads,
       // and we use a BehaviourSubject to ensure only latest value is sent
       this.goToPageEvent.complete();
     }
@@ -940,7 +957,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Whenever the menu is interacted with, restart the timer. However if the settings menu is open, don't restart, just cancel the timeout.
+   * Whenever the menu is interacted with, restart the timer. However, if the settings menu is open, don't restart, just cancel the timeout.
    */
   resetMenuCloseTimer() {
     if (this.menuTimeout) {
@@ -990,8 +1007,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /**
    * This executes BEFORE fromEvent('scroll')
-   * @param event
    * @returns
+   * @param _
    */
   onSwipeMove(_: SwipeEvent) {
     this.prevScrollLeft = this.readingArea?.nativeElement?.scrollLeft || 0;
@@ -1032,7 +1049,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
 
-          // We just came from a swipe where pagination was required and we are now at the end of the swipe, so make the user do it once more
+          // We just came from a swipe where pagination was required, and we are now at the end of the swipe, so make the user do it once more
           if (direction === KeyDirection.Right) {
             this.hasHitZeroScroll = false;
             if (scrollLeft === 0 && this.ReadingAreaWidth === 0) {
@@ -1136,9 +1153,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
                                 this.doubleReverseRenderer.getPageAmount(PAGING_DIRECTION.FORWARD),
                                 this.doubleNoCoverRenderer.getPageAmount(PAGING_DIRECTION.FORWARD)
                               );
-    const notInSplit = this.canvasRenderer.shouldMovePrev();
+    // If we are on last page with split mode, we need to be able to progress, hence why we check if we could move backwards or not
+    const isSplitRendering = [PageSplitOption.SplitRightToLeft, PageSplitOption.SplitRightToLeft].includes(parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10));
+    const notInSplit = this.canvasRenderer.getPageAmount(PAGING_DIRECTION.BACKWARDS) === 0;
+    const isASpread = this.mangaReaderService.isWidePage(this.pageNum);
 
-    if ((this.pageNum + pageAmount >= this.maxPages && notInSplit)) {
+
+    if ((this.pageNum + pageAmount >= this.maxPages && (!isASpread || !isSplitRendering || notInSplit))) {
       // Move to next volume/chapter automatically
       this.loadNextChapter();
       return;
@@ -1197,7 +1218,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Next Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1215,7 +1236,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPrevChapter() {
     if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) {
-      this.toastr.info('No Previous Chapter');
+      this.toastr.info(this.translocoService.translate('manga-reader.no-prev-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1251,10 +1272,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init();
-      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.info(msg, '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
+      const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter',
+        {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.warning(msg);
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;
@@ -1283,33 +1307,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cdRef.markForCheck();
   }
 
-  updateScalingForFirstPageRender() {
-    const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-    const windowHeight = window.innerHeight
-              || document.documentElement.clientHeight
-              || document.body.clientHeight;
-
-      const needsSplitting = this.mangaReaderService.isWidePage(this.readerService.imageUrlToPageNum(this.canvasImage.src));
-      let newScale = this.FittingOption;
-      const widthRatio = windowWidth / (this.canvasImage.width / (needsSplitting ? 2 : 1));
-      const heightRatio = windowHeight / (this.canvasImage.height);
-
-      // Given that we now have image dimensions, assuming this isn't a split image,
-      // Try to reset one time based on who's dimension (width/height) is smaller
-      if (widthRatio < heightRatio) {
-        newScale = FITTING_OPTION.WIDTH;
-      } else if (widthRatio > heightRatio) {
-        newScale = FITTING_OPTION.HEIGHT;
-      }
-
-      this.generalSettingsForm.get('fittingOption')?.setValue(newScale, {emitEvent: false});
-  }
-
   /**
-   * Maintains an array of images (that are requested from backend) around the user's current page. This allows for quick loading (seemless to user)
-   * and also maintains page info (wide image, etc) due to onload event.
+   * Maintains an array of images (that are requested from backend) around the user's current page. This allows for quick loading (seamless to user)
+   * and also maintains page info (wide image, etc.) due to onload event.
    */
   prefetch() {
     // NOTE: This doesn't allow for any directionality
@@ -1376,7 +1376,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // This will update the value for value except when in webtoon due to how the webtoon reader
     // responds to page changes
     if (this.readerMode !== ReaderMode.Webtoon) {
-      console.log('Setting Page Number as slider drag occured');
+      console.log('Setting Page Number as slider drag occurred');
       this.setPageNum(context.value);
     }
   }
@@ -1435,7 +1435,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   /**
    * Loads the first 5 images (throwaway cache) from the given chapterId
    * @param chapterId
-   * @param direction Used to indicate if the chapter is behind or ahead of curent chapter
+   * @param direction Used to indicate if the chapter is behind or ahead of current chapter
    */
   prefetchStartOfChapter(chapterId: number, direction: PAGING_DIRECTION) {
     let pages = [];
@@ -1497,7 +1497,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   promptForPage() {
-    const goToPageNum = window.prompt('There are ' + this.maxPages + ' pages. What page would you like to go to?', '');
+    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages});
+    const goToPageNum = window.prompt(question, '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
   }
@@ -1606,7 +1607,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info('Incognito mode is off. Progress will now start being tracked.');
+    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
@@ -1614,17 +1615,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   openShortcutModal() {
-    let ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
+    const ref = this.modalService.open(ShortcutsModalComponent, { scrollable: true, size: 'md' });
     ref.componentInstance.shortcuts = [
-      {key: '⇽', description: 'Move to previous page'},
-      {key: '⇾', description: 'Move to next page'},
-      {key: '↑', description: 'Move to previous page'},
-      {key: '↓', description: 'Move to previous page'},
-      {key: 'G', description: 'Open Go to Page dialog'},
-      {key: 'B', description: 'Bookmark current page'},
-      {key: 'double click', description: 'Bookmark current page'},
-      {key: 'ESC', description: 'Close reader'},
-      {key: 'SPACE', description: 'Toggle Menu'},
+      {key: '⇽', description: 'prev-page'},
+      {key: '⇾', description: 'next-page'},
+      {key: '↑', description: 'prev-page'},
+      {key: '↓', description: 'next-page'},
+      {key: 'G', description: 'go-to'},
+      {key: 'B', description: 'bookmark'},
+      {key: this.translocoService.translate('shortcuts-modal.double-click'), description: 'bookmark'},
+      {key: 'ESC', description: 'close-reader'},
+      {key: 'SPACE', description: 'toggle-menu'},
     ];
   }
 
@@ -1644,12 +1645,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
 
       this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
-        this.toastr.success('User preferences updated');
+        this.toastr.success(this.translocoService.translate('manga-reader.user-preferences-updated'));
         if (this.user) {
           this.user.preferences = updatedPrefs;
           this.cdRef.markForCheck();
         }
       })
     });
+  }
+
+  translatePrefOptions(o: {text: string, value: any}) {
+    const d = {...o};
+    d.text = translate('preferences.' + o.text);
+    return d;
   }
 }

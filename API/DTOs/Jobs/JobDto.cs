@@ -15,14 +15,6 @@ public class JobDto
     /// <summary>
     /// When the job was created
     /// </summary>
-    public DateTime? CreatedAt { get; set; }
-    /// <summary>
-    /// Last time the job was run
-    /// </summary>
-    public DateTime? LastExecution { get; set; }
-    /// <summary>
-    /// When the job was created
-    /// </summary>
     public DateTime? CreatedAtUtc { get; set; }
     /// <summary>
     /// Last time the job was run

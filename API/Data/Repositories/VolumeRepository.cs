@@ -9,6 +9,7 @@ using API.Extensions;
 using API.Services;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -205,8 +206,10 @@ public class VolumeRepository : IVolumeRepository
     {
         var extension = encodeFormat.GetExtension();
         return await _context.Volume
-                    .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
-                    .ToListAsync();
+            .Include(v => v.Chapters)
+            .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
+            .AsSplitQuery()
+            .ToListAsync();
     }
 
 
@@ -235,6 +238,7 @@ public class VolumeRepository : IVolumeRepository
                 if (progresses.Count == 0) continue;
                 c.PagesRead = progresses.Sum(p => p.PagesRead);
                 c.LastReadingProgressUtc = progresses.Max(p => p.LastModifiedUtc);
+                c.LastReadingProgress = progresses.Max(p => p.LastModified);
             }
 
             v.PagesRead = userProgress.Where(p => p.VolumeId == v.Id).Sum(p => p.PagesRead);

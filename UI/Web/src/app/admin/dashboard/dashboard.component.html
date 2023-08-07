@@ -1,12 +1,13 @@
-<app-side-nav-companion-bar>
-  <h2 title>
-    Admin Dashboard
-  </h2>
-</app-side-nav-companion-bar>
-<div class="container-fluid g-0">
-  <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
-      <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ tab.title | sentenceCase }}</a>
+<ng-container *transloco="let t; read: 'admin-dashboard'">
+  <app-side-nav-companion-bar>
+    <h2 title>
+      {{t('title')}}
+    </h2>
+  </app-side-nav-companion-bar>
+  <div class="container-fluid g-0">
+    <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-tabs">
+      <li *ngFor="let tab of tabs" [ngbNavItem]="tab" class=tab>
+        <a ngbNavLink routerLink="." [fragment]="tab.fragment">{{ t(tab.title) }}</a>
         <ng-template ngbNavContent>
           <ng-container *ngIf="tab.fragment === TabID.General">
             <app-manage-settings></app-manage-settings>
@@ -18,10 +19,10 @@
             <app-manage-media-settings></app-manage-media-settings>
           </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.Users">
-              <app-manage-users></app-manage-users>
+            <app-manage-users></app-manage-users>
           </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.Libraries">
-              <app-manage-library></app-manage-library>
+            <app-manage-library></app-manage-library>
           </ng-container>
           <ng-container *ngIf="tab.fragment === TabID.Logs">
             <app-manage-logs></app-manage-logs>
@@ -35,12 +36,15 @@
           <ng-container *ngIf="tab.fragment === TabID.Tasks">
             <app-manage-tasks-settings></app-manage-tasks-settings>
           </ng-container>
-          <ng-container *ngIf="tab.fragment === TabID.Plugins">
-            Nothing here yet. This will be built out in a future update.
+          <ng-container *ngIf="tab.fragment === TabID.KavitaPlus">
+            <p>{{t('kavita+-desc-part-1')}} <a href="https://wiki.kavitareader.com/en/kavita-plus" target="_blank" rel="noreferrer nofollow">{{t('kavita+-desc-part-2')}}</a> {{t('kavita+-desc-part-3')}} <a href="https://wiki.kavitareader.com/en/kavita-plus#faq" target="_blank" rel="noreferrer nofollow">FAQ</a></p>
+            <app-license></app-license>
           </ng-container>
         </ng-template>
       </li>
-  </ul>
-  <div [ngbNavOutlet]="nav" class="mt-3"></div>
+    </ul>
+    <div [ngbNavOutlet]="nav" class="mt-3 mb-3"></div>
 
-</div>
+  </div>
+
+</ng-container>

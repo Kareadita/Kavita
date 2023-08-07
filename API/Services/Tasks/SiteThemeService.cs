@@ -36,14 +36,13 @@ public class ThemeService : IThemeService
     /// </summary>
     /// <param name="themeId"></param>
     /// <returns></returns>
-    [AllowAnonymous]
     public async Task<string> GetContent(int themeId)
     {
         var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
-        if (theme == null) throw new KavitaException("Theme file missing or invalid");
+        if (theme == null) throw new KavitaException("theme-doesnt-exist");
         var themeFile = _directoryService.FileSystem.Path.Join(_directoryService.SiteThemeDirectory, theme.FileName);
         if (string.IsNullOrEmpty(themeFile) || !_directoryService.FileSystem.File.Exists(themeFile))
-            throw new KavitaException("Theme file missing or invalid");
+            throw new KavitaException("theme-doesnt-exist");
 
         return await _directoryService.FileSystem.File.ReadAllTextAsync(themeFile);
     }
@@ -104,7 +103,7 @@ public class ThemeService : IThemeService
 
         // if there are no default themes, reselect Dark as default
         var postSaveThemes = (await _unitOfWork.SiteThemeRepository.GetThemes()).ToList();
-        if (!postSaveThemes.Any(t => t.IsDefault))
+        if (!postSaveThemes.Exists(t => t.IsDefault))
         {
             var defaultThemeName = Seed.DefaultThemes.Single(t => t.IsDefault).NormalizedName;
             var theme = postSaveThemes.SingleOrDefault(t => t.NormalizedName == defaultThemeName);
@@ -151,7 +150,7 @@ public class ThemeService : IThemeService
         try
         {
             var theme = await _unitOfWork.SiteThemeRepository.GetThemeDto(themeId);
-            if (theme == null) throw new KavitaException("Theme file missing or invalid");
+            if (theme == null) throw new KavitaException("theme-doesnt-exist");
 
             foreach (var siteTheme in await _unitOfWork.SiteThemeRepository.GetThemes())
             {

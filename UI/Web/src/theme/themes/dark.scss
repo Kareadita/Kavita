@@ -1,4 +1,5 @@
-//
+@import '../variables';
+
 :root, :root .default {
     /* Base colors */
     --primary-color: #4ac694;
@@ -15,7 +16,7 @@
     --theme-color: #000000;
     --color-scheme: dark;
     --tile-color: var(--primary-color);
-    
+
 
     /* Navbar */
     --navbar-bg-color: black;
@@ -180,15 +181,14 @@
     --ratingstar-star-filled: var(--primary-color);
 
     /* Global */
-    //--hr-color: transparent;
     --hr-color: rgba(239, 239, 239, 0.125);
     --accent-bg-color: rgba(1, 4, 9, 0.5);
     --accent-text-color: lightgrey;
-    --grid-breakpoints-xs: $grid-breakpoint-xs;
-    --grid-breakpoints-sm: $grid-breakpoint-sm;
-    --grid-breakpoints-md: $grid-breakpoint-md;
-    --grid-breakpoints-lg: $grid-breakpoint-lg;
-    --grid-breakpoints-xl: $grid-breakpoint-xl;
+    --grid-breakpoints-xs: $grid-breakpoints-xs;
+    --grid-breakpoints-sm: $grid-breakpoints-sm;
+    --grid-breakpoints-md: $grid-breakpoints-md;
+    --grid-breakpoints-lg: $grid-breakpoints-lg;
+    --grid-breakpoints-xl: $grid-breakpoints-xl;
     --body-font-family: "EBGaramond", "Helvetica Neue", sans-serif;
     --brand-font-family: "Spartan", sans-serif;
 
@@ -246,4 +246,13 @@
 
     /* List Card Item */
     --card-list-item-bg-color: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.15) 1%, rgba(0,0,0,0) 100%);
+
+    /* Review Card */
+    --review-card-star-color: gold;
+    --review-spoiler-bg-color: var(--primary-color);
+    --review-spoiler-text-color: var(--body-text-color);
+
+    /** Rating Star Color **/
+    --rating-star-color: var(--primary-color);
+
   }

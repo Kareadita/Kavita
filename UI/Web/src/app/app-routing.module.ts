@@ -43,7 +43,11 @@ const routes: Routes = [
   },
   {
     path: 'libraries',
-    loadChildren: () => import('../app/dashboard/dashboard.module').then(m => m.DashboardModule)
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
+  },
+  {
+    path: 'libraries',
+    loadChildren: () => import('./dashboard/dashboard.module').then(m => m.DashboardModule)
   },
   {
     path: 'want-to-read',
@@ -55,12 +59,12 @@ const routes: Routes = [
     canActivate: [AuthGuard, LibraryAccessGuard],
     children: [
       {
-        path: ':libraryId', 
+        path: ':libraryId',
         pathMatch: 'full',
         loadChildren: () => import('../app/library-detail/library-detail.module').then(m => m.LibraryDetailModule)
       },
       {
-        path: ':libraryId/series/:seriesId', 
+        path: ':libraryId/series/:seriesId',
         pathMatch: 'full',
         loadChildren: () => import('../app/series-detail/series-detail.module').then(m => m.SeriesDetailModule)
       },

@@ -55,6 +55,9 @@ public class Program
             Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
         }
 
+        Configuration.KavitaPlusApiUrl = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development
+            ?  "http://localhost:5020" : "https://plus.kavitareader.com";
+
         try
         {
             var host = CreateHostBuilder(args).Build();
@@ -67,7 +70,8 @@ public class Program
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 var context = services.GetRequiredService<DataContext>();
                 var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
+                var isDbCreated = await context.Database.CanConnectAsync();
+                if (isDbCreated && pendingMigrations.Any())
                 {
                     logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
                     var migrationDirectory = await GetMigrationDirectory(context, directoryService);
@@ -79,16 +83,6 @@ public class Program
                         directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
                         logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
                     }
-                }
-
-                // This must run before the migration
-                try
-                {
-                    await MigrateSeriesRelationsExport.Migrate(context, logger);
-                }
-                catch (Exception)
-                {
-                    // If fresh install, could fail and we should just carry on as it's not applicable
                 }
 
                 await context.Database.MigrateAsync();
@@ -180,7 +174,7 @@ public class Program
                     }
                     else
                     {
-                        foreach (var ipAddress in ipAddresses.Split(','))
+                        foreach (var ipAddress in ipAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                         {
                             try
                             {

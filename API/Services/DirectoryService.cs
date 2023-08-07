@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.DTOs.System;
+using API.Entities.Enums;
 using API.Extensions;
 using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace API.Services;
+#nullable enable
 
 public interface IDirectoryService
 {
@@ -23,6 +25,7 @@ public interface IDirectoryService
     string ConfigDirectory { get; }
     string SiteThemeDirectory { get; }
     string FaviconDirectory { get; }
+    string LocalizationDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -77,11 +80,12 @@ public class DirectoryService : IDirectoryService
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
     public string FaviconDirectory { get; }
+    public string LocalizationDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
     private static readonly Regex ExcludeDirectories = new Regex(
-        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb",
+        @"@eaDir|\.DS_Store|\.qpkg|__MACOSX|@Recently-Snapshot|@recycle|\.@__thumb|\.caltrash",
         MatchOptions,
         Tasks.Scanner.Parser.Parser.RegexTimeout);
     private static readonly Regex FileCopyAppend = new Regex(@"\(\d+\)",
@@ -93,22 +97,23 @@ public class DirectoryService : IDirectoryService
     {
         _logger = logger;
         FileSystem = fileSystem;
-        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
-        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
-        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
-        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
-        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
-        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
-        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
-
-        ExistOrCreate(SiteThemeDirectory);
+        ExistOrCreate(ConfigDirectory);
+        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
         ExistOrCreate(CoverImageDirectory);
+        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
         ExistOrCreate(CacheDirectory);
+        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
         ExistOrCreate(LogDirectory);
+        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ExistOrCreate(TempDirectory);
+        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
         ExistOrCreate(BookmarkDirectory);
+        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
+        ExistOrCreate(SiteThemeDirectory);
+        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
         ExistOrCreate(FaviconDirectory);
+        LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
     }
 
     /// <summary>
@@ -484,10 +489,8 @@ public class DirectoryService : IDirectoryService
             }
 
             var noExtension = FileSystem.Path.GetFileNameWithoutExtension(fileInfo.Name);
-            //if (FileCopyAppendRegex().IsMatch(noExtension))
             if (FileCopyAppend.IsMatch(noExtension))
             {
-                //var match = FileCopyAppendRegex().Match(noExtension).Value;
                 var match = FileCopyAppend.Match(noExtension).Value;
                 var matchNumber = match.Replace("(", string.Empty).Replace(")", string.Empty);
                 noExtension = noExtension.Replace(match, $"({int.Parse(matchNumber) + 1})");
@@ -518,7 +521,9 @@ public class DirectoryService : IDirectoryService
             {
                 Name = d.Name,
                 FullPath = d.FullName,
-            }).ToImmutableList();
+            })
+            .OrderBy(s => s.Name)
+            .ToImmutableList();
 
         return dirs;
     }
@@ -562,11 +567,8 @@ public class DirectoryService : IDirectoryService
                     break;
                 }
 
-                var fullPath = Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(folder, parts.Last()));
-                if (!dirs.ContainsKey(fullPath))
-                {
-                    dirs.Add(fullPath, string.Empty);
-                }
+                var fullPath = Tasks.Scanner.Parser.Parser.NormalizePath(Path.Join(folder, parts[parts.Count - 1]));
+                dirs.TryAdd(fullPath, string.Empty);
             }
         }
 

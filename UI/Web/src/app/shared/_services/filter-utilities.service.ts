@@ -38,7 +38,11 @@ export enum FilterQueryParam {
   /**
    * This is a pagination control
    */
-  Page = 'page'
+  Page = 'page',
+  /**
+   * Special case for the UI. Does not trigger filtering
+   */
+  None = 'none'
 }
 
 @Injectable({

@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'dynamicList',
-  pure: true
+  pure: true,
+  standalone: true
 })
 export class DynamicListPipe implements PipeTransform {
 

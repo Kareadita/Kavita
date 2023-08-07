@@ -1,0 +1,24 @@
+<ng-container *transloco="let t; read: 'personal-table-of-contents'">
+  <div class="table-of-contents">
+    <div *ngIf="Pages.length === 0">
+      <em>{{t('no-data')}}}</em>
+    </div>
+    <ul>
+      <li *ngFor="let page of Pages">
+        <span (click)="loadChapterPage(page, '')">{{t('page', {value: page})}}</span>
+        <ul class="chapter-title">
+          <li class="ellipsis"
+              [ngbTooltip]="bookmark.title"
+              placement="right"
+              *ngFor="let bookmark of bookmarks[page]" (click)="loadChapterPage(bookmark.pageNumber, bookmark.bookScrollId); $event.stopPropagation();">
+            {{bookmark.title}}
+            <button class="btn btn-icon ms-1" (click)="removeBookmark(bookmark); $event.stopPropagation();">
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('delete', {bookmarkName: bookmark.title})}}</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</ng-container>

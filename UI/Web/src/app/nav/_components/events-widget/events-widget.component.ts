@@ -8,9 +8,9 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { map, shareReplay, takeUntil } from 'rxjs/operators';
+import { NgbModal, NgbModalRef, NgbPopover } from '@ng-bootstrap/ng-bootstrap';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { map, shareReplay } from 'rxjs/operators';
 import { ConfirmConfig } from 'src/app/shared/confirm-dialog/_models/confirm-config';
 import { ConfirmService } from 'src/app/shared/confirm.service';
 import { UpdateNotificationModalComponent } from 'src/app/shared/update-notification/update-notification-modal.component';
@@ -23,12 +23,18 @@ import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import { EVENTS, Message, MessageHubService } from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
+import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
+import { NgIf, NgClass, NgStyle, NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-nav-events-toggle',
-  templateUrl: './events-widget.component.html',
-  styleUrls: ['./events-widget.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-nav-events-toggle',
+    templateUrl: './events-widget.component.html',
+    styleUrls: ['./events-widget.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe, TranslocoModule]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input({required: true}) user!: User;
@@ -74,7 +80,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event: Message<NotificationProgressEvent>) => {
       if (event.event === EVENTS.NotificationProgress) {
         this.processNotificationProgressEvent(event);
       } else if (event.event === EVENTS.Error) {
@@ -89,6 +95,9 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         this.infoSource.next(values);
         this.activeEvents += 1;
         this.cdRef.markForCheck();
+      } else if (event.event === EVENTS.UpdateAvailable) {
+        console.log('event: ', event);
+        this.handleUpdateAvailableClick(event.payload);
       }
     });
 
@@ -145,10 +154,15 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
   }
 
 
-  handleUpdateAvailableClick(message: NotificationProgressEvent) {
+  handleUpdateAvailableClick(message: NotificationProgressEvent | UpdateVersionEvent) {
     if (this.updateNotificationModalRef != null) { return; }
     this.updateNotificationModalRef = this.modalService.open(UpdateNotificationModalComponent, { scrollable: true, size: 'lg' });
-    this.updateNotificationModalRef.componentInstance.updateData = message.body as UpdateVersionEvent;
+    if (message.hasOwnProperty('body')) {
+      this.updateNotificationModalRef.componentInstance.updateData = (message as NotificationProgressEvent).body as UpdateVersionEvent;
+    } else {
+      this.updateNotificationModalRef.componentInstance.updateData = message as UpdateVersionEvent;
+    }
+
     this.updateNotificationModalRef.closed.subscribe(() => {
       this.updateNotificationModalRef = null;
     });
@@ -171,7 +185,7 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
     }
     config.header = event.title;
     config.content = event.subTitle;
-    var result = await this.confirmService.alert(event.subTitle || event.title, config);
+    const result = await this.confirmService.alert(event.subTitle || event.title, config);
     if (result) {
       this.removeErrorOrInfo(event);
     }

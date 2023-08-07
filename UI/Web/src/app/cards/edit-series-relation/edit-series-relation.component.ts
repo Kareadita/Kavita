@@ -9,7 +9,7 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import { map, Subject, Observable, of, firstValueFrom, takeUntil, ReplaySubject } from 'rxjs';
 import { UtilityService } from 'src/app/shared/_services/utility.service';
 import { TypeaheadSettings } from 'src/app/typeahead/_models/typeahead-settings';
@@ -21,6 +21,10 @@ import { LibraryService } from 'src/app/_services/library.service';
 import { SearchService } from 'src/app/_services/search.service';
 import { SeriesService } from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
+import {CommonModule, NgForOf, NgIf} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
+import {RelationshipPipe} from "../../pipe/relationship.pipe";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well
@@ -30,6 +34,14 @@ interface RelationControl {
 
 @Component({
   selector: 'app-edit-series-relation',
+  standalone: true,
+  imports: [
+    TypeaheadComponent,
+    CommonModule,
+    ReactiveFormsModule,
+    TranslocoModule,
+    RelationshipPipe,
+  ],
   templateUrl: './edit-series-relation.component.html',
   styleUrls: ['./edit-series-relation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -46,7 +58,6 @@ export class EditSeriesRelationComponent implements OnInit {
 
   relationOptions = RelationKinds;
   relations: Array<RelationControl> = [];
-  seriesSettings: TypeaheadSettings<SearchResult> = new TypeaheadSettings();
   libraryNames: {[key:number]: string} = {};
 
   focusTypeahead = new EventEmitter();

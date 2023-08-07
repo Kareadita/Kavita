@@ -8,24 +8,26 @@ import {
   HostListener,
   inject,
   Input,
-  OnDestroy,
   OnInit,
   Output,
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import { NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-grouped-typeahead',
-  templateUrl: './grouped-typeahead.component.html',
-  styleUrls: ['./grouped-typeahead.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-grouped-typeahead',
+    templateUrl: './grouped-typeahead.component.html',
+    styleUrls: ['./grouped-typeahead.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [ReactiveFormsModule, NgClass, NgIf, NgFor, NgTemplateOutlet, TranslocoModule]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   /**

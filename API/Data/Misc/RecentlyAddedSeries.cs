@@ -2,6 +2,7 @@
 using API.Entities.Enums;
 
 namespace API.Data.Misc;
+#nullable enable
 
 public class RecentlyAddedSeries
 {

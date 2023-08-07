@@ -1,16 +1,22 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Device } from 'src/app/_models/device/device';
-import { DevicePlatform, devicePlatforms } from 'src/app/_models/device/device-platform';
 import { DeviceService } from 'src/app/_services/device.service';
+import { DevicePlatformPipe } from '../_pipes/device-platform.pipe';
+import { SentenceCasePipe } from '../../pipe/sentence-case.pipe';
+import { NgIf, NgFor } from '@angular/common';
+import { EditDeviceComponent } from '../edit-device/edit-device.component';
+import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-manage-devices',
-  templateUrl: './manage-devices.component.html',
-  styleUrls: ['./manage-devices.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-manage-devices',
+    templateUrl: './manage-devices.component.html',
+    styleUrls: ['./manage-devices.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+    imports: [NgbCollapse, EditDeviceComponent, NgIf, NgFor, SentenceCasePipe, DevicePlatformPipe, TranslocoModule]
 })
 export class ManageDevicesComponent implements OnInit, OnDestroy {
 
@@ -21,7 +27,7 @@ export class ManageDevicesComponent implements OnInit, OnDestroy {
 
   private readonly onDestroy = new Subject<void>();
 
-  constructor(public deviceService: DeviceService, private toastr: ToastrService, 
+  constructor(public deviceService: DeviceService, private toastr: ToastrService,
     private readonly cdRef: ChangeDetectorRef) { }
 
   ngOnInit(): void {
@@ -42,7 +48,7 @@ export class ManageDevicesComponent implements OnInit, OnDestroy {
       this.cdRef.markForCheck();
     });
   }
-  
+
   deleteDevice(device: Device) {
     this.deviceService.deleteDevice(device.id).subscribe(() => {
       const index = this.devices.indexOf(device);

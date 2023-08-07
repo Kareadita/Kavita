@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Entities.Enums;
 using API.Helpers.Converters;
+using API.Services.Plus;
 using API.Services.Tasks;
 using API.Services.Tasks.Metadata;
 using Hangfire;
@@ -31,8 +32,9 @@ public interface ITaskScheduler
     void CancelStatsTasks();
     Task RunStatCollection();
     void ScanSiteThemes();
-    Task CovertAllCoversToEncoding();
+    void CovertAllCoversToEncoding();
     Task CleanupDbEntries();
+    Task ScrobbleUpdates(int userId);
 
 }
 public class TaskScheduler : ITaskScheduler
@@ -51,17 +53,24 @@ public class TaskScheduler : ITaskScheduler
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
     private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
+    private readonly IScrobblingService _scrobblingService;
+    private readonly ILicenseService _licenseService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = "scan";
     public const string DefaultQueue = "default";
     public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
     public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
+    public const string CheckForUpdateId = "check-updates";
     public const string CleanupDbTaskId = "cleanup-db";
     public const string CleanupTaskId = "cleanup";
     public const string BackupTaskId = "backup";
     public const string ScanLibrariesTaskId = "scan-libraries";
     public const string ReportStatsTaskId = "report-stats";
+    public const string CheckScrobblingTokens = "check-scrobbling-tokens";
+    public const string ProcessScrobblingEvents = "process-scrobbling-events";
+    public const string ProcessProcessedScrobblingEvents = "process-processed-scrobbling-events";
+    public const string LicenseCheck = "license-check";
 
     private static readonly ImmutableArray<string> ScanTasks =
         ImmutableArray.Create("ScannerService", "ScanLibrary", "ScanLibraries", "ScanFolder", "ScanSeries");
@@ -78,7 +87,7 @@ public class TaskScheduler : ITaskScheduler
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
         IThemeService themeService, IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
-        IMediaConversionService mediaConversionService)
+        IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -93,6 +102,8 @@ public class TaskScheduler : ITaskScheduler
         _wordCountAnalyzerService = wordCountAnalyzerService;
         _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
+        _scrobblingService = scrobblingService;
+        _licenseService = licenseService;
     }
 
     public async Task ScheduleTasks()
@@ -116,7 +127,13 @@ public class TaskScheduler : ITaskScheduler
         if (setting != null)
         {
             _logger.LogDebug("Scheduling Backup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+            var schedule = CronConverter.ConvertToCronNotation(setting);
+            if (schedule == Cron.Daily())
+            {
+                // Override daily and make 2am so that everything on system has cleaned up and no blocking
+                schedule = Cron.Daily(2);
+            }
+            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(), () => schedule, RecurringJobOptions);
         }
         else
         {
@@ -127,6 +144,16 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(CleanupDbTaskId, () => _cleanupService.CleanupDbEntries(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId, () => _cleanupService.CleanupWantToRead(), Cron.Daily, RecurringJobOptions);
         RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId, () => _statisticService.UpdateServerStatistics(), Cron.Monthly, RecurringJobOptions);
+
+        // KavitaPlus based (needs license check)
+        RecurringJob.AddOrUpdate(CheckScrobblingTokens, () => _scrobblingService.CheckExternalAccessTokens(), Cron.Daily, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens()); // We also kick off an immediate check on startup
+        RecurringJob.AddOrUpdate(LicenseCheck, () => _licenseService.ValidateLicenseStatus(), LicenseService.Cron, RecurringJobOptions);
+        BackgroundJob.Enqueue(() => _licenseService.ValidateLicenseStatus());
+
+        // KavitaPlus Scrobbling (every 4 hours)
+        RecurringJob.AddOrUpdate(ProcessScrobblingEvents, () => _scrobblingService.ProcessUpdatesSinceLastSync(), "0 */4 * * *", RecurringJobOptions);
+        RecurringJob.AddOrUpdate(ProcessProcessedScrobblingEvents, () => _scrobblingService.ClearProcessedEvents(), Cron.Daily, RecurringJobOptions);
     }
 
     #region StatsTasks
@@ -187,10 +214,7 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _themeService.Scan());
     }
 
-    /// <summary>
-    /// Do not invoke this manually, always enqueue on a background thread
-    /// </summary>
-    public async Task CovertAllCoversToEncoding()
+    public void CovertAllCoversToEncoding()
     {
         var defaultParams = Array.Empty<object>();
         if (MediaConversionService.ConversionMethods.Any(method =>
@@ -199,13 +223,7 @@ public class TaskScheduler : ITaskScheduler
             return;
         }
 
-        await _mediaConversionService.ConvertAllManagedMediaToEncodingFormat();
-        _logger.LogInformation("Queuing tasks to update Series and Volume references via Cover Refresh");
-        var libraryIds = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
-        foreach (var lib in libraryIds)
-        {
-            RefreshMetadata(lib.Id, false);
-        }
+        BackgroundJob.Enqueue(() => _mediaConversionService.ConvertAllManagedMediaToEncodingFormat());
     }
 
     #endregion
@@ -215,10 +233,8 @@ public class TaskScheduler : ITaskScheduler
     public void ScheduleUpdaterTasks()
     {
         _logger.LogInformation("Scheduling Auto-Update tasks");
-        RecurringJob.AddOrUpdate("check-updates", () => CheckForUpdate(), Cron.Daily(Rnd.Next(5, 23)), new RecurringJobOptions()
-        {
-            TimeZone = TimeZoneInfo.Local
-        });
+        RecurringJob.AddOrUpdate(CheckForUpdateId, () => CheckForUpdate(), $"0 */{Rnd.Next(4, 6)} * * *", RecurringJobOptions);
+        BackgroundJob.Enqueue(() => CheckForUpdate());
     }
 
     public void ScanFolder(string folderPath, TimeSpan delay)
@@ -257,6 +273,16 @@ public class TaskScheduler : ITaskScheduler
     }
 
     /// <summary>
+    /// TODO: Remove this for Release
+    /// </summary>
+    /// <returns></returns>
+    public async Task ScrobbleUpdates(int userId)
+    {
+        if (!await _licenseService.HasActiveLicense()) return;
+        BackgroundJob.Enqueue(() => _scrobblingService.ProcessUpdatesSinceLastSync());
+    }
+
+    /// <summary>
     /// Attempts to call ScanLibraries on ScannerService, but if another scan task is in progress, will reschedule the invocation for 3 hours in future.
     /// </summary>
     /// <param name="force"></param>
@@ -289,6 +315,11 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.Enqueue(() => _cleanupService.CleanupCacheAndTempDirectories());
+    }
+
+    public void TurnOnScrobbling(int userId = 0)
+    {
+        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(userId));
     }
 
     public void CleanupChapters(int[] chapterIds)
@@ -354,11 +385,6 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _wordCountAnalyzerService.ScanSeries(libraryId, seriesId, forceUpdate));
     }
 
-    public void BackupDatabase()
-    {
-        BackgroundJob.Enqueue(() => _backupService.BackupDatabase());
-    }
-
     /// <summary>
     /// Not an external call. Only public so that we can call this for a Task
     /// </summary>
@@ -408,14 +434,14 @@ public class TaskScheduler : ITaskScheduler
     public static bool HasAlreadyEnqueuedTask(string className, string methodName, object[] args, string queue = DefaultQueue, bool checkRunningJobs = false)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Any(j => j.Value.InEnqueuedState &&
-                                     j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
-                                     j.Value.Job.Method.Name.Equals(methodName) &&
-                                     j.Value.Job.Method.DeclaringType.Name.Equals(className));
+        var ret = enqueuedJobs.Exists(j => j.Value.InEnqueuedState &&
+                                           j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
+                                           j.Value.Job.Method.Name.Equals(methodName) &&
+                                           j.Value.Job.Method.DeclaringType.Name.Equals(className));
         if (ret) return true;
 
         var scheduledJobs = JobStorage.Current.GetMonitoringApi().ScheduledJobs(0, int.MaxValue);
-        ret = scheduledJobs.Any(j =>
+        ret = scheduledJobs.Exists(j =>
             j.Value.Job != null &&
             j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
             j.Value.Job.Method.Name.Equals(methodName) &&
@@ -426,7 +452,7 @@ public class TaskScheduler : ITaskScheduler
         if (checkRunningJobs)
         {
             var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-            return runningJobs.Any(j =>
+            return runningJobs.Exists(j =>
                 j.Value.Job.Method.DeclaringType != null && j.Value.Job.Args.SequenceEqual(args) &&
                 j.Value.Job.Method.Name.Equals(methodName) &&
                 j.Value.Job.Method.DeclaringType.Name.Equals(className));
@@ -444,11 +470,11 @@ public class TaskScheduler : ITaskScheduler
     public static bool RunningAnyTasksByMethod(IEnumerable<string> classNames, string queue = DefaultQueue)
     {
         var enqueuedJobs =  JobStorage.Current.GetMonitoringApi().EnqueuedJobs(queue, 0, int.MaxValue);
-        var ret = enqueuedJobs.Any(j => !j.Value.InEnqueuedState &&
+        var ret = enqueuedJobs.Exists(j => !j.Value.InEnqueuedState &&
                                      classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
         if (ret) return true;
 
         var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
-        return runningJobs.Any(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+        return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 }

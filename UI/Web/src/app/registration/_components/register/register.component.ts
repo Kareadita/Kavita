@@ -1,19 +1,25 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { AccountService } from 'src/app/_services/account.service';
 import { MemberService } from 'src/app/_services/member.service';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { NgIf, NgTemplateOutlet } from '@angular/common';
+import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 /**
- * This is exclusivly used to register the first user on the server and nothing else
+ * This is exclusively used to register the first user on the server and nothing else
  */
 @Component({
-  selector: 'app-register',
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-register',
+    templateUrl: './register.component.html',
+    styleUrls: ['./register.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: true,
+  imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, TranslocoModule]
 })
 export class RegisterComponent {
 
@@ -23,9 +29,9 @@ export class RegisterComponent {
     password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")]),
   });
 
-  constructor(private router: Router, private accountService: AccountService, 
+  constructor(private router: Router, private accountService: AccountService,
     private toastr: ToastrService, private memberService: MemberService) {
-    
+
       this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       if (adminExists) {
         this.router.navigateByUrl('login');
@@ -37,7 +43,7 @@ export class RegisterComponent {
   submit() {
     const model = this.registerForm.getRawValue();
     this.accountService.register(model).subscribe((user) => {
-      this.toastr.success('Account registration complete');
+      this.toastr.success(translate('toasts.account-registration-complete'));
       this.router.navigateByUrl('login');
     });
   }

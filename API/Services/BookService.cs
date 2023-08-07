@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using API.Data.Metadata;
 using API.DTOs.Reader;
 using API.Entities;
@@ -29,6 +28,7 @@ using VersOne.Epub.Options;
 using VersOne.Epub.Schema;
 
 namespace API.Services;
+#nullable enable
 
 public interface IBookService
 {
@@ -231,7 +231,16 @@ public class BookService : IBookService
             }
             styleRule.Text = $"{CssScopeClass} " + styleRule.Text;
         }
-        return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+
+        try
+        {
+            return RemoveWhiteSpaceFromStylesheets(stylesheet.ToCss());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an issue escaping css, likely due to an unsupported css rule");
+        }
+        return RemoveWhiteSpaceFromStylesheets($"{CssScopeClass} {styleContent}");
     }
 
     private static void EscapeCssImportReferences(ref string stylesheetHtml, string apiBase, string prepend)
@@ -276,7 +285,7 @@ public class BookService : IBookService
 
         if (images == null) return;
 
-        var parent = images.First().ParentNode;
+        var parent = images[0].ParentNode;
 
         foreach (var image in images)
         {
@@ -396,7 +405,8 @@ public class BookService : IBookService
                 {
                     var cssFile = book.Content.Css.GetLocalFileRefByKey(key);
 
-                    var styleContent = await ScopeStyles(await cssFile.ReadContentAsync(), apiBase,
+                    var stylesheetHtml = await cssFile.ReadContentAsync();
+                    var styleContent = await ScopeStyles(stylesheetHtml, apiBase,
                         cssFile.FilePath, book);
                     if (styleContent != null)
                     {
@@ -421,7 +431,7 @@ public class BookService : IBookService
         {
             using var epubBook = EpubReader.OpenBook(filePath, BookReaderOptions);
             var publicationDate =
-                epubBook.Schema.Package.Metadata.Dates.FirstOrDefault(pDate => pDate.Event == "publication")?.Date;
+                epubBook.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
 
             if (string.IsNullOrEmpty(publicationDate))
             {
@@ -445,17 +455,32 @@ public class BookService : IBookService
             };
             ComicInfo.CleanComicInfo(info);
 
-            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers.Where(id => !string.IsNullOrEmpty(id.Scheme) && id.Scheme.Equals("ISBN")))
+            var weblinks = new List<string>();
+            foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
             {
                 if (string.IsNullOrEmpty(identifier.Identifier)) continue;
-                var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
-                if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                if (!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
-                    continue;
+                    var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
+                    if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+                    {
+                        _logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+                        continue;
+                    }
+                    info.Isbn = isbn;
                 }
-                info.Isbn = isbn;
-                break;
+
+                if ((!string.IsNullOrEmpty(identifier.Scheme) && identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
+                     identifier.Identifier.StartsWith("url:"))
+                {
+                    var url = identifier.Identifier.Replace("url:", string.Empty);
+                    weblinks.Add(url.Trim());
+                }
+            }
+
+            if (weblinks.Count > 0)
+            {
+                info.Web = string.Join(',', weblinks.Distinct());
             }
 
             // Parse tags not exposed via Library
@@ -558,11 +583,11 @@ public class BookService : IBookService
     {
         var titleId = metadataItem.Refines?.Replace("#", string.Empty);
         var titleElem = epubBook.Schema.Package.Metadata.Titles
-            .FirstOrDefault(item => item.Id == titleId);
+            .Find(item => item.Id == titleId);
         if (titleElem == null) return;
 
         var sortTitleElem = epubBook.Schema.Package.Metadata.MetaItems
-            .FirstOrDefault(item =>
+            .Find(item =>
                 item.Property == "file-as" && item.Refines == metadataItem.Refines);
         if (sortTitleElem == null || string.IsNullOrWhiteSpace(sortTitleElem.Content)) return;
         info.SeriesSort = sortTitleElem.Content;
@@ -572,24 +597,24 @@ public class BookService : IBookService
     {
         var titleId = metadataItem.Refines?.Replace("#", string.Empty);
         var readingListElem = epubBook.Schema.Package.Metadata.Titles
-            .FirstOrDefault(item => item.Id == titleId);
+            .Find(item => item.Id == titleId);
         if (readingListElem == null) return;
 
         var count = epubBook.Schema.Package.Metadata.MetaItems
-            .FirstOrDefault(item =>
+            .Find(item =>
                 item.Property == "display-seq" && item.Refines == metadataItem.Refines);
         if (count == null || count.Content == "0")
         {
             // TODO: Rewrite this to use a StringBuilder
             // Treat this as a Collection
             info.SeriesGroup += (string.IsNullOrEmpty(info.StoryArc) ? string.Empty : ",") +
-                                readingListElem.Title.Replace(",", "_");
+                                readingListElem.Title.Replace(',', '_');
         }
         else
         {
             // Treat as a reading list
             info.AlternateSeries += (string.IsNullOrEmpty(info.AlternateSeries) ? string.Empty : ",") +
-                                    readingListElem.Title.Replace(",", "_");
+                                    readingListElem.Title.Replace(',', '_');
             info.AlternateNumber += (string.IsNullOrEmpty(info.AlternateNumber) ? string.Empty : ",") + count.Content;
         }
     }
@@ -634,13 +659,13 @@ public class BookService : IBookService
         return Parser.CleanAuthor(person.Creator) + ",";
     }
 
-    private static (int year, int month, int day) GetPublicationDate(string publicationDate)
+    private static (int year, int month, int day) GetPublicationDate(string? publicationDate)
     {
-        var dateParsed = DateTime.TryParse(publicationDate, out var date);
         var year = 0;
         var month = 0;
         var day = 0;
-        switch (dateParsed)
+        if (string.IsNullOrEmpty(publicationDate)) return (year, month, day);
+        switch (DateTime.TryParse(publicationDate, out var date))
         {
             case true:
                 year = date.Year;
@@ -887,7 +912,7 @@ public class BookService : IBookService
     /// <param name="mappings">Epub mappings</param>
     /// <param name="page">Page number we are loading</param>
     /// <returns></returns>
-    public async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
+    private async Task<string> ScopePage(HtmlDocument doc, EpubBookRef book, string apiBase, HtmlNode body, Dictionary<string, int> mappings, int page)
     {
         await InlineStyles(doc, book, apiBase, body);
 
@@ -1111,7 +1136,7 @@ public class BookService : IBookService
                     if (doc.ParseErrors.Any())
                     {
                         LogBookErrors(book, contentFileRef, doc);
-                        throw new KavitaException("The file is malformed! Cannot read.");
+                        throw new KavitaException("epub-malformed");
                     }
                     _logger.LogError("{FilePath} has no body tag! Generating one for support. Book may be skewed", book.FilePath);
                     doc.DocumentNode.SelectSingleNode("/html").AppendChild(HtmlNode.CreateNode("<body></body>"));
@@ -1127,7 +1152,7 @@ public class BookService : IBookService
                 "There was an issue reading one of the pages for", ex);
         }
 
-        throw new KavitaException("Could not find the appropriate html for that page");
+        throw new KavitaException("epub-html-missing");
     }
 
     private static void CreateToCChapter(EpubBookRef book, EpubNavigationItemRef navigationItem, IList<BookChapterItem> nestedChapters,
@@ -1263,6 +1288,13 @@ public class BookService : IBookService
         body = Regex.Replace(body, @"[\n\r]+\s*", string.Empty, RegexOptions.None, Parser.RegexTimeout);
         body = Regex.Replace(body, @"\s+", " ", RegexOptions.None, Parser.RegexTimeout);
         body = Regex.Replace(body, @"\s?([:,;{}])\s?", "$1", RegexOptions.None, Parser.RegexTimeout);
+
+        // Handle <!-- which some books use (but shouldn't)
+        body = Regex.Replace(body, "<!--.*?-->", string.Empty, RegexOptions.None, Parser.RegexTimeout);
+
+        // Handle /* */
+        body = Regex.Replace(body, @"/\*.*?\*/", string.Empty, RegexOptions.None, Parser.RegexTimeout);
+
         try
         {
             body = body.Replace(";}", "}");

@@ -9,12 +9,14 @@ import {
   Output,
   TemplateRef
 } from '@angular/core';
-import { NgbOffcanvas } from '@ng-bootstrap/ng-bootstrap';
+import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import { Subject, takeUntil } from 'rxjs';
 import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
 import { NavService } from 'src/app/_services/nav.service';
 import { ToggleService } from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {CommonModule} from "@angular/common";
+import {TranslocoModule} from "@ngneat/transloco";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.
@@ -22,6 +24,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
  */
 @Component({
   selector: 'app-side-nav-companion-bar',
+  standalone: true,
+  imports: [CommonModule, NgbTooltip, TranslocoModule],
   templateUrl: './side-nav-companion-bar.component.html',
   styleUrls: ['./side-nav-companion-bar.component.scss']
 })

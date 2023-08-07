@@ -4,22 +4,26 @@ import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
 import { ServerService } from 'src/app/_services/server.service';
 import { SettingsService } from '../settings.service';
-import { ServerInfo } from '../_models/server-info';
+import {ServerInfoSlim} from '../_models/server-info';
 import { ServerSettings } from '../_models/server-settings';
+import { NgIf } from '@angular/common';
+import {translate, TranslocoModule} from "@ngneat/transloco";
 
 @Component({
-  selector: 'app-manage-system',
-  templateUrl: './manage-system.component.html',
-  styleUrls: ['./manage-system.component.scss']
+    selector: 'app-manage-system',
+    templateUrl: './manage-system.component.html',
+    styleUrls: ['./manage-system.component.scss'],
+    standalone: true,
+  imports: [NgIf, TranslocoModule]
 })
 export class ManageSystemComponent implements OnInit {
 
   settingsForm: FormGroup = new FormGroup({});
   serverSettings!: ServerSettings;
-  serverInfo!: ServerInfo;
+  serverInfo!: ServerInfoSlim;
 
 
-  constructor(private settingsService: SettingsService, private toastr: ToastrService, 
+  constructor(private settingsService: SettingsService, private toastr: ToastrService,
     private serverService: ServerService) { }
 
   ngOnInit(): void {
@@ -55,7 +59,7 @@ export class ManageSystemComponent implements OnInit {
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe((settings: ServerSettings) => {
       this.serverSettings = settings;
       this.resetForm();
-      this.toastr.success('Server settings updated');
+      this.toastr.success(translate('toasts.server-settings-updated'));
     }, (err: any) => {
       console.error('error: ', err);
     });

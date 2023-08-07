@@ -125,6 +125,11 @@ public static class IncludesExtensions
             query = query.Include(u => u.Devices);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.ScrobbleHolds))
+        {
+            query = query.Include(u => u.ScrobbleHolds);
+        }
+
         return query.AsSplitQuery();
     }
 
