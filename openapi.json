@@ -13628,6 +13628,7 @@
           },
           "apiKey": {
             "type": "string",
+            "description": "If ApiKey is passed, will ignore username/password for validation",
             "nullable": true
           }
         },
