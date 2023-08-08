@@ -50,14 +50,6 @@ export class AppComponent implements OnInit {
       if (!user) return false;
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
-
-    this.translocoService.events$.subscribe(event => {
-      if (event.type === 'translationLoadSuccess') {
-        console.log('Language has fully loaded!', translate('login.title'));
-      }
-      console.log('language event: ', event.type, translate('login.title'));
-    });
-
   }
 
   @HostListener('window:resize', ['$event'])

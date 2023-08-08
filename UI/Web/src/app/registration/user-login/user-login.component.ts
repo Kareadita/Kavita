@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
@@ -18,17 +18,10 @@ import {TRANSLOCO_SCOPE, TranslocoDirective} from "@ngneat/transloco";
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective],
-  providers: [
-    {
-      provide: TRANSLOCO_SCOPE,
-      useValue: 'login'
-    }
-  ]
+  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective]
 })
 export class UserLoginComponent implements OnInit {
 
-  //model: any = {username: '', password: ''};
   loginForm: FormGroup = new FormGroup({
       username: new FormControl('', [Validators.required]),
       password: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(6), Validators.pattern("^.{6,32}$")])
@@ -45,8 +38,8 @@ export class UserLoginComponent implements OnInit {
   isSubmitting = false;
 
   constructor(private accountService: AccountService, private router: Router, private memberService: MemberService,
-    private toastr: ToastrService, private navService: NavService, private modalService: NgbModal,
-    private readonly cdRef: ChangeDetectorRef) {
+    private toastr: ToastrService, private navService: NavService,
+    private readonly cdRef: ChangeDetectorRef, private route: ActivatedRoute) {
       this.navService.showNavBar();
       this.navService.hideSideNav();
     }
@@ -76,11 +69,21 @@ export class UserLoginComponent implements OnInit {
 
       this.cdRef.markForCheck();
     });
+
+    this.route.queryParamMap.subscribe(params => {
+      const val = params.get('apiKey');
+      console.log('key: ', val);
+      if (val != null && val.length > 0) {
+        this.login(val);
+      }
+    });
   }
 
 
-  login() {
+
+  login(apiKey: string = '') {
     const model = this.loginForm.getRawValue();
+    model.apiKey = apiKey;
     this.isSubmitting = true;
     this.cdRef.markForCheck();
     this.accountService.login(model).subscribe(() => {
