@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.6.11"
+    "version": "0.7.6.13"
   },
   "servers": [
     {
@@ -13624,6 +13624,11 @@
           },
           "password": {
             "type": "string",
+            "nullable": true
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "If ApiKey is passed, will ignore username/password for validation",
             "nullable": true
           }
         },

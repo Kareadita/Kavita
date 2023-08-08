@@ -177,26 +177,40 @@ public class AccountController : BaseApiController
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        var user = await _userManager.Users
-            .Include(u => u.UserPreferences)
-            .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
+        AppUser? user;
+        if (!string.IsNullOrEmpty(loginDto.ApiKey))
+        {
+            user = await _userManager.Users
+                .Include(u => u.UserPreferences)
+                .SingleOrDefaultAsync(x => x.ApiKey == loginDto.ApiKey);
+        }
+        else
+        {
+            user = await _userManager.Users
+                .Include(u => u.UserPreferences)
+                .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
+        }
+
 
         if (user == null) return Unauthorized(await _localizationService.Get("en", "bad-credentials"));
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
-        var result = await _signInManager
-            .CheckPasswordSignInAsync(user, loginDto.Password, true);
-
-        if (result.IsLockedOut)
+        if (string.IsNullOrEmpty(loginDto.ApiKey))
         {
-            await _userManager.UpdateSecurityStampAsync(user);
-            return Unauthorized(await _localizationService.Translate(user.Id, "locked-out"));
-        }
+            var result = await _signInManager
+                .CheckPasswordSignInAsync(user, loginDto.Password, true);
 
-        if (!result.Succeeded)
-        {
-            return Unauthorized(await _localizationService.Translate(user.Id, result.IsNotAllowed ? "confirm-email" : "bad-credentials"));
+            if (result.IsLockedOut)
+            {
+                await _userManager.UpdateSecurityStampAsync(user);
+                return Unauthorized(await _localizationService.Translate(user.Id, "locked-out"));
+            }
+
+            if (!result.Succeeded)
+            {
+                return Unauthorized(await _localizationService.Translate(user.Id, result.IsNotAllowed ? "confirm-email" : "bad-credentials"));
+            }
         }
 
         // Update LastActive on account
