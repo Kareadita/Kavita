@@ -178,23 +178,23 @@
         "include-unknowns-tooltip": ""
     },
     "site-theme-provider-pipe": {
-        "system": "",
-        "user": ""
+        "system": "Sistema",
+        "user": "Utilizador"
     },
     "manage-devices": {
-        "title": "",
-        "description": "",
-        "devices-title": "",
-        "no-devices": "",
-        "platform-label": "",
-        "email-label": "",
-        "add": "",
-        "delete": "",
-        "edit": ""
+        "title": "Gestor de Dispositivos",
+        "description": "Esta secção serve para configurar dispositivos que não se conseguem ligar ao Kavita através do browser e, em vez disso, têm um endereço de email que aceita ficheiros.",
+        "devices-title": "Dispositivos",
+        "no-devices": "Não existem dispositivos configurados",
+        "platform-label": "Plataforma: ",
+        "email-label": "Email: ",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}"
     },
     "edit-device": {
-        "device-name-label": "",
-        "email-label": "",
+        "device-name-label": "Nome do Dispositivo",
+        "email-label": "{{common.email}}",
         "email-tooltip": "",
         "device-platform-label": "",
         "save": "",
@@ -270,23 +270,23 @@
         "close": "{{common.close}}",
         "clear": "Limpar",
         "filter": "Filtro",
-        "open-filtered-search": ""
+        "open-filtered-search": "Abrir uma pesquisa filtrada por {{item}}"
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "",
-        "total-pages-read-tooltip": "",
-        "total-words-read-label": "",
-        "total-words-read-tooltip": "",
+        "total-pages-read-label": "Páginas Totais Lidas",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-words-read-label": "Palavras Totais Lidas",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "",
-        "time-spent-reading-tooltip": "",
-        "chapters-read-label": "",
-        "chapters-read-tooltip": "",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "chapters-read-label": "Capítulos Lidos",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "",
         "last-active-label": "",
-        "chapters": ""
+        "chapters": "{{value}} capítulos"
     },
     "user-stats": {
-        "library-read-progress-title": "",
+        "library-read-progress-title": "Progresso de Leitura da Biblioteca",
         "read-percentage": ""
     },
     "top-readers": {
@@ -294,63 +294,63 @@
         "time-selection-label": "",
         "comics-label": "",
         "manga-label": "",
-        "books-label": "",
-        "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
-        "all-time": ""
+        "books-label": "Livros: {{value}} hrs",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": ""
     },
     "directory-picker": {
-        "title": "",
-        "close": "",
-        "path-label": "",
-        "path-placeholder": "",
+        "title": "Escolha uma Pasta",
+        "close": "{{common.close}}",
+        "path-label": "Caminho",
+        "path-placeholder": "Comece a escrever ou escolha um caminho",
         "instructions": "",
-        "type-header": "",
-        "name-header": "",
-        "cancel": "",
-        "share": "",
-        "help": ""
+        "type-header": "Tipo",
+        "name-header": "Nome",
+        "cancel": "{{common.cancel}}",
+        "share": "Partilhar",
+        "help": "{{common.help}}"
     },
     "library-access-modal": {
-        "select-all": "",
-        "deselect-all": "",
-        "title": "",
-        "close": "",
-        "reset": "",
-        "cancel": "",
-        "save": "",
-        "no-data": ""
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Acesso a Biblioteca",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "no-data": "Não existem bibliotecas configuradas."
     },
     "time-periods": {
-        "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
+        "this-week": "Esta Semana",
+        "last-7-days": "Últimos 7 Dias",
+        "last-30-days": "Últimos 30 Dias",
+        "last-90-days": "Últimos 90 Dias",
+        "last-year": "Último Ano",
         "all-time": ""
     },
     "device-platform-pipe": {
         "custom": ""
     },
     "day-of-week-pipe": {
-        "monday": "",
-        "tuesday": "",
-        "wednesday": "",
-        "thursday": "",
-        "friday": "",
-        "saturday": "",
-        "sunday": ""
+        "monday": "Segunda-feira",
+        "tuesday": "Terça-feira",
+        "wednesday": "Quarta-feira",
+        "thursday": "Quinta-feira",
+        "friday": "Sexta-feira",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
     },
     "cbl-import-result-pipe": {
-        "success": "",
-        "partial": "",
-        "failure": ""
+        "success": "Sucesso",
+        "partial": "Parcial",
+        "failure": "Falha"
     },
     "cbl-conflict-reason-pipe": {
         "all-series-missing": "",
@@ -415,67 +415,67 @@
         "inker": "",
         "letterer": "",
         "penciller": "",
-        "publisher": "",
-        "writer": "",
-        "other": ""
+        "publisher": "Publicador",
+        "writer": "Escritor",
+        "other": "Outro"
     },
     "manga-format-pipe": {
-        "epub": "",
-        "archive": "",
-        "image": "",
-        "pdf": "",
-        "unknown": ""
+        "epub": "EPUB",
+        "archive": "Arquivo",
+        "image": "Imagem",
+        "pdf": "PDF",
+        "unknown": "Desconhecido"
     },
     "library-type-pipe": {
-        "book": "",
+        "book": "Livro",
         "comic": "",
-        "manga": ""
+        "manga": "Manga"
     },
     "age-rating-pipe": {
-        "unknown": "",
+        "unknown": "Desconhecido",
         "early-childhood": "",
-        "adults-only": "",
-        "everyone": "",
-        "everyone-10-plus": "",
-        "g": "",
-        "kids-to-adults": "",
+        "adults-only": "Adultos 18+",
+        "everyone": "Todos",
+        "everyone-10-plus": "Todos 10+",
+        "g": "G",
+        "kids-to-adults": "Crianças a Adultos",
         "mature": "",
-        "ma15-plus": "",
+        "ma15-plus": "MA15+",
         "mature-17-plus": "",
-        "rating-pending": "",
-        "teen": "",
-        "x18-plus": "",
-        "not-applicable": "",
-        "pg": "",
-        "r18-plus": ""
+        "rating-pending": "Classificação Pendente",
+        "teen": "Adolescente",
+        "x18-plus": "X18+",
+        "not-applicable": "Não Aplicável",
+        "pg": "PG",
+        "r18-plus": "R18+"
     },
     "reset-password": {
-        "title": "",
+        "title": "Repor Palavra Passe",
         "description": "",
-        "email-label": "",
-        "required-field": "",
-        "valid-email": "",
-        "submit": ""
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
-        "title": "",
-        "new-password-label": "",
-        "error-label": "",
-        "close": "",
-        "cancel": "",
-        "save": ""
+        "title": "Repor a Palavra Passe de {{username}}",
+        "new-password-label": "Nova Palavra Passe",
+        "error-label": "Erro: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "all-series": {
-        "series-count": ""
+        "series-count": "{{common.series-count}}"
     },
     "announcements": {
         "title": ""
     },
     "changelog": {
-        "installed": "",
+        "installed": "Instalado",
         "download": "",
-        "published-label": "",
-        "available": "",
+        "published-label": "Publicado: ",
+        "available": "Disponível",
         "description": "",
         "description-continued": ""
     },
