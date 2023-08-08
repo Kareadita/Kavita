@@ -231,8 +231,8 @@
         "save": ""
     },
     "change-age-restriction": {
-        "age-restriction-label": "",
-        "unknowns": "",
+        "age-restriction-label": "Restrizione età",
+        "unknowns": "Sconosciuti",
         "reset": "",
         "edit": "",
         "cancel": "",
