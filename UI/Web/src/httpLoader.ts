@@ -10,6 +10,7 @@ export class HttpLoader implements TranslocoLoader {
 
   getTranslation(langPath: string) {
     const tokens = langPath.split('/');
-    return this.http.get<Translation>(`assets/langs/${tokens[tokens.length - 1]}.json`).pipe(tap(d => console.log('translations: ', d)));
+    return this.http.get<Translation>(`assets/langs/${tokens[tokens.length - 1]}.json`)
+      .pipe(tap(d => console.log('translations: ', d)));
   }
 }

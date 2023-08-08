@@ -34,14 +34,16 @@ export function preloadUser(userService: AccountService, transloco: TranslocoSer
   return function() {
     return userService.currentUser$.pipe(switchMap((user) => {
       if (user && user.preferences.locale) {
+        console.log('preloaded locale: ', user.preferences.locale)
         transloco.setActiveLang(user.preferences.locale);
-        return transloco.load(user.preferences.locale, {fallbackLangs: ['en']})
+        return transloco.load(user.preferences.locale)
       }
 
       // If no user or locale is available, fallback to the default language ('en')
       const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
+      console.log('preloaded locale: ', localStorageLocale)
       transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale, {fallbackLangs: ['en']})
+      return transloco.load(localStorageLocale)
     })).subscribe();
   };
 }
@@ -91,9 +93,6 @@ const translocoOptions = {
     missingHandler: {
       useFallbackTranslation: true,
       allowEmpty: false,
-    },
-    flatten: {
-      aot: environment.production
     }
   }
 };

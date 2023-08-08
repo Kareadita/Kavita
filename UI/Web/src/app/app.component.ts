@@ -1,6 +1,6 @@
 import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import { NavigationStart, Router, RouterOutlet } from '@angular/router';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {map, pluck, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
@@ -55,7 +55,9 @@ export class AppComponent implements OnInit {
       if (event.type === 'translationLoadSuccess') {
         console.log('Language has fully loaded!', translate('login.title'));
       }
+      console.log('language event: ', event.type, translate('login.title'));
     });
+
   }
 
   @HostListener('window:resize', ['$event'])
