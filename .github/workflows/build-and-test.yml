@@ -32,7 +32,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
-          distribution: 'oracle'
+          distribution: 'zulu'
           java-version: '17'
 
       - uses: actions/upload-artifact@v2
