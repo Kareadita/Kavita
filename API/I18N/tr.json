@@ -1,1 +1,16 @@
-{}
+{
+    "denied": "İzin verilmedi",
+    "permission-denied": "Bu operasyona izniniz yok",
+    "bad-credentials": "Kimlik bilgileriniz doğru değil",
+    "confirm-email": "İlk olarak E-Posta'nı onaylaman gerek",
+    "register-user": "Kullanıcıyı kayıt ederken bir şeyler yanlış gitti",
+    "disabled-account": "Hesabınız devre dışı bırakıldı. Sunucu yöneticisiyle iletişime geçin.",
+    "validate-email": "E-Posta'yı doğrularken bir hata oluştu: {0}",
+    "confirm-token-gen": "Doğrulama tokeni oluşturulurken bir sorun oluştu",
+    "password-required": "Yönetici değilseniz, hesabınızı değiştirmek için mevcut şifrenizi girmelisiniz",
+    "invalid-token": "Geçersiz token",
+    "unable-to-reset-key": "Bir şeyler yanlış gitti, key sıfırlanmadı",
+    "invalid-password": "Geçersiz Şifre",
+    "invalid-payload": "Geçersiz yük",
+    "nothing-to-do": "Yapılacak bir şey yok"
+}
