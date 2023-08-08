@@ -35,13 +35,13 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
 
       - name: Cache SonarCloud packages
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
@@ -49,7 +49,7 @@ jobs:
 
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
           path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
@@ -107,7 +107,7 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.0.2
+        uses: jwalton/gh-find-current-pr@v1.3.2
         id: findPr
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
