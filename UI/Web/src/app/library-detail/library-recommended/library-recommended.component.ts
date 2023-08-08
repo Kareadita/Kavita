@@ -16,7 +16,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
 import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import { NgIf, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-library-recommended',
@@ -24,7 +24,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./library-recommended.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, CarouselReelComponent, SeriesCardComponent, AsyncPipe, TranslocoModule]
+  imports: [NgIf, CarouselReelComponent, SeriesCardComponent, AsyncPipe, TranslocoDirective]
 })
 export class LibraryRecommendedComponent implements OnInit {
 

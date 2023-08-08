@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbCollapse, NgbTooltip, NgbRating } from '@ng-bootstrap/ng-bootstrap';
-import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject, Subject, takeUntil } from 'rxjs';
+import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
 import { TypeaheadSettings } from '../typeahead/_models/typeahead-settings';

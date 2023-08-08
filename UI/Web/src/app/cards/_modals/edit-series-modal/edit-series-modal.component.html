@@ -428,10 +428,10 @@
                     <div>
                       <div class="row g-0">
                         <div class="col">
-                          {{t('added-title')}} {{volume.created | date: 'short'}}
+                          {{t('added-title')}} {{volume.createdUtc | translocoDate: {dateStyle: 'short' } | defaultDate}}
                         </div>
                         <div class="col">
-                          {{t('last-modified-title')}} {{volume.lastModified | date: 'short'}}
+                          {{t('last-modified-title')}} {{volume.lastModifiedUtc | translocoDate: {dateStyle: 'short' } | defaultDate}}
                         </div>
                       </div>
                       <div class="row g-0">

@@ -4,13 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
-import { User } from '../../_models/user';
 import { AccountService } from '../../_services/account.service';
 import { MemberService } from '../../_services/member.service';
 import { NavService } from '../../_services/nav.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoModule} from "@ngneat/transloco";
+import {TRANSLOCO_SCOPE, TranslocoDirective} from "@ngneat/transloco";
 
 
 @Component({
@@ -19,7 +18,7 @@ import {TRANSLOCO_SCOPE, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoModule],
+  imports: [SplashContainerComponent, NgIf, ReactiveFormsModule, RouterLink, TranslocoDirective],
   providers: [
     {
       provide: TRANSLOCO_SCOPE,

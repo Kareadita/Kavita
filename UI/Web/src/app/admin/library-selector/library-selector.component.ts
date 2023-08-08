@@ -5,14 +5,14 @@ import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-library-selector',
     templateUrl: './library-selector.component.html',
     styleUrls: ['./library-selector.component.scss'],
     standalone: true,
-  imports: [NgIf, ReactiveFormsModule, FormsModule, NgFor, TranslocoModule]
+  imports: [NgIf, ReactiveFormsModule, FormsModule, NgFor, TranslocoDirective]
 })
 export class LibrarySelectorComponent implements OnInit {
 

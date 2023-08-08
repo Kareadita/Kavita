@@ -19,7 +19,7 @@ import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SearchResultGroup } from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgClass, NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-grouped-typeahead',
@@ -27,7 +27,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./grouped-typeahead.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgClass, NgIf, NgFor, NgTemplateOutlet, TranslocoModule]
+  imports: [ReactiveFormsModule, NgClass, NgIf, NgFor, NgTemplateOutlet, TranslocoDirective]
 })
 export class GroupedTypeaheadComponent implements OnInit {
   /**

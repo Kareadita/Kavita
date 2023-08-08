@@ -11,7 +11,7 @@ import { ConfirmResetPasswordComponent } from './_components/confirm-reset-passw
 import { RegisterComponent } from './_components/register/register.component';
 import { ResetPasswordComponent } from './_components/reset-password/reset-password.component';
 import { SplashContainerComponent } from './_components/splash-container/splash-container.component';
-import {TRANSLOCO_SCOPE, TranslocoModule} from "@ngneat/transloco";
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 

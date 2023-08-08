@@ -34,7 +34,7 @@ import { EventsWidgetComponent } from '../events-widget/events-widget.component'
 import { SeriesFormatComponent } from '../../../shared/series-format/series-format.component';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { GroupedTypeaheadComponent } from '../grouped-typeahead/grouped-typeahead.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-nav-header',
@@ -42,7 +42,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoModule]
+  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
 })
 export class NavHeaderComponent implements OnInit {
 

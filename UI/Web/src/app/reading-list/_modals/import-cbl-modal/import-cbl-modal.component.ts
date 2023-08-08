@@ -2,12 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, injec
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FileUploadModule, FileUploadValidators} from '@iplab/ngx-file-upload';
 import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem, NgbAccordionModule, NgbAccordionToggle,
+  NgbAccordionModule, NgbAccordionToggle,
   NgbActiveModal
 } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -21,7 +16,7 @@ import {CommonModule} from "@angular/common";
 import {SafeHtmlPipe} from "../../../pipe/safe-html.pipe";
 import {CblConflictReasonPipe} from "../../_pipes/cbl-conflict-reason.pipe";
 import {CblImportResultPipe} from "../../_pipes/cbl-import-result.pipe";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 interface FileStep {
   fileName: string;
@@ -44,7 +39,7 @@ enum Step {
     FileUploadModule,
     NgbAccordionModule,
     SafeHtmlPipe,
-    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle, TranslocoModule],
+    CblConflictReasonPipe, ReactiveFormsModule, StepTrackerComponent, CblImportResultPipe, NgbAccordionToggle, TranslocoDirective],
   templateUrl: './import-cbl-modal.component.html',
   styleUrls: ['./import-cbl-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

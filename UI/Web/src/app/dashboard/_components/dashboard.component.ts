@@ -30,7 +30,7 @@ import { SeriesCardComponent } from '../../cards/series-card/series-card.compone
 import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-dashboard',
@@ -38,7 +38,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent, CardItemComponent, AsyncPipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent, CardItemComponent, AsyncPipe, TranslocoDirective]
 })
 export class DashboardComponent implements OnInit {
 

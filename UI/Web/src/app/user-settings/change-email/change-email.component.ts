@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {Observable, of, shareReplay, take} from 'rxjs';
+import {shareReplay, take} from 'rxjs';
 import {UpdateEmailResponse} from 'src/app/_models/auth/update-email-response';
 import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
@@ -9,7 +9,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { ApiKeyComponent } from '../api-key/api-key.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-email',
@@ -17,7 +17,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent, TranslocoModule]
+    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective]
 })
 export class ChangeEmailComponent implements OnInit {
 

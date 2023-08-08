@@ -23,7 +23,7 @@ import { TopReadersComponent } from '../top-readers/top-readers.component';
 import { StatListComponent } from '../stat-list/stat-list.component';
 import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
 import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-server-stats',
@@ -33,7 +33,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     standalone: true,
     imports: [NgIf, IconAndTitleComponent, StatListComponent, TopReadersComponent, FileBreakdownStatsComponent,
       PublicationStatusStatsComponent, ReadingActivityComponent, DayBreakdownComponent, AsyncPipe, DecimalPipe,
-      CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoModule]
+      CompactNumberPipe, TimeDurationPipe, BytesPipe, TranslocoDirective]
 })
 export class ServerStatsComponent {
 

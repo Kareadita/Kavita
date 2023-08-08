@@ -18,7 +18,7 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { NgIf, DecimalPipe } from '@angular/common';
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reading-lists',
@@ -26,7 +26,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./reading-lists.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgIf, CardDetailLayoutComponent, CardItemComponent, DecimalPipe, TranslocoDirective]
 })
 export class ReadingListsComponent implements OnInit {
 
@@ -36,7 +36,7 @@ export class ReadingListsComponent implements OnInit {
   isAdmin: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
-  globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
+  globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
 
   translocoService = inject(TranslocoService);
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,

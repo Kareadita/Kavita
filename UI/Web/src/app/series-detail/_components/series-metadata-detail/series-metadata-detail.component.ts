@@ -20,7 +20,7 @@ import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-info-cards.component";
 import {LibraryType} from "../../../_models/library";
 import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.component";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 
 @Component({
@@ -28,7 +28,7 @@ import {TranslocoModule} from "@ngneat/transloco";
   standalone: true,
   imports: [CommonModule, TagBadgeComponent, BadgeExpanderComponent, SafeHtmlPipe, ExternalRatingComponent,
     ReadMoreComponent, A11yClickDirective, PersonBadgeComponent, NgbCollapse, SeriesInfoCardsComponent,
-    MetadataDetailComponent, TranslocoModule],
+    MetadataDetailComponent, TranslocoDirective],
   templateUrl: './series-metadata-detail.component.html',
   styleUrls: ['./series-metadata-detail.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

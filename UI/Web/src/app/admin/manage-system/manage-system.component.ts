@@ -7,14 +7,14 @@ import { SettingsService } from '../settings.service';
 import {ServerInfoSlim} from '../_models/server-info';
 import { ServerSettings } from '../_models/server-settings';
 import { NgIf } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-manage-system',
     templateUrl: './manage-system.component.html',
     styleUrls: ['./manage-system.component.scss'],
     standalone: true,
-  imports: [NgIf, TranslocoModule]
+  imports: [NgIf, TranslocoDirective]
 })
 export class ManageSystemComponent implements OnInit {
 

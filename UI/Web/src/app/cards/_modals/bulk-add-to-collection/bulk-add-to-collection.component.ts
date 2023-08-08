@@ -18,12 +18,12 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
 import {FilterPipe} from "../../../pipe/filter.pipe";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoModule],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
   templateUrl: './bulk-add-to-collection.component.html',
   styleUrls: ['./bulk-add-to-collection.component.scss'],
   encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.

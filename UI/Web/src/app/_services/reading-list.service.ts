@@ -6,7 +6,6 @@ import { UtilityService } from '../shared/_services/utility.service';
 import { Person } from '../_models/metadata/person';
 import { PaginatedResult } from '../_models/pagination';
 import { ReadingList, ReadingListItem } from '../_models/reading-list';
-import { CblImportResult } from '../_models/reading-list/cbl/cbl-import-result.enum';
 import { CblImportSummary } from '../_models/reading-list/cbl/cbl-import-summary';
 import { TextResonse } from '../_types/text-response';
 import { ActionItem } from './action-factory.service';
@@ -28,7 +27,7 @@ export class ReadingListService {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted 
+    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + 'readinglist/lists?includePromoted=' + includePromoted
     + '&sortByLastModified=' + sortByLastModified, {}, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<ReadingList[]>());
@@ -92,7 +91,7 @@ export class ReadingListService {
     if (readingList?.promoted && !isAdmin) return false;
     return true;
   }
-  
+
   nameExists(name: string) {
     return this.httpClient.get<boolean>(this.baseUrl + 'readinglist/name-exists?name=' + name);
   }

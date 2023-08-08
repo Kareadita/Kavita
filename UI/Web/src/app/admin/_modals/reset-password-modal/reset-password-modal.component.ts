@@ -5,14 +5,14 @@ import { Member } from 'src/app/_models/auth/member';
 import { AccountService } from 'src/app/_services/account.service';
 import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
 import { NgIf } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reset-password-modal',
     templateUrl: './reset-password-modal.component.html',
     styleUrls: ['./reset-password-modal.component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, SentenceCasePipe, TranslocoModule]
+    imports: [ReactiveFormsModule, NgIf, SentenceCasePipe, TranslocoDirective]
 })
 export class ResetPasswordModalComponent {
 

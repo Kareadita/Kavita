@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { BookChapterItem } from '../../_models/book-chapter-item';
 import { NgIf, NgFor } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-table-of-contents',
@@ -9,7 +9,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./table-of-contents.component.scss'],
     changeDetection: ChangeDetectionStrategy.Default,
     standalone: true,
-  imports: [NgIf, NgFor, TranslocoModule]
+  imports: [NgIf, NgFor, TranslocoDirective]
 })
 export class TableOfContentsComponent  {
 

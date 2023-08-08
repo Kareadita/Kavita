@@ -9,13 +9,13 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { map, Observable, of, shareReplay, Subject, take, takeUntil } from 'rxjs';
+import { map, Observable, of, shareReplay, take } from 'rxjs';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-password',
@@ -23,7 +23,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoModule]
+  imports: [NgIf, NgbCollapse, NgFor, ReactiveFormsModule, AsyncPipe, TranslocoDirective]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 

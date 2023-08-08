@@ -26,7 +26,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SentenceCasePipe } from '../../../pipe/sentence-case.pipe';
 import { CircularLoaderComponent } from '../../../shared/circular-loader/circular-loader.component';
 import { NgIf, NgClass, NgStyle, NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-nav-events-toggle',
@@ -34,7 +34,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./events-widget.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe, TranslocoModule]
+  imports: [NgIf, NgClass, NgbPopover, NgStyle, CircularLoaderComponent, NgFor, AsyncPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class EventsWidgetComponent implements OnInit, OnDestroy {
   @Input({required: true}) user!: User;
