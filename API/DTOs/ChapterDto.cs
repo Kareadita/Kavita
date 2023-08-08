@@ -62,6 +62,11 @@ public class ChapterDto : IHasReadTimeEstimate
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
     /// <summary>
+    /// When chapter was created in local server time
+    /// </summary>
+    /// <remarks>This is required for Tachiyomi Extension</remarks>
+    public DateTime Created { get; set; }
+    /// <summary>
     /// When the chapter was released.
     /// </summary>
     /// <remarks>Metadata field</remarks>
