@@ -11,7 +11,7 @@
         "no-libraries": "Es sind noch keine Bibliotheken eingerichtet. Konfigurieren Sie einige in",
         "server-settings-link": "Servereinstellungen",
         "not-granted": "Sie haben keinen Zugang zu Bibliotheken erhalten.",
-        "on-deck-title": "On Deck",
+        "on-deck-title": "Weiterlesen",
         "recently-updated-title": "Kürzlich aktualisierte Serien",
         "recently-added-title": "Neu hinzugefügte Serien"
     },
@@ -131,7 +131,7 @@
         "writing-style-label": "Schreibstil",
         "writing-style-tooltip": "Ändert die Richtung des Textes. Horizontal ist von links nach rechts, vertikal von oben nach unten.",
         "layout-mode-book-label": "Layoutmodus",
-        "layout-mode-book-tooltip": "",
+        "layout-mode-book-tooltip": "Wie soll der Inhalt aufgebaut sein. Scrollen ist so, wie das Buch es verpackt. 1- oder 2-spaltig entspricht der Höhe des Geräts und fasst 1 oder 2 Spalten Text pro Seite",
         "color-theme-book-label": "Farbe Motiv",
         "color-theme-book-tooltip": "Welches Farb Motiv soll für den Inhalt und das Menü des Buchlesers verwendet werden",
         "font-size-book-label": "Schriftgröße",
@@ -148,33 +148,33 @@
     },
     "user-holds": {
         "title": "",
-        "description": ""
+        "description": "Dies ist eine vom Benutzer verwaltete Liste von Serien, die nicht an Upstream-Anbieter übertragen wird. Sie können eine Serie jederzeit entfernen und das nächste Scrobble-fähige Ereignis (Lesefortschritt, Bewertung, Lesewunschstatus) wird Ereignisse auslösen."
     },
     "theme-manager": {
-        "title": "",
-        "looking-for-theme": "",
-        "looking-for-theme-continued": "",
-        "scan": "",
-        "site-themes": "",
-        "set-default": "",
+        "title": "Motiv-Manager",
+        "looking-for-theme": "Suchen Sie nach einem Licht- oder E-Ink-Thema? Wir haben einige benutzerdefinierte Themen, die Sie auf unserer Website verwenden können ",
+        "looking-for-theme-continued": "Motiv github.",
+        "scan": "durchsuchen",
+        "site-themes": "Webseiten Motiv",
+        "set-default": "Standard festlegen",
         "apply": "{{common.apply}}",
-        "applied": "",
-        "updated-toastr": "",
-        "scan-queued": ""
+        "applied": "Angewandt",
+        "updated-toastr": "Der Standardwert der Seite wurde auf {{name}} aktualisiert",
+        "scan-queued": "Eine Website-Motivsuche wurde in die Warteschlange gestellt"
     },
     "theme": {
-        "theme-dark": "",
-        "theme-black": "",
-        "theme-paper": "",
-        "theme-white": ""
+        "theme-dark": "dunkel",
+        "theme-black": "schwarz",
+        "theme-paper": "Papier",
+        "theme-white": "weiß"
     },
     "restriction-selector": {
         "title": "",
         "description": "",
         "not-applicable-for-admins": "",
         "age-rating-label": "",
-        "no-restriction": "",
-        "include-unknowns-label": "",
+        "no-restriction": "Keine Einschränkung",
+        "include-unknowns-label": "Unbekannte einbeziehen",
         "include-unknowns-tooltip": ""
     },
     "site-theme-provider-pipe": {
@@ -504,7 +504,7 @@
         "title": "Kavita+ Lizenz",
         "manage": "",
         "invalid-license-tooltip": "",
-        "check": "",
+        "check": "Überprüfen",
         "cancel": "{{common.cancel}}",
         "edit": "{{common.edit}}",
         "buy": "Kaufen",
@@ -713,7 +713,7 @@
         "force-scan-tooltip": "",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
-        "next": "",
+        "next": "Nächste",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}"
     },
@@ -723,8 +723,8 @@
         "font-size-label": "{{user-preferences.font-size-book-label}}",
         "line-spacing-label": "{{user-preferences.line-height-book-label}}",
         "margin-label": "{{user-preferences.margin-book-label}}",
-        "reset-to-defaults": "",
-        "reader-settings-title": "",
+        "reset-to-defaults": "Auf Standardwerte zurücksetzen",
+        "reader-settings-title": "Reader-Einstellungen",
         "reading-direction-label": "{{user-preferences.reading-direction-book-label}}",
         "right-to-left": "",
         "left-to-right": "",
@@ -748,7 +748,7 @@
         "layout-mode-option-1col": "",
         "layout-mode-option-2col": "",
         "color-theme-title": "",
-        "theme-dark": "",
+        "theme-dark": "dunkel",
         "theme-black": "",
         "theme-white": "",
         "theme-paper": ""
@@ -901,11 +901,11 @@
         "open-external": ""
     },
     "list-item": {
-        "read": ""
+        "read": "{{common.read}}"
     },
     "manage-alerts": {
         "description-part-1": "",
-        "description-part-2": "",
+        "description-part-2": "Wiki.",
         "filter-label": "",
         "clear-alerts": "",
         "extension-header": "",
@@ -919,19 +919,19 @@
         "send-to-warning": "",
         "email-url-label": "",
         "email-url-tooltip": "",
-        "reset": "",
-        "test": "",
-        "host-name-label": "",
-        "host-name-tooltip": "",
-        "host-name-validation": "",
-        "reset-to-default": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "test": "Test",
+        "host-name-label": "Host Name",
+        "host-name-tooltip": "Domänenname (des Reverse Proxy). Wenn diese Option gesetzt ist, wird bei der E-Mail-Generierung immer dieser Name verwendet.",
+        "host-name-validation": "Der Hostname muss mit http(s) beginnen und darf nicht mit einem / enden",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
     },
     "manage-library": {
-        "title": "",
-        "add-library": "",
-        "no-data": "",
-        "loading": "",
+        "title": "Bibliotheken",
+        "add-library": "Bibliothek hinzufügen",
+        "no-data": "Es gibt keine Bibliotheken. Versuchen Sie, eine zu erstellen.",
+        "loading": "{{common.loading}}",
         "last-scanned-title": "",
         "shared-folders-title": "",
         "type-title": "",
@@ -1095,25 +1095,25 @@
     },
     "edit-collection-tags": {
         "title": "",
-        "required-field": "",
-        "save": "",
-        "close": "",
-        "cancel": "",
-        "general-tab": "",
-        "cover-image-tab": "",
-        "series-tab": "",
-        "name-label": "",
-        "name-validation": "",
+        "required-field": "{{validation.required-field}}",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "general-tab": "Allgemein",
+        "cover-image-tab": "Titelbild",
+        "series-tab": "Serien",
+        "name-label": "Name",
+        "name-validation": "Der Name muss einzigartig sein",
         "promote-label": "",
         "promote-tooltip": "",
-        "summary-label": "",
-        "series-title": "",
-        "deselect-all": "",
-        "select-all": ""
+        "summary-label": "Zusammenfassung",
+        "series-title": "Gilt für die Serien",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
     "library-detail": {
-        "library-tab": "",
-        "recommended-tab": ""
+        "library-tab": "Bibliothek",
+        "recommended-tab": "Empfohlen"
     },
     "library-recommended": {
         "no-data": "",
@@ -1122,7 +1122,7 @@
         "highly-rated": "",
         "quick-catchups": "",
         "quick-reads": "",
-        "on-deck": ""
+        "on-deck": "{{dashboard.on-deck-title}}"
     },
     "admin-dashboard": {
         "title": "",
