@@ -40,6 +40,11 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
               private translocoService: TranslocoService) {}
 
 	transform(value: string) {
+
+    if (value === '' || value === null || value === undefined || value.split('T')[0] === '0001-01-01')  {
+      return this.translocoService.translate('time-ago-pipe.never');
+    }
+
 		this.removeTimer();
 		const d = new Date(value);
 		const now = new Date();

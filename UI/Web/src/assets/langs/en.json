@@ -418,6 +418,7 @@
     },
 
     "time-ago-pipe": {
+        "never": "Never",
         "just-now": "just now",
         "min-ago": "a minute ago",
         "mins-ago": "{{value}} minutes ago",
@@ -1570,7 +1571,7 @@
         "format-title": "Format:",
         "created-title": "Created:",
         "last-read-title": "Last Read:",
-        "last-added-title": "Last Added To:",
+        "last-added-title": "Last Item Added:",
         "last-scanned-title": "Last Scanned:",
         "folder-path-title": "Folder Path:",
         "publication-status-title": "Publication Status:",
