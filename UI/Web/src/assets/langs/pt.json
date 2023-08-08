@@ -480,8 +480,8 @@
         "description-continued": ""
     },
     "invite-user": {
-        "title": "",
-        "close": "",
+        "title": "Convidar Utilizador",
+        "close": "{{common.close}}",
         "description": "",
         "email": "",
         "required-field": "",
