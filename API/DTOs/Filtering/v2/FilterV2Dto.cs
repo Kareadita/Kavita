@@ -17,7 +17,8 @@ public class FilterV2Dto
     /// The name of the filter if not anonymous
     /// </summary>
     public string? Name { get; set; }
-    public ICollection<FilterGroupDto> Groups { get; set; }
+    public ICollection<FilterStatementDto> Statements { get; set; }
+    public FilterCombination Combination { get; set; } = FilterCombination.Or;
     public SortOptions SortOptions { get; set; } // TODO: Solve for how to do this and have it serializable to DB
 
     /// <summary>
@@ -26,15 +27,6 @@ public class FilterV2Dto
     public int LimitTo { get; set; } = 0;
 }
 
-public class FilterGroupDto
-{
-    public ICollection<FilterGroupDto> And { get; set; }
-    public ICollection<FilterGroupDto> Or { get; set; }
-    /// <summary>
-    /// If there are statements then it is assumed there are no And/Ors
-    /// </summary>
-    public ICollection<FilterStatementDto> Statements { get; set; }
-}
 
 
 

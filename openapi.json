@@ -13378,34 +13378,6 @@
         },
         "additionalProperties": false
       },
-      "FilterGroupDto": {
-        "type": "object",
-        "properties": {
-          "and": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterGroupDto"
-            },
-            "nullable": true
-          },
-          "or": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterGroupDto"
-            },
-            "nullable": true
-          },
-          "statements": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterStatementDto"
-            },
-            "description": "If there are statements then it is assumed there are no And/Ors",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "FilterStatementDto": {
         "type": "object",
         "properties": {
@@ -13476,12 +13448,20 @@
             "description": "The name of the filter if not anonymous",
             "nullable": true
           },
-          "groups": {
+          "statements": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/FilterGroupDto"
+              "$ref": "#/components/schemas/FilterStatementDto"
             },
             "nullable": true
+          },
+          "combination": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "sortOptions": {
             "$ref": "#/components/schemas/SortOptions"

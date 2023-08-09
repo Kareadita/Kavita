@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using API.Constants;
 using API.Data;
 using API.DTOs.Filtering.v2;
 using EasyCaching.Core;
@@ -24,7 +25,7 @@ public class FilterController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<FilterV2Dto?>> GetFilter(string name)
     {
-        var provider = _cacheFactory.GetCachingProvider("filter");
+        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Filter);
         if (string.IsNullOrEmpty(name)) return Ok(null);
         var filter = await provider.GetAsync<FilterV2Dto>(name);
         if (filter.HasValue)
@@ -45,7 +46,7 @@ public class FilterController : BaseApiController
     [HttpPost("create-temp")]
     public async Task<ActionResult<string>> CreateTempFilter(FilterV2Dto filterDto)
     {
-        var provider = _cacheFactory.GetCachingProvider("filter");
+        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Filter);
         var name = filterDto.Name;
         if (string.IsNullOrEmpty(filterDto.Name))
         {

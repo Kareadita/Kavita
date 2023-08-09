@@ -925,8 +925,8 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking();
 
         var filterLibs = new List<int>();
-        // Can I just pass isAnd for the root query if it has statements?
-        query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries, false);
+
+        query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries);
 
         query = query
             .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
@@ -946,42 +946,20 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery(), filter.LimitTo);
     }
 
-    public static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query,
-        List<int> filterLibs, List<int> userLibraries, bool isAnd = true)
+    private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query,
+        List<int> filterLibs, IReadOnlyCollection<int> userLibraries)
     {
-        if (filterDto.Groups == null || !filterDto.Groups.Any())
-        {
-            // If there are no groups, return the original query
-            return query;
-        }
+        if (!filterDto.Statements.Any()) return query;
 
-        //var filteredQuery = isAnd ? query : query.Where(b => false);
         var filteredQuery = query;
-        // Initialize filteredQuery to the original query if isAnd is true,
-        // or to a query that always returns false if isAnd is false (to handle the case when there are no And groups)
 
-        foreach (var group in filterDto.Groups)
-        {
-            if (group.Statements != null && group.Statements.Any())
-            {
-                foreach (var statement in group.Statements)
-                {
-                    filteredQuery = BuildFilterGroup(userId, statement, filteredQuery, filterLibs, userLibraries);
-                }
-            }
-            if (group.And != null && group.And.Any())
-            {
-                var andQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.And }, query, filterLibs, userLibraries, true);
-                filteredQuery = filteredQuery.Intersect(andQuery);
-            }
-            if (group.Or != null && group.Or.Any())
-            {
-                var orQuery = BuildFilterQuery(userId, new FilterV2Dto { Groups = group.Or }, query, filterLibs, userLibraries, false);
-                filteredQuery = filteredQuery.Union(orQuery);
-            }
-        }
+        var queries = filterDto.Statements
+            .Select(statement => BuildFilterGroup(userId, statement, filteredQuery, filterLibs, userLibraries))
+            .ToList();
 
-        return filteredQuery;
+        return filterDto.Combination == FilterCombination.And
+            ? queries.Aggregate((q1, q2) => q1.Intersect(q2))
+            : queries.Aggregate((q1, q2) => q1.Union(q2));
     }
 
     private static IQueryable<Series> ApplyLimit(IQueryable<Series> query, int limit)
