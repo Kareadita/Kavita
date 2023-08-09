@@ -73,14 +73,9 @@ export class MetadataFilterComponent implements OnInit {
    */
   filteringCollapsed: boolean = true;
 
-  filter!: SeriesFilter;
   libraries: Array<FilterItem<Library>> = [];
 
-
-  readProgressGroup!: FormGroup;
   sortGroup!: FormGroup;
-  seriesNameGroup!: FormGroup;
-  releaseYearRange!: FormGroup;
   isAscendingSort: boolean = true;
 
   updateApplied: number = 0;
@@ -122,87 +117,6 @@ export class MetadataFilterComponent implements OnInit {
       });
     }
 
-    // this.filter = this.filterUtilityService.createSeriesFilter();
-    // this.readProgressGroup = new FormGroup({
-    //   read: new FormControl({value: this.filter.readStatus.read, disabled: this.filterSettings.readProgressDisabled}, []),
-    //   notRead: new FormControl({value: this.filter.readStatus.notRead, disabled: this.filterSettings.readProgressDisabled}, []),
-    //   inProgress: new FormControl({value: this.filter.readStatus.inProgress, disabled: this.filterSettings.readProgressDisabled}, []),
-    // });
-    this.filterV2 = this.filterSettings.presetsV2;
-    console.log('filterV2: ', this.filterV2);
-
-
-
-    console.log('this.filter.sortOptions: ', this.filter?.sortOptions);
-    this.sortGroup = new FormGroup({
-      sortField: new FormControl({value: this.filter?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
-    });
-
-    this.fullyLoaded = true;
-    this.cdRef.markForCheck();
-    this.apply();
-
-    // this.seriesNameGroup = new FormGroup({
-    //   seriesNameQuery: new FormControl({value: this.filter.seriesNameQuery || '', disabled: this.filterSettings.searchNameDisabled}, [])
-    // });
-
-    // this.releaseYearRange = new FormGroup({
-    //   min: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999), Validators.maxLength(4), Validators.minLength(4)]),
-    //   max: new FormControl({value: undefined, disabled: this.filterSettings.releaseYearDisabled}, [Validators.min(1000), Validators.max(9999), Validators.maxLength(4), Validators.minLength(4)])
-    // });
-
-    // this.readProgressGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
-    //   this.filter.readStatus.read = this.readProgressGroup.get('read')?.value;
-    //   this.filter.readStatus.inProgress = this.readProgressGroup.get('inProgress')?.value;
-    //   this.filter.readStatus.notRead = this.readProgressGroup.get('notRead')?.value;
-    //
-    //   let sum = 0;
-    //   sum += (this.filter.readStatus.read ? 1 : 0);
-    //   sum += (this.filter.readStatus.inProgress ? 1 : 0);
-    //   sum += (this.filter.readStatus.notRead ? 1 : 0);
-    //
-    //   if (sum === 1) {
-    //     if (this.filter.readStatus.read) this.readProgressGroup.get('read')?.disable({ emitEvent: false });
-    //     if (this.filter.readStatus.notRead) this.readProgressGroup.get('notRead')?.disable({ emitEvent: false });
-    //     if (this.filter.readStatus.inProgress) this.readProgressGroup.get('inProgress')?.disable({ emitEvent: false });
-    //   } else {
-    //     this.readProgressGroup.get('read')?.enable({ emitEvent: false });
-    //     this.readProgressGroup.get('notRead')?.enable({ emitEvent: false });
-    //     this.readProgressGroup.get('inProgress')?.enable({ emitEvent: false });
-    //   }
-    //   this.cdRef.markForCheck();
-    // });
-
-    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
-      if (this.filter.sortOptions == null) {
-        this.filter.sortOptions = {
-          isAscending: this.isAscendingSort,
-          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
-        };
-      }
-      this.filter.sortOptions.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
-      this.cdRef.markForCheck();
-    });
-
-    // this.seriesNameGroup.get('seriesNameQuery')?.valueChanges.pipe(
-    //   map(val => (val || '').trim()),
-    //   distinctUntilChanged(),
-    //   takeUntilDestroyed(this.destroyRef)
-    // )
-    // .subscribe(changes => {
-    //   this.filter.seriesNameQuery = changes; // TODO: See if we can make this into observable
-    //   this.cdRef.markForCheck();
-    // });
-
-    // this.releaseYearRange.valueChanges.pipe(
-    //   distinctUntilChanged(),
-    //   takeUntilDestroyed(this.destroyRef)
-    // )
-    // .subscribe(changes => {
-    //   this.filter.releaseYearRange = {min: this.releaseYearRange.get('min')?.value, max: this.releaseYearRange.get('max')?.value};
-    //   this.cdRef.markForCheck();
-    // });
-
     this.loadFromPresetsAndSetup();
   }
 
@@ -216,31 +130,24 @@ export class MetadataFilterComponent implements OnInit {
 
   loadFromPresetsAndSetup() {
     this.fullyLoaded = false;
-    // if (this.filterSettings.presets) {
-    //   this.readProgressGroup.get('read')?.patchValue(this.filterSettings.presets.readStatus.read);
-    //   this.readProgressGroup.get('notRead')?.patchValue(this.filterSettings.presets.readStatus.notRead);
-    //   this.readProgressGroup.get('inProgress')?.patchValue(this.filterSettings.presets.readStatus.inProgress);
-    //
-    //   if (this.filterSettings.presets.sortOptions) {
-    //     this.sortGroup.get('sortField')?.setValue(this.filterSettings.presets.sortOptions.sortField);
-    //     this.isAscendingSort = this.filterSettings.presets.sortOptions.isAscending;
-    //     if (this.filter.sortOptions) {
-    //       this.filter.sortOptions.isAscending = this.isAscendingSort;
-    //       this.filter.sortOptions.sortField = this.filterSettings.presets.sortOptions.sortField;
-    //     }
-    //   }
-    //
-    //   if (this.filterSettings.presets.rating > 0) {
-    //     this.updateRating(this.filterSettings.presets.rating);
-    //   }
-    //
-    //   if (this.filterSettings.presets.seriesNameQuery !== '') {
-    //     this.seriesNameGroup.get('searchNameQuery')?.setValue(this.filterSettings.presets.seriesNameQuery);
-    //   }
-    // }
 
     this.filterV2 = this.filterSettings.presetsV2;
     console.log('filterV2: ', this.filterV2);
+
+    this.sortGroup = new FormGroup({
+      sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
+    });
+
+    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
+      if (this.filterV2?.sortOptions === null) {
+        this.filterV2.sortOptions = {
+          isAscending: this.isAscendingSort,
+          sortField: parseInt(this.sortGroup.get('sortField')?.value, 10)
+        };
+      }
+      this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
+      this.cdRef.markForCheck();
+    });
 
     this.fullyLoaded = true;
     this.cdRef.markForCheck();
@@ -248,33 +155,24 @@ export class MetadataFilterComponent implements OnInit {
   }
 
 
-
-  updateRating(rating: any) {
-    if (this.filterSettings.ratingDisabled) return;
-    this.filter.rating = rating;
-  }
-
   updateSortOrder() {
     if (this.filterSettings.sortDisabled) return;
     this.isAscendingSort = !this.isAscendingSort;
-    if (this.filter.sortOptions === null) {
-      this.filter.sortOptions = {
+    if (this.filterV2?.sortOptions === null) {
+      this.filterV2.sortOptions = {
         isAscending: this.isAscendingSort,
         sortField: SortField.SortName
       }
     }
 
-    this.filter.sortOptions.isAscending = this.isAscendingSort;
+    this.filterV2!.sortOptions!.isAscending = this.isAscendingSort;
   }
 
   clear() {
-    this.filter = this.filterUtilityService.createSeriesFilter();
-    this.readProgressGroup.get('read')?.setValue(true);
-    this.readProgressGroup.get('notRead')?.setValue(true);
-    this.readProgressGroup.get('inProgress')?.setValue(true);
-    this.sortGroup.get('sortField')?.setValue(SortField.SortName);
-    this.isAscendingSort = true;
-    this.seriesNameGroup.get('seriesNameQuery')?.setValue('');
+    this.filterV2 = this.filterUtilityService.createSeriesV2Filter();
+
+    this.sortGroup.get('sortField')?.setValue(this.filterV2.sortOptions?.sortField);
+    this.isAscendingSort = this.filterV2.sortOptions?.isAscending!;
     this.cdRef.markForCheck();
     // Apply any presets which will trigger the apply
     this.loadFromPresetsAndSetup();
@@ -282,7 +180,7 @@ export class MetadataFilterComponent implements OnInit {
 
   apply() {
 
-    this.applyFilter.emit({filter: this.filter, isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
+    this.applyFilter.emit({filter: this.filterUtilityService.createSeriesFilter(), isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
 
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();

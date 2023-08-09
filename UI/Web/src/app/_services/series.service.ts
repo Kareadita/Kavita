@@ -18,7 +18,6 @@ import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
-import { FilterGroup } from '../_models/metadata/v2/filter-group';
 import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";

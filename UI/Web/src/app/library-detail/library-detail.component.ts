@@ -289,14 +289,12 @@ export class LibraryDetailComponent implements OnInit {
   updateFilter(data: FilterEvent) {
     console.log('library detail, updateFilter occurred: ', data);
     if (data.filterV2 === undefined) return;
-    //this.filter = data.filter;
     this.filterV2 = data.filterV2;
 
     if (!data.isFirst) {
       const url = this.filterUtilityService.encodeSeriesFilter(this.filterV2);
       window.history.replaceState(window.location.href, '', url);
     }
-
 
     this.loadPage();
   }

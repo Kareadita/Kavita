@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot } from '@angular/router';
-import { Pagination } from 'src/app/_models/pagination';
-import { SeriesFilter, SortField } from 'src/app/_models/metadata/series-filter';
+import {Injectable} from '@angular/core';
+import {ActivatedRouteSnapshot} from '@angular/router';
+import {Pagination} from 'src/app/_models/pagination';
+import {SeriesFilter, SortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
+import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 
 /**
  * Used to pass state between the filter and the url
@@ -384,4 +385,17 @@ export class FilterUtilitiesService {
 
     return data;
   }
+
+  createSeriesV2Filter(): SeriesFilterV2 {
+       return {
+           combination: FilterCombination.Or,
+           statements: [],
+           limitTo: 0,
+           sortOptions: {
+               isAscending: true,
+               sortField: SortField.SortName
+           },
+       };
+  }
+
 }

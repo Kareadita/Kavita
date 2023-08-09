@@ -1,11 +1,17 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { SeriesFilterV2 } from 'src/app/_models/metadata/v2/series-filter-v2';
 import {
-  ComparisonOption,
-  MetadataFilterRowGroupComponent
-} from "../metadata-filter-row-group/metadata-filter-row-group.component";
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component, DestroyRef,
+  EventEmitter,
+  inject,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
+import {MetadataService} from 'src/app/_services/metadata.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
+import {MetadataFilterRowGroupComponent} from "../metadata-filter-row-group/metadata-filter-row-group.component";
 import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -13,6 +19,11 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {take, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -34,13 +45,14 @@ import {FilterCombination} from "../../../_models/metadata/v2/filter-combination
 })
 export class MetadataBuilderComponent implements OnInit {
 
-  @Input() urlString: string = '';
   @Input({required: true}) filter!: SeriesFilterV2;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
+  protected readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly  destroyRef = inject(DestroyRef);
 
   formGroup: FormGroup = new FormGroup({});
 
@@ -54,7 +66,21 @@ export class MetadataBuilderComponent implements OnInit {
 
   ngOnInit() {
     console.log('Filter: ', this.filter);
-    this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter.combination, []));
+    if (this.filter === undefined) {
+      // If there is no default preset, let's open with series name
+      this.filter = this.filterUtilityService.createSeriesV2Filter();
+      this.filter.statements.push({
+        value: '',
+        comparison: FilterComparison.Equal,
+        field: FilterField.SeriesName
+      });
+    }
+
+    this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
+    this.formGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef), tap(values => {
+      this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10);
+      this.update.emit(this.filter);
+    })).subscribe()
   }
 
   addFilter() {
