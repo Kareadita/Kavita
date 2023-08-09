@@ -195,26 +195,13 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   createRootGroup() {
-
     const stmt = this.metadataService.createDefaultFilterStatement();
     stmt.comparison = FilterComparison.Contains;
     stmt.field = FilterField.Libraries;
     stmt.value = this.libraryId + '';
     const rootGroup = this.metadataService.createDefaultFilterDto();
-    rootGroup.groups[0].id = 'or-1';
-    rootGroup.groups[0].statements.push(stmt);
+    rootGroup.statements.push(stmt);
 
-    // const group = this.metadataService.createDefaultFilterGroup();
-    // const stmt = this.metadataService.createDefaultFilterStatement();
-    // stmt.comparison = FilterComparison.Contains;
-    // stmt.field = FilterField.Libraries;
-    // stmt.value = this.libraryId + '';
-    // group.id = 'or-1';
-    // group.statements.push(stmt);
-    //
-    // const rootGroup = this.metadataService.createDefaultFilterGroup();
-    // rootGroup.id = 'root';
-    // rootGroup.or.push(group);
     return rootGroup;
   }
 

@@ -2,11 +2,9 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot } from '@angular/router';
 import { Pagination } from 'src/app/_models/pagination';
 import { SeriesFilter, SortField } from 'src/app/_models/metadata/series-filter';
-import { SeriesService } from 'src/app/_services/series.service';
 import {MetadataService} from "../../_services/metadata.service";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
-import {FilterGroup} from "../../_models/metadata/v2/filter-group";
 
 /**
  * Used to pass state between the filter and the url
@@ -315,22 +313,11 @@ export class FilterUtilitiesService {
   }
 
   encodeSeriesFilter(filter: SeriesFilterV2) {
-    const encodedGroups = this.encodeFilterGroups(filter.groups);
+   const encodedStatements = this.encodeFilterStatements(filter.statements);
     const encodedSortOptions = filter.sortOptions ? `sortOptions=${filter.sortOptions}` : '';
     const encodedLimitTo = `limitTo=${filter.limitTo}`;
 
-    return `name=${encodeURIComponent(filter.name || '')}&groups=${encodedGroups}&${encodedSortOptions}&${encodedLimitTo}`;
-  }
-
-
-  encodeFilterGroups(groups: Array<FilterGroup>): string {
-    return groups.map(group => {
-      const encodedAnd = this.encodeFilterGroups(group.and);
-      const encodedOr = this.encodeFilterGroups(group.or);
-      const encodedStatements = this.encodeFilterStatements(group.statements);
-
-      return `groupid=${encodeURIComponent(group.id || '')}&and=${encodedAnd}&or=${encodedOr}&statements=${encodedStatements}`;
-      }).join(',');
+    return `name=${encodeURIComponent(filter.name || '')}&stmts=${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&combination=${filter.combination}`;
   }
 
   encodeFilterStatements(statements: Array<FilterStatement>) {

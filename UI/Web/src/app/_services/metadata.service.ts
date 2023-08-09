@@ -1,24 +1,23 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 import {map, tap} from 'rxjs/operators';
-import {finalize, of, ReplaySubject, switchMap} from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { Genre } from '../_models/metadata/genre';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
-import { Language } from '../_models/metadata/language';
-import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person } from '../_models/metadata/person';
-import { Tag } from '../_models/tag';
-import { TextResonse } from '../_types/text-response';
-import { FilterComparison } from '../_models/metadata/v2/filter-comparison';
-import { FilterField } from '../_models/metadata/v2/filter-field';
-import { FilterStatement } from '../_models/metadata/v2/filter-statement';
-import { FilterGroup } from '../_models/metadata/v2/filter-group';
-import {SiteTheme} from "../_models/preferences/site-theme";
+import {of, ReplaySubject, switchMap} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {Genre} from '../_models/metadata/genre';
+import {AgeRating} from '../_models/metadata/age-rating';
+import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
+import {Language} from '../_models/metadata/language';
+import {PublicationStatusDto} from '../_models/metadata/publication-status-dto';
+import {Person} from '../_models/metadata/person';
+import {Tag} from '../_models/tag';
+import {TextResonse} from '../_types/text-response';
+import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
+import {FilterField} from '../_models/metadata/v2/filter-field';
+import {FilterStatement} from '../_models/metadata/v2/filter-statement';
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {Router} from "@angular/router";
 import {SortField} from "../_models/metadata/series-filter";
+import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 
 @Injectable({
   providedIn: 'root'
@@ -35,14 +34,10 @@ export class MetadataService {
   constructor(private httpClient: HttpClient, private router: Router) { }
 
   applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
-    // First construct the DTO:
-    const group = this.createDefaultFilterGroup();
-    group.or = [this.createDefaultFilterGroup()];
-    group.or[0].statements = [this.createDefaultFilterStatement(filter, comparison, value + '')];
-
     const dto: SeriesFilterV2 = {
-      groups: [group],
-      limitTo: 0,
+      statements:  [this.createDefaultFilterStatement(filter, comparison, value + '')],
+      combination: FilterCombination.Or,
+      limitTo: 0
     }
     // Creates a temp name for the filter
     this.httpClient.post<string>(this.baseUrl + 'filter/create-temp', dto, TextResonse).pipe(map(name => {
@@ -138,29 +133,13 @@ export class MetadataService {
 
   createDefaultFilterDto(): SeriesFilterV2 {
     return {
-      groups: [this.createRootGroup()],
+      statements: [] as FilterStatement[],
+      combination: FilterCombination.Or,
       limitTo: 0,
       sortOptions: {
         isAscending: true,
         sortField: SortField.SortName
       }
-    };
-  }
-
-  createRootGroup() {
-    const group = this.createDefaultFilterGroup();
-
-    const rootGroup = this.createDefaultFilterGroup();
-    rootGroup.id = 'root';
-    rootGroup.or.push(group);
-    return rootGroup;
-  }
-
-  createDefaultFilterGroup(): FilterGroup {
-    return {
-      and: [],
-      or: [],
-      statements: [] as FilterStatement[]
     };
   }
 

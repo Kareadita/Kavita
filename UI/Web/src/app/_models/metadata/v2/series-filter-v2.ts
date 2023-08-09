@@ -1,9 +1,11 @@
 import { SortOptions } from "../series-filter";
-import { FilterGroup } from "./filter-group";
+import {FilterStatement} from "./filter-statement";
+import {FilterCombination} from "./filter-combination";
 
 export interface SeriesFilterV2 {
     name?: string;
-    groups: Array<FilterGroup>;
+    statements: Array<FilterStatement>;
+    combination: FilterCombination;
     sortOptions?: SortOptions;
     limitTo: number;
 }

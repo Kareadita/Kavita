@@ -1,15 +1,43 @@
+<ng-container *ngIf="filter">
 
-<ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
-    <div class="container-fluid">
-        <app-metadata-filter-row-group
-            [groupPreset]="groupPreset"
-            [filterGroup]="filterGroup"
-            (filterGroupUpdate)="updateFilterGroup($event)"
-            (filterGroupingUpdate)="updateFilterGrouping($event)">
-        </app-metadata-filter-row-group>
-    </div>
+    <ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
+        <div class="container-fluid">
+            <form [formGroup]="formGroup">
+                <div class="row mb-2">
+                    <div class="col-md-2">
+                        <select class="form-select" formControlName="comparison">
+                            <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>
+                        </select>
+
+                        <span class="badge text-bg-light fs-5">{{filter.combination}}</span>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button class="btn btn-icon" (click)="addFilter()" ngbTooltip="Add Rule">
+                            <i class="fa fa-solid fa-plus"></i>
+                            <span class="visually-hidden" aria-hidden="true">Add Rule</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div class="row mb-2" *ngFor="let filterStmt of filter.statements; let i = index">
+                <div class="col-md-10">
+                    <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">
+                        <div class="col-md-1 ms-2" #removeBtn>
+                            <button class="btn btn-icon" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
+                                <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                                <span class="visually-hidden">Remove Row {{i}}</span>
+                            </button>
+                        </div>
+                    </app-metadata-row-filter>
+                </div>
+
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #mobileView>
+        This will be a custom drawer experience allowing no groups
+    </ng-template>
+
 </ng-container>
-
-<ng-template #mobileView>
-    This will be a custom drawer experience allowing no groups
-</ng-template>

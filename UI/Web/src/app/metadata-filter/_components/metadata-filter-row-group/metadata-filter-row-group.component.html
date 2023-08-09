@@ -1,54 +1,54 @@
-<form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngIf="filterGroup.id !== 'root'">
-    <div class="row mb-2">
-        <div class="col-md-2">
-<!--            <select class="form-select" formControlName="comparison">-->
-<!--                <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>-->
-<!--            </select>-->
+<!--<form [formGroup]="formGroup" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngIf="filterGroup.id !== 'root'">-->
+<!--    <div class="row mb-2">-->
+<!--        <div class="col-md-2">-->
+<!--&lt;!&ndash;            <select class="form-select" formControlName="comparison">&ndash;&gt;-->
+<!--&lt;!&ndash;                <option *ngFor="let opt of groupOptions" [value]="opt.value">{{opt.title}}</option>&ndash;&gt;-->
+<!--&lt;!&ndash;            </select>&ndash;&gt;-->
 
-          <span class="badge text-bg-light fs-5">{{groupPreset | uppercase}}</span>
-        </div>
+<!--          <span class="badge text-bg-light fs-5">{{groupPreset | uppercase}}</span>-->
+<!--        </div>-->
 
-        <div class="col-md-2">
-            <button class="btn btn-icon" (click)="addFilter()" ngbTooltip="Add Rule">
-                <i class="fa fa-solid fa-plus"></i>
-                <span class="visually-hidden" aria-hidden="true">Add Rule</span>
-            </button>
-            <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
-        </div>
-    </div>
-</form>
+<!--        <div class="col-md-2">-->
+<!--            <button class="btn btn-icon" (click)="addFilter()" ngbTooltip="Add Rule">-->
+<!--                <i class="fa fa-solid fa-plus"></i>-->
+<!--                <span class="visually-hidden" aria-hidden="true">Add Rule</span>-->
+<!--            </button>-->
+<!--            <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</form>-->
 
-<ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">
-    <ng-container *ngFor="let andGroup of filterGroup.and">
-        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="andGroup" [groupPreset]="ComparisonOption.AND"
-            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>
-    </ng-container>
-</ng-container>
+<!--<ng-container *ngIf="filterGroup.and && filterGroup.and.length > 0">-->
+<!--    <ng-container *ngFor="let andGroup of filterGroup.and">-->
+<!--        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="andGroup" [groupPreset]="ComparisonOption.AND"-->
+<!--            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>-->
+<!--    </ng-container>-->
+<!--</ng-container>-->
 
-<ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">
-    <ng-container *ngFor="let orGroup of filterGroup.or">
-        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="orGroup" [groupPreset]="ComparisonOption.OR"
-            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>
-    </ng-container>
-</ng-container>
+<!--<ng-container *ngIf="filterGroup.or && filterGroup.or.length > 0">-->
+<!--    <ng-container *ngFor="let orGroup of filterGroup.or">-->
+<!--        <app-metadata-filter-row-group [parentGroup]="filterGroup" [filterGroup]="orGroup" [groupPreset]="ComparisonOption.OR"-->
+<!--            [nestedLevel]="nestedLevel + 1" (filterGroupUpdate)="nestedFilterGroupUpdate($event)" (filterGroupingUpdate)="updateFilterGrouping($event)"></app-metadata-filter-row-group>-->
+<!--    </ng-container>-->
+<!--</ng-container>-->
 
-<ng-container *ngIf="filterGroup.statements && filterGroup.statements.length > 0">
-    <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup, statements: filterGroup.statements }"></ng-container>
-</ng-container>
+<!--<ng-container *ngIf="filterGroup.statements && filterGroup.statements.length > 0">-->
+<!--    <ng-container [ngTemplateOutlet]="statements" [ngTemplateOutletContext]="{ group: filterGroup, statements: filterGroup.statements }"></ng-container>-->
+<!--</ng-container>-->
 
-<ng-template #statements let-group="group">
-    <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">
-        <div class="col-md-10">
-            <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">
-                <div class="col-md-1 ms-2" #removeBtn>
-                    <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i < (group.statements.length - 1) && group.statements.length > 1">
-                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                        <span class="visually-hidden">Remove Row {{i}}</span>
-                    </button>
-                </div>
-            </app-metadata-row-filter>
-        </div>
+<!--<ng-template #statements let-group="group">-->
+<!--    <div class="row mb-2" [ngStyle]="{'margin-left': (nestedLevel * 20) + 'px'}" *ngFor="let filterStmt of group.statements let i = index">-->
+<!--        <div class="col-md-10">-->
+<!--            <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">-->
+<!--                <div class="col-md-1 ms-2" #removeBtn>-->
+<!--                    <button class="btn btn-icon" (click)="removeFilter(i, group)" *ngIf="i < (group.statements.length - 1) && group.statements.length > 1">-->
+<!--                        <i class="fa-solid fa-minus" aria-hidden="true"></i>-->
+<!--                        <span class="visually-hidden">Remove Row {{i}}</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </app-metadata-row-filter>-->
+<!--        </div>-->
 
-    </div>
-</ng-template>
+<!--    </div>-->
+<!--</ng-template>-->
 
