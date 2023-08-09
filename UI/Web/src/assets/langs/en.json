@@ -429,7 +429,7 @@
         "month-ago": "a month ago",
         "months-ago": "{{value}} months ago",
         "year-ago": "a year ago",
-        "years-ago": "{[value}} years ago"
+        "years-ago": "{{value}} years ago"
     },
 
     "relationship-pipe": {
