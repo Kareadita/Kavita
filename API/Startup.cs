@@ -317,7 +317,7 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000", "https://kavita.majora2007.duckdns.org")
+                .WithOrigins("http://localhost:4200", $"http://{GetLocalIpAddress()}:4200", $"http://{GetLocalIpAddress()}:5000")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
         else
@@ -327,7 +327,6 @@ public class Startup
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials() // For SignalR token query param
-                .WithOrigins("https://kavita.majora2007.duckdns.org")
                 .WithExposedHeaders("Content-Disposition", "Pagination"));
         }
 
