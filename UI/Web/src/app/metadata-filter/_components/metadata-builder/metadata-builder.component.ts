@@ -42,13 +42,11 @@ export class MetadataBuilderComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
 
-  formGroup: FormGroup = new FormGroup({
-    'comparison': new FormControl<FilterCombination>(this.filter.combination, [])
-  });
+  formGroup: FormGroup = new FormGroup({});
 
-  groupOptions: Array<{value: ComparisonOption, title: string}> = [
-    {value: ComparisonOption.OR, title: 'Match any of the following'},
-    {value: ComparisonOption.AND, title: 'Match all of the following'},
+  groupOptions: Array<{value: FilterCombination, title: string}> = [
+    {value: FilterCombination.Or, title: 'Match any of the following'},
+    {value: FilterCombination.And, title: 'Match all of the following'},
   ];
 
   get Breakpoint() { return Breakpoint; }
@@ -56,6 +54,7 @@ export class MetadataBuilderComponent implements OnInit {
 
   ngOnInit() {
     console.log('Filter: ', this.filter);
+    this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter.combination, []));
   }
 
   addFilter() {

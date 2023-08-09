@@ -162,7 +162,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions || this.filterSettings?.presets?.sortOptions;
+    return this.filter?.sortOptions || this.filterSettings?.presets?.sortOptions;
   }
 
   performAction(action: ActionItem<any>) {

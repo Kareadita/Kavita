@@ -289,7 +289,7 @@ export class LibraryDetailComponent implements OnInit {
   updateFilter(data: FilterEvent) {
     console.log('library detail, updateFilter occurred: ', data);
     if (data.filterV2 === undefined) return;
-    this.filter = data.filter;
+    //this.filter = data.filter;
     this.filterV2 = data.filterV2;
 
     if (!data.isFirst) {
