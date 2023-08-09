@@ -9,7 +9,7 @@
     <div class="not-phone-hidden">
       <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 56}" (drawerClosed)="toggleService.set(false)">
         <h5 header>
-          Filter
+          {{t('filter-title')}}
         </h5>
         <div body class="drawer-body">
           <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
@@ -19,7 +19,7 @@
   </ng-container>
 
   <ng-template #filterSection>
-    <ng-template #globalFilterTooltip>This is library agnostic</ng-template>
+    <ng-template #globalFilterTooltip>{{t('format-tooltip')}}</ng-template>
     <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filterGroup]="filterV2!.groups[0]" (update)="handleFilters($event)"></app-metadata-builder>
@@ -27,11 +27,11 @@
         <div class="col-md-2 me-3">
           <form [formGroup]="sortGroup">
             <div class="mb-3">
-              <label for="sort-options" class="form-label">Sort By</label>
+              <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
-                <i class="fa fa-arrow-up" title="Ascending" *ngIf="isAscendingSort; else descSort"></i>
+                <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
                 <ng-template #descSort>
-                  <i class="fa fa-arrow-down" title="Descending"></i>
+                  <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
                 </ng-template>
               </button>
               <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">

@@ -1790,7 +1790,11 @@
         "view-series": "View Series",
         "clear": "Clear",
         "import-cbl": "Import CBL",
-        "read": "Read"
+        "read": "Read",
+        "add-rule-group-and": "Add Rule Group (AND)",
+        "add-rule-group-or": "Add Rule Group (OR)",
+        "remove-rule-group": "Remove Rule Group"
+
     },
 
     "preferences": {
