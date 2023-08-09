@@ -8,7 +8,7 @@ import {StatCount} from '../../_models/stat-count';
 import {DayOfWeekPipe} from '../../_pipes/day-of-week.pipe';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-day-breakdown',
@@ -16,7 +16,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./day-breakdown.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [BarChartModule, AsyncPipe, TranslocoModule]
+  imports: [BarChartModule, AsyncPipe, TranslocoDirective]
 })
 export class DayBreakdownComponent {
 

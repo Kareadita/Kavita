@@ -1,6 +1,4 @@
-import {DestroyRef, inject, Injectable, OnDestroy} from '@angular/core';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { ThemeService } from './theme.service';
 import { RecentlyAddedItem } from '../_models/recently-added-item';

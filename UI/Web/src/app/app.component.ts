@@ -1,6 +1,6 @@
 import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import { NavigationStart, Router, RouterOutlet } from '@angular/router';
-import {map, shareReplay, take} from 'rxjs/operators';
+import {map, pluck, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
@@ -12,7 +12,7 @@ import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-root',
@@ -50,16 +50,6 @@ export class AppComponent implements OnInit {
       if (!user) return false;
       return user.preferences.noTransitions;
     }), takeUntilDestroyed(this.destroyRef));
-
-    // this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-    //   if (user && user.preferences.locale) {
-    //     this.translocoService.setActiveLang(user.preferences.locale);
-    //   } else {
-    //     // If no user or locale is available, fallback to the default language ('en')
-    //     const localStorageLocale = localStorage.getItem(accountService.localeKey) || 'en';
-    //     this.translocoService.setActiveLang(localStorageLocale);
-    //   }
-    // });
   }
 
   @HostListener('window:resize', ['$event'])

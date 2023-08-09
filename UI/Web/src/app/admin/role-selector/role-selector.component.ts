@@ -3,10 +3,9 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Member } from 'src/app/_models/auth/member';
 import { User } from 'src/app/_models/user';
 import { AccountService } from 'src/app/_services/account.service';
-import { MemberService } from 'src/app/_services/member.service';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgFor } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective,} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-role-selector',
@@ -14,7 +13,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./role-selector.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoModule]
+  imports: [NgFor, ReactiveFormsModule, FormsModule, TranslocoDirective]
 })
 export class RoleSelectorComponent implements OnInit {
 

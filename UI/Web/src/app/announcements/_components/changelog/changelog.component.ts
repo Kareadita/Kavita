@@ -4,14 +4,14 @@ import { ServerService } from 'src/app/_services/server.service';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
 import { ReadMoreComponent } from '../../../shared/read-more/read-more.component';
 import { NgFor, NgIf, DatePipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-changelog',
     templateUrl: './changelog.component.html',
     styleUrls: ['./changelog.component.scss'],
     standalone: true,
-  imports: [NgFor, NgIf, ReadMoreComponent, LoadingComponent, DatePipe, TranslocoModule]
+  imports: [NgFor, NgIf, ReadMoreComponent, LoadingComponent, DatePipe, TranslocoDirective]
 })
 export class ChangelogComponent implements OnInit {
 

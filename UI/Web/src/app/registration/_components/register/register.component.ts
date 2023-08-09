@@ -8,7 +8,7 @@ import { MemberService } from 'src/app/_services/member.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgTemplateOutlet } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 /**
  * This is exclusively used to register the first user on the server and nothing else
@@ -19,7 +19,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./register.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, TranslocoModule]
+  imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
 })
 export class RegisterComponent {
 

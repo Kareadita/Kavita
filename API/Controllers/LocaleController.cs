@@ -24,7 +24,9 @@ public class LocaleController : BaseApiController
             {
                 Title = c.DisplayName,
                 IsoCode = c.IetfLanguageTag
-            }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
+            })
+            .Where(l => !string.IsNullOrEmpty(l.IsoCode))
+            .OrderBy(d => d.Title);
         return Ok(languages);
     }
 }

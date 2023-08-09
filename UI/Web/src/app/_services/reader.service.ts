@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import {DestroyRef, Inject, inject, Injectable} from '@angular/core';
-import {DOCUMENT, Location} from '@angular/common';
+import {DestroyRef, inject, Injectable} from '@angular/core';
+import {Location} from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ChapterInfo } from '../manga-reader/_models/chapter-info';

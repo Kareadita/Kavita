@@ -1,4 +1,4 @@
-import {inject, Pipe, PipeTransform} from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import {TranslocoService} from "@ngneat/transloco";
 

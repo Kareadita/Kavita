@@ -5,7 +5,6 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -21,7 +20,7 @@ import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { CoverImageChooserComponent } from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 enum TabID {
   General = 'general-tab',
@@ -34,7 +33,7 @@ enum TabID {
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoModule]
+  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgIf, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
 

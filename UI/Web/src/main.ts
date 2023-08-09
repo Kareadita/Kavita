@@ -2,7 +2,7 @@
 import {
   APP_INITIALIZER, ApplicationConfig,
   importProvidersFrom,
-  isDevMode,
+
 } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
@@ -91,9 +91,6 @@ const translocoOptions = {
     missingHandler: {
       useFallbackTranslation: true,
       allowEmpty: false,
-    },
-    flatten: {
-      aot: !isDevMode()
     }
   }
 };

@@ -7,9 +7,9 @@
                     <div class="d-flex list-container">
                         <div class="me-3 align-middle">
                             <div style="padding-top: 40px">
-                                <label for="reorder-{{i}}" class="form-label visually-hidden">{{t('reorder-label')}}</label>
+                                <label for="reorder-{{item.order}}" class="form-label visually-hidden">{{t('reorder-label')}}</label>
                                 <input *ngIf="accessibilityMode" id="reorder-{{i}}" class="form-control" type="number" inputmode="numeric" min="0" [max]="items.length - 1" [value]="item.order" style="width: 60px"
-                                (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
+                                (focusout)="updateIndex(item.order, item)" (keydown.enter)="updateIndex(item.order, item)" aria-describedby="instructions">
                             </div>
                         </div>
 

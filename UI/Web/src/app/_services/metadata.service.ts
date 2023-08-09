@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import {map, tap} from 'rxjs/operators';
 import {finalize, of, ReplaySubject, switchMap} from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { UtilityService } from '../shared/_services/utility.service';
 import { Genre } from '../_models/metadata/genre';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';

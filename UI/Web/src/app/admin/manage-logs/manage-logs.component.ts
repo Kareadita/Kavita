@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { BehaviorSubject, ReplaySubject, Subject, take } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { environment } from 'src/environments/environment';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
@@ -41,7 +41,7 @@ export class ManageLogsComponent implements OnInit, OnDestroy {
         .build();
 
         console.log('Starting log connection');
-  
+
       this.hubConnection
       .start()
       .catch(err => console.error(err));

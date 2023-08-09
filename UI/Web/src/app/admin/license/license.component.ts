@@ -2,8 +2,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
-  inject,
   OnInit
 } from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from "@angular/forms";
@@ -15,7 +13,7 @@ import { LoadingComponent } from '../../shared/loading/loading.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
 import {environment} from "../../../environments/environment";
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-license',
@@ -23,7 +21,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoModule]
+  imports: [NgIf, NgbTooltip, LoadingComponent, NgbCollapse, ReactiveFormsModule, TranslocoDirective]
 })
 export class LicenseComponent implements OnInit {
 

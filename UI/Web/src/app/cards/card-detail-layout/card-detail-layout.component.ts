@@ -37,13 +37,13 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-card-detail-layout',
   standalone: true,
-  imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoModule],
+  imports: [CommonModule, LoadingComponent, VirtualScrollerModule, CardActionablesComponent, NgbTooltip, MetadataFilterComponent, TranslocoDirective],
   templateUrl: './card-detail-layout.component.html',
   styleUrls: ['./card-detail-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

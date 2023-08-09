@@ -4,13 +4,13 @@ import { take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {CommonModule} from "@angular/common";
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 
 @Component({
   selector: 'app-card-actionables',
   standalone: true,
-  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoModule],
+  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

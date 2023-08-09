@@ -17,7 +17,7 @@ import { AgeRatingPipe } from '../../pipe/age-rating.pipe';
 import { RestrictionSelectorComponent } from '../restriction-selector/restriction-selector.component';
 import { NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, AsyncPipe } from '@angular/common';
-import {translate, TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-age-restriction',
@@ -25,7 +25,7 @@ import {translate, TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./change-age-restriction.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoModule]
+    imports: [NgIf, NgbCollapse, RestrictionSelectorComponent, AsyncPipe, AgeRatingPipe, TranslocoDirective]
 })
 export class ChangeAgeRestrictionComponent implements OnInit {
 

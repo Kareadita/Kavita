@@ -17,7 +17,9 @@ your reading collection with your friends and family!
 <a href="https://hosted.weblate.org/engage/kavita/">
 <img src="https://hosted.weblate.org/widgets/kavita/-/ui/svg-badge.svg" alt="Translation status" />
 </a>
+<img src="https://img.shields.io/endpoint?url=https://stats.kavitareader.com/api/ui/shield-badge"/>
 </div>
+
 
 ## What Kavita Provides
 - Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)

@@ -7,7 +7,7 @@ import {
   ViewChildren
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { LegendPosition, PieChartModule } from '@swimlane/ngx-charts';
+import { PieChartModule } from '@swimlane/ngx-charts';
 import { Observable, BehaviorSubject, combineLatest, map, shareReplay } from 'rxjs';
 import { StatisticsService } from 'src/app/_services/statistics.service';
 import { SortableHeader, SortEvent, compare } from 'src/app/_single-module/table/_directives/sortable-header.directive';
@@ -19,7 +19,7 @@ import { BytesPipe } from '../../../pipe/bytes.pipe';
 import { SortableHeader as SortableHeader_1 } from '../../../_single-module/table/_directives/sortable-header.directive';
 import { NgIf, NgFor, AsyncPipe, DecimalPipe } from '@angular/common';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 export interface StackedBarChartDataItem {
   name: string,
@@ -32,7 +32,7 @@ export interface StackedBarChartDataItem {
     styleUrls: ['./file-breakdown-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoModule]
+  imports: [NgbTooltip, ReactiveFormsModule, NgIf, PieChartModule, SortableHeader_1, NgFor, AsyncPipe, DecimalPipe, BytesPipe, MangaFormatPipe, TranslocoDirective]
 })
 export class FileBreakdownStatsComponent {
 

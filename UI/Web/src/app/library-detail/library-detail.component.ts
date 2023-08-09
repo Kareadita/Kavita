@@ -37,7 +37,7 @@ import { LibraryRecommendedComponent } from './library-recommended/library-recom
 import { NgFor, NgIf, DecimalPipe } from '@angular/common';
 import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {MetadataService} from "../_services/metadata.service";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
@@ -50,7 +50,7 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     styleUrls: ['./library-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class LibraryDetailComponent implements OnInit {
 

@@ -14,7 +14,7 @@ import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-api-key',
@@ -22,7 +22,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./api-key.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, TranslocoModule]
+    imports: [NgIf, NgbTooltip, TranslocoDirective]
 })
 export class ApiKeyComponent implements OnInit {
 

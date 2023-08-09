@@ -140,5 +140,14 @@
     "volume-num": "Volume {0}",
     "book-num": "Livro {0}",
     "chapter-num": "Capítulo {0}",
-    "unable-to-reset-key": "Aconteceu algo de errado, não foi possível fazer reset à chave"
+    "unable-to-reset-key": "Aconteceu algo de errado, não foi possível fazer reset à chave",
+    "permission-denied": "Não tem permissão para esta operação",
+    "no-cover-image": "Sem imagem de capa",
+    "no-image-for-page": "Não existe a imagem para a página {0}. Tente refrescar para refazer a cache.",
+    "duplicate-bookmark": "Um registo duplicado deste marcador já existe",
+    "encode-as-warning": "Não pode converter para PNG. Para as capas, use a funcionalidade Refrescar Capas. Os marcadores e os favicons não podem novamente codificados.",
+    "reset-chapter-lock": "Não foi possível repor o bloqueio de capa para o Capítulo",
+    "browse-reading-lists": "Explorar por Listas de Leituras",
+    "browse-libraries": "Explorar por Bibliotecas",
+    "browse-collections": "Explorar por Coleções"
 }

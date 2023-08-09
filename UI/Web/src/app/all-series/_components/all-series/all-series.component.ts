@@ -5,13 +5,11 @@ import {
   EventEmitter,
   HostListener,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { take, debounceTime, takeUntil } from 'rxjs/operators';
+import { take, debounceTime } from 'rxjs/operators';
 import { BulkSelectionService } from 'src/app/cards/bulk-selection.service';
 import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
@@ -31,7 +29,7 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 
 
@@ -41,7 +39,7 @@ import {TranslocoModule} from "@ngneat/transloco";
     styleUrls: ['./all-series.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoModule]
+  imports: [SideNavCompanionBarComponent, NgIf, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, DecimalPipe, TranslocoDirective]
 })
 export class AllSeriesComponent implements OnInit {
 

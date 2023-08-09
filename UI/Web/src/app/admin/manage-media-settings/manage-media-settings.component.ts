@@ -21,7 +21,7 @@ import {EncodeFormats} from '../_models/encode-format';
 import {ManageScrobbleErrorsComponent} from '../manage-scrobble-errors/manage-scrobble-errors.component';
 import {ManageAlertsComponent} from '../manage-alerts/manage-alerts.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-manage-media-settings',
@@ -29,7 +29,7 @@ import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent, TranslocoModule]
+  imports: [NgIf, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, NgFor, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, ManageAlertsComponent, ManageScrobbleErrorsComponent, TranslocoDirective]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

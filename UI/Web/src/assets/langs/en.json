@@ -418,6 +418,7 @@
     },
 
     "time-ago-pipe": {
+        "never": "Never",
         "just-now": "just now",
         "min-ago": "a minute ago",
         "mins-ago": "{{value}} minutes ago",
@@ -428,7 +429,7 @@
         "month-ago": "a month ago",
         "months-ago": "{{value}} months ago",
         "year-ago": "a year ago",
-        "years-ago": "{[value}} years ago"
+        "years-ago": "{{value}} years ago"
     },
 
     "relationship-pipe": {
@@ -1251,7 +1252,7 @@
         "more-in-genre": "More In {{genre}}",
         "rediscover": "Rediscover",
         "highly-rated": "Highly Rated",
-        "quick-catchups": "Quick Catchups",
+        "quick-catchups": "Quick Catch-ups",
         "quick-reads": "Quick Reads",
         "on-deck": "{{dashboard.on-deck-title}}"
     },
@@ -1570,7 +1571,7 @@
         "format-title": "Format:",
         "created-title": "Created:",
         "last-read-title": "Last Read:",
-        "last-added-title": "Last Added To:",
+        "last-added-title": "Last Item Added:",
         "last-scanned-title": "Last Scanned:",
         "folder-path-title": "Folder Path:",
         "publication-status-title": "Publication Status:",

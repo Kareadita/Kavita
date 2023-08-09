@@ -4,10 +4,9 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { map, Observable, shareReplay } from 'rxjs';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { UserReadStatistics } from 'src/app/statistics/_models/user-read-statistics';
 import { StatisticsService } from 'src/app/_services/statistics.service';

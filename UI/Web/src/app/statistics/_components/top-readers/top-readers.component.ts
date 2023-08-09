@@ -12,7 +12,7 @@ import { StatisticsService } from 'src/app/_services/statistics.service';
 import { TopUserRead } from '../../_models/top-reads';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgFor, AsyncPipe } from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 export const TimePeriods: Array<{title: string, value: number}> =
   [{title: 'this-week', value: new Date().getDay() || 1},
@@ -28,7 +28,7 @@ export const TimePeriods: Array<{title: string, value: number}> =
     styleUrls: ['./top-readers.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [ReactiveFormsModule, NgFor, AsyncPipe, TranslocoModule]
+  imports: [ReactiveFormsModule, NgFor, AsyncPipe, TranslocoDirective]
 })
 export class TopReadersComponent implements OnInit {
 

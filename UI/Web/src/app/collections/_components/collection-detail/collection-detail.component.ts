@@ -47,7 +47,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
@@ -56,8 +56,7 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
     styleUrls: ['./collection-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent,
-    BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoModule]
+  imports: [NgIf, SideNavCompanionBarComponent, CardActionablesComponent, NgStyle, ImageComponent, ReadMoreComponent, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective]
 })
 export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 

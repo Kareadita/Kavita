@@ -1,150 +1,150 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "Войти",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Забыли пароль?",
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
         "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
+        "server-settings-link": "Настройки сервера",
+        "not-granted": "Вам не был предоставлен доступ ни к каким библиотекам.",
         "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "recently-updated-title": "Недавно обновленная серия",
+        "recently-added-title": "Недавно добавленная серия"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
-        "username": "",
-        "required": "",
-        "email": "",
-        "not-valid-email": "",
-        "cancel": "",
-        "saving": "",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "cancel": "{{common.cancel}}",
+        "saving": "Сохранение…",
         "update": ""
     },
     "user-scrobble-history": {
         "title": "",
         "description": "",
-        "filter-label": "",
-        "created-header": "",
-        "last-modified-header": "",
-        "type-header": "",
-        "series-header": "",
+        "filter-label": "Фильтр",
+        "created-header": "Создано",
+        "last-modified-header": "Последнее изменение",
+        "type-header": "Тип",
+        "series-header": "Серии",
         "data-header": "",
-        "is-processed-header": "",
-        "no-data": "",
-        "volume-and-chapter-num": "",
-        "rating": "",
+        "is-processed-header": "Обрабатывается",
+        "no-data": "Нет данных",
+        "volume-and-chapter-num": "Том {{v}} Глава {{n}}",
+        "rating": "Рейтинг {{r}}",
         "not-applicable": "",
-        "processed": "",
-        "not-processed": ""
+        "processed": "Обработанный",
+        "not-processed": "Не обработано"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "",
-        "score-updated": "",
+        "chapter-read": "Прогресс чтения",
+        "score-updated": "Обновление рейтинга",
         "want-to-read-add": "",
         "want-to-read-remove": "",
-        "review": ""
+        "review": "Обновление обзора"
     },
     "spoiler": {
-        "click-to-show": ""
+        "click-to-show": "Спойлер, нажмите, чтобы показать"
     },
     "review-series-modal": {
-        "title": "",
+        "title": "Редактировать отзыв",
         "tagline-label": "",
-        "review-label": "",
-        "close": "",
-        "save": ""
+        "review-label": "Обзор",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
-        "close": "",
-        "user-review": "",
+        "close": "{{common.close}}",
+        "user-review": "Обзор на {{username}}",
         "external-mod": "",
         "go-to-review": ""
     },
     "review-card": {
-        "your-review": "",
+        "your-review": "Это ваш отзыв",
         "external-review": "",
-        "local-review": "",
-        "rating-percentage": ""
+        "local-review": "Обзор",
+        "rating-percentage": "Рейтинг {{r}}%"
     },
     "want-to-read": {
         "title": "",
-        "series-count": "",
-        "no-items": "",
-        "no-items-filtered": ""
+        "series-count": "{{common.series-count}}",
+        "no-items": "Нет ни одного элемента. Попробуйте добавить серию.",
+        "no-items-filtered": "Ни один элемент не соответствует текущему фильтру."
     },
     "user-preferences": {
-        "title": "",
-        "pref-description": "",
-        "account-tab": "",
-        "preferences-tab": "",
+        "title": "Панель управления пользователя",
+        "pref-description": "Это глобальные настройки, которые привязаны к вашей учетной записи.",
+        "account-tab": "Аккаунт",
+        "preferences-tab": "Параметры",
         "3rd-party-clients-tab": "",
-        "theme-tab": "",
-        "devices-tab": "",
-        "stats-tab": "",
+        "theme-tab": "Тема",
+        "devices-tab": "Устройства",
+        "stats-tab": "Статистика",
         "scrobbling-tab": "",
-        "success-toast": "",
-        "global-settings-title": "",
-        "page-layout-mode-label": "",
+        "success-toast": "Пользовательские настройки обновлены",
+        "global-settings-title": "Глобальные настройки",
+        "page-layout-mode-label": "Режим разметки страницы",
         "page-layout-mode-tooltip": "",
         "locale-label": "",
-        "locale-tooltip": "",
+        "locale-tooltip": "Язык, который должна использовать Кавита",
         "blur-unread-summaries-label": "",
-        "blur-unread-summaries-tooltip": "",
+        "blur-unread-summaries-tooltip": "Размытие аннотаций в не прочитанных томах или главах (во избежание спойлеров)",
         "prompt-on-download-label": "",
         "prompt-on-download-tooltip": "",
-        "disable-animations-label": "",
-        "disable-animations-tooltip": "",
+        "disable-animations-label": "Отключение анимации",
+        "disable-animations-tooltip": "Отключает анимацию на сайте. Полезно для устройств чтения с электронными чернилами.",
         "collapse-series-relationships-label": "",
         "collapse-series-relationships-tooltip": "",
-        "share-series-reviews-label": "",
-        "share-series-reviews-tooltip": "",
+        "share-series-reviews-label": "Поделится обзором серий",
+        "share-series-reviews-tooltip": "Должна ли Kavita включать ваши отзывы о сериях для других пользователей",
         "image-reader-settings-title": "",
-        "reading-direction-label": "",
-        "reading-direction-tooltip": "",
-        "scaling-option-label": "",
-        "scaling-option-tooltip": "",
-        "page-splitting-label": "",
+        "reading-direction-label": "Направление чтения",
+        "reading-direction-tooltip": "Направление нажатия для перехода на следующую страницу. С права на лево означает, что для перехода на следующую страницу нужно нажать в левой части экрана.",
+        "scaling-option-label": "Параметры масштабирования",
+        "scaling-option-tooltip": "Как масштабировать изображение для вашего экрана.",
+        "page-splitting-label": "Разделение страниц",
         "page-splitting-tooltip": "",
-        "reading-mode-label": "",
-        "layout-mode-label": "",
-        "layout-mode-tooltip": "",
-        "background-color-label": "",
-        "auto-close-menu-label": "",
-        "show-screen-hints-label": "",
-        "emulate-comic-book-label": "",
+        "reading-mode-label": "Режим чтения",
+        "layout-mode-label": "Режим макета",
+        "layout-mode-tooltip": "Вывод на экран одного изображения или двух рядом расположенных изображений",
+        "background-color-label": "Цвет фона",
+        "auto-close-menu-label": "Автоматическое закрытие меню",
+        "show-screen-hints-label": "Показывать экранные подсказки",
+        "emulate-comic-book-label": "Имитация комиксов",
         "swipe-to-paginate-label": "",
-        "book-reader-settings-title": "",
+        "book-reader-settings-title": "Читалка",
         "tap-to-paginate-label": "",
-        "tap-to-paginate-tooltip": "",
-        "immersive-mode-label": "",
+        "tap-to-paginate-tooltip": "Должны ли боковые стороны экрана читалки позволять нажимать на них для перехода к предыдущей/следующей странице",
+        "immersive-mode-label": "Режим погружения",
         "immersive-mode-tooltip": "",
-        "reading-direction-book-label": "",
-        "reading-direction-book-tooltip": "",
-        "font-family-label": "",
-        "font-family-tooltip": "",
-        "writing-style-label": "",
-        "writing-style-tooltip": "",
-        "layout-mode-book-label": "",
+        "reading-direction-book-label": "Направление чтения",
+        "reading-direction-book-tooltip": "Направление нажатия для перехода на следующую страницу. С лева на право означает, что для перехода на следующую страницу нужно щелкнуть в левой части экрана.",
+        "font-family-label": "Семейство шрифтов",
+        "font-family-tooltip": "Семейство шрифтов для загрузки. По умолчанию загрузит шрифт, используемый в книге по умолчанию",
+        "writing-style-label": "Стиль письма",
+        "writing-style-tooltip": "Изменяет направление текста. Горизонтальное направление - слева направо, вертикальное - сверху вниз.",
+        "layout-mode-book-label": "Режим макета",
         "layout-mode-book-tooltip": "",
-        "color-theme-book-label": "",
-        "color-theme-book-tooltip": "",
-        "font-size-book-label": "",
-        "line-height-book-label": "",
-        "line-height-book-tooltip": "",
+        "color-theme-book-label": "Цветовая тема",
+        "color-theme-book-tooltip": "Какую цветовую тему применить к содержанию и меню программы чтения книг",
+        "font-size-book-label": "Размер шрифта",
+        "line-height-book-label": "Межстрочный интервал",
+        "line-height-book-tooltip": "Размер интервала между строками книги",
         "margin-book-label": "",
         "margin-book-tooltip": "",
         "clients-opds-alert": "",
         "clients-opds-description": "",
         "clients-api-key-tooltip": "",
         "clients-opds-url-tooltip": "",
-        "reset": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
     "user-holds": {
         "title": "",
@@ -157,7 +157,7 @@
         "scan": "",
         "site-themes": "",
         "set-default": "",
-        "apply": "",
+        "apply": "{{common.apply}}",
         "applied": "",
         "updated-toastr": "",
         "scan-queued": ""
@@ -188,34 +188,34 @@
         "no-devices": "",
         "platform-label": "",
         "email-label": "",
-        "add": "",
-        "delete": "",
-        "edit": ""
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}"
     },
     "edit-device": {
         "device-name-label": "",
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "email-tooltip": "",
         "device-platform-label": "",
-        "save": "",
+        "save": "{{common.save}}",
         "required-field": "",
         "valid-email": ""
     },
     "change-password": {
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "current-password-label": "",
         "new-password-label": "",
         "confirm-password-label": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": "",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
         "required-field": "",
         "passwords-must-match": "",
         "permission-error": ""
     },
     "change-email": {
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "current-password-label": "",
         "email-not-confirmed": "",
         "email-updated-title": "",
@@ -225,18 +225,18 @@
         "invite-url-tooltip": "",
         "permission-error": "",
         "required-field": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "",
         "unknowns": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "api-key": {
         "copy": "",
@@ -254,20 +254,20 @@
         "generate": "",
         "instructions": "",
         "token-input-label": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "typeahead": {
         "locked-field": "",
-        "close": "",
-        "loading": "",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
         "add-item": "",
         "no-data": "",
         "add-custom-item": ""
     },
     "generic-list-modal": {
-        "close": "",
+        "close": "{{common.close}}",
         "clear": "",
         "filter": "",
         "open-filtered-search": ""
@@ -307,24 +307,24 @@
     },
     "directory-picker": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "path-label": "",
         "path-placeholder": "",
         "instructions": "",
         "type-header": "",
         "name-header": "",
-        "cancel": "",
+        "cancel": "{{common.cancel}}",
         "share": "",
-        "help": ""
+        "help": "{{common.help}}"
     },
     "library-access-modal": {
-        "select-all": "",
-        "deselect-all": "",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
         "title": "",
-        "close": "",
-        "reset": "",
-        "cancel": "",
-        "save": "",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
         "no-data": ""
     },
     "time-periods": {
@@ -452,21 +452,21 @@
     "reset-password": {
         "title": "",
         "description": "",
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "required-field": "",
         "valid-email": "",
-        "submit": ""
+        "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
         "title": "",
         "new-password-label": "",
         "error-label": "",
-        "close": "",
-        "cancel": "",
-        "save": ""
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "all-series": {
-        "series-count": ""
+        "series-count": "{{common.series-count}}"
     },
     "announcements": {
         "title": ""
@@ -481,10 +481,10 @@
     },
     "invite-user": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "description": "",
-        "email": "",
-        "required-field": "",
+        "email": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
         "setup-user-title": "",
         "setup-user-description": "",
         "setup-user-account": "",
@@ -492,12 +492,12 @@
         "invite-url-label": "",
         "invite": "",
         "inviting": "",
-        "cancel": ""
+        "cancel": "{{common.cancel}}"
     },
     "library-selector": {
         "title": "",
-        "select-all": "",
-        "deselect-all": "",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
         "no-data": ""
     },
     "license": {
@@ -505,28 +505,28 @@
         "manage": "",
         "invalid-license-tooltip": "",
         "check": "",
-        "cancel": "",
-        "edit": "",
+        "cancel": "{{common.cancel}}",
+        "edit": "{{common.edit}}",
         "buy": "",
         "activate": "",
         "renew": "",
         "no-license-key": "",
         "license-valid": "",
         "license-not-valid": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "activate-description": "",
         "activate-license-label": "",
-        "activate-email-label": "",
+        "activate-email-label": "{{common.email}}",
         "activate-delete": "",
-        "activate-save": ""
+        "activate-save": "{{common.save}}"
     },
     "book-line-overlay": {
         "copy": "",
         "bookmark": "",
-        "close": "",
-        "required-field": "",
+        "close": "{{common.close}}",
+        "required-field": "{{common.required-field}}",
         "bookmark-label": "",
-        "save": ""
+        "save": "{{common.save}}"
     },
     "book-reader": {
         "title": "",
@@ -560,11 +560,11 @@
         "title": "",
         "description": "",
         "error-label": "",
-        "username-label": "",
-        "password-label": "",
-        "email-label": "",
-        "required-field": "",
-        "valid-email": "",
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}",
+        "email-label": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "valid-email": "{{common.valid-email}}",
         "password-validation": "",
         "register": ""
     },
@@ -577,18 +577,18 @@
     "confirm-reset-password": {
         "title": "",
         "description": "",
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "required-field": "",
-        "submit": "",
+        "submit": "{{common.submit}}",
         "password-validation": ""
     },
     "register": {
         "title": "",
         "description": "",
-        "username-label": "",
-        "email-label": "",
+        "username-label": "{{common.username}}",
+        "email-label": "{{common.email}}",
         "email-tooltip": "",
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "required-field": "",
         "valid-email": "",
         "password-validation": "",
@@ -596,12 +596,12 @@
     },
     "series-detail": {
         "page-settings-title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "layout-mode-label": "",
         "layout-mode-option-card": "",
         "layout-mode-option-list": "",
         "continue-from": "",
-        "read": "",
+        "read": "{{common.read}}",
         "continue": "",
         "read-options-alt": "",
         "incognito": "",
@@ -638,7 +638,7 @@
         "translators-title": "",
         "pencillers-title": "",
         "publishers-title": "",
-        "promoted": "",
+        "promoted": "{{common.promoted}}",
         "see-more": "",
         "see-less": ""
     },
@@ -651,7 +651,7 @@
     },
     "update-notification-modal": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "help": "",
         "download": ""
     },
@@ -673,7 +673,7 @@
         "donate": ""
     },
     "library-settings-modal": {
-        "close": "",
+        "close": "{{common.close}}",
         "edit-title": "",
         "add-title": "",
         "general-tab": "",
@@ -711,10 +711,10 @@
         "include-in-search-tooltip": "",
         "force-scan": "",
         "force-scan-tooltip": "",
-        "reset": "",
-        "cancel": "",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
         "next": "",
-        "save": "",
+        "save": "{{common.save}}",
         "required-field": ""
     },
     "reader-settings": {
@@ -758,7 +758,7 @@
     },
     "bookmarks": {
         "title": "",
-        "series-count": "",
+        "series-count": "{{common.series-count}}",
         "no-data": "",
         "no-data-2": "",
         "confirm-delete": "",
@@ -771,7 +771,7 @@
         "items-selected": "",
         "mark-as-unread": "",
         "mark-as-read": "",
-        "deselect-all": ""
+        "deselect-all": "{{common.deselect-all}}"
     },
     "card-detail-drawer": {
         "general-tab": "",
@@ -784,7 +784,7 @@
         "publishers-title": "",
         "tags-title": "",
         "not-defined": "",
-        "read": "",
+        "read": "{{common.read}}",
         "unread": "",
         "files": "",
         "pages": "",
@@ -818,9 +818,9 @@
         "load": "",
         "back": "",
         "reset-cover-tooltip": "",
-        "reset": "",
+        "reset": "{{common.reset}}",
         "image-num": "",
-        "apply": "",
+        "apply": "{{common.apply}}",
         "applied": ""
     },
     "download-indicator": {
@@ -883,14 +883,14 @@
     },
     "bulk-add-to-collection": {
         "title": "",
-        "promoted": "",
-        "close": "",
+        "promoted": "{{common.promoted}}",
+        "close": "{{common.close}}",
         "filter-label": "",
-        "clear": "",
+        "clear": "{{common.clear}}",
         "no-data": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "collection-label": "",
-        "create": ""
+        "create": "{{common.create}}"
     },
     "entity-title": {
         "special": "",
@@ -901,7 +901,7 @@
         "open-external": ""
     },
     "list-item": {
-        "read": ""
+        "read": "{{common.read}}"
     },
     "manage-alerts": {
         "description-part-1": "",
@@ -919,19 +919,19 @@
         "send-to-warning": "",
         "email-url-label": "",
         "email-url-tooltip": "",
-        "reset": "",
+        "reset": "{{common.reset}}",
         "test": "",
         "host-name-label": "",
         "host-name-tooltip": "",
         "host-name-validation": "",
-        "reset-to-default": "",
-        "save": ""
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
     },
     "manage-library": {
         "title": "",
         "add-library": "",
         "no-data": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "last-scanned-title": "",
         "shared-folders-title": "",
         "type-title": "",
@@ -952,9 +952,9 @@
         "bookmark-dir-label": "",
         "bookmark-dir-tooltip": "",
         "change": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "media-issue-title": "",
         "scrobble-issue-title": ""
     },
@@ -1002,9 +1002,9 @@
         "folder-watching-label": "",
         "folder-watching-tooltip": "",
         "enable-folder-watching": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "cache-size-validation": "",
         "field-required": "",
         "max-logs-validation": "",
@@ -1038,9 +1038,9 @@
         "job-title-header": "",
         "description-header": "",
         "action-header": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "recurring-tasks-title": "",
         "last-executed-header": "",
         "cron-header": "",
@@ -1091,14 +1091,14 @@
         "online-now-tooltip": "",
         "sharing-title": "",
         "no-data": "",
-        "loading": ""
+        "loading": "{{common.loading}}"
     },
     "edit-collection-tags": {
         "title": "",
         "required-field": "",
-        "save": "",
-        "close": "",
-        "cancel": "",
+        "save": "{{common.save}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
         "general-tab": "",
         "cover-image-tab": "",
         "series-tab": "",
@@ -1108,8 +1108,8 @@
         "promote-tooltip": "",
         "summary-label": "",
         "series-title": "",
-        "deselect-all": "",
-        "select-all": ""
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
     "library-detail": {
         "library-tab": "",
@@ -1147,7 +1147,7 @@
     },
     "all-collections": {
         "title": "",
-        "item-count": "",
+        "item-count": "{{common.item-count}}",
         "no-data": "",
         "create-one-part-1": "",
         "create-one-part-2": ""
@@ -1163,22 +1163,22 @@
     },
     "reading-lists": {
         "title": "",
-        "item-count": "",
+        "item-count": "{{common.item-count}}",
         "no-data": "",
         "create-one-part-1": "",
         "create-one-part-2": ""
     },
     "reading-list-item": {
-        "remove": "",
-        "read": ""
+        "remove": "{{common.remove}}",
+        "read": "{{common.read}}"
     },
     "reading-list-detail": {
-        "item-count": "",
+        "item-count": "{{common.item-count}}",
         "page-settings-title": "",
         "remove-read": "",
         "order-numbers-label": "",
         "continue": "",
-        "read": "",
+        "read": "{{common.read}}",
         "read-options-alt": "",
         "incognito-alt": "",
         "no-data": ""
@@ -1189,14 +1189,14 @@
         "update-available": "",
         "downloading-item": "",
         "more-info": "",
-        "close": "",
+        "close": "{{common.close}}",
         "users-online-count": "",
         "active-events-title": "",
         "no-data": ""
     },
     "shortcuts-modal": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "prev-page": "",
         "next-page": "",
         "go-to": "",
@@ -1214,8 +1214,8 @@
         "libraries": "",
         "reading-lists": "",
         "collections": "",
-        "close": "",
-        "loading": ""
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}"
     },
     "nav-header": {
         "skip-alt": "",
@@ -1232,19 +1232,19 @@
     },
     "add-to-list-modal": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "filter-label": "",
         "promoted-alt": "",
         "no-data": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "reading-list-label": "",
-        "create": ""
+        "create": "{{common.create}}"
     },
     "edit-reading-list-modal": {
         "title": "",
         "general-tab": "",
         "cover-image-tab": "",
-        "close": "",
+        "close": "{{common.close}}",
         "save": "",
         "year-validation": "",
         "month-validation": "",
@@ -1259,7 +1259,7 @@
         "promote-tooltip": ""
     },
     "import-cbl-modal": {
-        "close": "",
+        "close": "{{common.close}}",
         "title": "",
         "import-description": "",
         "validate-description": "",
@@ -1357,8 +1357,8 @@
         "sort-by-label": "",
         "ascending-alt": "",
         "descending-alt": "",
-        "reset": "",
-        "apply": ""
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}"
     },
     "sort-field-pipe": {
         "sort-name": "",
@@ -1394,7 +1394,7 @@
         "age-rating-label": "",
         "publication-status-label": "",
         "required-field": "",
-        "close": "",
+        "close": "{{common.close}}",
         "name-label": "",
         "sort-name-label": "",
         "localized-name-label": "",
@@ -1405,7 +1405,7 @@
         "add-link-alt": "",
         "remove-link-alt": "",
         "cover-image-description": "",
-        "save": "",
+        "save": "{{common.save}}",
         "field-locked-alt": "",
         "info-title": "",
         "library-title": "",
@@ -1420,13 +1420,13 @@
         "total-items-title": "",
         "max-items-title": "",
         "size-title": "",
-        "loading": "",
+        "loading": "{{common.loading}}",
         "added-title": "",
         "last-modified-title": "",
         "view-files": "",
         "pages-title": "",
         "chapter-title": "",
-        "volume-num": "",
+        "volume-num": "{{common.volume-num}}",
         "highest-count-tooltip": "",
         "max-issue-tooltip": ""
     },

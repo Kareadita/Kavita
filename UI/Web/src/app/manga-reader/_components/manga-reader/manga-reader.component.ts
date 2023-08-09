@@ -67,7 +67,7 @@ import { FittingIconPipe } from '../../_pipes/fitting-icon.pipe';
 import { InfiniteScrollerComponent } from '../infinite-scroller/infinite-scroller.component';
 import { SwipeDirective } from '../../../ng-swipe/ng-swipe.directive';
 import { LoadingComponent } from '../../../shared/loading/loading.component';
-import {translate, TranslocoModule, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 
 const PREFETCH_PAGES = 10;
@@ -121,7 +121,7 @@ enum KeyDirection {
         ])
     ],
     standalone: true,
-  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe, TranslocoModule]
+  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe, TranslocoDirective]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
