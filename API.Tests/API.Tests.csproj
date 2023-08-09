@@ -8,7 +8,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="7.0.10" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
-        <PackageReference Include="Moq" Version="4.20.1" />
         <PackageReference Include="NSubstitute" Version="5.0.0" />
         <PackageReference Include="System.IO.Abstractions.TestingHelpers" Version="19.2.51" />
         <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="19.2.51" />
