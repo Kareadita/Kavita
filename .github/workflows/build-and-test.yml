@@ -130,7 +130,7 @@ jobs:
           body=${body//$'`'/'%60'}
           body=${body//$'>'/'%3E'}
           echo $body
-          echo "::set-output name=BODY::$body"
+          echo "BODY=$body" >> $GITHUB_OUTPUT
 
       - name: Check Out Repo
         uses: actions/checkout@v3
@@ -163,7 +163,7 @@ jobs:
       - name: Parse Version
         run: |
           version='${{steps.get-version.outputs.assembly-version}}'
-          echo "::set-output name=VERSION::$version"
+          echo "VERSION=$version" >> $GITHUB_OUTPUT
         id: parse-version
 
       - name: Echo csproj version
@@ -254,7 +254,8 @@ jobs:
           body=${body//$'`'/'%60'}
           body=${body//$'>'/'%3E'}
           echo $body
-          echo "::set-output name=BODY::$body"
+          echo "BODY=$body" >> $GITHUB_OUTPUT
+          
 
       - name: Check Out Repo
         uses: actions/checkout@v3
@@ -293,7 +294,7 @@ jobs:
           version='${{steps.get-version.outputs.assembly-version}}'
           newVersion=${version%.*}
           echo $newVersion
-          echo "::set-output name=VERSION::$newVersion"
+          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
         id: parse-version
 
       - name: Compile dotnet app
@@ -392,7 +393,7 @@ jobs:
           - name: Parse Version
             run: |
                 version='${{steps.get-version.outputs.assembly-version}}'
-                echo "::set-output name=VERSION::$version"
+                echo "VERSION=$version" >> $GITHUB_OUTPUT
             id: parse-version
 
           - name: Echo csproj version
