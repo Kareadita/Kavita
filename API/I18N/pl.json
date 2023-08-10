@@ -1,1 +1,22 @@
-{}
+{
+    "bad-credentials": "Twoje dane uwierzytelniające są nieprawidłowe",
+    "disabled-account": "Twoje konto jest wyłączone. Skontaktuj się z administratorem serwera.",
+    "register-user": "Coś poszło nie tak podczas rejestracji użytkownika",
+    "validate-email": "Wystąpił problem z weryfikacją adresu e-mail: {0}",
+    "confirm-token-gen": "Wystąpił problem z wygenerowaniem tokena potwierdzenia",
+    "denied": "Niedozwolone",
+    "password-required": "Aby zmienić konto, musisz wprowadzić istniejące hasło, chyba że jesteś administratorem",
+    "invalid-password": "Nieprawidłowe hasło",
+    "unable-to-reset-key": "Coś poszło nie tak, nie można zresetować klucza",
+    "invalid-payload": "Nieprawidłowy payload",
+    "nothing-to-do": "Nie ma, nic do zrobienia",
+    "share-multiple-emails": "Nie można udostępniać wiadomości e-mail na wielu kontach",
+    "age-restriction-update": "Wystąpił błąd aktualizacji ograniczenia wiekowego",
+    "no-user": "Użytkownik nie istnieje",
+    "username-taken": "Nazwa użytkownika jest już zajęta",
+    "confirm-email": "Najpierw musisz potwierdzić swój adres e-mail",
+    "locked-out": "Zostałeś zablokowany z powodu zbyt wielu prób autoryzacji. Odczekaj 10 minut.",
+    "permission-denied": "Ta operacja jest niedozwolona",
+    "invalid-token": "Nieprawidłowy token",
+    "generate-token": "Wystąpił problem z generowaniem tokenu wiadomości e-mail z potwierdzeniem. Zobacz logi"
+}
