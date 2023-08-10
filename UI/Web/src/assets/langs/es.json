@@ -755,5 +755,37 @@
         "valid-email": "Este debe ser un correo electrónico válido",
         "required-field": "Este campo es obligatorio",
         "password-validation": "La contraseña debe tener entre 6 y 32 caracteres"
+    },
+    "entity-type": {
+        "bookmark": "marcador",
+        "logs": "registros",
+        "volume": "volumen",
+        "chapter": "capítulo"
+    },
+    "actionable": {
+        "settings": "Ajustes",
+        "analyze-files": "Analizar Archivos",
+        "scan-library": "Escanear Biblioteca",
+        "read": "Leer",
+        "import-cbl": "Importar CBL",
+        "clear": "Limpiar",
+        "mark-as-unread": "Marcar como no leído",
+        "mark-as-read": "Marcar como leído",
+        "refresh-covers": "Actualizar Portadas",
+        "edit": "Editar"
+    },
+    "preferences": {
+        "automatic": "Automático",
+        "vertical": "Vertical",
+        "horizontal": "Horizontal",
+        "1-column": "1 Columna",
+        "list": "Lista",
+        "cards": "Tarjetas",
+        "right-to-left": "Derecha a izquierda",
+        "left-to-right": "Izquierda a derecha",
+        "2-column": "2 Columnas"
+    },
+    "toasts": {
+        "confirm-regen-covers": "Actualizar portadas obligará a recalcular todas las imágenes de las portadas. Se trata de una operación pesada. ¿Está seguro de que no desea realizar un escaneo en su lugar?"
     }
 }
