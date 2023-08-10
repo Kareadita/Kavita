@@ -18,7 +18,7 @@ public class FilterV2Dto
     /// </summary>
     public string? Name { get; set; }
     public ICollection<FilterStatementDto> Statements { get; set; }
-    public FilterCombination Combination { get; set; } = FilterCombination.Or;
+    public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SortOptions SortOptions { get; set; } // TODO: Solve for how to do this and have it serializable to DB
 
     /// <summary>

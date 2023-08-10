@@ -139,7 +139,7 @@ export class MetadataService {
   createDefaultFilterDto(): SeriesFilterV2 {
     return {
       statements: [] as FilterStatement[],
-      combination: FilterCombination.Or,
+      combination: FilterCombination.And,
       limitTo: 0,
       sortOptions: {
         isAscending: true,

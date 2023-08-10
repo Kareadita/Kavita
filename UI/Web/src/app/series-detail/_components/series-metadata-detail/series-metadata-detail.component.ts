@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
-import {FilterQueryParam, FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
+import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../../shared/_services/utility.service';
 import { MangaFormat } from '../../../_models/manga-format';
 import { ReadingList } from '../../../_models/reading-list';
@@ -23,8 +23,6 @@ import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.compon
 import {TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {MetadataService} from "../../../_services/metadata.service";
-
 
 
 @Component({
@@ -61,7 +59,6 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   get LibraryType() { return LibraryType; }
   get MangaFormat() { return MangaFormat; }
   get TagBadgeCursor() { return TagBadgeCursor; }
-  get FilterQueryParam() { return FilterQueryParam; }
 
   get FilterField() {
     return FilterField;
@@ -74,7 +71,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
 
   constructor(public utilityService: UtilityService,
     private router: Router, public readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private metadataService: MetadataService, private filterUtilityService: FilterUtilitiesService) {
+    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {
 
   }
 

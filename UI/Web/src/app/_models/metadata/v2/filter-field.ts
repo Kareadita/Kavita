@@ -1,5 +1,6 @@
 export enum FilterField
 {
+    None = -1,
     Summary = 0,
     SeriesName = 1,
     PublicationStatus = 2,
@@ -26,4 +27,4 @@ export enum FilterField
     ReadTime = 23
 }
 
-export const allFields = Object.keys(FilterField).filter(key => !isNaN(Number(key))).map(key => parseInt(key, 10)) as FilterField[];
+export const allFields = Object.keys(FilterField).filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0).map(key => parseInt(key, 10)) as FilterField[];
