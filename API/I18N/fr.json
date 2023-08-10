@@ -27,5 +27,7 @@
     "invalid-payload": "Paramètre invalide",
     "manual-setup-fail": "La configuration manuelle est impossible. Veuillez annuler et recréer l'invitation",
     "generic-user-email-update": "Impossible de mettre a jour l’e-mail de l'utilisateur. Veuillez vérifier les logs.",
-    "generic-password-update": "Une erreur s'est produite au moment de vérifier le mot de passe"
+    "generic-password-update": "Une erreur s'est produite au moment de vérifier le mot de passe",
+    "password-updated": "Mot de passe mis a jour",
+    "forgot-password-generic": "Un e-mail sera envoyé a cette adresse si elle existe dans la base de données"
 }
