@@ -24,5 +24,6 @@
     "user-already-invited": "L'usager à déjà été invité avec ce courriel et n'a pas encore accepté l'invitation.",
     "generic-invite-user": "Une erreur est survenue lors de l'invitation de l'usager. Voir le journal.",
     "invalid-email-confirmation": "La confirmation de courriel est invalide",
-    "invalid-payload": "Paramètre invalide"
+    "invalid-payload": "Paramètre invalide",
+    "manual-setup-fail": "La configuration manuelle est impossible. Veuillez annuler et recréer l'invitation"
 }
