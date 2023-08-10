@@ -42,20 +42,15 @@
                   </ng-template>
                 </button>
                 <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                  <option [value]="SortField.SortName">Sort Name</option>
-                  <option [value]="SortField.Created">Created</option>
-                  <option [value]="SortField.LastModified">Last Modified</option>
-                  <option [value]="SortField.LastChapterAdded">Item Added</option>
-                  <option [value]="SortField.TimeToRead">Time to Read</option>
-                  <option [value]="SortField.ReleaseYear">Release Year</option>
+                  <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
                 </select>
               </div>
           </div>
           <div class="col-md-2 me-3 mt-4">
-            <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
+            <button class="btn btn-secondary col-12" (click)="clear()">{{t('clear')}}</button>
           </div>
           <div class="col-md-2 me-3 mt-4">
-            <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
+            <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>
           </div>
       </div>
       </form>

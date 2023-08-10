@@ -1,5 +1,6 @@
 import { MangaFormat } from "../manga-format";
 import { SeriesFilterV2 } from "./v2/series-filter-v2";
+import {FilterField} from "./v2/filter-field";
 
 export interface FilterItem<T> {
     title: string;
@@ -58,6 +59,8 @@ export interface ReadStatus {
   inProgress: boolean,
   read: boolean,
 }
+
+export const allSortFields = Object.keys(SortField).filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0).map(key => parseInt(key, 10)) as SortField[];
 
 export const mangaFormatFilters = [
     {

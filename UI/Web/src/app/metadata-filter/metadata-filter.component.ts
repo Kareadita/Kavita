@@ -14,14 +14,14 @@ import { NgbCollapse, NgbTooltip, NgbRating } from '@ng-bootstrap/ng-bootstrap';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
 import { Library } from '../_models/library';
-import { FilterEvent, FilterItem, SortField } from '../_models/metadata/series-filter';
+import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { TypeaheadComponent } from '../typeahead/_components/typeahead.component';
 import { DrawerComponent } from '../shared/drawer/drawer.component';
-import { NgIf, NgTemplateOutlet, AsyncPipe } from '@angular/common';
+import {NgIf, NgTemplateOutlet, AsyncPipe, NgForOf} from '@angular/common';
 import {TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
@@ -33,7 +33,7 @@ import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent]
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf]
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -69,6 +69,8 @@ export class MetadataFilterComponent implements OnInit {
 
   fullyLoaded: boolean = false;
   filterV2: SeriesFilterV2 | undefined;
+  allSortFields = allSortFields;
+
 
 
 
