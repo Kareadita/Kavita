@@ -29,15 +29,15 @@
     "generic-user-email-update": "Impossible de mettre à jour le courriel de l'utilisateur. Veuillez vérifier les logs.",
     "generic-password-update": "Une erreur s'est produite lors de la vérification du nouveau mot de passe",
     "password-updated": "Mot de passe mis a jour",
-    "forgot-password-generic": "Un e-mail sera envoyé a cette adresse si elle existe dans notre base de données",
+    "forgot-password-generic": "Un courriel sera envoyé à cette adresse si elle existe dans notre base de données",
     "not-accessible-password": "Votre serveur n'est pas accessible. Un lien pour réinitialiser votre mot de passe est dans les logs",
     "not-accessible": "Votre serveur n'est pas accessible publiquement",
     "email-sent": "Email envoyé",
     "user-migration-needed": "Cet utilisateur doit être déplacé. Faite le se déconnecter et reconnecter afin d'entamer la procédure",
-    "generic-invite-email": "Erreur lors du renvoi de l'invitation par e-mail",
+    "generic-invite-email": "Erreur lors du renvoi de l'invitation par courriel",
     "admin-already-exists": "Administrateur déjà existant",
     "invalid-username": "Nom d'utilisateur invalide",
-    "critical-email-migration": "Un problème est survenu lors de la migration de l'e-mail. Contactez le support",
+    "critical-email-migration": "Un problème est survenu lors de la migration du courriel. Veuillez contacter le support",
     "chapter-doesnt-exist": "Chapitre non existant",
     "file-missing": "Fichier introuvable dans le livre"
 }
