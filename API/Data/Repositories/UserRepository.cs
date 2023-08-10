@@ -7,6 +7,7 @@ using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
@@ -53,7 +54,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
-    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter);
+    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
@@ -374,36 +375,42 @@ public class UserRepository : IUserRepository
     /// <param name="userId"></param>
     /// <param name="filter">Only supports SeriesNameQuery</param>
     /// <returns></returns>
-    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter)
+    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter)
     {
         var query = _context.AppUserBookmark
             .Where(x => x.AppUserId == userId)
             .OrderBy(x => x.Created)
             .AsNoTracking();
 
-        if (string.IsNullOrEmpty(filter.SeriesNameQuery))
-            return await query
-                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-
-        var seriesNameQueryNormalized = filter.SeriesNameQuery.ToNormalized();
-        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
-            {
-                bookmark,
-                series
-            })
-            .Where(o => (EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%"))
-                        || (o.series.OriginalName != null && EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%"))
-                        || (o.series.LocalizedName != null && EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%"))
-                        || (EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%"))
-            );
-
-        query = filterSeriesQuery.Select(o => o.bookmark);
-
+        // TODO: Implement this with new Filter code
 
         return await query
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+        //
+        // if (string.IsNullOrEmpty(filter.SeriesNameQuery))
+        //     return await query
+        //         .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+        //         .ToListAsync();
+        //
+        // var seriesNameQueryNormalized = filter.SeriesNameQuery.ToNormalized();
+        // var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
+        //     {
+        //         bookmark,
+        //         series
+        //     })
+        //     .Where(o => (EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%"))
+        //                 || (o.series.OriginalName != null && EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%"))
+        //                 || (o.series.LocalizedName != null && EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%"))
+        //                 || (EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%"))
+        //     );
+        //
+        // query = filterSeriesQuery.Select(o => o.bookmark);
+        //
+        //
+        // return await query
+        //     .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+        //     .ToListAsync();
     }
 
     /// <summary>

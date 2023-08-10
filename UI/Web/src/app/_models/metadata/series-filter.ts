@@ -86,7 +86,7 @@ export const mangaFormatFilters = [
 ];
 
 export interface FilterEvent {
-  filter: SeriesFilter;// TODO: remove this
+  //filter: SeriesFilter;// TODO: remove this
   filterV2: SeriesFilterV2;
   isFirst: boolean;
 }

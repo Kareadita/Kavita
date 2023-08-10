@@ -196,23 +196,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
     this.loadPage();
   }
-
-  handleAction(action: ActionItem<Series>, series: Series) {
-    // let lib: Partial<Library> = library;
-    // if (library === undefined) {
-    //   lib = {id: this.libraryId, name: this.libraryName};
-    // }
-    // switch (action.action) {
-    //   case(Action.Scan):
-    //     this.actionService.scanLibrary(lib);
-    //     break;
-    //   case(Action.RefreshMetadata):
-    //   this.actionService.refreshMetadata(lib);
-    //     break;
-    //   default:
-    //     break;
-    // }
-  }
 }
 
 

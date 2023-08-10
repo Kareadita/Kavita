@@ -19,6 +19,7 @@ import { TextResonse } from '../_types/text-response';
 import { AccountService } from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {PersonalToC} from "../_models/readers/personal-toc";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
@@ -70,12 +71,8 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page});
   }
 
-  getAllBookmarks(filter: SeriesFilter | undefined) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, undefined, undefined);
-    const data = this.filterUtilityService.createSeriesFilter(filter);
-
-    return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', data);
+  getAllBookmarks(filter: SeriesFilterV2 | undefined) {
+    return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
 
   getBookmarks(chapterId: number) {

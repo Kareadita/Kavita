@@ -522,6 +522,7 @@
     },
 
     "all-series": {
+        "title": "All Series",
         "series-count": "{{common.series-count}}"
     },
 

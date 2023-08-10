@@ -29,7 +29,9 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
 
@@ -43,14 +45,14 @@ import {TranslocoDirective} from "@ngneat/transloco";
 })
 export class AllSeriesComponent implements OnInit {
 
-  title: string = 'All Series';
+  title: string = translate('all-series.title');
   series: Series[] = [];
   loadingSeries = false;
   pagination!: Pagination;
-  filter: SeriesFilter | undefined = undefined;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   private readonly destroyRef = inject(DestroyRef);
@@ -116,8 +118,17 @@ export class AllSeriesComponent implements OnInit {
     this.titleService.setTitle('Kavita - ' + this.title);
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
+
+    this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+    if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+      this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+    }
+    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+    this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+    this.filterSettings.presetsV2 =  this.filter;
+
+    // [this.filterSettings.presets, this.filterSettings.openByDefault]  = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
+    // this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
     this.cdRef.markForCheck();
   }
 
@@ -144,9 +155,13 @@ export class AllSeriesComponent implements OnInit {
 
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    }
+
     this.loadPage();
   }
 
@@ -154,7 +169,7 @@ export class AllSeriesComponent implements OnInit {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.loadingSeries = true;
     this.cdRef.markForCheck();
-    this.seriesService.getAllSeries(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeriesV2(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (s: Series) => s.name);
       this.pagination = series.pagination;

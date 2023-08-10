@@ -39,6 +39,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -88,7 +89,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  filter: SeriesFilter = this.filterUtilityService.createSeriesFilter();
+  filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
@@ -175,7 +176,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     console.log('card-detail-layout applying metadata filter: ', event);
     this.applyFilter.emit(event);
     this.updateApplied++;
-    this.filter = event.filter;
+    this.filter = event.filterV2;
     this.cdRef.markForCheck();
   }
 
