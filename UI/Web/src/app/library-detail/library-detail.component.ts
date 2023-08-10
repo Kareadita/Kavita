@@ -292,8 +292,9 @@ export class LibraryDetailComponent implements OnInit {
     this.filterV2 = data.filterV2;
 
     if (!data.isFirst) {
-      const url = this.filterUtilityService.encodeSeriesFilter(this.filterV2);
-      window.history.replaceState(window.location.href, '', url);
+      //const url = this.filterUtilityService.encodeSeriesFilter(this.filterV2);
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filterV2);
+      //window.history.replaceState(window.location.href, '', url);
     }
 
     this.loadPage();
