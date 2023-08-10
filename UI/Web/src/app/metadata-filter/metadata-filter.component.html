@@ -24,30 +24,28 @@
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2!" (update)="handleFilters($event)"></app-metadata-builder>
       </div>
-      <form [formGroup]="sortGroup">
-        <div class="row justify-content-center g-0 mb-3">
-        <div class="col-md-3">
-          <div class="form-group pe-2">
-            <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
-            <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
+      <form [formGroup]="sortGroup" class="container-fluid">
+        <div class="row mb-3">
+          <div class="col-md-2">
+            <div class="form-group pe-1">
+              <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
+              <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
+            </div>
           </div>
-        </div>
-          <div class="col-md-6">
-              <div>
-                <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-                <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
-                  <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
-                  <ng-template #descSort>
-                    <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
-                  </ng-template>
-                </button>
-                <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                  <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
-                </select>
-              </div>
+          <div class="col-md-3">
+              <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
+              <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
+                <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
+                <ng-template #descSort>
+                  <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
+                </ng-template>
+              </button>
+              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
+                <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
+              </select>
           </div>
           <div class="col-md-2 me-3 mt-4">
-            <button class="btn btn-secondary col-12" (click)="clear()">{{t('clear')}}</button>
+            <button class="btn btn-secondary col-12" (click)="clear()">{{t('reset')}}</button>
           </div>
           <div class="col-md-2 me-3 mt-4">
             <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>

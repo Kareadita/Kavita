@@ -1515,7 +1515,6 @@
         "descending-alt": "Descending",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "clear": "{{common.clear}}",
         "limit-label": "Limit To"
 
     },
