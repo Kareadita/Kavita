@@ -1,70 +1,70 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "Connexion",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Mot de passe oublié ?",
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "no-libraries": "Aucune bibliothèque n'est configurée. Veuillez en ajouter une",
+        "server-settings-link": "Paramètres du serveur",
+        "not-granted": "Vous n'avez accès à aucune bibliothèque.",
+        "on-deck-title": "En Cours",
+        "recently-updated-title": "Séries mises-à-jour récemment",
+        "recently-added-title": "Séries ajoutées récemment"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
-        "username": "",
-        "required": "",
-        "email": "",
-        "not-valid-email": "",
-        "cancel": "",
-        "saving": "",
-        "update": ""
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "cancel": "{{common.cancel}}",
+        "saving": "Sauvegarde…",
+        "update": "Mise-à-jour"
     },
     "user-scrobble-history": {
-        "title": "",
-        "description": "",
-        "filter-label": "",
-        "created-header": "",
-        "last-modified-header": "",
-        "type-header": "",
-        "series-header": "",
-        "data-header": "",
-        "is-processed-header": "",
-        "no-data": "",
-        "volume-and-chapter-num": "",
-        "rating": "",
-        "not-applicable": "",
-        "processed": "",
-        "not-processed": ""
+        "title": "Historique de scrobble",
+        "description": "Ici, vous trouverez les événements de scrobble reliées à votre compte. Afin d'avoir des événements, vous devez avoir un fournisseur de scrobble actif et configuré. Tous les événements qui ont été traités vont automatiquement disparaitre après un mois. Si des événements demeurent non traités, il est fort probable qu'il n'y ait aucune correspondance chez le fournisseur. Veuillez contacter votre administrateur afin de les corriger.",
+        "filter-label": "Filtre",
+        "created-header": "Création",
+        "last-modified-header": "Dernière modification",
+        "type-header": "Type",
+        "series-header": "Series",
+        "data-header": "Données",
+        "is-processed-header": "A été traité",
+        "no-data": "Aucune donnée",
+        "volume-and-chapter-num": "Volume {{v}} Chapitre {{n}}",
+        "rating": "Évaluation {{r}}",
+        "not-applicable": "Non applicable",
+        "processed": "Traité",
+        "not-processed": "Non traité"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "",
-        "score-updated": "",
-        "want-to-read-add": "",
-        "want-to-read-remove": "",
-        "review": ""
+        "chapter-read": "Progression de la lecture",
+        "score-updated": "Mise à jour de l'évaluation",
+        "want-to-read-add": "À lire : Ajouter à la liste",
+        "want-to-read-remove": "À lire : Retirer de la liste",
+        "review": "Mettre à jour la critique"
     },
     "spoiler": {
-        "click-to-show": ""
+        "click-to-show": "Divulgâcheur, cliquez afin d'afficher"
     },
     "review-series-modal": {
-        "title": "",
-        "tagline-label": "",
-        "review-label": "",
-        "close": "",
-        "save": ""
+        "title": "Éditer la critique",
+        "tagline-label": "Slogan",
+        "review-label": "Critique",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
-        "close": "",
-        "user-review": "",
-        "external-mod": "",
-        "go-to-review": ""
+        "close": "{{common.close}}",
+        "user-review": "Critique de {{username}}",
+        "external-mod": "(externe)",
+        "go-to-review": "Lire la critique"
     },
     "review-card": {
         "your-review": "",
