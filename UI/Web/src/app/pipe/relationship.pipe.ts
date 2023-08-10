@@ -1,5 +1,6 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
 import { RelationKind } from '../_models/series-detail/relation-kind';
+import {TranslocoService} from "@ngneat/transloco";
 
 @Pipe({
   name: 'relationship',
@@ -7,35 +8,37 @@ import { RelationKind } from '../_models/series-detail/relation-kind';
 })
 export class RelationshipPipe implements PipeTransform {
 
+  translocoService = inject(TranslocoService);
+
   transform(relationship: RelationKind | undefined): string {
     if (relationship === undefined) return '';
     switch (relationship) {
       case RelationKind.Adaptation:
-        return 'Adaptation';
+        return this.translocoService.translate('relationship-pipe.adaptation');
       case RelationKind.AlternativeSetting:
-        return 'Alternative Setting';
+        return this.translocoService.translate('relationship-pipe.alternative-setting');
       case RelationKind.AlternativeVersion:
-        return 'Alternative Version';
+        return this.translocoService.translate('relationship-pipe.alternative-version');
       case RelationKind.Character:
-        return 'Character';
+        return this.translocoService.translate('relationship-pipe.character');
       case RelationKind.Contains:
-        return 'Contains';
+        return this.translocoService.translate('relationship-pipe.contains');
       case RelationKind.Doujinshi:
-        return 'Doujinshi';
+        return this.translocoService.translate('relationship-pipe.doujinshi');
       case RelationKind.Other:
-        return 'Other';
+        return this.translocoService.translate('relationship-pipe.other');
       case RelationKind.Prequel:
-        return 'Prequel';
+        return this.translocoService.translate('relationship-pipe.prequel');
       case RelationKind.Sequel:
-        return 'Sequel';
+        return this.translocoService.translate('relationship-pipe.sequel');
       case RelationKind.SideStory:
-        return 'Side Story';
+        return this.translocoService.translate('relationship-pipe.side-story');
       case RelationKind.SpinOff:
-        return 'Spin Off';
+        return this.translocoService.translate('relationship-pipe.spin-off');
       case RelationKind.Parent:
-        return 'Parent';
+        return this.translocoService.translate('relationship-pipe.parent');
       case RelationKind.Edition:
-        return 'Edition'
+        return this.translocoService.translate('relationship-pipe.edition');
       default:
         return '';
     }

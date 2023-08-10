@@ -1,7 +1,8 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
+import {TranslocoService} from "@ngneat/transloco";
 
 @Pipe({
   name: 'ageRating',
@@ -9,35 +10,51 @@ import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
 })
 export class AgeRatingPipe implements PipeTransform {
 
-  constructor() {}
+  translocoService = inject(TranslocoService);
 
   transform(value: AgeRating | AgeRatingDto | undefined): Observable<string> {
-    if (value === undefined || value === null) return of('Unknown');
+    if (value === undefined || value === null) return of(this.translocoService.translate('age-rating-pipe.unknown') as string);
 
     if (value.hasOwnProperty('title')) {
       return of((value as AgeRatingDto).title);
     }
 
-    switch(value) {
-      case AgeRating.Unknown: return of('Unknown');
-      case AgeRating.EarlyChildhood: return of('Early Childhood');
-      case AgeRating.AdultsOnly: return of('Adults Only 18+');
-      case AgeRating.Everyone: return of('Everyone');
-      case AgeRating.Everyone10Plus: return of('Everyone 10+');
-      case AgeRating.G: return of('G');
-      case AgeRating.KidsToAdults: return of('Kids to Adults');
-      case AgeRating.Mature: return of('Mature');
-      case AgeRating.Mature15Plus: return of('MA15+');
-      case AgeRating.Mature17Plus: return of('Mature 17+');
-      case AgeRating.RatingPending: return of('Rating Pending');
-      case AgeRating.Teen: return of('Teen');
-      case AgeRating.X18Plus: return of('X18+');
-      case AgeRating.NotApplicable: return of('Not Applicable');
-      case AgeRating.PG: return of('PG');
-      case AgeRating.R18Plus: return of('R18+')
+    switch (value) {
+      case AgeRating.Unknown:
+        return this.translocoService.translate('age-rating-pipe.unknown');
+      case AgeRating.EarlyChildhood:
+        return this.translocoService.translate('age-rating-pipe.early-childhood');
+      case AgeRating.AdultsOnly:
+        return this.translocoService.translate('age-rating-pipe.adults-only');
+      case AgeRating.Everyone:
+        return this.translocoService.translate('age-rating-pipe.everyone');
+      case AgeRating.Everyone10Plus:
+        return this.translocoService.translate('age-rating-pipe.everyone-10-plus');
+      case AgeRating.G:
+        return this.translocoService.translate('age-rating-pipe.g');
+      case AgeRating.KidsToAdults:
+        return this.translocoService.translate('age-rating-pipe.kids-to-adults');
+      case AgeRating.Mature:
+        return this.translocoService.translate('age-rating-pipe.mature');
+      case AgeRating.Mature15Plus:
+        return this.translocoService.translate('age-rating-pipe.ma15-plus');
+      case AgeRating.Mature17Plus:
+        return this.translocoService.translate('age-rating-pipe.mature-17-plus');
+      case AgeRating.RatingPending:
+        return this.translocoService.translate('age-rating-pipe.rating-pending');
+      case AgeRating.Teen:
+        return this.translocoService.translate('age-rating-pipe.teen');
+      case AgeRating.X18Plus:
+        return this.translocoService.translate('age-rating-pipe.x18-plus');
+      case AgeRating.NotApplicable:
+        return this.translocoService.translate('age-rating-pipe.not-applicable');
+      case AgeRating.PG:
+        return this.translocoService.translate('age-rating-pipe.pg');
+      case AgeRating.R18Plus:
+        return this.translocoService.translate('age-rating-pipe.r18-plus');
     }
 
-    return of('Unknown');
+    return of(this.translocoService.translate('age-rating-pipe.unknown') as string);
   }
 
 }

@@ -1,77 +1,80 @@
-<div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
+<ng-container *transloco="let t; read: 'cover-image-chooser'">
+  <div class="container-fluid" style="padding-left: 0px; padding-right: 0px">
     <form [formGroup]="form">
-        <ngx-file-drop (onFileDrop)="dropped($event)" 
-        (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false"
-         dropZoneClassName="file-upload" contentClassName="file-upload-zone">
-            <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
-                    <div class="mx-auto">
-                        <div class="row g-0 mb-3">
-                            <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
-                        </div>
+      <ngx-file-drop (onFileDrop)="dropped($event)"
+                     (onFileOver)="fileOver($event)" (onFileLeave)="fileLeave($event)" [accept]="acceptableExtensions" [directory]="false"
+                     dropZoneClassName="file-upload" contentClassName="file-upload-zone">
+        <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+          <div class="row g-0 mt-3 pb-3" *ngIf="mode === 'all'">
+            <div class="mx-auto">
+              <div class="row g-0 mb-3">
+                <i class="fa fa-file-upload mx-auto" style="font-size: 24px; width: 20px;" aria-hidden="true"></i>
+              </div>
 
-                        <div class="d-flex justify-content-center">
-                            <div class="d-flex justify-content-evenly">
-                                <a style="padding-right:0px" href="javascript:void(0)" (click)="changeMode('url')"><span class="phone-hidden">Enter a </span>Url</a>
-                                <span class="ps-1 pe-1">•</span>
-                                <span style="padding-right:0px" href="javascript:void(0)">Drag and drop</span>
-                                <span class="ps-1 pe-1" style="padding-right:0px">•</span>
-                                <a style="padding-right:0px" href="javascript:void(0)" (click)="openFileSelector()">Upload<span class="phone-hidden"> an image</span></a>
-                            </div>
-                        </div>
-                    </div>
+              <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-evenly">
+                  <a style="padding-right:0px" href="javascript:void(0)" (click)="changeMode('url')"><span class="phone-hidden">Enter a </span>Url</a>
+                  <span class="ps-1 pe-1">•</span>
+                  <span style="padding-right:0px" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
+                  <span class="ps-1 pe-1" style="padding-right:0px">•</span>
+                  <a style="padding-right:0px" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
                 </div>
-                
+              </div>
+            </div>
+          </div>
 
-                <ng-container *ngIf="mode === 'url'">
-                    <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
-                        <div class="input-group col-auto me-md-2" style="width: 83%">
-                            <label class="input-group-text" for="load-image">Url</label>
-                            <input type="text" autofocus autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
-                            <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="form.get('coverImageUrl')?.value.length === 0">
-                                Load
-                            </button>
-                        </div>
-                        <button class="btn btn-secondary col-auto" href="javascript:void(0)" (click)="mode = 'all'" aria-label="Back">
-                            <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
-                            <span class="phone-hidden">Back</span>
-                        </button>
-                    </div>
-                    
-                </ng-container>
-                
-            </ng-template>
-        </ngx-file-drop>
 
-        <ng-template>
+          <ng-container *ngIf="mode === 'url'">
+            <div class="row g-0 mt-3 pb-3 ms-md-2 me-md-2">
+              <div class="input-group col-auto me-md-2" style="width: 83%">
+                <label class="input-group-text" for="load-image">{{t('url-label')}}</label>
+                <input type="text" autofocus autocomplete="off" class="form-control" formControlName="coverImageUrl" placeholder="https://" id="load-image" class="form-control">
+                <button class="btn btn-outline-secondary" type="button" id="load-image-addon" (click)="loadImage(); mode='all';" [disabled]="(form.get('coverImageUrl')?.value).length === 0">
+                  {{t('load')}}
+                </button>
+              </div>
+              <button class="btn btn-secondary col-auto" href="javascript:void(0)" (click)="mode = 'all'">
+                <i class="fas fa-share" aria-hidden="true" style="transform: rotateY(180deg)"></i>&nbsp;
+                <span class="phone-hidden">{{t('back')}}</span>
+              </button>
+            </div>
+
+          </ng-container>
 
         </ng-template>
+      </ngx-file-drop>
+
+      <ng-template>
+
+      </ng-template>
     </form>
 
     <div class="row g-0 chooser" style="padding-top: 10px">
-        <div class="image-card col-auto" 
-            *ngIf="showReset" tabindex="0" aria-label="Reset cover image" (click)="reset()"
-            [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
-            <app-image class="card-img-top" title="Reset Cover Image" height="230px" width="158px" [imageUrl]="imageService.resetCoverImage"></app-image>
-            <ng-container *ngIf="showApplyButton">
-                <br>
-                <button style="width: 100%;" class="btn btn-secondary" aria-label="Reset to generated image" (click)="resetImage()">Reset</button>
-            </ng-container>
-            
-        </div>
-        <div class="image-card col-auto" 
-            *ngFor="let url of imageUrls; let idx = index;" tabindex="0" attr.aria-label="Image {{idx + 1}}" (click)="selectImage(idx)"
-            [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
-            <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
-            <ng-container *ngIf="showApplyButton">
-                <br>
-                <button class="btn btn-primary" style="width: 100%;" aria-label="Apply for uploaded image" 
-                    (click)="applyImage(idx)">
-                    {{appliedIndex === idx ? 'Applied' : 'Apply'}}
-                </button>
-            </ng-container>
-        </div>
+      <div class="image-card col-auto"
+           *ngIf="showReset" tabindex="0" (click)="reset()"
+           [ngClass]="{'selected': !showApplyButton && selectedIndex === -1}">
+        <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="230px" width="158px" [imageUrl]="imageService.resetCoverImage"></app-image>
+        <ng-container *ngIf="showApplyButton">
+          <br>
+          <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
+        </ng-container>
+
+      </div>
+      <div class="image-card col-auto"
+           *ngFor="let url of imageUrls; let idx = index;" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
+           [ngClass]="{'selected': !showApplyButton && selectedIndex === idx}">
+        <app-image class="card-img-top" height="230px" width="158px" [imageUrl]="url" [processEvents]="idx > 0"></app-image>
+        <ng-container *ngIf="showApplyButton">
+          <br>
+          <button class="btn btn-primary" style="width: 100%;"
+                  (click)="applyImage(idx)">
+            {{appliedIndex === idx ? t('applied') : t('apply')}}
+          </button>
+        </ng-container>
+      </div>
     </div>
 
-</div>
+  </div>
 
+
+</ng-container>

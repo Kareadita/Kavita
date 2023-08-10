@@ -37,7 +37,7 @@ import { NgFor, NgIf, DecimalPipe } from '@angular/common';
 import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
 import { CardActionablesComponent } from '../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {Device} from "../_models/device/device";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-library-detail',
@@ -45,7 +45,7 @@ import {Device} from "../_models/device/device";
     styleUrls: ['./library-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class LibraryDetailComponent implements OnInit {
 
@@ -64,9 +64,11 @@ export class LibraryDetailComponent implements OnInit {
 
   jumpKeys: Array<JumpKey> = [];
 
+  translocoService = inject(TranslocoService);
+
   tabs: Array<{title: string, fragment: string, icon: string}> = [
-    {title: 'Library', fragment: '', icon: 'fa-landmark'},
-    {title: 'Recommended', fragment: 'recommended', icon: 'fa-award'},
+    {title: 'library-tab', fragment: '', icon: 'fa-landmark'},
+    {title: 'recommended-tab', fragment: 'recommended', icon: 'fa-award'},
   ];
   active = this.tabs[0];
   private readonly destroyRef = inject(DestroyRef);
@@ -171,6 +173,7 @@ export class LibraryDetailComponent implements OnInit {
           return;
         }
         this.seriesService.getSeries(seriesAdded.seriesId).subscribe(s => {
+          if (this.series.filter(sObj => s.id === sObj.id).length > 0) return;
           this.series = [...this.series, s].sort((s1: Series, s2: Series) => {
             if (s1.sortName < s2.sortName) return -1;
             if (s1.sortName > s2.sortName) return 1;

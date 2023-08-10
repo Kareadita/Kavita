@@ -26,11 +26,12 @@ import {DownloadIndicatorComponent} from "../download-indicator/download-indicat
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
 import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-list-item',
   standalone: true,
-  imports: [CommonModule, ReadMoreComponent, ImageComponent, DownloadIndicatorComponent, EntityInfoCardsComponent, CardActionablesComponent, NgbProgressbar, NgbTooltip],
+  imports: [CommonModule, ReadMoreComponent, ImageComponent, DownloadIndicatorComponent, EntityInfoCardsComponent, CardActionablesComponent, NgbProgressbar, NgbTooltip, TranslocoDirective],
   templateUrl: './list-item.component.html',
   styleUrls: ['./list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -89,6 +90,7 @@ export class ListItemComponent implements OnInit {
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
 
   actionInProgress: boolean = false;
   summary: string = '';
@@ -134,7 +136,7 @@ export class ListItemComponent implements OnInit {
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
       if (this.downloadInProgress) {
-        this.toastr.info('Download is already in progress. Please wait.');
+        this.toastr.info(this.translocoService.translate('toasts.download-in-progress'));
         return;
       }
 

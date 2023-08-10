@@ -1,0 +1,738 @@
+{
+    "login": {
+        "title": "Acceso",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "La contraseña tiene que tener entre {{min}} y{{max}} caracteres",
+        "forgot-password": "Has olvidado la contraseña?",
+        "submit": "Enviar"
+    },
+    "dashboard": {
+        "no-libraries": "No existen librerías configuradas. Configura algunas en",
+        "server-settings-link": "Ajustes del servidor",
+        "not-granted": "No has sido autorizado para ver ninguna librería.",
+        "on-deck-title": "On Deck",
+        "recently-updated-title": "Series Actualizadas Recientemente",
+        "recently-added-title": "Series Añadidas Recientemente"
+    },
+    "edit-user": {
+        "edit": "Editar",
+        "username": "Nombre de Usuario",
+        "not-valid-email": "El correo electronico tiene que ser válido",
+        "saving": "Guardando …",
+        "update": "Actualizar",
+        "required": "Este campo es obligatorio",
+        "close": "Cerrar",
+        "email": "dirección de correo",
+        "cancel": "Cancelar"
+    },
+    "user-scrobble-history": {
+        "data-header": "Datos",
+        "not-applicable": "No aplicable",
+        "filter-label": "Filtro",
+        "type-header": "Tipo",
+        "rating": "Puntuación {{r}}",
+        "no-data": "No hay datos",
+        "last-modified-header": "Última Modificación",
+        "processed": "Procesado",
+        "volume-and-chapter-num": "Volumen {{v}} Capítulo {{n}}",
+        "not-processed": "Sin procesar",
+        "description": "Aquí encontrarás cualquier evento de scrobble vinculado a tu cuenta. Para que existan eventos, debes tener configurado\n  un proveedor de scrobble activo. Todos los eventos que hayan sido procesados se eliminarán después de un mes. Si hay eventos no procesados, es\n  probable que estos no puedan formar coincidencias en un nivel superior. Por favor, ponte en contacto con tu administrador para corregirlos.",
+        "title": "Historial de Scrobble",
+        "series-header": "Series",
+        "created-header": "Creado",
+        "is-processed-header": "Está procesado"
+    },
+    "edit-reading-list-modal": {
+        "year-label": "Año",
+        "month-label": "Mes",
+        "promote-label": "Promocionar",
+        "promote-tooltip": "La promoción significa que la etiqueta puede ser vista en todo el servidor, no solo por los usuarios administradores. Todas las series que tengan esta etiqueta aún tendrán restricciones de acceso para los usuarios."
+    },
+    "metadata-filter": {
+        "penciller-label": "Dibujante",
+        "filter-title": "Filtro",
+        "format-label": "Formato",
+        "libraries-label": "Librerías",
+        "genres-label": "Géneros",
+        "tags-label": "Etiquetas",
+        "writer-label": "Escritor",
+        "publisher-label": "Editorial",
+        "character-label": "Personaje",
+        "letterer-label": "Rotulista",
+        "inker-label": "Entintador",
+        "editor-label": "Corrector",
+        "colorist-label": "Colorista",
+        "translator-label": "Traductor",
+        "collections-label": "Colecciones",
+        "in-progress": "En progreso",
+        "language-label": "Idioma",
+        "read-progress-label": "Progreso de lectura",
+        "unread": "Sin leer",
+        "read": "Leído",
+        "rating-label": "Calificación",
+        "age-rating-label": "Clasificación de edad"
+    },
+    "manga-reader": {
+        "incognito-title": "Modo incógnito:",
+        "back": "Volver",
+        "first-page-tooltip": "Primera página",
+        "left-to-right-alt": "Izquierda a derecha",
+        "settings-tooltip": "Ajustes",
+        "enable-comic-book-label": "Emular a un cómic",
+        "user-preferences-updated": "Preferencias de usuario actualizadas",
+        "save-globally": "Guardar globalmente",
+        "next-page-tooltip": "Página siguiente",
+        "next-chapter-tooltip": "Capítulo/Volumen siguiente",
+        "last-page-tooltip": "Última página",
+        "right-to-left-alt": "Derecha a izquierda",
+        "reading-direction-tooltip": "Dirección de lectura: ",
+        "reading-mode-tooltip": "Modo de lectura",
+        "image-splitting-label": "Separación de imágenes",
+        "image-scaling-label": "Escalado de imágenes",
+        "original": "Original",
+        "brightness-label": "Brillo",
+        "height": "Alto",
+        "width": "Ancho"
+    },
+    "import-cbl-modal": {
+        "import": "Importar",
+        "next": "Siguiente"
+    },
+    "pdf-reader": {
+        "incognito-mode": "Modo incógnito",
+        "light-theme-alt": "Tema claro",
+        "dark-theme-alt": "Tema oscuro"
+    },
+    "infinite-reader": {
+        "continuous-reading-prev-chapter": "Capítulo anterior",
+        "continuous-reading-next-chapter": "Capítulo siguiente"
+    },
+    "scrobble-event-type-pipe": {
+        "chapter-read": "Progreso de lectura",
+        "score-updated": "Actualización de calificación",
+        "want-to-read-add": "Quiero leer: Añadir",
+        "want-to-read-remove": "Quiero leer: Eliminar",
+        "review": "Actualización de reseña"
+    },
+    "common": {
+        "volume-num": "Volumen",
+        "create": "Crear",
+        "help": "Ayuda",
+        "submit": "Enviar",
+        "select-all": "Seleccionar todo",
+        "deselect-all": "Deseleccionar todo",
+        "apply": "Aplicar",
+        "edit": "Editar",
+        "loading": "Cargando…",
+        "read": "Leer",
+        "close": "Cerrar",
+        "cancel": "Cancelar",
+        "add": "Añadir",
+        "save": "Guardar",
+        "reset": "Reiniciar",
+        "delete": "Eliminar",
+        "username": "Usuario",
+        "password": "Contraseña",
+        "series-count": "{{num}} Series",
+        "promoted": "Promocionado",
+        "reset-to-default": "Reiniciar a predeterminado",
+        "book-num": "Libro",
+        "chapter-num": "Capitulo"
+    },
+    "user-preferences": {
+        "share-series-reviews-label": "Compartir reseñas de series",
+        "reading-direction-tooltip": "Dirección para hacer clic para pasar a la siguiente página. De derecha a izquierda significa que haces clic en el lado izquierdo de la pantalla para pasar a la siguiente página.",
+        "writing-style-tooltip": "Cambia la dirección del texto. Horizontal es de izquierda a derecha, vertical es de arriba a abajo.",
+        "reading-direction-book-tooltip": "Dirección para hacer clic para pasar a la siguiente página. De derecha a izquierda significa que haces clic en el lado izquierdo de la pantalla para pasar a la siguiente página.",
+        "auto-close-menu-label": "Cerrar menú automáticamente",
+        "immersive-mode-tooltip": "Esto ocultará el menú detrás de un clic en el documento del lector y activará tocar para paginar",
+        "layout-mode-book-tooltip": "Cómo se debe organizar el contenido. Desplazable es tal como el libro se empaqueta. 1 o 2 columnas se ajusta a la altura del dispositivo y ajusta 1 o 2 columnas de texto por página.",
+        "line-height-book-tooltip": "Cuánto espacio habrá entre las líneas del libro.",
+        "title": "Panel de usuario",
+        "pref-description": "Estos son ajustes globales vinculados a tu cuenta.",
+        "account-tab": "Cuenta",
+        "preferences-tab": "Preferencias",
+        "3rd-party-clients-tab": "Clientes de terceros",
+        "theme-tab": "Tema",
+        "devices-tab": "Dispositivos",
+        "stats-tab": "Estadísticas",
+        "success-toast": "Preferencias de usuario actualizadas",
+        "global-settings-title": "Ajustes globales",
+        "page-layout-mode-label": "Modo de diseño de página",
+        "page-layout-mode-tooltip": "Mostrar elementos como tarjetas o en vista de lista en la página de detalles de la serie.",
+        "locale-label": "Localización",
+        "locale-tooltip": "El idioma que debería usar Kavita",
+        "blur-unread-summaries-label": "Desenfocar resúmenes no leídos",
+        "blur-unread-summaries-tooltip": "Desenfoca el texto del resumen en volúmenes o capítulos que no tienen progreso de lectura (para evitar spoilers)",
+        "disable-animations-label": "Deshabilitar animaciones",
+        "prompt-on-download-tooltip": "Aviso cuando una descarga supera los {{size}} MB",
+        "prompt-on-download-label": "Avisar al descargar",
+        "disable-animations-tooltip": "Desactiva las animaciones en el sitio. Útil para lectores de tinta electrónica.",
+        "collapse-series-relationships-label": "Colapsar relaciones de series",
+        "collapse-series-relationships-tooltip": "Kavita debería mostrar series que no tienen relaciones o es la serie madre/secuela",
+        "share-series-reviews-tooltip": "Kavita debería incluir tus reseñas de series para otros usuarios",
+        "image-reader-settings-title": "Lector de imágenes",
+        "reading-direction-label": "Dirección de lectura",
+        "scaling-option-label": "Opciones de escalado",
+        "scaling-option-tooltip": "Cómo ajustar la imagen a tu pantalla.",
+        "page-splitting-label": "Separación de página",
+        "page-splitting-tooltip": "Cómo separar una imagen de ancho completo (es decir, ambas imágenes izquierda y derecha están combinadas)",
+        "reading-mode-label": "Modo de lectura",
+        "layout-mode-label": "Modo de diseño",
+        "layout-mode-tooltip": "Renderizar una única imagen en la pantalla o dos imágenes una al lado de la otra",
+        "background-color-label": "Color de fondo",
+        "show-screen-hints-label": "Mostrar sugerencias en pantalla",
+        "emulate-comic-book-label": "Emular a un cómic",
+        "swipe-to-paginate-label": "Deslizar para paginar",
+        "book-reader-settings-title": "Lector de libros",
+        "tap-to-paginate-label": "Tocar para paginar",
+        "tap-to-paginate-tooltip": "Los lados de la pantalla del lector de libros deben permitir tocar para pasar a la página anterior/siguiente",
+        "immersive-mode-label": "Modo inmersivo",
+        "reading-direction-book-label": "Dirección de lectura",
+        "font-family-label": "Familia de fuentes",
+        "font-family-tooltip": "Familia de fuentes para cargar. Por defecto cargará la fuente predeterminada del libro.",
+        "writing-style-label": "Estilo de escritura",
+        "layout-mode-book-label": "Modo de diseño",
+        "color-theme-book-label": "Tema de color",
+        "color-theme-book-tooltip": "Qué tema de color aplicar al contenido del lector de libros y al menú.",
+        "font-size-book-label": "Tamaño de fuente",
+        "margin-book-label": "Margen",
+        "margin-book-tooltip": "Cuánto espacio habrá en cada lado de la pantalla. Esto se anulará a 0 en los dispositivos móviles sin importar esta configuración.",
+        "clients-opds-alert": "OPDS no está habilitado en este servidor. Esto no afectará a los usuarios de Tachiyomi.",
+        "clients-opds-description": "Todos los clientes de terceros usarán la clave API o la URL de conexión a continuación. Estos son como contraseñas, mantenlo en privado.",
+        "clients-api-key-tooltip": "La clave API es como una contraseña. Mantenlo en secreto, mantenlo seguro.",
+        "clients-opds-url-tooltip": "URL de OPDS",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "line-height-book-label": "Espaciado entre líneas",
+        "scrobbling-tab": "Seguimiento"
+    },
+    "user-holds": {
+        "description": "Esta es una lista gestionada por el usuario de series que no serán scrobbleadas a los proveedores de flujo ascendente. Puedes eliminar una serie en\n    cualquier momento y el siguiente evento Scrobble-able (progreso de lectura, calificación, estado de lectura deseado) activará eventos.",
+        "title": "Retenciones de scrobble"
+    },
+    "theme-manager": {
+        "site-themes": "Temas del sitio",
+        "title": "Gestor de temas",
+        "looking-for-theme": "¿Buscas un tema claro o de tinta electrónica? Tenemos algunos temas personalizados que puedes usar en nuestro ",
+        "looking-for-theme-continued": "github de temas.",
+        "scan": "Escanear",
+        "set-default": "Establecer por defecto",
+        "applied": "Aplicado",
+        "updated-toastr": "El tema por defecto del sitio ha sido actualizado a {{name}}",
+        "apply": "{{common.apply}}",
+        "scan-queued": "Escaneo de Temas añadido a la cola"
+    },
+    "spoiler": {
+        "click-to-show": "Alerta de spoiler, haz clic para mostrar"
+    },
+    "review-series-modal": {
+        "title": "Editar reseña",
+        "review-label": "Reseña",
+        "tagline-label": "Titular",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+    "review-card-modal": {
+        "close": "{{common.close}}",
+        "user-review": "Reseña de {{username}}",
+        "external-mod": "(externa)",
+        "go-to-review": "Ir a la reseña"
+    },
+    "review-card": {
+        "your-review": "Esta es tu reseña",
+        "external-review": "Reseña externa",
+        "local-review": "Reseña",
+        "rating-percentage": "Calificación {{r}}%"
+    },
+    "want-to-read": {
+        "series-count": "{{common.series-count}}",
+        "title": "Quiero leer",
+        "no-items": "No hay elementos. Prueba añadir una serie.",
+        "no-items-filtered": "Ningún elemento coincide con tu filtro actual."
+    },
+    "manage-devices": {
+        "title": "Administrador de dispositivos",
+        "description": "Esta sección es para configurar los dispositivos que solo pueden recibir archivos a través de un correo electronico.",
+        "edit": "{{common.edit}}",
+        "no-devices": "No hay ningún dispositivo configurado todavía",
+        "devices-title": "Dispositivos",
+        "platform-label": "Plataforma: ",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}"
+    },
+    "edit-device": {
+        "device-name-label": "Nombre del dispositivo",
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "device-platform-label": "Plataforma del dispositivo",
+        "save": "{{common.save}}"
+    },
+    "restriction-selector": {
+        "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
+        "title": "Clasificación por edad",
+        "description": "Cuando está seleccionado, las series y las listas de lectura que tengan una clasificación mayor serán ocultadas en los resultados.",
+        "not-applicable-for-admins": "No se aplica a los administradores.",
+        "age-rating-label": "Clasificación por edad",
+        "no-restriction": "Sin restricción",
+        "include-unknowns-label": "Incluir desconocidos"
+    },
+    "change-password": {
+        "cancel": "{{common.cancel}}",
+        "current-password-label": "Contraseña actual",
+        "new-password-label": "Nueva contraseña",
+        "confirm-password-label": "Confirmar contraseña",
+        "permission-error": "No tienes permiso para cambiar la contraseña. Contacta con el administrador del servidor.",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "password-label": "{{common.password}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "passwords-must-match": "Las contraseñas deben coincidir"
+    },
+    "change-email": {
+        "current-password-label": "Contraseña actual",
+        "email-not-confirmed": "La dirección de correo electrónico no se ha confirmado",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "email-updated-title": "Correo electrónico actualizado",
+        "email-label": "{{common.email}}",
+        "email-updated-description": "Puedes usar el siguiente enlace para confirmar el correo. Si el servidor es accesible externamente, se enviará un correo electrónico para confirmarlo.",
+        "edit": "{{common.edit}}",
+        "invite-url-label": "Enlace de invitación",
+        "invite-url-tooltip": "Copia y pégalo en una nueva ventana",
+        "permission-error": "No tienes permiso para cambiar tu dirección de correo electrónico. Contacta a un administrador del servidor.",
+        "required-field": "{{validation.required-field}}",
+        "reset": "{{common.reset}}",
+        "setup-user-account": "Configurar cuenta de usuario"
+    },
+    "change-age-restriction": {
+        "save": "{{common.save}}",
+        "age-restriction-label": "Clasificación por edad",
+        "reset": "{{common.reset}}",
+        "unknowns": "Desconocido",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}"
+    },
+    "api-key": {
+        "copy": "Copiar",
+        "key-reset": "Resetear Clave de API",
+        "no-key": "ERROR - KEY NOT SET",
+        "confirm-reset": "Esto invalidará cualquier configuración de OPDS. Estás seguro que quieres continuar?",
+        "regen-warning": "Regenerar tu Clave de API invalidará los clientes conectados."
+    },
+    "scrobbling-providers": {
+        "generate": "Generar",
+        "edit": "{{common.edit}}",
+        "requires": "Esta característica requiere una licencia de {{product}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "token-set": "Token configurado",
+        "token-input-label": "El token de {{service}} va aquí",
+        "title": "Proveedores de seguimiento",
+        "token-expired": "Token expirado",
+        "no-token-set": "Token no configurado",
+        "instructions": "Usuarios que usan el servicio por primera vez deben hacer clic en \"{{scrobbling-providers.generate}}\" debajo para permitir a Kavita+ comunicarse con {{service}}. Una vez autorizado, copia y pega el token en la caja de abajo. Puedes regenerar el token en cualquier momento."
+    },
+    "user-stats-info-cards": {
+        "total-words-read-label": "Total de palabras leídas",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "last-active-label": "Última vez activo",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "total-pages-read-label": "Páginas leídas totales",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "time-spent-reading-label": "Tiempo invertido leyendo",
+        "chapters": "{{value}} capítulos",
+        "chapters-read-label": "Capítulos leídos",
+        "avg-reading-per-week-label": "Media de leídos por semana"
+    },
+    "top-readers": {
+        "comics-label": "Comics: {{value}} hrs",
+        "books-label": "Libros: {{value}} hrs",
+        "manga-label": "Manga: {{value}} hrs",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}",
+        "this-week": "{{time-periods.this-week}}",
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "title": "Top lectores"
+    },
+    "directory-picker": {
+        "path-placeholder": "Comienza a escribir o selecciona una ruta",
+        "title": "Escoge un directorio",
+        "close": "{{common.close}}",
+        "path-label": "Ruta",
+        "type-header": "Tipo",
+        "name-header": "Nombre",
+        "cancel": "{{common.cancel}}",
+        "share": "Compartir",
+        "help": "{{common.help}}"
+    },
+    "theme": {
+        "theme-dark": "Oscuro",
+        "theme-black": "Negro",
+        "theme-paper": "Papel",
+        "theme-white": "Blanco"
+    },
+    "site-theme-provider-pipe": {
+        "user": "Usuario",
+        "system": "Sistema"
+    },
+    "generic-list-modal": {
+        "close": "{{common.close}}",
+        "open-filtered-search": "Abierta una búsqueda filtrada para {{item}}",
+        "filter": "Filtrar",
+        "clear": "Limpiar"
+    },
+    "user-stats": {
+        "read-percentage": "% Leído",
+        "library-read-progress-title": "Progreso de lectura de librería"
+    },
+    "typeahead": {
+        "locked-field": "El campo está bloqueado",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "no-data": "No existen datos",
+        "add-item": "Añadir {{item}}…",
+        "add-custom-item": ", escribe para añadir un objeto"
+    },
+    "library-access-modal": {
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
+        "title": "Acceso a librería",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "no-data": "No hay librerías configuradas todavía."
+    },
+    "time-periods": {
+        "this-week": "Esta semana",
+        "last-7-days": "Últimos 7 días",
+        "last-30-days": "Últimos 30 días",
+        "last-90-days": "Últimos 90 días",
+        "last-year": "Último año",
+        "all-time": "Todos los tiempos"
+    },
+    "device-platform-pipe": {
+        "custom": "Personalizado"
+    },
+    "day-of-week-pipe": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miercoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+    },
+    "cbl-import-result-pipe": {
+        "success": "Satisfactorio",
+        "partial": "Parcial",
+        "failure": "Fallo"
+    },
+    "cbl-conflict-reason-pipe": {
+        "all-series-missing": "Tu cuenta no tiene acceso a todas las series de la lista o Kavita no tiene nada presente en la lista.",
+        "chapter-missing": "{{series}}: Capítulo {{chapter}} no presente en Kavita. Este item será saltado.",
+        "empty-file": "El archivo CBL está vacío. Ninguna acción realizada.",
+        "name-conflict": "Una lista de lectura que coincide con el archivo CBL ({{readingListName}}) ya existe en tu cuenta.",
+        "series-collision": "La serie, {{seriesLink}}, tiene conflicto con otra serie en otra librería."
+    },
+    "library-type-pipe": {
+        "manga": "Manga",
+        "book": "Libro",
+        "comic": "Comic"
+    },
+    "age-rating-pipe": {
+        "unknown": "Desconocido",
+        "adults-only": "Solo adultos +18",
+        "rating-pending": "Calificacion por edad pendiente",
+        "not-applicable": "No aplicable"
+    },
+    "series-detail": {
+        "close": "{{common.close}}",
+        "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
+        "page-settings-title": "Ajustes de página",
+        "layout-mode-option-list": "Lista",
+        "read": "{{common.read}}",
+        "downloading-status": "Descargando…",
+        "books-tab": "Libros",
+        "layout-mode-option-card": "Carta",
+        "continue-from": "Continuar {{title}}",
+        "user-reviews-alt": "Opiniones de usuarios",
+        "continue": "Continuar",
+        "read-options-alt": "Opciones de lectura",
+        "remove-from-want-to-read": "Quitar de Quiero leer",
+        "incognito": "Incognito",
+        "add-to-want-to-read": "Añadir a Quiero leer",
+        "edit-series-alt": "Editar informacion de la serie",
+        "download-series--tooltip": "Descargar serie",
+        "volumes-tab": "Volumenes",
+        "specials-tab": "Especiales",
+        "related-tab": "Relacionados",
+        "recommendations-tab": "Recomendaciones",
+        "send-to": "Archivo enviado a {{deviceName}}",
+        "no-chapters": "No existen capitulos en este volumen. No se puede leer.",
+        "cover-change": "Puede tomar hasta un minuto para que tu navegador actualice la imagen. Espera hasta entonces. La imagen antigua se puede mostrar en algunas páginas.",
+        "no-pages": "{{toasts.no-pages}}"
+    },
+    "book-reader": {
+        "go-to-page-prompt": "Hay {{totalPages}} páginas. A qué pagina quieres ir?",
+        "page-label": "Página",
+        "next-chapter": "Siguiente Capitulo/Volumen",
+        "skip-header": "Saltar al contenido principal",
+        "virtual-pages": "paginas virtuales",
+        "settings-header": "Ajustes",
+        "table-of-contents-header": "Tabla de Contenidos",
+        "bookmarks-header": "Marcapaginas",
+        "go-to-last-page": "Ir a la última página",
+        "prev-chapter": "Capitulo/Volume anteriorn",
+        "pagination-header": "Sección",
+        "go-to-page": "Ir a página",
+        "prev-page": "Página anterior",
+        "next-page": "Siguiente página",
+        "toc-header": "ToC",
+        "loading-book": "Cargando libro…",
+        "go-back": "Ir atrás",
+        "incognito-mode-alt": "Modo incognito activado. Pulsa para desactivar.",
+        "incognito-mode-label": "Modo incognito",
+        "next": "Siguiente",
+        "previous": "Anterior",
+        "title": "Ajustes de libro"
+    },
+    "personal-table-of-contents": {
+        "page": "Page {{value}}",
+        "delete": "Eliminar {{bookmarkName}}"
+    },
+    "time-ago-pipe": {
+        "never": "Nunca",
+        "just-now": "ahora mismo",
+        "min-ago": "hace un minuto",
+        "years-ago": "hace {{value}} años",
+        "mins-ago": "hace {{value}} minutos",
+        "hour-ago": "hace una hora",
+        "hours-ago": "hace {{value}} horas",
+        "day-ago": "hace un día",
+        "days-ago": "hace {{value}} días",
+        "month-ago": "hace un mes",
+        "months-ago": "hace {{value}} meses",
+        "year-ago": "hace un año"
+    },
+    "reset-password": {
+        "submit": "{{common.submit}}",
+        "valid-email": "{{validation.valid-email}}",
+        "title": "Resetear contraseña",
+        "required-field": "{{validation.required-field}}",
+        "email-label": "{{common.email}}",
+        "description": "Introduce el correo de tu cuenta. Kavita enviará un correo si es correcto. Si no está configurado pide al administrador el enlace desde el registro."
+    },
+    "reset-password-modal": {
+        "new-password-label": "Nueva contraseña",
+        "error-label": "Error: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "title": "Reiniciar contraseña de {{username}}"
+    },
+    "changelog": {
+        "installed": "Instalado",
+        "download": "Descarga",
+        "available": "Disponible",
+        "description": "Si no ves una etiqueta {{installed}}",
+        "description-continued": ", estás en una versión de desarrollo. Solo versiones estable aparecerán como disponible."
+    },
+    "invite-user": {
+        "setup-user-title": "Usuario invitado",
+        "cancel": "{{common.cancel}}",
+        "title": "Invitar usuario",
+        "setup-user-account-tooltip": "Copia y pega esto en una nueva pestaña. Puede que tengas que cerrar la sesión actual.",
+        "email": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "setup-user-account": "Configurar cuenta de usuario",
+        "invite-url-label": "Enlace de invitación",
+        "close": "{{common.close}}",
+        "invite": "Invitar",
+        "inviting": "Invitando…",
+        "description": "Invita a un usuario a tu servidor. Introduce su correo electrónico y le enviaremos un correo para que cree su cuenta. Si no quieres usar nuestro servicio de correo puedes <a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">hostear tu propio</a> servicio de correo o usar una dirección de correo falsa (\"He perdido la contraseña no funcionará\"). Un enlace se mostrará de todas maneras y puede ser usado para configurar manualmente.",
+        "setup-user-description": "Puedes usar el enlace de abajo para configurar la cuenta para tu usuario o usa el botón de copiar. Puede que tengas que cerrar sesión antes de usar el enlace para registrar un nuevo usuario. Si tu servidor es accesible desde fuera, un correo se habrá enviado al usuario con el enlace para que el usuario configure su cuenta."
+    },
+    "license": {
+        "manage": "Administrar",
+        "activate-description": "Introduce clave de licencia y correo usado al registrar en Stripe",
+        "invalid-license-tooltip": "Si tu subscripción ha finalizado, debes enviar un email a soporte para crear una nueva subscripción",
+        "check": "Comprobar",
+        "no-license-key": "Sin clave de licencia",
+        "license-not-valid": "Licencia no válida",
+        "loading": "{{common.loading}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "buy": "Comprar",
+        "activate": "Activar",
+        "renew": "Renovar",
+        "license-valid": "Licencia es valida",
+        "activate-license-label": "Clave de licencia",
+        "activate-email-label": "{{common.email}}",
+        "activate-delete": "Eliminar",
+        "activate-save": "{{common.save}}"
+    },
+    "series-metadata-detail": {
+        "translators-title": "Traductores",
+        "cover-artists-title": "Artista de Portada",
+        "links-title": "Enlaces",
+        "genres-title": "Generos",
+        "tags-title": "Etiquetas",
+        "collections-title": "{{side-nav.collections}}",
+        "reading-lists-title": "{{side-nav.reading-lists}}",
+        "writers-title": "Escritor/Autor",
+        "characters-title": "Persoanjes",
+        "see-less": "Ver menos",
+        "see-more": "Ver más",
+        "promoted": "{{common.promoted}}"
+    },
+    "update-notification-modal": {
+        "close": "{{common.close}}",
+        "title": "Nueva actualización disponible!",
+        "download": "Descargar",
+        "help": "Cómo actualizar"
+    },
+    "side-nav-companion-bar": {
+        "page-settings-title": "{{series-detail.page-settings-title}}",
+        "open-filter-and-sort": "Abrir Filtro y ordenar",
+        "close-filter-and-sort": "Cerrar filtro y ordenar",
+        "filter-and-sort-alt": "Ordenar/Filtrar"
+    },
+    "side-nav": {
+        "collections": "Colecciones",
+        "filter-label": "Filtro",
+        "all-series": "Todas las series",
+        "clear": "Limpiar",
+        "donate": "Donar",
+        "reading-lists": "Listas de lectura"
+    },
+    "library-settings-modal": {
+        "close": "{{common.close}}",
+        "edit-title": "Editar {{name}}",
+        "add-title": "Añadir librería",
+        "general-tab": "General",
+        "folder-tab": "Directorio",
+        "cover-tab": "Portada",
+        "advanced-tab": "Avanzado",
+        "name-label": "Nombre",
+        "library-name-unique": "El nombre de la librería debe ser únic",
+        "last-scanned-label": "Ultima vez escaneado:",
+        "type-label": "Tipo",
+        "help-us-part-1": "Ayudanos siguiendo ",
+        "help-us-part-2": "nuestra guía",
+        "help-us-part-3": "para nombrar y organizar tus archivos.",
+        "folder-description": "Añadir carpetas a tu librería",
+        "naming-conventions-part-1": "Kavita tiene ",
+        "naming-conventions-part-2": "requerimientos de carpetas.",
+        "naming-conventions-part-3": "Comprueba este enlace para asegurarte que estás siguiendo los requerimientos. De lo contrario algunos archivos no se mostrarán al escanear.",
+        "allow-scrobbling-label": "Permitir seguimiento",
+        "allow-scrobbling-tooltip": "En caso de que Kavita scrobble lea los eventos, quiera leer el estado, las calificaciones y las reseñas de los proveedores configurados. Esto solo ocurrirá si el servidor tiene una suscripción Kavita+ activa."
+    },
+    "all-series": {
+        "series-count": "{{common.series-count}}"
+    },
+    "announcements": {
+        "title": "Noticias"
+    },
+    "time-duration-pipe": {
+        "hours": "{{value}} horas",
+        "minutes": "{{value}} minutos",
+        "days": "{{value}} días",
+        "months": "{{value}} meses",
+        "years": "{{value}} años"
+    },
+    "relationship-pipe": {
+        "adaptation": "Adaptacion",
+        "alternative-version": "Version alternativa",
+        "character": "Personajes",
+        "contains": "Contiene",
+        "other": "Otro",
+        "prequel": "Precuela",
+        "sequel": "Secuela",
+        "side-story": "Historia alternativa",
+        "parent": "Padre",
+        "edition": "Edicion"
+    },
+    "publication-status-pipe": {
+        "ongoing": "En curso",
+        "hiatus": "Parado",
+        "completed": "Completado",
+        "cancelled": "Cancelado",
+        "ended": "Finalizado"
+    },
+    "person-role-pipe": {
+        "artist": "Artista",
+        "writer": "Escritor",
+        "character": "Personaje",
+        "cover-artist": "Artista de portada",
+        "editor": "Editor",
+        "other": "Otro"
+    },
+    "manga-format-pipe": {
+        "unknown": "Desconocido",
+        "epub": "EPUB",
+        "archive": "Archivo",
+        "image": "Imagen",
+        "pdf": "PDF"
+    },
+    "book-line-overlay": {
+        "copy": "Copiar",
+        "bookmark": "Marcapagina",
+        "close": "{{common.close}}",
+        "required-field": "{{common.required-field}}",
+        "bookmark-label": "Nombre marcapagina",
+        "save": "{{common.save}}"
+    },
+    "confirm-email": {
+        "title": "Registrar",
+        "description": "Completa el formulario para completar tu registro",
+        "error-label": "Errores: ",
+        "email-label": "{{common.email}}",
+        "valid-email": "{{common.valid-email}}",
+        "required-field": "{{common.required-field}}",
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Registrar",
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}"
+    },
+    "confirm-email-change": {
+        "title": "Validar cambio de correo",
+        "non-confirm-description": "Por favor espera mientras el cambio de correo se valida.",
+        "confirm-description": "Tu correo ha sido validado y cambiado en Kavita. Serás redirigido al inicio de sesion.",
+        "success": "Exito!"
+    },
+    "confirm-reset-password": {
+        "title": "Resetear contraseña",
+        "description": "Introduce nueva contraseña",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "submit": "{{common.submit}}",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "register": {
+        "title": "Registrar",
+        "description": "Completa el formulario para registrar una cuenta de administrador",
+        "username-label": "{{common.username}}",
+        "email-label": "{{common.email}}",
+        "password-label": "{{common.password}}",
+        "email-tooltip": "El correo no tiene por qué ser una direccion real. Pero provee acceso a contraseña olvidada. No se envia fuera del servidor a menos que se use la funcionalidad de contraseña olvidada con un servidor de correo personalizado.",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "register": "Registrar",
+        "password-validation": "{{validation.password-validation}}"
+    },
+    "badge-expander": {
+        "more-items": "y {{count}} más"
+    },
+    "read-more": {
+        "read-more": "Leer más",
+        "read-less": "Leer menos"
+    }
+}

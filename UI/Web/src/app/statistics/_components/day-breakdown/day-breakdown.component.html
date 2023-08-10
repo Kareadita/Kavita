@@ -1,17 +1,19 @@
-<div class="dashboard-card-content">
-  <div class="row g-0 mb-2">
-      <h4>Day Breakdown</h4>
-  </div>
+<ng-container *transloco="let t; read: 'day-breakdown'">
+  <div class="dashboard-card-content">
+    <div class="row g-0 mb-2">
+      <h4>{{t('title')}}</h4>
+    </div>
 
-  <ngx-charts-bar-vertical
-    class="dark"
-    [results]="dayBreakdown$ | async"
-    [xAxis]="true"
-    [yAxis]="true"
-    [legend]="showLegend"
-    [showXAxisLabel]="true"
-    [showYAxisLabel]="true"
-    xAxisLabel="Day of Week"
-    yAxisLabel="Reading Events">
-  </ngx-charts-bar-vertical>
-</div>
+    <ngx-charts-bar-vertical
+      class="dark"
+      [results]="dayBreakdown$ | async"
+      [xAxis]="true"
+      [yAxis]="true"
+      [legend]="showLegend"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      [xAxisLabel]="t('x-axis-label')"
+      [yAxisLabel]="t('y-axis-label')">
+    </ngx-charts-bar-vertical>
+  </div>
+</ng-container>

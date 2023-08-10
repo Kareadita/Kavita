@@ -1,4 +1,15 @@
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  inject,
+  Input,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {FormGroup, FormControl, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -7,11 +18,12 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
 import {FilterPipe} from "../../../pipe/filter.pipe";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule],
+  imports: [CommonModule, ReactiveFormsModule, FilterPipe, NgbModalModule, TranslocoDirective],
   templateUrl: './bulk-add-to-collection.component.html',
   styleUrls: ['./bulk-add-to-collection.component.scss'],
   encapsulation: ViewEncapsulation.None, // This is needed as per the bootstrap modal documentation to get styles to work.
@@ -33,6 +45,8 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   listForm: FormGroup = new FormGroup({});
 
   collectionTitleTrackby = (index: number, item: CollectionTag) => `${item.title}`;
+
+  translocoService = inject(TranslocoService);
 
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
@@ -69,7 +83,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   create() {
     const tagName = this.listForm.value.title;
     this.collectionService.addByMultiple(0, this.seriesIds, tagName).subscribe(() => {
-      this.toastr.success('Series added to ' + tagName + ' collection');
+      this.toastr.success(this.translocoService.translate('toasts.series-added-to-collection', {collectionName: tagName}));
       this.modal.close();
     });
   }
@@ -78,7 +92,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
     if (this.seriesIds.length === 0) return;
 
     this.collectionService.addByMultiple(tag.id, this.seriesIds, '').subscribe(() => {
-      this.toastr.success('Series added to ' + tag.title + ' collection');
+      this.toastr.success(this.translocoService.translate('toasts.series-added-to-collection', {collectionName: tag.title}));
       this.modal.close();
     });
 

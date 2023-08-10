@@ -5,6 +5,8 @@ using API.Data;
 using API.DTOs.Account;
 using API.DTOs.License;
 using API.Entities.Enums;
+using API.Extensions;
+using API.Services;
 using API.Services.Plus;
 using Kavita.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -18,13 +20,15 @@ public class LicenseController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<LicenseController> _logger;
     private readonly ILicenseService _licenseService;
+    private readonly ILocalizationService _localizationService;
 
     public LicenseController(IUnitOfWork unitOfWork, ILogger<LicenseController> logger,
-        ILicenseService licenseService)
+        ILicenseService licenseService, ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _licenseService = licenseService;
+        _localizationService = localizationService;
     }
 
     /// <summary>
@@ -73,7 +77,14 @@ public class LicenseController : BaseApiController
     [HttpPost]
     public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
     {
-        await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
+        try
+        {
+            await _licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim());
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), ex.Message));
+        }
         return Ok();
     }
 }

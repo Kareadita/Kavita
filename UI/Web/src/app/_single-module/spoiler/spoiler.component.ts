@@ -9,11 +9,12 @@ import {
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-spoiler',
   standalone: true,
-  imports: [CommonModule, SafeHtmlPipe],
+    imports: [CommonModule, SafeHtmlPipe, TranslocoDirective],
   templateUrl: './spoiler.component.html',
   styleUrls: ['./spoiler.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

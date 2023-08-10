@@ -33,9 +33,11 @@ public class SettingsController : BaseApiController
     private readonly IMapper _mapper;
     private readonly IEmailService _emailService;
     private readonly ILibraryWatcher _libraryWatcher;
+    private readonly ILocalizationService _localizationService;
 
     public SettingsController(ILogger<SettingsController> logger, IUnitOfWork unitOfWork, ITaskScheduler taskScheduler,
-        IDirectoryService directoryService, IMapper mapper, IEmailService emailService, ILibraryWatcher libraryWatcher)
+        IDirectoryService directoryService, IMapper mapper, IEmailService emailService, ILibraryWatcher libraryWatcher,
+        ILocalizationService localizationService)
     {
         _logger = logger;
         _unitOfWork = unitOfWork;
@@ -44,6 +46,7 @@ public class SettingsController : BaseApiController
         _mapper = mapper;
         _emailService = emailService;
         _libraryWatcher = libraryWatcher;
+        _localizationService = localizationService;
     }
 
     [HttpGet("base-url")]
@@ -224,7 +227,7 @@ public class SettingsController : BaseApiController
                 foreach (var ipAddress in updateSettingsDto.IpAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (!IPAddress.TryParse(ipAddress.Trim(), out _)) {
-                        return BadRequest($"IP Address '{ipAddress}' is invalid");
+                        return BadRequest(await _localizationService.Translate(User.GetUserId(), "ip-address-invalid", ipAddress));
                     }
                 }
 
@@ -279,7 +282,7 @@ public class SettingsController : BaseApiController
                 // Validate new directory can be used
                 if (!await _directoryService.CheckWriteAccess(bookmarkDirectory))
                 {
-                    return BadRequest("Bookmark Directory does not have correct permissions for Kavita to use");
+                    return BadRequest(await _localizationService.Translate(User.GetUserId(), "bookmark-dir-permissions"));
                 }
 
                 originalBookmarkDirectory = setting.Value;
@@ -308,7 +311,7 @@ public class SettingsController : BaseApiController
             {
                 if (updateSettingsDto.TotalBackups > 30 || updateSettingsDto.TotalBackups < 1)
                 {
-                    return BadRequest("Total Backups must be between 1 and 30");
+                    return BadRequest(await _localizationService.Translate(User.GetUserId(), "total-backups"));
                 }
                 setting.Value = updateSettingsDto.TotalBackups + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
@@ -318,7 +321,7 @@ public class SettingsController : BaseApiController
             {
                 if (updateSettingsDto.TotalLogs > 30 || updateSettingsDto.TotalLogs < 1)
                 {
-                    return BadRequest("Total Logs must be between 1 and 30");
+                    return BadRequest(await _localizationService.Translate(User.GetUserId(), "total-logs"));
                 }
                 setting.Value = updateSettingsDto.TotalLogs + string.Empty;
                 _unitOfWork.SettingsRepository.Update(setting);
@@ -366,7 +369,7 @@ public class SettingsController : BaseApiController
         {
             _logger.LogError(ex, "There was an exception when updating server settings");
             await _unitOfWork.RollbackAsync();
-            return BadRequest("There was a critical issue. Please try again.");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
         }
 
 

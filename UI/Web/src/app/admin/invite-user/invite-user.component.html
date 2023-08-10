@@ -1,61 +1,59 @@
-<div class="modal-container">
+<ng-container *transloco="let t; read: 'invite-user'">
+  <div class="modal-container">
     <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Invite User</h4>
-        <button type="button" class="btn-close" aria-label="Close" (click)="close()"></button>
+      <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal">
-        <p>
-            Invite a user to your server. Enter their email in and we will send them an email to create an account. If you do not want to use our email service, you can <a href="https://wiki.kavitareader.com/en/guides/misc/email" rel="noopener noreferrer" target="_blank">host your own</a> 
-            email service or use a fake email (Forgot User will not work). A link will be presented regardless and can be used to setup the account manually.
+      <p [innerHTML]="t('description') | safeHtml"></p>
+
+      <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
+        <div class="row g-0">
+          <div class="mb-3" style="width:100%">
+            <label for="email" class="form-label">{{t('email')}}</label>
+            <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
+            <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
+              <div *ngIf="email?.errors?.required">
+                {{t('required-field')}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-0">
+          <div class="col-md-6">
+            <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
+          </div>
+
+          <div class="col-md-6">
+            <app-library-selector (selected)="updateLibrarySelection($event)"></app-library-selector>
+          </div>
+        </div>
+
+        <div class="row g-0">
+          <div class="col-md-12">
+            <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected"></app-restriction-selector>
+          </div>
+        </div>
+      </form>
+
+      <ng-container *ngIf="emailLink !== ''">
+        <h4>{{t('setup-user-title')}}</h4>
+        <p>{{t('setup-user-description')}}
         </p>
-    
-        <form [formGroup]="inviteForm" *ngIf="emailLink === ''">
-            <div class="row g-0">
-                <div class="mb-3" style="width:100%">
-                    <label for="email" class="form-label">Email</label>
-                    <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
-                    <div id="inviteForm-validations" class="invalid-feedback" *ngIf="inviteForm.dirty || inviteForm.touched">
-                        <div *ngIf="email?.errors?.required">
-                            This field is required
-                        </div>
-                    </div>
-                </div>
-            </div>
-    
-            <div class="row g-0">
-                <div class="col-md-6">
-                    <app-role-selector (selected)="updateRoleSelection($event)" [allowAdmin]="true"></app-role-selector>
-                </div>
-    
-                <div class="col-md-6">
-                    <app-library-selector (selected)="updateLibrarySelection($event)"></app-library-selector>
-                </div>
-            </div>
-    
-            <div class="row g-0">
-                <div class="col-md-12">
-                    <app-restriction-selector (selected)="updateRestrictionSelection($event)" [isAdmin]="hasAdminRoleSelected"></app-restriction-selector>
-                </div>
-            </div>
-        </form>
-    
-        <ng-container *ngIf="emailLink !== ''">
-            <h4>User invited</h4>
-            <p>You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user.
-                If your server is externally accessible, an email will have been sent to the user and the links can be used by them to finish setting up their account.
-            </p>
-            <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">Setup user's account</a>
-            <app-api-key title="Invite Url" tooltipText="Copy this and paste in a new tab. You may need to log out." [showRefresh]="false" [transform]="makeLink"></app-api-key>
-        </ng-container>
-    
+        <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+      </ng-container>
+
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">
-            Cancel
-        </button>
-        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
-            <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            <span>{{isSending ? 'Inviting...' : 'Invite'}}</span>
-        </button>
+      <button type="button" class="btn btn-secondary" (click)="close()">
+        {{t('cancel')}}
+      </button>
+      <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
+        <span *ngIf="isSending" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span>{{isSending ? t('inviting') : t('invite')}}</span>
+      </button>
     </div>
-</div>
+  </div>
+</ng-container>

@@ -5,11 +5,12 @@ import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {CommonModule} from "@angular/common";
 import {DynamicListPipe} from "../../dynamic-list.pipe";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-card-actionables',
   standalone: true,
-  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe],
+  imports: [CommonModule, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, DynamicListPipe, TranslocoDirective],
   templateUrl: './card-actionables.component.html',
   styleUrls: ['./card-actionables.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -10,6 +10,7 @@ import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {TranslocoModule} from "@ngneat/transloco";
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import {
     CardItemComponent,
     SeriesCardComponent,
     SideNavCompanionBarComponent,
-    DashboardComponent
+    DashboardComponent,
+    TranslocoModule
 ]
 })
 export class DashboardModule { }

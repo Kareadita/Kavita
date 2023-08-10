@@ -13,11 +13,12 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {UserReview} from "../review-card/user-review";
 import {SpoilerComponent} from "../spoiler/spoiler.component";
 import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-review-card-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe],
+    imports: [CommonModule, ReactiveFormsModule, SpoilerComponent, SafeHtmlPipe, TranslocoDirective],
   templateUrl: './review-card-modal.component.html',
   styleUrls: ['./review-card-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

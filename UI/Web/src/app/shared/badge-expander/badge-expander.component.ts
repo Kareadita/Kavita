@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, Input, OnInit, TemplateRef } from '@angular/core';
 import {CommonModule} from "@angular/common";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-badge-expander',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslocoDirective],
   templateUrl: './badge-expander.component.html',
   styleUrls: ['./badge-expander.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

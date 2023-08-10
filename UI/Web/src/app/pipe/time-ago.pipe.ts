@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform } from '@angular/core';
+import {ChangeDetectorRef, NgZone, OnDestroy, Pipe, PipeTransform} from '@angular/core';
+import {TranslocoService} from "@ngneat/transloco";
 
 /**
  * MIT License
@@ -35,8 +36,15 @@ and modified
 export class TimeAgoPipe implements PipeTransform, OnDestroy {
 
 	private timer: number | null = null;
-	constructor(private readonly changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone) {}
+	constructor(private readonly changeDetectorRef: ChangeDetectorRef, private ngZone: NgZone,
+              private translocoService: TranslocoService) {}
+
 	transform(value: string) {
+
+    if (value === '' || value === null || value === undefined || value.split('T')[0] === '0001-01-01')  {
+      return this.translocoService.translate('time-ago-pipe.never');
+    }
+
 		this.removeTimer();
 		const d = new Date(value);
 		const now = new Date();
@@ -63,36 +71,36 @@ export class TimeAgoPipe implements PipeTransform, OnDestroy {
 		}
 
 		if (seconds <= 45) {
-				return 'just now';
-			}
+				return this.translocoService.translate('time-ago-pipe.just-now');
+    }
 		if (seconds <= 90) {
-				return 'a minute ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.min-ago');
+    }
 		if (minutes <= 45) {
-				return minutes + ' minutes ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.mins-ago', {value: minutes});
+    }
 		if (minutes <= 90) {
-				return 'an hour ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.hour-ago');
+    }
 		if (hours <= 22) {
-				return hours + ' hours ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.hours-ago', {value: hours});
+    }
 		if (hours <= 36) {
-				return 'a day ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.day-ago');
+    }
 		if (days <= 25) {
-				return days + ' days ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.days-ago', {value: days});
+    }
 		if (days <= 45) {
-				return 'a month ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.month-ago');
+    }
 		if (days <= 345) {
-				return months + ' months ago';
-			}
+      return this.translocoService.translate('time-ago-pipe.months-ago', {value: months});
+    }
 		if (days <= 545) {
-				return 'a year ago';
-			}
-		return years + ' years ago';
+      return this.translocoService.translate('time-ago-pipe.year-ago');
+    }
+    return this.translocoService.translate('time-ago-pipe.years-ago', {value: years});
 	}
 
 	ngOnDestroy(): void {

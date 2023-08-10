@@ -6,4 +6,5 @@ export interface Device {
     platform: DevicePlatform;
     emailAddress: string;
     lastUsed: string;
+    lastUsedUtc: string;
 }

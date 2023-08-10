@@ -1,6 +1,6 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { filter, map, Observable, of, shareReplay, Subject, switchMap, takeUntil } from 'rxjs';
+import { filter, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { MangaFormatPipe } from 'src/app/pipe/manga-format.pipe';
 import { Member } from 'src/app/_models/auth/member';
 import { MemberService } from 'src/app/_services/member.service';
@@ -10,9 +10,9 @@ import { TimePeriods } from '../top-readers/top-readers.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { LineChartModule } from '@swimlane/ngx-charts';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 const options: Intl.DateTimeFormatOptions  = { month: "short", day: "numeric" };
-const mangaFormatPipe = new MangaFormatPipe();
 
 @Component({
     selector: 'app-reading-activity',
@@ -20,7 +20,7 @@ const mangaFormatPipe = new MangaFormatPipe();
     styleUrls: ['./reading-activity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe]
+  imports: [ReactiveFormsModule, NgIf, NgFor, LineChartModule, AsyncPipe, TranslocoDirective]
 })
 export class ReadingActivityComponent implements OnInit {
   /**
@@ -39,13 +39,15 @@ export class ReadingActivityComponent implements OnInit {
   data$: Observable<Array<PieDataItem>>;
   timePeriods = TimePeriods;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
+  mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor(private statService: StatisticsService, private memberService: MemberService) {
     this.data$ = this.formGroup.valueChanges.pipe(
       switchMap(_ => this.statService.getReadCountByDay(this.formGroup.get('users')!.value, this.formGroup.get('days')!.value)),
       map(data => {
         const gList = data.reduce((formats, entry) => {
-          const formatTranslated = mangaFormatPipe.transform(entry.format);
+          const formatTranslated = this.mangaFormatPipe.transform(entry.format);
           if (!formats[formatTranslated]) {
             formats[formatTranslated] = {
               name: formatTranslated,

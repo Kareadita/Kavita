@@ -1,27 +1,29 @@
-<ng-container *ngIf="bulkSelectionService.selections$ | async as selectionCount">
+<ng-container *transloco="let t; read: 'bulk-operations'">
+  <ng-container *ngIf="bulkSelectionService.selections$ | async as selectionCount">
     <div *ngIf="selectionCount > 0" class="bulk-select mb-3 fixed-top" [ngStyle]="{'margin-top': topOffset + 'px'}">
-        <div class="d-flex justify-content-around align-items-center">
-            
+      <div class="d-flex justify-content-around align-items-center">
+
             <span class="highlight">
                 <i class="fa fa-check me-1" aria-hidden="true"></i>
-                {{selectionCount | number}} items selected
+              {{t('items-selected',{num: selectionCount | number})}}
             </span>
 
-            <span>
-                <button *ngIf="hasMarkAsUnread" class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" ngbTooltip="Mark as Unread" placement="bottom">
+        <span>
+                <button *ngIf="hasMarkAsUnread" class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
                     <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
-                    <span class="visually-hidden">Mark as Unread</span>
+                    <span class="visually-hidden">{{t('mark-as-unread')}}</span>
                 </button>
-                <button *ngIf="hasMarkAsRead" class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" ngbTooltip="Mark as Read" placement="bottom">
+                <button *ngIf="hasMarkAsRead" class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
                     <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                    <span class="visually-hidden">Mark as Read</span>
+                    <span class="visually-hidden">{{t('mark-as-read')}}</span>
                 </button>
                 <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
-            </span>
-            
-            <span id="bulk-actions-header"  class="visually-hidden">Bulk Actions</span>
-            
-            <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times" aria-hidden="true"></i>&nbsp;Deselect All</button>
-        </div>
+        </span>
+
+        <span id="bulk-actions-header" class="visually-hidden">Bulk Actions</span>
+
+        <button class="btn btn-icon" (click)="bulkSelectionService.deselectAll()"><i class="fa fa-times me-1" aria-hidden="true"></i>{{t('deselect-all')}}</button>
+      </div>
     </div>
+  </ng-container>
 </ng-container>

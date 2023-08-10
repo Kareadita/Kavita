@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {filter, map, shareReplay, startWith, take, tap} from 'rxjs/operators';
+import {filter, map, shareReplay, take} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -26,11 +26,12 @@ import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {CardActionablesComponent} from "../../../cards/card-item/card-actionables/card-actionables.component";
 import {FilterPipe} from "../../../pipe/filter.pipe";
 import {FormsModule} from "@angular/forms";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule],
+  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,7 +42,7 @@ export class SideNavComponent implements OnInit {
 
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
-  readingListActions = [{action: Action.Import, title: 'Import CBL', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
+  readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;

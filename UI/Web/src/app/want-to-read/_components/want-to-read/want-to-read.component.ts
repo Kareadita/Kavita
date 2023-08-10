@@ -36,6 +36,7 @@ import { SeriesCardComponent } from '../../../cards/series-card/series-card.comp
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoDirective} from "@ngneat/transloco";
 
 
 @Component({
@@ -44,7 +45,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./want-to-read.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, NgIf, DecimalPipe]
+    imports: [SideNavCompanionBarComponent, NgStyle, BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, NgIf, DecimalPipe, TranslocoDirective]
 })
 export class WantToReadComponent implements OnInit, AfterContentChecked {
 

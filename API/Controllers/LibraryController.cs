@@ -36,13 +36,14 @@ public class LibraryController : BaseApiController
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEventHub _eventHub;
     private readonly ILibraryWatcher _libraryWatcher;
+    private readonly ILocalizationService _localizationService;
     private readonly IEasyCachingProvider _libraryCacheProvider;
     private const string CacheKey = "library_";
 
     public LibraryController(IDirectoryService directoryService,
         ILogger<LibraryController> logger, IMapper mapper, ITaskScheduler taskScheduler,
         IUnitOfWork unitOfWork, IEventHub eventHub, ILibraryWatcher libraryWatcher,
-        IEasyCachingProviderFactory cachingProviderFactory)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
     {
         _directoryService = directoryService;
         _logger = logger;
@@ -51,6 +52,7 @@ public class LibraryController : BaseApiController
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
         _libraryWatcher = libraryWatcher;
+        _localizationService = localizationService;
 
         _libraryCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.Library);
     }
@@ -66,7 +68,7 @@ public class LibraryController : BaseApiController
     {
         if (await _unitOfWork.LibraryRepository.LibraryExists(dto.Name))
         {
-            return BadRequest("Library name already exists. Please choose a unique name to the server.");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-name-exists"));
         }
 
         var library = new LibraryBuilder(dto.Name, dto.Type)
@@ -96,7 +98,7 @@ public class LibraryController : BaseApiController
         }
 
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue. Please try again.");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
         _logger.LogInformation("Created a new library: {LibraryName}", library.Name);
         await _libraryWatcher.RestartWatching();
@@ -160,7 +162,8 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, userId)) return BadRequest("User does not have access to library");
+        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, userId))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-library-access"));
 
         return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
     }
@@ -175,9 +178,9 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
-        if (user == null) return BadRequest("Could not validate user");
+        if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-doesnt-exist"));
 
-        var libraryString = string.Join(",", updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
+        var libraryString = string.Join(',', updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
         _logger.LogInformation("Granting user {UserName} access to: {Libraries}", updateLibraryForUserDto.Username, libraryString);
 
         var allLibraries = await _unitOfWork.LibraryRepository.GetLibrariesAsync();
@@ -195,7 +198,6 @@ public class LibraryController : BaseApiController
             {
                 library.AppUsers.Add(user);
             }
-
         }
 
         if (!_unitOfWork.HasChanges())
@@ -213,7 +215,7 @@ public class LibraryController : BaseApiController
         }
 
 
-        return BadRequest("There was a critical issue. Please try again.");
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
     }
 
     /// <summary>
@@ -224,9 +226,9 @@ public class LibraryController : BaseApiController
     /// <returns></returns>
     [Authorize(Policy = "RequireAdminRole")]
     [HttpPost("scan")]
-    public ActionResult Scan(int libraryId, bool force = false)
+    public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
-        if (libraryId <= 0) return BadRequest("Invalid libraryId");
+        if (libraryId <= 0) return BadRequest(await _localizationService.Translate(User.GetUserId(), "greater-0", "libraryId"));
         _taskScheduler.ScanLibrary(libraryId, force);
         return Ok();
     }
@@ -277,7 +279,7 @@ public class LibraryController : BaseApiController
         var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
         if (!isAdmin) return BadRequest("API key must belong to an admin");
 
-        if (dto.FolderPath.Contains("..")) return BadRequest("Invalid Path");
+        if (dto.FolderPath.Contains("..")) return BadRequest(await _localizationService.Translate(user.Id, "invalid-path"));
 
         dto.FolderPath = Services.Tasks.Scanner.Parser.Parser.NormalizePath(dto.FolderPath);
 
@@ -310,12 +312,11 @@ public class LibraryController : BaseApiController
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 _logger.LogInformation("User is attempting to delete a library while a scan is in progress");
-                return BadRequest(
-                    "You cannot delete a library while a scan is in progress. Please wait for scan to complete or restart Kavita then try to delete");
+                return BadRequest(await _localizationService.Translate(User.GetUserId(), "delete-library-while-scan"));
             }
 
             var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-            if (library == null) return BadRequest("Library no longer exists");
+            if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
 
             // Due to a bad schema that I can't figure out how to fix, we need to erase all RelatedSeries before we delete the library
             // Aka SeriesRelation has an invalid foreign key
@@ -354,7 +355,7 @@ public class LibraryController : BaseApiController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was a critical error trying to delete the library");
+            _logger.LogError(ex, await _localizationService.Translate(User.GetUserId(), "generic-library"));
             await _unitOfWork.RollbackAsync();
             return Ok(false);
         }
@@ -384,11 +385,11 @@ public class LibraryController : BaseApiController
     public async Task<ActionResult> UpdateLibrary(UpdateLibraryDto dto)
     {
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders);
-        if (library == null) return BadRequest("Library doesn't exist");
+        if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
         if (await _unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
-            return BadRequest("Library name already exists");
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-name-exists"));
 
         var originalFolders = library.Folders.Select(x => x.Path).ToList();
 
@@ -416,7 +417,7 @@ public class LibraryController : BaseApiController
 
         _unitOfWork.LibraryRepository.Update(library);
 
-        if (!await _unitOfWork.CommitAsync()) return BadRequest("There was a critical issue updating the library.");
+        if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library-update"));
         if (originalFolders.Count != dto.Folders.Count() || typeUpdate)
         {
             await _libraryWatcher.RestartWatching();

@@ -25,6 +25,7 @@ public interface IDirectoryService
     string ConfigDirectory { get; }
     string SiteThemeDirectory { get; }
     string FaviconDirectory { get; }
+    string LocalizationDirectory { get; }
     /// <summary>
     /// Original BookmarkDirectory. Only used for resetting directory. Use <see cref="ServerSettingKey.BackupDirectory"/> for actual path.
     /// </summary>
@@ -79,6 +80,7 @@ public class DirectoryService : IDirectoryService
     public string BookmarkDirectory { get; }
     public string SiteThemeDirectory { get; }
     public string FaviconDirectory { get; }
+    public string LocalizationDirectory { get; }
     private readonly ILogger<DirectoryService> _logger;
     private const RegexOptions MatchOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
 
@@ -95,22 +97,23 @@ public class DirectoryService : IDirectoryService
     {
         _logger = logger;
         FileSystem = fileSystem;
-        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
-        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
-        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
-        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ConfigDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config");
-        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
-        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
-        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
-
-        ExistOrCreate(SiteThemeDirectory);
+        ExistOrCreate(ConfigDirectory);
+        CoverImageDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "covers");
         ExistOrCreate(CoverImageDirectory);
+        CacheDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "cache");
         ExistOrCreate(CacheDirectory);
+        LogDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "logs");
         ExistOrCreate(LogDirectory);
+        TempDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "temp");
         ExistOrCreate(TempDirectory);
+        BookmarkDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "bookmarks");
         ExistOrCreate(BookmarkDirectory);
+        SiteThemeDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "themes");
+        ExistOrCreate(SiteThemeDirectory);
+        FaviconDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "config", "favicons");
         ExistOrCreate(FaviconDirectory);
+        LocalizationDirectory = FileSystem.Path.Join(FileSystem.Directory.GetCurrentDirectory(), "I18N");
     }
 
     /// <summary>

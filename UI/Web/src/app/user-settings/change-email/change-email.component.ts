@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {Observable, of, shareReplay, take} from 'rxjs';
+import {shareReplay, take} from 'rxjs';
 import {UpdateEmailResponse} from 'src/app/_models/auth/update-email-response';
 import {User} from 'src/app/_models/user';
 import {AccountService} from 'src/app/_services/account.service';
@@ -9,6 +9,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { ApiKeyComponent } from '../api-key/api-key.component';
 import { NgbTooltip, NgbCollapse } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgFor } from '@angular/common';
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-change-email',
@@ -16,7 +17,7 @@ import { NgIf, NgFor } from '@angular/common';
     styleUrls: ['./change-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent]
+    imports: [NgIf, NgbTooltip, NgbCollapse, NgFor, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective]
 })
 export class ChangeEmailComponent implements OnInit {
 
@@ -61,12 +62,12 @@ export class ChangeEmailComponent implements OnInit {
     this.accountService.updateEmail(model.email, model.password).subscribe((updateEmailResponse: UpdateEmailResponse) => {
       if (updateEmailResponse.emailSent) {
         if (updateEmailResponse.hadNoExistingEmail) {
-          this.toastr.success('An email has been sent to ' + model.email + ' for confirmation.');
+          this.toastr.success(translate('toasts.email-sent-to-no-existing', {email: model.email}));
         } else {
-          this.toastr.success('An email has been sent to your old email address for confirmation');
+          this.toastr.success(translate('toasts.email-send-to'));
         }
       } else {
-        this.toastr.success('The server is not publicly accessible. Ask the admin to fetch your confirmation link from the logs');
+        this.toastr.success(translate('toasts.change-email-private'));
       }
 
       this.isViewMode = true;

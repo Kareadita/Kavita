@@ -28,12 +28,14 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {translate, TranslocoModule} from "@ngneat/transloco";
+import {DefaultDatePipe} from "../../../pipe/default-date.pipe";
 
 enum TabID {
-  General = 'General',
-  Folder = 'Folder',
-  Cover = 'Cover',
-  Advanced = 'Advanced'
+  General = 'general-tab',
+  Folder = 'folder-tab',
+  Cover = 'cover-tab',
+  Advanced = 'advanced-tab'
 }
 
 enum StepID {
@@ -46,7 +48,7 @@ enum StepID {
 @Component({
   selector: 'app-library-settings-modal',
   standalone: true,
-  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent],
+  imports: [CommonModule, NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip, SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -162,7 +164,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   forceScan() {
-    this.libraryService.scan(this.library.id, true).subscribe(() => this.toastr.info('A forced scan has been started for ' + this.library.name));
+    this.libraryService.scan(this.library.id, true)
+      .subscribe(() => this.toastr.info(translate('toasts.forced-scan-queued', {name: this.library.name})));
   }
 
   async save() {
@@ -179,8 +182,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       model.type = parseInt(model.type, 10);
 
       if (model.type !== this.library.type) {
-        if (!await this.confirmService.confirm(`Changing library type will trigger a new scan with different parsing rules and may lead to
-        series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?`)) return;
+        if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
       this.libraryService.update(model).subscribe(() => {
@@ -190,7 +192,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
       this.libraryService.create(model).subscribe(() => {
-        this.toastr.success('Library created successfully. A scan has been started.');
+        this.toastr.success(translate('toasts.library-created'));
         this.close(true);
       });
     }

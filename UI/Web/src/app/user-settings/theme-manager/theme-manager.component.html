@@ -1,29 +1,32 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read:'theme-manager'">
+  <div class="container-fluid">
     <div class="row mb-2">
-        <div class="col-8"><h3>Theme Manager</h3></div>
-        <div class="col-4" *ngIf="isAdmin">
-            <button class="btn btn-primary float-end" (click)="scan()">
-                <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;Scan
-            </button>
-        </div>
+      <div class="col-8"><h3>{{t('title')}}</h3></div>
+      <div class="col-4" *ngIf="isAdmin">
+        <button class="btn btn-primary float-end" (click)="scan()">
+          <i class="fa fa-refresh" aria-hidden="true"></i>&nbsp;{{t('scan')}}
+        </button>
+      </div>
     </div>
 
-    <p *ngIf="isAdmin"> 
-        Looking for a light or e-ink theme? We have some custom themes you can use on our <a href="https://github.com/Kareadita/Themes" target="_blank" rel="noopener noreferrer">theme github</a>.
+    <p *ngIf="isAdmin">
+      {{t('looking-for-theme')}}<a href="https://github.com/Kareadita/Themes" target="_blank" rel="noopener noreferrer">{{t('looking-for-theme-continued')}}</a>
     </p>
 
     <div class="row g-0">
-        <h4>Site Themes</h4>
-        <ng-container *ngFor="let theme of (themeService.themes$ | async)">
-            <div class="card col-auto me-3 mb-3" style="width: 18rem;">
-                <div class="card-body">
-                  <h5 class="card-title">{{theme.name | sentenceCase}}</h5>
-                  <h6 class="card-subtitle mb-2 text-muted">{{theme.provider | siteThemeProvider}}</h6>
-                  <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin" (click)="updateDefault(theme)">Set Default</button>
-                  <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? 'Applied' : 'Apply'}}</button>
-                </div>
-              </div>
-        </ng-container>
+      <h4>{{t('site-themes')}}</h4>
+      <ng-container *ngFor="let theme of (themeService.themes$ | async)">
+        <div class="card col-auto me-3 mb-3" style="width: 18rem;">
+          <div class="card-body">
+            <h5 class="card-title">{{theme.name | sentenceCase}}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{{theme.provider | siteThemeProvider}}</h6>
+            <button class="btn btn-secondary me-2" [disabled]="theme.isDefault" *ngIf="isAdmin" (click)="updateDefault(theme)">{{t('set-default')}}</button>
+            <button class="btn btn-primary" (click)="applyTheme(theme)" [disabled]="currentTheme?.id === theme.id">{{currentTheme?.id === theme.id ? t('applied') : t('apply')}}</button>
+          </div>
+        </div>
+      </ng-container>
     </div>
-</div>
+  </div>
 
+
+</ng-container>

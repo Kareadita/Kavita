@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from 'src/app/_services/account.service';
 import { NgIf } from '@angular/common';
 import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reset-password',
@@ -12,7 +13,7 @@ import { SplashContainerComponent } from '../splash-container/splash-container.c
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgIf]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgIf, TranslocoDirective]
 })
 export class ResetPasswordComponent {
 
@@ -20,7 +21,7 @@ export class ResetPasswordComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
   });
 
-  constructor(private router: Router, private accountService: AccountService, 
+  constructor(private router: Router, private accountService: AccountService,
     private toastr: ToastrService) {}
 
   submit() {

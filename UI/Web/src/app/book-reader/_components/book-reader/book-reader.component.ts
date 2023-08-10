@@ -51,6 +51,7 @@ import {
   PersonalTableOfContentsComponent,
   PersonalToCEvent
 } from "../personal-table-of-contents/personal-table-of-contents.component";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 
 enum TabID {
@@ -101,7 +102,7 @@ const elementLevelStyles = ['line-height', 'font-family'];
         ])
     ],
     standalone: true,
-  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent]
+  imports: [NgTemplateOutlet, DrawerComponent, NgIf, NgbProgressbar, NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReaderSettingsComponent, TableOfContentsComponent, NgbNavOutlet, NgStyle, NgClass, NgbTooltip, BookLineOverlayComponent, PersonalTableOfContentsComponent, TranslocoDirective]
 })
 export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -305,7 +306,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('readingHtml', {static: false}) bookContentElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('readingSection', {static: false}) readingSectionElemRef!: ElementRef<HTMLDivElement>;
   @ViewChild('stickyTop', {static: false}) stickyTopElemRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('reader', {static: true}) reader!: ElementRef;
+  @ViewChild('reader', {static: false}) reader!: ElementRef;
 
 
   get BookPageLayoutMode() {
@@ -577,7 +578,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(hasProgress => {
       if (!hasProgress) {
         this.toggleDrawer();
-        this.toastr.info('You can modify book settings, save those settings for all books, and view table of contents from the drawer.');
+        this.toastr.info(translate('toasts.book-settings-info'));
       }
     });
 
@@ -782,12 +783,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
-      this.toastr.info(direction + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase() + ' loaded', '', {timeOut: 3000});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
       this.init();
     } else {
       // This will only happen if no actual chapter can be found
-      this.toastr.warning('Could not find ' + direction.toLowerCase() + ' ' + this.utilityService.formatChapterName(this.libraryType).toLowerCase());
+      const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      this.toastr.warning(msg);
       this.isLoading = false;
       if (direction === 'Prev') {
         this.prevPageDisabled = true;
@@ -852,7 +855,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   promptForPage() {
-    const question = 'There are ' + (this.maxPages - 1) + ' pages. What page do you want to go to?';
+    const question = translate('book-reader.go-to-page-prompt', {totalPages: this.maxPages - 1});
     const goToPageNum = window.prompt(question, '');
     if (goToPageNum === null || goToPageNum.trim().length === 0) { return null; }
     return goToPageNum;
@@ -1594,6 +1597,4 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   refreshPersonalToC() {
     this.refreshPToC.emit();
   }
-
-  protected readonly undefined = undefined;
 }

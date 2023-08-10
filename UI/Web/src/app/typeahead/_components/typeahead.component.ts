@@ -19,12 +19,13 @@ import {
   ViewChild
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { auditTime, filter, map, shareReplay, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { Observable, ReplaySubject } from 'rxjs';
+import { auditTime, filter, map, shareReplay, switchMap, take, tap } from 'rxjs/operators';
 import { KEY_CODES } from 'src/app/shared/_services/utility.service';
 import { SelectionCompareFn, TypeaheadSettings } from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 
 /**
@@ -152,7 +153,7 @@ const ANIMATION_SPEED = 200;
 @Component({
   selector: 'app-typeahead',
   standalone: true,
-  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule],
+  imports: [CommonModule, TagBadgeComponent, ReactiveFormsModule, TranslocoDirective],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

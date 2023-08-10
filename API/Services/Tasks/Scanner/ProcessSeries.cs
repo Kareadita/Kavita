@@ -36,7 +36,7 @@ public interface IProcessSeries
     void UpdateVolumes(Series series, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void UpdateChapters(Series series, Volume volume, IList<ParserInfo> parsedInfos, bool forceUpdate = false);
     void AddOrUpdateFileForChapter(Chapter chapter, ParserInfo info, bool forceUpdate = false);
-    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo);
+    void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false);
 }
 
 /// <summary>
@@ -146,6 +146,7 @@ public class ProcessSeries : IProcessSeries
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
+            // BUG: This check doesn't work for Books, as books usually have metadata on all files. (#2167)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
             UpdateVolumes(series, parsedInfos, forceUpdate);
@@ -534,11 +535,11 @@ public class ProcessSeries : IProcessSeries
             foreach (var chapter in volume.Chapters)
             {
                 var firstFile = chapter.Files.MinBy(x => x.Chapter);
-                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) continue;
+                if (firstFile == null || _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) continue;
                 try
                 {
                     var firstChapterInfo = infos.SingleOrDefault(i => i.FullFilePath.Equals(firstFile.FilePath));
-                    UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo);
+                    UpdateChapterFromComicInfo(chapter, firstChapterInfo?.ComicInfo, forceUpdate);
                 }
                 catch (Exception ex)
                 {
@@ -660,12 +661,12 @@ public class ProcessSeries : IProcessSeries
         }
     }
 
-    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo)
+    public void UpdateChapterFromComicInfo(Chapter chapter, ComicInfo? comicInfo, bool forceUpdate = false)
     {
         if (comicInfo == null) return;
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null ||
-            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, false, firstFile)) return;
+            _cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, forceUpdate, firstFile)) return;
 
         _logger.LogTrace("[ScannerService] Read ComicInfo for {File}", firstFile.FilePath);
 

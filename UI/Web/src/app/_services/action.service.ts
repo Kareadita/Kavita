@@ -19,6 +19,7 @@ import { LibraryService } from './library.service';
 import { MemberService } from './member.service';
 import { ReaderService } from './reader.service';
 import { SeriesService } from './series.service';
+import {translate, TranslocoService} from "@ngneat/transloco";
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
 export type SeriesActionCallback = (series: Series) => void;
@@ -42,7 +43,8 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceSerivce: DeviceService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
+    private translocoService: TranslocoService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -64,7 +66,7 @@ export class ActionService implements OnDestroy {
     const force = false; // await this.promptIfForce();
 
     this.libraryService.scan(library.id, force).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Scan queued for ' + library.name);
+      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -83,7 +85,7 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    if (!await this.confirmService.confirm('Refresh covers will force all cover images to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
       if (callback) {
         callback(library);
       }
@@ -93,7 +95,7 @@ export class ActionService implements OnDestroy {
     const forceUpdate = true; //await this.promptIfForce();
 
     this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Scan queued for ' + library.name);
+      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -119,7 +121,7 @@ export class ActionService implements OnDestroy {
       return;
     }
 
-    if (!await this.confirmService.alert('This is a long running process. Please give it the time to complete before invoking again.')) {
+    if (!await this.confirmService.alert(translate('toasts.alert-long-running'))) {
       if (callback) {
         callback(library);
       }
@@ -127,7 +129,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Library file analysis queued for ' + library.name);
+      this.toastr.info(this.translocoService.translate('toasts.library-file-analysis-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -142,7 +144,7 @@ export class ActionService implements OnDestroy {
   markSeriesAsRead(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.markRead(series.id).pipe(take(1)).subscribe(res => {
       series.pagesRead = series.pages;
-      this.toastr.success(series.name + ' is now read');
+      this.toastr.success(this.translocoService.translate('toasts.entity-read', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -157,7 +159,7 @@ export class ActionService implements OnDestroy {
   markSeriesAsUnread(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.markUnread(series.id).pipe(take(1)).subscribe(res => {
       series.pagesRead = 0;
-      this.toastr.success(series.name + ' is now unread');
+      this.toastr.success(this.translocoService.translate('toasts.entity-unread', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -171,7 +173,7 @@ export class ActionService implements OnDestroy {
    */
   async scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Scan queued for ' + series.name);
+      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -185,7 +187,7 @@ export class ActionService implements OnDestroy {
    */
   analyzeFilesForSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Scan queued for ' + series.name);
+      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -198,7 +200,7 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
   async refreshMetdata(series: Series, callback?: SeriesActionCallback) {
-    if (!await this.confirmService.confirm('Refresh covers will force all cover images and metadata to be recalculated. This is a heavy operation. Are you sure you don\'t want to perform a Scan instead?')) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-regen-covers'))) {
       if (callback) {
         callback(series);
       }
@@ -206,7 +208,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info('Refresh covers queued for ' + series.name);
+      this.toastr.info(this.translocoService.translate('toasts.refresh-covers-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -223,7 +225,7 @@ export class ActionService implements OnDestroy {
     this.readerService.markVolumeRead(seriesId, volume.id).pipe(take(1)).subscribe(() => {
       volume.pagesRead = volume.pages;
       volume.chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success('Marked as Read');
+      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
 
       if (callback) {
         callback(volume);
@@ -241,7 +243,7 @@ export class ActionService implements OnDestroy {
     this.readerService.markVolumeUnread(seriesId, volume.id).subscribe(() => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success('Marked as Unread');
+      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
       if (callback) {
         callback(volume);
       }
@@ -257,7 +259,7 @@ export class ActionService implements OnDestroy {
   markChapterAsRead(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
     this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
-      this.toastr.success('Marked as Read');
+      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
       if (callback) {
         callback(chapter);
       }
@@ -273,7 +275,7 @@ export class ActionService implements OnDestroy {
   markChapterAsUnread(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
     this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
-      this.toastr.success('Marked as Unread');
+      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
       if (callback) {
         callback(chapter);
       }
@@ -294,7 +296,7 @@ export class ActionService implements OnDestroy {
         volume.chapters?.forEach(c => c.pagesRead = c.pages);
       });
       chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success('Marked as Read');
+      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
 
       if (callback) {
         callback();
@@ -315,7 +317,7 @@ export class ActionService implements OnDestroy {
         volume.chapters?.forEach(c => c.pagesRead = 0);
       });
       chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success('Marked as Unread');
+      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
 
       if (callback) {
         callback();
@@ -333,7 +335,7 @@ export class ActionService implements OnDestroy {
       series.forEach(s => {
         s.pagesRead = s.pages;
       });
-      this.toastr.success('Marked as Read');
+      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
 
       if (callback) {
         callback();
@@ -351,7 +353,7 @@ export class ActionService implements OnDestroy {
       series.forEach(s => {
         s.pagesRead = s.pages;
       });
-      this.toastr.success('Marked as Unread');
+      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
 
       if (callback) {
         callback();
@@ -394,7 +396,7 @@ export class ActionService implements OnDestroy {
 
   removeMultipleSeriesFromWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
     this.memberService.removeSeriesToWantToRead(seriesIds).subscribe(() => {
-      this.toastr.success('Series removed from Want to Read list');
+      this.toastr.success(this.translocoService.translate('toasts.series-removed-want-to-read'));
       if (callback) {
         callback();
       }
@@ -538,14 +540,14 @@ export class ActionService implements OnDestroy {
    * @param callback Optional callback to perform actions after API completes
    */
    async deleteMultipleSeries(seriesIds: Array<Series>, callback?: BooleanActionCallback) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete ' + seriesIds.length + ' series? It will not modify files on disk.')) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-multiple-series', {count: seriesIds.length}))) {
       if (callback) {
         callback(false);
       }
       return;
     }
     this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success('Series deleted');
+      this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
 
       if (callback) {
         callback(true);
@@ -554,7 +556,7 @@ export class ActionService implements OnDestroy {
   }
 
   async deleteSeries(series: Series, callback?: BooleanActionCallback) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete this series? It will not modify files on disk.')) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-series'))) {
       if (callback) {
         callback(false);
       }
@@ -563,15 +565,15 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success('Series deleted');
+        this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
         callback(res);
       }
     });
   }
 
   sendToDevice(chapterIds: Array<number>, device: Device, callback?: VoidActionCallback) {
-    this.deviceSerivce.sendTo(chapterIds, device.id).subscribe(() => {
-      this.toastr.success('File emailed to ' + device.name);
+    this.deviceService.sendTo(chapterIds, device.id).subscribe(() => {
+      this.toastr.success(this.translocoService.translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
       }
@@ -579,8 +581,8 @@ export class ActionService implements OnDestroy {
   }
 
   sendSeriesToDevice(seriesId: number, device: Device, callback?: VoidActionCallback) {
-    this.deviceSerivce.sendSeriesTo(seriesId, device.id).subscribe(() => {
-      this.toastr.success('File(s) emailed to ' + device.name);
+    this.deviceService.sendSeriesTo(seriesId, device.id).subscribe(() => {
+      this.toastr.success(this.translocoService.translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
       }

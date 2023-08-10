@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { take } from 'rxjs/operators';
@@ -28,6 +28,7 @@ import { ImageComponent } from '../../../shared/image/image.component';
 import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { NgIf, NgClass, AsyncPipe, DecimalPipe, DatePipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-reading-list-detail',
@@ -35,7 +36,7 @@ import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe]
+  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective]
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
@@ -55,6 +56,8 @@ export class ReadingListDetailComponent implements OnInit {
 
   libraryTypes: {[key: number]: LibraryType} = {};
   characters$!: Observable<Person[]>;
+
+  private translocoService = inject(TranslocoService);
 
   get MangaFormat(): typeof MangaFormat {
     return MangaFormat;
@@ -156,10 +159,10 @@ export class ReadingListDetailComponent implements OnInit {
   }
 
   async deleteList(readingList: ReadingList) {
-    if (!await this.confirmService.confirm('Are you sure you want to delete the reading list? This cannot be undone.')) return;
+    if (!await this.confirmService.confirm(this.translocoService.translate('toasts.confirm-delete-reading-list'))) return;
 
     this.readingListService.delete(readingList.id).subscribe(() => {
-      this.toastr.success('Reading list deleted');
+      this.toastr.success(this.translocoService.translate('toasts.reading-list-deleted'));
       this.router.navigateByUrl('/lists');
     });
   }
@@ -175,7 +178,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.items.splice(position, 1);
       this.items = [...this.items];
       this.cdRef.markForCheck();
-      this.toastr.success('Item removed');
+      this.toastr.success(this.translocoService.translate('toasts.item-removed'));
     });
   }
 
@@ -185,22 +188,22 @@ export class ReadingListDetailComponent implements OnInit {
     this.cdRef.markForCheck();
     this.readingListService.removeRead(this.readingList.id).subscribe((resp) => {
       if (resp === 'Nothing to remove') {
-        this.toastr.info(resp);
+        this.toastr.info(this.translocoService.translate('toasts.nothing-to-remove'));
         return;
       }
       this.getListItems();
     });
   }
 
-  read(inconitoMode: boolean = false) {
+  read(incognitoMode: boolean = false) {
     if (!this.readingList) return;
     const firstItem = this.items[0];
     this.router.navigate(
       this.readerService.getNavigationArray(firstItem.libraryId, firstItem.seriesId, firstItem.chapterId, firstItem.seriesFormat),
-      {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
+      {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
   }
 
-  continue(inconitoMode: boolean = false) {
+  continue(incognitoMode: boolean = false) {
     // TODO: Can I do this in the backend?
     if (!this.readingList) return;
     let currentlyReadingChapter = this.items[0];
@@ -214,10 +217,10 @@ export class ReadingListDetailComponent implements OnInit {
 
     this.router.navigate(
       this.readerService.getNavigationArray(currentlyReadingChapter.libraryId, currentlyReadingChapter.seriesId, currentlyReadingChapter.chapterId, currentlyReadingChapter.seriesFormat),
-      {queryParams: {readingListId: this.readingList.id, inconitoMode: inconitoMode}});
+      {queryParams: {readingListId: this.readingList.id, incognitoMode: incognitoMode}});
   }
 
-  updateAccesibilityMode() {
+  updateAccessibilityMode() {
     this.accessibilityMode = !this.accessibilityMode;
     this.cdRef.markForCheck();
   }

@@ -60,6 +60,7 @@ public class ScrobblingService : IScrobblingService
     private readonly IEventHub _eventHub;
     private readonly ILogger<ScrobblingService> _logger;
     private readonly ILicenseService _licenseService;
+    private readonly ILocalizationService _localizationService;
 
     public const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
@@ -87,13 +88,15 @@ public class ScrobblingService : IScrobblingService
 
 
     public ScrobblingService(IUnitOfWork unitOfWork, ITokenService tokenService,
-        IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService)
+        IEventHub eventHub, ILogger<ScrobblingService> logger, ILicenseService licenseService,
+        ILocalizationService localizationService)
     {
         _unitOfWork = unitOfWork;
         _tokenService = tokenService;
         _eventHub = eventHub;
         _logger = logger;
         _licenseService = licenseService;
+        _localizationService = localizationService;
 
         FlurlHttp.ConfigureClient(Configuration.KavitaPlusApiUrl, cli =>
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
@@ -184,11 +187,11 @@ public class ScrobblingService : IScrobblingService
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
-            throw new KavitaException("AniList Credentials have expired or not set");
+            throw new KavitaException(await _localizationService.Translate(userId, "unable-to-register-k+"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
-        if (series == null) throw new KavitaException("Series not found");
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
         if (library.Type == LibraryType.Comic) return;
@@ -229,11 +232,11 @@ public class ScrobblingService : IScrobblingService
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
-            throw new KavitaException("AniList Credentials have expired or not set");
+            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
-        if (series == null) throw new KavitaException("Series not found");
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
         if (library.Type == LibraryType.Comic) return;
@@ -273,11 +276,11 @@ public class ScrobblingService : IScrobblingService
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
-            throw new KavitaException("AniList Credentials have expired or not set");
+            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
-        if (series == null) throw new KavitaException("Series not found");
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
             _logger.LogInformation("Series {SeriesName} is on UserId {UserId}'s hold list. Not scrobbling", series.Name, userId);
@@ -338,11 +341,11 @@ public class ScrobblingService : IScrobblingService
         var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
         if (await HasTokenExpired(token, ScrobbleProvider.AniList))
         {
-            throw new KavitaException("AniList Credentials have expired or not set");
+            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
         }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
-        if (series == null) throw new KavitaException("Series not found");
+        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true}) return;
         if (library.Type == LibraryType.Comic) return;
@@ -368,6 +371,7 @@ public class ScrobblingService : IScrobblingService
 
     private async Task<int> GetRateLimit(string license, string aniListToken)
     {
+        if (string.IsNullOrWhiteSpace(aniListToken)) return 0;
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/scrobbling/rate-limit?accessToken=" + aniListToken)

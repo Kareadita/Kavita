@@ -117,7 +117,7 @@ public class ReaderService : IReaderService
     {
         var seenVolume = new Dictionary<int, bool>();
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
-        if (series == null) throw new KavitaException("Series suddenly doesn't exist, cannot mark as read");
+        if (series == null) throw new KavitaException("series-doesnt-exist");
         foreach (var chapter in chapters)
         {
             var userProgress = GetUserProgressForChapter(user, chapter);
@@ -202,8 +202,9 @@ public class ReaderService : IReaderService
 
         if (user.Progresses == null)
         {
-            throw new KavitaException("Progresses must exist on user");
+            throw new KavitaException("progress-must-exist");
         }
+
         try
         {
             userProgress =

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { fromEvent } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, takeUntil, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, tap } from 'rxjs/operators';
 import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
 import { Chapter } from 'src/app/_models/chapter';
 import { CollectionTag } from 'src/app/_models/collection-tag';
@@ -34,6 +34,7 @@ import { EventsWidgetComponent } from '../events-widget/events-widget.component'
 import { SeriesFormatComponent } from '../../../shared/series-format/series-format.component';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { GroupedTypeaheadComponent } from '../grouped-typeahead/grouped-typeahead.component';
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-nav-header',
@@ -41,7 +42,7 @@ import { GroupedTypeaheadComponent } from '../grouped-typeahead/grouped-typeahea
     styleUrls: ['./nav-header.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-    imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe]
+  imports: [NgIf, RouterLink, RouterLinkActive, NgOptimizedImage, GroupedTypeaheadComponent, ImageComponent, SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, AsyncPipe, PersonRolePipe, SentenceCasePipe, TranslocoDirective]
 })
 export class NavHeaderComponent implements OnInit {
 

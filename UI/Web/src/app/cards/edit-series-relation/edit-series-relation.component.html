@@ -1,38 +1,41 @@
-<div class="container-fluid">
+<ng-container *transloco="let t; read: 'edit-series-relation'">
+  <div class="container-fluid">
 
     <p>
-        Not sure what relationship to add? See our <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/series-relationships" target="_blank" rel="noopener noreferrer" referrerpolicy="no-refer">wiki for hints</a>.
+      {{t('description-part-1')}} <a href="https://wiki.kavitareader.com/en/guides/get-started-using-your-library/series-relationships" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{{t('description-part-2')}}</a>
     </p>
 
     <div class="row g-0" *ngIf="relations.length > 0">
-        <label class="form-label col-md-7">Target Series</label>
-        <label class="form-label col-md-5">Relationship</label>
+      <label class="form-label col-md-7">{{t('target-series')}}</label>
+      <label class="form-label col-md-5">{{t('relationship')}}</label>
     </div>
 
     <form>
-        <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
-            <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
-                <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
-                    <ng-template #badgeItem let-item let-position="idx">
-                        {{item.name}} ({{libraryNames[item.libraryId]}})
-                    </ng-template>
-                    <ng-template #optionItem let-item let-position="idx">
-                        {{item.name}} ({{libraryNames[item.libraryId]}})
-                    </ng-template>
-                </app-typeahead>
-            </div>
-            <div class="col-sm-12 col-md-10 col-lg-3 mb-3">
-                <select class="form-select" [formControl]="relation.formControl">
-                    <option [value]="RelationKind.Parent" disabled>Parent</option>
-                    <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.text}}</option>
-                </select>
-            </div>
-            <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)">
-              <i class="fa fa-trash"></i><span class="visually-hidden">Remove</span></button>
+      <div class="row g-0" *ngFor="let relation of relations; let idx = index; let isLast = last;">
+        <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
+          <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
+            <ng-template #badgeItem let-item let-position="idx">
+              {{item.name}} ({{libraryNames[item.libraryId]}})
+            </ng-template>
+            <ng-template #optionItem let-item let-position="idx">
+              {{item.name}} ({{libraryNames[item.libraryId]}})
+            </ng-template>
+          </app-typeahead>
         </div>
+        <div class="col-sm-12 col-md-10 col-lg-3 mb-3">
+          <select class="form-select" [formControl]="relation.formControl">
+            <option [value]="RelationKind.Parent" disabled>{{t('parent')}}</option>
+            <option *ngFor="let opt of relationOptions" [value]="opt.value">{{opt.value | relationship }}</option>
+          </select>
+        </div>
+        <button class="col-sm-auto col-md-2 mb-3 btn btn-outline-secondary" (click)="removeRelation(idx)">
+          <i class="fa fa-trash"></i><span class="visually-hidden">{{t('remove')}}</span></button>
+      </div>
     </form>
 
     <div class="row g-0 mt-3 mb-3">
-        <button class="btn btn-outline-secondary col-md-12" (click)="addNewRelation()">Add Relationship</button>
+      <button class="btn btn-outline-secondary col-md-12" (click)="addNewRelation()">{{t('add-relationship')}}</button>
     </div>
-</div>
+  </div>
+
+</ng-container>

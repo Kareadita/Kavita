@@ -1,59 +1,61 @@
+<ng-container *transloco="let t; read: 'library-recommended'">
 
-
-<ng-container *ngIf="all$ | async as all">
+  <ng-container *ngIf="all$ | async as all">
     <p *ngIf="all.length === 0">
-        Nothing to show here. Add some metadata to your library, read something or rate something. This library may also have recommendations turned off.
+      {{t('no-data')}}
     </p>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="onDeck$ | async as onDeck">
-    <app-carousel-reel [items]="onDeck" title="On Deck">
-        <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-        </ng-template>
+  <ng-container *ngIf="onDeck$ | async as onDeck">
+    <app-carousel-reel [items]="onDeck" [title]="t('on-deck')">
+      <ng-template #carouselItem let-item let-position="idx">
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+      </ng-template>
     </app-carousel-reel>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="quickReads$ | async as quickReads">
-    <app-carousel-reel [items]="quickReads" title="Quick Reads">
-        <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-        </ng-template>
+  <ng-container *ngIf="quickReads$ | async as quickReads">
+    <app-carousel-reel [items]="quickReads" [title]="t('quick-reads')">
+      <ng-template #carouselItem let-item let-position="idx">
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+      </ng-template>
     </app-carousel-reel>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="quickCatchups$ | async as quickCatchups">
-    <app-carousel-reel [items]="quickCatchups" title="Quick Catchups">
-        <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-        </ng-template>
+  <ng-container *ngIf="quickCatchups$ | async as quickCatchups">
+    <app-carousel-reel [items]="quickCatchups" [title]="t('quick-catchups')">
+      <ng-template #carouselItem let-item let-position="idx">
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+      </ng-template>
     </app-carousel-reel>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="highlyRated$ | async as highlyRated">
-    <app-carousel-reel [items]="highlyRated" title="Highly Rated">
-        <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-        </ng-template>
+  <ng-container *ngIf="highlyRated$ | async as highlyRated">
+    <app-carousel-reel [items]="highlyRated" [title]="t('highly-rated')">
+      <ng-template #carouselItem let-item let-position="idx">
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+      </ng-template>
     </app-carousel-reel>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="rediscover$ | async as rediscover">
-    <app-carousel-reel [items]="rediscover" title="Rediscover">
-        <ng-template #carouselItem let-item let-position="idx">
-            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-        </ng-template>
+  <ng-container *ngIf="rediscover$ | async as rediscover">
+    <app-carousel-reel [items]="rediscover" [title]="t('rediscover')">
+      <ng-template #carouselItem let-item let-position="idx">
+        <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+      </ng-template>
     </app-carousel-reel>
-</ng-container>
+  </ng-container>
 
-<ng-container *ngIf="genre$ | async as genre">
+  <ng-container *ngIf="genre$ | async as genre">
     <ng-container *ngIf="moreIn$ | async as moreIn">
-        <ng-container *ngIf="moreIn.length > 1">
-            <app-carousel-reel [items]="moreIn" title="More In {{genre.title}}">
-                <ng-template #carouselItem let-item let-position="idx">
-                    <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
-                </ng-template>
-            </app-carousel-reel>
-        </ng-container>
+      <ng-container *ngIf="moreIn.length > 1">
+        <app-carousel-reel [items]="moreIn" [title]="t('more-in-genre', {genre: genre.title})">
+          <ng-template #carouselItem let-item let-position="idx">
+            <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" (reload)="reloadInProgress($event)" (dataChanged)="reloadInProgress($event)"></app-series-card>
+          </ng-template>
+        </app-carousel-reel>
+      </ng-container>
     </ng-container>
+  </ng-container>
+
 </ng-container>

@@ -10,13 +10,14 @@ import { RestrictionSelectorComponent } from '../../user-settings/restriction-se
 import { LibrarySelectorComponent } from '../library-selector/library-selector.component';
 import { RoleSelectorComponent } from '../role-selector/role-selector.component';
 import { NgIf } from '@angular/common';
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe]
+  imports: [ReactiveFormsModule, NgIf, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective]
 })
 export class EditUserComponent implements OnInit {
 

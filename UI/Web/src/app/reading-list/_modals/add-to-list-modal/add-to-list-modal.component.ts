@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, Input, OnInit, ViewChild} from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
@@ -6,6 +6,7 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { ReadingListService } from 'src/app/_services/reading-list.service';
 import { FilterPipe } from '../../../pipe/filter.pipe';
 import { NgIf, NgFor } from '@angular/common';
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 export enum ADD_FLOW {
   Series = 0,
@@ -20,7 +21,7 @@ export enum ADD_FLOW {
     templateUrl: './add-to-list-modal.component.html',
     styleUrls: ['./add-to-list-modal.component.scss'],
     standalone: true,
-    imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe]
+  imports: [ReactiveFormsModule, NgIf, NgFor, FilterPipe, TranslocoDirective]
 })
 export class AddToListModalComponent implements OnInit, AfterViewInit {
 
@@ -68,6 +69,8 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
     return listItem.title.toLowerCase().indexOf((this.listForm.value.filterQuery || '').toLowerCase()) >= 0;
   }
 
+  translocoService = inject(TranslocoService);
+
 
   constructor(private modal: NgbActiveModal, private readingListService: ReadingListService, private toastr: ToastrService) { }
 
@@ -106,7 +109,7 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
     if (this.type === ADD_FLOW.Multiple_Series && this.seriesIds !== undefined) {
       this.readingListService.updateByMultipleSeries(readingList.id, this.seriesIds).subscribe(() => {
-        this.toastr.success('Series added to reading list');
+        this.toastr.success(this.translocoService.translate('toasts.series-added-to-reading-list'));
         this.modal.close();
       });
     }
@@ -115,22 +118,22 @@ export class AddToListModalComponent implements OnInit, AfterViewInit {
 
     if (this.type === ADD_FLOW.Series && this.seriesId !== undefined) {
       this.readingListService.updateBySeries(readingList.id, this.seriesId).subscribe(() => {
-        this.toastr.success('Series added to reading list');
+        this.toastr.success(this.translocoService.translate('toasts.series-added-to-reading-list'));
         this.modal.close();
       });
     } else if (this.type === ADD_FLOW.Volume && this.volumeId !== undefined) {
       this.readingListService.updateByVolume(readingList.id, this.seriesId, this.volumeId).subscribe(() => {
-        this.toastr.success('Volumes added to reading list');
+        this.toastr.success(this.translocoService.translate('toasts.volumes-added-to-reading-list'));
         this.modal.close();
       });
     } else if (this.type === ADD_FLOW.Chapter && this.chapterId !== undefined) {
       this.readingListService.updateByChapter(readingList.id, this.seriesId, this.chapterId).subscribe(() => {
-        this.toastr.success('Chapter added to reading list');
+        this.toastr.success(this.translocoService.translate('toasts.chapter-added-to-reading-list'));
         this.modal.close();
       });
     } else if (this.type === ADD_FLOW.Multiple && this.volumeIds !== undefined && this.chapterIds !== undefined) {
       this.readingListService.updateByMultiple(readingList.id, this.seriesId, this.volumeIds, this.chapterIds).subscribe(() => {
-        this.toastr.success('Chapters and Volumes added to reading list');
+        this.toastr.success(this.translocoService.translate('toasts.multiple-added-to-reading-list'));
         this.modal.close();
       });
     }

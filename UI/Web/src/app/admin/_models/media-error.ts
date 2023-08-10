@@ -3,6 +3,4 @@ export interface KavitaMediaError {
     filePath: string;
     comment: string;
     details: string;
-    created: string;
-    createdUtc: string;
 }

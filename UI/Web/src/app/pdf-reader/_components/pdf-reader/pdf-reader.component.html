@@ -1,93 +1,96 @@
-<div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user">
+<ng-container *transloco="let t; read: 'pdf-reader'">
+  <div class="{{theme}}" *ngIf="accountService.currentUser$ | async as user">
 
     <ng-container *ngIf="isLoading">
-        <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            Loading...PDFs may take longer than expected
+      <div class="loading mx-auto" style="min-width: 200px; width: 600px;">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        {{t('loading-message')}}
+      </div>
+      <div class="progress-container row g-0 align-items-center">
+        <div class="progress" style="height: 5px;">
+          <div class="progress-bar" role="progressbar" [ngStyle]="{'width': loadPercent + '%'}" [attr.aria-valuenow]="loadPercent" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <div class="progress-container row g-0 align-items-center">
-            <div class="progress" style="height: 5px;">
-                <div class="progress-bar" role="progressbar" [ngStyle]="{'width': loadPrecent + '%'}" [attr.aria-valuenow]="loadPrecent" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-        </div>
+      </div>
     </ng-container>
     <ngx-extended-pdf-viewer
-        #pdfViewer
-        [src]="readerService.downloadPdf(this.chapterId)"
-        [authorization]="'Bearer ' + user.token"
-        height="100vh"
-        [(page)]="currentPage"
-        [textLayer]="true"
-        [useBrowserLocale]="false"
-        [showHandToolButton]="true"
-        [showOpenFileButton]="false"
-        [showPrintButton]="false"
-        [showRotateButton]="false"
-        [showDownloadButton]="false"
-        [showPropertiesButton]="false"
-        [(zoom)]="zoomSetting"
-        [showSecondaryToolbarButton]="true"
-        [showBorders]="true"
-        [theme]="theme"
-        [formTheme]="theme"
-        [backgroundColor]="backgroundColor"
-        [customToolbar]="multiToolbar"
+      #pdfViewer
+      [src]="readerService.downloadPdf(this.chapterId)"
+      [authorization]="'Bearer ' + user.token"
+      height="100vh"
+      [(page)]="currentPage"
+      [textLayer]="true"
+      [useBrowserLocale]="true"
+      [showHandToolButton]="true"
+      [showOpenFileButton]="false"
+      [showPrintButton]="false"
+      [showRotateButton]="false"
+      [showDownloadButton]="false"
+      [showPropertiesButton]="false"
+      [(zoom)]="zoomSetting"
+      [showSecondaryToolbarButton]="true"
+      [showBorders]="true"
+      [theme]="theme"
+      [backgroundColor]="backgroundColor"
+      [customToolbar]="multiToolbar"
+      [language]="user.preferences.locale"
 
-        (pageChange)="saveProgress()"
-        (pdfLoadingStarts)="updateLoading(true)"
-        (pdfLoaded)="updateLoading(false)"
-        (progress)="updateLoadProgress($event)"
+      (pageChange)="saveProgress()"
+      (pdfLoadingStarts)="updateLoading(true)"
+      (pdfLoaded)="updateLoading(false)"
+      (progress)="updateLoadProgress($event)"
     >
 
     </ngx-extended-pdf-viewer>
 
     <ng-template #multiToolbar>
-        <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}"> <!--action-bar row g-0 justify-content-between-->
-            <div  id="toolbarViewerLeft">
-                <pdf-toggle-sidebar></pdf-toggle-sidebar>
-                <pdf-find-button></pdf-find-button>
-                <pdf-paging-area></pdf-paging-area>
-            </div>
-
-            <div  id="toolbarViewerRight">
-                <pdf-hand-tool></pdf-hand-tool>
-                <pdf-select-tool></pdf-select-tool>
-                <pdf-presentation-mode></pdf-presentation-mode>
-
-
-                <!-- This is not yet supported by the underlying library
-                <button (click)="toggleBookPageMode()" class="btn btn-icon toolbarButton">
-                    <i class="toolbar-icon fa-solid {{this.bookMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{this.bookMode !== 'book' ? 'Book Mode' : 'Normal Mode'}}</span>
-                </button> -->
-
-                <button class="btn btn-icon toolbarButton" [ngbTooltip]="bookTitle">
-                    <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-                    <span class="visually-hidden">
-                        {{bookTitle}}
-                    </span>
-                </button>
-
-                <button *ngIf="incognitoMode" (click)="turnOffIncognito()" class="btn btn-icon toolbarButton">
-                    <i class="toolbar-icon fa fa-glasses" [ngStyle]="{color: fontColor}" aria-hidden="true"></i><span class="visually-hidden">Incognito Mode</span>
-                </button>
-
-                <!-- This is pretty experimental, so it might not work perfectly -->
-                <button (click)="toggleTheme()" class="btn btn-icon toolbarButton">
-                    <i class="toolbar-icon fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{this.theme === 'light' ? 'Light Theme' : 'Dark Theme'}}</span>
-                </button>
-
-                <button class="btn btn-icon col-2 col-xs-1 toolbarButton" (click)="closeReader()">
-                    <i class="toolbar-icon fa fa-times-circle" aria-hidden="true" [ngStyle]="{color: fontColor}"></i>
-                    <span class="visually-hidden">Close Reader</span>
-                </button>
-
-                <div class="verticalToolbarSeparator hiddenSmallView"></div>
-                <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
-            </div>
-            <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+      <div style="min-height: 36px" id="toolbarViewer" [ngStyle]="{'background-color': backgroundColor, 'color': fontColor}"> <!--action-bar row g-0 justify-content-between-->
+        <div  id="toolbarViewerLeft">
+          <pdf-toggle-sidebar></pdf-toggle-sidebar>
+          <pdf-find-button></pdf-find-button>
+          <pdf-paging-area></pdf-paging-area>
         </div>
 
-      </ng-template>
-</div>
+        <div  id="toolbarViewerRight">
+          <pdf-hand-tool></pdf-hand-tool>
+          <pdf-select-tool></pdf-select-tool>
+          <pdf-presentation-mode></pdf-presentation-mode>
+
+
+          <!-- This is not yet supported by the underlying library
+          <button (click)="toggleBookPageMode()" class="btn btn-icon toolbarButton">
+              <i class="toolbar-icon fa-solid {{this.bookMode !== 'book' ? 'fa-book' : 'fa-book-open'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{this.bookMode !== 'book' ? 'Book Mode' : 'Normal Mode'}}</span>
+          </button> -->
+
+          <button class="btn btn-icon toolbarButton" [ngbTooltip]="bookTitle">
+            <i class="toolbar-icon fa-solid fa-info" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+            <span class="visually-hidden">
+                        {{bookTitle}}
+                    </span>
+          </button>
+
+          <button *ngIf="incognitoMode" (click)="turnOffIncognito()" class="btn btn-icon toolbarButton">
+            <i class="toolbar-icon fa fa-glasses" [ngStyle]="{color: fontColor}" aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-mode')}}</span>
+          </button>
+
+          <!-- This is pretty experimental, so it might not work perfectly -->
+          <button (click)="toggleTheme()" class="btn btn-icon toolbarButton">
+            <i class="toolbar-icon fa-solid {{this.theme === 'light' ? 'fa-sun' : 'fa-moon'}}" [ngStyle]="{color: fontColor}" aria-hidden="true"></i>
+            <span class="visually-hidden">{{this.theme === 'light' ? t('light-theme-alt') : t('dark-theme-alt')}}</span>
+          </button>
+
+          <button class="btn btn-icon col-2 col-xs-1 toolbarButton" (click)="closeReader()">
+            <i class="toolbar-icon fa fa-times-circle" aria-hidden="true" [ngStyle]="{color: fontColor}"></i>
+            <span class="visually-hidden">{{t('close-reader-alt')}}</span>
+          </button>
+
+          <div class="verticalToolbarSeparator hiddenSmallView"></div>
+          <pdf-toggle-secondary-toolbar></pdf-toggle-secondary-toolbar>
+        </div>
+        <pdf-zoom-toolbar ></pdf-zoom-toolbar>
+      </div>
+
+    </ng-template>
+  </div>
+
+</ng-container>

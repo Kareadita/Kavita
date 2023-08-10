@@ -4,10 +4,9 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { map, Observable, shareReplay, Subject, takeUntil } from 'rxjs';
+import { map, Observable, shareReplay } from 'rxjs';
 import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
 import { UserReadStatistics } from 'src/app/statistics/_models/user-read-statistics';
 import { StatisticsService } from 'src/app/_services/statistics.service';
@@ -21,6 +20,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { StatListComponent } from '../stat-list/stat-list.component';
 import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
 import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats-info-cards.component';
+import {TranslocoModule} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-user-stats',
@@ -34,6 +34,7 @@ import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats
         ReadingActivityComponent,
         StatListComponent,
         AsyncPipe,
+        TranslocoModule,
     ],
 })
 export class UserStatsComponent implements OnInit {

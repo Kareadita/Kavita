@@ -19,12 +19,15 @@ public class StatsController : BaseApiController
     private readonly IStatisticService _statService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILocalizationService _localizationService;
 
-    public StatsController(IStatisticService statService, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+    public StatsController(IStatisticService statService, IUnitOfWork unitOfWork,
+        UserManager<AppUser> userManager, ILocalizationService localizationService)
     {
         _statService = statService;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
+        _localizationService = localizationService;
     }
 
     [HttpGet("user/{userId}/read")]
@@ -33,7 +36,7 @@ public class StatsController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
         if (user!.Id != userId && !await _userManager.IsInRoleAsync(user, PolicyConstants.AdminRole))
-            return Unauthorized("You are not authorized to view another user's statistics");
+            return Unauthorized(await _localizationService.Translate(User.GetUserId(), "stats-permission-denied"));
 
         return Ok(await _statService.GetUserReadStatistics(userId, new List<int>()));
     }

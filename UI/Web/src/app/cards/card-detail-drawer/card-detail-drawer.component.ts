@@ -49,6 +49,7 @@ import {BytesPipe} from "../../pipe/bytes.pipe";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
+import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 enum TabID {
   General = 0,
@@ -60,7 +61,7 @@ enum TabID {
 @Component({
   selector: 'app-card-detail-drawer',
   standalone: true,
-  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent],
+  imports: [CommonModule, EntityTitleComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ImageComponent, ReadMoreComponent, EntityInfoCardsComponent, CoverImageChooserComponent, ChapterMetadataDetailComponent, CardActionablesComponent, DefaultDatePipe, BytesPipe, NgbNavOutlet, BadgeExpanderComponent, TagBadgeComponent, PersonBadgeComponent, TranslocoDirective],
   templateUrl: './card-detail-drawer.component.html',
   styleUrls: ['./card-detail-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -72,6 +73,8 @@ export class CardDetailDrawerComponent implements OnInit {
   @Input() libraryId: number = 0;
   @Input({required: true}) data!: Volume | Chapter;
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translocoService = inject(TranslocoService);
+
 
   /**
    * If this is a volume, this will be first chapter for said volume.
@@ -94,7 +97,12 @@ export class CardDetailDrawerComponent implements OnInit {
   libraryType: LibraryType = LibraryType.Manga;
 
 
-  tabs = [{title: 'General', disabled: false}, {title: 'Metadata', disabled: false}, {title: 'Cover', disabled: false}, {title: 'Info', disabled: false}];
+  tabs = [
+    {title: 'general-tab', disabled: false},
+    {title: 'metadata-tab', disabled: false},
+    {title: 'cover-tab', disabled: false},
+    {title: 'info-tab', disabled: false}
+  ];
   active = this.tabs[0];
 
   chapterMetadata!: ChapterMetadata;
@@ -201,7 +209,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   resetCoverImage() {
     this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
-      this.toastr.info('A job has been enqueued to regenerate the cover image');
+      this.toastr.info(this.translocoService.translate('toasts.regen-cover'));
     });
   }
 
@@ -254,7 +262,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   readChapter(chapter: Chapter, incognito: boolean = false) {
     if (chapter.pages === 0) {
-      this.toastr.error('There are no pages. Kavita was not able to read this archive.');
+      this.toastr.error(this.translocoService.translate('toasts.no-pages'));
       return;
     }
 
@@ -265,7 +273,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   download(chapter: Chapter) {
     if (this.downloadInProgress) {
-      this.toastr.info('Download is already in progress. Please wait.');
+      this.toastr.info(this.translocoService.translate('toasts.download-in-progress'));
       return;
     }
 

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { UserReadStatistics } from '../statistics/_models/user-read-statistics';
 import { PublicationStatusPipe } from '../pipe/publication-status.pipe';
@@ -13,6 +13,7 @@ import { StatCount } from '../statistics/_models/stat-count';
 import { PublicationStatus } from '../_models/metadata/publication-status';
 import { MangaFormat } from '../_models/manga-format';
 import { TextResonse } from '../_types/text-response';
+import {TranslocoService} from "@ngneat/transloco";
 
 export enum DayOfWeek
 {
@@ -25,15 +26,15 @@ export enum DayOfWeek
     Saturday = 6,
 }
 
-const publicationStatusPipe = new PublicationStatusPipe();
-const mangaFormatPipe = new MangaFormatPipe();
-
 @Injectable({
   providedIn: 'root'
 })
 export class StatisticsService {
 
   baseUrl = environment.apiUrl;
+  translocoService = inject(TranslocoService);
+  publicationStatusPipe = new PublicationStatusPipe(this.translocoService);
+  mangaFormatPipe = new MangaFormatPipe(this.translocoService);
 
   constructor(private httpClient: HttpClient) { }
 
@@ -41,7 +42,7 @@ export class StatisticsService {
     // TODO: Convert to httpParams object
     let url = 'stats/user/' + userId + '/read';
     if (libraryIds.length > 0) url += '?libraryIds=' + libraryIds.join(',');
-    
+
     return this.httpClient.get<UserReadStatistics>(this.baseUrl + url);
   }
 
@@ -88,14 +89,14 @@ export class StatisticsService {
   getPublicationStatus() {
     return this.httpClient.get<StatCount<PublicationStatus>[]>(this.baseUrl + 'stats/server/count/publication-status').pipe(
       map(spreads => spreads.map(spread => {
-      return {name: publicationStatusPipe.transform(spread.value), value: spread.count};
+      return {name: this.publicationStatusPipe.transform(spread.value), value: spread.count};
       })));
   }
 
   getMangaFormat() {
     return this.httpClient.get<StatCount<MangaFormat>[]>(this.baseUrl + 'stats/server/count/manga-format').pipe(
       map(spreads => spreads.map(spread => {
-      return {name: mangaFormatPipe.transform(spread.value), value: spread.count};
+      return {name: this.mangaFormatPipe.transform(spread.value), value: spread.count};
       })));
   }
 

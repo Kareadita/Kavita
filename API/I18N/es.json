@@ -1,0 +1,8 @@
+{
+    "bad-credentials": "Las credenciales son incorrectas",
+    "confirm-email": "Debes confirmar el correo electrónico primero",
+    "disabled-account": "La cuenta está deshabilitada. Contacta con un administrador.",
+    "validate-email": "Ha habido un error al validar el correo: {0}",
+    "locked-out": "Se ha bloqueado el acceso debido a demasiados intentos. Por favor espera 10 minutos.",
+    "register-user": "Ha ocurrido un error registrando el usuario"
+}

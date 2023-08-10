@@ -5,13 +5,14 @@ import { Member } from 'src/app/_models/auth/member';
 import { LibraryService } from 'src/app/_services/library.service';
 import { SelectionModel } from 'src/app/typeahead/_components/typeahead.component';
 import { NgIf, NgFor } from '@angular/common';
+import {TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-library-selector',
     templateUrl: './library-selector.component.html',
     styleUrls: ['./library-selector.component.scss'],
     standalone: true,
-    imports: [NgIf, ReactiveFormsModule, FormsModule, NgFor]
+  imports: [NgIf, ReactiveFormsModule, FormsModule, NgFor, TranslocoDirective]
 })
 export class LibrarySelectorComponent implements OnInit {
 
@@ -41,7 +42,7 @@ export class LibrarySelectorComponent implements OnInit {
   setupSelections() {
     this.selections = new SelectionModel<Library>(false, this.allLibraries);
     this.isLoading = false;
-      
+
     // If a member is passed in, then auto-select their libraries
     if (this.member !== undefined) {
       this.member.libraries.forEach(lib => {

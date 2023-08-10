@@ -5,15 +5,15 @@ import {
   DestroyRef,
   inject,
   Input,
-  OnDestroy,
   OnInit
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, CommonModule} from "@angular/common";
 import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+import {TranslocoModule} from "@ngneat/transloco";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-bulk-operations',
@@ -21,7 +21,9 @@ import {CardActionablesComponent} from "../card-item/card-actionables/card-actio
   imports: [
     CommonModule,
     AsyncPipe,
-    CardActionablesComponent
+    CardActionablesComponent,
+    TranslocoModule,
+    NgbTooltip
   ],
   templateUrl: './bulk-operations.component.html',
   styleUrls: ['./bulk-operations.component.scss'],

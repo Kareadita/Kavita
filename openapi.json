@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.6.0"
+    "version": "0.7.6.15"
   },
   "servers": [
     {
@@ -2851,6 +2851,44 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Locale": {
+      "get": {
+        "tags": [
+          "Locale"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8509,7 +8547,7 @@
           "Server"
         ],
         "summary": "Returns non-sensitive information about the current system",
-        "description": "This is just for the UI and is extremly lightweight",
+        "description": "This is just for the UI and is extremely lightweight",
         "responses": {
           "200": {
             "description": "Success",
@@ -11220,6 +11258,11 @@
             "type": "boolean",
             "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
           },
+          "locale": {
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user",
+            "nullable": true
+          },
           "appUser": {
             "$ref": "#/components/schemas/AppUser"
           },
@@ -11988,21 +12031,18 @@
             "description": "Volume Id this Chapter belongs to",
             "format": "int32"
           },
-          "created": {
+          "createdUtc": {
             "type": "string",
             "description": "When chapter was created",
             "format": "date-time"
           },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
           "lastModifiedUtc": {
             "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "releaseDate": {
@@ -12779,16 +12819,6 @@
             "type": "integer",
             "description": "Platform (ie) Windows 10",
             "format": "int32"
-          },
-          "lastUsed": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
-          },
-          "lastUsedUtc": {
-            "type": "string",
-            "description": "Last time this device was used to send a file",
-            "format": "date-time"
           }
         },
         "additionalProperties": false,
@@ -13348,18 +13378,6 @@
             "description": "Human Readable title for the Job",
             "nullable": true
           },
-          "createdAt": {
-            "type": "string",
-            "description": "When the job was created",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastExecution": {
-            "type": "string",
-            "description": "Last time the job was run",
-            "format": "date-time",
-            "nullable": true
-          },
           "createdAtUtc": {
             "type": "string",
             "description": "When the job was created",
@@ -13607,6 +13625,11 @@
           "password": {
             "type": "string",
             "nullable": true
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "If ApiKey is passed, will ignore username/password for validation",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -13836,14 +13859,6 @@
             "type": "string",
             "description": "Exception message",
             "nullable": true
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -14807,11 +14822,11 @@
             "format": "int32",
             "nullable": true
           },
-          "lastModified": {
+          "lastModifiedUtc": {
             "type": "string",
             "format": "date-time"
           },
-          "created": {
+          "createdUtc": {
             "type": "string",
             "format": "date-time"
           },
@@ -16396,22 +16411,6 @@
             "description": "Where did the theme come from",
             "format": "int32"
           },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
           "selector": {
             "type": "string",
             "nullable": true,
@@ -17292,6 +17291,7 @@
           "emulateBook",
           "globalPageLayoutMode",
           "layoutMode",
+          "locale",
           "noTransitions",
           "pageSplitOption",
           "promptForDownloadSize",
@@ -17467,6 +17467,11 @@
           "shareReviews": {
             "type": "boolean",
             "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+          },
+          "locale": {
+            "minLength": 1,
+            "type": "string",
+            "description": "UI Site Global Setting: The language locale that should be used for the user"
           }
         },
         "additionalProperties": false
@@ -17672,12 +17677,22 @@
             "type": "integer",
             "format": "int32"
           },
-          "lastModified": {
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdUtc": {
             "type": "string",
             "format": "date-time"
           },
           "created": {
             "type": "string",
+            "description": "When chapter was created in local server time",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "description": "When chapter was last modified in local server time",
             "format": "date-time"
           },
           "seriesId": {

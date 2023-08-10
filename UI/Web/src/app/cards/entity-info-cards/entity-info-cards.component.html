@@ -1,121 +1,124 @@
+<ng-container *transloco="let t; read: 'entity-info-cards'">
 
-<div class="mt-4 mb-3">
-  <div class="row g-0" *ngIf="chapterMetadata ">
-    <!-- Tags and Characters are used a lot of Hentai and Doujinshi type content, so showing in list item has value add on first glance -->
-    <app-metadata-detail [tags]="chapterMetadata.tags" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Tags" heading="Tags">
-      <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
-    </app-metadata-detail>
+  <div class="mt-4 mb-3">
+    <div class="row g-0" *ngIf="chapterMetadata ">
+      <!-- Tags and Characters are used a lot of Hentai and Doujinshi type content, so showing in list item has value add on first glance -->
+      <app-metadata-detail [tags]="chapterMetadata.tags" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Tags" heading="Tags">
+        <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
+      </app-metadata-detail>
 
-    <app-metadata-detail [tags]="chapterMetadata.characters" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Character" heading="Characters">
-      <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
-    </app-metadata-detail>
-  </div>
+      <app-metadata-detail [tags]="chapterMetadata.characters" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Character" heading="Characters">
+        <ng-template #titleTemplate let-item>{{item.name}}</ng-template>
+      </app-metadata-detail>
+    </div>
 
-  <div class="row g-0">
+    <div class="row g-0">
       <ng-container *ngIf="chapter !== undefined && chapter.releaseDate && (chapter.releaseDate | date: 'shortDate') !== '1/1/01'">
-          <div class="col-auto mb-2">
-              <app-icon-and-title label="Release Date" [clickable]="false" fontClasses="fa-regular fa-calendar" title="Release">
-                  {{chapter.releaseDate | date:'shortDate' | defaultDate}}
-              </app-icon-and-title>
-          </div>
-          <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('release-date-tooltip')" [clickable]="false" fontClasses="fa-regular fa-calendar" [title]="t('release-date-title')">
+            {{chapter.releaseDate | date:'shortDate' | defaultDate}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
       </ng-container>
 
       <ng-container *ngIf="chapter.ageRating !== AgeRating.Unknown">
-          <div class="col-auto mb-2">
-              <app-icon-and-title label="Age Rating" [clickable]="false" fontClasses="fas fa-eye" title="Age Rating">
-                  {{chapter.ageRating | ageRating | async}}
-              </app-icon-and-title>
-          </div>
-          <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('age-rating-title')" [clickable]="false" fontClasses="fas fa-eye" [title]="t('age-rating-title')">
+            {{chapter.ageRating | ageRating}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
       </ng-container>
 
       <ng-container *ngIf="totalPages > 0">
-          <div class="col-auto mb-2">
-              <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-regular fa-file-lines" title="Pages">
-                  {{totalPages | compactNumber}} Pages
-              </app-icon-and-title>
-          </div>
-          <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-regular fa-file-lines">
+            {{t('pages-count', {num: totalPages | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
       </ng-container>
 
       <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0">
-          <div class="col-auto mb-2">
-              <app-icon-and-title label="Length" [clickable]="false" fontClasses="fa-solid fa-book-open">
-                  {{totalWordCount | compactNumber}} Words
-              </app-icon-and-title>
-          </div>
-          <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('length-title')" [clickable]="false" fontClasses="fa-solid fa-book-open">
+            {{t('words-count', {num: totalWordCount | compactNumber})}}
+          </app-icon-and-title>
+        </div>
+        <div class="vr d-none d-lg-block m-2"></div>
       </ng-container>
 
       <ng-container *ngIf="chapter.files[0].format === MangaFormat.EPUB && totalWordCount > 0 || chapter.files[0].format !== MangaFormat.EPUB">
-          <div class="col-auto mb-2">
-              <app-icon-and-title label="Read Time" [clickable]="false" fontClasses="fa-regular fa-clock">
-                  <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">&lt;1 Hour</ng-container>
-                  <ng-template #normalReadTime>
-                      {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} Hour{{readingTime.minHours > 1 ? 's' : ''}}
-                  </ng-template>
-              </app-icon-and-title>
-          </div>
+        <div class="col-auto mb-2">
+          <app-icon-and-title [label]="t('read-time-title')" [clickable]="false" fontClasses="fa-regular fa-clock">
+            <ng-container *ngIf="readingTime.maxHours === 0 || readingTime.minHours === 0; else normalReadTime">{{t('less-than-hour')}}</ng-container>
+            <ng-template #normalReadTime>
+              {{readingTime.minHours}}{{readingTime.maxHours !== readingTime.minHours ? ('-' + readingTime.maxHours) : ''}} {{readingTime.minHours > 1 ? t('hours') : t('hour')}}
+            </ng-template>
+          </app-icon-and-title>
+        </div>
       </ng-container>
 
-      <ng-container *ngIf="showExtendedProperties && chapter.created && chapter.created !== '' && (chapter.created | date: 'shortDate') !== '1/1/01'">
-          <div class="vr d-none d-lg-block m-2"></div>
-          <div class="col-auto">
-              <app-icon-and-title label="Date Added" [clickable]="false" fontClasses="fa-solid fa-file-import" title="Date Added">
-                  {{chapter.created | date:'short' | defaultDate}}
-              </app-icon-and-title>
-          </div>
+      <ng-container *ngIf="showExtendedProperties && chapter.createdUtc && chapter.createdUtc !== '' && (chapter.createdUtc | date: 'shortDate') !== '1/1/01'">
+        <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto">
+          <app-icon-and-title [label]="t('date-added-title')" [clickable]="false" fontClasses="fa-solid fa-file-import" [title]="t('date-added-title')">
+            {{chapter.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
+          </app-icon-and-title>
+        </div>
       </ng-container>
 
       <ng-container *ngIf="showExtendedProperties && size > 0">
-          <div class="vr d-none d-lg-block m-2"></div>
-          <div class="col-auto">
-              <app-icon-and-title label="Size" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" title="ID">
-                  {{size | bytes}}
-              </app-icon-and-title>
-          </div>
+        <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto">
+          <app-icon-and-title [label]="t('size-title')" [clickable]="false" fontClasses="fa-solid fa-scale-unbalanced" [title]="t('size-title')">
+            {{size | bytes}}
+          </app-icon-and-title>
+        </div>
       </ng-container>
 
       <ng-container *ngIf="showExtendedProperties">
+        <div class="vr d-none d-lg-block m-2"></div>
+        <div class="col-auto">
+          <app-icon-and-title [label]="t('id-title')" [clickable]="false" fontClasses="fa-solid fa-fingerprint" [title]="t('id-title')">
+            {{entity.id}}
+          </app-icon-and-title>
+        </div>
+        <ng-container *ngIf="WebLinks.length > 0">
           <div class="vr d-none d-lg-block m-2"></div>
           <div class="col-auto">
-              <app-icon-and-title label="ID" [clickable]="false" fontClasses="fa-solid fa-fingerprint" title="ID">
-                  {{entity.id}}
-              </app-icon-and-title>
+            <app-icon-and-title [label]="t('links-title')" [clickable]="false" fontClasses="fa-solid fa-link" [title]="t('links-title')">
+              <a class="me-1" [href]="link | safeHtml" *ngFor="let link of WebLinks" target="_blank" rel="noopener noreferrer" [title]="link">
+                <img width="24" height="24"  #img class="lazyload img-placeholder"
+                     src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+                     [attr.data-src]="imageService.getWebLinkImage(link)"
+                     (error)="imageService.updateErroredWebLinkImage($event)"
+                     aria-hidden="true" alt="">
+              </a>
+            </app-icon-and-title>
           </div>
-          <ng-container *ngIf="WebLinks.length > 0">
-              <div class="vr d-none d-lg-block m-2"></div>
-              <div class="col-auto">
-                  <app-icon-and-title label="Links" [clickable]="false" fontClasses="fa-solid fa-link" title="Links">
-                      <a class="me-1" [href]="link | safeHtml" *ngFor="let link of WebLinks" target="_blank" rel="noopener noreferrer" [title]="link">
-                          <img width="24" height="24"  #img class="lazyload img-placeholder"
-                              src="data:image/gif;base64,R0lGODlhAQABAPAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
-                              [attr.data-src]="imageService.getWebLinkImage(link)"
-                              (error)="imageService.updateErroredWebLinkImage($event)"
-                              aria-hidden="true" alt="">
-                      </a>
-                  </app-icon-and-title>
-              </div>
-          </ng-container>
+        </ng-container>
 
-          <ng-container *ngIf="chapter.isbn.length > 0">
-              <div class="vr d-none d-lg-block m-2"></div>
-              <div class="col-auto">
-                  <app-icon-and-title label="ISBN" [clickable]="false" fontClasses="fa-solid fa-barcode" title="ISBN">
-                      {{chapter.isbn}}
-                  </app-icon-and-title>
-              </div>
-          </ng-container>
+        <ng-container *ngIf="chapter.isbn.length > 0">
+          <div class="vr d-none d-lg-block m-2"></div>
+          <div class="col-auto">
+            <app-icon-and-title [label]="t('isbn-title')" [clickable]="false" fontClasses="fa-solid fa-barcode" [title]="t('isbn-title')">
+              {{chapter.isbn}}
+            </app-icon-and-title>
+          </div>
+        </ng-container>
 
-          <ng-container *ngIf="(chapter.lastReadingProgress | date: 'shortDate') !== '1/1/01'">
-            <div class="vr d-none d-lg-block m-2"></div>
-            <div class="col-auto">
-              <app-icon-and-title label="Last Read" [clickable]="false" fontClasses="fa-regular fa-clock" [ngbTooltip]="chapter.lastReadingProgress | date: 'medium'">
-                {{chapter.lastReadingProgress | date: 'shortDate'}}
-              </app-icon-and-title>
-            </div>
-          </ng-container>
+        <ng-container *ngIf="(chapter.lastReadingProgress | date: 'shortDate') !== '1/1/01'">
+          <div class="vr d-none d-lg-block m-2"></div>
+          <div class="col-auto">
+            <app-icon-and-title [label]="t('last-read-title')" [clickable]="false" fontClasses="fa-regular fa-clock" [ngbTooltip]="chapter.lastReadingProgress | date: 'medium'">
+              {{chapter.lastReadingProgress | date: 'shortDate'}}
+            </app-icon-and-title>
+          </div>
+        </ng-container>
       </ng-container>
+    </div>
   </div>
-</div>
+
+</ng-container>
