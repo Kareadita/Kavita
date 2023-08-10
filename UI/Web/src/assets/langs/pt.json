@@ -46,8 +46,8 @@
     "scrobble-event-type-pipe": {
         "chapter-read": "",
         "score-updated": "Atualização de Classificação",
-        "want-to-read-add": "",
-        "want-to-read-remove": "",
+        "want-to-read-add": "Leituras Desejadas: Adicionar",
+        "want-to-read-remove": "Leituras Desejadas: Eliminar",
         "review": "Atualização de crítica"
     },
     "spoiler": {
@@ -79,7 +79,7 @@
         "no-items-filtered": "Não existem itens para o filtro atual."
     },
     "user-preferences": {
-        "title": "",
+        "title": "Painel do Utilizador",
         "pref-description": "Estas definições globais estão ligadas à sua conta.",
         "account-tab": "Conta",
         "preferences-tab": "Preferências",
@@ -106,7 +106,7 @@
         "share-series-reviews-tooltip": "As suas críticas de Séries devem ser incluídas para outros utilizadores pelo Kavita",
         "image-reader-settings-title": "",
         "reading-direction-label": "Direção de Leitura",
-        "reading-direction-tooltip": "",
+        "reading-direction-tooltip": "Direção a clicar para ir para a próxima página. Direita para a Esquerda significa que se clica no lado esquerdo do ecrã para ir para a página seguinte.",
         "scaling-option-label": "Opções de Dimensionamento",
         "scaling-option-tooltip": "Como adaptar a dimensão da imagem ao seu ecrã.",
         "page-splitting-label": "",
@@ -117,9 +117,9 @@
         "background-color-label": "Cor de Fundo",
         "auto-close-menu-label": "Fechar Menu Automaticamente",
         "show-screen-hints-label": "",
-        "emulate-comic-book-label": "",
+        "emulate-comic-book-label": "Emular livro de BD",
         "swipe-to-paginate-label": "",
-        "book-reader-settings-title": "",
+        "book-reader-settings-title": "Leitor de Livros",
         "tap-to-paginate-label": "",
         "tap-to-paginate-tooltip": "",
         "immersive-mode-label": "Modo Imersivo",
@@ -195,7 +195,7 @@
     "edit-device": {
         "device-name-label": "Nome do Dispositivo",
         "email-label": "{{common.email}}",
-        "email-tooltip": "",
+        "email-tooltip": "Este email será usado para aceitar o ficheiro através da funcionalidade Enviar Para",
         "device-platform-label": "",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
@@ -353,10 +353,10 @@
         "failure": "Falha"
     },
     "cbl-conflict-reason-pipe": {
-        "all-series-missing": "",
+        "all-series-missing": "A sua conta não tem acesso a todas as séries na lista ou o Kavita não tem nada na lista.",
         "chapter-missing": "{{series}}: Capítulo {{chapter}} não existe no Kavita. Este item será ignorado.",
         "empty-file": "O ficheiro cbl está vazio, não irá ser feito nada.",
-        "name-conflict": "",
+        "name-conflict": "Já existe uma lista de leitura {{readingListName}} na sua conta correspondente ao ficheiro cbl.",
         "series-collision": "A série, {{seriesLink}}, colide com outra série com o mesmo nome noutra biblioteca.",
         "series-missing": "A série, {{series}}, não existe no Kavita ou a sua conta não tem permissões suficientes. Todos os itens desta série serão ignorados na importação.",
         "volume-missing": "{{series}}: O volume {{volume}} não existe no Kavita ou a sua conta não tem as permissões suficientes. Todos os itens com este número de volume serão ignorados.",
@@ -410,12 +410,12 @@
     "person-role-pipe": {
         "artist": "Artista",
         "character": "Personagem",
-        "colorist": "",
-        "cover-artist": "",
+        "colorist": "Colorista",
+        "cover-artist": "Artista de Capa",
         "editor": "Editor",
         "inker": "",
-        "letterer": "",
-        "penciller": "",
+        "letterer": "Letrista",
+        "penciller": "Desenhista",
         "publisher": "Publicador",
         "writer": "Escritor",
         "other": "Outro"
@@ -429,20 +429,20 @@
     },
     "library-type-pipe": {
         "book": "Livro",
-        "comic": "",
+        "comic": "BD",
         "manga": "Manga"
     },
     "age-rating-pipe": {
         "unknown": "Desconhecido",
-        "early-childhood": "",
+        "early-childhood": "Pré-Escolar",
         "adults-only": "Adultos 18+",
         "everyone": "Todos",
         "everyone-10-plus": "Todos 10+",
         "g": "G",
         "kids-to-adults": "Crianças a Adultos",
-        "mature": "",
+        "mature": "Maiores de 18",
         "ma15-plus": "MA15+",
-        "mature-17-plus": "",
+        "mature-17-plus": "Maiores de 17",
         "rating-pending": "Classificação Pendente",
         "teen": "Adolescente",
         "x18-plus": "X18+",
@@ -452,7 +452,7 @@
     },
     "reset-password": {
         "title": "Repor Palavra Passe",
-        "description": "",
+        "description": "Introduza o endereço de email da sua conta. O Kavita",
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
@@ -488,7 +488,7 @@
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Utilizador convidado",
         "setup-user-description": "",
-        "setup-user-account": "",
+        "setup-user-account": "Configurar conta de utilizador",
         "setup-user-account-tooltip": "",
         "invite-url-label": "",
         "invite": "Convite",
@@ -554,33 +554,33 @@
     },
     "personal-table-of-contents": {
         "no-data": "",
-        "page": "",
-        "delete": ""
+        "page": "Página {{value}}",
+        "delete": "Eliminar {{bookmarkName}}"
     },
     "confirm-email": {
-        "title": "",
-        "description": "",
-        "error-label": "",
-        "username-label": "",
-        "password-label": "",
-        "email-label": "",
-        "required-field": "",
-        "valid-email": "",
-        "password-validation": "",
-        "register": ""
+        "title": "Registar",
+        "description": "Complete o formulário para terminar o seu registo",
+        "error-label": "Erros: ",
+        "username-label": "{{common.username}}",
+        "password-label": "{{common.password}}",
+        "email-label": "{{common.email}}",
+        "required-field": "{{common.required-field}}",
+        "valid-email": "{{common.valid-email}}",
+        "password-validation": "{{validation.password-validation}}",
+        "register": "Registar"
     },
     "confirm-email-change": {
-        "title": "",
-        "non-confirm-description": "",
+        "title": "Validar Alteração de Email",
+        "non-confirm-description": "Por favor aguarde enquanto a alteração de email é validada.",
         "confirm-description": "",
-        "success": ""
+        "success": "Sucesso!"
     },
     "confirm-reset-password": {
-        "title": "",
-        "description": "",
-        "password-label": "",
-        "required-field": "",
-        "submit": "",
+        "title": "Repor Palavra Passe",
+        "description": "Introduza a nova palavra passe",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "submit": "{{common.submit}}",
         "password-validation": ""
     },
     "register": {
