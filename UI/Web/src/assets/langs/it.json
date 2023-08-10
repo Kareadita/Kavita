@@ -235,59 +235,59 @@
         "unknowns": "Sconosciuti",
         "reset": "",
         "edit": "",
-        "cancel": "",
-        "save": ""
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "",
-        "regen-warning": "",
-        "no-key": "",
-        "confirm-reset": "",
-        "key-reset": ""
+        "copy": "Copia",
+        "regen-warning": "La rigenerazione della chiave API invaliderà tutti i client esistenti.",
+        "no-key": "ERRORE - CHIAVE NON IMPOSTATA",
+        "confirm-reset": "Ciò invaliderà tutte le configurazioni OPDS impostate. Sei sicuro di voler continuare?",
+        "key-reset": "Ripristino della chiave API"
     },
     "scrobbling-providers": {
-        "title": "",
-        "requires": "",
-        "token-expired": "",
-        "no-token-set": "",
-        "token-set": "",
-        "generate": "",
-        "instructions": "",
-        "token-input-label": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "title": "Fornitori di Scrobbling",
+        "requires": "Questa funzione richiede una licenza {{product}} attiva",
+        "token-expired": "Token scaduto",
+        "no-token-set": "Nessun Token impostato",
+        "token-set": "Token Impostato",
+        "generate": "Generate",
+        "instructions": "Gli utenti per la prima volta devono fare clic su \"{{scrobbling-providers.generate}}\" di seguito per consentire a Kavita+ di parlare con {{service}}. Una volta autorizzato il programma, copia e incolla il token nell'input sottostante. Puoi rigenerare il tuo token in qualsiasi momento.",
+        "token-input-label": "Il token {{service}} va qui",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "typeahead": {
-        "locked-field": "",
-        "close": "",
-        "loading": "",
-        "add-item": "",
-        "no-data": "",
-        "add-custom-item": ""
+        "locked-field": "Il campo è bloccato",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "add-item": "Aggiungi {{item}}…",
+        "no-data": "Nessun dato",
+        "add-custom-item": ", digitare per aggiungere un elemento personalizzato"
     },
     "generic-list-modal": {
-        "close": "",
-        "clear": "",
-        "filter": "",
-        "open-filtered-search": ""
+        "close": "{{common.close}}",
+        "clear": "Pulito",
+        "filter": "Filtro",
+        "open-filtered-search": "Apri una ricerca filtrata per {{item}}"
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "",
-        "total-pages-read-tooltip": "",
-        "total-words-read-label": "",
-        "total-words-read-tooltip": "",
-        "time-spent-reading-label": "",
-        "time-spent-reading-tooltip": "",
-        "chapters-read-label": "",
-        "chapters-read-tooltip": "",
-        "avg-reading-per-week-label": "",
-        "last-active-label": "",
-        "chapters": ""
+        "total-pages-read-label": "Pagine totali lette",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
+        "total-words-read-label": "Totale Parole Lette",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
+        "time-spent-reading-label": "Tempo passato leggendo",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
+        "chapters-read-label": "Capitoli Letti",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
+        "avg-reading-per-week-label": "Lettura media / settimana",
+        "last-active-label": "Ultimo attivo",
+        "chapters": "{{value}} capitoli"
     },
     "user-stats": {
-        "library-read-progress-title": "",
-        "read-percentage": ""
+        "library-read-progress-title": "Progressi di lettura della biblioteca",
+        "read-percentage": "% Letto"
     },
     "top-readers": {
         "title": "",
@@ -343,37 +343,37 @@
         "tuesday": "",
         "wednesday": "",
         "thursday": "",
-        "friday": "",
-        "saturday": "",
-        "sunday": ""
+        "friday": "Venerdì",
+        "saturday": "Sabato",
+        "sunday": "Domenia"
     },
     "cbl-import-result-pipe": {
-        "success": "",
-        "partial": "",
-        "failure": ""
+        "success": "Successo",
+        "partial": "Parziale",
+        "failure": "Fallimento"
     },
     "cbl-conflict-reason-pipe": {
-        "all-series-missing": "",
-        "chapter-missing": "",
-        "empty-file": "",
-        "name-conflict": "",
-        "series-collision": "",
-        "series-missing": "",
-        "volume-missing": "",
-        "all-chapter-missing": "",
-        "invalid-file": "",
-        "success": ""
+        "all-series-missing": "Il tuo account non ha accesso a tutte le serie nell'elenco o Kavita non ha nulla presente nell'elenco.",
+        "chapter-missing": "{{series}}: manca il capitolo {{chapter}} di Kavita. Questo elemento verrà saltato.",
+        "empty-file": "Il file cbl è vuoto, niente da fare.",
+        "name-conflict": "Esiste già un elenco di lettura ({{readingListName}}) sul tuo account che corrisponde al file cbl.",
+        "series-collision": "La serie, {{seriesLink}}, si scontra con un'altra serie con lo stesso nome in un'altra libreria.",
+        "series-missing": "La serie, {{series}}, non è presente in Kavita oppure il tuo account non dispone dell'autorizzazione. Tutti gli articoli con questa serie verranno ignorati dall'importazione.",
+        "volume-missing": "{{series}}: Il volume {{volume}} non è presente in Kavita oppure il tuo account non dispone dell'autorizzazione. Tutti gli elementi con questo numero di volume verranno ignorati.",
+        "all-chapter-missing": "Non tutti i capitoli possono essere abbinati ai capitoli in Kavita.",
+        "invalid-file": "Il file è danneggiato o non corrisponde ai tag/specifiche previste.",
+        "success": "{{series}} volume {{volume}} capitolo {{chapter}} mappato correttamente."
     },
     "time-duration-pipe": {
-        "hours": "",
-        "minutes": "",
-        "days": "",
-        "months": "",
-        "years": ""
+        "hours": "{{value}} ore",
+        "minutes": "{{value}} minuti",
+        "days": "{{value}} giorni",
+        "months": "{{value}} mesi",
+        "years": "{{value}} anni"
     },
     "time-ago-pipe": {
-        "just-now": "",
-        "min-ago": "",
+        "just-now": "proprio adesso",
+        "min-ago": "un minuto fà",
         "mins-ago": "",
         "hour-ago": "",
         "hours-ago": "",
@@ -382,7 +382,8 @@
         "month-ago": "",
         "months-ago": "",
         "year-ago": "",
-        "years-ago": ""
+        "years-ago": "",
+        "never": "Mai"
     },
     "relationship-pipe": {
         "adaptation": "",
