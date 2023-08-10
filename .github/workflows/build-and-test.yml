@@ -110,6 +110,7 @@ jobs:
         uses: jwalton/gh-find-current-pr@v1
         id: findPr
         with:
+          state: all
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Parse PR body
@@ -234,6 +235,7 @@ jobs:
         uses: jwalton/gh-find-current-pr@v1
         id: findPr
         with:
+          state: all
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Parse PR body
@@ -360,6 +362,7 @@ jobs:
             uses: jwalton/gh-find-current-pr@v1
             id: findPr
             with:
+                state: all
                 github-token: ${{ secrets.GITHUB_TOKEN }}
 
           - name: Check Out Repo
