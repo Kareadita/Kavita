@@ -118,7 +118,7 @@ export class ManageLibraryComponent implements OnInit {
   }
 
   async deleteLibrary(library: Library) {
-    if (await this.confirmService.confirm(translate('toast.confirm-library-delete', {name: library.name}))) {
+    if (await this.confirmService.confirm(translate('toasts.confirm-library-delete', {name: library.name}))) {
       this.deletionInProgress = true;
       this.libraryService.delete(library.id).pipe(take(1)).subscribe(() => {
         this.deletionInProgress = false;
