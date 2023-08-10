@@ -13,13 +13,14 @@ import { LibrarySelectorComponent } from '../library-selector/library-selector.c
 import { RoleSelectorComponent } from '../role-selector/role-selector.component';
 import { NgIf } from '@angular/common';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 
 @Component({
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
     standalone: true,
-  imports: [NgIf, ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective]
+    imports: [NgIf, ReactiveFormsModule, RoleSelectorComponent, LibrarySelectorComponent, RestrictionSelectorComponent, ApiKeyComponent, TranslocoDirective, SafeHtmlPipe]
 })
 export class InviteUserComponent implements OnInit {
 

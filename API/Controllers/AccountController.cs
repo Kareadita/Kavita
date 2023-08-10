@@ -1018,7 +1018,20 @@ public class AccountController : BaseApiController
         if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
 
         var baseUrl = string.Empty;
-        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) && !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl)) baseUrl = serverSettings.BaseUrl + "/";
+        if (!string.IsNullOrEmpty(serverSettings.BaseUrl) &&
+            !serverSettings.BaseUrl.Equals(Configuration.DefaultBaseUrl))
+        {
+            baseUrl = serverSettings.BaseUrl + "/";
+            if (baseUrl.EndsWith("//"))
+            {
+                baseUrl = baseUrl.Replace("//", "/");
+            }
+
+            if (baseUrl.StartsWith("/"))
+            {
+                baseUrl = baseUrl.Substring(1, baseUrl.Length - 1);
+            }
+        }
         return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
 
     }
