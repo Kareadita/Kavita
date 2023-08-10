@@ -13,11 +13,11 @@ import {Tag} from '../_models/tag';
 import {TextResonse} from '../_types/text-response';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
-import {FilterStatement} from '../_models/metadata/v2/filter-statement';
-import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {Router} from "@angular/router";
 import {SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 
 @Injectable({
   providedIn: 'root'

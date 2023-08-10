@@ -359,50 +359,52 @@ export class FilterUtilitiesService {
     }
 
     encodeFilterStatements(statements: Array<FilterStatement>) {
-        return statements.map(statement => {
+        return encodeURIComponent(statements.map(statement => {
             const encodedComparison = `comparison=${statement.comparison}`;
             const encodedField = `field=${statement.field}`;
             const encodedValue = `value=${encodeURIComponent(statement.value)}`;
 
             return `${encodedComparison}&${encodedField}&${encodedValue}`;
-        }).join(',');
+        }).join(','));
     }
 
     filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
         const filter = this.metadataService.createDefaultFilterDto();
-        let anyChanged = false;
+        if (!window.location.href.includes('?')) return filter;
 
         const queryParams = snapshot.queryParams;
 
         if (queryParams.name) {
             filter.name = queryParams.name;
-            anyChanged = true;
         }
 
-        if (queryParams.stmts) {
-            filter.statements = this.decodeFilterStatements(queryParams.stmts);
-            anyChanged = true;
+        const fullUrl = window.location.href.split('?')[1];
+        const stmtsStartIndex = fullUrl.indexOf('stmts=');
+        const sortOptionsStartIndex = fullUrl.indexOf('&sortOptions=');
+
+
+        if (stmtsStartIndex !== -1 && sortOptionsStartIndex !== -1) {
+            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + 6, sortOptionsStartIndex);
+            filter.statements = this.decodeFilterStatements(stmtsEncoded);
+            console.log('statements: ', filter.statements);
         }
 
         if (queryParams.sortOptions) {
             const sortOptions = this.decodeSortOptions(queryParams.sortOptions);
             if (sortOptions) {
                 filter.sortOptions = sortOptions;
-                anyChanged = true;
             }
         }
 
         if (queryParams.limitTo) {
             filter.limitTo = parseInt(queryParams.limitTo, 10);
-            anyChanged = true;
         }
 
         if (queryParams.combination) {
-            filter.combination = queryParams.combination as FilterCombination;
-            anyChanged = true;
+            filter.combination = parseInt(queryParams.combination, 10) as FilterCombination;
         }
 
-        return anyChanged ? filter : this.createSeriesV2Filter();
+        return filter;
     }
 
     decodeSortOptions(encodedSortOptions: string): SortOptions | null {
@@ -420,10 +422,10 @@ export class FilterUtilitiesService {
     }
 
     decodeFilterStatements(encodedStatements: string): FilterStatement[] {
-        const statementStrings = encodedStatements.split(','); // I don't think this will wrk
+        const statementStrings = decodeURIComponent(encodedStatements).split(','); // I don't think this will wrk
         return statementStrings.map(statementString => {
             const parts = statementString.split('&');
-            if (parts === null || parts.length <= 3) return null;
+            if (parts === null || parts.length < 3) return null;
 
             const comparisonStartToken = parts.find(part => part.startsWith('comparison='));
             if (!comparisonStartToken) return null;

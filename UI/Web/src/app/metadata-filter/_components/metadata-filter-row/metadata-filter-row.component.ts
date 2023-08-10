@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, inject, OnInit, Output, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  inject,
+  OnInit,
+  Output,
+  DestroyRef
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
 import { BehaviorSubject, Subject, distinctUntilChanged, filter, map, merge, of, startWith, switchMap, takeUntil, tap } from 'rxjs';
@@ -12,6 +22,7 @@ import { allFields, FilterField } from 'src/app/_models/metadata/v2/filter-field
 import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 enum PredicateType {
   Text = 1,
@@ -63,12 +74,13 @@ const DropdownComparisons = [FilterComparison.Equal,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent implements OnInit, OnDestroy {
+export class MetadataFilterRowComponent implements OnInit {
 
   @Input() preset!: FilterStatement;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   formGroup: FormGroup = new FormGroup({
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
@@ -79,7 +91,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
   dropdownOptions$ = of<{value: number, title: string}[]>([]);
   allFields = allFields;
 
-  private onDestroy: Subject<void> = new Subject();
+  loaded: boolean = false;
 
 
   get PredicateType() { return PredicateType };
@@ -90,9 +102,10 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
   ngOnInit() {
     //console.log('Filter row setup')
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
-    this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
 
+    this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
+
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
@@ -108,23 +121,20 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
 
         this.formGroup.get('filterValue')?.setValue(opts[0].value);
       }),
-      takeUntil(this.onDestroy)
+      takeUntilDestroyed(this.destroyRef)
     );
 
-    this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntil(this.onDestroy)).subscribe(_ => {
-      //console.log('Form change ');
+    this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
+      console.log('Form change ');
       this.filterStatement.emit({
         comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
       });
-
     });
-  }
 
-  ngOnDestroy(): void {
-    this.onDestroy.next();
-    this.onDestroy.complete();
+    this.loaded = true;
+    this.cdRef.markForCheck();
   }
 
   populateFromPreset() {
@@ -133,8 +143,10 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
     } else {
       this.formGroup.get('filterValue')?.patchValue(parseInt(this.preset.value, 10));
     }
+    console.log('patched value: ', this.preset.value, this.formGroup.get('filterValue')!.value);
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
     this.formGroup.get('input')?.setValue(this.preset.field);
+    this.cdRef.markForCheck();
   }
 
   getDropdownObservable() {
@@ -202,7 +214,8 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
       this.validComparisons$.next(StringComparisons);
 
       this.predicateType$.next(PredicateType.Text);
-      this.formGroup.get('filterValue')?.setValue('');
+      if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
+
       return;
     }
 
@@ -213,7 +226,7 @@ export class MetadataFilterRowComponent implements OnInit, OnDestroy {
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
-      this.formGroup.get('filterValue')?.setValue('');
+      if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
       return;
     }
 

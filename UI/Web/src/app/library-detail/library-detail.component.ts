@@ -1,42 +1,44 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import {of, Subject} from 'rxjs';
-import { debounceTime, take, takeUntil } from 'rxjs/operators';
-import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
-import { Library } from '../_models/library';
-import { Pagination } from '../_models/pagination';
-import { Series } from '../_models/series';
-import {FilterEvent, SeriesFilter, SortField} from '../_models/metadata/series-filter';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
-import { EVENTS, MessageHubService } from '../_services/message-hub.service';
-import { SeriesService } from '../_services/series.service';
-import { NavService } from '../_services/nav.service';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { FilterSettings } from '../metadata-filter/filter-settings';
-import { JumpKey } from '../_models/jumpbar/jump-key';
-import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {take} from 'rxjs/operators';
+import {BulkSelectionService} from '../cards/bulk-selection.service';
+import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
+import {SeriesAddedEvent} from '../_models/events/series-added-event';
+import {Library} from '../_models/library';
+import {Pagination} from '../_models/pagination';
+import {Series} from '../_models/series';
+import {FilterEvent, SeriesFilter} from '../_models/metadata/series-filter';
+import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {ActionService} from '../_services/action.service';
+import {LibraryService} from '../_services/library.service';
+import {EVENTS, MessageHubService} from '../_services/message-hub.service';
+import {SeriesService} from '../_services/series.service';
+import {NavService} from '../_services/nav.service';
+import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
+import {FilterSettings} from '../metadata-filter/filter-settings';
+import {JumpKey} from '../_models/jumpbar/jump-key';
+import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../pipe/sentence-case.pipe';
-import { BulkOperationsComponent } from '../cards/bulk-operations/bulk-operations.component';
-import { SeriesCardComponent } from '../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../cards/card-detail-layout/card-detail-layout.component';
-import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
-import { NgFor, NgIf, DecimalPipe } from '@angular/common';
-import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
-import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {SentenceCasePipe} from '../pipe/sentence-case.pipe';
+import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
+import {SeriesCardComponent} from '../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
+import {LibraryRecommendedComponent} from './library-recommended/library-recommended.component';
+import {DecimalPipe, NgFor, NgIf} from '@angular/common';
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
+import {
+  SideNavCompanionBarComponent
+} from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {MetadataService} from "../_services/metadata.service";
@@ -161,33 +163,40 @@ export class LibraryDetailComponent implements OnInit {
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-    this.filterSettings.presetsV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-    if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
+    this.filterV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+    console.log('filter preset: ', this.filterV2)
 
-    const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
-
-    if (filterName === '') {
-      this.filterV2 = this.createRootGroup();
-      this.filterSettings.presetsV2 = this.filterV2;
-      this.loadPage();
-    } else {
-      this.metadataService.getFilter(filterName)
-        .subscribe((filter: SeriesFilterV2 | null) => {
-          console.log('resume from filter setup')
-          if (filter) {
-            this.filterV2 = filter;
-          } else {
-            this.filterV2 = this.createRootGroup();
-            // Update url without an id
-
-          }
-
-          this.filterSettings.presetsV2 = this.filterV2;
-          console.log(this.filterV2);
-          this.loadPage();
-        });
+    if (this.filterV2.statements.length === 0) {
+       this.filterV2!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
     }
+
+    this.filterSettings.presetsV2 =  this.filterV2;
+
+    this.loadPage();
+
+    // const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
+    //
+    // if (filterName === '') {
+    //   this.filterV2 = this.createRootGroup();
+    //   this.filterSettings.presetsV2 = this.filterV2;
+    //   this.loadPage();
+    // } else {
+    //   this.metadataService.getFilter(filterName)
+    //     .subscribe((filter: SeriesFilterV2 | null) => {
+    //       console.log('resume from filter setup')
+    //       if (filter) {
+    //         this.filterV2 = filter;
+    //       } else {
+    //         this.filterV2 = this.createRootGroup();
+    //         // Update url without an id
+    //
+    //       }
+    //
+    //       this.filterSettings.presetsV2 = this.filterV2;
+    //       console.log(this.filterV2);
+    //       this.loadPage();
+    //     });
+    // }
 
 
     this.filterSettings.libraryDisabled = true;
@@ -305,6 +314,7 @@ export class LibraryDetailComponent implements OnInit {
     this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
     this.cdRef.markForCheck();
 
+    console.log('Searching for ', this.filterV2);
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2)
       .subscribe(series => {
       this.series = series.result;
