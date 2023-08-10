@@ -67,14 +67,14 @@
         "go-to-review": "Lire la critique"
     },
     "review-card": {
-        "your-review": "",
-        "external-review": "",
-        "local-review": "",
-        "rating-percentage": ""
+        "your-review": "Voici votre critique",
+        "external-review": "Critique externe",
+        "local-review": "Critique",
+        "rating-percentage": "Évaluation {{r}}%"
     },
     "want-to-read": {
-        "title": "",
-        "series-count": "",
+        "title": "À lire",
+        "series-count": "{{common.series-count}}",
         "no-items": "",
         "no-items-filtered": ""
     },
