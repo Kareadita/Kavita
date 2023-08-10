@@ -11,7 +11,7 @@
         "no-libraries": "Não existem bibliotecas configuradas. Configure algumas em",
         "server-settings-link": "Definições do servidor",
         "not-granted": "Não lhe foi atribuído acesso a nenhuma biblioteca.",
-        "on-deck-title": "",
+        "on-deck-title": "Continue a Ler",
         "recently-updated-title": "Séries Atualizadas Recentemente",
         "recently-added-title": "Séries Adicionadas Recentemente"
     },
@@ -27,7 +27,7 @@
         "update": "Atualizar"
     },
     "user-scrobble-history": {
-        "title": "",
+        "title": "Histórico de Scrobble",
         "description": "",
         "filter-label": "Filtro",
         "created-header": "Criado",
@@ -51,7 +51,7 @@
         "review": "Atualização de crítica"
     },
     "spoiler": {
-        "click-to-show": ""
+        "click-to-show": "Spoiler, clique para ver"
     },
     "review-series-modal": {
         "title": "Editar Crítica",
@@ -87,7 +87,7 @@
         "theme-tab": "Tema",
         "devices-tab": "Dispositivos",
         "stats-tab": "Estatísticas",
-        "scrobbling-tab": "",
+        "scrobbling-tab": "Scrobbling",
         "success-toast": "Preferências de utilizador atualizadas",
         "global-settings-title": "Definições globais",
         "page-layout-mode-label": "",
