@@ -123,6 +123,7 @@ export class MetadataFilterComponent implements OnInit {
 
     this.sortGroup = new FormGroup({
       sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
+      limitTo: new FormControl(this.filterV2?.limitTo || 0, [])
     });
 
     this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
@@ -133,6 +134,7 @@ export class MetadataFilterComponent implements OnInit {
         };
       }
       this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
+      this.filterV2!.limitTo = parseInt(this.sortGroup.get('limitTo')?.value, 10);
       this.cdRef.markForCheck();
     });
 

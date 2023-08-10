@@ -62,7 +62,6 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
-  filter: SeriesFilter | undefined = undefined;
   filterV2: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
@@ -164,15 +163,21 @@ export class LibraryDetailComponent implements OnInit {
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
     this.filterV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-    console.log('filter preset: ', this.filterV2)
 
     if (this.filterV2.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
        this.filterV2!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
     }
 
-    this.filterSettings.presetsV2 =  this.filterV2;
+    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+    this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
 
+    console.log('deep equal: ', this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck))
+
+    console.log('filter preset: ', this.filterV2)
+
+    this.filterSettings.presetsV2 =  this.filterV2;
     this.filterSettings.libraryDisabled = true;
+
     this.cdRef.markForCheck();
   }
 
@@ -182,7 +187,7 @@ export class LibraryDetailComponent implements OnInit {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -202,7 +207,7 @@ export class LibraryDetailComponent implements OnInit {
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -230,17 +235,17 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  handleAction(action: ActionItem<Library>, library: Library) {
+  async handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
       lib = {id: this.libraryId, name: this.libraryName};
     }
     switch (action.action) {
       case(Action.Scan):
-        this.actionService.scanLibrary(lib);
+        await this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetadata(lib);
+        await this.actionService.refreshMetadata(lib);
         break;
       case(Action.Edit):
         this.actionService.editLibrary(lib);

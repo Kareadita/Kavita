@@ -125,7 +125,6 @@ export class MetadataFilterRowComponent implements OnInit {
     );
 
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
-      console.log('Form change ');
       this.filterStatement.emit({
         comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
@@ -143,7 +142,7 @@ export class MetadataFilterRowComponent implements OnInit {
     } else {
       this.formGroup.get('filterValue')?.patchValue(parseInt(this.preset.value, 10));
     }
-    console.log('patched value: ', this.preset.value, this.formGroup.get('filterValue')!.value);
+
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
     this.formGroup.get('input')?.setValue(this.preset.field);
     this.cdRef.markForCheck();

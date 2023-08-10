@@ -23,35 +23,42 @@
     <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2!" (update)="handleFilters($event)"></app-metadata-builder>
-
-        <div class="col-md-2 me-3">
-          <form [formGroup]="sortGroup">
-            <div class="mb-3">
-              <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
-                <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
-                <ng-template #descSort>
-                  <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
-                </ng-template>
-              </button>
-              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
-                <option [value]="SortField.SortName">Sort Name</option>
-                <option [value]="SortField.Created">Created</option>
-                <option [value]="SortField.LastModified">Last Modified</option>
-                <option [value]="SortField.LastChapterAdded">Item Added</option>
-                <option [value]="SortField.TimeToRead">Time to Read</option>
-                <option [value]="SortField.ReleaseYear">Release Year</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="col-md-2 me-3 mt-4">
-          <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
-        </div>
-        <div class="col-md-2 me-3 mt-4">
-          <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
-        </div>
       </div>
+      <form [formGroup]="sortGroup">
+        <div class="row justify-content-center g-0 mb-3">
+        <div class="col-md-3">
+          <div class="form-group pe-2">
+            <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
+            <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
+          </div>
+        </div>
+          <div class="col-md-6">
+              <div>
+                <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
+                <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
+                  <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
+                  <ng-template #descSort>
+                    <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>
+                  </ng-template>
+                </button>
+                <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
+                  <option [value]="SortField.SortName">Sort Name</option>
+                  <option [value]="SortField.Created">Created</option>
+                  <option [value]="SortField.LastModified">Last Modified</option>
+                  <option [value]="SortField.LastChapterAdded">Item Added</option>
+                  <option [value]="SortField.TimeToRead">Time to Read</option>
+                  <option [value]="SortField.ReleaseYear">Release Year</option>
+                </select>
+              </div>
+          </div>
+          <div class="col-md-2 me-3 mt-4">
+            <button class="btn btn-secondary col-12" (click)="clear()">Clear</button>
+          </div>
+          <div class="col-md-2 me-3 mt-4">
+            <button class="btn btn-primary col-12" (click)="apply()">Apply</button>
+          </div>
+      </div>
+      </form>
     </div>
   </ng-template>
 </ng-container>

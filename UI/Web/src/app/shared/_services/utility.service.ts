@@ -155,6 +155,7 @@ export class UtilityService {
     }
     return true;
   }
+
   private isObject(object: any) {
     return object != null && typeof object === 'object';
   }

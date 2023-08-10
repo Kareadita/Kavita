@@ -1514,7 +1514,8 @@
         "ascending-alt": "Ascending",
         "descending-alt": "Descending",
         "reset": "{{common.reset}}",
-        "apply": "{{common.apply}}"
+        "apply": "{{common.apply}}",
+        "limit-label": "Limit To"
 
     },
 
