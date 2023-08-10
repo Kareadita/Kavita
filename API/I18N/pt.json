@@ -149,5 +149,7 @@
     "reset-chapter-lock": "Não foi possível repor o bloqueio de capa para o Capítulo",
     "browse-reading-lists": "Explorar por Listas de Leituras",
     "browse-libraries": "Explorar por Bibliotecas",
-    "browse-collections": "Explorar por Coleções"
+    "browse-collections": "Explorar por Coleções",
+    "invalid-payload": "Payload inválido",
+    "scrobble-bad-payload": "Payload inválido de Fornecedor de Scrobble"
 }
