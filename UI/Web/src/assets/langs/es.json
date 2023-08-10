@@ -3,7 +3,7 @@
         "title": "Inicio de Sesión",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "La contraseña debe tener entre {{min}} y {{max}} caracteres",
+        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "¿Has olvidado la contraseña?",
         "submit": "Enviar"
     },
@@ -17,7 +17,7 @@
     },
     "edit-user": {
         "edit": "{{common.edit}}",
-        "username": "Nombre de Usuario",
+        "username": "{{common.username}}",
         "not-valid-email": "{{validation.valid-email}}",
         "saving": "Guardando …",
         "update": "Actualizar",
@@ -37,7 +37,7 @@
         "processed": "Procesado",
         "volume-and-chapter-num": "Volumen {{v}} Capítulo {{n}}",
         "not-processed": "Sin procesar",
-        "description": "Aquí encontrarás cualquier evento de scrobble vinculado a tu cuenta. Para que existan eventos, debes tener configurado\n  un proveedor de scrobble activo. Todos los eventos que hayan sido procesados se eliminarán después de un mes. Si hay eventos no procesados, es\n  probable que estos no puedan formar coincidencias en un nivel superior. Por favor, ponte en contacto con tu administrador para corregirlos.",
+        "description": "Aquí encontrarás cualquier evento de scrobbling vinculado a tu cuenta. Para que haya eventos, debes tener configurado un proveedor de scrobbling activo. Todos los eventos que hayan sido procesados se eliminarán después de un mes. Si hay eventos sin procesar, es probable que estos no puedan encontrar coincidencias en el proveedor. Por favor, ponte en contacto con tu administrador para corregirlos.",
         "title": "Historial de Scrobble",
         "series-header": "Series",
         "created-header": "Creado",
@@ -132,14 +132,17 @@
         "save": "Guardar",
         "reset": "Restablecer",
         "delete": "Eliminar",
-        "username": "Usuario",
+        "username": "Nombre de usuario",
         "password": "Contraseña",
         "series-count": "{{num}} Series",
         "promoted": "Promocionado",
         "reset-to-default": "Restablecer valores predeterminados",
         "book-num": "Libro",
-        "chapter-num": "Capitulo",
-        "email": "Correo electrónico"
+        "chapter-num": "Capítulo",
+        "email": "Correo electrónico",
+        "item-count": "{{num}} Elementos",
+        "issue-hash-num": "Número #",
+        "issue-num": "Número"
     },
     "user-preferences": {
         "share-series-reviews-label": "Compartir reseñas de series",
@@ -210,7 +213,7 @@
         "scrobbling-tab": "Seguimiento"
     },
     "user-holds": {
-        "description": "Esta es una lista gestionada por el usuario de series que no serán scrobbleadas a los proveedores. Puedes eliminar una serie en cualquier momento y el siguiente evento Scrobble-able (progreso de lectura, calificación, estado de \"quiero leer\") activará eventos.",
+        "description": "Esta es una lista gestionada por el usuario de series a las que no se les hará scrobbling. Puedes eliminar una serie en cualquier momento y el siguiente evento de scrobbling (progreso de lectura, calificación, estado de \"quiero leer\") activará eventos.",
         "title": "Retenciones de scrobble"
     },
     "theme-manager": {
@@ -270,7 +273,8 @@
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
         "device-platform-label": "Plataforma del dispositivo",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "email-tooltip": "Este correo electrónico será usado para recibir el archivo mediante Enviar A"
     },
     "restriction-selector": {
         "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
@@ -361,7 +365,8 @@
         "last-7-days": "{{time-periods.last-7-days}}",
         "last-30-days": "{{time-periods.last-30-days}}",
         "last-90-days": "{{time-periods.last-90-days}}",
-        "title": "Top lectores"
+        "title": "Top lectores",
+        "time-selection-label": "Período"
     },
     "directory-picker": {
         "path-placeholder": "Comienza a escribir o selecciona una ruta",
@@ -372,7 +377,8 @@
         "name-header": "Nombre",
         "cancel": "{{common.cancel}}",
         "share": "Compartir",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "instructions": "Elige una carpeta para ver los breadcrumbs. ¿No ves tu carpeta? Revisa / primero."
     },
     "theme": {
         "theme-dark": "Oscuro",
@@ -442,7 +448,12 @@
         "chapter-missing": "{{series}}: Capítulo {{chapter}} no presente en Kavita. Este item será saltado.",
         "empty-file": "El archivo CBL está vacío. Ninguna acción realizada.",
         "name-conflict": "Una lista de lectura que coincide con el archivo CBL ({{readingListName}}) ya existe en tu cuenta.",
-        "series-collision": "La serie, {{seriesLink}}, tiene conflicto con otra serie en otra librería."
+        "series-collision": "La serie, {{seriesLink}}, tiene conflicto con otra serie en otra librería.",
+        "series-missing": "La serie {{series}} no existe en Kavita o tu cuenta no está autorizada. Todos los elementos con esta serie no serán importados.",
+        "volume-missing": "{{series}}: El volumen {{volume}} no existe en Kavita o tu cuenta no está autorizada. Todos los elementos con este número de volumen serán ignorados.",
+        "all-chapter-missing": "No todos los capítulos coinciden con capítulos en Kavita.",
+        "invalid-file": "El archivo está corrupto o el formato es incorrecto.",
+        "success": "El capítulo {{chapter}} del volumen {{volume}} de {{series}} se ha mapeado con éxito."
     },
     "library-type-pipe": {
         "manga": "Manga",
@@ -736,5 +747,13 @@
     "read-more": {
         "read-more": "Leer más",
         "read-less": "Leer menos"
+    },
+    "role-selector": {
+        "title": "Roles"
+    },
+    "validation": {
+        "valid-email": "Este debe ser un correo electrónico válido",
+        "required-field": "Este campo es obligatorio",
+        "password-validation": "La contraseña debe tener entre 6 y 32 caracteres"
     }
 }
