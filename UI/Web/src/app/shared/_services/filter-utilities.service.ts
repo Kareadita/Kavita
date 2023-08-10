@@ -1,11 +1,13 @@
 import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot} from '@angular/router';
 import {Pagination} from 'src/app/_models/pagination';
-import {SeriesFilter, SortField} from 'src/app/_models/metadata/series-filter';
+import {SeriesFilter, SortField, SortOptions} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 
 /**
  * Used to pass state between the filter and the url
@@ -315,11 +317,15 @@ export class FilterUtilitiesService {
 
   encodeSeriesFilter(filter: SeriesFilterV2) {
    const encodedStatements = this.encodeFilterStatements(filter.statements);
-    const encodedSortOptions = filter.sortOptions ? `sortOptions=${filter.sortOptions}` : '';
+    const encodedSortOptions = filter.sortOptions ? `sortOptions=${this.encodeSortOptions(filter.sortOptions)}` : '';
     const encodedLimitTo = `limitTo=${filter.limitTo}`;
 
     return `name=${encodeURIComponent(filter.name || '')}&stmts=${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&combination=${filter.combination}`;
   }
+
+    encodeSortOptions(sortOptions: SortOptions) {
+       return `sortField=${sortOptions.sortField}&isAscending=${sortOptions.isAscending}`;
+    }
 
   encodeFilterStatements(statements: Array<FilterStatement>) {
     return statements.map(statement => {
@@ -332,22 +338,69 @@ export class FilterUtilitiesService {
   }
 
   filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
-    const filter =  this.metadataService.createDefaultFilterDto();
+    const filter = this.metadataService.createDefaultFilterDto();
     let anyChanged = false;
 
-    console.log('query params: ', snapshot.queryParams);
+    const queryParams = snapshot.queryParams;
 
-    // const format = snapshot.queryParamMap.get(FilterQueryParam.Format);
-    // if (format !== undefined && format !== null) {
-    //   filter.formats = [...filter.formats, ...format.split(',').map(item => parseInt(item, 10))];
-    //   anyChanged = true;
-    // }
+    if (queryParams.name) {
+        filter.name = queryParams.name;
+        anyChanged = true;
+    }
 
+    if (queryParams.stmts) {
+        filter.statements = this.decodeFilterStatements(queryParams.stmts);
+        anyChanged = true;
+    }
 
+    if (queryParams.sortOptions) {
+        const sortOptions = this.decodeSortOptions(queryParams.sortOptions);
+        if (sortOptions) {
+            filter.sortOptions = sortOptions;
+            anyChanged = true;
+        }
+    }
 
+    if (queryParams.limitTo) {
+        filter.limitTo = parseInt(queryParams.limitTo, 10);
+        anyChanged = true;
+    }
 
-    return filter; // anyChanged. Testing out if having a filter active but keep drawer closed by default works better
-  }
+    if (queryParams.combination) {
+        filter.combination = queryParams.combination as FilterCombination;
+        anyChanged = true;
+    }
+
+    // TODO: Implement other query parameters as needed
+
+    return anyChanged ? filter : this.createSeriesV2Filter();
+    }
+
+    decodeSortOptions(encodedSortOptions: string): SortOptions | null {
+        const parts = encodedSortOptions.split('&');
+        const sortFieldPart = parts.find(part => part.startsWith('sortField='));
+        const isAscendingPart = parts.find(part => part.startsWith('isAscending='));
+
+        if (sortFieldPart && isAscendingPart) {
+            const sortField = parseInt(sortFieldPart.split('=')[1], 10) as SortField;
+            const isAscending = isAscendingPart.split('=')[1] === 'true';
+            return { sortField, isAscending };
+        }
+
+        return null;
+    }
+
+    decodeFilterStatements(encodedStatements: string): FilterStatement[] {
+        const statementStrings = encodedStatements.split(','); // I don't think this will wrk
+        return statementStrings.map(statementString => {
+            const parts = statementString.split('&');
+            if (parts === null || parts.length <= 3) return null;
+            const comparison = parseInt(parts.find(part => part.startsWith('comparison=')).split('=')[1], 10) as FilterComparison;
+            const field = parseInt(parts.find(part => part.startsWith('field=')).split('=')[1], 10) as FilterField;
+            const value = decodeURIComponent(parts.find(part => part.startsWith('value=')).split('=')[1]);
+            return { comparison, field, value };
+        });
+    }
 
 
   createSeriesFilter(filter?: SeriesFilter) {
