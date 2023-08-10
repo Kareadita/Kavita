@@ -1,11 +1,11 @@
 {
     "login": {
         "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "",
-        "submit": ""
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
         "no-libraries": "",
@@ -16,13 +16,13 @@
         "recently-added-title": ""
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
-        "username": "",
-        "required": "",
-        "email": "",
-        "not-valid-email": "",
-        "cancel": "",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}",
+        "username": "{{common.username}}",
+        "required": "{{validation.required-field}}",
+        "email": "{{common.email}}",
+        "not-valid-email": "{{validation.valid-email}}",
+        "cancel": "{{common.cancel}}",
         "saving": "",
         "update": ""
     },
@@ -57,11 +57,11 @@
         "title": "",
         "tagline-label": "",
         "review-label": "",
-        "close": "",
-        "save": ""
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
     },
     "review-card-modal": {
-        "close": "",
+        "close": "{{common.close}}",
         "user-review": "",
         "external-mod": "",
         "go-to-review": ""
@@ -74,7 +74,7 @@
     },
     "want-to-read": {
         "title": "",
-        "series-count": "",
+        "series-count": "{{common.series-count}}",
         "no-items": "",
         "no-items-filtered": ""
     },
@@ -143,8 +143,8 @@
         "clients-opds-description": "",
         "clients-api-key-tooltip": "",
         "clients-opds-url-tooltip": "",
-        "reset": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
     "user-holds": {
         "title": "",
@@ -157,7 +157,7 @@
         "scan": "",
         "site-themes": "",
         "set-default": "",
-        "apply": "",
+        "apply": "{{common.apply}}",
         "applied": "",
         "updated-toastr": "",
         "scan-queued": ""
@@ -188,34 +188,34 @@
         "no-devices": "",
         "platform-label": "",
         "email-label": "",
-        "add": "",
-        "delete": "",
-        "edit": ""
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
+        "edit": "{{common.edit}}"
     },
     "edit-device": {
         "device-name-label": "",
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "email-tooltip": "",
         "device-platform-label": "",
-        "save": "",
-        "required-field": "",
-        "valid-email": ""
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "current-password-label": "",
         "new-password-label": "",
         "confirm-password-label": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": "",
-        "required-field": "",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "",
         "permission-error": ""
     },
     "change-email": {
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "current-password-label": "",
         "email-not-confirmed": "",
         "email-updated-title": "",
@@ -224,19 +224,19 @@
         "invite-url-label": "",
         "invite-url-tooltip": "",
         "permission-error": "",
-        "required-field": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "required-field": "{{validation.required-field}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "change-age-restriction": {
         "age-restriction-label": "",
         "unknowns": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "api-key": {
         "copy": "",
@@ -254,33 +254,33 @@
         "generate": "",
         "instructions": "",
         "token-input-label": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "typeahead": {
         "locked-field": "",
-        "close": "",
-        "loading": "",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
         "add-item": "",
         "no-data": "",
         "add-custom-item": ""
     },
     "generic-list-modal": {
-        "close": "",
+        "close": "{{common.close}}",
         "clear": "",
         "filter": "",
         "open-filtered-search": ""
     },
     "user-stats-info-cards": {
         "total-pages-read-label": "",
-        "total-pages-read-tooltip": "",
+        "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
         "total-words-read-label": "",
-        "total-words-read-tooltip": "",
+        "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "",
-        "time-spent-reading-tooltip": "",
+        "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
         "chapters-read-label": "",
-        "chapters-read-tooltip": "",
+        "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
         "avg-reading-per-week-label": "",
         "last-active-label": "",
         "chapters": ""
@@ -296,35 +296,35 @@
         "manga-label": "",
         "books-label": "",
         "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
-        "all-time": ""
+        "last-7-days": "{{time-periods.last-7-days}}",
+        "last-30-days": "{{time-periods.last-30-days}}",
+        "last-90-days": "{{time-periods.last-90-days}}",
+        "last-year": "{{time-periods.last-year}}",
+        "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
         "title": ""
     },
     "directory-picker": {
         "title": "",
-        "close": "",
+        "close": "{{common.close}}",
         "path-label": "",
         "path-placeholder": "",
         "instructions": "",
         "type-header": "",
         "name-header": "",
-        "cancel": "",
+        "cancel": "{{common.cancel}}",
         "share": "",
-        "help": ""
+        "help": "{{common.help}}"
     },
     "library-access-modal": {
-        "select-all": "",
-        "deselect-all": "",
+        "select-all": "{{common.select-all}}",
+        "deselect-all": "{{common.deselect-all}}",
         "title": "",
-        "close": "",
-        "reset": "",
-        "cancel": "",
-        "save": "",
+        "close": "{{common.close}}",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}",
         "no-data": ""
     },
     "time-periods": {
