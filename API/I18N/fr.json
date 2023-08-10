@@ -68,5 +68,9 @@
     "library-doesnt-exist": "Bibliothèque non existante",
     "invalid-path": "Chemin invalide",
     "generic-library-update": "Erreur critique lors de la mise à jour de la bibliothèque.",
-    "reading-list-position": "Impossible de mettre a jour la position"
+    "reading-list-position": "Impossible de mettre a jour la position",
+    "reading-list-updated": "Mis à Jour",
+    "reading-list-item-delete": "Impossible de supprimer le/les objets",
+    "reading-list-deleted": "Liste de lecture à été supprimé",
+    "generic-reading-list-delete": "Erreur lors de la suppression de la liste de lecture"
 }
