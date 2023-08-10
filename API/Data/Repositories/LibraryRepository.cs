@@ -46,8 +46,7 @@ public interface ILibraryRepository
     Task<int> GetTotalFiles();
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds);
-    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds);
-    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync();
+    Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int>? libraryIds);
     IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds);
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
     Task<string?> GetLibraryCoverImageAsync(int libraryId);
@@ -261,30 +260,10 @@ public class LibraryRepository : ILibraryRepository
             .ToListAsync();
     }
 
-    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int> libraryIds)
+    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int>? libraryIds)
     {
         var ret = await _context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Select(s => s.Metadata.Language)
-            .AsSplitQuery()
-            .AsNoTracking()
-            .Distinct()
-            .ToListAsync();
-
-        return ret
-            .Where(s => !string.IsNullOrEmpty(s))
-            .Select(s => new LanguageDto()
-            {
-                Title = CultureInfo.GetCultureInfo(s).DisplayName,
-                IsoCode = s
-            })
-            .OrderBy(s => s.Title)
-            .ToList();
-    }
-
-    public async Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync()
-    {
-        var ret = await _context.Series
+            .WhereIf(libraryIds is {Count: > 0} , s => libraryIds.Contains(s.LibraryId))
             .Select(s => s.Metadata.Language)
             .AsSplitQuery()
             .AsNoTracking()

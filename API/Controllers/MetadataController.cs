@@ -142,12 +142,7 @@ public class MetadataController : BaseApiController
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids is {Count: > 0})
-        {
-            return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
-        }
-
-        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync());
+        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
     }
 
 
