@@ -172,8 +172,6 @@ export class LibraryDetailComponent implements OnInit {
 
     this.filterSettings.presetsV2 =  this.filterV2;
 
-    this.loadPage();
-
     // const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
     //
     // if (filterName === '') {
