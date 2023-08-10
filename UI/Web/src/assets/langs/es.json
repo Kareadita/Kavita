@@ -632,7 +632,8 @@
         "naming-conventions-part-1": "Kavita tiene ",
         "naming-conventions-part-2": "requerimientos de carpetas.",
         "naming-conventions-part-3": "Comprueba este enlace para asegurarte que estás siguiendo los requerimientos. De lo contrario algunos archivos no se mostrarán al escanear.",
-        "allow-scrobbling-label": "Permitir seguimiento"
+        "allow-scrobbling-label": "Permitir seguimiento",
+        "allow-scrobbling-tooltip": "En caso de que Kavita scrobble lea los eventos, quiera leer el estado, las calificaciones y las reseñas de los proveedores configurados. Esto solo ocurrirá si el servidor tiene una suscripción Kavita+ activa."
     },
     "all-series": {
         "series-count": "{{common.series-count}}"
