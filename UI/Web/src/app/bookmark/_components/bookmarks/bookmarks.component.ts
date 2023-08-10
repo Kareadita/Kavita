@@ -86,13 +86,13 @@ export class BookmarksComponent implements OnInit {
       this.filterSettings.tagsDisabled = true;
       this.filterSettings.sortDisabled = true;
 
-    this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-    if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
-      this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    }
-    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
-    this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
-    this.filterSettings.presetsV2 =  this.filter;
+      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+      if (this.filter.statements.filter(stmt => stmt.field === FilterField.SeriesName).length === 0) {
+        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      }
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
 
     }
 

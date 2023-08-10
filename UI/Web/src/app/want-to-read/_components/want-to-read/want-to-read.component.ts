@@ -112,7 +112,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
       this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 
       this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+      if (this.filter.statements.filter(stmt => stmt.field === FilterField.SeriesName).length === 0) {
         this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       }
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
