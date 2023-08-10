@@ -926,6 +926,15 @@ public class SeriesRepository : ISeriesRepository
 
         var filterLibs = new List<int>();
 
+        // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
+        foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
+        {
+            filterLibs.Add(int.Parse(stmt.Value));
+        }
+
+        // Remove as filterLibs now has everything
+        filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
+
         query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries);
 
         query = query
@@ -951,10 +960,9 @@ public class SeriesRepository : ISeriesRepository
     {
         if (!filterDto.Statements.Any()) return query;
 
-        var filteredQuery = query;
 
         var queries = filterDto.Statements
-            .Select(statement => BuildFilterGroup(userId, statement, filteredQuery, filterLibs, userLibraries))
+            .Select(statement => BuildFilterGroup(userId, statement, query, filterLibs, userLibraries))
             .ToList();
 
         return filterDto.Combination == FilterCombination.And
@@ -976,75 +984,75 @@ public class SeriesRepository : ISeriesRepository
             case FilterField.Summary:
                 break;
             case FilterField.SeriesName:
-                query = query.HasName(true, statement.Comparison, (string) value);
+                return query.HasName(true, statement.Comparison, (string) value);
                 break;
             case FilterField.PublicationStatus:
-                query = query.HasPublicationStatus(true, statement.Comparison, (IList<PublicationStatus>) value);
+                return query.HasPublicationStatus(true, statement.Comparison, (IList<PublicationStatus>) value);
                 break;
             case FilterField.Languages:
-                query = query.HasLanguage(true, statement.Comparison, (IList<string>) value);
+                return query.HasLanguage(true, statement.Comparison, (IList<string>) value);
                 break;
             case FilterField.AgeRating:
-                query = query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value);
+                return query.HasAgeRating(true, statement.Comparison, (IList<AgeRating>) value);
                 break;
             case FilterField.UserRating:
-                query = query.HasRating(true, statement.Comparison, (int) value, userId);
+                return query.HasRating(true, statement.Comparison, (int) value, userId);
                 break;
             case FilterField.Tags:
-                query = query.HasTags(true, statement.Comparison, (IList<int>) value);
+                return query.HasTags(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.CollectionTags:
-                query = query.HasCollectionTags(true, statement.Comparison, (IList<int>) value);
+                return query.HasCollectionTags(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Translators:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Characters:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Publisher:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Editor:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.CoverArtist:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Letterer:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Colorist:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Inker:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Penciller:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Writers:
-                query = query.HasPeople(true, statement.Comparison, (IList<int>) value);
+                return query.HasPeople(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Genres:
-                query = query.HasGenre(true, statement.Comparison, (IList<int>) value);
+                return query.HasGenre(true, statement.Comparison, (IList<int>) value);
                 break;
             case FilterField.Libraries:
                 // This is handled above as we need to restrict to what user has access to as well
-                var filterLibraries = (IList<int>) value;
-                filterLibs.AddRange(userLibraries.Where(l => filterLibraries.Contains(l)));
+                //var filterLibraries = (IList<int>) value;
+                //filterLibs.AddRange(userLibraries.Where(l => filterLibraries.Contains(l)));
                 break;
             case FilterField.ReadProgress:
-                query = query.HasReadingProgress(true, statement.Comparison, (int) value, userId);
+                return query.HasReadingProgress(true, statement.Comparison, (int) value, userId);
                 break;
             case FilterField.Formats:
-                query = query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value);
+                return query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value);
                 break;
             case FilterField.ReleaseYear:
-                query = query.HasReleaseYear(true, statement.Comparison, (int) value);
+                return query.HasReleaseYear(true, statement.Comparison, (int) value);
                 break;
             case FilterField.ReadTime:
-                query = query.HasAverageReadTime(true, statement.Comparison, (int) value);
+                return query.HasAverageReadTime(true, statement.Comparison, (int) value);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
