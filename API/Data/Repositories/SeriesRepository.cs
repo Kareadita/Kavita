@@ -935,7 +935,7 @@ public class SeriesRepository : ISeriesRepository
         // Remove as filterLibs now has everything
         filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
 
-        query = BuildFilterQuery(userId, filter, query, filterLibs, userLibraries);
+        query = BuildFilterQuery(userId, filter, query);
 
         query = query
             .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
@@ -955,14 +955,13 @@ public class SeriesRepository : ISeriesRepository
             .AsSplitQuery(), filter.LimitTo);
     }
 
-    private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query,
-        List<int> filterLibs, IReadOnlyCollection<int> userLibraries)
+    private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query)
     {
         if (!filterDto.Statements.Any()) return query;
 
 
         var queries = filterDto.Statements
-            .Select(statement => BuildFilterGroup(userId, statement, query, filterLibs, userLibraries))
+            .Select(statement => BuildFilterGroup(userId, statement, query))
             .ToList();
 
         return filterDto.Combination == FilterCombination.And
@@ -975,8 +974,7 @@ public class SeriesRepository : ISeriesRepository
         return limit <= 0 ? query : query.Take(limit);
     }
 
-    private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query, List<int> filterLibs,
-        IEnumerable<int> userLibraries)
+    private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
     {
         var (value, _) = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
         switch (statement.Field)
