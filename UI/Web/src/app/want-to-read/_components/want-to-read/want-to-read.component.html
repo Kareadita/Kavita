@@ -6,7 +6,7 @@
                   {{t('title')}}
               </h2>
           </ng-container>
-          <h6 subtitle>{{t('series-count', {num: (seriesPagination.totalItems | number)})}}</h6>
+          <h6 subtitle>{{t('series-count', {num: (pagination.totalItems | number)})}}</h6>
       </app-side-nav-companion-bar>
   </div>
 
@@ -16,7 +16,7 @@
       <app-card-detail-layout
           [isLoading]="isLoading"
           [items]="series"
-          [pagination]="seriesPagination"
+          [pagination]="pagination"
           [filterSettings]="filterSettings"
           [filterOpen]="filterOpen"
           [jumpBarKeys]="jumpbarKeys"

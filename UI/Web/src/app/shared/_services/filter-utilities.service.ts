@@ -8,9 +8,6 @@ import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
-import {TextResonse} from "../../_types/text-response";
-import {map} from "rxjs/operators";
-import {switchMap} from "rxjs";
 
 /**
  * Used to pass state between the filter and the url
@@ -490,7 +487,7 @@ export class FilterUtilitiesService {
 
     createSeriesV2Filter(): SeriesFilterV2 {
         return {
-            combination: FilterCombination.Or,
+            combination: FilterCombination.And,
             statements: [],
             limitTo: 0,
             sortOptions: {
@@ -498,6 +495,14 @@ export class FilterUtilitiesService {
                 sortField: SortField.SortName
             },
         };
+    }
+
+    createSeriesV2DefaultStatement(): FilterStatement {
+        return {
+            comparison: FilterComparison.Equal,
+            value: '',
+            field: FilterField.SeriesName
+        }
     }
 
 }

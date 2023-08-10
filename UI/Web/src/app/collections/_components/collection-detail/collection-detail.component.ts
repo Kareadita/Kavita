@@ -172,11 +172,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 
       this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
-
       if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
         this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
       }
-
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
       this.filterSettings.presetsV2 =  this.filter;
