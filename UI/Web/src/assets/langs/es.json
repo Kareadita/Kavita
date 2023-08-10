@@ -1,10 +1,10 @@
 {
     "login": {
-        "title": "Acceso",
+        "title": "Inicio de Sesión",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "La contraseña tiene que tener entre {{min}} y{{max}} caracteres",
-        "forgot-password": "Has olvidado la contraseña?",
+        "password-validation": "La contraseña debe tener entre {{min}} y {{max}} caracteres",
+        "forgot-password": "¿Has olvidado la contraseña?",
         "submit": "Enviar"
     },
     "dashboard": {
@@ -16,12 +16,12 @@
         "recently-added-title": "Series Añadidas Recientemente"
     },
     "edit-user": {
-        "edit": "Editar",
+        "edit": "{{common.edit}}",
         "username": "Nombre de Usuario",
-        "not-valid-email": "El correo electronico tiene que ser válido",
+        "not-valid-email": "{{validation.valid-email}}",
         "saving": "Guardando …",
         "update": "Actualizar",
-        "required": "Este campo es obligatorio",
+        "required": "{{validation.required-field}}",
         "close": "Cerrar",
         "email": "dirección de correo",
         "cancel": "Cancelar"
@@ -138,7 +138,8 @@
         "promoted": "Promocionado",
         "reset-to-default": "Reiniciar a predeterminado",
         "book-num": "Libro",
-        "chapter-num": "Capitulo"
+        "chapter-num": "Capitulo",
+        "email": "Correo electrónico"
     },
     "user-preferences": {
         "share-series-reviews-label": "Compartir reseñas de series",
@@ -209,7 +210,7 @@
         "scrobbling-tab": "Seguimiento"
     },
     "user-holds": {
-        "description": "Esta es una lista gestionada por el usuario de series que no serán scrobbleadas a los proveedores de flujo ascendente. Puedes eliminar una serie en\n    cualquier momento y el siguiente evento Scrobble-able (progreso de lectura, calificación, estado de lectura deseado) activará eventos.",
+        "description": "Esta es una lista gestionada por el usuario de series que no serán scrobbleadas a los proveedores. Puedes eliminar una serie en cualquier momento y el siguiente evento Scrobble-able (progreso de lectura, calificación, estado de \"quiero leer\") activará eventos.",
         "title": "Retenciones de scrobble"
     },
     "theme-manager": {
@@ -260,7 +261,8 @@
         "devices-title": "Dispositivos",
         "platform-label": "Plataforma: ",
         "add": "{{common.add}}",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "email-label": "{{common.email}} "
     },
     "edit-device": {
         "device-name-label": "Nombre del dispositivo",
