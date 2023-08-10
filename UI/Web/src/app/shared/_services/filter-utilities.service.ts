@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot} from '@angular/router';
+import {ActivatedRouteSnapshot, Router} from '@angular/router';
 import {Pagination} from 'src/app/_models/pagination';
 import {SeriesFilter, SortField, SortOptions} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
@@ -8,6 +8,9 @@ import {FilterStatement} from "../../_models/metadata/v2/filter-statement";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {TextResonse} from "../../_types/text-response";
+import {map} from "rxjs/operators";
+import {switchMap} from "rxjs";
 
 /**
  * Used to pass state between the filter and the url
@@ -51,7 +54,18 @@ export enum FilterQueryParam {
 })
 export class FilterUtilitiesService {
 
-    constructor(private metadataService: MetadataService) {
+    constructor(private metadataService: MetadataService, private router: Router) {
+    }
+
+    applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
+        const dto: SeriesFilterV2 = {
+            statements:  [this.metadataService.createDefaultFilterStatement(filter, comparison, value + '')],
+            combination: FilterCombination.Or,
+            limitTo: 0
+        };
+
+        console.log('navigating to: ', this.urlFromFilterV2(page.join('/') + '?', dto));
+        this.router.navigateByUrl(this.urlFromFilterV2(page.join('/') + '?', dto));
     }
 
     /**
@@ -78,13 +92,6 @@ export class FilterUtilitiesService {
         window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(url, pagination));
     }
 
-    /**
-     * Patches the page query param in the window location.
-     * @param pagination
-     */
-    updateUrlFromPagination(pagination: Pagination) {
-        window.history.replaceState(window.location.href, '', this.replacePaginationOnUrl(window.location.href, pagination));
-    }
 
     private replacePaginationOnUrl(url: string, pagination: Pagination) {
         return url.replace(/page=\d+/i, 'page=' + pagination.currentPage);
@@ -380,11 +387,13 @@ export class FilterUtilitiesService {
 
         const fullUrl = window.location.href.split('?')[1];
         const stmtsStartIndex = fullUrl.indexOf('stmts=');
-        const sortOptionsStartIndex = fullUrl.indexOf('&sortOptions=');
+        let endIndex = fullUrl.indexOf('&sortOptions=');
+        if (endIndex < 0) {
+            endIndex = fullUrl.indexOf('&limitTo=');
+        }
 
-
-        if (stmtsStartIndex !== -1 && sortOptionsStartIndex !== -1) {
-            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + 6, sortOptionsStartIndex);
+        if (stmtsStartIndex !== -1 && endIndex !== -1) {
+            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + 6, endIndex);
             filter.statements = this.decodeFilterStatements(stmtsEncoded);
             console.log('statements: ', filter.statements);
         }

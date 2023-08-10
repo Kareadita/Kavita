@@ -9,25 +9,12 @@ import {
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgbCollapse, NgbTooltip, NgbRating } from '@ng-bootstrap/ng-bootstrap';
-import { distinctUntilChanged, forkJoin, map, Observable, of, ReplaySubject } from 'rxjs';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
-import { TypeaheadSettings } from '../typeahead/_models/typeahead-settings';
-import { CollectionTag } from '../_models/collection-tag';
-import { Genre } from '../_models/metadata/genre';
 import { Library } from '../_models/library';
-import { MangaFormat } from '../_models/manga-format';
-import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
-import { Language } from '../_models/metadata/language';
-import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person, PersonRole } from '../_models/metadata/person';
-import { FilterEvent, FilterItem, mangaFormatFilters, SeriesFilter, SortField } from '../_models/metadata/series-filter';
-import { Tag } from '../_models/tag';
-import { CollectionTagService } from '../_services/collection-tag.service';
-import { LibraryService } from '../_services/library.service';
-import { MetadataService } from '../_services/metadata.service';
+import { FilterEvent, FilterItem, SortField } from '../_models/metadata/series-filter';
 import { ToggleService } from '../_services/toggle.service';
 import { FilterSettings } from './filter-settings';
 import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
@@ -174,7 +161,7 @@ export class MetadataFilterComponent implements OnInit {
     this.sortGroup.get('sortField')?.setValue(this.filterV2.sortOptions?.sortField);
     this.isAscendingSort = this.filterV2.sortOptions?.isAscending!;
     this.cdRef.markForCheck();
-    // Apply any presets which will trigger the apply
+    // Apply any presets which will trigger the "apply"
     this.loadFromPresetsAndSetup();
   }
 

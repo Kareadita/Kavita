@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
-import { FilterQueryParam } from '../../../shared/_services/filter-utilities.service';
+import {FilterQueryParam, FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../../shared/_services/utility.service';
 import { MangaFormat } from '../../../_models/manga-format';
 import { ReadingList } from '../../../_models/reading-list';
@@ -74,7 +74,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
 
   constructor(public utilityService: UtilityService,
     private router: Router, public readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private metadataService: MetadataService) {
+    private readonly cdRef: ChangeDetectorRef, private metadataService: MetadataService, private filterUtilityService: FilterUtilitiesService) {
 
   }
 
@@ -104,7 +104,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   }
 
   goTo(queryParamName: FilterField, filter: any) {
-    this.metadataService.applyFilter(['library', this.series.libraryId], queryParamName, FilterComparison.Equal, filter);
+    this.filterUtilityService.applyFilter(['library', this.series.libraryId], queryParamName, FilterComparison.Equal, filter);
   }
 
   navigate(basePage: string, id: number) {

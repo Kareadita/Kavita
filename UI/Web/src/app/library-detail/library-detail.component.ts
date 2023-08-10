@@ -166,51 +166,16 @@ export class LibraryDetailComponent implements OnInit {
     this.filterV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
     console.log('filter preset: ', this.filterV2)
 
-    if (this.filterV2.statements.length === 0) {
+    if (this.filterV2.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
        this.filterV2!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
     }
 
     this.filterSettings.presetsV2 =  this.filterV2;
 
-    // const filterName = (this.route.snapshot.queryParamMap.get('filterName') || '').trim();
-    //
-    // if (filterName === '') {
-    //   this.filterV2 = this.createRootGroup();
-    //   this.filterSettings.presetsV2 = this.filterV2;
-    //   this.loadPage();
-    // } else {
-    //   this.metadataService.getFilter(filterName)
-    //     .subscribe((filter: SeriesFilterV2 | null) => {
-    //       console.log('resume from filter setup')
-    //       if (filter) {
-    //         this.filterV2 = filter;
-    //       } else {
-    //         this.filterV2 = this.createRootGroup();
-    //         // Update url without an id
-    //
-    //       }
-    //
-    //       this.filterSettings.presetsV2 = this.filterV2;
-    //       console.log(this.filterV2);
-    //       this.loadPage();
-    //     });
-    // }
-
-
     this.filterSettings.libraryDisabled = true;
     this.cdRef.markForCheck();
   }
 
-  createRootGroup() {
-    const stmt = this.metadataService.createDefaultFilterStatement();
-    stmt.comparison = FilterComparison.Contains;
-    stmt.field = FilterField.Libraries;
-    stmt.value = this.libraryId + '';
-    const rootGroup = this.metadataService.createDefaultFilterDto();
-    rootGroup.statements.push(stmt);
-
-    return rootGroup;
-  }
 
   ngOnInit(): void {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
@@ -294,14 +259,11 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   updateFilter(data: FilterEvent) {
-    console.log('library detail, updateFilter occurred: ', data);
     if (data.filterV2 === undefined) return;
     this.filterV2 = data.filterV2;
 
     if (!data.isFirst) {
-      //const url = this.filterUtilityService.encodeSeriesFilter(this.filterV2);
       this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filterV2);
-      //window.history.replaceState(window.location.href, '', url);
     }
 
     this.loadPage();

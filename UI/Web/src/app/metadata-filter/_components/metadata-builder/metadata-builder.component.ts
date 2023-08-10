@@ -11,7 +11,6 @@ import {
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
-import {MetadataFilterRowGroupComponent} from "../metadata-filter-row-group/metadata-filter-row-group.component";
 import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -23,7 +22,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {take, tap} from "rxjs/operators";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -31,7 +30,6 @@ import {take, tap} from "rxjs/operators";
   styleUrls: ['./metadata-builder.component.scss'],
   standalone: true,
   imports: [
-    MetadataFilterRowGroupComponent,
     NgIf,
     MetadataFilterRowComponent,
     NgForOf,

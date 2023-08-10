@@ -18,6 +18,7 @@ import {SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,11 @@ export class MetadataService {
       statements:  [this.createDefaultFilterStatement(filter, comparison, value + '')],
       combination: FilterCombination.Or,
       limitTo: 0
-    }
+    };
+    //
+    // console.log('navigating to: ', this.filterUtilityService.urlFromFilterV2(page.join('/'), dto));
+    // this.router.navigateByUrl(this.filterUtilityService.urlFromFilterV2(page.join('/'), dto));
+
     // Creates a temp name for the filter
     this.httpClient.post<string>(this.baseUrl + 'filter/create-temp', dto, TextResonse).pipe(map(name => {
       dto.name = name;
@@ -152,7 +157,6 @@ export class MetadataService {
   }
 
   updateFilter(arr: Array<FilterStatement>, index: number, filterStmt: FilterStatement) {
-    console.log('Filter at ', index, 'updated: ', filterStmt);
     arr[index].comparison = filterStmt.comparison;
     arr[index].field = filterStmt.field;
     arr[index].value = filterStmt.value + '';
