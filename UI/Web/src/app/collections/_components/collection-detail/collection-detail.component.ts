@@ -49,6 +49,9 @@ import {
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 @Component({
     selector: 'app-collection-detail',
@@ -70,14 +73,14 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   tagImage: string = '';
   isLoading: boolean = true;
   series: Array<Series> = [];
-  seriesPagination!: Pagination;
+  pagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
-  filter: SeriesFilter | undefined = undefined;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   summary: string = '';
 
   actionInProgress: boolean = false;
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -166,11 +169,18 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterSettings.presets.collectionTags = [tagId];
-      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
-      this.filterActiveCheck.collectionTags = [tagId];
+      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+
+      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+
+      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+        this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+      }
+
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+      this.filterSettings.presetsV2 =  this.filter;
+
       this.cdRef.markForCheck();
 
       this.updateTag(tagId);
@@ -214,14 +224,17 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       const matchingTags = tags.filter(t => t.id === tagId);
       if (matchingTags.length === 0) {
         this.toastr.error(this.translocoService.translate('errors.collection-invalid-access'));
+        // TODO: Why would access need to be checked? Even if a id was guessed, the series wouldn't return
         this.router.navigateByUrl('/');
         return;
       }
 
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
+      // TODO: This can be changed now that we have app-image and collection cover merge code
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle(this.translocoService.translate('errors.collection-invalid-access', {collectionName: this.collectionTag.title}));
+      // TODO: BUG: This title key is incorrect!
       this.cdRef.markForCheck();
     });
   }
@@ -231,16 +244,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    if (!this.filter) {
-      this.filter =  this.filterUtilityService.createSeriesFilter(this.filter);
-      this.filter.sortOptions = {
-        isAscending: true,
-        sortField: SortField.SortName
-      }
-    }
-    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeriesV2(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
-      this.seriesPagination = series.pagination;
+      this.pagination = series.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
@@ -249,9 +255,13 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    }
+
     this.loadPage();
   }
 

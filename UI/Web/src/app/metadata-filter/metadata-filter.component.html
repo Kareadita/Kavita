@@ -43,6 +43,7 @@
                 <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
               </select>
           </div>
+          <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
           <div class="col-md-2 me-3 mt-4">
             <button class="btn btn-secondary col-12" (click)="clear()">{{t('reset')}}</button>
           </div>

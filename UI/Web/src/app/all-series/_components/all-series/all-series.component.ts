@@ -154,7 +154,7 @@ export class AllSeriesComponent implements OnInit {
     this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
     this.loadingSeries = true;
     this.cdRef.markForCheck();
-    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeries(undefined, undefined, this.filter!).pipe(take(1)).subscribe(series => {
       this.series = series.result;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (s: Series) => s.name);
       this.pagination = series.pagination;

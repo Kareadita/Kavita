@@ -7939,17 +7939,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }

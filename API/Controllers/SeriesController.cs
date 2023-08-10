@@ -278,11 +278,11 @@ public class SeriesController : BaseApiController
     /// <param name="libraryId"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterV2Dto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var series =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
         if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));

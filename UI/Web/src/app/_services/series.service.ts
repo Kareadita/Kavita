@@ -47,6 +47,17 @@ export class SeriesService {
     );
   }
 
+  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', filter, {observe: 'response', params}).pipe(
+        map((response: any) => {
+          return this.utilityService.createPaginatedResult(response, this.paginatedResults);
+        })
+    );
+  }
+
   getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);

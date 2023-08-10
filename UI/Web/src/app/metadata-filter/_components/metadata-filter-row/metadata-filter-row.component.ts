@@ -50,7 +50,7 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
     FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
     FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-    FilterField.Formats,
+    FilterField.Formats, FilterField.CollectionTags
 ];
 
 const StringComparisons = [FilterComparison.Equal,

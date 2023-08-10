@@ -20,7 +20,7 @@ export class FilterSettings {
     presetsV2: SeriesFilterV2 | undefined;
     /**
      * Should the filter section be open by default
-     * @deprecated This is deprecated UX pattern. New style is to show highlight on filter button. 
+     * @deprecated This is deprecated UX pattern. New style is to show highlight on filter button.
      */
     openByDefault = false;
   }
