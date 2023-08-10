@@ -140,5 +140,21 @@
     "scrobble-bad-payload": "Payload invalide de la part de Scrobble",
     "theme-doesnt-exist": "Fichier de thème manquant ou invalide",
     "bad-copy-files-for-download": "Impossible de copier les fichiers dans le répertoire temporaire de l'archive de téléchargement.",
-    "generic-create-temp-archive": "Erreur lors de la création de l'archive temporaire"
+    "generic-create-temp-archive": "Erreur lors de la création de l'archive temporaire",
+    "series-restricted-age-restriction": "L'utilisateur n'est pas autorisé à visionner cette série en raison de restrictions d'âge",
+    "book-num": "Tome {0}",
+    "epub-malformed": "Fichier malformé ! Impossible de le lire.",
+    "epub-html-missing": "Impossible de trouver le code html approprié pour cette page",
+    "collection-tag-title-required": "Le titre de la collection ne peut pas être vide",
+    "reading-list-title-required": "Le titre de la liste de lecture ne peut être vide",
+    "collection-tag-duplicate": "Une collection portant ce nom existe déjà",
+    "device-duplicate": "Un appareil portant ce nom existe déjà",
+    "device-not-created": "Cet appareil n'existe pas encore. Veuillez d'abord le créer",
+    "send-to-permission": "Impossible d'envoyer des fichiers non-EPUB ou PDF à des appareils car ils ne sont pas pris en charge par Kindle",
+    "progress-must-exist": "La progression doit exister sur l'utilisateur",
+    "reading-list-name-exists": "Une liste de lecture de ce nom existe déjà",
+    "user-no-access-library-from-series": "L'utilisateur n'a pas accès à la bibliothèque à laquelle appartient cette série",
+    "volume-num": "Volume {0}",
+    "issue-num": "Issue {0}{1}",
+    "chapter-num": "Chapitre {0}"
 }
