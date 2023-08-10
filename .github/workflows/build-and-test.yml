@@ -30,7 +30,7 @@ jobs:
         run: dotnet restore
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -107,9 +107,10 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' }}
     steps:
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.3.2
+        uses: jwalton/gh-find-current-pr@v1
         id: findPr
         with:
+          state: all
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Parse PR body
@@ -138,7 +139,7 @@ jobs:
           ref: develop
 
       - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
       - run: |
@@ -155,7 +156,7 @@ jobs:
           cd ../ || exit
 
       - name: Get csproj Version
-        uses: naminodarie/get-net-sdk-project-versions-action@v1
+        uses: kzrnm/get-net-sdk-project-versions-action@v1
         id: get-version
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
@@ -193,15 +194,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -231,9 +232,10 @@ jobs:
     steps:
 
       - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1.0.2
+        uses: jwalton/gh-find-current-pr@v1
         id: findPr
         with:
+          state: all
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Parse PR body
@@ -263,7 +265,7 @@ jobs:
           ref: main
 
       - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v3
         with:
           node-version: '16'
       - run: |
@@ -281,7 +283,7 @@ jobs:
           cd ../ || exit
 
       - name: Get csproj Version
-        uses: naminodarie/get-net-sdk-project-versions-action@v1
+        uses: kzrnm/get-net-sdk-project-versions-action@v1
         id: get-version
         with:
           proj-path: Kavita.Common/Kavita.Common.csproj
@@ -320,15 +322,15 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Build and push
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
@@ -357,9 +359,10 @@ jobs:
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/canary' }}
       steps:
           - name: Find Current Pull Request
-            uses: jwalton/gh-find-current-pr@v1.0.2
+            uses: jwalton/gh-find-current-pr@v1
             id: findPr
             with:
+                state: all
                 github-token: ${{ secrets.GITHUB_TOKEN }}
 
           - name: Check Out Repo
@@ -368,7 +371,7 @@ jobs:
                 ref: canary
 
           - name: NodeJS to Compile WebUI
-            uses: actions/setup-node@v2.1.5
+            uses: actions/setup-node@v3
             with:
                 node-version: '16'
           - run: |
@@ -385,7 +388,7 @@ jobs:
                 cd ../ || exit
 
           - name: Get csproj Version
-            uses: naminodarie/get-net-sdk-project-versions-action@v1
+            uses: kzrnm/get-net-sdk-project-versions-action@v1
             id: get-version
             with:
                 proj-path: Kavita.Common/Kavita.Common.csproj
@@ -423,15 +426,15 @@ jobs:
                 password: ${{ secrets.GITHUB_TOKEN }}
 
           - name: Set up QEMU
-            uses: docker/setup-qemu-action@v1
+            uses: docker/setup-qemu-action@v2
 
           - name: Set up Docker Buildx
             id: buildx
-            uses: docker/setup-buildx-action@v1
+            uses: docker/setup-buildx-action@v2
 
           - name: Build and push
             id: docker_build
-            uses: docker/build-push-action@v2
+            uses: docker/build-push-action@v4
             with:
                 context: .
                 platforms: linux/amd64,linux/arm/v7,linux/arm64
