@@ -11,6 +11,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Services.Tasks.Scanner.Parser;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.Common.Extensions;
@@ -292,13 +293,33 @@ public class LibraryRepository : ILibraryRepository
 
         return ret
             .Where(s => !string.IsNullOrEmpty(s))
-            .Select(s => new LanguageDto()
+            .DistinctBy(Parser.Normalize)
+            .Select(GetCulture)
+            .Where(s => s != null)
+            .OrderBy(s => s.Title)
+            .ToList();
+    }
+
+    private static LanguageDto GetCulture(string s)
+    {
+        try
+        {
+            return new LanguageDto()
             {
                 Title = CultureInfo.GetCultureInfo(s).DisplayName,
                 IsoCode = s
-            })
-            .OrderBy(s => s.Title)
-            .ToList();
+            };
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        return new LanguageDto()
+        {
+            Title = s,
+            IsoCode = s
+        };;
     }
 
     public IEnumerable<PublicationStatusDto> GetAllPublicationStatusesDtosForLibrariesAsync(List<int> libraryIds)

@@ -19,7 +19,6 @@
   </ng-container>
 
   <ng-template #filterSection>
-    <ng-template #globalFilterTooltip>{{t('format-tooltip')}}</ng-template>
     <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
       <div class="row justify-content-center g-0">
         <app-metadata-builder [filter]="filterV2!" (update)="handleFilters($event)"></app-metadata-builder>
@@ -34,7 +33,7 @@
           </div>
           <div class="col-md-3">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
-              <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0px;" [disabled]="filterSettings.sortDisabled">
+              <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
                 <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
                 <ng-template #descSort>
                   <i class="fa fa-arrow-down" [title]="t('descending-alt')"></i>

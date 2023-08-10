@@ -11,7 +11,20 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
-import { BehaviorSubject, Subject, distinctUntilChanged, filter, map, merge, of, startWith, switchMap, takeUntil, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  of,
+  startWith,
+  switchMap,
+  takeUntil,
+  tap,
+  Observable
+} from 'rxjs';
 import { MetadataService } from 'src/app/_services/metadata.service';
 import { mangaFormatFilters } from 'src/app/_models/metadata/series-filter';
 import { PersonRole } from 'src/app/_models/metadata/person';
@@ -111,7 +124,7 @@ export class MetadataFilterRowComponent implements OnInit {
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
       switchMap((_) => this.getDropdownObservable()),
-      tap(opts => {
+      tap((opts) => {
         const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
         if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
@@ -148,8 +161,7 @@ export class MetadataFilterRowComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  getDropdownObservable() {
-    //console.log('Dropdown recalc');
+  getDropdownObservable(): Observable<{value: any, title: string}[]> {
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
       switch (filterField) {
         case FilterField.PublicationStatus:
@@ -165,11 +177,9 @@ export class MetadataFilterRowComponent implements OnInit {
             return {value: genre.id, title: genre.title}
           })));
         case FilterField.Languages:
-          // TODO: Languages needs to be redesigned
-          return of([{value: 0, title: 'This field needs a different DTO'}]);
-          // return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
-          //   return {value: status.isoCode, title: status.title}
-          // })));
+          return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
+            return {value: status.isoCode, title: status.title + `(${status.isoCode})`}
+          })));
         case FilterField.Formats:
           return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
             return {value: status.value, title: status.title}

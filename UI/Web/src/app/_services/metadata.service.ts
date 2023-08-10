@@ -18,7 +18,6 @@ import {SortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
-import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 
 @Injectable({
   providedIn: 'root'
@@ -112,6 +111,7 @@ export class MetadataService {
     }
     return this.httpClient.get<Array<Language>>(this.baseUrl + method);
   }
+
 
   /**
    * All the potential language tags there can be

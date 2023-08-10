@@ -1481,8 +1481,14 @@
 
     "metadata-filter": {
         "filter-title": "Filter",
+        "sort-by-label": "Sort By",
+        "ascending-alt": "Ascending",
+        "descending-alt": "Descending",
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}",
+        "limit-label": "Limit To",
+
         "format-label": "Format",
-        "format-tooltip": "This is library agnostic",
         "libraries-label": "Libraries",
         "collections-label": "Collections",
         "genres-label": "Genres",
@@ -1509,14 +1515,7 @@
         "series-name-tooltip": "Series name will filter against Name, Sort Name, or Localized Name",
         "release-label": "Release",
         "min": "Min",
-        "max": "Max",
-        "sort-by-label": "Sort By",
-        "ascending-alt": "Ascending",
-        "descending-alt": "Descending",
-        "reset": "{{common.reset}}",
-        "apply": "{{common.apply}}",
-        "limit-label": "Limit To"
-
+        "max": "Max"
     },
 
     "sort-field-pipe": {
