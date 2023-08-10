@@ -28,7 +28,7 @@
     },
     "user-scrobble-history": {
         "title": "Histórico de Scrobble",
-        "description": "",
+        "description": "Aqui você encontrará todos os eventos scrobble vinculados à sua conta. Para que os eventos existam, você deve ter um provedor scrobble ativo configurado. Todos os eventos processados serão apagados após um mês. Se houver eventos não processados, é provável que eles não possam formar correspondências upstream. Entre em contato com seu administrador para corrigi-los.",
         "filter-label": "Filtro",
         "created-header": "Criado",
         "last-modified-header": "Última alteração",
