@@ -26,5 +26,6 @@
     "invalid-email-confirmation": "La confirmation de courriel est invalide",
     "invalid-payload": "Paramètre invalide",
     "manual-setup-fail": "La configuration manuelle est impossible. Veuillez annuler et recréer l'invitation",
-    "generic-user-email-update": "Impossible de mettre a jour l’e-mail de l'utilisateur. Veuillez vérifier les logs."
+    "generic-user-email-update": "Impossible de mettre a jour l’e-mail de l'utilisateur. Veuillez vérifier les logs.",
+    "generic-password-update": "Une erreur s'est produite au moment de vérifier le mot de passe"
 }
