@@ -73,19 +73,6 @@ export class BookmarksComponent implements OnInit {
     private router: Router, private readonly cdRef: ChangeDetectorRef,
     private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
     private jumpbarService: JumpbarService) {
-      this.filterSettings.ageRatingDisabled = true;
-      this.filterSettings.collectionDisabled = true;
-      this.filterSettings.formatDisabled = true;
-      this.filterSettings.genresDisabled = true;
-      this.filterSettings.languageDisabled = true;
-      this.filterSettings.libraryDisabled = true;
-      this.filterSettings.peopleDisabled = true;
-      this.filterSettings.publicationStatusDisabled = true;
-      this.filterSettings.ratingDisabled = true;
-      this.filterSettings.readProgressDisabled = true;
-      this.filterSettings.tagsDisabled = true;
-      this.filterSettings.sortDisabled = true;
-
       this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
       if (this.filter.statements.filter(stmt => stmt.field === FilterField.SeriesName).length === 0) {
         this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());

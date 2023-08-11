@@ -7349,7 +7349,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/Series/v2": {
@@ -7357,6 +7358,7 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets series with the applied Filter",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7377,6 +7379,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {

@@ -399,7 +399,7 @@ public static class SeriesFilter
     {
         if (!condition || collectionTags.Count == 0) return queryable;
 
-        var first = collectionTags.First();
+        //var first = collectionTags.First();
         switch (comparison)
         {
             case FilterComparison.Equal:

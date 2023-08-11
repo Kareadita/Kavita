@@ -26,7 +26,7 @@ import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
-import {allFields, FilterField} from "../_models/metadata/v2/filter-field";
+import {allFields} from "../_models/metadata/v2/filter-field";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -100,44 +100,6 @@ export class MetadataFilterComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }
-
-    if (this.filterSettings.libraryDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Libraries);
-    }
-    if (this.filterSettings.genresDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Genres);
-    }
-    if (this.filterSettings.languageDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Languages);
-    }
-    if (this.filterSettings.formatDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Formats);
-    }
-    if (this.filterSettings.ageRatingDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.AgeRating);
-    }
-    if (this.filterSettings.collectionDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.CollectionTags);
-    }
-    if (this.filterSettings.publicationStatusDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.PublicationStatus);
-    }
-    if (this.filterSettings.peopleDisabled) {
-      const peopleFields = [FilterField.Characters, FilterField.Colorist, FilterField.CoverArtist,
-        FilterField.Editor, FilterField.Inker, FilterField.Penciller, FilterField.Letterer, FilterField.Writers,
-        FilterField.Translators]
-      this.allFilterFields = this.allFilterFields.filter(f => !peopleFields.includes(f));
-    }
-    if (this.filterSettings.ratingDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.UserRating);
-    }
-    if (this.filterSettings.readProgressDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.ReadProgress);
-    }
-    if (this.filterSettings.tagsDisabled) {
-      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Tags);
-    }
-
 
     this.loadFromPresetsAndSetup();
   }

@@ -176,7 +176,6 @@ export class LibraryDetailComponent implements OnInit {
     console.log('filter preset: ', this.filterV2)
 
     this.filterSettings.presetsV2 =  this.filterV2;
-    this.filterSettings.libraryDisabled = true;
 
     this.cdRef.markForCheck();
   }
