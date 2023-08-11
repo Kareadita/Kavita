@@ -36,8 +36,7 @@ import { SeriesCardComponent } from '../../../cards/series-card/series-card.comp
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective} from "@ngneat/transloco";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
@@ -86,7 +85,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   collectionTag: any;
-  tagImage: any;
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -106,7 +104,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
     private jumpbarService: JumpbarService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.titleService.setTitle('Want To Read');
+      this.titleService.setTitle(translate('want-to-read.title'));
 
       this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 

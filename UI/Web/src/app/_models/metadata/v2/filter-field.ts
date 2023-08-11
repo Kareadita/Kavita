@@ -27,4 +27,7 @@ export enum FilterField
     ReadTime = 23
 }
 
-export const allFields = Object.keys(FilterField).filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0).map(key => parseInt(key, 10)) as FilterField[];
+export const allFields = Object.keys(FilterField)
+    .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
+    .map(key => parseInt(key, 10))
+    .sort((a, b) => a - b) as FilterField[];

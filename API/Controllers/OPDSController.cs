@@ -402,10 +402,8 @@ public class OpdsController : BaseApiController
         SetFeedId(feed, $"library-{library.Name}");
         AddPagination(feed, series, $"{prefix}{apiKey}/libraries/{libraryId}");
 
-        foreach (var seriesDto in series)
-        {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
-        }
+        feed.Entries.AddRange(series.Select(seriesDto =>
+            CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl)));
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -747,8 +745,8 @@ public class OpdsController : BaseApiController
         return new FeedEntry()
         {
             Id = seriesDto.Id.ToString(),
-            Title = $"{seriesDto.Name} ({seriesDto.Format})",
-            Summary = seriesDto.Summary,
+            Title = $"{seriesDto.Name}",
+            Summary = $"Format: {seriesDto.Format}    Summary: {metadata.Summary}",
             Authors = metadata.Writers.Select(p => new FeedAuthor()
             {
                 Name = p.Name,
@@ -773,7 +771,8 @@ public class OpdsController : BaseApiController
         return new FeedEntry()
         {
             Id = searchResultDto.SeriesId.ToString(),
-            Title = $"{searchResultDto.Name} ({searchResultDto.Format})",
+            Title = $"{searchResultDto.Name}",
+            Summary = $"Format: {searchResultDto.Format}",
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/series/{searchResultDto.SeriesId}"),

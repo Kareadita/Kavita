@@ -15761,10 +15761,6 @@
             "type": "string",
             "nullable": true
           },
-          "summary": {
-            "type": "string",
-            "nullable": true
-          },
           "pages": {
             "type": "integer",
             "format": "int32"
