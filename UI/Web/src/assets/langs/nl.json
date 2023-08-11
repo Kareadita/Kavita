@@ -1279,12 +1279,6 @@
         "dark-theme-alt": "",
         "close-reader-alt": ""
     },
-    "infinite-reader": {
-        "continuous-reading-prev-chapter-alt": "",
-        "continuous-reading-prev-chapter": "",
-        "continuous-reading-next-chapter-alt": "",
-        "continuous-reading-next-chapter": ""
-    },
     "manga-reader": {
         "back": "",
         "save-globally": "",
@@ -1322,7 +1316,6 @@
     "metadata-filter": {
         "filter-title": "",
         "format-label": "",
-        "format-tooltip": "",
         "libraries-label": "",
         "collections-label": "",
         "genres-label": "",

@@ -1071,7 +1071,6 @@
         "max": "최대",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "format-tooltip": "이것은 라이브러리에 구애받지 않습니다",
         "letterer-label": "레터러",
         "sort-by-label": "정렬 기준",
         "filter-title": "필터",
@@ -1348,12 +1347,6 @@
     "user-holds": {
         "description": "이것은 업스트림 공급자에게 스크로블되지 않는 시리즈의 사용자 관리 목록입니다. 언제든지 시리즈를 제거할 수 있으며 다음 스크로블 가능 이벤트(읽기 진행률, 평점, 읽고 싶어요 상태)가 이벤트를 트리거합니다.",
         "title": "스크러블 홀드"
-    },
-    "infinite-reader": {
-        "continuous-reading-next-chapter": "다음 챕터",
-        "continuous-reading-prev-chapter-alt": "위로 스크롤하여 이전 챕터로 이동",
-        "continuous-reading-prev-chapter": "이전 챕터",
-        "continuous-reading-next-chapter-alt": "위로 스크롤하여 다음 챕터로 이동"
     },
     "entity-info-cards": {
         "read-time-title": "{{series-info-cards.read-time-title}}",
