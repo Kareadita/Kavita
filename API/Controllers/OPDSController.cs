@@ -229,21 +229,19 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
-        foreach (var tag in tags)
+
+        feed.Entries.AddRange(tags.Select(tag => new FeedEntry()
         {
-            feed.Entries.Add(new FeedEntry()
+            Id = tag.Id.ToString(),
+            Title = tag.Title,
+            Summary = tag.Summary,
+            Links = new List<FeedLink>()
             {
-                Id = tag.Id.ToString(),
-                Title = tag.Title,
-                Summary = tag.Summary,
-                Links = new List<FeedLink>()
-                {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}")
-                }
-            });
-        }
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
+            }
+        }));
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -318,6 +316,8 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
                 }
             });
         }
