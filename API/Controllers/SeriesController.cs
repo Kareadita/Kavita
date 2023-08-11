@@ -64,6 +64,7 @@ public class SeriesController : BaseApiController
     /// <param name="filterDto"></param>
     /// <returns></returns>
     [HttpPost]
+    [Obsolete("use v2")]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
@@ -80,6 +81,12 @@ public class SeriesController : BaseApiController
         return Ok(series);
     }
 
+    /// <summary>
+    /// Gets series with the applied Filter
+    /// </summary>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
     [HttpPost("v2")]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
     {
