@@ -835,11 +835,11 @@
         "relationship": "Relação",
         "remove": "Remover",
         "add-relationship": "Adicionar Relação",
-        "parent": ""
+        "parent": "{{relationship-pipe.parent}}"
     },
     "entity-info-cards": {
-        "tags-title": "",
-        "characters-title": "",
+        "tags-title": "{{series-metadata-detail.tags-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
         "release-date-title": "",
         "release-date-tooltip": "",
         "age-rating-title": "",
