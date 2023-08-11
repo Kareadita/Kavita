@@ -288,14 +288,12 @@ public static class SeriesFilter
 
         switch (comparison)
         {
+            case FilterComparison.Equal:
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.Tags.Any(t => tags.Contains(t.Id)));
-            case FilterComparison.Equal:
-                return queryable.Where(s => s.Metadata.Tags.All(t => tags.Contains(t.Id)));
+            case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.Tags.Any(t => !tags.Contains(t.Id)));
-            case FilterComparison.NotEqual:
-                return queryable.Where(s => s.Metadata.Tags.All(t => !tags.Contains(t.Id)));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -320,14 +318,12 @@ public static class SeriesFilter
 
         switch (comparison)
         {
+            case FilterComparison.Equal:
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.Id)));
-            case FilterComparison.Equal:
-                return queryable.Where(s => s.Metadata.People.All(t => people.Contains(t.Id)));
+            case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.People.Any(t => !people.Contains(t.Id)));
-            case FilterComparison.NotEqual:
-                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.Id)));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -353,11 +349,9 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                return queryable.Where(s => s.Metadata.Genres.All(t => genres.Contains(t.Id)));
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.Genres.Any(p => genres.Contains(p.Id)));
             case FilterComparison.NotEqual:
-                return queryable.Where(s => s.Metadata.Genres.All(t => !genres.Contains(t.Id)));
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.Genres.All(p => !genres.Contains(p.Id)));
             case FilterComparison.GreaterThan:
