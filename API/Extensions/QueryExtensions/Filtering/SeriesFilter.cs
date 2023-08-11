@@ -58,17 +58,19 @@ public static class SeriesFilter
             case FilterComparison.Equal:
                 return queryable.Where(s => s.Metadata.ReleaseYear == releaseYear);
             case FilterComparison.GreaterThan:
+            case FilterComparison.IsAfter:
                 return queryable.Where(s => s.Metadata.ReleaseYear > releaseYear);
             case FilterComparison.GreaterThanEqual:
                 return queryable.Where(s => s.Metadata.ReleaseYear >= releaseYear);
             case FilterComparison.LessThan:
+            case FilterComparison.IsBefore:
                 return queryable.Where(s => s.Metadata.ReleaseYear < releaseYear);
             case FilterComparison.LessThanEqual:
                 return queryable.Where(s => s.Metadata.ReleaseYear <= releaseYear);
-            case FilterComparison.IsBefore:
-            case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
+                return queryable.Where(s => s.Metadata.ReleaseYear >= DateTime.Now.Year - (int) releaseYear);
             case FilterComparison.IsNotInLast:
+                return queryable.Where(s => s.Metadata.ReleaseYear < DateTime.Now.Year - (int) releaseYear);
             case FilterComparison.Matches:
             case FilterComparison.Contains:
             case FilterComparison.NotContains:
@@ -158,6 +160,8 @@ public static class SeriesFilter
 
         switch (comparison)
         {
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.AvgHoursToRead != avgReadTime);
             case FilterComparison.Equal:
                 return queryable.Where(s => s.AvgHoursToRead == avgReadTime);
             case FilterComparison.GreaterThan:
@@ -171,7 +175,6 @@ public static class SeriesFilter
             case FilterComparison.Contains:
             case FilterComparison.Matches:
             case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:
@@ -257,10 +260,12 @@ public static class SeriesFilter
             case FilterComparison.LessThanEqual:
                 subQuery = subQuery.Where(s => s.Percentage <= readProgress);
                 break;
+            case FilterComparison.NotEqual:
+                subQuery = subQuery.Where(s => s.Percentage != readProgress);
+                break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:
             case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:
@@ -285,14 +290,17 @@ public static class SeriesFilter
         {
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.Tags.Any(t => tags.Contains(t.Id)));
+            case FilterComparison.Equal:
+                return queryable.Where(s => s.Metadata.Tags.All(t => tags.Contains(t.Id)));
+            case FilterComparison.NotContains:
+                return queryable.Where(s => s.Metadata.Tags.Any(t => !tags.Contains(t.Id)));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Metadata.Tags.All(t => !tags.Contains(t.Id)));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
             case FilterComparison.LessThanEqual:
             case FilterComparison.Matches:
-            case FilterComparison.Equal:
-            case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:
@@ -315,12 +323,15 @@ public static class SeriesFilter
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.Id)));
             case FilterComparison.Equal:
+                return queryable.Where(s => s.Metadata.People.All(t => people.Contains(t.Id)));
+            case FilterComparison.NotContains:
+                return queryable.Where(s => s.Metadata.People.Any(t => !people.Contains(t.Id)));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.Id)));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
             case FilterComparison.LessThanEqual:
-            case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:
@@ -342,9 +353,11 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
+                return queryable.Where(s => s.Metadata.Genres.All(t => genres.Contains(t.Id)));
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.Genres.Any(p => genres.Contains(p.Id)));
             case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Metadata.Genres.All(t => !genres.Contains(t.Id)));
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.Genres.All(p => !genres.Contains(p.Id)));
             case FilterComparison.GreaterThan:
@@ -405,13 +418,14 @@ public static class SeriesFilter
             case FilterComparison.Equal:
             case FilterComparison.Contains:
                 return queryable.Where(s => s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+            case FilterComparison.NotContains:
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => !s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
             case FilterComparison.LessThanEqual:
             case FilterComparison.Matches:
-            case FilterComparison.NotContains:
-            case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
             case FilterComparison.IsBefore:

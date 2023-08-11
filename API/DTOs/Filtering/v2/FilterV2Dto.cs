@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using API.DTOs.Metadata;
-using API.Extensions.QueryExtensions.Filtering;
+﻿using System.Collections.Generic;
+
 
 namespace API.DTOs.Filtering.v2;
 

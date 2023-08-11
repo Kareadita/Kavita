@@ -383,14 +383,16 @@ public class OpdsController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "no-library-access"));
         }
 
-        var filter = new FilterV2Dto();
-        filter.Statements = new List<FilterStatementDto>() {
-            new FilterStatementDto()
+        var filter = new FilterV2Dto
+        {
+            Statements = new List<FilterStatementDto>() {
+                new ()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = FilterField.Libraries,
                     Value = libraryId + string.Empty
                 }
+            }
         };
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(pageNumber), filter);

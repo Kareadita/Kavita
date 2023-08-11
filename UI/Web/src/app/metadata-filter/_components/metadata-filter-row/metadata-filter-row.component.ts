@@ -2,36 +2,23 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   EventEmitter,
-  Input,
   inject,
+  Input,
   OnInit,
-  Output,
-  DestroyRef
+  Output
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import { FilterStatement } from '../../../_models/metadata/v2/filter-statement';
-import {
-  BehaviorSubject,
-  Subject,
-  distinctUntilChanged,
-  filter,
-  map,
-  merge,
-  of,
-  startWith,
-  switchMap,
-  takeUntil,
-  tap,
-  Observable
-} from 'rxjs';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { mangaFormatFilters } from 'src/app/_models/metadata/series-filter';
-import { PersonRole } from 'src/app/_models/metadata/person';
-import { LibraryService } from 'src/app/_services/library.service';
-import { CollectionTagService } from 'src/app/_services/collection-tag.service';
-import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
-import { allFields, FilterField } from 'src/app/_models/metadata/v2/filter-field';
+import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
+import {BehaviorSubject, distinctUntilChanged, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {MetadataService} from 'src/app/_services/metadata.service';
+import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
+import {PersonRole} from 'src/app/_models/metadata/person';
+import {LibraryService} from 'src/app/_services/library.service';
+import {CollectionTagService} from 'src/app/_services/collection-tag.service';
+import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
+import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
 import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
@@ -50,7 +37,7 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
     FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
     FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-    FilterField.Formats, FilterField.CollectionTags
+    FilterField.Formats, FilterField.CollectionTags, FilterField.Tags
 ];
 
 const StringComparisons = [FilterComparison.Equal,
@@ -237,7 +224,7 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (NumberFields.includes(inputVal)) {
-      let comps = NumberComparisons;
+      let comps = [...NumberComparisons];
       if (inputVal === FilterField.ReleaseYear) {
         comps.push(...DateComparisons);
       }
@@ -248,7 +235,11 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (DropdownFields.includes(inputVal)) {
-      this.validComparisons$.next(DropdownComparisons);
+      let comps = [...DropdownComparisons];
+      if (inputVal === FilterField.AgeRating) {
+        comps.push(...NumberComparisons);
+      }
+      this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
     }
   }
