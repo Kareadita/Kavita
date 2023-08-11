@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
 using API.DTOs.Search;
 using API.Entities;
@@ -65,6 +66,8 @@ public class OpdsController : BaseApiController
         SortOptions = null,
         PublicationStatus = new List<PublicationStatus>()
     };
+
+    private readonly FilterV2Dto _filterV2Dto = new FilterV2Dto();
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private const int PageSize = 20;
 
@@ -378,7 +381,15 @@ public class OpdsController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "no-library-access"));
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, GetUserParams(pageNumber), _filterDto);
+        var filter = new FilterV2Dto();
+        filter.Statements.Add(new FilterStatementDto()
+        {
+            Comparison = FilterComparison.Equal,
+            Field = FilterField.Libraries,
+            Value = libraryId + string.Empty
+        });
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(pageNumber), filter);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
         var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix);
@@ -401,7 +412,7 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
         var (baseUrl, prefix) = await GetPrefix();
-        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, userId, GetUserParams(pageNumber), _filterDto);
+        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, GetUserParams(pageNumber), _filterV2Dto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id));
 
         var feed = CreateFeed(await _localizationService.Translate(userId, "recently-added"), $"{prefix}{apiKey}/recently-added", apiKey, prefix);
