@@ -814,19 +814,19 @@
     },
     "cover-image-chooser": {
         "drag-n-drop": "Arrastar e soltar",
-        "upload": "Enviar",
-        "upload-continued": "",
-        "url-label": "",
-        "load": "",
-        "back": "",
-        "reset-cover-tooltip": "",
-        "reset": "",
-        "image-num": "",
-        "apply": "",
-        "applied": ""
+        "upload": "Upload",
+        "upload-continued": "uma imagem",
+        "url-label": "Url",
+        "load": "Carregar",
+        "back": "Voltar",
+        "reset-cover-tooltip": "Redefinir Imagem da Capa",
+        "reset": "{{common.reset}}",
+        "image-num": "Imagem {{num}}",
+        "apply": "{{common.apply}}",
+        "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": ""
+        "progress": "{{percentage}}% baixado"
     },
     "edit-series-relation": {
         "description-part-1": "",
