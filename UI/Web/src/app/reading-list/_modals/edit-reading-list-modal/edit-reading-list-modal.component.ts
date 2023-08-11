@@ -126,7 +126,6 @@ export class EditReadingListModalComponent implements OnInit {
 
   updateSelectedIndex(index: number) {
     this.coverImageIndex = index;
-    console.log(this.coverImageIndex)
     this.cdRef.detectChanges();
   }
 

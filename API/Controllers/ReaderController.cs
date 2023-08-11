@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.Entities;
 using API.Entities.Enums;
@@ -596,7 +597,7 @@ public class ReaderController : BaseApiController
     /// <param name="filterDto">Only supports SeriesNameQuery</param>
     /// <returns></returns>
     [HttpPost("all-bookmarks")]
-    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterDto filterDto)
+    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterV2Dto filterDto)
     {
         return Ok(await _unitOfWork.UserRepository.GetAllBookmarkDtos(User.GetUserId(), filterDto));
     }

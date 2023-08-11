@@ -5,7 +5,6 @@ import { AllCollectionsComponent } from './_components/all-collections/all-colle
 import { CollectionsRoutingModule } from './collections-routing.module';
 import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
@@ -13,6 +12,7 @@ import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.
 import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
 import {CardItemComponent} from "../cards/card-item/card-item.component";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 
 

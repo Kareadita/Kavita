@@ -150,7 +150,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -393,7 +393,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Is any part of the element visible in the scrollport. Does not take into account
-   * style properites, just scroll port visibility.
+   * style properties, just scroll port visibility.
    * @param elem
    * @returns
    */

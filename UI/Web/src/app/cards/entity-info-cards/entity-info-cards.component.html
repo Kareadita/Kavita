@@ -3,11 +3,11 @@
   <div class="mt-4 mb-3">
     <div class="row g-0" *ngIf="chapterMetadata ">
       <!-- Tags and Characters are used a lot of Hentai and Doujinshi type content, so showing in list item has value add on first glance -->
-      <app-metadata-detail [tags]="chapterMetadata.tags" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Tags" heading="Tags">
+      <app-metadata-detail [tags]="chapterMetadata.tags" [libraryId]="libraryId" [queryParam]="FilterField.Tags" heading="Tags">
         <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
       </app-metadata-detail>
 
-      <app-metadata-detail [tags]="chapterMetadata.characters" [libraryId]="libraryId" [queryParam]="FilterQueryParam.Character" heading="Characters">
+      <app-metadata-detail [tags]="chapterMetadata.characters" [libraryId]="libraryId" [queryParam]="FilterField.Characters" heading="Characters">
         <ng-template #titleTemplate let-item>{{item.name}}</ng-template>
       </app-metadata-detail>
     </div>

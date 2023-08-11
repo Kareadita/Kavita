@@ -96,7 +96,6 @@ export class EventsWidgetComponent implements OnInit, OnDestroy {
         this.activeEvents += 1;
         this.cdRef.markForCheck();
       } else if (event.event === EVENTS.UpdateAvailable) {
-        console.log('event: ', event);
         this.handleUpdateAvailableClick(event.payload);
       }
     });

@@ -1,43 +1,50 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   HostListener,
   inject,
   OnInit
 } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, Router } from '@angular/router';
-import { take } from 'rxjs/operators';
-import { BulkSelectionService } from '../cards/bulk-selection.service';
-import { KEY_CODES, UtilityService } from '../shared/_services/utility.service';
-import { SeriesAddedEvent } from '../_models/events/series-added-event';
-import { Library } from '../_models/library';
-import { Pagination } from '../_models/pagination';
-import { Series } from '../_models/series';
-import { FilterEvent, SeriesFilter } from '../_models/metadata/series-filter';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
-import { ActionService } from '../_services/action.service';
-import { LibraryService } from '../_services/library.service';
-import { EVENTS, MessageHubService } from '../_services/message-hub.service';
-import { SeriesService } from '../_services/series.service';
-import { NavService } from '../_services/nav.service';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { FilterSettings } from '../metadata-filter/filter-settings';
-import { JumpKey } from '../_models/jumpbar/jump-key';
-import { SeriesRemovedEvent } from '../_models/events/series-removed-event';
+import {Title} from '@angular/platform-browser';
+import {ActivatedRoute, Router} from '@angular/router';
+import {take} from 'rxjs/operators';
+import {BulkSelectionService} from '../cards/bulk-selection.service';
+import {KEY_CODES, UtilityService} from '../shared/_services/utility.service';
+import {SeriesAddedEvent} from '../_models/events/series-added-event';
+import {Library} from '../_models/library';
+import {Pagination} from '../_models/pagination';
+import {Series} from '../_models/series';
+import {FilterEvent} from '../_models/metadata/series-filter';
+import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
+import {ActionService} from '../_services/action.service';
+import {LibraryService} from '../_services/library.service';
+import {EVENTS, MessageHubService} from '../_services/message-hub.service';
+import {SeriesService} from '../_services/series.service';
+import {NavService} from '../_services/nav.service';
+import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
+import {FilterSettings} from '../metadata-filter/filter-settings';
+import {JumpKey} from '../_models/jumpbar/jump-key';
+import {SeriesRemovedEvent} from '../_models/events/series-removed-event';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SentenceCasePipe } from '../pipe/sentence-case.pipe';
-import { BulkOperationsComponent } from '../cards/bulk-operations/bulk-operations.component';
-import { SeriesCardComponent } from '../cards/series-card/series-card.component';
-import { CardDetailLayoutComponent } from '../cards/card-detail-layout/card-detail-layout.component';
-import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
-import { NgFor, NgIf, DecimalPipe } from '@angular/common';
-import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbNavOutlet } from '@ng-bootstrap/ng-bootstrap';
-import { CardActionablesComponent } from '../cards/card-item/card-actionables/card-actionables.component';
-import { SideNavCompanionBarComponent } from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {SentenceCasePipe} from '../pipe/sentence-case.pipe';
+import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
+import {SeriesCardComponent} from '../cards/series-card/series-card.component';
+import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
+import {LibraryRecommendedComponent} from './library-recommended/library-recommended.component';
+import {DecimalPipe, NgFor, NgIf} from '@angular/common';
+import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
+import {
+  SideNavCompanionBarComponent
+} from '../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {MetadataService} from "../_services/metadata.service";
+import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../_models/metadata/v2/filter-field";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 @Component({
     selector: 'app-library-detail',
@@ -55,11 +62,11 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination!: Pagination;
   actions: ActionItem<Library>[] = [];
-  filter: SeriesFilter | undefined = undefined;
+  filterV2: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   refresh: EventEmitter<void> = new EventEmitter();
 
   jumpKeys: Array<JumpKey> = [];
@@ -72,6 +79,9 @@ export class LibraryDetailComponent implements OnInit {
   ];
   active = this.tabs[0];
   private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
+  private readonly cdRef = inject(ChangeDetectorRef);
+
 
   bulkActionCallback = (action: ActionItem<any>, data: any) => {
     const selectedSeriesIndices = this.bulkSelectionService.getSelectedCardsForSource('series');
@@ -128,15 +138,14 @@ export class LibraryDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
-    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService,
-    private readonly cdRef: ChangeDetectorRef) {
+    private utilityService: UtilityService, public navService: NavService, private filterUtilityService: FilterUtilitiesService) {
     const routeId = this.route.snapshot.paramMap.get('libraryId');
     if (routeId === null) {
       this.router.navigateByUrl('/libraries');
       return;
     }
 
-
+    this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
     this.libraryId = parseInt(routeId, 10);
     this.libraryService.getLibraryNames().pipe(take(1)).subscribe(names => {
@@ -153,22 +162,27 @@ export class LibraryDetailComponent implements OnInit {
     this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
-    [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-    if (this.filterSettings.presets) this.filterSettings.presets.libraries = [this.libraryId];
-    // Setup filterActiveCheck to check filter against
-    this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
-    this.filterActiveCheck.libraries = [this.libraryId];
+    this.filterV2 = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
 
-    this.filterSettings.libraryDisabled = true;
+    if (this.filterV2.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+       this.filterV2!.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+    }
+
+    this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+    this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+
+    this.filterSettings.presetsV2 =  this.filterV2;
+
     this.cdRef.markForCheck();
   }
+
 
   ngOnInit(): void {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
       if (event.event === EVENTS.SeriesAdded) {
         const seriesAdded = event.payload as SeriesAddedEvent;
         if (seriesAdded.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -188,7 +202,7 @@ export class LibraryDetailComponent implements OnInit {
       } else if (event.event === EVENTS.SeriesRemoved) {
         const seriesRemoved = event.payload as SeriesRemovedEvent;
         if (seriesRemoved.libraryId !== this.libraryId) return;
-        if (!this.utilityService.deepEqual(this.filter, this.filterActiveCheck)) {
+        if (!this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck)) {
           this.loadPage();
           return;
         }
@@ -216,17 +230,17 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  handleAction(action: ActionItem<Library>, library: Library) {
+  async handleAction(action: ActionItem<Library>, library: Library) {
     let lib: Partial<Library> = library;
     if (library === undefined) {
       lib = {id: this.libraryId, name: this.libraryName};
     }
     switch (action.action) {
       case(Action.Scan):
-        this.actionService.scanLibrary(lib);
+        await this.actionService.scanLibrary(lib);
         break;
       case(Action.RefreshMetadata):
-        this.actionService.refreshMetadata(lib);
+        await this.actionService.refreshMetadata(lib);
         break;
       case(Action.Edit):
         this.actionService.editLibrary(lib);
@@ -245,25 +259,23 @@ export class LibraryDetailComponent implements OnInit {
   }
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filterV2 = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filterV2);
+    }
+
     this.loadPage();
   }
 
   loadPage() {
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    if (this.filter == undefined) {
-      this.filter = this.filterUtilityService.createSeriesFilter();
-      this.filter.libraries.push(this.libraryId);
-      this.cdRef.markForCheck();
-    }
-
     this.loadingSeries = true;
-    this.filterActive = !this.utilityService.deepEqual(this.filter, this.filterActiveCheck);
+    this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
     this.cdRef.markForCheck();
 
-    this.seriesService.getSeriesForLibrary(0, undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2)
+      .subscribe(series => {
       this.series = series.result;
       this.pagination = series.pagination;
       this.loadingSeries = false;

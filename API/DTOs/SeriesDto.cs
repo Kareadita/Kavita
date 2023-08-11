@@ -12,7 +12,6 @@ public class SeriesDto : IHasReadTimeEstimate
     public string? OriginalName { get; init; }
     public string? LocalizedName { get; init; }
     public string? SortName { get; init; }
-    public string? Summary { get; init; }
     public int Pages { get; init; }
     public bool CoverImageLocked { get; set; }
     /// <summary>

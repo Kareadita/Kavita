@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.6.15"
+    "version": "0.7.7.1"
   },
   "servers": [
     {
@@ -1905,6 +1905,95 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Filter": {
+      "get": {
+        "tags": [
+          "Filter"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilterV2Dto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Filter/create-temp": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "summary": "Caches the filter in the backend and returns a temp string for retrieving.",
+        "description": "The cache line lives for only 1 hour",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -4839,17 +4928,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -7180,10 +7269,13 @@
         "tags": [
           "Series"
         ],
+        "summary": "Gets series with the applied Filter",
+        "description": "This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2",
         "parameters": [
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -7208,6 +7300,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -7222,6 +7315,85 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/FilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Series"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/Series/v2": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Gets series with the applied Filter",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -7608,7 +7780,7 @@
         "tags": [
           "Series"
         ],
-        "summary": "Gets all recently added series",
+        "summary": "Gets all recently added series. Obsolete, use recently-added-v2",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7654,6 +7826,85 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/FilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/Series/recently-added-v2": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Gets all recently added series",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -7770,17 +8021,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/FilterDto"
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -7853,26 +8104,6 @@
             }
           }
         ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Success",
@@ -10545,7 +10776,7 @@
         "tags": [
           "WantToRead"
         ],
-        "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered",
+        "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)",
         "parameters": [
           {
             "name": "PageNumber",
@@ -10615,7 +10846,8 @@
               }
             }
           }
-        }
+        },
+        "deprecated": true
       },
       "get": {
         "tags": [
@@ -10648,6 +10880,84 @@
               "text/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/want-to-read/v2": {
+      "post": {
+        "tags": [
+          "WantToRead"
+        ],
+        "summary": "Return all Series that are in the current logged in user's Want to Read list, filtered",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
                 }
               }
             }
@@ -13209,6 +13519,103 @@
         },
         "additionalProperties": false
       },
+      "FilterStatementDto": {
+        "type": "object",
+        "properties": {
+          "comparison": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "field": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15,
+              16,
+              17,
+              18,
+              19,
+              20,
+              21,
+              22,
+              23
+            ],
+            "type": "integer",
+            "description": "Represents the field which will dictate the value type and the Extension used for filtering",
+            "format": "int32"
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FilterV2Dto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the filter",
+            "nullable": true
+          },
+          "statements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterStatementDto"
+            },
+            "nullable": true
+          },
+          "combination": {
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "format": "int32"
+          },
+          "sortOptions": {
+            "$ref": "#/components/schemas/SortOptions"
+          },
+          "limitTo": {
+            "type": "integer",
+            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Metadata filtering for v2 API only"
+      },
       "FolderPath": {
         "type": "object",
         "properties": {
@@ -15351,10 +15758,6 @@
             "nullable": true
           },
           "sortName": {
-            "type": "string",
-            "nullable": true
-          },
-          "summary": {
             "type": "string",
             "nullable": true
           },
@@ -17756,6 +18159,10 @@
     {
       "name": "Download",
       "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
     },
     {
       "name": "Image",

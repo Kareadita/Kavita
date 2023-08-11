@@ -38,11 +38,6 @@ export class SideNavCompanionBarComponent implements OnInit {
   @Input() hasExtras: boolean = false;
 
   /**
-   * Is the input open by default
-   */
-  @Input() filterOpenByDefault: boolean = false;
-
-  /**
    * This implies there is a filter in effect on the underlying page. Will show UI styles to imply this to the user.
    */
   @Input() filterActive: boolean = false;
@@ -62,8 +57,6 @@ export class SideNavCompanionBarComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isFilterOpen = this.filterOpenByDefault;
-
     // If user opens side nav while filter is open on mobile, then collapse filter (as it doesn't render well) TODO: Change this when we have new drawer
     this.navService.sideNavCollapsed$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(sideNavCollapsed => {
       if (this.isFilterOpen && sideNavCollapsed && this.utilityService.getActiveBreakpoint() < Breakpoint.Tablet) {

@@ -14,7 +14,6 @@ import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.co
 import {ExternalSeriesCardComponent} from "../cards/external-series-card/external-series-card.component";
 import {ExternalListItemComponent} from "../cards/external-list-item/external-list-item.component";
 import {ListItemComponent} from "../cards/list-item/list-item.component";
-import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
 import {SafeHtmlPipe} from "../pipe/safe-html.pipe";
 import {TagBadgeComponent} from "../shared/tag-badge/tag-badge.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
@@ -37,6 +36,7 @@ import {
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 
 @NgModule({

@@ -1,36 +1,32 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  Input,
-  OnInit
-} from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { Router, RouterLink } from '@angular/router';
-import { Observable, of, ReplaySubject } from 'rxjs';
-import { debounceTime, map, take, tap, shareReplay } from 'rxjs/operators';
-import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
-import { SeriesAddedEvent } from 'src/app/_models/events/series-added-event';
-import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event';
-import { Library } from 'src/app/_models/library';
-import { RecentlyAddedItem } from 'src/app/_models/recently-added-item';
-import { Series } from 'src/app/_models/series';
-import { SortField } from 'src/app/_models/metadata/series-filter';
-import { SeriesGroup } from 'src/app/_models/series-group';
-import { AccountService } from 'src/app/_services/account.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { MessageHubService, EVENTS } from 'src/app/_services/message-hub.service';
-import { SeriesService } from 'src/app/_services/series.service';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {Title} from '@angular/platform-browser';
+import {Router, RouterLink} from '@angular/router';
+import {Observable, of, ReplaySubject} from 'rxjs';
+import {debounceTime, map, shareReplay, take, tap} from 'rxjs/operators';
+import {FilterQueryParam, FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
+import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
+import {Library} from 'src/app/_models/library';
+import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
+import {Series} from 'src/app/_models/series';
+import {SortField} from 'src/app/_models/metadata/series-filter';
+import {SeriesGroup} from 'src/app/_models/series-group';
+import {AccountService} from 'src/app/_services/account.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { CardItemComponent } from '../../cards/card-item/card-item.component';
-import { SeriesCardComponent } from '../../cards/series-card/series-card.component';
-import { CarouselReelComponent } from '../../carousel/_components/carousel-reel/carousel-reel.component';
-import { NgIf, AsyncPipe } from '@angular/common';
-import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {CardItemComponent} from '../../cards/card-item/card-item.component';
+import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
+import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
+import {AsyncPipe, NgIf} from '@angular/common';
+import {
+  SideNavCompanionBarComponent
+} from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 
 @Component({
     selector: 'app-dashboard',
@@ -61,6 +57,7 @@ export class DashboardComponent implements OnInit {
    */
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   private readonly destroyRef = inject(DestroyRef);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
@@ -138,9 +135,11 @@ export class DashboardComponent implements OnInit {
   }
 
   loadRecentlyAddedSeries() {
-    let api = this.seriesService.getRecentlyAdded(0, 1, 30);
+    let api = this.seriesService.getRecentlyAdded(1, 30);
     if (this.libraryId > 0) {
-      api = this.seriesService.getRecentlyAdded(this.libraryId, 1, 30);
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      filter.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+      api = this.seriesService.getRecentlyAdded(1, 30, filter);
     }
     api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
       this.recentlyAddedSeries = updatedSeries.result;

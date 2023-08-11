@@ -68,9 +68,9 @@ import { CarouselReelComponent } from '../../../carousel/_components/carousel-re
 import { SeriesMetadataDetailComponent } from '../series-metadata-detail/series-metadata-detail.component';
 import { ImageComponent } from '../../../shared/image/image.component';
 import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component';
-import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 
 interface RelatedSeriesPair {
   series: Series;
