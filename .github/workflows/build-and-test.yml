@@ -124,6 +124,12 @@ jobs:
             Read full changelog: https://github.com/Kareadita/Kavita/pull/${{ steps.findPr.outputs.pr }}"
           fi
 
+          body=${body//\'/}
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
 
@@ -211,7 +217,7 @@ jobs:
         with:
             severity: info
             description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
-            details: '${{ steps.parse-body.outputs.BODY }}'
+            details: '${{ steps.findPr.outputs.body }}'
             text: <@&939225459156217917> <@&939225350775406643>  A new nightly build has been released for docker.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
 
@@ -243,6 +249,12 @@ jobs:
             Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
           fi
 
+          body=${body//\'/}
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
           
@@ -333,7 +345,7 @@ jobs:
         with:
             severity: info
             description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
-            details: '${{ steps.parse-body.outputs.BODY }}'
+            details: '${{ steps.findPr.outputs.body }}'
             text: <@&939225192553644133> A new stable build has been released.
             webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
 
