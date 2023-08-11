@@ -61,7 +61,6 @@ export class FilterUtilitiesService {
             limitTo: 0
         };
 
-        console.log('navigating to: ', this.urlFromFilterV2(page.join('/') + '?', dto));
         this.router.navigateByUrl(this.urlFromFilterV2(page.join('/') + '?', dto));
     }
 
@@ -153,7 +152,6 @@ export class FilterUtilitiesService {
         if (stmtsStartIndex !== -1 && endIndex !== -1) {
             const stmtsEncoded = fullUrl.substring(stmtsStartIndex + 6, endIndex);
             filter.statements = this.decodeFilterStatements(stmtsEncoded);
-            console.log('statements: ', filter.statements);
         }
 
         if (queryParams.sortOptions) {

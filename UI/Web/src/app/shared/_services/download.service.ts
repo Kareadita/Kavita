@@ -228,7 +228,6 @@ export class DownloadService {
         ).pipe(
           throttleTime(DEBOUNCE_TIME, asyncScheduler, { leading: true, trailing: true }),
           download((blob, filename) => {
-            console.log('saving: ', filename)
             this.save(blob, decodeURIComponent(filename));
           }),
           tap((d) => this.updateDownloadState(d, downloadType, subtitle)),

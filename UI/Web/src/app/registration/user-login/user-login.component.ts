@@ -60,7 +60,7 @@ export class UserLoginComponent implements OnInit {
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
-      
+
       if (this.firstTimeFlow) {
         this.router.navigateByUrl('registration/register');
         return;
@@ -72,7 +72,6 @@ export class UserLoginComponent implements OnInit {
 
     this.route.queryParamMap.subscribe(params => {
       const val = params.get('apiKey');
-      console.log('key: ', val);
       if (val != null && val.length > 0) {
         this.login(val);
       }

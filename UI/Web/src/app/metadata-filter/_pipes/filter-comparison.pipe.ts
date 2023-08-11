@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FilterComparison } from 'src/app/_models/metadata/v2/filter-comparison';
+import {translate} from "@ngneat/transloco";
 
 @Pipe({
   name: 'filterComparison',
@@ -10,35 +11,35 @@ export class FilterComparisonPipe implements PipeTransform {
   transform(value: FilterComparison): string {
     switch (value) {
       case FilterComparison.BeginsWith:
-        return 'Begins with';
+        return translate('filter-comparison-pipe.begins-with');
       case FilterComparison.Contains:
-        return 'Contains';
+        return translate('filter-comparison-pipe.contains');
       case FilterComparison.Equal:
-        return 'Equal';
+        return translate('filter-comparison-pipe.equal');
       case FilterComparison.GreaterThan:
-        return 'Greater than';
+        return translate('filter-comparison-pipe.greater-than');
       case FilterComparison.GreaterThanEqual:
-        return 'Greater than or equal';
+        return translate('filter-comparison-pipe.greater-than-or-equal');
       case FilterComparison.LessThan:
-        return 'Less than';
+        return translate('filter-comparison-pipe.less-than');
       case FilterComparison.LessThanEqual:
-        return 'Less than or equal';
+        return translate('filter-comparison-pipe.less-than-or-equal');
       case FilterComparison.Matches:
-        return 'Matches';
+        return translate('filter-comparison-pipe.matches');
       case FilterComparison.NotContains:
-        return 'Does not contain';
+        return translate('filter-comparison-pipe.does-not-contain');
       case FilterComparison.NotEqual:
-        return 'Not equal';
+        return translate('filter-comparison-pipe.not-equal');
       case FilterComparison.EndsWith:
-        return 'Ends with';
+        return translate('filter-comparison-pipe.ends-with');
       case FilterComparison.IsBefore:
-        return 'Is before';
+        return translate('filter-comparison-pipe.is-before');
       case FilterComparison.IsAfter:
-        return 'Is after';
+        return translate('filter-comparison-pipe.is-after');
       case FilterComparison.IsInLast:
-        return 'Is in last';
+        return translate('filter-comparison-pipe.is-in-last');
       case FilterComparison.IsNotInLast:
-        return 'Is not in last';
+        return translate('filter-comparison-pipe.is-not-in-last');
       default:
         throw new Error(`Invalid FilterComparison value: ${value}`);
     }

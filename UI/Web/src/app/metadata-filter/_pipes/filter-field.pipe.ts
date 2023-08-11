@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { FilterField } from 'src/app/_models/metadata/v2/filter-field';
+import {translate} from "@ngneat/transloco";
 
 @Pipe({
   name: 'filterField',
@@ -10,53 +11,53 @@ export class FilterFieldPipe implements PipeTransform {
   transform(value: FilterField): string {
     switch (value) {
       case FilterField.AgeRating:
-        return 'Age Rating';
+        return translate('filter-field-pipe.age-rating');
       case FilterField.Characters:
-        return 'Characters';
+        return translate('filter-field-pipe.characters');
       case FilterField.CollectionTags:
-        return 'Collection Tags';
+        return translate('filter-field-pipe.collection-tags');
       case FilterField.Colorist:
-        return 'Colorist';
+        return translate('filter-field-pipe.colorist');
       case FilterField.CoverArtist:
-        return 'Cover Artist';
+        return translate('filter-field-pipe.cover-artist');
       case FilterField.Editor:
-        return 'Editor';
+        return translate('filter-field-pipe.editor');
       case FilterField.Formats:
-        return 'Formats';
+        return translate('filter-field-pipe.formats');
       case FilterField.Genres:
-        return 'Genres';
+        return translate('filter-field-pipe.genres');
       case FilterField.Inker:
-        return 'Inker';
+        return translate('filter-field-pipe.inker');
       case FilterField.Languages:
-        return 'Languages';
+        return translate('filter-field-pipe.languages');
       case FilterField.Libraries:
-        return 'Libraries';
+        return translate('filter-field-pipe.libraries');
       case FilterField.Letterer:
-        return 'Letterer';
+        return translate('filter-field-pipe.letterer');
       case FilterField.PublicationStatus:
-        return 'Publication Status';
+        return translate('filter-field-pipe.publication-status');
       case FilterField.Penciller:
-        return 'Penciller';
+        return translate('filter-field-pipe.penciller');
       case FilterField.Publisher:
-        return 'Publisher';
+        return translate('filter-field-pipe.publisher');
       case FilterField.ReadProgress:
-        return 'Read Progress';
+        return translate('filter-field-pipe.read-progress');
       case FilterField.ReadTime:
-        return 'Read Time';
+        return translate('filter-field-pipe.read-time');
       case FilterField.ReleaseYear:
-        return 'Release Year';
+        return translate('filter-field-pipe.release-year');
       case FilterField.SeriesName:
-        return 'Series Name';
+        return translate('filter-field-pipe.series-name');
       case FilterField.Summary:
-        return 'Summary';
+        return translate('filter-field-pipe.summary');
       case FilterField.Tags:
-        return 'Tags';
+        return translate('filter-field-pipe.tags');
       case FilterField.Translators:
-        return 'Translators';
+        return translate('filter-field-pipe.translators');
       case FilterField.UserRating:
-        return 'User Rating';
+        return translate('filter-field-pipe.user-rating');
       case FilterField.Writers:
-        return 'Writers';
+        return translate('filter-field-pipe.writers');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

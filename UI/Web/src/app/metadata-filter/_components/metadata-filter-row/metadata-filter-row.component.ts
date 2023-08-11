@@ -101,7 +101,6 @@ export class MetadataFilterRowComponent implements OnInit {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
-    //console.log('Filter row setup')
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));

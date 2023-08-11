@@ -171,10 +171,6 @@ export class LibraryDetailComponent implements OnInit {
     this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
     this.filterActiveCheck.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
 
-    console.log('deep equal: ', this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck))
-
-    console.log('filter preset: ', this.filterV2)
-
     this.filterSettings.presetsV2 =  this.filterV2;
 
     this.cdRef.markForCheck();
@@ -278,7 +274,6 @@ export class LibraryDetailComponent implements OnInit {
     this.filterActive = !this.utilityService.deepEqual(this.filterV2, this.filterActiveCheck);
     this.cdRef.markForCheck();
 
-    console.log('Searching for ', this.filterV2);
     this.seriesService.getSeriesForLibraryV2(undefined, undefined, this.filterV2)
       .subscribe(series => {
       this.series = series.result;

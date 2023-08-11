@@ -173,7 +173,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   applyMetadataFilter(event: FilterEvent) {
-    console.log('card-detail-layout applying metadata filter: ', event);
     this.applyFilter.emit(event);
     this.updateApplied++;
     this.filter = event.filterV2;

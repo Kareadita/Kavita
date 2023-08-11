@@ -23,6 +23,7 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {allFields, FilterField} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs/operators";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-metadata-builder',
@@ -37,7 +38,8 @@ import {tap} from "rxjs/operators";
     FormsModule,
     NgbTooltip,
     UpperCasePipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslocoDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -56,17 +58,17 @@ export class MetadataBuilderComponent implements OnInit {
   formGroup: FormGroup = new FormGroup({});
 
   groupOptions: Array<{value: FilterCombination, title: string}> = [
-    {value: FilterCombination.Or, title: 'Match any of the following'},
-    {value: FilterCombination.And, title: 'Match all of the following'},
+    {value: FilterCombination.Or, title: translate('metadata-builder.or')},
+    {value: FilterCombination.And, title: translate('metadata-builder.and')},
   ];
 
   get Breakpoint() { return Breakpoint; }
 
 
   ngOnInit() {
-    console.log('Filter: ', this.filter);
     if (this.filter === undefined) {
-      console.log('No filter, creating one in metadata-builder')
+      // I've left this in to see if it ever happens or not
+      console.error('No filter, creating one in metadata-builder')
       // If there is no default preset, let's open with series name
       this.filter = this.filterUtilityService.createSeriesV2Filter();
       this.filter.statements.push({

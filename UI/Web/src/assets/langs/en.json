@@ -1689,6 +1689,58 @@
         "invalid-password-reset-url": "Invalid reset password url"
     },
 
+    "metadata-builder": {
+        "or": "Match any of the following",
+        "and": "Match all of the following",
+        "add-rule": "Add Rule",
+        "remove-rule": "Remove Row {{num}}"
+    },
+
+    "filter-field-pipe": {
+        "age-rating": "Age Rating",
+        "characters": "Characters",
+        "collection-tags": "Collection Tags",
+        "colorist": "Colorist",
+        "cover-artist": "Cover Artist",
+        "editor": "Editor",
+        "formats": "Formats",
+        "genres": "Genres",
+        "inker": "Inker",
+        "languages": "Languages",
+        "libraries": "Libraries",
+        "letterer": "Letterer",
+        "publication-status": "Publication Status",
+        "penciller": "Penciller",
+        "publisher": "Publisher",
+        "read-progress": "Read Progress",
+        "read-time": "Read Time",
+        "release-year": "Release Year",
+        "series-name": "Series Name",
+        "summary": "Summary",
+        "tags": "Tags",
+        "translators": "Translators",
+        "user-rating": "User Rating",
+        "writers": "Writers"
+    },
+
+    "filter-comparison-pipe": {
+        "begins-with": "Begins with",
+        "contains": "Contains",
+        "equal": "Equal",
+        "greater-than": "Greater than",
+        "greater-than-or-equal": "Greater than or equal",
+        "less-than": "Less than",
+        "less-than-or-equal": "Less than or equal",
+        "matches": "Matches",
+        "does-not-contain": "Does not contain",
+        "not-equal": "Not equal",
+        "ends-with": "Ends with",
+        "is-before": "Is before",
+        "is-after": "Is after",
+        "is-in-last": "Is in last",
+        "is-not-in-last": "Is not in last"
+    },
+
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",

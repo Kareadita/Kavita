@@ -140,7 +140,6 @@ export class MetadataFilterComponent implements OnInit {
     this.fullyLoaded = false;
 
     this.filterV2 = this.deepClone(this.filterSettings.presetsV2);
-    console.log('filterV2: ', this.filterV2);
 
     this.sortGroup = new FormGroup({
       sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
@@ -179,11 +178,6 @@ export class MetadataFilterComponent implements OnInit {
   }
 
   clear() {
-    // this.filterV2 = this.filterUtilityService.createSeriesV2Filter();
-    //
-    // this.sortGroup.get('sortField')?.setValue(this.filterV2.sortOptions?.sortField);
-    // this.isAscendingSort = this.filterV2.sortOptions?.isAscending!;
-    // this.cdRef.markForCheck();
     // Apply any presets which will trigger the "apply"
     this.loadFromPresetsAndSetup();
   }
