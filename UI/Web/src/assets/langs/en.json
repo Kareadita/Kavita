@@ -1436,7 +1436,7 @@
         "close-reader-alt": "Close Reader"
     },
 
-    "infinite-reader": {
+    "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Scroll up to move to previous chapter",
         "continuous-reading-prev-chapter": "Previous Chapter",
         "continuous-reading-next-chapter-alt": "Scroll up to move to next chapter",
