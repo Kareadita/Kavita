@@ -169,10 +169,10 @@
         "theme-white": "weiß"
     },
     "restriction-selector": {
-        "title": "",
+        "title": "Altersbeschränkung",
         "description": "",
-        "not-applicable-for-admins": "",
-        "age-rating-label": "",
+        "not-applicable-for-admins": "Admins sind davon nicht betroffen.",
+        "age-rating-label": "Altersfreigabe",
         "no-restriction": "Keine Einschränkung",
         "include-unknowns-label": "Unbekannte einbeziehen",
         "include-unknowns-tooltip": ""
@@ -182,12 +182,12 @@
         "user": "Benutzer"
     },
     "manage-devices": {
-        "title": "",
+        "title": "Gerätemanager",
         "description": "",
-        "devices-title": "",
-        "no-devices": "",
-        "platform-label": "",
-        "email-label": "",
+        "devices-title": "Geräte",
+        "no-devices": "Es ist noch kein Gerät eingerichtet",
+        "platform-label": "Plattform: ",
+        "email-label": "E-Mail: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
@@ -203,20 +203,20 @@
     },
     "change-password": {
         "password-label": "{{common.password}}",
-        "current-password-label": "",
-        "new-password-label": "",
+        "current-password-label": "Aktuelles Passwort",
+        "new-password-label": "Neues Passwort",
         "confirm-password-label": "",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "passwords-must-match": "",
+        "passwords-must-match": "Passwörter müssen übereinstimmen",
         "permission-error": ""
     },
     "change-email": {
         "email-label": "{{common.email}}",
-        "current-password-label": "",
+        "current-password-label": "Aktuelles Passwort",
         "email-not-confirmed": "",
         "email-updated-title": "",
         "email-updated-description": "",
@@ -698,7 +698,7 @@
         "manage-collection-label": "",
         "manage-collection-tooltip": "",
         "manage-reading-list-label": "Leselisten verwalten",
-        "manage-reading-list-tooltip": "Soll Kavita Leselisten aus den Tags StoryArc/StoryArcNumber und AlternativeSeries/AlternativeCount in den ComicInfo.xml/opf-Dateien erstellen?",
+        "manage-reading-list-tooltip": "Soll Kavita Leselisten aus den Tags StoryArc/StoryArcNumber und AlternativeSeries/AlternativeCount in den ComicInfo.xml/opf-Dateien erstellen",
         "allow-scrobbling-label": "",
         "allow-scrobbling-tooltip": "",
         "folder-watching-label": "",
