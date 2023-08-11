@@ -746,7 +746,9 @@ public class OpdsController : BaseApiController
         {
             Id = seriesDto.Id.ToString(),
             Title = $"{seriesDto.Name}",
-            Summary = $"Format: {seriesDto.Format}    Summary: {metadata.Summary}",
+            Summary = $"Format: {seriesDto.Format}" + (string.IsNullOrWhiteSpace(metadata.Summary)
+                ? string.Empty
+                : $"     Summary: {metadata.Summary}"),
             Authors = metadata.Writers.Select(p => new FeedAuthor()
             {
                 Name = p.Name,
