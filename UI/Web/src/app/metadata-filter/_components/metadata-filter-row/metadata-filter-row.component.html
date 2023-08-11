@@ -1,7 +1,7 @@
 
 <form [formGroup]="formGroup">
     <div class="row g-0">
-        <div class="col-md-3 me-2">
+        <div class="col-md-3 me-2 col-10">
             <ng-container *ngIf="formGroup.get('input') as control">
                 <select class="form-select me-2" formControlName="input">
                     <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
@@ -9,13 +9,13 @@
             </ng-container>
         </div>
 
-        <div class="col-md-2 me-2">
+        <div class="col-md-2 me-2 col-10">
             <select class="col-auto form-select" formControlName="comparison">
                 <option *ngFor="let comparison of validComparisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
             </select>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-4 col-10">
             <ng-container *ngIf="predicateType$ | async as predicateType">
                 <ng-container [ngSwitch]="predicateType">
                     <ng-container *ngSwitchCase="PredicateType.Text">
