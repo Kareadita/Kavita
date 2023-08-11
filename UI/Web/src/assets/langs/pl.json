@@ -1,19 +1,19 @@
 {
     "login": {
-        "title": "",
+        "title": "Login",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "",
+        "forgot-password": "Zapomniałeś hasła?",
         "submit": "{{common.submit}}"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
+        "no-libraries": "W tej chwili nie ma zdefiniowanych bibliotek. Zmień ustawienia w",
+        "server-settings-link": "Ustawienia serwera",
         "not-granted": "",
         "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "recently-updated-title": "Ostatnio Zaktualizowane Serie",
+        "recently-added-title": "Nowo Dodane Serie"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -23,7 +23,7 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "",
+        "saving": "Zapisuję…",
         "update": ""
     },
     "user-scrobble-history": {
