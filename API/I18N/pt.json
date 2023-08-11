@@ -151,5 +151,8 @@
     "browse-libraries": "Explorar por Bibliotecas",
     "browse-collections": "Explorar por Coleções",
     "invalid-payload": "Payload inválido",
-    "scrobble-bad-payload": "Payload inválido de Fornecedor de Scrobble"
+    "scrobble-bad-payload": "Payload inválido de Fornecedor de Scrobble",
+    "on-deck": "Continuar a Ler",
+    "browse-on-deck": "Explorar Continuar a Ler",
+    "issue-num": "Número {0}{1}"
 }

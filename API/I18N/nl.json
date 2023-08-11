@@ -154,5 +154,7 @@
     "book-num": "Boek {0}",
     "issue-num": "Uitgave {0}{1}",
     "chapter-num": "Hoofdstuk {0}",
-    "generic-scrobble-hold": "Er is een fout opgetreden bij het toevoegen van de bewaarplicht"
+    "generic-scrobble-hold": "Er is een fout opgetreden bij het toevoegen van de bewaarplicht",
+    "on-deck": "Aan het lezen",
+    "browse-on-deck": "Aan Het Lezen doorbladeren"
 }
