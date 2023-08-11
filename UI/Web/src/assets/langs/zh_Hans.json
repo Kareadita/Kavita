@@ -171,30 +171,30 @@
     "restriction-selector": {
         "title": "年龄分级限制",
         "description": "",
-        "not-applicable-for-admins": "",
-        "age-rating-label": "",
-        "no-restriction": "",
-        "include-unknowns-label": "",
-        "include-unknowns-tooltip": ""
+        "not-applicable-for-admins": "不适用于管理员。",
+        "age-rating-label": "年龄分级",
+        "no-restriction": "无限制",
+        "include-unknowns-label": "包含未知内容",
+        "include-unknowns-tooltip": "选中此项，那么未知内容将在年龄限制下被允许。这可能导致未标记的媒体泄露给有年龄限制的用户。"
     },
     "site-theme-provider-pipe": {
-        "system": "",
-        "user": ""
+        "system": "系统",
+        "user": "用户"
     },
     "manage-devices": {
-        "title": "",
-        "description": "",
-        "devices-title": "",
-        "no-devices": "",
-        "platform-label": "",
-        "email-label": "",
-        "add": "",
-        "delete": "",
+        "title": "设备管理",
+        "description": "此部分是为您设置无法通过Web浏览器连接到Kavita的设备而设计的，而是具有接收文件的电子邮件地址。",
+        "devices-title": "设备",
+        "no-devices": "目前还没有设置任何设备",
+        "platform-label": "设备平台: ",
+        "email-label": "邮件地址: ",
+        "add": "{{common.add}}",
+        "delete": "{{common.delete}}",
         "edit": "{{common.edit}}"
     },
     "edit-device": {
         "device-name-label": "设备名称",
-        "email-label": "",
+        "email-label": "{{common.email}}",
         "email-tooltip": "",
         "device-platform-label": "",
         "save": "",
