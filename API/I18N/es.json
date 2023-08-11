@@ -4,5 +4,16 @@
     "disabled-account": "La cuenta está deshabilitada. Contacta con un administrador.",
     "validate-email": "Ha habido un error al validar el correo: {0}",
     "locked-out": "Se ha bloqueado el acceso debido a demasiados intentos. Por favor espera 10 minutos.",
-    "register-user": "Ha ocurrido un error registrando el usuario"
+    "register-user": "Ha ocurrido un error registrando el usuario",
+    "denied": "No permitido",
+    "permission-denied": "No estás autorizado a realizar esta operación",
+    "password-required": "Debes introducir tu contraseña para cambiar tu cuenta, excepto si eres administrador",
+    "invalid-password": "Contraseña incorrecta",
+    "invalid-token": "Token incorrecto",
+    "unable-to-reset-key": "Algo fue mal, no fue posible reiniciar la clave",
+    "confirm-token-gen": "Ha habido un problema generando el token de confirmación",
+    "invalid-payload": "Paquete no válido",
+    "nothing-to-do": "Nada que hacer",
+    "share-multiple-emails": "No puedes compartir correos electrónicos entre varias cuentas",
+    "generate-token": "Ha habido un problema generando un token de confirmación. Comprueba los registros"
 }
