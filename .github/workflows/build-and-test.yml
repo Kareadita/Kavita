@@ -124,12 +124,6 @@ jobs:
             Read full changelog: https://github.com/Kareadita/Kavita/pull/${{ steps.findPr.outputs.pr }}"
           fi
 
-          body=${body//\'/}
-          body=${body//'%'/'%25'}
-          body=${body//$'\n'/'%0A'}
-          body=${body//$'\r'/'%0D'}
-          body=${body//$'`'/'%60'}
-          body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
 
@@ -249,12 +243,6 @@ jobs:
             Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
           fi
 
-          body=${body//\'/}
-          body=${body//'%'/'%25'}
-          body=${body//$'\n'/'%0A'}
-          body=${body//$'\r'/'%0D'}
-          body=${body//$'`'/'%60'}
-          body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
           
