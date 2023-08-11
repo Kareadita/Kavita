@@ -770,51 +770,51 @@
     },
     "bulk-operations": {
         "title": "",
-        "items-selected": "",
-        "mark-as-unread": "",
-        "mark-as-read": "",
-        "deselect-all": ""
+        "items-selected": "{{num}} itens selecionados",
+        "mark-as-unread": "Marcar como Não Lido",
+        "mark-as-read": "Marcar como Lido",
+        "deselect-all": "{{common.deselect-all}}"
     },
     "card-detail-drawer": {
-        "general-tab": "",
-        "metadata-tab": "",
-        "cover-tab": "",
+        "general-tab": "Geral",
+        "metadata-tab": "Metadados",
+        "cover-tab": "Capa",
         "info-tab": "",
-        "no-summary": "",
-        "writers-title": "",
-        "genres-title": "",
-        "publishers-title": "",
-        "tags-title": "",
-        "not-defined": "",
-        "read": "",
-        "unread": "",
-        "files": "",
-        "pages": "",
-        "added": "",
-        "size": ""
+        "no-summary": "Nenhum Resumo disponível.",
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "genres-title": "{{series-metadata-detail.genres-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "tags-title": "{{series-metadata-detail.tags-title}}",
+        "not-defined": "Não definido",
+        "read": "{{common.read}}",
+        "unread": "Não Lido",
+        "files": "Arquivos",
+        "pages": "Páginas:",
+        "added": "Adicionado:",
+        "size": "Tamanho:"
     },
     "card-detail-layout": {
-        "total-items": ""
+        "total-items": "{{count}} itens no total"
     },
     "card-item": {
-        "cannot-read": ""
+        "cannot-read": "Não foi Possível Ler"
     },
     "chapter-metadata-detail": {
-        "no-data": "",
-        "writers-title": "",
-        "publishers-title": "",
-        "characters-title": "",
-        "translators-title": "",
-        "letterers-title": "",
-        "colorists-title": "",
-        "inkers-title": "",
-        "pencillers-title": "",
-        "cover-artists-title": "",
-        "editors-title": ""
+        "no-data": "Nenhum metadado disponível",
+        "writers-title": "{{series-metadata-detail.writers-title}}",
+        "publishers-title": "{{series-metadata-detail.publishers-title}}",
+        "characters-title": "{{series-metadata-detail.characters-title}}",
+        "translators-title": "{{series-metadata-detail.translators-title}}",
+        "letterers-title": "{{series-metadata-detail.letterers-title}}",
+        "colorists-title": "{{series-metadata-detail.colorists-title}}",
+        "inkers-title": "{{series-metadata-detail.inkers-title}}",
+        "pencillers-title": "{{series-metadata-detail.pencillers-title}}",
+        "cover-artists-title": "{{series-metadata-detail.cover-artists-title}}",
+        "editors-title": "{{series-metadata-detail.editors-title}}"
     },
     "cover-image-chooser": {
-        "drag-n-drop": "",
-        "upload": "",
+        "drag-n-drop": "Arrastar e soltar",
+        "upload": "Enviar",
         "upload-continued": "",
         "url-label": "",
         "load": "",
