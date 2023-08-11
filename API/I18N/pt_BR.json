@@ -153,5 +153,8 @@
     "generic-read-progress": "Ocorreu um problema ao salvar o progresso",
     "generic-clear-bookmarks": "Não foi possível limpar os marcadores",
     "reading-list-permission": "Você não tem permissões nesta lista de leitura ou a lista não existe",
-    "reading-list-item-delete": "Não foi possível excluir os itens"
+    "reading-list-item-delete": "Não foi possível excluir os itens",
+    "invalid-payload": "Carga inválida",
+    "issue-num": "Número {0}{1}",
+    "chapter-num": "Capítulo {0}"
 }
