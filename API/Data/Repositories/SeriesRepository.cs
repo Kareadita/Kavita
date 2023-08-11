@@ -123,6 +123,7 @@ public interface ISeriesRepository
     Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId);
     Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId);
     Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter);
+    Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId);
     Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None);
@@ -920,7 +921,7 @@ public class SeriesRepository : ISeriesRepository
         return query.AsSplitQuery();
     }
 
-    private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter, QueryContext queryContext)
+    private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter, QueryContext queryContext, IQueryable<Series>? query = null)
     {
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext);
@@ -929,7 +930,7 @@ public class SeriesRepository : ISeriesRepository
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync();
 
-        var query = _context.Series
+        query ??= _context.Series
             .AsNoTracking();
 
         var filterLibs = new List<int>();
@@ -1725,6 +1726,21 @@ public class SeriesRepository : ISeriesRepository
             .AsNoTracking();
 
         var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
+
+        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter)
+    {
+        var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
+        var query = _context.AppUser
+            .Where(user => user.Id == userId)
+            .SelectMany(u => u.WantToRead)
+            .Where(s => libraryIds.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        var filteredQuery = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.None, query);
 
         return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectTo<SeriesDto>(_mapper.ConfigurationProvider), userParams.PageNumber, userParams.PageSize);
     }
