@@ -74,7 +74,7 @@
     },
     "want-to-read": {
         "title": "准备阅读",
-        "series-count": "",
+        "series-count": "{{common.series-count}}",
         "no-items": "尚无项目，试着添加系列。",
         "no-items-filtered": "没有项目与当前筛选器匹配。"
     },
@@ -143,8 +143,8 @@
         "clients-opds-description": "",
         "clients-api-key-tooltip": "API密钥就像是一个密码,请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
-        "reset": "",
-        "save": ""
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}"
     },
     "user-holds": {
         "title": "",
@@ -157,19 +157,19 @@
         "scan": "扫描",
         "site-themes": "网站主题",
         "set-default": "设为默认值",
-        "apply": "",
-        "applied": "",
-        "updated-toastr": "",
-        "scan-queued": ""
+        "apply": "{{common.apply}}",
+        "applied": "已应用",
+        "updated-toastr": "网站默认值已更新为{{name}}",
+        "scan-queued": "网站主题扫描已进入队列"
     },
     "theme": {
-        "theme-dark": "",
-        "theme-black": "",
-        "theme-paper": "",
-        "theme-white": ""
+        "theme-dark": "黑暗",
+        "theme-black": "黑色",
+        "theme-paper": "纸张",
+        "theme-white": "白色"
     },
     "restriction-selector": {
-        "title": "",
+        "title": "年龄分级限制",
         "description": "",
         "not-applicable-for-admins": "",
         "age-rating-label": "",
@@ -190,10 +190,10 @@
         "email-label": "",
         "add": "",
         "delete": "",
-        "edit": ""
+        "edit": "{{common.edit}}"
     },
     "edit-device": {
-        "device-name-label": "",
+        "device-name-label": "设备名称",
         "email-label": "",
         "email-tooltip": "",
         "device-platform-label": "",
