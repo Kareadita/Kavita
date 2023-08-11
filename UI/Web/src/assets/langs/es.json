@@ -95,7 +95,6 @@
         "sort-by-label": "Ordenar Por",
         "ascending-alt": "Ascendente",
         "descending-alt": "Descendente",
-        "format-tooltip": "Es independiente de la biblioteca",
         "cover-artist-label": "Artista de la Portada"
     },
     "manga-reader": {
@@ -149,10 +148,6 @@
         "dark-theme-alt": "Tema oscuro",
         "loading-message": "Cargando……los PDF pueden ser más lentos de lo esperado",
         "close-reader-alt": "Cerrar Lector"
-    },
-    "infinite-reader": {
-        "continuous-reading-prev-chapter": "Capítulo anterior",
-        "continuous-reading-next-chapter": "Capítulo siguiente"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progreso de lectura",
