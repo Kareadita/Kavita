@@ -829,12 +829,12 @@
         "progress": "{{percentage}}% baixado"
     },
     "edit-series-relation": {
-        "description-part-1": "",
-        "description-part-2": "",
-        "target-series": "",
-        "relationship": "",
-        "remove": "",
-        "add-relationship": "",
+        "description-part-1": "Não tem certeza de qual relacionamento adicionar? Veja nosso",
+        "description-part-2": "wiki para dicas.",
+        "target-series": "Série de Destino",
+        "relationship": "Relação",
+        "remove": "Remover",
+        "add-relationship": "Adicionar Relação",
         "parent": ""
     },
     "entity-info-cards": {
