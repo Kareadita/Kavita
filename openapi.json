@@ -13586,7 +13586,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "The name of the filter if not anonymous",
+            "description": "The name of the filter",
             "nullable": true
           },
           "statements": {

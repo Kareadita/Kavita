@@ -204,6 +204,8 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries/{library.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/library-cover?libraryId={library.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/library-cover?libraryId={library.Id}&apiKey={apiKey}")
                 }
             });
         }
@@ -382,12 +384,14 @@ public class OpdsController : BaseApiController
         }
 
         var filter = new FilterV2Dto();
-        filter.Statements.Add(new FilterStatementDto()
-        {
-            Comparison = FilterComparison.Equal,
-            Field = FilterField.Libraries,
-            Value = libraryId + string.Empty
-        });
+        filter.Statements = new List<FilterStatementDto>() {
+            new FilterStatementDto()
+                {
+                    Comparison = FilterComparison.Equal,
+                    Field = FilterField.Libraries,
+                    Value = libraryId + string.Empty
+                }
+        };
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(pageNumber), filter);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));

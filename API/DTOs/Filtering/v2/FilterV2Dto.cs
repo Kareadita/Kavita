@@ -14,12 +14,12 @@ namespace API.DTOs.Filtering.v2;
 public class FilterV2Dto
 {
     /// <summary>
-    /// The name of the filter if not anonymous
+    /// The name of the filter
     /// </summary>
     public string? Name { get; set; }
-    public ICollection<FilterStatementDto> Statements { get; set; }
+    public ICollection<FilterStatementDto> Statements { get; set; } = new List<FilterStatementDto>();
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public SortOptions SortOptions { get; set; } // TODO: Solve for how to do this and have it serializable to DB
+    public SortOptions SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)
