@@ -10,7 +10,6 @@ import { MangaFormat } from '../_models/manga-format';
 import { BookmarkInfo } from '../_models/manga-reader/bookmark-info';
 import { PageBookmark } from '../_models/readers/page-bookmark';
 import { ProgressBookmark } from '../_models/readers/progress-bookmark';
-import { SeriesFilter } from '../_models/metadata/series-filter';
 import { UtilityService } from '../shared/_services/utility.service';
 import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { FileDimension } from '../manga-reader/_models/file-dimension';

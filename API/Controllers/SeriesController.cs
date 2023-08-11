@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -234,7 +235,7 @@ public class SeriesController : BaseApiController
     }
 
     /// <summary>
-    /// Gets all recently added series
+    /// Gets all recently added series. Obsolete, use recently-added-v2
     /// </summary>
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
@@ -242,11 +243,36 @@ public class SeriesController : BaseApiController
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
+    [Obsolete("use recently-added-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Gets all recently added series
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [ResponseCache(CacheProfileName = "Instant")]
+    [HttpPost("recently-added-v2")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var series =
+            await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
         if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
@@ -297,16 +323,15 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// Fetches series that are on deck aka have progress on them.
     /// </summary>
-    /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("on-deck")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
+        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, null);
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
 
@@ -314,6 +339,7 @@ public class SeriesController : BaseApiController
 
         return Ok(pagedList);
     }
+
 
     /// <summary>
     /// Removes a series from displaying on deck until the next read event on that series

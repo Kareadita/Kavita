@@ -23,7 +23,7 @@ import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event'
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { SeriesFilter, FilterEvent } from 'src/app/_models/metadata/series-filter';
+import { FilterEvent } from 'src/app/_models/metadata/series-filter';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';

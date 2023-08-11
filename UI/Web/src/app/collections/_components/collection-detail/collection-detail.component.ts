@@ -28,7 +28,7 @@ import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesFilter, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';

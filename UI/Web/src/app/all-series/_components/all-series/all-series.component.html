@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'all-series'">
-  <app-side-nav-companion-bar [hasFilter]="true" [filterOpenByDefault]="filterSettings.openByDefault" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+  <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
     <h2 title>
       {{title}}
     </h2>

@@ -20,7 +20,7 @@ import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { FilterEvent, SeriesFilter } from 'src/app/_models/metadata/series-filter';
+import { FilterEvent } from 'src/app/_models/metadata/series-filter';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';

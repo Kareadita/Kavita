@@ -7777,7 +7777,7 @@
         "tags": [
           "Series"
         ],
-        "summary": "Gets all recently added series",
+        "summary": "Gets all recently added series. Obsolete, use recently-added-v2",
         "parameters": [
           {
             "name": "PageNumber",
@@ -7823,6 +7823,85 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/FilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SeriesDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/api/Series/recently-added-v2": {
+      "post": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Gets all recently added series",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "description": "If set to 0, will set as MaxInt",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -8022,26 +8101,6 @@
             }
           }
         ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Success",

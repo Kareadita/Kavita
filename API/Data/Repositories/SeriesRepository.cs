@@ -99,8 +99,9 @@ public interface ISeriesRepository
     /// <returns></returns>
     Task AddSeriesModifiers(int userId, IList<SeriesDto> series);
     Task<string?> GetSeriesCoverImageAsync(int seriesId);
-    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter);
+    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter);
     Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter);
+    Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter);
     Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams);
     Task<IList<MangaFile>> GetFilesForSeries(int seriesId);
@@ -661,7 +662,6 @@ public class SeriesRepository : ISeriesRepository
     }
 
 
-
     /// <summary>
     /// Returns a list of Series that were added, ordered by Created desc
     /// </summary>
@@ -673,6 +673,19 @@ public class SeriesRepository : ISeriesRepository
     public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.Dashboard);
+
+        var retSeries = query
+            .OrderByDescending(s => s.Created)
+            .ProjectTo<SeriesDto>(_mapper.ConfigurationProvider)
+            .AsSplitQuery()
+            .AsNoTracking();
+
+        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public async Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter)
+    {
+        var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.Dashboard);
 
         var retSeries = query
             .OrderByDescending(s => s.Created)
@@ -776,7 +789,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userParams">Pagination information</param>
     /// <param name="filter">Optional (default null) filter on query</param>
     /// <returns></returns>
-    public async Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto filter)
+    public async Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter)
     {
         var settings = await _context.ServerSetting
             .Select(x => x)
@@ -796,11 +809,6 @@ public class SeriesRepository : ISeriesRepository
             .Where(d => d.AppUserId == userId)
             .Select(d => d.SeriesId)
             .AsEnumerable();
-
-        // var onDeckRemovals = _context.AppUser.Where(u => u.Id == userId)
-        //     .SelectMany(u => u.OnDeckRemovals.Select(d => d.Id))
-        //     .AsEnumerable();
-
 
         var query = _context.Series
             .Where(s => usersSeriesIds.Contains(s.Id))
@@ -927,13 +935,17 @@ public class SeriesRepository : ISeriesRepository
         var filterLibs = new List<int>();
 
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
-        foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
+        if (filter.Statements != null)
         {
-            filterLibs.Add(int.Parse(stmt.Value));
+            foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
+            {
+                filterLibs.Add(int.Parse(stmt.Value));
+            }
+
+            // Remove as filterLibs now has everything
+            filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
         }
 
-        // Remove as filterLibs now has everything
-        filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
 
         query = BuildFilterQuery(userId, filter, query);
 
@@ -957,7 +969,7 @@ public class SeriesRepository : ISeriesRepository
 
     private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query)
     {
-        if (!filterDto.Statements.Any()) return query;
+        if (filterDto.Statements == null || !filterDto.Statements.Any()) return query;
 
 
         var queries = filterDto.Statements

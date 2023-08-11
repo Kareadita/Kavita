@@ -1,4 +1,3 @@
-import { SeriesFilter } from "../_models/metadata/series-filter";
 import { SeriesFilterV2 } from "../_models/metadata/v2/series-filter-v2";
 
 export class FilterSettings {
@@ -15,9 +14,4 @@ export class FilterSettings {
     languageDisabled = false;
     publicationStatusDisabled = false;
     presetsV2: SeriesFilterV2 | undefined;
-    /**
-     * Should the filter section be open by default
-     * @deprecated This is deprecated UX pattern. New style is to show highlight on filter button.
-     */
-    openByDefault = false;
   }
