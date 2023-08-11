@@ -1323,7 +1323,8 @@
         "read": "{{common.read}}",
         "read-options-alt": "Read options",
         "incognito-alt": "(Incognito)",
-        "no-data": "Nothing added"
+        "no-data": "Nothing added",
+        "characters-title": "{{series-metadata-detail.characters-title}}"
     },
 
     "events-widget": {
@@ -1816,7 +1817,8 @@
         "alert-bad-theme": "There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.",
         "confirm-library-delete": "Are you sure you want to delete the {{name}} library? You cannot undo this action.",
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",
-        "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?"
+        "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
+        "list-doesnt-exist": "This list doesn't exist"
     },
 
     "actionable": {

@@ -101,7 +101,8 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   }
 
   goTo(queryParamName: FilterField, filter: any) {
-    this.filterUtilityService.applyFilter(['library', this.series.libraryId], queryParamName, FilterComparison.Equal, filter);
+    this.filterUtilityService.applyFilter(['library', this.series.libraryId], queryParamName,
+        FilterComparison.Equal, filter);
   }
 
   navigate(basePage: string, id: number) {

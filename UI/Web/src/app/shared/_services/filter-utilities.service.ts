@@ -61,6 +61,7 @@ export class FilterUtilitiesService {
             limitTo: 0
         };
 
+        console.log('applying filter: ', this.urlFromFilterV2(page.join('/') + '?', dto))
         this.router.navigateByUrl(this.urlFromFilterV2(page.join('/') + '?', dto));
     }
 

@@ -111,6 +111,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
 
   handleGoTo(queryParamName: FilterField, filter: any) {
+    if (filter + '' === '') return;
     this.goTo.emit({queryParamName, filter});
   }
 

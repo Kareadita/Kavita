@@ -26,7 +26,7 @@
               <div class="col-auto ms-2 mt-2" *ngIf="!(readingList?.promoted && !this.isAdmin)">
                 <div class="form-check form-check-inline">
                   <input class="form-check-input" type="checkbox" id="accessibility-mode" [value]="accessibilityMode" (change)="updateAccessibilityMode()">
-                  <label class="form-check-label" for="accessibility-mode">Order Numbers</label>
+                  <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@
                 <span class="read-btn--text">{{t('continue')}}</span>
               </span>
               </button>
-              <div class="btn-group" ngbDropdown role="group" aria-label="Read options">
+              <div class="btn-group" ngbDropdown role="group" [attr.aria-label]="t('read-options-alt')">
                 <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
                 <div class="dropdown-menu" ngbDropdownMenu>
                   <button ngbDropdownItem (click)="read()">
@@ -106,10 +106,10 @@
     <ng-container *ngIf="characters$ | async as characters">
       <div class="row mb-2">
         <div class="row" *ngIf="characters && characters.length > 0">
-          <h5>Characters</h5>
+          <h5>{{t('characters-title')}}</h5>
           <app-badge-expander [items]="characters">
             <ng-template #badgeExpanderItem let-item let-position="idx">
-              <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
+              <app-person-badge a11y-click="13,32" class="col-auto" [person]="item" (click)="goToCharacter(item)"></app-person-badge>
             </ng-template>
           </app-badge-expander>
         </div>

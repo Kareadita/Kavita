@@ -21,7 +21,7 @@
 
       <ng-container *ngIf="seriesMetadata.language !== null">
         <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-          <app-icon-and-title [label]="t('language-title')" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterField.Languages, seriesMetadata.language)" [title]="t('language-title')">
+          <app-icon-and-title [label]="t('language-title')" [clickable]="seriesMetadata.language !== ''" fontClasses="fas fa-language" (click)="handleGoTo(FilterField.Languages, seriesMetadata.language)" [title]="t('language-title')">
             {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
           </app-icon-and-title>
         </div>
