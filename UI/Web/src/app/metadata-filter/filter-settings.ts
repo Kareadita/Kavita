@@ -14,9 +14,6 @@ export class FilterSettings {
     tagsDisabled = false;
     languageDisabled = false;
     publicationStatusDisabled = false;
-    searchNameDisabled = false;
-    releaseYearDisabled = false;
-    presets: SeriesFilter | undefined;
     presetsV2: SeriesFilterV2 | undefined;
     /**
      * Should the filter section be open by default

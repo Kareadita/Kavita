@@ -20,7 +20,7 @@
             </form>
             <div class="row mb-2" *ngFor="let filterStmt of filter.statements; let i = index">
                 <div class="col-md-10">
-                    <app-metadata-row-filter [preset]="filterStmt" (filterStatement)="updateFilter(i, $event)">
+                    <app-metadata-row-filter [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
                         <div class="col-md-1 ms-2">
                             <button class="btn btn-icon" #removeBtn (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
                                 <i class="fa-solid fa-minus" aria-hidden="true"></i>

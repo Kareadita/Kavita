@@ -20,7 +20,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {allFields, FilterField} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs/operators";
 
@@ -44,6 +44,7 @@ import {tap} from "rxjs/operators";
 export class MetadataBuilderComponent implements OnInit {
 
   @Input({required: true}) filter!: SeriesFilterV2;
+  @Input() availableFilterFields = allFields;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -65,6 +66,7 @@ export class MetadataBuilderComponent implements OnInit {
   ngOnInit() {
     console.log('Filter: ', this.filter);
     if (this.filter === undefined) {
+      console.log('No filter, creating one in metadata-builder')
       // If there is no default preset, let's open with series name
       this.filter = this.filterUtilityService.createSeriesV2Filter();
       this.filter.statements.push({
@@ -91,7 +93,6 @@ export class MetadataBuilderComponent implements OnInit {
   }
 
   updateFilter(index: number, filterStmt: FilterStatement) {
-    console.log('Filter at ', index, 'updated: ', filterStmt);
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }

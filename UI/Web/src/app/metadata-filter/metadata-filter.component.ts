@@ -2,29 +2,31 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild, DestroyRef,
+  ContentChild,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
   OnInit,
   Output
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NgbCollapse, NgbTooltip, NgbRating } from '@ng-bootstrap/ng-bootstrap';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
-import { Breakpoint, UtilityService } from '../shared/_services/utility.service';
-import { Library } from '../_models/library';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {NgbCollapse, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
+import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
+import {Library} from '../_models/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
-import { ToggleService } from '../_services/toggle.service';
-import { FilterSettings } from './filter-settings';
-import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
+import {ToggleService} from '../_services/toggle.service';
+import {FilterSettings} from './filter-settings';
+import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { TypeaheadComponent } from '../typeahead/_components/typeahead.component';
-import { DrawerComponent } from '../shared/drawer/drawer.component';
-import {NgIf, NgTemplateOutlet, AsyncPipe, NgForOf} from '@angular/common';
+import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
+import {DrawerComponent} from '../shared/drawer/drawer.component';
+import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
+import {allFields, FilterField} from "../_models/metadata/v2/filter-field";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -70,6 +72,7 @@ export class MetadataFilterComponent implements OnInit {
   fullyLoaded: boolean = false;
   filterV2: SeriesFilterV2 | undefined;
   allSortFields = allSortFields;
+  allFilterFields = allFields;
 
 
 
@@ -82,10 +85,6 @@ export class MetadataFilterComponent implements OnInit {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-
-  get SortField(): typeof SortField {
-    return SortField;
-  }
 
   constructor(private utilityService: UtilityService,
     public toggleService: ToggleService,
@@ -105,6 +104,44 @@ export class MetadataFilterComponent implements OnInit {
         this.cdRef.markForCheck();
       });
     }
+
+    if (this.filterSettings.libraryDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Libraries);
+    }
+    if (this.filterSettings.genresDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Genres);
+    }
+    if (this.filterSettings.languageDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Languages);
+    }
+    if (this.filterSettings.formatDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Formats);
+    }
+    if (this.filterSettings.ageRatingDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.AgeRating);
+    }
+    if (this.filterSettings.collectionDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.CollectionTags);
+    }
+    if (this.filterSettings.publicationStatusDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.PublicationStatus);
+    }
+    if (this.filterSettings.peopleDisabled) {
+      const peopleFields = [FilterField.Characters, FilterField.Colorist, FilterField.CoverArtist,
+        FilterField.Editor, FilterField.Inker, FilterField.Penciller, FilterField.Letterer, FilterField.Writers,
+        FilterField.Translators]
+      this.allFilterFields = this.allFilterFields.filter(f => !peopleFields.includes(f));
+    }
+    if (this.filterSettings.ratingDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.UserRating);
+    }
+    if (this.filterSettings.readProgressDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.ReadProgress);
+    }
+    if (this.filterSettings.tagsDisabled) {
+      this.allFilterFields = this.allFilterFields.filter(f => f != FilterField.Tags);
+    }
+
 
     this.loadFromPresetsAndSetup();
   }

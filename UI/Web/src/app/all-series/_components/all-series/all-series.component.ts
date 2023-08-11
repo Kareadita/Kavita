@@ -114,7 +114,7 @@ export class AllSeriesComponent implements OnInit {
 
     this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
-    this.title = this.route.snapshot.queryParamMap.get('title') || 'All Series';
+    this.title = this.route.snapshot.queryParamMap.get('title') || this.title;
     this.titleService.setTitle('Kavita - ' + this.title);
 
     this.pagination = this.filterUtilityService.pagination(this.route.snapshot);

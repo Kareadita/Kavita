@@ -90,6 +90,7 @@ const DropdownComparisons = [FilterComparison.Equal,
 export class MetadataFilterRowComponent implements OnInit {
 
   @Input() preset!: FilterStatement;
+  @Input() availableFields: Array<FilterField> = allFields;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -102,7 +103,7 @@ export class MetadataFilterRowComponent implements OnInit {
   validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
   dropdownOptions$ = of<{value: number, title: string}[]>([]);
-  allFields = allFields;
+
 
   loaded: boolean = false;
 
@@ -118,6 +119,8 @@ export class MetadataFilterRowComponent implements OnInit {
 
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
+
+    this.buildDisabledList();
 
 
     // Dropdown dynamic option selection
@@ -147,6 +150,10 @@ export class MetadataFilterRowComponent implements OnInit {
 
     this.loaded = true;
     this.cdRef.markForCheck();
+  }
+
+  buildDisabledList() {
+
   }
 
   populateFromPreset() {
@@ -215,6 +222,7 @@ export class MetadataFilterRowComponent implements OnInit {
       return {value: person.id, title: person.name}
     })))
   }
+
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
