@@ -18,5 +18,9 @@
     "locked-out": "Zostałeś zablokowany z powodu zbyt wielu prób autoryzacji. Odczekaj 10 minut.",
     "permission-denied": "Ta operacja jest niedozwolona",
     "invalid-token": "Nieprawidłowy token",
-    "generate-token": "Wystąpił problem z generowaniem tokenu wiadomości e-mail z potwierdzeniem. Zobacz logi"
+    "generate-token": "Wystąpił problem z generowaniem tokenu wiadomości e-mail z potwierdzeniem. Zobacz logi",
+    "generic-user-update": "Wystąpił wyjątek podczas aktualizacji użytkownika",
+    "user-already-registered": "Użytkownik jest już zarejestrowany jako {0}",
+    "user-already-confirmed": "Użytkownik jest już potwierdzony",
+    "manual-setup-fail": "Nie można ukończyć konfiguracji ręcznej. Anuluj i ponownie utwórz zaproszenie"
 }
