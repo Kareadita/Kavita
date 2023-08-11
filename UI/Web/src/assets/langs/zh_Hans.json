@@ -220,30 +220,30 @@
         "email-not-confirmed": "此电子邮件未确认",
         "email-updated-title": "电子邮件已更新",
         "email-updated-description": "您可以使用下面的链接确认您账户的电子邮件。如果您的服务器可以外部访问，一封电子邮件将发送到该电子邮件地址，并且您可以使用该链接来确认电子邮件。",
-        "setup-user-account": "",
-        "invite-url-label": "",
-        "invite-url-tooltip": "",
-        "permission-error": "",
-        "required-field": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "setup-user-account": "设置用户帐户",
+        "invite-url-label": "邀请 URL",
+        "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
+        "permission-error": "您没有权限更改电子邮件。请与服务器管理员联系。",
+        "required-field": "{{validation.required-field}}",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "change-age-restriction": {
-        "age-restriction-label": "",
-        "unknowns": "",
-        "reset": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "age-restriction-label": "年龄限制",
+        "unknowns": "未知",
+        "reset": "{{common.reset}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "",
-        "regen-warning": "",
-        "no-key": "",
-        "confirm-reset": "",
-        "key-reset": ""
+        "copy": "复制",
+        "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
+        "no-key": "错误-未设置密钥",
+        "confirm-reset": "这将使您设置的所有OPDS配置失效。您确定要继续吗？",
+        "key-reset": "API密钥重置"
     },
     "scrobbling-providers": {
         "title": "",
