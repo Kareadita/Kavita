@@ -74,11 +74,7 @@ export class MetadataFilterComponent implements OnInit {
   allSortFields = allSortFields;
   allFilterFields = allFields;
 
-
-
-
   handleFilters(filter: SeriesFilterV2) {
-    console.log('[metadata-filter] handleFilters');
     this.filterV2 = filter;
   }
 
@@ -165,7 +161,7 @@ export class MetadataFilterComponent implements OnInit {
       limitTo: new FormControl(this.filterV2?.limitTo || 0, [])
     });
 
-    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(changes => {
+    this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.filterV2?.sortOptions === null) {
         this.filterV2.sortOptions = {
           isAscending: this.isAscendingSort,

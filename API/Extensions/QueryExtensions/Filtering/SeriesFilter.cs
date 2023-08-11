@@ -230,13 +230,13 @@ public static class SeriesFilter
 
         var subQuery = queryable
             .Include(s => s.Progress)
+            .Where(s => s.Progress != null)
             .Select(s => new
             {
                 Series = s,
-                Percentage = Math.Truncate(((double) s.Progress.DefaultIfEmpty()
-                    .Where(p => p != null)
+                Percentage = Math.Truncate(((double) s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? p.PagesRead : 0) / s.Pages) * 100)
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100))
             })
             .AsEnumerable();
 

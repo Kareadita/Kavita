@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using API.Data.ManualMigrations;
@@ -307,6 +305,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userParams"></param>
     /// <param name="filter"></param>
     /// <returns></returns>
+    [Obsolete("Use GetSeriesDtoForLibraryIdAsync")]
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.None);
@@ -671,6 +670,7 @@ public class SeriesRepository : ISeriesRepository
     /// <param name="userParams">Contains pagination information</param>
     /// <param name="filter">Optional filter on query</param>
     /// <returns></returns>
+    [Obsolete("Use GetRecentlyAddedV2")]
     public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter)
     {
         var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.Dashboard);
@@ -868,7 +868,7 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-            //.HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // BUG: This has some nullable issue
+            .HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // BUG: This has some nullable issue
 
             // This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
@@ -1715,6 +1715,7 @@ public class SeriesRepository : ISeriesRepository
             .AsEnumerable();
     }
 
+    [Obsolete("Use GetWantToReadForUserV2Async")]
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter)
     {
         var libraryIds = await _context.Library.GetUserLibraries(userId).ToListAsync();
