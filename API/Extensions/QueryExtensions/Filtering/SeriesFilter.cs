@@ -471,4 +471,37 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
         }
     }
+
+    public static IQueryable<Series> HasSummary(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, string queryString)
+    {
+        if (string.IsNullOrEmpty(queryString) || !condition) return queryable;
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                return queryable.Where(s => s.Metadata.Summary.Equals(queryString));
+            case FilterComparison.BeginsWith:
+                return queryable.Where(s => EF.Functions.Like(s.Metadata.Summary, $"{queryString}%"));
+            case FilterComparison.EndsWith:
+                return queryable.Where(s => EF.Functions.Like(s.Metadata.Summary, $"%{queryString}"));
+            case FilterComparison.Matches:
+                return queryable.Where(s => EF.Functions.Like(s.Metadata.Summary, $"%{queryString}%"));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.Metadata.Summary != queryString);
+            case FilterComparison.NotContains:
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Contains:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+                throw new KavitaException($"{comparison} not applicable for Series.Metadata.Summary");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
+        }
+    }
 }
