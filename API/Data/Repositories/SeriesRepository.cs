@@ -840,7 +840,7 @@ public class SeriesRepository : ISeriesRepository
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, QueryContext queryContext)
     {
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
-        // TODO: Remove the unneeded libraryId from all APIs so we can ust use FilterDto
+        // TODO: Remove this method
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
@@ -868,7 +868,6 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-            .HasReadingProgress(true, FilterComparison.GreaterThanEqual, 20, userId) // BUG: This has some nullable issue
 
             // This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
@@ -876,6 +875,23 @@ public class SeriesRepository : ISeriesRepository
             .WhereIf(onlyParentSeries,
                 s => s.RelationOf.Count == 0 || s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
             .Where(s => userLibraries.Contains(s.LibraryId));
+
+        if (filter.ReadStatus.InProgress)
+        {
+            query = query.HasReadingProgress(hasProgressFilter, FilterComparison.GreaterThan,
+                0, userId)
+                .HasReadingProgress(hasProgressFilter, FilterComparison.LessThan,
+                    100, userId);
+        } else if (filter.ReadStatus.Read)
+        {
+            query = query.HasReadingProgress(hasProgressFilter, FilterComparison.Equal,
+                100, userId);
+        }
+        else if (filter.ReadStatus.NotRead)
+        {
+            query = query.HasReadingProgress(hasProgressFilter, FilterComparison.Equal,
+                0, userId);
+        }
 
         if (userRating.AgeRating != AgeRating.NotApplicable)
         {
