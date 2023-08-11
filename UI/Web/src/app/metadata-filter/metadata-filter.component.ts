@@ -111,11 +111,35 @@ export class MetadataFilterComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  deepClone(obj: any): any {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    if (obj instanceof Array) {
+      return obj.map(item => this.deepClone(item));
+    }
+
+    const clonedObj: any = {};
+
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+          clonedObj[key] = this.deepClone(obj[key]);
+        } else {
+          clonedObj[key] = obj[key];
+        }
+      }
+    }
+
+    return clonedObj;
+  }
+
 
   loadFromPresetsAndSetup() {
     this.fullyLoaded = false;
 
-    this.filterV2 = this.filterSettings.presetsV2;
+    this.filterV2 = this.deepClone(this.filterSettings.presetsV2);
     console.log('filterV2: ', this.filterV2);
 
     this.sortGroup = new FormGroup({
@@ -155,11 +179,11 @@ export class MetadataFilterComponent implements OnInit {
   }
 
   clear() {
-    this.filterV2 = this.filterUtilityService.createSeriesV2Filter();
-
-    this.sortGroup.get('sortField')?.setValue(this.filterV2.sortOptions?.sortField);
-    this.isAscendingSort = this.filterV2.sortOptions?.isAscending!;
-    this.cdRef.markForCheck();
+    // this.filterV2 = this.filterUtilityService.createSeriesV2Filter();
+    //
+    // this.sortGroup.get('sortField')?.setValue(this.filterV2.sortOptions?.sortField);
+    // this.isAscendingSort = this.filterV2.sortOptions?.isAscending!;
+    // this.cdRef.markForCheck();
     // Apply any presets which will trigger the "apply"
     this.loadFromPresetsAndSetup();
   }
