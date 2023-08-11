@@ -28,6 +28,7 @@ import {MetadataDetailComponent} from "../../series-detail/_components/metadata-
 import {FilterQueryParam} from "../../shared/_services/filter-utilities.service";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
 
 @Component({
   selector: 'app-entity-info-cards',
@@ -74,6 +75,8 @@ export class EntityInfoCardsComponent implements OnInit {
   get AgeRating() {
     return AgeRating;
   }
+
+  get FilterField() { return FilterField; }
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];

@@ -12,12 +12,12 @@ import { PaginatedResult } from '../_models/pagination';
 import { Series } from '../_models/series';
 import { RelatedSeries } from '../_models/series-detail/related-series';
 import { SeriesDetail } from '../_models/series-detail/series-detail';
-import { SeriesFilter } from '../_models/metadata/series-filter';
 import { SeriesGroup } from '../_models/series-group';
 import { SeriesMetadata } from '../_models/metadata/series-metadata';
 import { Volume } from '../_models/volume';
 import { ImageService } from './image.service';
 import { TextResonse } from '../_types/text-response';
+import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";
 import {Recommendation} from "../_models/series-detail/recommendation";
@@ -32,26 +32,26 @@ export class SeriesService {
   paginatedSeriesForTagsResults: PaginatedResult<Series[]> = new PaginatedResult<Series[]>();
 
   constructor(private httpClient: HttpClient, private imageService: ImageService,
-    private utilityService: UtilityService, private filterUtilityService: FilterUtilitiesService) { }
+    private utilityService: UtilityService) { }
 
-  getAllSeries(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+  getAllSeriesV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    const data = this.filterUtilityService.createSeriesFilter(filter);
+    const data = filter || {};
 
     return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
-      map((response: any) => {
-        return this.utilityService.createPaginatedResult(response, this.paginatedResults);
-      })
+        map((response: any) => {
+          return this.utilityService.createPaginatedResult(response, this.paginatedResults);
+        })
     );
   }
 
-  getSeriesForLibrary(libraryId: number, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
+  getSeriesForLibraryV2(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    const data = this.filterUtilityService.createSeriesFilter(filter);
+    const data = filter || {};
 
-    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/v2', data, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response, this.paginatedResults);
       })
@@ -102,12 +102,12 @@ export class SeriesService {
     return this.httpClient.post<void>(this.baseUrl + 'reader/mark-unread', {seriesId});
   }
 
-  getRecentlyAdded(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
-    const data = this.filterUtilityService.createSeriesFilter(filter);
+  getRecentlyAdded(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'series/recently-added?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
+    const data = filter || {};
+    return this.httpClient.post<Series[]>(this.baseUrl + 'series/recently-added-v2', data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
       })
@@ -118,13 +118,12 @@ export class SeriesService {
     return this.httpClient.post<SeriesGroup[]>(this.baseUrl + 'series/recently-updated-series', {});
   }
 
-  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter): Observable<PaginatedResult<Series[]>> {
-    const data = this.filterUtilityService.createSeriesFilter(filter);
-
+  getWantToRead(pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2): Observable<PaginatedResult<Series[]>> {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+    const data = filter || {};
 
-    return this.httpClient.post<Series[]>(this.baseUrl + 'want-to-read/', data, {observe: 'response', params}).pipe(
+    return this.httpClient.post<Series[]>(this.baseUrl + 'want-to-read/v2', data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
     }));
@@ -137,11 +136,10 @@ export class SeriesService {
     }));
   }
 
-  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilter) {
-    const data = this.filterUtilityService.createSeriesFilter(filter);
-
+  getOnDeck(libraryId: number = 0, pageNum?: number, itemsPerPage?: number, filter?: SeriesFilterV2) {
     let params = new HttpParams();
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+    const data = filter || {};
 
     return this.httpClient.post<Series[]>(this.baseUrl + 'series/on-deck?libraryId=' + libraryId, data, {observe: 'response', params}).pipe(
       map(response => {

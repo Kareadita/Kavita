@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges
 import { Router } from '@angular/router';
 import { ReaderService } from 'src/app/_services/reader.service';
 import {TagBadgeComponent, TagBadgeCursor} from '../../../shared/tag-badge/tag-badge.component';
-import { FilterQueryParam } from '../../../shared/_services/filter-utilities.service';
+import {FilterUtilitiesService} from '../../../shared/_services/filter-utilities.service';
 import { UtilityService } from '../../../shared/_services/utility.service';
 import { MangaFormat } from '../../../_models/manga-format';
 import { ReadingList } from '../../../_models/reading-list';
@@ -21,6 +21,8 @@ import {SeriesInfoCardsComponent} from "../../../cards/series-info-cards/series-
 import {LibraryType} from "../../../_models/library";
 import {MetadataDetailComponent} from "../metadata-detail/metadata-detail.component";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 
 
 @Component({
@@ -57,7 +59,10 @@ export class SeriesMetadataDetailComponent implements OnChanges {
   get LibraryType() { return LibraryType; }
   get MangaFormat() { return MangaFormat; }
   get TagBadgeCursor() { return TagBadgeCursor; }
-  get FilterQueryParam() { return FilterQueryParam; }
+
+  get FilterField() {
+    return FilterField;
+  }
 
   get WebLinks() {
     if (this.seriesMetadata?.webLinks === '') return [];
@@ -66,7 +71,7 @@ export class SeriesMetadataDetailComponent implements OnChanges {
 
   constructor(public utilityService: UtilityService,
     private router: Router, public readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef) {
+    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {
 
   }
 
@@ -91,15 +96,13 @@ export class SeriesMetadataDetailComponent implements OnChanges {
     this.cdRef.markForCheck();
   }
 
-  handleGoTo(event: {queryParamName: FilterQueryParam, filter: any}) {
+  handleGoTo(event: {queryParamName: FilterField, filter: any}) {
     this.goTo(event.queryParamName, event.filter);
   }
 
-  goTo(queryParamName: FilterQueryParam, filter: any) {
-    let params: any = {};
-    params[queryParamName] = filter;
-    params[FilterQueryParam.Page] = 1;
-    this.router.navigate(['library', this.series.libraryId], {queryParams: params});
+  goTo(queryParamName: FilterField, filter: any) {
+    this.filterUtilityService.applyFilter(['library', this.series.libraryId], queryParamName,
+        FilterComparison.Equal, filter);
   }
 
   navigate(basePage: string, id: number) {

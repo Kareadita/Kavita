@@ -4,8 +4,8 @@ import { take } from 'rxjs';
 import { AccountService } from 'src/app/_services/account.service';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import {CommonModule} from "@angular/common";
-import {DynamicListPipe} from "../../dynamic-list.pipe";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
 
 @Component({
   selector: 'app-card-actionables',

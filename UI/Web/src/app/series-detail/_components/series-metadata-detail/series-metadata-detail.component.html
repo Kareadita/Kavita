@@ -26,11 +26,11 @@
   </ng-container>
 
 
-  <app-metadata-detail [tags]="seriesMetadata.genres" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Genres" [heading]="t('genres-title')">
+  <app-metadata-detail [tags]="seriesMetadata.genres" [libraryId]="series.libraryId" [queryParam]="FilterField.Genres" [heading]="t('genres-title')">
     <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
   </app-metadata-detail>
 
-  <app-metadata-detail [tags]="seriesMetadata.tags" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Tags" [heading]="t('tags-title')">
+  <app-metadata-detail [tags]="seriesMetadata.tags" [libraryId]="series.libraryId" [queryParam]="FilterField.Tags" [heading]="t('tags-title')">
     <ng-template #titleTemplate let-item>{{item.title}}</ng-template>
   </app-metadata-detail>
 
@@ -56,7 +56,7 @@
   </app-metadata-detail>
 
 
-  <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Writers" [heading]="t('writers-title')">
+  <app-metadata-detail [tags]="seriesMetadata.writers" [libraryId]="series.libraryId" [queryParam]="FilterField.Writers" [heading]="t('writers-title')">
     <ng-template #itemTemplate let-item>
       <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
     </ng-template>
@@ -64,55 +64,55 @@
 
 
   <div #collapse="ngbCollapse" [(ngbCollapse)]="isCollapsed" id="extended-series-metadata">
-    <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.CoverArtists" [heading]="t('cover-artists-title')">
+    <app-metadata-detail [tags]="seriesMetadata.coverArtists" [libraryId]="series.libraryId" [queryParam]="FilterField.CoverArtist" [heading]="t('cover-artists-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Character" [heading]="t('characters-title')">
+    <app-metadata-detail [tags]="seriesMetadata.characters" [libraryId]="series.libraryId" [queryParam]="FilterField.Characters" [heading]="t('characters-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Colorist" [heading]="t('colorists-title')">
+    <app-metadata-detail [tags]="seriesMetadata.colorists" [libraryId]="series.libraryId" [queryParam]="FilterField.Colorist" [heading]="t('colorists-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Editor" [heading]="t('editors-title')">
+    <app-metadata-detail [tags]="seriesMetadata.editors" [libraryId]="series.libraryId" [queryParam]="FilterField.Editor" [heading]="t('editors-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Inker" [heading]="t('inkers-title')">
+    <app-metadata-detail [tags]="seriesMetadata.inkers" [libraryId]="series.libraryId" [queryParam]="FilterField.Inker" [heading]="t('inkers-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Letterer" [heading]="t('letterers-title')">
+    <app-metadata-detail [tags]="seriesMetadata.letterers" [libraryId]="series.libraryId" [queryParam]="FilterField.Letterer" [heading]="t('letterers-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Translator" [heading]="t('translators-title')">
+    <app-metadata-detail [tags]="seriesMetadata.translators" [libraryId]="series.libraryId" [queryParam]="FilterField.Translators" [heading]="t('translators-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Penciller" [heading]="t('pencillers-title')">
+    <app-metadata-detail [tags]="seriesMetadata.pencillers" [libraryId]="series.libraryId" [queryParam]="FilterField.Penciller" [heading]="t('pencillers-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>
     </app-metadata-detail>
 
-    <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterQueryParam.Publisher" [heading]="t('publishers-title')">
+    <app-metadata-detail [tags]="seriesMetadata.publishers" [libraryId]="series.libraryId" [queryParam]="FilterField.Publisher" [heading]="t('publishers-title')">
       <ng-template #itemTemplate let-item>
         <app-person-badge a11y-click="13,32" class="col-auto" [person]="item"></app-person-badge>
       </ng-template>

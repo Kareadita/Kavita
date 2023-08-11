@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.WantToRead;
 using API.Extensions;
 using API.Helpers;
@@ -33,16 +35,35 @@ public class WantToReadController : BaseApiController
     }
 
     /// <summary>
-    /// Return all Series that are in the current logged in user's Want to Read list, filtered
+    /// Return all Series that are in the current logged in user's Want to Read list, filtered (deprecated, use v2)
     /// </summary>
     /// <param name="userParams"></param>
     /// <param name="filterDto"></param>
     /// <returns></returns>
     [HttpPost]
+    [Obsolete("use v2 instead")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams userParams, FilterDto filterDto)
     {
         userParams ??= new UserParams();
         var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserAsync(User.GetUserId(), userParams, filterDto);
+        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(User.GetUserId(), pagedList);
+
+        return Ok(pagedList);
+    }
+
+    /// <summary>
+    /// Return all Series that are in the current logged in user's Want to Read list, filtered
+    /// </summary>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
+    [HttpPost("v2")]
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToReadV2([FromQuery] UserParams userParams, FilterV2Dto filterDto)
+    {
+        userParams ??= new UserParams();
+        var pagedList = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(User.GetUserId(), userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(User.GetUserId(), pagedList);

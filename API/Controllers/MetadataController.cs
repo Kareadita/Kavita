@@ -138,18 +138,13 @@ public class MetadataController : BaseApiController
     /// <param name="libraryIds">String separated libraryIds or null for all ratings</param>
     /// <returns></returns>
     [HttpGet("languages")]
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<LanguageDto>>> GetAllLanguages(string? libraryIds)
     {
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
-        if (ids is {Count: > 0})
-        {
-            return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
-        }
-
-
-        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync());
+        return Ok(await _unitOfWork.LibraryRepository.GetAllLanguagesForLibrariesAsync(ids));
     }
+
 
     [HttpGet("all-languages")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour)]
@@ -162,6 +157,7 @@ public class MetadataController : BaseApiController
                 IsoCode = c.IetfLanguageTag
             }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
     }
+
 
     /// <summary>
     /// Returns summary for the chapter

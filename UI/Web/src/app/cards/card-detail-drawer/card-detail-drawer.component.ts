@@ -43,13 +43,13 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
 import {CoverImageChooserComponent} from "../cover-image-chooser/cover-image-chooser.component";
 import {ChapterMetadataDetailComponent} from "../chapter-metadata-detail/chapter-metadata-detail.component";
-import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 import {BytesPipe} from "../../pipe/bytes.pipe";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 enum TabID {
   General = 0,

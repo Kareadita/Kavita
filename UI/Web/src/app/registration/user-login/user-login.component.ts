@@ -60,19 +60,18 @@ export class UserLoginComponent implements OnInit {
 
     this.memberService.adminExists().pipe(take(1)).subscribe(adminExists => {
       this.firstTimeFlow = !adminExists;
-      this.isLoaded = true;
 
       if (this.firstTimeFlow) {
         this.router.navigateByUrl('registration/register');
         return;
       }
 
+      this.isLoaded = true;
       this.cdRef.markForCheck();
     });
 
     this.route.queryParamMap.subscribe(params => {
       const val = params.get('apiKey');
-      console.log('key: ', val);
       if (val != null && val.length > 0) {
         this.login(val);
       }

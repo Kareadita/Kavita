@@ -54,7 +54,6 @@ public class TokenService : ITokenService
         };
 
         var roles = await _userManager.GetRolesAsync(user);
-
         claims.AddRange(roles.Select(role => new Claim(Role, role)));
 
         var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

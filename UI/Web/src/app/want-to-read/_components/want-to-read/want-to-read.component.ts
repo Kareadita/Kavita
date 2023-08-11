@@ -23,7 +23,7 @@ import { SeriesRemovedEvent } from 'src/app/_models/events/series-removed-event'
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { SeriesFilter, FilterEvent } from 'src/app/_models/metadata/series-filter';
+import { FilterEvent } from 'src/app/_models/metadata/series-filter';
 import { Action, ActionItem } from 'src/app/_services/action-factory.service';
 import { ActionService } from 'src/app/_services/action.service';
 import { ImageService } from 'src/app/_services/image.service';
@@ -36,7 +36,8 @@ import { SeriesCardComponent } from '../../../cards/series-card/series-card.comp
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
 @Component({
@@ -55,12 +56,12 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   isLoading: boolean = true;
   series: Array<Series> = [];
-  seriesPagination!: Pagination;
-  filter: SeriesFilter | undefined = undefined;
+  pagination!: Pagination;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -84,7 +85,6 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   collectionTag: any;
-  tagImage: any;
 
   get ScrollingBlockHeight() {
     if (this.scrollingBlock === undefined) return 'calc(var(--vh)*100)';
@@ -104,11 +104,18 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
     private jumpbarService: JumpbarService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.titleService.setTitle('Want To Read');
+      this.titleService.setTitle(translate('want-to-read.title'));
 
-      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
+      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+
+      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+      if (this.filter.statements.length === 0) {
+        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      }
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
+
       this.cdRef.markForCheck();
 
       this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
@@ -120,7 +127,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
           }
 
           this.series = this.series.filter(s => s.id != seriesRemoved.seriesId);
-          this.seriesPagination.totalItems--;
+          this.pagination.totalItems--;
           this.cdRef.markForCheck();
           this.refresh.emit();
         }
@@ -156,7 +163,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
   removeSeries(seriesId: number) {
     this.series = this.series.filter(s => s.id != seriesId);
-    this.seriesPagination.totalItems--;
+    this.pagination.totalItems--;
     this.cdRef.markForCheck();
     this.refresh.emit();
   }
@@ -168,7 +175,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
     this.seriesService.getWantToRead(undefined, undefined, this.filter).pipe(take(1)).subscribe(paginatedList => {
       this.series = paginatedList.result;
-      this.seriesPagination = paginatedList.pagination;
+      this.pagination = paginatedList.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
@@ -177,27 +184,14 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   }
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    }
+
     this.loadPage();
-  }
-
-  handleAction(action: ActionItem<Series>, series: Series) {
-    // let lib: Partial<Library> = library;
-    // if (library === undefined) {
-    //   lib = {id: this.libraryId, name: this.libraryName};
-    // }
-    // switch (action.action) {
-    //   case(Action.Scan):
-    //     this.actionService.scanLibrary(lib);
-    //     break;
-    //   case(Action.RefreshMetadata):
-    //   this.actionService.refreshMetadata(lib);
-    //     break;
-    //   default:
-    //     break;
-    // }
   }
 }
 

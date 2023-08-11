@@ -3,13 +3,13 @@
   <div class="row mt-2 g-0 pb-2" *ngIf="header !== undefined && header.length > 0">
     <div class="col me-auto">
       <h2>
-            <span *ngIf="actions.length > 0" class="">
-                <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
-            </span>
+        <span *ngIf="actions.length > 0" class="">
+            <app-card-actionables (actionHandler)="performAction($event)" [actions]="actions" [labelBy]="header"></app-card-actionables>&nbsp;
+        </span>
         <span *ngIf="header !== undefined && header.length > 0">
-                {{header}}&nbsp;
-                <span class="badge bg-primary rounded-pill" [attr.aria-label]="t('total-items', {count: pagination.totalItems})" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
-            </span>
+          {{header}}&nbsp;
+          <span class="badge bg-primary rounded-pill" [attr.aria-label]="t('total-items', {count: pagination.totalItems})" *ngIf="pagination !== undefined">{{pagination.totalItems}}</span>
+        </span>
       </h2>
     </div>
   </div>

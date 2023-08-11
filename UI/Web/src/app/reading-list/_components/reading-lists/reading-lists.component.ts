@@ -16,9 +16,9 @@ import { ImportCblModalComponent } from '../../_modals/import-cbl-modal/import-c
 import { CardItemComponent } from '../../../cards/card-item/card-item.component';
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { NgIf, DecimalPipe } from '@angular/common';
-import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
     selector: 'app-reading-lists',

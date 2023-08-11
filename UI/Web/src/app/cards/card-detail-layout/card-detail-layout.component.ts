@@ -5,12 +5,15 @@ import {
   ChangeDetectorRef,
   Component,
   ContentChild,
+  DestroyRef,
   ElementRef,
   EventEmitter,
-  HostListener, inject,
+  HostListener,
+  inject,
   Inject,
   Input,
   OnChanges,
+  OnDestroy,
   OnInit,
   Output,
   TemplateRef,
@@ -25,16 +28,18 @@ import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.ser
 import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { Library } from 'src/app/_models/library';
 import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
+import { FilterEvent, FilterItem } from 'src/app/_models/metadata/series-filter';
 import { ActionItem } from 'src/app/_services/action-factory.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
 import { ScrollService } from 'src/app/_services/scroll.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
-import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -84,11 +89,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  filter: SeriesFilter = this.filterUtilityService.createSeriesFilter();
+  filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
   hasResumedJumpKey: boolean = false;
+
 
   get Breakpoint() {
     return Breakpoint;
@@ -157,7 +163,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions || this.filterSettings?.presets?.sortOptions;
+    return this.filter?.sortOptions || this.filterSettings?.presetsV2?.sortOptions;
   }
 
   performAction(action: ActionItem<any>) {
@@ -169,7 +175,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
-    this.filter = event.filter;
+    this.filter = event.filterV2;
     this.cdRef.markForCheck();
   }
 

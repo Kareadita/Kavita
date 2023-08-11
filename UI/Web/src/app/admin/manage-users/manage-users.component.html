@@ -28,7 +28,7 @@
               </button>
 
               <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="resendEmail(member)"
-                      placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})">{{t('resend')}}}</button>
+                      placement="top" [ngbTooltip]="t('resend-invite-tooltip')" [attr.aria-label]="t('resend-invite-alt', {user: member.username | titlecase})">{{t('resend')}}</button>
               <button *ngIf="member.isPending" class="btn btn-secondary btn-sm me-2" (click)="setup(member)"
                       placement="top" [ngbTooltip]="t('setup-user-tooltip')" [attr.aria-label]="t('setup-user-alt', {user: member.username | titlecase})">Setup</button>
               <button *ngIf="!member.isPending" class="btn btn-secondary btn-sm" (click)="updatePassword(member)"

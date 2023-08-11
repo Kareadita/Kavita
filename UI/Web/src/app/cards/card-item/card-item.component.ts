@@ -36,11 +36,11 @@ import {DownloadIndicatorComponent} from "../download-indicator/download-indicat
 import {FormsModule} from "@angular/forms";
 import {MangaFormatPipe} from "../../pipe/manga-format.pipe";
 import {MangaFormatIconPipe} from "../../pipe/manga-format-icon.pipe";
-import {CardActionablesComponent} from "./card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../pipe/sentence-case.pipe";
 import {CommonModule} from "@angular/common";
 import {RouterLink} from "@angular/router";
 import {TranslocoModule} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-card-item',
