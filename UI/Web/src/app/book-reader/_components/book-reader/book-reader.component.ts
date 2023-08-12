@@ -292,7 +292,18 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
-  pointer: boolean = false;
+  /**
+   * Controls whether the cursor is a pointer when tap to paginate is on and the curso is over
+   * either of the pagination areas
+   */
+  cursorIsPointer: boolean = false;
+
+  /**
+   * Used to keep track of the last time a paginator area was clicked to prevent the default
+   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
+   * triggered by repeated click pagination (when enabled).
+   */
+  lastPaginatorClickTime: number = 0;
 
   /**
    * Used to refresh the Personal PoC
@@ -502,10 +513,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        map(this.mapMousePositionToPointerCursor.bind(this)),
+        map(this.isCursorOverPaginators.bind(this)),
         distinctUntilChanged())
-      .subscribe((pointer) => {
-        this.changeCursor(pointer);
+      .subscribe((isPointer) => {
+        this.changeCursor(isPointer);
     });
   }
 
@@ -1577,40 +1588,34 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
-  private mapMousePositionToPointerCursor(event: MouseEvent): boolean {
-    if (!this.isLoading && this.clickToPaginate) {
-      if (event.clientX <= window.innerWidth * 0.2 || event.clientX >= window.innerWidth * 0.8) {
-        return true;
-      } else {
-        return false;
-      }
+  private isCursorOverPaginators(event: MouseEvent): boolean {
+    if (this.isLoading || !this.clickToPaginate) {
+      return false;
     }
 
-    return false;
+    return event.clientX <= window.innerWidth * 0.2 || event.clientX >= window.innerWidth * 0.8;
   }
 
-  private changeCursor(pointer: boolean) {
-    this.pointer = pointer;
+  private changeCursor(isPointer: boolean) {
+    this.cursorIsPointer = isPointer;
     this.cdRef.markForCheck();
   }
 
   handleReaderClick(event: MouseEvent) {
-    if (this.clickToPaginate) {
-      const mouseOffset = 5;
-      const probablyHighlighting =
-        Math.abs(this.mousePosition.x - event.clientX) > mouseOffset ||
-        Math.abs(this.mousePosition.y - event.clientY) > mouseOffset;
-      if (event.clientX <= window.innerWidth * 0.2) {
-        if (!probablyHighlighting) {
-          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
-        }
-      } else if (event.clientX >= window.innerWidth * 0.8) {
-        if (!probablyHighlighting) {
-          this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
-        }
-      } else {
-        this.toggleMenu(event);
-      }
+    if (!this.clickToPaginate) {
+      this.toggleMenu(event);
+      return;
+    }
+
+    const isHighlighting = window.getSelection()?.toString() != '';
+    if (isHighlighting) {
+      return;
+    }
+
+    if (event.clientX <= window.innerWidth * 0.2) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+    } else if (event.clientX >= window.innerWidth * 0.8) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
     } else {
       this.toggleMenu(event);
     }
@@ -1638,6 +1643,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   mouseDown($event: MouseEvent) {
     this.mousePosition.x = $event.clientX;
     this.mousePosition.y = $event.clientY;
+    if (!this.clickToPaginate || !this.isCursorOverPaginators($event)) {
+      return
+    }
+
+    const now = Date.now();
+    // This prevents selecting text when clicking repeatedly to switch pages
+    if (now - this.lastPaginatorClickTime < 500) {
+      $event.preventDefault();
+    }
+    this.lastPaginatorClickTime = now;
   }
 
   refreshPersonalToC() {
