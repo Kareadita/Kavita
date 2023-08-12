@@ -140,7 +140,7 @@
         "margin-book-label": "页边距",
         "margin-book-tooltip": "屏幕两侧的间距是多少,无论此设置如何移动设备上的间距都会将其重定义为0。",
         "clients-opds-alert": "此服务器未启用OPDS功能,这不会影响Tachiyomi用户。",
-        "clients-opds-description": "",
+        "clients-opds-description": "所有第三方客户端都会使用下面的API密钥或连接。它们就像密码一样，请保密。",
         "clients-api-key-tooltip": "API密钥就像是一个密码,请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
@@ -199,10 +199,10 @@
         "device-platform-label": "设备平台",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
-        "valid-email": ""
+        "valid-email": "{{validation.valid-email}}"
     },
     "change-password": {
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "current-password-label": "当前密码",
         "new-password-label": "新密码",
         "confirm-password-label": "确认密码",
@@ -247,29 +247,29 @@
     },
     "scrobbling-providers": {
         "title": "",
-        "requires": "",
-        "token-expired": "",
-        "no-token-set": "",
-        "token-set": "",
+        "requires": "此功能需要一个有效的{{product}}许可证",
+        "token-expired": "Token已过期",
+        "no-token-set": "未设置Token",
+        "token-set": "设置Token",
         "generate": "",
         "instructions": "",
         "token-input-label": "",
-        "edit": "",
-        "cancel": "",
-        "save": ""
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "typeahead": {
-        "locked-field": "",
-        "close": "",
-        "loading": "",
-        "add-item": "",
-        "no-data": "",
-        "add-custom-item": ""
+        "locked-field": "字段已锁定",
+        "close": "{{common.close}}",
+        "loading": "{{common.loading}}",
+        "add-item": "添加 {{item}}…",
+        "no-data": "无数据",
+        "add-custom-item": ", 输入以添加自定义项目"
     },
     "generic-list-modal": {
-        "close": "",
-        "clear": "",
-        "filter": "",
+        "close": "{{common.close}}",
+        "clear": "清除",
+        "filter": "过滤器",
         "open-filtered-search": ""
     },
     "user-stats-info-cards": {
