@@ -28,7 +28,7 @@
     },
     "user-scrobble-history": {
         "title": "刮削历史",
-        "description": "",
+        "description": "在这里您将找到与您的帐户关联的任何刮削记录事件。为了确保记录存在，您必须配置了一个可用的刮削服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与记录完成传输。请联系您的管理员以进行修正。",
         "filter-label": "筛选器",
         "created-header": "创建",
         "last-modified-header": "上次修改",
@@ -147,8 +147,8 @@
         "save": "{{common.save}}"
     },
     "user-holds": {
-        "title": "",
-        "description": ""
+        "title": "刮削暂停",
+        "description": "这是一个由用户自主管理的系列列表，这些系列将不会被同步到你设定的刮削器记录中。您可以随时移除一个系列在下一个可刮削的事件（阅读进度、评分、想读状态）时触发事件。"
     },
     "theme-manager": {
         "title": "主题管理器",
