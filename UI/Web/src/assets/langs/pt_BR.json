@@ -1545,7 +1545,7 @@
         "volumes-added-to-reading-list": "Volume adicionado à lista de leitura",
         "chapter-added-to-reading-list": "Capítulo adicionado à lista de leitura",
         "multiple-added-to-reading-list": "Capítulos e volumes adicionados à lista de leitura",
-        "select-files-warning": "",
+        "select-files-warning": "Você precisa selecionar arquivos para avançar",
         "reading-list-imported": "",
         "incognito-off": "",
         "email-service-reset": "",
