@@ -535,29 +535,30 @@
         "go-to-page": "",
         "go-to-last-page": "",
         "prev-page": "",
-        "next-page": "",
-        "prev-chapter": "",
-        "next-chapter": "",
-        "skip-header": "",
+        "next-page": "Nächste Seite",
+        "prev-chapter": "Vorheriges Kapitel/Band",
+        "next-chapter": "Nächstes Kapitel/Band",
+        "skip-header": "Zum Hauptinhalt springen",
         "virtual-pages": "",
         "settings-header": "Einstellungen",
-        "table-of-contents-header": "",
+        "table-of-contents-header": "Inhaltsverzeichnis",
         "bookmarks-header": "Lesezeichen",
         "toc-header": "",
-        "loading-book": "",
+        "loading-book": "Buch wird geladen…",
         "go-back": "",
         "incognito-mode-alt": "",
         "incognito-mode-label": "",
-        "next": "",
-        "previous": ""
+        "next": "Nächste",
+        "previous": "Vorherige",
+        "go-to-page-prompt": "Es gibt {{totalPages}} Seiten. Auf welche Seite möchten sie gehen?"
     },
     "personal-table-of-contents": {
         "no-data": "",
-        "page": "",
-        "delete": ""
+        "page": "Seite {{value}}",
+        "delete": "Löschen {{bookmarkName}}"
     },
     "confirm-email": {
-        "title": "",
+        "title": "Registrieren",
         "description": "Füllen Sie das Formular aus, um Ihre Registrierung abzuschließen",
         "error-label": "",
         "username-label": "{{common.username}}",
@@ -575,7 +576,7 @@
         "success": ""
     },
     "confirm-reset-password": {
-        "title": "",
+        "title": "Passwort Zurücksetzen",
         "description": "",
         "password-label": "{{common.password}}",
         "required-field": "{{validation.required-field}}",
@@ -583,8 +584,8 @@
         "password-validation": "{{validation.password-validation}}"
     },
     "register": {
-        "title": "",
-        "description": "",
+        "title": "Registrieren",
+        "description": "Füllen Sie das Formular aus, um ein Administratorkonto zu registrieren",
         "username-label": "{{common.username}}",
         "email-label": "{{common.email}}",
         "email-tooltip": "Die E-Mail muss keine echte Adresse sein, sondern ermöglicht den Zugriff auf vergesse Passwörter. Sie wird nicht außerhalb des Servers versendet, es sei denn, Passwort vergessen wird ohne einen benutzerdefinierten E-Mail-Service-Host verwendet.",
@@ -595,14 +596,14 @@
         "register": ""
     },
     "series-detail": {
-        "page-settings-title": "",
+        "page-settings-title": "Seiteneinstellungen",
         "close": "{{common.close}}",
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
         "layout-mode-option-card": "",
         "layout-mode-option-list": "",
         "continue-from": "",
         "read": "{{common.read}}",
-        "continue": "",
+        "continue": "Fortsetzen",
         "read-options-alt": "",
         "incognito": "",
         "remove-from-want-to-read": "",
@@ -995,7 +996,7 @@
         "allow-stats-label": "",
         "allow-stats-tooltip-part-1": "",
         "allow-stats-tooltip-part-2": "",
-        "send-data": "",
+        "send-data": "Daten senden",
         "opds-label": "",
         "opds-tooltip": "",
         "enable-opds": "",
@@ -1021,11 +1022,11 @@
         "version-title": "Version",
         "installId-title": "",
         "more-info-title": "",
-        "home-page-title": "",
-        "wiki-title": "",
-        "discord-title": "",
-        "donations-title": "",
-        "source-title": "",
+        "home-page-title": "Startseite:",
+        "wiki-title": "Wiki:",
+        "discord-title": "Discord:",
+        "donations-title": "Spenden:",
+        "source-title": "Quelle:",
         "feature-request-title": ""
     },
     "manage-tasks-settings": {
@@ -1219,16 +1220,16 @@
     },
     "nav-header": {
         "skip-alt": "",
-        "search-series-alt": "",
-        "search-alt": "",
+        "search-series-alt": "Serie Suchen",
+        "search-alt": "Suchen…",
         "promoted": "",
-        "no-data": "",
+        "no-data": "Keine Ergebnisse gefunden",
         "scroll-to-top-alt": "",
-        "server-settings": "",
-        "settings": "",
-        "help": "",
-        "announcements": "",
-        "logout": ""
+        "server-settings": "Server Einstellungen",
+        "settings": "Einstellungen",
+        "help": "Hilfe",
+        "announcements": "Ankündigungen",
+        "logout": "Abmelden"
     },
     "add-to-list-modal": {
         "title": "",
@@ -1675,6 +1676,6 @@
         "issue-hash-num": "",
         "issue-num": "",
         "chapter-num": "",
-        "volume-num": ""
+        "volume-num": "Band"
     }
 }
