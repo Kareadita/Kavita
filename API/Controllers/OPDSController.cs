@@ -143,6 +143,19 @@ public class OpdsController : BaseApiController
         });
         feed.Entries.Add(new FeedEntry()
         {
+            Id = "wantToRead",
+            Title = await _localizationService.Translate(userId, "want-to-read"),
+            Content = new FeedEntryContent()
+            {
+                Text = await _localizationService.Translate(userId, "browse-want-to-read")
+            },
+            Links = new List<FeedLink>()
+            {
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/want-to-read"),
+            }
+        });
+        feed.Entries.Add(new FeedEntry()
+        {
             Id = "allLibraries",
             Title = await _localizationService.Translate(userId, "libraries"),
             Content = new FeedEntryContent()
@@ -209,6 +222,27 @@ public class OpdsController : BaseApiController
                 }
             });
         }
+
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
+    [HttpGet("{apiKey}/want-to-read")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetWantToRead(string apiKey, [FromQuery] int pageNumber = 0)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+        var wantToReadSeries = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(userId, GetUserParams(pageNumber), _filterV2Dto);
+        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(wantToReadSeries.Select(s => s.Id));
+
+        var feed = CreateFeed(await _localizationService.Translate(userId, "want-to-read"), $"{apiKey}/want-to-read", apiKey, prefix);
+        SetFeedId(feed, $"want-to-read");
+        AddPagination(feed, wantToReadSeries, $"{prefix}{apiKey}/want-to-read");
+
+        feed.Entries.AddRange(wantToReadSeries.Select(seriesDto =>
+            CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl)));
 
         return CreateXmlResult(SerializeXml(feed));
     }

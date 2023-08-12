@@ -3422,6 +3422,37 @@
         }
       }
     },
+    "/api/Opds/{apiKey}/want-to-read": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Opds/{apiKey}/collections": {
       "get": {
         "tags": [
