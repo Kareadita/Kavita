@@ -154,28 +154,28 @@
         "title": "",
         "looking-for-theme": "",
         "looking-for-theme-continued": "",
-        "scan": "",
-        "site-themes": "",
-        "set-default": "",
+        "scan": "Scansione",
+        "site-themes": "Temi del sito",
+        "set-default": "Imposta default",
         "apply": "",
-        "applied": "",
-        "updated-toastr": "",
+        "applied": "Applicato",
+        "updated-toastr": "L'impostazione predefinita del sito è stata aggiornata a {{name}}",
         "scan-queued": ""
     },
     "theme": {
-        "theme-dark": "",
-        "theme-black": "",
-        "theme-paper": "",
-        "theme-white": ""
+        "theme-dark": "Scuro",
+        "theme-black": "Nero",
+        "theme-paper": "Carta",
+        "theme-white": "Bianco"
     },
     "restriction-selector": {
-        "title": "",
-        "description": "",
-        "not-applicable-for-admins": "",
-        "age-rating-label": "",
-        "no-restriction": "",
-        "include-unknowns-label": "",
-        "include-unknowns-tooltip": ""
+        "title": "Limitazione della classificazione in base all'età",
+        "description": "Quando selezionata, tutte le serie e gli elenchi di lettura che hanno almeno un elemento che viola la restrizione selezionata verranno omessi dai risultati.",
+        "not-applicable-for-admins": "Non applicabile per gli amministratori.",
+        "age-rating-label": "Classificazione per Età",
+        "no-restriction": "Nessuna Restrizione",
+        "include-unknowns-label": "Includi sconosciuti",
+        "include-unknowns-tooltip": "Se vero, Sconosciuti verranno consentiti con le limitazioni di età. Ciò potrebbe portare a perdite di contenuti multimediali senza tag per gli utenti con limiti di età."
     },
     "site-theme-provider-pipe": {
         "system": "",
@@ -184,10 +184,10 @@
     "manage-devices": {
         "title": "",
         "description": "",
-        "devices-title": "",
-        "no-devices": "",
-        "platform-label": "",
-        "email-label": "",
+        "devices-title": "Dispositivi",
+        "no-devices": "Non ci sono ancora dispositivi configurati",
+        "platform-label": "Piattaforma: ",
+        "email-label": "Email: ",
         "add": "",
         "delete": "",
         "edit": ""
