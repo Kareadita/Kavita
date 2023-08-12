@@ -80,7 +80,7 @@ export class BookmarksComponent implements OnInit {
       this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       this.filterSettings.presetsV2 =  this.filter;
-
+      this.filterSettings.statementLimit = 1;
     }
 
   ngOnInit(): void {

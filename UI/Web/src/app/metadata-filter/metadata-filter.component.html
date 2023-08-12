@@ -21,7 +21,7 @@
   <ng-template #filterSection>
     <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
       <div class="row justify-content-center g-0">
-        <app-metadata-builder [filter]="filterV2!" [availableFilterFields]="allFilterFields" (update)="handleFilters($event)"></app-metadata-builder>
+        <app-metadata-builder [filter]="filterV2!" [availableFilterFields]="allFilterFields" (update)="handleFilters($event)" [statementLimit]="filterSettings.statementLimit"></app-metadata-builder>
       </div>
       <form [formGroup]="sortGroup" class="container-fluid">
         <div class="row mb-3">

@@ -12,7 +12,7 @@
                         </div>
 
                         <div class="col-md-2">
-                            <button class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')">
+                            <button class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit === -1 || (statementLimit > 0 && filter.statements.length >= statementLimit)">
                                 <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
                                 <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
                             </button>
