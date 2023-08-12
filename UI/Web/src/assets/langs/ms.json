@@ -1,14 +1,14 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "Log masuk",
+        "username": "{{biasa.nama_pengguna}}",
+        "password": "{{biasa.kata_laluan}}",
+        "password-validation": "{{pengesahan.pengesahan-kata laluan}}",
+        "forgot-password": "Lupa Kata Laluan?",
+        "submit": "{{biasa.hantar}}"
     },
     "dashboard": {
-        "no-libraries": "",
+        "no-libraries": "Perpustakaan belum di persediakan lagi. Semak pada konfigurasi",
         "server-settings-link": "",
         "not-granted": "",
         "on-deck-title": "",
