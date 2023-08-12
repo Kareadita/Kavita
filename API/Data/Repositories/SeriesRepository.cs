@@ -939,7 +939,6 @@ public class SeriesRepository : ISeriesRepository
 
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter, QueryContext queryContext, IQueryable<Series>? query = null)
     {
-        // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
@@ -952,6 +951,26 @@ public class SeriesRepository : ISeriesRepository
 
 
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
+        query = ApplyLibraryFilter(filter, query);
+
+        query = BuildFilterQuery(userId, filter, query);
+
+
+        query = query
+            .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
+            .WhereIf(onlyParentSeries, s =>
+                s.RelationOf.Count == 0 ||
+                s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
+            .RestrictAgainstAgeRestriction(userRating);
+
+
+        return ApplyLimit(query
+            .Sort(filter.SortOptions)
+            .AsSplitQuery(), filter.LimitTo);
+    }
+
+    private static IQueryable<Series> ApplyLibraryFilter(FilterV2Dto filter, IQueryable<Series> query)
+    {
         var filterIncludeLibs = new List<int>();
         var filterExcludeLibs = new List<int>();
         if (filter.Statements != null)
@@ -966,43 +985,29 @@ public class SeriesRepository : ISeriesRepository
                 {
                     filterExcludeLibs.Add(int.Parse(stmt.Value));
                 }
-
             }
 
             // Remove as filterLibs now has everything
             filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
         }
 
-        // if (filter.Combination == FilterCombination.And)
-        // {
-        //     query = query.Intersect(queryIncludeLibs);
-        // }
-        // else
-        // {
-        //     query = query.Union(queryIncludeLibs);
-        // }
-        // TODO: Finish this later
+        // We now have a list of libraries the user wants it restricted to and libraries the user doesn't want in the list
+        // We need to check what the filer combo is to see how to next approach
 
-        query = BuildFilterQuery(userId, filter, query);
+        if (filter.Combination == FilterCombination.And)
+        {
+            // If the filter combo is AND, then we need 2 different queries
+            query = query
+                .WhereIf(filterIncludeLibs.Count > 0, s => filterIncludeLibs.Contains(s.LibraryId))
+                .WhereIf(filterExcludeLibs.Count > 0, s => !filterExcludeLibs.Contains(s.LibraryId));
+        }
+        else
+        {
+            // This is an OR statement. In that case we can just remove the filterExcludes
+            query = query.WhereIf(filterIncludeLibs.Count > 0, s => filterIncludeLibs.Contains(s.LibraryId));
+        }
 
-
-        query = query
-            .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
-            .WhereIf(onlyParentSeries, s =>
-                s.RelationOf.Count == 0 ||
-                s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
-            .RestrictAgainstAgeRestriction(userRating);
-
-
-        query = query
-            .WhereIf(filterIncludeLibs.Count > 0, s => filterIncludeLibs.Contains(s.LibraryId));
-
-        //if (filter.)
-
-
-        return ApplyLimit(query
-            .Sort(filter.SortOptions)
-            .AsSplitQuery(), filter.LimitTo);
+        return query;
     }
 
     private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query)
