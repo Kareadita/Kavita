@@ -483,7 +483,7 @@ public static class SeriesFilter
     public static IQueryable<Series> HasSummary(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, string queryString)
     {
-        if (string.IsNullOrEmpty(queryString) || !condition) return queryable;
+        if (!condition) return queryable;
 
         switch (comparison)
         {
