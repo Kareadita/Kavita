@@ -1694,7 +1694,7 @@
         "or": "Match any of the following",
         "and": "Match all of the following",
         "add-rule": "Add Rule",
-        "remove-rule": "Remove Row {{num}}"
+        "remove-rule": "Remove Row"
     },
 
     "filter-field-pipe": {

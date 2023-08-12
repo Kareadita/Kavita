@@ -949,35 +949,56 @@ public class SeriesRepository : ISeriesRepository
         query ??= _context.Series
             .AsNoTracking();
 
-        var filterLibs = new List<int>();
+
 
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
+        var filterIncludeLibs = new List<int>();
+        var filterExcludeLibs = new List<int>();
         if (filter.Statements != null)
         {
             foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
             {
-                filterLibs.Add(int.Parse(stmt.Value));
+                if (stmt.Comparison is FilterComparison.Equal or FilterComparison.Contains)
+                {
+                    filterIncludeLibs.Add(int.Parse(stmt.Value));
+                }
+                else
+                {
+                    filterExcludeLibs.Add(int.Parse(stmt.Value));
+                }
+
             }
 
             // Remove as filterLibs now has everything
             filter.Statements = filter.Statements.Where(stmt => stmt.Field != FilterField.Libraries).ToList();
         }
 
+        // if (filter.Combination == FilterCombination.And)
+        // {
+        //     query = query.Intersect(queryIncludeLibs);
+        // }
+        // else
+        // {
+        //     query = query.Union(queryIncludeLibs);
+        // }
+        // TODO: Finish this later
 
         query = BuildFilterQuery(userId, filter, query);
 
+
         query = query
             .WhereIf(userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
-            .WhereIf(filterLibs.Count > 0, s => filterLibs.Contains(s.LibraryId))
             .WhereIf(onlyParentSeries, s =>
-            s.RelationOf.Count == 0 ||
-            s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
+                s.RelationOf.Count == 0 ||
+                s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
+            .RestrictAgainstAgeRestriction(userRating);
 
-        if (userRating.AgeRating != AgeRating.NotApplicable)
-        {
-             // this if statement is included in the extension
-            query = query.RestrictAgainstAgeRestriction(userRating);
-        }
+
+        query = query
+            .WhereIf(filterIncludeLibs.Count > 0, s => filterIncludeLibs.Contains(s.LibraryId));
+
+        //if (filter.)
+
 
         return ApplyLimit(query
             .Sort(filter.SortOptions)
