@@ -267,6 +267,7 @@
 
     "api-key": {
         "copy": "Copy",
+        "show": "Show",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
