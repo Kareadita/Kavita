@@ -148,7 +148,7 @@
     },
     "user-holds": {
         "title": "",
-        "description": ""
+        "description": "Esta é uma lista de Séries, gerida por utilizador, que não será scrobbled para os fornecedores upstream. Pode eliminar uma série a qualquer momento e próximo evento de scrobble (progresso de leitura, classificação, estado de leituras futuras) irá despoletar eventos."
     },
     "theme-manager": {
         "title": "Gestor de Temas",
@@ -452,7 +452,7 @@
     },
     "reset-password": {
         "title": "Repor Palavra Passe",
-        "description": "Introduza o endereço de email da sua conta. O Kavita",
+        "description": "Introduza o endereço de email da sua conta. O Kavita irá enviar um email se encontrar um válido em ficheiro, caso contrário peça ao administrador pelo link dos logs.",
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
