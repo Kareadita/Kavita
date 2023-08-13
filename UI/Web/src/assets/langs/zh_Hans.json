@@ -243,7 +243,8 @@
         "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
         "no-key": "错误-未设置密钥",
         "confirm-reset": "这将使您设置的所有OPDS配置失效。您确定要继续吗？",
-        "key-reset": "API密钥重置"
+        "key-reset": "API密钥重置",
+        "show": "显示"
     },
     "scrobbling-providers": {
         "title": "刮削提供",
@@ -627,7 +628,7 @@
     },
     "series-metadata-detail": {
         "links-title": "链接",
-        "genres-title": "流派",
+        "genres-title": "类别",
         "tags-title": "标签",
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
@@ -1482,8 +1483,8 @@
         "total-files-label": "文件总数",
         "total-files-tooltip": "文件总数: {{count}}",
         "total-size-label": "总大小",
-        "total-genres-label": "全部流派",
-        "total-genres-tooltip": "全部流派: {{count}}",
+        "total-genres-label": "全部种类",
+        "total-genres-tooltip": "全部类别: {{count}}",
         "total-tags-label": "标签总数",
         "total-tags-tooltip": "标签总数: {{count}}",
         "total-people-label": "总人数",
