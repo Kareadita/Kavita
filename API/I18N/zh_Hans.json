@@ -107,5 +107,6 @@
     "favicon-doesnt-exist": "图标不存在",
     "not-authenticated": "用户未通过身份验证",
     "anilist-cred-expired": "AniList凭据已过期或未设置",
-    "theme-doesnt-exist": "主题文件丢失或者无效"
+    "theme-doesnt-exist": "主题文件丢失或者无效",
+    "generic-user-email-update": "无法更新用户的电子邮件。请检查日志。"
 }
