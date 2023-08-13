@@ -38,6 +38,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {MetadataDetailComponent} from "../../../series-detail/_components/metadata-detail/metadata-detail.component";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-reading-list-detail',
@@ -76,7 +77,9 @@ export class ReadingListDetailComponent implements OnInit {
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {}
+    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService, private titleService: Title) {
+    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
+  }
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');

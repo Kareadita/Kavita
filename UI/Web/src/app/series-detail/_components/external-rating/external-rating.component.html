@@ -1,7 +1,7 @@
-<div class="row">
+<div class="row g-0">
   <div class="col-auto custom-col clickable" [ngbPopover]="popContent"
        popoverTitle="Your Rating + Overall" popoverClass="md-popover">
-    <span class="badge rounded-pill me-1">
+    <span class="badge rounded-pill ps-0 me-1">
       <img class="me-1" ngSrc="assets/images/logo-32.png" width="24" height="24" alt="">
       <ng-container *ngIf="hasUserRated; else notYetRated">{{userRating * 20}}</ng-container>
       <ng-template #notYetRated>N/A</ng-template>

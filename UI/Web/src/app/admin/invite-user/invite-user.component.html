@@ -42,7 +42,7 @@
         <p>{{t('setup-user-description')}}
         </p>
         <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [showRefresh]="false" [transform]="makeLink"></app-api-key>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [showRefresh]="false" [transform]="makeLink"></app-api-key>
       </ng-container>
 
     </div>

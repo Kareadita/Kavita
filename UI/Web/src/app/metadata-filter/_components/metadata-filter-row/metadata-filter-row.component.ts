@@ -171,7 +171,7 @@ export class MetadataFilterRowComponent implements OnInit {
           })));
         case FilterField.Languages:
           return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
-            return {value: status.isoCode, title: status.title + `(${status.isoCode})`}
+            return {value: status.isoCode, title: status.title + ` (${status.isoCode})`}
           })));
         case FilterField.Formats:
           return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {

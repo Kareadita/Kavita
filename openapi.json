@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.7.1"
+    "version": "0.7.7.7"
   },
   "servers": [
     {
@@ -3412,6 +3412,37 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Opds/{apiKey}/want-to-read": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],

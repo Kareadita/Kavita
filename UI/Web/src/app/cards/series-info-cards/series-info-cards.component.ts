@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -10,15 +11,15 @@ import {
   Output
 } from '@angular/core';
 import {debounceTime, filter, map} from 'rxjs';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
-import { HourEstimateRange } from 'src/app/_models/series-detail/hour-estimate-range';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { Series } from 'src/app/_models/series';
-import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
-import { AccountService } from 'src/app/_services/account.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {UserProgressUpdateEvent} from 'src/app/_models/events/user-progress-update-event';
+import {HourEstimateRange} from 'src/app/_models/series-detail/hour-estimate-range';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {Series} from 'src/app/_models/series';
+import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
+import {AccountService} from 'src/app/_services/account.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {ReaderService} from 'src/app/_services/reader.service';
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobblingService} from "../../_services/scrobbling.service";
@@ -111,7 +112,8 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
 
 
   handleGoTo(queryParamName: FilterField, filter: any) {
-    if (filter + '' === '') return;
+    // Ignore the default case added as this query combo would never be valid
+    if (filter + '' === '' && queryParamName === FilterField.SeriesName) return;
     this.goTo.emit({queryParamName, filter});
   }
 
