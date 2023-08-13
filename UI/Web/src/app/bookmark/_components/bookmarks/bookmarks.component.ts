@@ -31,9 +31,10 @@ import { CardItemComponent } from '../../../cards/card-item/card-item.component'
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-bookmarks',
@@ -72,7 +73,7 @@ export class BookmarksComponent implements OnInit {
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private router: Router, private readonly cdRef: ChangeDetectorRef,
     private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
-    private jumpbarService: JumpbarService) {
+    private jumpbarService: JumpbarService, private titleService: Title) {
       this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
       if (this.filter.statements.length === 0) {
         this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
@@ -81,6 +82,7 @@ export class BookmarksComponent implements OnInit {
       this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
       this.filterSettings.presetsV2 =  this.filter;
       this.filterSettings.statementLimit = 1;
+      this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
 
   ngOnInit(): void {

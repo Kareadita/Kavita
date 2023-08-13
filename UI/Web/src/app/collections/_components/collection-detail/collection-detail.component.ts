@@ -229,10 +229,10 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      // TODO: This can be changed now that we have app-image and collection cover merge code
+      // TODO: This can be changed now that we have app-image and collection cover merge code (can it? Because we still have the case where there is no image)
+      // I can always tweak merge to allow blank slots and if just one item, just show that item image
       this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
-      this.titleService.setTitle(this.translocoService.translate('errors.collection-invalid-access', {collectionName: this.collectionTag.title}));
-      // TODO: BUG: This title key is incorrect!
+      this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
       this.cdRef.markForCheck();
     });
   }
