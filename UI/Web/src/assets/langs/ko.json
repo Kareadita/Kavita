@@ -48,13 +48,13 @@
         "score-updated": "평점 업데이트",
         "want-to-read-add": "읽고 싶어요: 추가",
         "want-to-read-remove": "읽고 싶어요: 제거",
-        "review": "후기 업데이트"
+        "review": "리뷰 업데이트"
     },
     "spoiler": {
         "click-to-show": "스포일러, 표시하려면 클릭"
     },
     "review-series-modal": {
-        "title": "후기 수정",
+        "title": "리뷰 수정",
         "tagline-label": "제목",
         "review-label": "평가",
         "close": "{{common.close}}",
@@ -84,8 +84,8 @@
         "add": "추가",
         "delete": "삭제",
         "edit": "편집",
-        "help": "도움",
-        "submit": "제출",
+        "help": "도움말",
+        "submit": "로그인",
         "loading": "로딩중…",
         "select-all": "모두 선택",
         "deselect-all": "모두 선택 취소",
@@ -180,7 +180,7 @@
         "on-deck-last-chapter-add-tooltip": "계속 읽기를 포함하기 위해 마지막 챕터 이후의 일수가 추가되었습니다.",
         "logging-level-label": "로그 레벨",
         "logging-level-tooltip": "문제를 식별하는 데 도움이 되도록 디버그를 사용하십시오. 디버그는 디스크 공간을 많이 차지할 수 있습니다.",
-        "base-url-label": "기본 Url",
+        "base-url-label": "기본 URL",
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
@@ -201,7 +201,7 @@
         "backup-tooltip": "유지 관리할 백업 수입니다. 기본값은 30, 최소값은 1, 최대값은 30입니다.",
         "cache-size-tooltip": "무거운 API 캐싱에 허용되는 메모리 양입니다. 기본값은 75MB입니다.",
         "on-deck-last-chapter-add-label": "계속 읽기 마지막 챕터 추가(일)",
-        "on-deck-last-progress-label": "계속 읽기 마지막 진행 상황(일)",
+        "on-deck-last-progress-label": "계속 읽기 마지막 진행률(일)",
         "allow-stats-label": "익명 사용 수집 허용",
         "allow-stats-tooltip-part-2": "무엇을 수집합니다.",
         "send-data": "데이터 보내기",
@@ -228,7 +228,7 @@
         "setup-user-alt": "사용자 설정 {{user}}",
         "setup": "설정",
         "none": "없음",
-        "never": "절대",
+        "never": "없음",
         "no-data": "다른 사용자가 없습니다.",
         "loading": "{{common.loading}}",
         "you-alt": "(당신)",
@@ -268,13 +268,13 @@
         "skip-alt": "메인 콘텐츠로 건너뛰기",
         "no-data": "검색 결과가 없습니다",
         "server-settings": "서버 설정",
-        "help": "도움",
+        "help": "도움말",
         "logout": "로그아웃",
         "settings": "설정",
         "scroll-to-top-alt": "맨위로 스크롤",
         "announcements": "공지 사항",
         "search-series-alt": "시리즈 검색",
-        "search-alt": "검색중…"
+        "search-alt": "검색…"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -343,7 +343,7 @@
         "release-year": "출시 연도",
         "sort-name": "정렬 이름",
         "created": "생성됨",
-        "time-to-read": "읽는 시간",
+        "time-to-read": "완독 예상 시간",
         "last-chapter-added": "추가된 항목"
     },
     "manga-format-stats": {
@@ -411,7 +411,7 @@
         "volumes-added-to-reading-list": "읽기 목록에 추가된 볼륨",
         "mark-read": "읽음으로 표시됨",
         "file-send-to": "파일이 {{name}}에 이메일로 전송됨",
-        "device-updated": "장치 갱신됨",
+        "device-updated": "장치 업데이트됨",
         "change-email-private": "서버는 공개적으로 액세스할 수 없습니다. 로그에서 확인 링크를 가져오도록 관리자에게 요청하십시오",
         "no-series-collection-warning": "경고! 시리즈를 선택하지 않았습니다. 저장하면 컬렉션이 삭제됩니다. 계속 하시겠습니까?",
         "nothing-to-remove": "제거할 항목 없음",
@@ -428,11 +428,11 @@
         "confirm-delete-reading-list": "읽기 목록을 삭제하시겠습니까? 이것은 되돌릴 수 없습니다.",
         "library-deleted": "라이브러리 {{name}}이(가) 제거되었습니다",
         "account-migration-complete": "계정 마이그레이션 완료",
-        "password-updated": "비밀번호가 갱신되었습니다",
+        "password-updated": "비밀번호가 업데이트되었습니다",
         "forced-scan-queued": "{{name}}에 대한 강제 스캔이 시작되었습니다",
         "library-created": "라이브러리가 성공적으로 생성되었습니다. 스캔이 시작되었습니다.",
-        "anilist-token-updated": "AniList 토큰이 갱신되었습니다",
-        "age-restriction-updated": "연령 제한이 갱신되었습니다",
+        "anilist-token-updated": "AniList 토큰이 업데이트되었습니다",
+        "age-restriction-updated": "연령 제한이 업데이트되었습니다",
         "email-sent-to-no-existing": "확인을 위해 {{email}}로 이메일을 보냈습니다.",
         "confirm-download-size": "{{entityType}}은 {{size}}입니다. 정말 계속 하시겠습니까?",
         "user-deleted": "{{user}} 가 삭제되었습니다",
@@ -441,8 +441,8 @@
         "chapter-added-to-reading-list": "읽기 목록에 챕터 추가됨",
         "multiple-added-to-reading-list": "읽기 목록에 추가된 챕터 및 볼륨",
         "select-files-warning": "앞으로 이동하려면 파일을 선택해야 합니다",
-        "collection-updated": "컬렉션 갱신됨",
-        "reading-list-updated": "읽기 목록 갱신됨",
+        "collection-updated": "컬렉션 업데이트됨",
+        "reading-list-updated": "읽기 목록 업데이트됨",
         "item-removed": "삭제된 항목",
         "entity-read": "{{name}}을(를) 읽음",
         "k+-error": "라이선스를 활성화하는 동안 오류가 발생했습니다. 다시 시도해 주세요.",
@@ -464,7 +464,7 @@
         "regen-cover": "표지 이미지를 재생성하기 위한 작업이 대기열에 추가되었습니다",
         "download-in-progress": "다운로드가 이미 진행 중입니다. 기다리세요.",
         "scan-queued": "대기 중인 스캔 {{name}}",
-        "server-settings-updated": "서버 설정 갱신됨",
+        "server-settings-updated": "서버 설정 업데이트됨",
         "reset-ip-address": "IP 주소 재설정",
         "reset-base-url": "기본 URL 재설정",
         "unauthorized-1": "이 페이지를 볼 권한이 없습니다.",
@@ -479,7 +479,8 @@
         "confirm-delete-series": "이 시리즈를 삭제하시겠습니까? 디스크의 파일은 수정하지 않습니다.",
         "alert-bad-theme": "테마에 유효하지 않거나 안전하지 않은 CSS가 있습니다. 이를 수정하려면 관리자에게 문의하세요. 어두운 테마로 기본 설정.",
         "confirm-library-delete": "정말로 {{name}} 라이브러리를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "confirm-regen-covers": "표지를 새로 고치면 모든 표지 이미지가 다시 계산됩니다. 이것은 무거운 작업입니다. 대신 스캔을 수행하지 않으시겠습니까?"
+        "confirm-regen-covers": "표지를 새로 고치면 모든 표지 이미지가 다시 계산됩니다. 이것은 무거운 작업입니다. 대신 스캔을 수행하지 않으시겠습니까?",
+        "list-doesnt-exist": "이 목록은 존재하지 않습니다"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -505,10 +506,13 @@
         "clear": "지우기",
         "import-cbl": "CBL 가져오기",
         "others": "그 외",
-        "remove-from-on-deck": "계속 읽기에서 제거"
+        "remove-from-on-deck": "계속 읽기에서 제거",
+        "add-rule-group-and": "규칙 그룹 추가(AND)",
+        "add-rule-group-or": "규칙 그룹 추가(OR)",
+        "remove-rule-group": "규칙 그룹 제거"
     },
     "preferences": {
-        "original": "오리지날",
+        "original": "원본",
         "no-split": "분할 안 함",
         "fit-to-screen": "화면에 맞추기",
         "single": "단일",
@@ -535,7 +539,7 @@
         "hour-ago": "1시간 전",
         "day-ago": "1일 전",
         "month-ago": "1달 전",
-        "never": "절대",
+        "never": "없음",
         "mins-ago": "{{value}} 분 전",
         "hours-ago": "{{value}} 시간 전",
         "days-ago": "{{value}} 일 전",
@@ -547,7 +551,7 @@
         "doujinshi": "동인지",
         "side-story": "외전",
         "edition": "에디션",
-        "other": "다른",
+        "other": "그 외",
         "prequel": "프리퀄",
         "sequel": "속편",
         "spin-off": "스핀오프",
@@ -675,7 +679,7 @@
         "title": "이메일 변경 확인",
         "confirm-description": "귀하의 이메일이 확인되었으며 이제 Kavita 내에서 변경되었습니다. 로그인으로 리디렉션됩니다.",
         "success": "성공!",
-        "non-confirm-description": "이메일 갱신이 확인되는 동안 잠시 기다려 주십시오."
+        "non-confirm-description": "이메일 업데이트가 확인되는 동안 잠시 기다려 주십시오."
     },
     "series-detail": {
         "remove-from-want-to-read": "읽고 싶어요에서 제거",
@@ -688,7 +692,7 @@
         "no-chapters": "이 볼륨에는 챕터가 없습니다. 읽을 수 없습니다.",
         "cover-change": "브라우저에서 이미지를 새로 고치는 데 최대 1분이 걸릴 수 있습니다. 그때까지는 일부 페이지에 이전 이미지가 표시될 수 있습니다.",
         "layout-mode-label": "{{user-preferences.layout-mode-book-label}}",
-        "incognito": "익명",
+        "incognito": "시크릿 모드",
         "page-settings-title": "페이지 설정",
         "close": "{{common.close}}",
         "layout-mode-option-card": "카드",
@@ -825,7 +829,7 @@
         "age-rating-title": "{{entity-info-cards.age-rating-title}}",
         "language-title": "언어",
         "publication-status-tooltip": "출판현황",
-        "read-time-title": "읽는 시간",
+        "read-time-title": "완독 예상 시간",
         "publication-status-title": "출판",
         "disabled": "비활성",
         "scrobbling-title": "스크로블링",
@@ -901,7 +905,7 @@
         "bust-cache-task-desc": "Kavita+ 캐시 파괴 - 잘못된 일치를 디버깅할 때만 사용해야 합니다.",
         "description-header": "설명",
         "clear-reading-cache-task": "읽기 캐시 지우기",
-        "clean-up-want-to-read-task-desc": "읽고 싶어요 게시 상태가 완료인 사용자가 완전히 읽은 모든 시리즈를 제거합니다. 24시간마다 실행됩니다.",
+        "clean-up-want-to-read-task-desc": "사용자가 완전히 읽은 출판 현황이 완결인 모든 시리즈를 읽고 싶어요에서 제거합니다. 24시간마다 실행됩니다.",
         "clear-reading-cache-task-desc": "읽기 위해 캐시된 파일을 지웁니다. 지난 24시간 이내에 이전에 읽은 파일을 방금 업데이트한 경우에 유용합니다.",
         "clear-reading-cache-task-success": "캐시가 지워졌습니다",
         "library-scan-label": "라이브러리 스캔",
@@ -931,13 +935,14 @@
     "reading-list-detail": {
         "remove-read": "읽기 제거",
         "read": "{{common.read}}",
-        "incognito-alt": "(익명)",
+        "incognito-alt": "(시크릿)",
         "no-data": "추가된 사항 없음",
         "page-settings-title": "페이지 설정",
         "order-numbers-label": "주문 번호",
         "item-count": "{{common.item-count}}",
         "continue": "계속 읽기",
-        "read-options-alt": "읽기 옵션"
+        "read-options-alt": "읽기 옵션",
+        "characters-title": "{{series-metadata-detail.characters-title}}"
     },
     "events-widget": {
         "update-available": "업데이트 사용 가능",
@@ -945,7 +950,7 @@
         "downloading-item": "다운로드 중 {{item}}",
         "more-info": "자세한 내용을 보려면 클릭하십시오",
         "dismiss-all": "모두 해제",
-        "no-data": "여기서는 별로 진행되지 않습니다",
+        "no-data": "아무것도 없습니다",
         "close": "{{common.close}}",
         "users-online-count": "{{num}} 사용자 온라인",
         "active-events-title": "활성 이벤트:"
@@ -1031,7 +1036,7 @@
         "first-page-tooltip": "첫 페이지",
         "image-splitting-label": "이미지 분할",
         "no-next-chapter": "다음 챕터 없음",
-        "user-preferences-updated": "사용자 기본 설정 갱신됨",
+        "user-preferences-updated": "사용자 기본 설정 업데이트됨",
         "fullscreen": "전체 화면",
         "swipe-enabled-label": "스와이프 사용",
         "settings-tooltip": "설정",
@@ -1042,7 +1047,7 @@
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "prev-chapter-tooltip": "이전 챕터/볼륨",
-        "save-globally": "전역 저장",
+        "save-globally": "전역 설정",
         "prev-page-tooltip": "이전 페이지",
         "next-page-tooltip": "다음 페이지",
         "collapse": "접기",
@@ -1056,7 +1061,7 @@
         "reading-direction-tooltip": "읽는 방향: ",
         "reading-mode-tooltip": "읽기 모드",
         "width": "너비",
-        "original": "오리지날",
+        "original": "원본",
         "brightness-label": "밝기",
         "first-time-reading-manga": "메뉴를 열려면 언제든지 이미지를 탭하세요. 다른 설정을 구성하거나 진행 표시줄을 클릭하여 페이지로 이동할 수 있습니다. 이미지의 측면을 탭하면 다음/이전 페이지로 이동합니다.",
         "no-prev-chapter": "이전 챕터 없음"
@@ -1071,7 +1076,6 @@
         "max": "최대",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "format-tooltip": "이것은 라이브러리에 구애받지 않습니다",
         "letterer-label": "레터러",
         "sort-by-label": "정렬 기준",
         "filter-title": "필터",
@@ -1096,7 +1100,8 @@
         "series-name-tooltip": "시리즈 이름은 이름, 정렬 이름 또는 현지화된 이름을 기준으로 필터링됩니다",
         "series-name-label": "시리즈 이름",
         "release-label": "출시",
-        "min": "최소"
+        "min": "최소",
+        "limit-label": "다음으로 제한"
     },
     "day-breakdown": {
         "x-axis-label": "요일",
@@ -1218,7 +1223,7 @@
         "scrobble-issue-title": "스크로블 문제"
     },
     "theme-manager": {
-        "updated-toastr": "사이트 기본값이 {{name}}(으)로 갱신되었습니다",
+        "updated-toastr": "사이트 기본값이 {{name}}(으)로 업데이트되었습니다",
         "title": "테마 관리자",
         "looking-for-theme": "밝은 테마 또는 전자 잉크 테마를 찾고 계십니까? 우리에게는 당신이 사용할 수 있는 몇 가지 사용자 정의 테마가 있습니다 ",
         "looking-for-theme-continued": "테마 github.",
@@ -1235,7 +1240,7 @@
         "email-label": "{{common.email}}",
         "current-password-label": "현재 비밀번호",
         "email-not-confirmed": "이 이메일은 확인되지 않았습니다",
-        "email-updated-title": "이메일 갱신됨",
+        "email-updated-title": "이메일 업데이트됨",
         "setup-user-account": "사용자 계정 설정",
         "invite-url-label": "초대 URL",
         "required-field": "{{validation.required-field}}",
@@ -1349,17 +1354,11 @@
         "description": "이것은 업스트림 공급자에게 스크로블되지 않는 시리즈의 사용자 관리 목록입니다. 언제든지 시리즈를 제거할 수 있으며 다음 스크로블 가능 이벤트(읽기 진행률, 평점, 읽고 싶어요 상태)가 이벤트를 트리거합니다.",
         "title": "스크러블 홀드"
     },
-    "infinite-reader": {
-        "continuous-reading-next-chapter": "다음 챕터",
-        "continuous-reading-prev-chapter-alt": "위로 스크롤하여 이전 챕터로 이동",
-        "continuous-reading-prev-chapter": "이전 챕터",
-        "continuous-reading-next-chapter-alt": "위로 스크롤하여 다음 챕터로 이동"
-    },
     "entity-info-cards": {
         "read-time-title": "{{series-info-cards.read-time-title}}",
         "pages-count": "{{num}} 페이지",
         "words-count": "{{num}} 단어",
-        "reading-time-title": "읽는 시간",
+        "reading-time-title": "완독 예상 시간",
         "hours": "시간",
         "release-date-tooltip": "출시일",
         "age-rating-title": "연령 등급",
@@ -1378,7 +1377,7 @@
         "id-title": "아이디"
     },
     "manage-alerts": {
-        "extension-header": "확대",
+        "extension-header": "확장자",
         "clear-alerts": "알림 지우기",
         "filter-label": "필터",
         "description-part-1": "이 표에는 미디어를 스캔하거나 읽는 동안 발견된 문제가 포함되어 있습니다. 이 목록은 관리되지 않습니다. 언제든지 지우고 라이브러리(강제) 스캔을 사용하여 분석을 수행할 수 있습니다. 몇 가지 일반적인 오류 목록과 그 의미는 다음에서 찾을 수 있습니다. ",
@@ -1388,7 +1387,7 @@
         "comment-header": "코멘트"
     },
     "default-date-pipe": {
-        "never": "절대"
+        "never": "없음"
     },
     "theme": {
         "theme-dark": "다크",
@@ -1431,7 +1430,7 @@
         "copy": "복사",
         "regen-warning": "API 키를 재생성하면 기존 클라이언트가 무효화됩니다.",
         "no-key": "오류 - 키가 설정되지 않음",
-        "confirm-reset": "이렇게 하면 설정한 모든 OPDS 구성이 무효화됩니다. 계속 하시겠습니까?",
+        "confirm-reset": "이렇게 하면 설정한 모든 OPDS 구성이 무효화됩니다. 정말 계속 하시겠습니까?",
         "key-reset": "API 키 재설정"
     },
     "typeahead": {
@@ -1578,7 +1577,7 @@
         "format-header": "포맷",
         "total-files-header": "총 파일",
         "data-table-label": "데이터 테이블",
-        "extension-header": "확대",
+        "extension-header": "확장자",
         "total-size-header": "총 크기",
         "total-file-size-title": "총 파일 크기:",
         "not-classified": "분류되지 않음"
@@ -1637,7 +1636,8 @@
         "failure": "실패"
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "모든 시리즈"
     },
     "announcements": {
         "title": "공지 사항"
@@ -1687,5 +1687,60 @@
         "instructions-alt": "재정렬 입력에 숫자를 입력하면 해당 위치에 항목이 삽입되고 다른 모든 항목의 순서가 업데이트됩니다.",
         "reorder-label": "재 주문",
         "remove-item-alt": "항목 제거"
+    },
+    "infinite-scroller": {
+        "continuous-reading-prev-chapter-alt": "위로 스크롤하여 이전 챕터로 이동",
+        "continuous-reading-next-chapter-alt": "위로 스크롤하여 다음 챕터로 이동",
+        "continuous-reading-prev-chapter": "이전 챕터",
+        "continuous-reading-next-chapter": "다음 챕터"
+    },
+    "filter-field-pipe": {
+        "collection-tags": "컬렉션 태그",
+        "colorist": "컬러리스트",
+        "cover-artist": "커버 아티스트",
+        "editor": "편집자",
+        "summary": "요약",
+        "tags": "태그",
+        "translators": "역자",
+        "age-rating": "연령 등급",
+        "characters": "캐릭터",
+        "formats": "포맷",
+        "letterer": "레터러",
+        "publication-status": "출판현황",
+        "penciller": "펜슬러",
+        "publisher": "출판사",
+        "read-progress": "읽기 진행률",
+        "genres": "장르",
+        "read-time": "완독 예상 시간",
+        "inker": "잉커",
+        "release-year": "출시 연도",
+        "user-rating": "사용자 평점",
+        "writers": "작가",
+        "languages": "언어",
+        "libraries": "라이브러리",
+        "series-name": "시리즈 이름"
+    },
+    "filter-comparison-pipe": {
+        "is-not-in-last": "마지막에 없음",
+        "begins-with": "시작",
+        "contains": "포함",
+        "equal": "같음",
+        "less-than": "작음",
+        "greater-than-or-equal": "크거나 같음",
+        "matches": "일치",
+        "less-than-or-equal": "작거나 같음",
+        "greater-than": "큼",
+        "does-not-contain": "포함 안 함",
+        "not-equal": "같지 않음",
+        "ends-with": "로 끝남",
+        "is-before": "이전",
+        "is-after": "이후",
+        "is-in-last": "마지막에 있음"
+    },
+    "metadata-builder": {
+        "or": "다음 중 하나와 일치",
+        "add-rule": "규칙 추가",
+        "and": "다음 모두 일치",
+        "remove-rule": "행 {{num}} 제거"
     }
 }

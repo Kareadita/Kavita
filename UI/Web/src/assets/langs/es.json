@@ -95,7 +95,6 @@
         "sort-by-label": "Ordenar Por",
         "ascending-alt": "Ascendente",
         "descending-alt": "Descendente",
-        "format-tooltip": "Es independiente de la biblioteca",
         "cover-artist-label": "Artista de la Portada"
     },
     "manga-reader": {
@@ -149,10 +148,6 @@
         "dark-theme-alt": "Tema oscuro",
         "loading-message": "Cargando……los PDF pueden ser más lentos de lo esperado",
         "close-reader-alt": "Cerrar Lector"
-    },
-    "infinite-reader": {
-        "continuous-reading-prev-chapter": "Capítulo anterior",
-        "continuous-reading-next-chapter": "Capítulo siguiente"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progreso de lectura",
@@ -311,7 +306,7 @@
         "platform-label": "Plataforma: ",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
-        "email-label": "{{common.email}} "
+        "email-label": "Email: "
     },
     "edit-device": {
         "device-name-label": "Nombre del dispositivo",
@@ -324,7 +319,7 @@
     },
     "restriction-selector": {
         "include-unknowns-tooltip": "Al estar activada, se mostraran objetos con clasificación de edad desconocida en las búsquedas. Esto puede provocar que se filtren series de mayor categoría a usuarios con restricción de edad.",
-        "title": "Clasificación por edad",
+        "title": "Restricción por edad",
         "description": "Cuando está seleccionado, las series y las listas de lectura que tengan una clasificación mayor serán ocultadas en los resultados.",
         "not-applicable-for-admins": "No se aplica a los administradores.",
         "age-rating-label": "Clasificación por edad",
@@ -362,9 +357,9 @@
     },
     "change-age-restriction": {
         "save": "{{common.save}}",
-        "age-restriction-label": "Clasificación por edad",
+        "age-restriction-label": "Restricción de edad",
         "reset": "{{common.reset}}",
-        "unknowns": "Desconocido",
+        "unknowns": "Desconocidos",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}"
     },
@@ -514,13 +509,15 @@
         "early-childhood": "Infancia Temprana",
         "everyone": "Todos",
         "everyone-10-plus": "Mayores de 10 años",
-        "kids-to-adults": "Adolescentes",
+        "kids-to-adults": "Desde niños hasta adultos",
         "ma15-plus": "Mayores de 15 años",
         "mature-17-plus": "Mayores de 17 años",
         "teen": "Adolescentes",
         "x18-plus": "Mayores de 18 años",
         "pg": "Con acompañamiento adulto",
-        "r18-plus": "Mayores de 18 años"
+        "r18-plus": "Mayores de 18 años",
+        "g": "Todas las edades",
+        "mature": "Mayor de edad"
     },
     "series-detail": {
         "close": "{{common.close}}",
@@ -754,7 +751,8 @@
         "parent": "Padre",
         "edition": "Edicion",
         "alternative-setting": "Ajuste Alternativo",
-        "spin-off": "Spin-Off"
+        "spin-off": "Spin-Off",
+        "doujinshi": "Doujinshi"
     },
     "publication-status-pipe": {
         "ongoing": "En curso",
