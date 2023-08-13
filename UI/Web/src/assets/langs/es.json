@@ -368,7 +368,8 @@
         "key-reset": "Resetear Clave de API",
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "Esto invalidará cualquier configuración de OPDS. Estás seguro que quieres continuar?",
-        "regen-warning": "Regenerar tu Clave de API invalidará los clientes conectados."
+        "regen-warning": "Regenerar tu Clave de API invalidará los clientes conectados.",
+        "show": "Mostrar"
     },
     "scrobbling-providers": {
         "generate": "Generar",
@@ -724,10 +725,16 @@
         "cover-description": "Los iconos de bibliotecas personalizadas son opcionales",
         "cover-description-extra": "Las imágenes de biblioteca no deben ser grandes. Usa un archivo pequeño, de 32x32 píxeles. Kavita no valida por tamaño.",
         "manage-reading-list-label": "Gestionar Listas de Lectura",
-        "folder-watching-label": "Monitorizar Carpetas"
+        "folder-watching-label": "Monitorizar Carpetas",
+        "include-in-dashboard-tooltip": "¿Deben incluirse las series de la biblioteca en el panel de control? Esto afecta a todas las fuentes, como \"En el puente\", \"Actualizado recientemente\", \"Añadido recientemente\" o cualquier adición personalizada.",
+        "folder-watching-tooltip": "Anula la monitorización de carpetas del servidor para esta biblioteca. Si está desactivada, la monitorización de carpetas no se ejecutará en las carpetas que contenga esta biblioteca. Si las bibliotecas comparten carpetas, éstas pueden seguir siendo monitorizadas.",
+        "force-scan": "Escaneo forzado",
+        "include-in-search-tooltip": "¿Deben incluirse las series y cualquier información derivada (géneros, personas, archivos) de la biblioteca en los resultados de búsqueda?",
+        "manage-reading-list-tooltip": "¿Debe Kavita crear listas de lectura a partir de las etiquetas StoryArc/StoryArcNumber y AlternativeSeries/AlternativeCount que se encuentran en los archivos ComicInfo.xml/opf?"
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Todas las series"
     },
     "announcements": {
         "title": "Noticias"
