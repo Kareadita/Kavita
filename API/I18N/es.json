@@ -156,5 +156,7 @@
     "opds-disabled": "OPDS no está habilitado en este servidor",
     "browse-recently-added": "Navegar por los añadidos recientemente",
     "browse-collections": "Navegar por colecciones",
-    "reading-list-restricted": "La lista de lectura no existe o no tiene acceso"
+    "reading-list-restricted": "La lista de lectura no existe o no tiene acceso",
+    "browse-want-to-read": "Navegar en deseo leer",
+    "want-to-read": "Deseo leer"
 }
