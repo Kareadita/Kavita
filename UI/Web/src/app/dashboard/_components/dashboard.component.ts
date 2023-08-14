@@ -169,7 +169,6 @@ export class DashboardComponent implements OnInit {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'recently updated series') {
       const params: any = {};
-      //params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params[FilterQueryParam.Page] = 1;
       params['title'] = 'Recently Updated';
       const filter = this.filterUtilityService.createSeriesV2Filter();
@@ -177,20 +176,29 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
-      this.filterUtilityService.applyFilter2(['all-series'], filter, params)
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
-      params[FilterQueryParam.ReadStatus] = 'true,false,false';
-      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params[FilterQueryParam.Page] = 1;
       params['title'] = 'On Deck';
-      this.router.navigate(['all-series'], {queryParams: params});
+
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.LastChapterAdded;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
-      params[FilterQueryParam.SortBy] = SortField.Created + ',false'; // sort by created, desc
       params[FilterQueryParam.Page] = 1;
       params['title'] = 'Newly Added';
-      this.router.navigate(['all-series'], {queryParams: params});
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.Created;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }
   }
 

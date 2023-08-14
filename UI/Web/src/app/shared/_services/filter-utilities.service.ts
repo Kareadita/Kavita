@@ -67,14 +67,12 @@ export class FilterUtilitiesService {
         };
 
         const url = this.urlFromFilterV2(page.join('/') + '?', dto);
-        console.log('applying filter: ', url)
         return this.router.navigateByUrl(url);
     }
 
-    applyFilter2(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
+    applyFilterWithParams(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
         let url = this.urlFromFilterV2(page.join('/') + '?', filter);
         url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
-        console.log('applying filter: ', url)
         return this.router.navigateByUrl(url, extraParams);
     }
 
@@ -166,7 +164,7 @@ export class FilterUtilitiesService {
 
         if (stmtsStartIndex !== -1 || endIndex !== -1) {
             // +1 is for the =
-            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length + 1, endIndex);
+            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length, endIndex);
             filter.statements = this.decodeFilterStatements(stmtsEncoded);
         }
 
