@@ -169,10 +169,15 @@ export class DashboardComponent implements OnInit {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'recently updated series') {
       const params: any = {};
-      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
+      //params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
       params[FilterQueryParam.Page] = 1;
       params['title'] = 'Recently Updated';
-      this.router.navigate(['all-series'], {queryParams: params});
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.LastChapterAdded;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilter2(['all-series'], filter, params)
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params[FilterQueryParam.ReadStatus] = 'true,false,false';

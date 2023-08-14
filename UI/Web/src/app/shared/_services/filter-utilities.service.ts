@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRouteSnapshot, Router} from '@angular/router';
+import {ActivatedRouteSnapshot, Params, Router} from '@angular/router';
 import {Pagination} from 'src/app/_models/pagination';
 import {SortField, SortOptions} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
@@ -46,6 +46,11 @@ export enum FilterQueryParam {
     None = 'none'
 }
 
+const sortOptionsKey = 'sortOptions=';
+const statementsKey = 'stmts=';
+const limitToKey = 'limitTo=';
+const combinationKey = 'combination=';
+
 @Injectable({
     providedIn: 'root'
 })
@@ -61,8 +66,16 @@ export class FilterUtilitiesService {
             limitTo: 0
         };
 
-        console.log('applying filter: ', this.urlFromFilterV2(page.join('/') + '?', dto))
-        this.router.navigateByUrl(this.urlFromFilterV2(page.join('/') + '?', dto));
+        const url = this.urlFromFilterV2(page.join('/') + '?', dto);
+        console.log('applying filter: ', url)
+        return this.router.navigateByUrl(url);
+    }
+
+    applyFilter2(page: Array<any>, filter: SeriesFilterV2, extraParams: Params) {
+        let url = this.urlFromFilterV2(page.join('/') + '?', filter);
+        url += Object.keys(extraParams).map(k => `&${k}=${extraParams[k]}`).join('');
+        console.log('applying filter: ', url)
+        return this.router.navigateByUrl(url, extraParams);
     }
 
     /**
@@ -107,10 +120,10 @@ export class FilterUtilitiesService {
 
     encodeSeriesFilter(filter: SeriesFilterV2) {
         const encodedStatements = this.encodeFilterStatements(filter.statements);
-        const encodedSortOptions = filter.sortOptions ? `sortOptions=${this.encodeSortOptions(filter.sortOptions)}` : '';
-        const encodedLimitTo = `limitTo=${filter.limitTo}`;
+        const encodedSortOptions = filter.sortOptions ? `${sortOptionsKey}${this.encodeSortOptions(filter.sortOptions)}` : '';
+        const encodedLimitTo = `${limitToKey}${filter.limitTo}`;
 
-        return `${this.encodeName(filter.name)}stmts=${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&combination=${filter.combination}`;
+        return `${this.encodeName(filter.name)}${encodedStatements}&${encodedSortOptions}&${encodedLimitTo}&${combinationKey}${filter.combination}`;
     }
 
     encodeName(name: string | undefined) {
@@ -124,7 +137,8 @@ export class FilterUtilitiesService {
     }
 
     encodeFilterStatements(statements: Array<FilterStatement>) {
-        return encodeURIComponent(statements.map(statement => {
+        if (statements.length === 0) return '';
+        return statementsKey + encodeURIComponent(statements.map(statement => {
             const encodedComparison = `comparison=${statement.comparison}`;
             const encodedField = `field=${statement.field}`;
             const encodedValue = `value=${encodeURIComponent(statement.value)}`;
@@ -144,19 +158,23 @@ export class FilterUtilitiesService {
         }
 
         const fullUrl = window.location.href.split('?')[1];
-        const stmtsStartIndex = fullUrl.indexOf('stmts=');
-        let endIndex = fullUrl.indexOf('&sortOptions=');
+        const stmtsStartIndex = fullUrl.indexOf(statementsKey);
+        let endIndex = fullUrl.indexOf('&' + sortOptionsKey);
         if (endIndex < 0) {
-            endIndex = fullUrl.indexOf('&limitTo=');
+            endIndex = fullUrl.indexOf('&' + limitToKey);
         }
 
-        if (stmtsStartIndex !== -1 && endIndex !== -1) {
-            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + 6, endIndex);
+        if (stmtsStartIndex !== -1 || endIndex !== -1) {
+            // +1 is for the =
+            const stmtsEncoded = fullUrl.substring(stmtsStartIndex + statementsKey.length + 1, endIndex);
             filter.statements = this.decodeFilterStatements(stmtsEncoded);
         }
 
         if (queryParams.sortOptions) {
-            const sortOptions = this.decodeSortOptions(queryParams.sortOptions);
+            const optionsStartIndex = fullUrl.indexOf('&' + sortOptionsKey);
+            const endIndex = fullUrl.indexOf('&' + limitToKey);
+            const sortOptionsEncoded = fullUrl.substring(optionsStartIndex + sortOptionsKey.length + 1, endIndex);
+            const sortOptions = this.decodeSortOptions(sortOptionsEncoded);
             if (sortOptions) {
                 filter.sortOptions = sortOptions;
             }
@@ -174,7 +192,7 @@ export class FilterUtilitiesService {
     }
 
     decodeSortOptions(encodedSortOptions: string): SortOptions | null {
-        const parts = encodedSortOptions.split('&');
+        const parts = decodeURIComponent(encodedSortOptions).split('&');
         const sortFieldPart = parts.find(part => part.startsWith('sortField='));
         const isAscendingPart = parts.find(part => part.startsWith('isAscending='));
 
