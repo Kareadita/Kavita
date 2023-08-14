@@ -243,7 +243,8 @@
         "regen-warning": "Gerar novamente sua chave de API invalidará todos os clientes existentes.",
         "no-key": "ERRO - NENHUMA CHAVE DEFINIDA",
         "confirm-reset": "Isso invalidará todas as configurações OPDS que você configurou. Você tem certeza que quer continuar?",
-        "key-reset": "Redefinir chave API"
+        "key-reset": "Redefinir chave API",
+        "show": "Mostrar"
     },
     "scrobbling-providers": {
         "title": "Provedores de Scrobbling",
