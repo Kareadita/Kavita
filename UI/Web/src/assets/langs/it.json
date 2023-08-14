@@ -92,7 +92,7 @@
         "global-settings-title": "Impostazioni globali",
         "page-layout-mode-label": "Modalità layout di pagina",
         "page-layout-mode-tooltip": "Mostra gli elementi come schede o visualizzazione elenco nella pagina Dettaglio serie.",
-        "locale-label": "Locale",
+        "locale-label": "Localizzazione",
         "locale-tooltip": "La lingua che Kavita dovrebbe usare",
         "blur-unread-summaries-label": "Sfoca i riepiloghi non letti",
         "blur-unread-summaries-tooltip": "Sfoca il testo di riepilogo su volumi o capitoli che non hanno avanzamento di lettura (per evitare spoiler)",
@@ -148,10 +148,10 @@
     },
     "user-holds": {
         "title": "",
-        "description": ""
+        "description": "Questo è un elenco di serie gestito dall'utente che non verrà sottoposto a scrobbling . Puoi rimuovere una serie in qualsiasi momento e il prossimo evento in grado di attivare lo scrobbling (avanzamento della lettura, valutazione, desidera leggere lo stato) attiverà gli eventi."
     },
     "theme-manager": {
-        "title": "",
+        "title": "Gestore dei Temi",
         "looking-for-theme": "",
         "looking-for-theme-continued": "",
         "scan": "Scansione",
@@ -523,7 +523,7 @@
     },
     "book-line-overlay": {
         "copy": "Copia",
-        "bookmark": "Segnalibri",
+        "bookmark": "Segnalibro",
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "Nome Segnalibro",
