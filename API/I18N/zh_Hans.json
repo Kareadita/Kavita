@@ -152,5 +152,6 @@
     "url-required": "必须提供一个URL才能使用",
     "series-restricted-age-restriction": "由于年龄限制用户无权查看此系列",
     "user-no-access-library-from-series": "用户无法访问此系列所属的资料库",
-    "generic-create-temp-archive": "创建临时档案时出现问题"
+    "generic-create-temp-archive": "创建临时档案时出现问题",
+    "query-required": "您必须传递一个查询参数"
 }
