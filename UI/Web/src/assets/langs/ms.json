@@ -9,15 +9,15 @@
     },
     "dashboard": {
         "no-libraries": "Perpustakaan belum di persediakan lagi. Semak pada konfigurasi",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "server-settings-link": "Tetapan Server",
+        "not-granted": "Anda belum di berikan akses kepada mana-mana perpustakaan.",
+        "on-deck-title": "Atas Dek",
+        "recently-updated-title": "Siri Yang Baru-baru ini Di kemaskini",
+        "recently-added-title": "Siri Baru Di tambah"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
+        "edit": "{{biasa.sunting}}",
+        "close": "{{biasa.tutup}}",
         "username": "",
         "required": "",
         "email": "",
