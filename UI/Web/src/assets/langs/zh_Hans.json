@@ -11,7 +11,7 @@
         "no-libraries": "还没有设置资料库，请先配置一些",
         "server-settings-link": "服务器设置",
         "not-granted": "您没有权限访问资料库。",
-        "on-deck-title": "继续阅读",
+        "on-deck-title": "最近阅读",
         "recently-updated-title": "最近更新的系列",
         "recently-added-title": "新增系列"
     },
