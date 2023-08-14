@@ -7,13 +7,23 @@
           <br/><b>{{t('encode-as-warning')}}</b>
         </p>
         <div *ngIf="settingsForm.get('encodeMediaAs')?.dirty" class="alert alert-danger" role="alert">{{t('media-warning')}}</div>
-        <div class="col-md-6 col-sm-12 mb-3">
+        <div class="col-md-6 col-sm-12 mb-3  pe-1">
           <label for="settings-media-encodeMediaAs" class="form-label me-1">{{t('encode-as-label')}}</label>
           <i class="fa fa-info-circle" placement="right" [ngbTooltip]="encodeMediaAsTooltip" role="button" tabindex="0"></i>
           <ng-template #encodeMediaAsTooltip>{{t('encode-as-tooltip')}}</ng-template>
           <span class="visually-hidden" id="settings-media-encodeMediaAs-help"><ng-container [ngTemplateOutlet]="encodeMediaAsTooltip"></ng-container></span>
           <select class="form-select" aria-describedby="settings-media-encodeMediaAs-help" formControlName="encodeMediaAs" id="settings-media-encodeMediaAs">
             <option *ngFor="let format of EncodeFormats" [value]="format.value">{{format.title}}</option>
+          </select>
+        </div>
+
+        <div class="col-md-6 col-sm-12 mb-3">
+          <label for="settings-media-coverImageSize" class="form-label me-1">{{t('cover-image-size-label')}}</label>
+          <i class="fa fa-info-circle" placement="right" [ngbTooltip]="coverImageSizeTooltip" role="button" tabindex="0"></i>
+          <ng-template #coverImageSizeTooltip>{{t('cover-image-size-tooltip')}}</ng-template>
+          <span class="visually-hidden" id="settings-media-coverImageSize-help"><ng-container [ngTemplateOutlet]="coverImageSizeTooltip"></ng-container></span>
+          <select class="form-select" aria-describedby="settings-media-coverImageSize-help" formControlName="coverImageSize" id="settings-media-coverImageSize">
+            <option *ngFor="let size of coverImageSizes" [value]="size.value">{{size.title}}</option>
           </select>
         </div>
       </div>

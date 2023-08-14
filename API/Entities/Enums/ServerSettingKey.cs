@@ -143,5 +143,10 @@ public enum ServerSettingKey
     /// </summary>
     [Description("OnDeckUpdateDays")]
     OnDeckUpdateDays = 26,
+    /// <summary>
+    /// The size of the cover image thumbnail. Defaults to <see cref="CoverImageSize"/>.Default
+    /// </summary>
+    [Description("CoverImageSize")]
+    CoverImageSize = 27
 
 }

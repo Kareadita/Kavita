@@ -1069,7 +1069,16 @@
         "save": "{{common.save}}",
 
         "media-issue-title": "Media Issues",
-        "scrobble-issue-title": "Scrobble Issues"
+        "scrobble-issue-title": "Scrobble Issues",
+        "cover-image-size-label": "Cover Image Size",
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+    },
+
+    "cover-image-size": {
+        "default": "Default (320x455)",
+        "medium": "Medium (640x909)",
+        "large": "Large (900x1277)",
+        "xlarge": "Extra Large (1265x1795)"
     },
 
     "manage-scrobble-errors": {

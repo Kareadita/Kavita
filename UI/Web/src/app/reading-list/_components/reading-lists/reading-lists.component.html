@@ -2,7 +2,7 @@
   <app-side-nav-companion-bar>
     <h2 title>
       <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)"></app-card-actionables>
-      <span>Reading Lists</span>
+      <span>{{t('title')}}</span>
     </h2>
     <h6 subtitle class="subtitle-with-actionables" *ngIf="pagination">{{t('item-count', {num: pagination.totalItems | number})}}</h6>
   </app-side-nav-companion-bar>
@@ -13,6 +13,7 @@
     [pagination]="pagination"
     [jumpBarKeys]="jumpbarKeys"
     [filteringDisabled]="true"
+    [trackByIdentity]="trackByIdentity"
   >
     <ng-template #cardItem let-item let-position="idx" >
       <app-card-item [title]="item.title" [entity]="item" [actions]="actions[item.id]"

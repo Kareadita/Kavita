@@ -79,6 +79,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.OnDeckUpdateDays:
                     destination.OnDeckUpdateDays = int.Parse(row.Value);
                     break;
+                case ServerSettingKey.CoverImageSize:
+                    destination.CoverImageSize = Enum.Parse<CoverImageSize>(row.Value);
+                    break;
             }
         }
 

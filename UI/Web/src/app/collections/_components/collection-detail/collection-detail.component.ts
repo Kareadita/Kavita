@@ -70,7 +70,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   translocoService = inject(TranslocoService);
 
   collectionTag!: CollectionTag;
-  tagImage: string = '';
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination!: Pagination;
@@ -229,9 +228,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
 
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      // TODO: This can be changed now that we have app-image and collection cover merge code (can it? Because we still have the case where there is no image)
-      // I can always tweak merge to allow blank slots and if just one item, just show that item image
-      this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
       this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
       this.cdRef.markForCheck();
     });
@@ -285,11 +281,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
       this.updateTag(this.collectionTag.id);
       this.loadPage();
-      if (results.coverImageUpdated) {
-        this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
-        this.collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
-        this.cdRef.markForCheck();
-      }
     });
   }
 
