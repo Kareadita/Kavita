@@ -960,7 +960,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "媒体问题",
-        "scrobble-issue-title": "刮削问题"
+        "scrobble-issue-title": "刮削问题",
+        "cover-image-size-tooltip": "封面图像应生成多大尺寸。注意：任何大于默认值的图片都会延长页面加载时间。",
+        "cover-image-size-label": "封面图片尺寸"
     },
     "manage-scrobble-errors": {
         "description": "这个表格记录刮削中发现的问题。此列表是非受控的。您可以随时清除它，并等待下一次刮削以查看结果。如果有一个未知的系列，最好是更正系列名称或本地化系列名称，或者为提供者添加一个网页链接。",
@@ -1743,5 +1745,11 @@
         "is-in-last": "在最近",
         "is-not-in-last": "不在最近",
         "does-not-contain": "不包含"
+    },
+    "cover-image-size": {
+        "default": "默认 (320x455)",
+        "medium": "中（640x909）",
+        "large": "大（900x1277）",
+        "xlarge": "特大（1265x1795）"
     }
 }
