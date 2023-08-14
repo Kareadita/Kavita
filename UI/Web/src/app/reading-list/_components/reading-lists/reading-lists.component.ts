@@ -19,6 +19,7 @@ import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {CollectionTag} from "../../../_models/collection-tag";
 
 @Component({
     selector: 'app-reading-lists',
@@ -37,6 +38,7 @@ export class ReadingListsComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
+  trackByIdentity = (index: number, item: ReadingList) => `${item.id}_${item.title}`;
 
   translocoService = inject(TranslocoService);
   constructor(private readingListService: ReadingListService, public imageService: ImageService, private actionFactoryService: ActionFactoryService,

@@ -22,7 +22,7 @@ public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
     int GetNumberOfPagesFromArchive(string archivePath);
-    string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format);
+    string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default);
     bool IsValidArchive(string archivePath);
     ComicInfo? GetComicInfo(string archivePath);
     ArchiveLibrary CanOpen(string archivePath);
@@ -205,7 +205,7 @@ public class ArchiveService : IArchiveService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="format">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format)
+    public string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default)
     {
         if (archivePath == null || !IsValidArchive(archivePath)) return string.Empty;
         try
@@ -221,7 +221,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.FullName == entryName);
 
                     using var stream = entry.Open();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.SharpCompress:
                 {
@@ -232,7 +232,7 @@ public class ArchiveService : IArchiveService
                     var entry = archive.Entries.Single(e => e.Key == entryName);
 
                     using var stream = entry.OpenEntryStream();
-                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format);
+                    return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, format, size);
                 }
                 case ArchiveLibrary.NotSupported:
                     _logger.LogWarning("[GetCoverImage] This archive cannot be read: {ArchivePath}. Defaulting to no cover image", archivePath);
@@ -246,7 +246,7 @@ public class ArchiveService : IArchiveService
         {
             _logger.LogWarning(ex, "[GetCoverImage] There was an exception when reading archive stream: {ArchivePath}. Defaulting to no cover image", archivePath);
             _mediaErrorService.ReportMediaIssue(archivePath, MediaErrorProducer.ArchiveService,
-                "This archive cannot be read or not supported", ex);
+                "This archive cannot be read or not supported", ex); // TODO: Localize this
         }
 
         return string.Empty;

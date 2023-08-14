@@ -33,7 +33,7 @@ public interface IMetadataService
     /// <param name="forceUpdate">Overrides any cache logic and forces execution</param>
 
     Task GenerateCoversForSeries(int libraryId, int seriesId, bool forceUpdate = true);
-    Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, bool forceUpdate = false);
+    Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceUpdate = false);
     Task RemoveAbandonedMetadataKeys();
 }
 
@@ -65,7 +65,7 @@ public class MetadataService : IMetadataService
     /// <param name="chapter"></param>
     /// <param name="forceUpdate">Force updating cover image even if underlying file has not been modified or chapter already has a cover image</param>
     /// <param name="encodeFormat">Convert image to Encoding Format when extracting the cover</param>
-    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate, EncodeFormat encodeFormat)
+    private Task<bool> UpdateChapterCoverImage(Chapter chapter, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize)
     {
         var firstFile = chapter.Files.MinBy(x => x.Chapter);
         if (firstFile == null) return Task.FromResult(false);
@@ -79,7 +79,7 @@ public class MetadataService : IMetadataService
         _logger.LogDebug("[MetadataService] Generating cover image for {File}", firstFile.FilePath);
 
         chapter.CoverImage = _readingItemService.GetCoverImage(firstFile.FilePath,
-            ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat);
+            ImageService.GetChapterFormat(chapter.Id, chapter.VolumeId), firstFile.Format, encodeFormat, coverImageSize);
         _unitOfWork.ChapterRepository.Update(chapter);
         _updateEvents.Add(MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter));
         return Task.FromResult(true);
@@ -143,7 +143,7 @@ public class MetadataService : IMetadataService
     /// <param name="series"></param>
     /// <param name="forceUpdate"></param>
     /// <param name="encodeFormat"></param>
-    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat)
+    private async Task ProcessSeriesCoverGen(Series series, bool forceUpdate, EncodeFormat encodeFormat, CoverImageSize coverImageSize)
     {
         _logger.LogDebug("[MetadataService] Processing cover image generation for series: {SeriesName}", series.OriginalName);
         try
@@ -156,7 +156,7 @@ public class MetadataService : IMetadataService
                 var index = 0;
                 foreach (var chapter in volume.Chapters)
                 {
-                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat);
+                    var chapterUpdated = await UpdateChapterCoverImage(chapter, forceUpdate, encodeFormat, coverImageSize);
                     // If cover was update, either the file has changed or first scan and we should force a metadata update
                     UpdateChapterLastModified(chapter, forceUpdate || chapterUpdated);
                     if (index == 0 && chapterUpdated)
@@ -208,7 +208,9 @@ public class MetadataService : IMetadataService
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}"));
 
-        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var encodeFormat = settings.EncodeMediaAs;
+        var coverImageSize = settings.CoverImageSize;
 
         for (var chunk = 1; chunk <= chunkInfo.TotalChunks; chunk++)
         {
@@ -238,7 +240,7 @@ public class MetadataService : IMetadataService
 
                 try
                 {
-                    await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat);
+                    await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize);
                 }
                 catch (Exception ex)
                 {
@@ -288,8 +290,10 @@ public class MetadataService : IMetadataService
             return;
         }
 
-        var encodeFormat = (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
-        await GenerateCoversForSeries(series, encodeFormat, forceUpdate);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var encodeFormat = settings.EncodeMediaAs;
+        var coverImageSize = settings.CoverImageSize;
+        await GenerateCoversForSeries(series, encodeFormat, coverImageSize, forceUpdate);
     }
 
     /// <summary>
@@ -298,13 +302,13 @@ public class MetadataService : IMetadataService
     /// <param name="series">A full Series, with metadata, chapters, etc</param>
     /// <param name="encodeFormat">When saving the file, what encoding should be used</param>
     /// <param name="forceUpdate"></param>
-    public async Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, bool forceUpdate = false)
+    public async Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceUpdate = false)
     {
         var sw = Stopwatch.StartNew();
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.CoverUpdateProgressEvent(series.LibraryId, 0F, ProgressEventType.Started, series.Name));
 
-        await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat);
+        await ProcessSeriesCoverGen(series, forceUpdate, encodeFormat, coverImageSize);
 
 
         if (_unitOfWork.HasChanges())

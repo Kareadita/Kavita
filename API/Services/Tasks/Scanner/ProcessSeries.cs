@@ -231,7 +231,8 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 
