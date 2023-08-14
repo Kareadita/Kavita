@@ -28,7 +28,7 @@
     },
     "user-scrobble-history": {
         "title": "刮削历史",
-        "description": "在这里您将找到与您的帐户关联的任何刮削记录事件。为了确保记录存在，您必须配置了一个可用的刮削服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与填写记录完成匹配。请联系您的管理员以进行修正。",
+        "description": "在这里您将找到与您的帐户关联的所有追踪记录事件。为了确保记录存在，您必须配置一个可用的追踪记录服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与追踪记录进行匹配。请联系您的管理员进行修正。",
         "filter-label": "筛选器",
         "created-header": "创建",
         "last-modified-header": "上次修改",
@@ -67,7 +67,7 @@
         "go-to-review": "跳转评论"
     },
     "review-card": {
-        "your-review": "你的评论",
+        "your-review": "我的评论",
         "external-review": "外部评论",
         "local-review": "评论",
         "rating-percentage": "评分 {{r}}%"
@@ -978,7 +978,7 @@
     "manage-settings": {
         "notice": "注意：",
         "restart-required": "更改端口、网址、缓存大小或者IP需要手动重启Kavita才能生效。",
-        "base-url-label": "网址",
+        "base-url-label": "网站根目录",
         "base-url-tooltip": "如果您想在基本URL上托管Kavita，例如yourdomain.com/kavita，请使用此选项。在使用非root用户的Docker上不支持该功能。",
         "ip-address-label": "IP地址",
         "ip-address-tooltip": "以逗号分隔的IP地址列表，用于服务器监听。如果您在Docker上运行，则此选项是固定的。需要重新启动才能生效。",
@@ -994,8 +994,8 @@
         "cache-size-tooltip": "允许为缓存重型API使用的内存量。默认值为75MB。",
         "on-deck-last-progress-label": "“最近阅读”最后进度（天数）",
         "on-deck-last-progress-tooltip": "",
-        "on-deck-last-chapter-add-label": "",
-        "on-deck-last-chapter-add-tooltip": "",
+        "on-deck-last-chapter-add-label": "最近阅读上一次章节加入（天数）",
+        "on-deck-last-chapter-add-tooltip": "上一次章节内容加入至最近阅读的天数。",
         "allow-stats-label": "允许匿名收集使用数据",
         "allow-stats-tooltip-part-1": "采用匿名方式将使用数据发送到Kavita服务器。这些数据包括使用使用某些功能、文件数量、操作系统版本、Kavita版本号、CPU和内存。我们将使用这些信息来确定功能开发、修复错误和性能调整的优先级。需要重新启动才能生效。请参阅wiki了解收集的内容。 ",
         "allow-stats-tooltip-part-2": "对于收集的内容。",
