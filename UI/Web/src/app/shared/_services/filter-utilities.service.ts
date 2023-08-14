@@ -9,43 +9,6 @@ import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 
-/**
- * Used to pass state between the filter and the url
- */
-// export enum FilterQueryParam {
-//     Format = 'format',
-//     Genres = 'genres',
-//     AgeRating = 'ageRating',
-//     PublicationStatus = 'publicationStatus',
-//     Tags = 'tags',
-//     Languages = 'languages',
-//     CollectionTags = 'collectionTags',
-//     Libraries = 'libraries',
-//     Writers = 'writers',
-//     Artists = 'artists',
-//     Character = 'character',
-//     Colorist = 'colorist',
-//     CoverArtists = 'coverArtists',
-//     Editor = 'editor',
-//     Inker = 'inker',
-//     Letterer = 'letterer',
-//     Penciller = 'penciller',
-//     Publisher = 'publisher',
-//     Translator = 'translators',
-//     ReadStatus = 'readStatus',
-//     SortBy = 'sortBy',
-//     Rating = 'rating',
-//     Name = 'name',
-//     /**
-//      * This is a pagination control
-//      */
-//     Page = 'page',
-//     /**
-//      * Special case for the UI. Does not trigger filtering
-//      */
-//     None = 'none'
-// }
-
 const sortOptionsKey = 'sortOptions=';
 const statementsKey = 'stmts=';
 const limitToKey = 'limitTo=';
@@ -56,8 +19,7 @@ const combinationKey = 'combination=';
 })
 export class FilterUtilitiesService {
 
-    constructor(private metadataService: MetadataService, private router: Router) {
-    }
+    constructor(private metadataService: MetadataService, private router: Router) {}
 
     applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
         const dto: SeriesFilterV2 = {
@@ -95,7 +57,7 @@ export class FilterUtilitiesService {
 
     /**
      * Will fetch current page from route if present
-     * @param ActivatedRouteSnapshot to fetch page from. Must be from component else may get stale data
+     * @param snapshot to fetch page from. Must be from component else may get stale data
      * @param itemsPerPage If you want pagination, pass non-zero number
      * @returns A default pagination object
      */
@@ -204,7 +166,7 @@ export class FilterUtilitiesService {
     }
 
     decodeFilterStatements(encodedStatements: string): FilterStatement[] {
-        const statementStrings = decodeURIComponent(encodedStatements).split(','); // I don't think this will wrk
+        const statementStrings = decodeURIComponent(encodedStatements).split(',');
         return statementStrings.map(statementString => {
             const parts = statementString.split('&');
             if (parts === null || parts.length < 3) return null;

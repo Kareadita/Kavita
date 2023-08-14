@@ -4,7 +4,6 @@ import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {Router} from "@angular/router";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
