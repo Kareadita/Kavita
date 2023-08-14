@@ -145,5 +145,11 @@
     "reading-list-name-exists": "此名称的阅读清单已存在",
     "volume-num": "第{0}卷",
     "issue-num": "问题编号{0}{1}",
-    "book-num": "第 {0}本"
+    "book-num": "第 {0}本",
+    "user-migration-needed": "该用户需要进行迁移。请让他们注销登录并重新登录，以触发迁移流程",
+    "generic-relationship": "更新关系时发生了问题",
+    "encode-as-warning": "无法转换为PNG格式。对于封面，请使用刷新封面功能。书签和网站图标无法再进行编码。",
+    "url-required": "必须提供一个URL才能使用",
+    "series-restricted-age-restriction": "由于年龄限制用户无权查看此系列",
+    "user-no-access-library-from-series": "用户无法访问此系列所属的资料库"
 }
