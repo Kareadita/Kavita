@@ -151,5 +151,6 @@
     "encode-as-warning": "无法转换为PNG格式。对于封面，请使用刷新封面功能。书签和网站图标无法再进行编码。",
     "url-required": "必须提供一个URL才能使用",
     "series-restricted-age-restriction": "由于年龄限制用户无权查看此系列",
-    "user-no-access-library-from-series": "用户无法访问此系列所属的资料库"
+    "user-no-access-library-from-series": "用户无法访问此系列所属的资料库",
+    "generic-create-temp-archive": "创建临时档案时出现问题"
 }
