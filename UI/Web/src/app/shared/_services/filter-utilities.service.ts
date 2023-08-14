@@ -12,39 +12,39 @@ import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 /**
  * Used to pass state between the filter and the url
  */
-export enum FilterQueryParam {
-    Format = 'format',
-    Genres = 'genres',
-    AgeRating = 'ageRating',
-    PublicationStatus = 'publicationStatus',
-    Tags = 'tags',
-    Languages = 'languages',
-    CollectionTags = 'collectionTags',
-    Libraries = 'libraries',
-    Writers = 'writers',
-    Artists = 'artists',
-    Character = 'character',
-    Colorist = 'colorist',
-    CoverArtists = 'coverArtists',
-    Editor = 'editor',
-    Inker = 'inker',
-    Letterer = 'letterer',
-    Penciller = 'penciller',
-    Publisher = 'publisher',
-    Translator = 'translators',
-    ReadStatus = 'readStatus',
-    SortBy = 'sortBy',
-    Rating = 'rating',
-    Name = 'name',
-    /**
-     * This is a pagination control
-     */
-    Page = 'page',
-    /**
-     * Special case for the UI. Does not trigger filtering
-     */
-    None = 'none'
-}
+// export enum FilterQueryParam {
+//     Format = 'format',
+//     Genres = 'genres',
+//     AgeRating = 'ageRating',
+//     PublicationStatus = 'publicationStatus',
+//     Tags = 'tags',
+//     Languages = 'languages',
+//     CollectionTags = 'collectionTags',
+//     Libraries = 'libraries',
+//     Writers = 'writers',
+//     Artists = 'artists',
+//     Character = 'character',
+//     Colorist = 'colorist',
+//     CoverArtists = 'coverArtists',
+//     Editor = 'editor',
+//     Inker = 'inker',
+//     Letterer = 'letterer',
+//     Penciller = 'penciller',
+//     Publisher = 'publisher',
+//     Translator = 'translators',
+//     ReadStatus = 'readStatus',
+//     SortBy = 'sortBy',
+//     Rating = 'rating',
+//     Name = 'name',
+//     /**
+//      * This is a pagination control
+//      */
+//     Page = 'page',
+//     /**
+//      * Special case for the UI. Does not trigger filtering
+//      */
+//     None = 'none'
+// }
 
 const sortOptionsKey = 'sortOptions=';
 const statementsKey = 'stmts=';

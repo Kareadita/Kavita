@@ -3,7 +3,7 @@ import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap} from 'rxjs/operators';
-import {FilterQueryParam, FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {Library} from 'src/app/_models/library';
@@ -169,7 +169,7 @@ export class DashboardComponent implements OnInit {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'recently updated series') {
       const params: any = {};
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'Recently Updated';
       const filter = this.filterUtilityService.createSeriesV2Filter();
       if (filter.sortOptions) {
@@ -179,7 +179,7 @@ export class DashboardComponent implements OnInit {
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'On Deck';
 
       const filter = this.filterUtilityService.createSeriesV2Filter();
@@ -191,7 +191,7 @@ export class DashboardComponent implements OnInit {
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'Newly Added';
       const filter = this.filterUtilityService.createSeriesV2Filter();
       if (filter.sortOptions) {

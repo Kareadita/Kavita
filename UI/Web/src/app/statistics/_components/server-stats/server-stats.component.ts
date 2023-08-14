@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject} fr
 import {Router} from '@angular/router';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
-import {FilterQueryParam, FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {Series} from 'src/app/_models/series';
 import {ImageService} from 'src/app/_services/image.service';
