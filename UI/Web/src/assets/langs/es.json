@@ -730,7 +730,9 @@
         "folder-watching-tooltip": "Anula la monitorización de carpetas del servidor para esta biblioteca. Si está desactivada, la monitorización de carpetas no se ejecutará en las carpetas que contenga esta biblioteca. Si las bibliotecas comparten carpetas, éstas pueden seguir siendo monitorizadas.",
         "force-scan": "Escaneo forzado",
         "include-in-search-tooltip": "¿Deben incluirse las series y cualquier información derivada (géneros, personas, archivos) de la biblioteca en los resultados de búsqueda?",
-        "manage-reading-list-tooltip": "¿Debe Kavita crear listas de lectura a partir de las etiquetas StoryArc/StoryArcNumber y AlternativeSeries/AlternativeCount que se encuentran en los archivos ComicInfo.xml/opf?"
+        "manage-reading-list-tooltip": "¿Debe Kavita crear listas de lectura a partir de las etiquetas StoryArc/StoryArcNumber y AlternativeSeries/AlternativeCount que se encuentran en los archivos ComicInfo.xml/opf?",
+        "force-scan-tooltip": "Esto forzará un escaneo de la biblioteca, tratándolo como un escaneo nuevo",
+        "next": "Siguiente"
     },
     "all-series": {
         "series-count": "{{common.series-count}}",
@@ -1047,5 +1049,121 @@
         "users-online-count": "{{num}} Usuarios en línea",
         "active-events-title": "Eventos activos:",
         "no-data": "No hay mucha actividad por aquí"
+    },
+    "reader-settings": {
+        "reset-to-defaults": "Restablecer valores predeterminados",
+        "right-to-left": "Derecha a izquierda",
+        "left-to-right": "Izquierda a derecha",
+        "theme-dark": "Oscuro",
+        "theme-white": "Blanco",
+        "theme-paper": "Papel",
+        "reader-settings-title": "Ajustes del lector",
+        "fullscreen-tooltip": "Poner lector en modo de pantalla completa",
+        "on": "Encendido",
+        "exit": "Salir",
+        "enter": "Entrar",
+        "layout-mode-option-2col": "2 Columnas",
+        "general-settings-title": "Ajustes Generales",
+        "off": "Apagado",
+        "fullscreen-label": "Pantalla completa",
+        "layout-mode-option-1col": "1 Columna",
+        "color-theme-title": "Tema de la interfaz",
+        "theme-black": "Negro",
+        "vertical": "Vertical",
+        "writing-style-tooltip": "Cambia la dirección del texto. Horizontal es de izquierda a derecha, vertical es de arriba a abajo.",
+        "tap-to-paginate-tooltip": "Pulsa los bordes de la pantalla para paginar",
+        "horizontal": "Horizontal"
+    },
+    "cover-image-chooser": {
+        "upload": "Subir",
+        "reset-cover-tooltip": "Restablecer Imagen de Portada",
+        "drag-n-drop": "Arrastrar y soltar",
+        "upload-continued": "una imagen",
+        "url-label": "Url",
+        "load": "Cargar",
+        "back": "Atrás",
+        "image-num": "Imagen {{num}}"
+    },
+    "edit-series-relation": {
+        "description-part-1": "¿No estás seguro de qué relación añadir? Mira nuestro",
+        "description-part-2": "wiki para obtener pistas.",
+        "target-series": "Series objetivo",
+        "relationship": "Relación",
+        "remove": "Eliminar",
+        "add-relationship": "Añadir Relación"
+    },
+    "entity-info-cards": {
+        "pages-count": "{{num}} Páginas",
+        "words-count": "{{num}} Palabras",
+        "reading-time-title": "Tiempo de lectura",
+        "length-title": "Longitud",
+        "less-than-hour": "<1 Hora",
+        "release-date-title": "Lanzamiento",
+        "release-date-tooltip": "Fecha de Lanzamiento",
+        "age-rating-title": "Clasificación por Edad",
+        "isbn-title": "ISBN",
+        "last-read-title": "Última lectura",
+        "size-title": "Tamaño",
+        "id-title": "Identificador",
+        "hour": "Hora",
+        "hours": "Horas"
+    },
+    "series-info-cards": {
+        "length-title": "Longitud",
+        "read-time-title": "Tiempo de lectura",
+        "time-left-title": "Tiempo restante",
+        "last-read-title": "Última lectura",
+        "publication-status-title": "Publicación",
+        "disabled": "Deshabilitado",
+        "format-title": "Formato",
+        "release-year-tooltip": "Año de lanzamiento",
+        "language-title": "Idioma",
+        "publication-status-tooltip": "Estado de publicación",
+        "on": "Encendido",
+        "off": "Apagado"
+    },
+    "bulk-add-to-collection": {
+        "filter-label": "Filtro",
+        "no-data": "Todavía no se han creado colecciones",
+        "collection-label": "Colección",
+        "title": "Añadir a la colección"
+    },
+    "bookmarks": {
+        "no-data-2": "uno.",
+        "confirm-delete": "¿Estás seguro de que deseas limpiar todos los marcadores para varias series? Esto no se puede deshacer.",
+        "confirm-single-delete": "¿Estás seguro de que deseas limpiar todos los marcadores de {{seriesName}}? Esto no se puede deshacer.",
+        "delete-success": "Se han eliminado los marcadores",
+        "delete-single-success": "Los marcadores de la serie {{seriesName}} se han eliminado",
+        "no-data": "No hay marcadores. Prueba a crearlos"
+    },
+    "card-detail-drawer": {
+        "not-defined": "No definido",
+        "unread": "No leído",
+        "pages": "Páginas:",
+        "added": "Añadido:",
+        "size": "Tamaño:",
+        "general-tab": "General",
+        "metadata-tab": "Metadatos",
+        "cover-tab": "Portada",
+        "info-tab": "Información",
+        "no-summary": "No hay un resumen disponible.",
+        "files": "Archivos"
+    },
+    "chapter-metadata-detail": {
+        "no-data": "No hay metadatos disponibles"
+    },
+    "table-of-contents": {
+        "no-data": "Este libro no tiene Tabla de Contenidos definida en los metadatos o archivo toc"
+    },
+    "download-indicator": {
+        "progress": "{{percentage}}% descargado"
+    },
+    "bulk-operations": {
+        "title": "Acciones en bloque",
+        "mark-as-unread": "Marcar como no leído",
+        "mark-as-read": "Marcar como leído"
+    },
+    "entity-title": {
+        "special": "Especial"
     }
 }
