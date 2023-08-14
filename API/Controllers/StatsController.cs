@@ -125,12 +125,19 @@ public class StatsController : BaseApiController
     }
 
     [HttpGet("day-breakdown")]
-    [Authorize("RequireAdminRole")]
     [ResponseCache(CacheProfileName = "Statistics")]
-    public ActionResult<IEnumerable<StatCount<DayOfWeek>>> GetDayBreakdown()
+    public async Task<ActionResult<IEnumerable<StatCount<DayOfWeek>>>> GetDayBreakdown(int userId = 0)
     {
-        return Ok(_statService.GetDayBreakdown());
+        if (userId == 0)
+        {
+            var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
+            var isAdmin = await _unitOfWork.UserRepository.IsUserAdminAsync(user);
+            if (!isAdmin) return BadRequest();
+        }
+
+        return Ok(_statService.GetDayBreakdown(userId));
     }
+
 
 
     [HttpGet("user/reading-history")]

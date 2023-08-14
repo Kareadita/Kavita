@@ -13,6 +13,7 @@ import {StatListComponent} from '../stat-list/stat-list.component';
 import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
 import {UserStatsInfoCardsComponent} from '../user-stats-info-cards/user-stats-info-cards.component';
 import {TranslocoModule} from "@ngneat/transloco";
+import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
 
 @Component({
     selector: 'app-user-stats',
@@ -27,6 +28,7 @@ import {TranslocoModule} from "@ngneat/transloco";
         StatListComponent,
         AsyncPipe,
         TranslocoModule,
+        DayBreakdownComponent,
     ],
 })
 export class UserStatsComponent implements OnInit {

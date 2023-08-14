@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import { BarChartModule } from '@swimlane/ngx-charts';
 import {map, Observable} from 'rxjs';
@@ -18,8 +18,9 @@ import {TranslocoDirective} from "@ngneat/transloco";
     standalone: true,
   imports: [BarChartModule, AsyncPipe, TranslocoDirective]
 })
-export class DayBreakdownComponent {
+export class DayBreakdownComponent implements OnInit {
 
+  @Input() userId = 0;
   view: [number, number] = [0,0];
   showLegend: boolean = true;
 
@@ -27,9 +28,11 @@ export class DayBreakdownComponent {
   dayBreakdown$!: Observable<Array<PieDataItem>>;
   private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private statService: StatisticsService) {
+  constructor(private statService: StatisticsService) {}
+
+  ngOnInit() {
     const dayOfWeekPipe = new DayOfWeekPipe();
-    this.dayBreakdown$ = this.statService.getDayBreakdown().pipe(
+    this.dayBreakdown$ = this.statService.getDayBreakdown(this.userId).pipe(
       map((data: Array<StatCount<DayOfWeek>>) => {
         return data.map(d => {
           return {name: dayOfWeekPipe.transform(d.value), value: d.count};
