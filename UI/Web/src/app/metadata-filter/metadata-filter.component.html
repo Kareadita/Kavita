@@ -25,13 +25,13 @@
       </div>
       <form [formGroup]="sortGroup" class="container-fluid">
         <div class="row mb-3">
-          <div class="col-md-2">
+          <div class="col-md-2 col-sm-2">
             <div class="form-group pe-1">
               <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
               <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-3 col-sm-10">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
                 <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
@@ -43,15 +43,23 @@
                 <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
               </select>
           </div>
-          <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
-          <div class="col-md-2 me-3 mt-4">
-            <button class="btn btn-secondary col-12" (click)="clear()">{{t('reset')}}</button>
-          </div>
-          <div class="col-md-2 me-3 mt-4">
-            <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>
-          </div>
-      </div>
+          <ng-container *ngIf="utilityService.getActiveBreakpoint() > Breakpoint.Tablet" [ngTemplateOutlet]="buttons"></ng-container>
+        </div>
+        <div class="row mb-3" *ngIf="utilityService.getActiveBreakpoint() <= Breakpoint.Tablet">
+          <ng-container [ngTemplateOutlet]="buttons"></ng-container>
+        </div>
       </form>
     </div>
   </ng-template>
+  <ng-template #buttons>
+    <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
+    <div class="col-md-2 col-sm-6 mt-4">
+      <button class="btn btn-secondary col-12" (click)="clear()">{{t('reset')}}</button>
+    </div>
+    <div class="col-md-2 col-sm-6 mt-4">
+      <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>
+    </div>
+  </ng-template>
 </ng-container>
+
+
