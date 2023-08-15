@@ -55,6 +55,7 @@ export class MetadataFilterComponent implements OnInit {
 
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
   private readonly destroyRef = inject(DestroyRef);
+  public readonly utilityService = inject(UtilityService);
 
 
    /**
@@ -82,10 +83,7 @@ export class MetadataFilterComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
 
 
-  constructor(private utilityService: UtilityService,
-    public toggleService: ToggleService,
-    private filterUtilityService: FilterUtilitiesService) {
-  }
+  constructor(public toggleService: ToggleService) {}
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
@@ -203,4 +201,5 @@ export class MetadataFilterComponent implements OnInit {
     this.toggleService.set(!this.filteringCollapsed);
   }
 
+    protected readonly Breakpoint = Breakpoint;
 }

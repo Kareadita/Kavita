@@ -18,6 +18,7 @@ import {LibraryType} from "../../../_models/library";
 import {ProviderNamePipe} from "../../../pipe/provider-name.pipe";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
+import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-external-rating',
@@ -37,6 +38,7 @@ export class ExternalRatingComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly accountService = inject(AccountService);
   private readonly themeService = inject(ThemeService);
+  public readonly utilityService = inject(UtilityService);
 
   ratings: Array<Rating> = [];
   isLoading: boolean = false;
@@ -71,4 +73,6 @@ export class ExternalRatingComponent implements OnInit {
       this.cdRef.markForCheck();
     });
   }
+
+  protected readonly Breakpoint = Breakpoint;
 }

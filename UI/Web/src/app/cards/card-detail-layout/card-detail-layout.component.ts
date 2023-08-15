@@ -5,7 +5,6 @@ import {
   ChangeDetectorRef,
   Component,
   ContentChild,
-  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -13,7 +12,6 @@ import {
   Inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output,
   TemplateRef,
@@ -70,12 +68,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
-  @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
+  /**
+   * A trackBy to help with rendering. This is required as without it there are issues when scrolling
+   */
+  @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
   @Input() filterSettings!: FilterSettings;
   @Input() refresh!: EventEmitter<void>;
 
 
-  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels tall, original keys
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
@@ -115,7 +116,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
+      this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
     if (this.filterSettings === undefined) {

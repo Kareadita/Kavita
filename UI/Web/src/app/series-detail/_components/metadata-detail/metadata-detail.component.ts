@@ -3,8 +3,7 @@ import {CommonModule} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
-import {FilterQueryParam, FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {Router} from "@angular/router";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
@@ -25,7 +24,6 @@ export class MetadataDetailComponent {
   @ContentChild('titleTemplate') titleTemplate!: TemplateRef<any>;
   @ContentChild('itemTemplate') itemTemplate?: TemplateRef<any>;
 
-  private readonly router = inject(Router);
   private readonly filterUtilitiesService = inject(FilterUtilitiesService);
   protected readonly TagBadgeCursor = TagBadgeCursor;
 

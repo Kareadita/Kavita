@@ -30,7 +30,6 @@ import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-ope
 import { NgIf, DecimalPipe } from '@angular/common';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@ngneat/transloco";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 
