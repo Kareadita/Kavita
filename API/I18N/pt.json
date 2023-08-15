@@ -156,5 +156,7 @@
     "browse-on-deck": "Explorar Continuar a Ler",
     "issue-num": "Número {0}{1}",
     "generic-scrobble-hold": "Ocorreu um erro ao adicionar o hold",
-    "bad-copy-files-for-download": "Não foi possível copiar os ficheiros para a diretoria temp para descarregar os arquivos."
+    "bad-copy-files-for-download": "Não foi possível copiar os ficheiros para a diretoria temp para descarregar os arquivos.",
+    "want-to-read": "Leituras Futuras",
+    "browse-want-to-read": "Explorar Leituras Futuras"
 }
