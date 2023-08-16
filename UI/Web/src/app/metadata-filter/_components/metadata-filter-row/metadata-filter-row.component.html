@@ -25,9 +25,10 @@
                         <input type="number" inputmode="numeric" class="form-control  me-2" formControlName="filterValue">
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
-                        <select class="col-auto form-select  me-2" formControlName="filterValue">
-                            <option *ngFor="let option of dropdownOptions$ | async" [value]="option.value">{{option.title}}</option>
-                        </select>
+                      <ng-container *ngIf="dropdownOptions$ | async as opts">
+                        <select2 [data]="opts" formControlName="filterValue" [value]="formGroup.get('filterValue')?.value" [multiple]="MultipleDropdownAllowed">
+                        </select2>
+                      </ng-container>
                     </ng-container>
                 </ng-container>
             </ng-container>
