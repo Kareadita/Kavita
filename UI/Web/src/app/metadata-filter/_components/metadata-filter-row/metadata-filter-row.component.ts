@@ -23,7 +23,7 @@ import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common"
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Select2Module, Select2Option} from "ng-select2-component";
+import {Select2Module, Select2Option, Select2UpdateEvent} from "ng-select2-component";
 
 enum PredicateType {
   Text = 1,
@@ -147,6 +147,12 @@ export class MetadataFilterRowComponent implements OnInit {
 
   buildDisabledList() {
 
+  }
+
+  updateDropdown(event: Select2UpdateEvent) {
+    this.formGroup.get('filterValue')?.patchValue(event.value);
+    console.log('updating value: ', event.value);
+    this.cdRef.markForCheck();
   }
 
   populateFromPreset() {

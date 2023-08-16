@@ -26,7 +26,9 @@
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
                       <ng-container *ngIf="dropdownOptions$ | async as opts">
-                        <select2 [data]="opts" formControlName="filterValue" [value]="formGroup.get('filterValue')?.value" [multiple]="MultipleDropdownAllowed">
+                        <select2 [data]="opts" formControlName="filterValue" [value]="MultipleDropdownAllowed ? [formGroup.get('filterValue')?.value] : formGroup.get('filterValue')?.value"
+                                 [multiple]="MultipleDropdownAllowed"
+                                 (update)="updateDropdown($event)">
                         </select2>
                       </ng-container>
                     </ng-container>
