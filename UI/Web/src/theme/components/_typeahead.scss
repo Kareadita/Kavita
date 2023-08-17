@@ -16,11 +16,11 @@
   --select2-selection-text-color: var(--input-text-color);
 
   /* selection: choice item (multiple) */
-  --select2-selection-choice-background: var(--input-bg-readonly-color);
-  --select2-selection-choice-text-color: var(--tagbadge-text-color);
+  --select2-selection-choice-background: var(--tagbadge-filled-bg-color);
+  --select2-selection-choice-text-color: var(--tagbadge-filled-text-color);
   --select2-selection-choice-border-color: var(--tagbadge-border-color);
-  --select2-selection-choice-close-color: var(--tagbadge-border-color);
-  --select2-selection-choice-hover-close-color: var(--input-focus-boxshadow-color);
+  --select2-selection-choice-close-color: var(--tagbadge-filled-text-color);
+  --select2-selection-choice-hover-close-color: var(--tagbadge-filled-text-color);
 
   /* placeholder */
   --select2-placeholder-color: #999;
@@ -67,6 +67,6 @@
   --select2-hint-text-color: #888;
 }
 
-.select2-selection__rendered {
-  padding-top: 4px;
-}
+//.select2-selection__rendered {
+//  padding-top: 4px;
+//}

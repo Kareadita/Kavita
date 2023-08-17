@@ -32,17 +32,7 @@
                                        formControlName="filterValue"
                                        [multiple]="multipleAllowed"
                                        [infiniteScroll]="true"
-                                       [resettable]="true"
-                                       (update)="updateDropdown($event)">
-
-<!--                                  <ng-template #itemTemplate let-data="data">-->
-<!--                                    <ng-container *ngIf="multipleAllowed; else singleItem">-->
-<!--                                        {{data.label}}-->
-<!--                                    </ng-container>-->
-<!--                                    <ng-template #singleItem>-->
-<!--                                        {{data.label}}-->
-<!--                                    </ng-template>-->
-<!--                                  </ng-template>-->
+                                       [resettable]="true">
                               </select2>
                           </ng-template>
                       </ng-container>

@@ -156,9 +156,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
   }
 
-  updateDropdown(event: Select2UpdateEvent) {
-    console.log('updating value: ', this.formGroup.get('filterValue')?.value);
-  }
 
   populateFromPreset() {
     if (StringFields.includes(this.preset.field)) {
