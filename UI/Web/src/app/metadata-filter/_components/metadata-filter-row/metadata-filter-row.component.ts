@@ -23,7 +23,7 @@ import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {Select2Module, Select2Option, Select2UpdateEvent} from "ng-select2-component";
+import {Select2Module, Select2Option} from "ng-select2-component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 
 enum PredicateType {
@@ -81,6 +81,9 @@ const DropdownComparisons = [FilterComparison.Equal,
 })
 export class MetadataFilterRowComponent implements OnInit {
 
+  /**
+   * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
+   */
   @Input() preset!: FilterStatement;
   @Input() availableFields: Array<FilterField> = allFields;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
@@ -103,7 +106,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   get MultipleDropdownAllowed() {
     const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-    return  comp === FilterComparison.Contains || comp === FilterComparison.NotContains;
+    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains;
   }
 
   constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService,
@@ -115,24 +118,14 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
 
-    this.buildDisabledList();
-
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
       switchMap((_) => this.getDropdownObservable()),
       tap((opts) => {
-        const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-        const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-        if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
-          if (this.MultipleDropdownAllowed) {
-            // Possible BUG: This can reload the preset when switching from Contains -> Equal and back to Contains, but this is needed to preload the dropdown value
-            // from initial load
-            this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
-          } else {
-            this.formGroup.get('filterValue')?.setValue(this.preset.value);
-          }
+        if (!this.formGroup.get('filterValue')?.value) {
+          this. populateFromPreset();
           return;
         }
 
@@ -158,14 +151,20 @@ export class MetadataFilterRowComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  buildDisabledList() {
-
-  }
-
 
   populateFromPreset() {
     if (StringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(this.preset.value);
+    } else if (DropdownFields.includes(this.preset.field)) {
+      if (this.MultipleDropdownAllowed) {
+        this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
+      } else {
+        if (this.preset.field === FilterField.Languages) {
+          this.formGroup.get('filterValue')?.setValue(this.preset.value);
+        } else {
+          this.formGroup.get('filterValue')?.setValue(parseInt(this.preset.value, 10));
+        }
+      }
     } else {
       this.formGroup.get('filterValue')?.patchValue(parseInt(this.preset.value, 10));
     }
@@ -239,7 +238,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
       this.predicateType$.next(PredicateType.Text);
       if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
-
       return;
     }
 
