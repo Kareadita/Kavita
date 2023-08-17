@@ -56,8 +56,8 @@
   --select2-option-text-color: var(--body-text-color);
   --select2-option-disabled-text-color: #999;
   --select2-option-disabled-background: transparent;
-  --select2-option-selected-text-color: #000;
-  --select2-option-selected-background: #ddd;
+  --select2-option-selected-text-color: lightgrey;
+  --select2-option-selected-background: var(--btn-disabled-bg-color);
   --select2-option-highlighted-text-color: #fff;
   --select2-option-highlighted-background: #5897fb; // TODO: This needs to be done correctly and applied throughout the app
   --select2-option-group-text-color: var(--body-text-color);

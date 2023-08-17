@@ -127,6 +127,8 @@ export class MetadataFilterRowComponent implements OnInit {
         const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
         if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
           if (this.MultipleDropdownAllowed) {
+            // Possible BUG: This can reload the preset when switching from Contains -> Equal and back to Contains, but this is needed to preload the dropdown value
+            // from initial load
             this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
           } else {
             this.formGroup.get('filterValue')?.setValue(this.preset.value);
@@ -134,7 +136,11 @@ export class MetadataFilterRowComponent implements OnInit {
           return;
         }
 
-        this.formGroup.get('filterValue')?.setValue(opts[0].value);
+        if (this.MultipleDropdownAllowed) {
+          this.formGroup.get('filterValue')?.setValue((opts[0].value + '').split(','));
+        } else {
+          this.formGroup.get('filterValue')?.setValue(opts[0].value);
+        }
       }),
       takeUntilDestroyed(this.destroyRef)
     );
