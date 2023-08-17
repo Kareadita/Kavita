@@ -19,11 +19,12 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
-import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
+import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from "@angular/common";
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Select2Module, Select2Option, Select2UpdateEvent} from "ng-select2-component";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 
 enum PredicateType {
   Text = 1,
@@ -72,7 +73,9 @@ const DropdownComparisons = [FilterComparison.Equal,
     NgSwitchCase,
     NgForOf,
     NgIf,
-    Select2Module
+    Select2Module,
+    NgTemplateOutlet,
+    TagBadgeComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -123,7 +126,11 @@ export class MetadataFilterRowComponent implements OnInit {
         const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
         if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
-          this.formGroup.get('filterValue')?.setValue(this.preset.value);
+          if (this.MultipleDropdownAllowed) {
+            this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
+          } else {
+            this.formGroup.get('filterValue')?.setValue(this.preset.value);
+          }
           return;
         }
 
@@ -150,9 +157,7 @@ export class MetadataFilterRowComponent implements OnInit {
   }
 
   updateDropdown(event: Select2UpdateEvent) {
-    this.formGroup.get('filterValue')?.patchValue(event.value);
-    console.log('updating value: ', event.value);
-    this.cdRef.markForCheck();
+    console.log('updating value: ', this.formGroup.get('filterValue')?.value);
   }
 
   populateFromPreset() {

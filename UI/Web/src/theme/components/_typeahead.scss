@@ -13,13 +13,13 @@
   --select2-selection-disabled-background: #eee;
   --select2-selection-border-color: var(--input-border-color);
   --select2-selection-focus-border-color: var(--input-focus-boxshadow-color);
-  --select2-selection-text-color: #111;
+  --select2-selection-text-color: var(--input-text-color);
 
   /* selection: choice item (multiple) */
   --select2-selection-choice-background: var(--input-bg-readonly-color);
-  --select2-selection-choice-text-color: #000;
-  --select2-selection-choice-border-color: #aaa;
-  --select2-selection-choice-close-color: #999;
+  --select2-selection-choice-text-color: var(--tagbadge-text-color);
+  --select2-selection-choice-border-color: var(--tagbadge-border-color);
+  --select2-selection-choice-close-color: var(--tagbadge-border-color);
   --select2-selection-choice-hover-close-color: var(--input-focus-boxshadow-color);
 
   /* placeholder */
@@ -59,30 +59,14 @@
   --select2-option-selected-text-color: #000;
   --select2-option-selected-background: #ddd;
   --select2-option-highlighted-text-color: #fff;
-  --select2-option-highlighted-background: #5897fb;
+  --select2-option-highlighted-background: #5897fb; // TODO: This needs to be done correctly and applied throughout the app
   --select2-option-group-text-color: var(--body-text-color);
   --select2-option-group-background: transparent;
 
   /* hint */
   --select2-hint-text-color: #888;
-
-  /* for Material ------------------------------------------*/
-  --select2-material-underline: #ddd;
-  --select2-material-underline-active: #5a419e;
-  --select2-material-underline-disabled: linear-gradient(
-                  to right,
-                  rgba(0, 0, 0, 0.26) 0,
-                  rgba(0, 0, 0, 0.26) 33%,
-                  transparent 0
-  );
-  --select2-material-underline-invalid: red;
-  --select2-material-placeholder-color: rgba(0, 0, 0, 0.38);
-  --select2-material-selection-background: #ddd;
-  --select2-material-option-selected-background: rgba(0, 0, 0, 0.04);
-  --select2-material-option-highlighted-text-color: #000;
-  --select2-material-option-selected-text-color: #ff5722;
 }
 
-ul.select2-selection__rendered {
+.select2-selection__rendered {
   padding-top: 4px;
 }

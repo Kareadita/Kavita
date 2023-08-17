@@ -26,10 +26,25 @@
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
                       <ng-container *ngIf="dropdownOptions$ | async as opts">
-                        <select2 [data]="opts" formControlName="filterValue" [value]="MultipleDropdownAllowed ? [formGroup.get('filterValue')?.value] : formGroup.get('filterValue')?.value"
-                                 [multiple]="MultipleDropdownAllowed"
-                                 (update)="updateDropdown($event)">
-                        </select2>
+                          <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>
+                          <ng-template #dropdown let-options="options" let-multipleAllowed="multipleAllowed">
+                              <select2 [data]="options"
+                                       formControlName="filterValue"
+                                       [multiple]="multipleAllowed"
+                                       [infiniteScroll]="true"
+                                       [resettable]="true"
+                                       (update)="updateDropdown($event)">
+
+<!--                                  <ng-template #itemTemplate let-data="data">-->
+<!--                                    <ng-container *ngIf="multipleAllowed; else singleItem">-->
+<!--                                        {{data.label}}-->
+<!--                                    </ng-container>-->
+<!--                                    <ng-template #singleItem>-->
+<!--                                        {{data.label}}-->
+<!--                                    </ng-template>-->
+<!--                                  </ng-template>-->
+                              </select2>
+                          </ng-template>
                       </ng-container>
                     </ng-container>
                 </ng-container>
