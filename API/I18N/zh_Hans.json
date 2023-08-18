@@ -138,7 +138,7 @@
     "browse-recently-added": "浏览最近加入",
     "reading-lists": "阅读清单",
     "search": "搜索",
-    "unable-to-register-k+": "由于错误无法注册许可证。请联系 Kavita+ 支持人员",
+    "unable-to-register-k+": "因为一些错误导致无法注册许可证。请联系 Kavita+ 支持人员",
     "device-duplicate": "设备名称已存在",
     "device-not-created": "设备不存在，请先创建",
     "send-to-permission": "无法向设备发送Kindel不支持的非EPUB格式或者PDF格式文件",
@@ -152,5 +152,6 @@
     "url-required": "必须提供一个URL才能使用",
     "series-restricted-age-restriction": "由于年龄限制用户无权查看此系列",
     "user-no-access-library-from-series": "用户无法访问此系列所属的资料库",
-    "generic-create-temp-archive": "创建临时档案时出现问题"
+    "generic-create-temp-archive": "创建临时档案时出现问题",
+    "query-required": "您必须传递一个查询参数"
 }

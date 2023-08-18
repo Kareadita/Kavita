@@ -960,7 +960,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "Problemas na Mídia",
-        "scrobble-issue-title": "Problemas no Scrobble"
+        "scrobble-issue-title": "Problemas no Scrobble",
+        "cover-image-size-label": "Tamanho da Imagem da Capa",
+        "cover-image-size-tooltip": "Quão grande deve ser as imagens de capas geradas como. Nota: Qualquer coisa maior do que o padrão resultará em tempos de carregamento de página mais longos."
     },
     "manage-scrobble-errors": {
         "description": "Esta tabela contém problemas encontrados durante o scrobbling. Esta lista não é gerenciada. Você pode limpá-lo a qualquer momento e esperar o próximo upload do scrobble para ver. Se houver uma série desconhecida, é melhor corrigir o nome da série ou o nome da série localizada, ou adicionar um link para os provedores.",
@@ -1687,7 +1689,7 @@
         "issue-hash-num": "Número #",
         "issue-num": "Número",
         "chapter-num": "Capítulo",
-        "volume-num": ""
+        "volume-num": "Volume"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Role para cima para ir para o capítulo anterior",
@@ -1743,5 +1745,11 @@
         "contains": "Contém",
         "is-in-last": "É no final de",
         "is-not-in-last": "Não é no final de"
+    },
+    "cover-image-size": {
+        "default": "Padrão (320x455)",
+        "medium": "Médio (640x909)",
+        "xlarge": "Extra Grande (1265x1795)",
+        "large": "Grande (900x1277)"
     }
 }
