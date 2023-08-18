@@ -1,8 +1,8 @@
 <div class="row g-0 mb-1" *ngIf="tags.length > 0">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <h5>{{heading}}</h5>
   </div>
-  <div class="col-md-8">
+  <div class="col-md-9">
     <app-badge-expander [items]="tags">
       <ng-template #badgeExpanderItem let-item let-position="idx">
         <ng-container *ngIf="itemTemplate; else useTitle">
