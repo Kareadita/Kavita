@@ -923,7 +923,7 @@
         "email-url-tooltip": "",
         "reset": "{{common.reset}}",
         "test": "Prova",
-        "host-name-label": "",
+        "host-name-label": "Nome Host",
         "host-name-tooltip": "",
         "host-name-validation": "",
         "reset-to-default": "",
