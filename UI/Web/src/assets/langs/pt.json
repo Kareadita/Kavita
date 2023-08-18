@@ -1266,7 +1266,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "",
+        "title": "Importar CBL",
         "import-description": "",
         "validate-description": "",
         "validate-warning": "",
