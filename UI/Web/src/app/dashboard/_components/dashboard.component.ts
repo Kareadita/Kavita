@@ -184,6 +184,7 @@ export class DashboardComponent implements OnInit {
 
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
+      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.LessThan, value: '100'});
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
