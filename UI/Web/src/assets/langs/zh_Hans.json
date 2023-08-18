@@ -615,7 +615,7 @@
         "download-series--tooltip": "下载系列",
         "downloading-status": "下载中…",
         "user-reviews-alt": "用户评论",
-        "storyline-tab": "故事情节",
+        "storyline-tab": "正传故事线",
         "books-tab": "书籍",
         "volumes-tab": "卷",
         "specials-tab": "特刊",
@@ -712,9 +712,9 @@
         "include-in-recommendation-label": "包含在推荐中",
         "include-in-recommendation-tooltip": "是否应该在推荐页面上包括来自该库的系列。",
         "include-in-search-label": "包含在搜索中",
-        "include-in-search-tooltip": "是否应该在搜索结果中包含来自该库的系列和任何派生信息（类型、人物、文件）。",
+        "include-in-search-tooltip": "是否应该在搜索结果中包含来自该库的系列和任何派生信息（类别、人物、文件）。",
         "force-scan": "强制扫描",
-        "force-scan-tooltip": "这将强制对资料库进行扫描，就像进行全新的扫描一样",
+        "force-scan-tooltip": "对资料库强制扫描，即全新扫描",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "next": "下一项",
@@ -960,7 +960,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "媒体问题",
-        "scrobble-issue-title": "刮削问题"
+        "scrobble-issue-title": "刮削问题",
+        "cover-image-size-tooltip": "封面图像应生成多大尺寸。注意：任何大于默认值的图片都会延长页面加载时间。",
+        "cover-image-size-label": "封面图片尺寸"
     },
     "manage-scrobble-errors": {
         "description": "这个表格记录刮削中发现的问题。此列表是非受控的。您可以随时清除它，并等待下一次刮削以查看结果。如果有一个未知的系列，最好是更正系列名称或本地化系列名称，或者为提供者添加一个网页链接。",
@@ -993,7 +995,7 @@
         "cache-size-label": "缓存大小",
         "cache-size-tooltip": "允许为缓存重型API使用的内存量。默认值为75MB。",
         "on-deck-last-progress-label": "“最近阅读”最后进度（天数）",
-        "on-deck-last-progress-tooltip": "",
+        "on-deck-last-progress-tooltip": "在“On Deck”上显示某个内容之前进度经过的天数。",
         "on-deck-last-chapter-add-label": "最近阅读上一次章节加入（天数）",
         "on-deck-last-chapter-add-tooltip": "上一次章节内容加入至最近阅读的天数。",
         "allow-stats-label": "允许匿名收集使用数据",
@@ -1140,7 +1142,7 @@
         "statistics-tab": "统计数据",
         "system-tab": "系统",
         "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "Kavita+ 是一个高级订阅服务，为该 Kavita 实例上的所有用户解锁功能。购买订阅以解锁 ",
+        "kavita+-desc-part-1": "Kavita+ 是一个高级订阅服务，为 Kavita 上的所有用户解锁高级订阅功能。订阅加以解锁 ",
         "kavita+-desc-part-2": "高级会员福利",
         "kavita+-desc-part-3": "今天！"
     },
@@ -1215,7 +1217,7 @@
         "chapters": "章节",
         "people": "创作人员",
         "tags": "标签",
-        "genres": "流派",
+        "genres": "类别",
         "libraries": "资料库",
         "reading-lists": "阅读清单",
         "collections": "收藏",
@@ -1328,7 +1330,7 @@
         "format-label": "格式",
         "libraries-label": "资料库",
         "collections-label": "收藏",
-        "genres-label": "流派",
+        "genres-label": "类别",
         "tags-label": "标签",
         "cover-artist-label": "封面设计",
         "writer-label": "作者",
@@ -1378,7 +1380,7 @@
         "related-tab": "相关",
         "info-tab": "信息",
         "collections-label": "收藏",
-        "genres-label": "流派",
+        "genres-label": "类别",
         "tags-label": "标签",
         "cover-artist-label": "封面设计",
         "writer-label": "作者",
@@ -1483,7 +1485,7 @@
         "total-files-label": "文件总数",
         "total-files-tooltip": "文件总数: {{count}}",
         "total-size-label": "总大小",
-        "total-genres-label": "全部种类",
+        "total-genres-label": "全部类别",
         "total-genres-tooltip": "全部类别: {{count}}",
         "total-tags-label": "标签总数",
         "total-tags-tooltip": "标签总数: {{count}}",
@@ -1498,12 +1500,12 @@
         "popular-libraries-title": "热门资料库",
         "popular-series-title": "热门系列",
         "recently-read-title": "最近阅读",
-        "genre-count": "{{num}} 流派",
+        "genre-count": "{{num}} 类别",
         "tag-count": "{{num}} 标签",
         "people-count": "{{num}} 人",
         "tags": "标签",
         "people": "创作人员",
-        "genres": "流派"
+        "genres": "类别"
     },
     "errors": {
         "series-doesnt-exist": "该系列已不存在",
@@ -1523,7 +1525,7 @@
         "regen-cover": "已加入队列的任务以重新生成封面图像",
         "no-pages": "没有任何页面。Kavita无法读取此存档文件。",
         "download-in-progress": "下载正在进行中，请稍候。",
-        "scan-queued": "为{{name}}排队进行扫描",
+        "scan-queued": "{{name}}进入队列扫描",
         "server-settings-updated": "服务器设置已更新",
         "reset-ip-address": "IP地址已重置",
         "reset-base-url": "基本URL已重置",
@@ -1743,5 +1745,11 @@
         "is-in-last": "在最近",
         "is-not-in-last": "不在最近",
         "does-not-contain": "不包含"
+    },
+    "cover-image-size": {
+        "default": "默认 (320x455)",
+        "medium": "中（640x909）",
+        "large": "大（900x1277）",
+        "xlarge": "特大（1265x1795）"
     }
 }

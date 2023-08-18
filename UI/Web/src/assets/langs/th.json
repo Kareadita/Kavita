@@ -148,7 +148,7 @@
     },
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "นี่คือรายการซีรีส์ที่จัดการโดยผู้ใช้ซึ่งจะไม่ถูกบล็อกไปยังผู้ให้บริการอัปสตรีม คุณสามารถนำชุดข้อมูลออกได้ทุกเมื่อ จากนั้นเหตุการณ์ที่สามารถเขียน Scrobble ได้ครั้งถัดไป (ความคืบหน้าในการอ่าน การให้คะแนน สถานะที่ต้องการอ่าน) จะทำให้เกิดขึ้น"
+        "description": "นี่คือรายการซีรีส์ที่จัดการโดยผู้ใช้ซึ่งจะไม่ถูกบล็อกไปยังผู้ให้บริการอัปสตรีม คุณสามารถนำชุดข้อมูลออกได้ทุกเมื่อ จากนั้นเหตุการณ์ที่สามารถเขียน scrobble ได้ครั้งถัดไป (ความคืบหน้าในการอ่าน การให้คะแนน สถานะที่ต้องการอ่าน) จะทำให้เกิดขึ้น"
     },
     "theme-manager": {
         "title": "ตัวจัดการธีม",
@@ -243,7 +243,8 @@
         "regen-warning": "การสร้างคีย์ API ของคุณใหม่จะทำให้ไคลเอนต์ที่มีอยู่ใช้ไม่ได้",
         "no-key": "ข้อผิดพลาด - ไม่ได้ตั้งค่าคีย์",
         "confirm-reset": "การดำเนินการนี้จะทำให้การกำหนดค่า OPDS ใดๆ ที่คุณตั้งค่าไว้เป็นโมฆะ คุณแน่ใจหรือไม่ว่าต้องการดำเนินการต่อ?",
-        "key-reset": "รีเซ็ตคีย์ API"
+        "key-reset": "รีเซ็ตคีย์ API",
+        "show": "แสดง"
     },
     "scrobbling-providers": {
         "title": "ผู้ให้บริการ Scrobbling",
@@ -382,7 +383,7 @@
         "month-ago": "หนึ่งเดือนที่ผ่านมา",
         "months-ago": "{{value}} เดือนที่แล้ว",
         "year-ago": "เมื่อปีก่อน",
-        "years-ago": "{[value}} ปีที่แล้ว",
+        "years-ago": "{{value}} ปีที่แล้ว",
         "never": "ไม่เคย"
     },
     "relationship-pipe": {
@@ -414,26 +415,26 @@
         "cover-artist": "ผู้วาดหน้าปก",
         "editor": "อิดิเตอร์",
         "inker": "ผู้ลงหมึก",
-        "letterer": "",
-        "penciller": "",
-        "publisher": "",
-        "writer": "",
-        "other": ""
+        "letterer": "เลทเทอเรอ",
+        "penciller": "เพนซิลเลอ",
+        "publisher": "สำนักพิมพ์",
+        "writer": "ผู้แต่ง",
+        "other": "อื่นๆ"
     },
     "manga-format-pipe": {
-        "epub": "",
-        "archive": "",
-        "image": "",
-        "pdf": "",
-        "unknown": ""
+        "epub": "EPUB",
+        "archive": "Archive",
+        "image": "รูปภาพ",
+        "pdf": "PDF",
+        "unknown": "ไม่รู้จัก"
     },
     "library-type-pipe": {
-        "book": "",
-        "comic": "",
-        "manga": ""
+        "book": "หนังสือ",
+        "comic": "การ์ตูน",
+        "manga": "มังงะ"
     },
     "age-rating-pipe": {
-        "unknown": "",
+        "unknown": "ไม่รู้จัก",
         "early-childhood": "",
         "adults-only": "",
         "everyone": "",
@@ -451,20 +452,20 @@
         "r18-plus": ""
     },
     "reset-password": {
-        "title": "",
+        "title": "รีเซ็ตรหัสผ่าน",
         "description": "",
-        "email-label": "",
-        "required-field": "",
-        "valid-email": "",
-        "submit": ""
+        "email-label": "{{common.email}}",
+        "required-field": "{{validation.required-field}}",
+        "valid-email": "{{validation.valid-email}}",
+        "submit": "{{common.submit}}"
     },
     "reset-password-modal": {
-        "title": "",
-        "new-password-label": "",
-        "error-label": "",
-        "close": "",
-        "cancel": "",
-        "save": ""
+        "title": "รีเซ็ตรหัสผ่านของ {{username}}",
+        "new-password-label": "รหัสผ่านใหม่",
+        "error-label": "ข้อผิดพลาด: ",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "save": "{{common.save}}"
     },
     "all-series": {
         "series-count": ""
@@ -493,7 +494,7 @@
         "invite-url-label": "",
         "invite": "",
         "inviting": "",
-        "cancel": ""
+        "cancel": "{{common.cancel}}"
     },
     "library-selector": {
         "title": "",
@@ -506,7 +507,7 @@
         "manage": "",
         "invalid-license-tooltip": "",
         "check": "",
-        "cancel": "",
+        "cancel": "{{common.cancel}}",
         "edit": "",
         "buy": "",
         "activate": "",
@@ -519,7 +520,7 @@
         "activate-license-label": "",
         "activate-email-label": "",
         "activate-delete": "",
-        "activate-save": ""
+        "activate-save": "{{common.save}}"
     },
     "book-line-overlay": {
         "copy": "",
@@ -527,7 +528,7 @@
         "close": "",
         "required-field": "",
         "bookmark-label": "",
-        "save": ""
+        "save": "{{common.save}}"
     },
     "book-reader": {
         "title": "",
@@ -576,12 +577,12 @@
         "success": ""
     },
     "confirm-reset-password": {
-        "title": "",
-        "description": "",
-        "password-label": "",
-        "required-field": "",
-        "submit": "",
-        "password-validation": ""
+        "title": "รีเซ็ตรหัสผ่าน",
+        "description": "ระบุรหัสผ่านใหม่",
+        "password-label": "{{common.password}}",
+        "required-field": "{{validation.required-field}}",
+        "submit": "{{common.submit}}",
+        "password-validation": "{{validation.password-validation}}"
     },
     "register": {
         "title": "",
@@ -712,10 +713,10 @@
         "include-in-search-tooltip": "",
         "force-scan": "",
         "force-scan-tooltip": "",
-        "reset": "",
-        "cancel": "",
+        "reset": "{{common.reset}}",
+        "cancel": "{{common.cancel}}",
         "next": "",
-        "save": "",
+        "save": "{{common.save}}",
         "required-field": ""
     },
     "reader-settings": {
@@ -724,7 +725,7 @@
         "font-size-label": "",
         "line-spacing-label": "",
         "margin-label": "",
-        "reset-to-defaults": "",
+        "reset-to-defaults": "รีเซ็ตกลับเป็นค่าเริ่มต้น",
         "reader-settings-title": "",
         "reading-direction-label": "",
         "right-to-left": "",
@@ -818,8 +819,8 @@
         "url-label": "",
         "load": "",
         "back": "",
-        "reset-cover-tooltip": "",
-        "reset": "",
+        "reset-cover-tooltip": "รีเซ็ตภาพปก",
+        "reset": "{{common.reset}}",
         "image-num": "",
         "apply": "",
         "applied": ""
@@ -919,13 +920,13 @@
         "send-to-warning": "",
         "email-url-label": "",
         "email-url-tooltip": "",
-        "reset": "",
+        "reset": "{{common.reset}}",
         "test": "",
         "host-name-label": "",
         "host-name-tooltip": "",
         "host-name-validation": "",
-        "reset-to-default": "",
-        "save": ""
+        "reset-to-default": "{{common.reset-to-default}}",
+        "save": "{{common.save}}"
     },
     "manage-library": {
         "title": "",
@@ -947,14 +948,14 @@
         "encode-as-description-part-3": "",
         "encode-as-warning": "",
         "media-warning": "",
-        "encode-as-label": "",
+        "encode-as-label": "บันทึกสื่อเป็น",
         "encode-as-tooltip": "",
         "bookmark-dir-label": "",
         "bookmark-dir-tooltip": "",
         "change": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "media-issue-title": "",
         "scrobble-issue-title": ""
     },
@@ -1002,9 +1003,9 @@
         "folder-watching-label": "",
         "folder-watching-tooltip": "",
         "enable-folder-watching": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "cache-size-validation": "",
         "field-required": "",
         "max-logs-validation": "",
@@ -1038,9 +1039,9 @@
         "job-title-header": "",
         "description-header": "",
         "action-header": "",
-        "reset-to-default": "",
-        "reset": "",
-        "save": "",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
         "recurring-tasks-title": "",
         "last-executed-header": "",
         "cron-header": "",
@@ -1096,9 +1097,9 @@
     "edit-collection-tags": {
         "title": "",
         "required-field": "",
-        "save": "",
+        "save": "{{common.save}}",
         "close": "",
-        "cancel": "",
+        "cancel": "{{common.cancel}}",
         "general-tab": "",
         "cover-image-tab": "",
         "series-tab": "",
@@ -1245,7 +1246,7 @@
         "general-tab": "",
         "cover-image-tab": "",
         "close": "",
-        "save": "",
+        "save": "{common.save}}",
         "year-validation": "",
         "month-validation": "",
         "name-unique-validation": "",
@@ -1285,7 +1286,7 @@
     },
     "manga-reader": {
         "back": "",
-        "save-globally": "",
+        "save-globally": "บันทึก",
         "incognito-alt": "",
         "incognito-title": "",
         "shortcuts-menu-alt": "",
@@ -1350,7 +1351,7 @@
         "sort-by-label": "",
         "ascending-alt": "",
         "descending-alt": "",
-        "reset": "",
+        "reset": "{{common.reset}}",
         "apply": ""
     },
     "sort-field-pipe": {
@@ -1398,7 +1399,7 @@
         "add-link-alt": "",
         "remove-link-alt": "",
         "cover-image-description": "",
-        "save": "",
+        "save": "{{common.save}}",
         "field-locked-alt": "",
         "info-title": "",
         "library-title": "",
@@ -1504,7 +1505,7 @@
         "rejected-cover-upload": "",
         "invalid-confirmation-url": "",
         "invalid-confirmation-email": "",
-        "invalid-password-reset-url": ""
+        "invalid-password-reset-url": "URL รีเซ็ตรหัสผ่านไม่ถูกต้อง"
     },
     "toasts": {
         "regen-cover": "",
@@ -1512,8 +1513,8 @@
         "download-in-progress": "",
         "scan-queued": "",
         "server-settings-updated": "",
-        "reset-ip-address": "",
-        "reset-base-url": "",
+        "reset-ip-address": "รีเซ็ต IP Addresses",
+        "reset-base-url": "รีเซ็ต Base Url",
         "unauthorized-1": "",
         "unauthorized-2": "",
         "no-updates": "",
@@ -1536,7 +1537,7 @@
         "select-files-warning": "",
         "reading-list-imported": "",
         "incognito-off": "",
-        "email-service-reset": "",
+        "email-service-reset": "รีเซ็ต Email Service",
         "email-service-reachable": "",
         "email-service-unresponsive": "",
         "refresh-covers-queued": "",
@@ -1553,7 +1554,7 @@
         "k+-license-saved": "",
         "k+-unlocked": "",
         "k+-error": "",
-        "k+-delete-key": "",
+        "k+-delete-key": "การดำเนินการนี้จะลบ License ของ Kavita และอนุญาตให้แสดงลิงก์ซื้อ การดำเนินการนี้จะไม่ยกเลิกการสมัครรับข้อมูลของคุณ ใช้ฟังก์ชันนี้เฉพาะเมื่อได้รับคำแนะนำจากฝ่ายสนับสนุนเท่านั้น!",
         "library-deleted": "",
         "copied-to-clipboard": "",
         "book-settings-info": "",
@@ -1563,7 +1564,7 @@
         "load-prev-chapter": "",
         "account-registration-complete": "",
         "account-migration-complete": "",
-        "password-reset": "",
+        "password-reset": "รีเซ็ตรหัสผ่าน",
         "password-updated": "",
         "forced-scan-queued": "",
         "library-created": "",
@@ -1643,12 +1644,12 @@
         "logs": ""
     },
     "common": {
-        "reset-to-default": "",
+        "reset-to-default": "รีเซ็ตกลับค่าเริ่มต้น",
         "close": "",
-        "cancel": "",
+        "cancel": "ยกเลิก",
         "create": "",
-        "save": "",
-        "reset": "",
+        "save": "บันทึก",
+        "reset": "รีเซ็ต",
         "add": "",
         "apply": "",
         "delete": "",

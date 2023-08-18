@@ -24,7 +24,7 @@
         "not-valid-email": "",
         "cancel": "",
         "saving": "保存中。。。",
-        "update": ""
+        "update": "更新"
     },
     "user-scrobble-history": {
         "title": "",
@@ -36,7 +36,7 @@
         "series-header": "シリーズ",
         "data-header": "",
         "is-processed-header": "",
-        "no-data": "",
+        "no-data": "データなし",
         "volume-and-chapter-num": "",
         "rating": "",
         "not-applicable": "",
