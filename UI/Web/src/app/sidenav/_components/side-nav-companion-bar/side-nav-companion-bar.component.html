@@ -14,6 +14,7 @@
       </button>
       <button *ngIf="hasFilter" class="btn btn-{{filterActive ? 'primary' : 'secondary'}} btn-small" (click)="toggleService.toggle()"
               [attr.aria-expanded]="filterOpen" placement="left"
+              id="filter-btn--komf"
               ngbTooltip="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}"
               attr.aria-label="{{filterOpen ? t('open-filter-and-sort') : t('close-filter-and-sort')}}">
         <i class="fa fa-filter" aria-hidden="true"></i>
