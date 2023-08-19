@@ -22,7 +22,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {allFields, FilterField} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {tap} from "rxjs/operators";
+import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
@@ -70,30 +70,21 @@ export class MetadataBuilderComponent implements OnInit {
 
 
   ngOnInit() {
-    if (this.filter === undefined) {
-      // I've left this in to see if it ever happens or not
-      console.error('No filter, creating one in metadata-builder')
-      // If there is no default preset, let's open with series name
-      this.filter = this.filterUtilityService.createSeriesV2Filter();
-      this.filter.statements.push({
-        value: '',
-        comparison: FilterComparison.Equal,
-        field: FilterField.SeriesName
-      });
-    }
-
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
-    this.formGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef), tap(values => {
-      this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10);
+    this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
+      this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterCombination;
       this.update.emit(this.filter);
     })).subscribe()
   }
 
   addFilter() {
+    console.log('Adding Filter')
     this.filter.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filter.statements];
+    this.cdRef.markForCheck();
   }
 
   removeFilter(index: number) {
+    console.log('Removing filter')
     this.filter.statements = this.filter.statements.slice(0, index).concat(this.filter.statements.slice(index + 1))
     this.cdRef.markForCheck();
   }

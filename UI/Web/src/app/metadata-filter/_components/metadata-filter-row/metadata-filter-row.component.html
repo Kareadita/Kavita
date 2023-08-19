@@ -2,11 +2,9 @@
 <form [formGroup]="formGroup">
     <div class="row g-0">
         <div class="col-md-3 me-2 col-10 mb-2">
-            <ng-container *ngIf="formGroup.get('input') as control">
-                <select class="form-select me-2" formControlName="input">
-                    <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
-                </select>
-            </ng-container>
+            <select class="form-select me-2" formControlName="input">
+                <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
+            </select>
         </div>
 
         <div class="col-md-2 me-2 col-10 mb-2">

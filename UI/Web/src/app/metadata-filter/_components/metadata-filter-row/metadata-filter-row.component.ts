@@ -5,13 +5,22 @@ import {
   DestroyRef,
   EventEmitter,
   inject,
-  Input,
+  Input, OnChanges,
   OnInit,
-  Output
+  Output, SimpleChanges
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {BehaviorSubject, distinctUntilChanged, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  map,
+  Observable,
+  of,
+  startWith,
+  switchMap,
+  tap
+} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -79,8 +88,9 @@ const DropdownComparisons = [FilterComparison.Equal,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent implements OnInit {
+export class MetadataFilterRowComponent implements OnInit, OnChanges {
 
+  @Input() index: number = 0; // This is only for debugging
   /**
    * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
    */
@@ -113,7 +123,7 @@ export class MetadataFilterRowComponent implements OnInit {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
-    console.log('creating stmt: ', this.preset)
+    console.log('creating stmt (' + this.index + '): ', this.preset)
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
@@ -139,17 +149,23 @@ export class MetadataFilterRowComponent implements OnInit {
     );
 
 
-    this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
-      console.log('value: ', this.formGroup.get('filterValue')?.value)
-      this.filterStatement.emit({
+    this.formGroup.get('filterValue')!.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
+      const stmt = {
         comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
-      });
+      };
+      if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
+      console.log('value: ', stmt.value)
+      this.filterStatement.emit(stmt);
     });
 
     this.loaded = true;
     this.cdRef.markForCheck();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('changes occurred: ', changes);
   }
 
 
@@ -235,21 +251,21 @@ export class MetadataFilterRowComponent implements OnInit {
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
+    // BUG: This is triggering populating preset to trigger like mad (over 400 calls just from switching Libraries -> Series Name)
 
     if (StringFields.includes(inputVal)) {
       this.validComparisons$.next(StringComparisons);
       this.predicateType$.next(PredicateType.Text);
 
       if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue('');
-        console.log('setting filtervalue to empty string', this.formGroup.get('filterValue')?.value)
-        //this.cdRef.markForCheck();
+        this.formGroup.get('filterValue')?.patchValue('',{emitEvent: false});
+        console.log('setting filterValue to empty string', this.formGroup.get('filterValue')?.value)
       } // BUG: undefined is getting set and the input value isn't updating and emitting to the backend
       return;
     }
 
     if (NumberFields.includes(inputVal)) {
-      let comps = [...NumberComparisons];
+      const comps = [...NumberComparisons];
       if (inputVal === FilterField.ReleaseYear) {
         comps.push(...DateComparisons);
       }
@@ -260,12 +276,13 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (DropdownFields.includes(inputVal)) {
-      let comps = [...DropdownComparisons];
+      const comps = [...DropdownComparisons];
       if (inputVal === FilterField.AgeRating) {
         comps.push(...NumberComparisons);
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
+      return;
     }
   }
 
