@@ -159,6 +159,6 @@ export class MetadataService {
   updateFilter(arr: Array<FilterStatement>, index: number, filterStmt: FilterStatement) {
     arr[index].comparison = filterStmt.comparison;
     arr[index].field = filterStmt.field;
-    arr[index].value = filterStmt.value + '';
+    arr[index].value = filterStmt.value ? filterStmt.value + '' : '';
   }
 }

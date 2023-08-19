@@ -181,7 +181,6 @@ export class MetadataFilterComponent implements OnInit {
   }
 
   apply() {
-
     this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
 
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {

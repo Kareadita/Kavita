@@ -22,7 +22,7 @@
                         <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Number">
-                        <input type="number" inputmode="numeric" class="form-control  me-2" formControlName="filterValue">
+                        <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
                     </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
                       <ng-container *ngIf="dropdownOptions$ | async as opts">

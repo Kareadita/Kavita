@@ -32,7 +32,7 @@ enum PredicateType {
   Dropdown = 3,
 }
 
-const StringFields = [FilterField.SeriesName, FilterField.Summary];
+const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path];
 const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
@@ -113,11 +113,11 @@ export class MetadataFilterRowComponent implements OnInit {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
+    console.log('creating stmt: ', this.preset)
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
-    this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
+    this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
-
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
@@ -140,6 +140,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
+      console.log('value: ', this.formGroup.get('filterValue')?.value)
       this.filterStatement.emit({
         comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
@@ -153,24 +154,26 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
   populateFromPreset() {
+    const val = this.preset.value === "undefined" || !this.preset.value ? '' : this.preset.value;
+    console.log('populating preset: ', val);
     if (StringFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(this.preset.value);
+      this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed) {
-        this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
+        this.formGroup.get('filterValue')?.patchValue(val.split(','));
       } else {
         if (this.preset.field === FilterField.Languages) {
-          this.formGroup.get('filterValue')?.setValue(this.preset.value);
+          this.formGroup.get('filterValue')?.patchValue(val);
         } else {
-          this.formGroup.get('filterValue')?.setValue(parseInt(this.preset.value, 10));
+          this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));
         }
       }
     } else {
-      this.formGroup.get('filterValue')?.patchValue(parseInt(this.preset.value, 10));
+      this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));
     }
 
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
-    this.formGroup.get('input')?.setValue(this.preset.field);
+    this.formGroup.get('input')?.patchValue(this.preset.field);
     this.cdRef.markForCheck();
   }
 
@@ -235,9 +238,13 @@ export class MetadataFilterRowComponent implements OnInit {
 
     if (StringFields.includes(inputVal)) {
       this.validComparisons$.next(StringComparisons);
-
       this.predicateType$.next(PredicateType.Text);
-      if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
+
+      if (this.loaded) {
+        this.formGroup.get('filterValue')?.patchValue('');
+        console.log('setting filtervalue to empty string', this.formGroup.get('filterValue')?.value)
+        //this.cdRef.markForCheck();
+      } // BUG: undefined is getting set and the input value isn't updating and emitting to the backend
       return;
     }
 
@@ -248,7 +255,7 @@ export class MetadataFilterRowComponent implements OnInit {
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
-      if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
+      if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
       return;
     }
 

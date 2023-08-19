@@ -1731,7 +1731,8 @@
         "tags": "Tags",
         "translators": "Translators",
         "user-rating": "User Rating",
-        "writers": "Writers"
+        "writers": "Writers",
+        "path": "Path"
     },
 
     "filter-comparison-pipe": {

@@ -100,6 +100,7 @@ export class MetadataBuilderComponent implements OnInit {
 
   updateFilter(index: number, filterStmt: FilterStatement) {
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
+    console.log('updating filter: ', this.filter.statements);
     this.update.emit(this.filter);
   }
 

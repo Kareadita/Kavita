@@ -1036,6 +1036,7 @@ public class SeriesRepository : ISeriesRepository
         {
             FilterField.Summary => query.HasSummary(true, statement.Comparison, (string) value),
             FilterField.SeriesName => query.HasName(true, statement.Comparison, (string) value),
+            FilterField.Path => query.HasPath(true, statement.Comparison, (string) value),
             FilterField.PublicationStatus => query.HasPublicationStatus(true, statement.Comparison,
                 (IList<PublicationStatus>) value),
             FilterField.Languages => query.HasLanguage(true, statement.Comparison, (IList<string>) value),
