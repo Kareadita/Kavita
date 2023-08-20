@@ -122,7 +122,8 @@
         "layout-mode-switched": "El modo de diseño se ha cambiado a Individual ya que no hay espacio suficiente para renderizar el diseño doble",
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "first-time-reading-manga": "Pulsa en la imagen en cualquier momento para abrir el menú. Puedes configurar diferentes ajustes o ir a la página pulsando la barra de progreso. Pulsar en los laterales de la imagen te lleva a la siguiente/anterior página.",
-        "no-prev-chapter": "No hay Capítulo Anterior"
+        "no-prev-chapter": "No hay Capítulo Anterior",
+        "fullscreen": "Pantalla completa"
     },
     "import-cbl-modal": {
         "import": "Importar",
@@ -871,7 +872,10 @@
         "mark-as-unread": "Marcar como no leído",
         "mark-as-read": "Marcar como leído",
         "refresh-covers": "Actualizar Portadas",
-        "edit": "Editar"
+        "edit": "Editar",
+        "delete": "Borrar",
+        "download": "Descargar",
+        "others": "Otros"
     },
     "preferences": {
         "automatic": "Automático",
@@ -882,7 +886,9 @@
         "cards": "Tarjetas",
         "right-to-left": "Derecha a izquierda",
         "left-to-right": "Izquierda a derecha",
-        "2-column": "2 Columnas"
+        "2-column": "2 Columnas",
+        "double": "Doble",
+        "original": "Original"
     },
     "toasts": {
         "confirm-regen-covers": "Actualizar portadas obligará a recalcular todas las imágenes de las portadas. Se trata de una operación pesada. ¿Está seguro de que no desea realizar un escaneo en su lugar?",
@@ -905,7 +911,10 @@
         "alert-long-running": "Este proceso es de larga duración. Por favor, dale tiempo a completarse antes de volverlo a iniciar.",
         "change-email-private": "No se puede acceder al servidor de forma externa. Pídele tu enlace de confirmación al administrador",
         "alert-bad-theme": "Hay un css no válido o inseguro en el tema. Por favor, ponte en contacto con tu administrador para corregirlo. Estableciendo el tema oscuro por defecto.",
-        "confirm-delete-series": "¿Estás seguro de que deseas eliminar esta serie? No se modificarán los archivos en el disco."
+        "confirm-delete-series": "¿Estás seguro de que deseas eliminar esta serie? No se modificarán los archivos en el disco.",
+        "list-doesnt-exist": "Esta lista no existe",
+        "item-removed": "Elemento eliminado",
+        "collection-updated": "Colección actualizada"
     },
     "library-selector": {
         "title": "Bibliotecas",
@@ -1026,7 +1035,8 @@
     },
     "reading-lists": {
         "create-one-part-1": "Prueba a crear",
-        "create-one-part-2": "uno"
+        "create-one-part-2": "uno",
+        "title": "Listas de lectura"
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
@@ -1154,7 +1164,9 @@
         "pages-count": "{{entity-info-cards.pages-count}}",
         "words-count": "{{entity-info-cards.words-count}}",
         "release-date-title": "{{entity-info-cards.release-date-title}}",
-        "age-rating-title": "{{entity-info-cards.age-rating-title}}"
+        "age-rating-title": "{{entity-info-cards.age-rating-title}}",
+        "scrobbling-title": "",
+        "scrobbling-tooltip": "Estado del scrobbling"
     },
     "bulk-add-to-collection": {
         "filter-label": "Filtro",
@@ -1247,13 +1259,18 @@
         "reset": "{{common.reset}}",
         "test": "Test",
         "email-url-tooltip": "Utiliza la dirección URL completa del servicio de correo electrónico. No incluyas la barra oblicua final.",
-        "host-name-label": "Nombre del host"
+        "host-name-label": "Nombre del host",
+        "host-name-tooltip": "Nombre de dominio (del proxy inverso). Si se indica, el generador de correos electrónicos usará siempre este.",
+        "host-name-validation": "El nombre del anfitrión debe empezar con http(s) y no acabar en /"
     },
     "list-item": {
         "read": "{{common.read}}"
     },
     "cover-image-size": {
-        "xlarge": "Extragrande (1265x1795)"
+        "xlarge": "Extragrande (1265x1795)",
+        "default": "Por defecto (320x455)",
+        "medium": "Mediano (640x909)",
+        "large": "Grande (900x1277)"
     },
     "manage-scrobble-errors": {
         "description": "Esta tabla contiene los problemas encontrados durante el scrobbling. Esta lista no está administrada. Puedes borrarla en cualquier momento y esperar a la siguiente carga de scrobble para verla. Si hay una serie desconocida, lo mejor es corregir el nombre de la serie o el nombre localizado de la serie o añadir un enlace web para los proveedores.",
@@ -1277,6 +1294,151 @@
     "manage-settings": {
         "notice": "Noticia:",
         "restart-required": "Cambiar el puerto, la URL base, el tamaño de caché o las direcciones IP requiere un reinicio manual de Kavita para que surta efecto.",
-        "base-url-label": "URL base"
+        "base-url-label": "URL base",
+        "log-tooltip": "Número de registros a mantener. Por defecto 30, como mínimo 1 y cómo máximo 30.",
+        "cache-size-validation": "Debes tener al menos 50 MB.",
+        "ip-address-label": "Direcciones IP",
+        "port-label": "Puerto",
+        "backup-label": "Días de copias de seguridad",
+        "backup-tooltip": "Número de copias de seguridad a mantener. Por defecto 30, como mínimo 1, como máximo 30.",
+        "log-label": "Días de registros",
+        "port-tooltip": "Puerto en el que el servidor escucha. Esto es fijo si se ejecuta en Docker. Requiere reinicio para ser aplicado.",
+        "ip-address-tooltip": "Lista de direcciones IP separadas por comas en las que el servidor escucha. Esto es fijo si se ejecuta en Docker. Requiere reinicio para ser aplicado.",
+        "cache-size-label": "Tamaño de caché",
+        "cache-size-tooltip": "Cantidad de memoria permitida para almacenar APIs pesadas en caché. Por defecto, 75MB.",
+        "opds-label": "OPDS",
+        "enable-opds": "Habilitar OPDS",
+        "send-data": "Enviar datos",
+        "base-url-tooltip": "Usa esto si quieres alojar Kavita en una url base ej. tudominio.com/kavita. No soportado si se usa Docker como usuario no-root.",
+        "logging-level-label": "Nivel de registro"
+    },
+    "manage-media-settings": {
+        "encode-as-description-part-1": "WebP/AVIF puede reducir drásticamente el espacio requerido para archivos. WebP/AVIF no está soportado por todos los navegadores o versiones. Para comprobar si estos ajustes son apropiados para tu configuración, visita ",
+        "encode-as-description-part-2": "¿Puedo usar WebP?",
+        "encode-as-description-part-3": "¿Puedo usar AVIF?",
+        "encode-as-warning": "No puedes convertir de nuevo a PNG una vez ya has obtenido WebP/AVIF. Necesitarías recargar las portadas en tus bibliotecas para regenerar todas las portadas. Los marcadores y favicons no se pueden convertir.",
+        "cover-image-size-label": "Tamaño de la imagen de portada",
+        "media-warning": "Debes iniciar la tarea de conversión multimedia en la pestaña Tareas.,",
+        "encode-as-label": "Guardar Media como",
+        "encode-as-tooltip": "Toda la multimedia que Kavita gestiona (portadas, marcadores, favicons) serán codificados con este tipo.",
+        "bookmark-dir-label": "Directorio de marcadores",
+        "bookmark-dir-tooltip": "Lugar en el que se almacenarán los marcadores. Los marcadores son archivos de origen y pueden ser grandes. Elige un lugar con el almacenamiento adecuado. El directorio es gestionado; otros archivos que existan en el directorio serán eliminados. Si estás utilizando Docker, monta un volumen adicional y úsalo.",
+        "change": "Cambiar",
+        "media-issue-title": "Problemas multimedia",
+        "scrobble-issue-title": "Problemas con el scrobbling"
+    },
+    "all-collections": {
+        "title": "Colecciones",
+        "create-one-part-2": "una"
+    },
+    "reading-activity": {
+        "x-axis-label": "Tiempo",
+        "legend-label": "Formatos"
+    },
+    "admin-dashboard": {
+        "kavita+-desc-part-3": "hoy!",
+        "general-tab": "General",
+        "users-tab": "Usuarios",
+        "libraries-tab": "Bibliotecas",
+        "logs-tab": "Registros",
+        "email-tab": "Correo electrónico",
+        "tasks-tab": "Tareas",
+        "statistics-tab": "Estadísticas",
+        "system-tab": "Sistema",
+        "kavita+-tab": "Kavita+"
+    },
+    "file-breakdown-stats": {
+        "visualisation-label": "Visualización",
+        "format-title": "Formato",
+        "format-header": "Formato",
+        "total-size-header": "Tamaño total"
+    },
+    "filter-field-pipe": {
+        "colorist": "Colorista",
+        "formats": "Formatos",
+        "inker": "Entintador",
+        "languages": "Idiomas",
+        "libraries": "Bibliotecas",
+        "letterer": "Rotulista",
+        "penciller": "Dibujante",
+        "summary": "Resumen",
+        "tags": "Etiquetas",
+        "translators": "Traductores",
+        "characters": "Personajes",
+        "publisher": "Editorial",
+        "genres": "Géneros",
+        "release-year": "Año de lanzamiento",
+        "writers": "Escritores"
+    },
+    "filter-comparison-pipe": {
+        "contains": "Contiene",
+        "equal": "Igual a",
+        "greater-than": "Mayor que"
+    },
+    "manage-system": {
+        "more-info-title": "Más información",
+        "wiki-title": "Wiki:",
+        "discord-title": "Discord:",
+        "donations-title": "Donaciones:",
+        "source-title": "Fuente:",
+        "version-title": "Versión"
+    },
+    "manage-tasks-settings": {
+        "action-header": "Acción",
+        "check-for-updates-task": "Buscar actualizaciones",
+        "cron-header": "Cron",
+        "description-header": "Descripción"
+    },
+    "manage-users": {
+        "edit-user-tooltip": "Editar",
+        "pending-title": "Pendiente",
+        "online-now-tooltip": "En línea ahora",
+        "change-password-tooltip": "Cambiar contraseña",
+        "change-password-alt": "Cambiar contraseña de {{user}}",
+        "setup": "Configuración",
+        "none": "Ninguno",
+        "never": "Nunca",
+        "sharing-title": "Compartiendo:",
+        "no-data": "No hay otros usuarios."
+    },
+    "manga-format-stats": {
+        "title": "Formato",
+        "visualisation-label": "Visualización",
+        "format-header": "Formato"
+    },
+    "publication-status-stats": {
+        "visualisation-label": "Visualización",
+        "data-table-label": "Tabla de datos",
+        "year-header": "Año"
+    },
+    "manage-library": {
+        "last-scanned-title": "Último escaneo:",
+        "shared-folders-title": "Carpetas compartidas:",
+        "type-title": "Tipo:",
+        "title": "Bibliotecas",
+        "add-library": "Añadir biblioteca",
+        "no-data": "No existen bibliotecas. Prueba a crear una.",
+        "scan-library": "Escanear biblioteca",
+        "delete-library": "Borrar biblioteca",
+        "delete-library-by-name": "Eliminar {{name}}",
+        "edit-library": "Editar",
+        "edit-library-by-name": "Eliminar {{name}}"
+    },
+    "edit-collection-tags": {
+        "general-tab": "General",
+        "name-label": "Nombre",
+        "summary-label": "Resumen"
+    },
+    "library-detail": {
+        "library-tab": "Biblioteca",
+        "recommended-tab": "Recomendado"
+    },
+    "server-stats": {
+        "reads": "lecturas",
+        "release-years-title": "Años de lanzamiento",
+        "most-active-users-title": "Usuarios más activos",
+        "tags": "Etiquetas",
+        "people": "Personas",
+        "genres": "Géneros"
     }
 }
