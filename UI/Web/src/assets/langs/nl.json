@@ -1097,81 +1097,81 @@
         "cancel": "{{common.cancel}}",
         "general-tab": "Algemeen",
         "cover-image-tab": "Omslagafbeelding",
-        "series-tab": "",
-        "name-label": "",
-        "name-validation": "",
-        "promote-label": "",
-        "promote-tooltip": "",
-        "summary-label": "",
-        "series-title": "",
-        "deselect-all": "",
-        "select-all": ""
+        "series-tab": "Serie",
+        "name-label": "Naam",
+        "name-validation": "Naam moet uniek zijn",
+        "promote-label": "Promoot",
+        "promote-tooltip": "Promotie betekent dat de tag serverbreed zichtbaar is, niet alleen voor beheerders. Alle series die deze tag hebben, hebben nog steeds beperkingen voor gebruikerstoegang.",
+        "summary-label": "Samenvatting",
+        "series-title": "Geldt voor serie",
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
     "library-detail": {
-        "library-tab": "",
-        "recommended-tab": ""
+        "library-tab": "Bibliotheek",
+        "recommended-tab": "Aanbevolen"
     },
     "library-recommended": {
-        "no-data": "",
-        "more-in-genre": "",
-        "rediscover": "",
-        "highly-rated": "",
-        "quick-catchups": "",
-        "quick-reads": "",
-        "on-deck": ""
+        "no-data": "Hier is niets te zien. Voeg wat metadata toe aan je bibliotheek, lees iets of beoordeel iets. Voor deze bibliotheek zijn aanbevelingen mogelijk ook uitgeschakeld.",
+        "more-in-genre": "Meer in {{genre}}",
+        "rediscover": "Herontdekken",
+        "highly-rated": "Hoog beoordeeld",
+        "quick-catchups": "Snelle inhaalacties",
+        "quick-reads": "Snel gelezen",
+        "on-deck": "{{dashboard.on-deck-title}}"
     },
     "admin-dashboard": {
-        "title": "",
-        "general-tab": "",
-        "users-tab": "",
-        "libraries-tab": "",
-        "media-tab": "",
-        "logs-tab": "",
-        "email-tab": "",
-        "tasks-tab": "",
+        "title": "Beheerdashboard",
+        "general-tab": "Algemeen",
+        "users-tab": "Gebruikers",
+        "libraries-tab": "Bibliotheken",
+        "media-tab": "Media",
+        "logs-tab": "Logboeken",
+        "email-tab": "Email",
+        "tasks-tab": "Taken",
         "statistics-tab": "Statistieken",
-        "system-tab": "",
-        "kavita+-tab": "",
-        "kavita+-desc-part-1": "",
-        "kavita+-desc-part-2": "",
-        "kavita+-desc-part-3": ""
+        "system-tab": "Systeem",
+        "kavita+-tab": "Kavita+",
+        "kavita+-desc-part-1": "Kavita+ is een premium abonnementsservice die functies ontgrendelt voor alle gebruikers van deze Kavita-instantie. Koop een abonnement om te ontgrendelen ",
+        "kavita+-desc-part-2": "premium voordelen",
+        "kavita+-desc-part-3": "Vandaag!"
     },
     "collection-detail": {
-        "no-data": "",
-        "no-data-filtered": "",
-        "title-alt": ""
+        "no-data": "Hier is nog niks. Probeer nieuwe series toe te voegen.",
+        "no-data-filtered": "Geen resultaten met huidige filter.",
+        "title-alt": "Kavita - {{collectionName}} Collectie"
     },
     "all-collections": {
-        "title": "",
-        "item-count": "",
-        "no-data": "",
-        "create-one-part-1": "",
-        "create-one-part-2": ""
+        "title": "Collecties",
+        "item-count": "{{common.item-count}}",
+        "no-data": "Er zijn geen collecties.",
+        "create-one-part-1": "Probeer te creëren",
+        "create-one-part-2": "één"
     },
     "carousel-reel": {
-        "prev-items": "",
-        "next-items": ""
+        "prev-items": "Vorige items",
+        "next-items": "Volgende items"
     },
     "draggable-ordered-list": {
-        "instructions-alt": "",
-        "reorder-label": "",
-        "remove-item-alt": ""
+        "instructions-alt": "Wanneer u een nummer invoert in de invoer voor opnieuw bestellen, wordt het artikel op die locatie ingevoegd en wordt de volgorde van alle andere artikelen bijgewerkt.",
+        "reorder-label": "Herordenen",
+        "remove-item-alt": "Verwijder item"
     },
     "reading-lists": {
-        "title": "",
-        "item-count": "",
-        "no-data": "",
-        "create-one-part-1": "",
-        "create-one-part-2": ""
+        "title": "Lees lijsten",
+        "item-count": "{{common.item-count}}",
+        "no-data": "Er zijn geen leeslijsten.",
+        "create-one-part-1": "Probeer te creëren",
+        "create-one-part-2": "één"
     },
     "reading-list-item": {
-        "remove": "",
-        "read": ""
+        "remove": "{{common.remove}}",
+        "read": "{{common.read}}"
     },
     "reading-list-detail": {
-        "item-count": "",
-        "page-settings-title": "",
-        "remove-read": "",
+        "item-count": "{{common.item-count}}",
+        "page-settings-title": "Pagina Instellingen",
+        "remove-read": "Verwijder Lezen",
         "order-numbers-label": "",
         "continue": "",
         "read": "",
