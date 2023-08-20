@@ -1065,8 +1065,8 @@
         "backup-database-task-desc": "",
         "backup-database-task-success": "",
         "download-logs-task": "Descarregar Logs",
-        "download-logs-task-desc": "",
-        "analyze-files-task": "",
+        "download-logs-task-desc": "Junta todos os ficheiros de log num ficheiro zip e descarrega-o.",
+        "analyze-files-task": "Analisar Ficheiros",
         "analyze-files-task-desc": "",
         "analyze-files-task-success": "",
         "check-for-updates-task": "Verificar se há Updates",
@@ -1083,8 +1083,8 @@
         "edit-user-alt": "Editar Utilizador {{user}}",
         "resend-invite-tooltip": "Reenviar Convite",
         "resend-invite-alt": "Reenviar Convite {{user}}",
-        "setup-user-tooltip": "",
-        "setup-user-alt": "",
+        "setup-user-tooltip": "Configurar Utilizador",
+        "setup-user-alt": "Configurar Utilizador {{user}}",
         "change-password-tooltip": "Alterar Palavra Passe",
         "change-password-alt": "Alterar Palavra Passe {{user}}",
         "resend": "Reenviar",
@@ -1112,7 +1112,7 @@
         "promote-label": "Promover",
         "promote-tooltip": "",
         "summary-label": "Sumário",
-        "series-title": "",
+        "series-title": "Aplicável a Séries",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -1121,7 +1121,7 @@
         "recommended-tab": ""
     },
     "library-recommended": {
-        "no-data": "",
+        "no-data": "Nada a mostrar. Adicione metadados à sua biblioteca, leia ou classifique algo. Esta biblioteca também pode ter as recomendações desligadas.",
         "more-in-genre": "",
         "rediscover": "Redescobrir",
         "highly-rated": "",
@@ -1141,14 +1141,14 @@
         "statistics-tab": "Estatísticas",
         "system-tab": "Sistema",
         "kavita+-tab": "Kavita+",
-        "kavita+-desc-part-1": "",
-        "kavita+-desc-part-2": "",
-        "kavita+-desc-part-3": ""
+        "kavita+-desc-part-1": "O Kavita+ é um serviço de subscrição premium que desbloqueia funcionalidades para todos os utilizadores desta instância Kavita. Compre uma subscrição para desbloquear ",
+        "kavita+-desc-part-2": "os benefícios premium",
+        "kavita+-desc-part-3": "agora!"
     },
     "collection-detail": {
         "no-data": "Não existem itens. Tente adicionar uma série.",
         "no-data-filtered": "Não existem itens para o filtro atual.",
-        "title-alt": ""
+        "title-alt": "Kavita - Coleção {{collectionName}}"
     },
     "all-collections": {
         "title": "Coleções",
@@ -1162,9 +1162,9 @@
         "next-items": "Itens Seguintes"
     },
     "draggable-ordered-list": {
-        "instructions-alt": "",
+        "instructions-alt": "Quando coloca um número no campo para reordenar, o item será inserido nesse local e todos os outros itens terão a sua ordem atualizada.",
         "reorder-label": "Reordenar",
-        "remove-item-alt": ""
+        "remove-item-alt": "Remover item"
     },
     "reading-lists": {
         "title": "Listas de Leitura",
@@ -1180,19 +1180,19 @@
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
         "page-settings-title": "Definições de Página",
-        "remove-read": "",
+        "remove-read": "Remover Leitura",
         "order-numbers-label": "",
         "continue": "Continuar",
         "read": "{{common.read}}",
-        "read-options-alt": "",
-        "incognito-alt": "",
+        "read-options-alt": "Opções de leitura",
+        "incognito-alt": "(Incógnito)",
         "no-data": "",
         "characters-title": "{{series-metadata-detail.characters-title}}"
     },
     "events-widget": {
         "title-alt": "Atividade",
         "dismiss-all": "",
-        "update-available": "",
+        "update-available": "Atualização disponível",
         "downloading-item": "A descarregar {{item}}",
         "more-info": "Clique para ver mais informação",
         "close": "{{common.close}}",
@@ -1224,7 +1224,7 @@
         "loading": "{{common.loading}}"
     },
     "nav-header": {
-        "skip-alt": "",
+        "skip-alt": "Saltar para o conteúdo principal",
         "search-series-alt": "Procurar séries",
         "search-alt": "",
         "promoted": "",
@@ -1283,11 +1283,11 @@
         "final-import-step": "Passo Final"
     },
     "pdf-reader": {
-        "loading-message": "",
+        "loading-message": "A carregar....PDFs podem demorar mais que o esperado",
         "incognito-mode": "Modo Incógnito",
         "light-theme-alt": "",
         "dark-theme-alt": "",
-        "close-reader-alt": ""
+        "close-reader-alt": "Fechar Leitor"
     },
     "manga-reader": {
         "back": "Voltar",
@@ -1304,7 +1304,7 @@
         "left-to-right-alt": "Esquerda para Direita",
         "right-to-left-alt": "Direita para Esquerda",
         "reading-direction-tooltip": "Direção de Leitura: ",
-        "reading-mode-tooltip": "",
+        "reading-mode-tooltip": "Modo de Leitura",
         "collapse": "Colapsar",
         "fullscreen": "Ecrã Completo",
         "settings-tooltip": "Definições",
@@ -1398,7 +1398,7 @@
         "name-label": "Nome",
         "sort-name-label": "",
         "localized-name-label": "",
-        "summary-label": "",
+        "summary-label": "Sumário",
         "release-year-label": "",
         "web-link-description": "",
         "web-link-label": "",
@@ -1433,23 +1433,23 @@
     "day-breakdown": {
         "title": "",
         "x-axis-label": "Dia da Semana",
-        "y-axis-label": ""
+        "y-axis-label": "Eventos de Leitura"
     },
     "file-breakdown-stats": {
         "format-title": "",
         "format-tooltip": "",
-        "visualisation-label": "",
+        "visualisation-label": "Visualização",
         "data-table-label": "",
         "extension-header": "",
         "format-header": "",
         "total-size-header": "Tamanho Total",
-        "total-files-header": "",
+        "total-files-header": "Ficheiros Totais",
         "not-classified": "Não Classificado",
         "total-file-size-title": ""
     },
     "reading-activity": {
         "title": "",
-        "legend-label": "",
+        "legend-label": "Formatos",
         "x-axis-label": "",
         "y-axis-label": "",
         "no-data": "",
@@ -1463,16 +1463,16 @@
     },
     "manga-format-stats": {
         "title": "",
-        "visualisation-label": "",
+        "visualisation-label": "Visualização",
         "data-table-label": "",
         "format-header": "",
         "count-header": ""
     },
     "publication-status-stats": {
         "title": "",
-        "visualisation-label": "",
+        "visualisation-label": "Visualização",
         "data-table-label": "",
-        "year-header": "",
+        "year-header": "Ano",
         "count-header": ""
     },
     "server-stats": {
@@ -1494,7 +1494,7 @@
         "series": "",
         "reads": "",
         "release-years-title": "",
-        "most-active-users-title": "",
+        "most-active-users-title": "Utilizadores Mais Ativos",
         "popular-libraries-title": "Bibliotecas Populares",
         "popular-series-title": "Séries Populares",
         "recently-read-title": "Lido Recentemente",
@@ -1521,7 +1521,7 @@
     },
     "toasts": {
         "regen-cover": "",
-        "no-pages": "",
+        "no-pages": "Não existem páginas. O Kavita não conseguiu ler este arquivo.",
         "download-in-progress": "",
         "scan-queued": "",
         "server-settings-updated": "",
@@ -1702,6 +1702,12 @@
         "libraries": "Bibliotecas",
         "summary": "Sumário",
         "series-name": "Nome da Série",
-        "translators": "Tradutores"
+        "translators": "Tradutores",
+        "characters": "Personagens",
+        "languages": "Idiomas"
+    },
+    "metadata-builder": {
+        "remove-rule": "Remover Linha",
+        "add-rule": "Adicionar Regra"
     }
 }
