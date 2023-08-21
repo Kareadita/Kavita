@@ -1077,7 +1077,7 @@
         "exit": "Salir",
         "enter": "Entrar",
         "layout-mode-option-2col": "2 Columnas",
-        "general-settings-title": "Ajustes Generales",
+        "general-settings-title": "Ajustes generales",
         "off": "Apagado",
         "fullscreen-label": "Pantalla completa",
         "layout-mode-option-1col": "1 Columna",
@@ -1165,7 +1165,7 @@
         "words-count": "{{entity-info-cards.words-count}}",
         "release-date-title": "{{entity-info-cards.release-date-title}}",
         "age-rating-title": "{{entity-info-cards.age-rating-title}}",
-        "scrobbling-title": "",
+        "scrobbling-title": "Scrobbling",
         "scrobbling-tooltip": "Estado del scrobbling"
     },
     "bulk-add-to-collection": {
@@ -1248,20 +1248,21 @@
         "description-part-2": "wiki.",
         "details-header": "Detalles",
         "filter-label": "Filtrar",
-        "clear-alerts": "Desactivar las alertas",
+        "clear-alerts": "Limpiar alertas",
         "extension-header": "Extensión"
     },
     "manage-email-settings": {
         "send-to-warning": "Si quieres que Enviar a un dispositivo funcione debes alojar tu propio servicio de correo electrónico.",
         "email-url-label": "URL del servicio de correo",
-        "description": "Kavita viene listo para usar con un servicio de correo electrónico para impulsar las tareas como invitar a los usuarios, solicitud de restablecimiento de la contraseña, etc. Los correos electrónicos enviados a través de nuestro servicio se eliminan de inmediato. Puedes utilizar tu propio servicio de correo electrónico configurando el servicio {{link}}  . Configura la dirección URL del servicio de correo electrónico y usa el botón Probar para asegurarte de que funciona. Puedes restablecer esta configuración a los valores predeterminados en cualquier momento. No hay forma de deshabilitar los correos electrónicos para la autenticación, aunque no es necesario que uses una dirección de correo electrónico válida. Los enlaces de confirmación siempre se guardarán en los registros y se mostrarán en la interfaz de usuario. No se enviarán correos electrónicos de registro/confirmación si no está accediendo a Kavita a través de una dirección URL de acceso público o a menos que la función Nombre de host esté configurada.",
+        "description": "Kavita trae de serie un servicio de email para realizar tareas como invitar usuarios, solicitudes de restablecimiento de contraseña, etc. Los emails enviados por este medio son borrados inmediatamente. Puedes usar tu propio servicio de email configurando el servicio {{link}}. Añade la URL del servicio de email y comprueba que funciona mediante el botón Test. Puedes restaurar esta configuración a sus valores predeterminados en cualquier momento. No es posible deshabilitar los emails de autenticación, aunque no se requiere usar una dirección de email válida para los usuarios. Los enlaces de confirmación serán siempre guardados en los registros y mostrados en la interfaz gráfica. Los emails de registro/confirmación no serán enviados si no estás accediendo a Kavita por una URL públicamente accesible o a menos que la característica Host Name esté configurada.",
         "title": "Servicios de correo electrónico (SMTP)",
         "reset": "{{common.reset}}",
         "test": "Test",
         "email-url-tooltip": "Utiliza la dirección URL completa del servicio de correo electrónico. No incluyas la barra oblicua final.",
         "host-name-label": "Nombre del host",
         "host-name-tooltip": "Nombre de dominio (del proxy inverso). Si se indica, el generador de correos electrónicos usará siempre este.",
-        "host-name-validation": "El nombre del anfitrión debe empezar con http(s) y no acabar en /"
+        "host-name-validation": "El nombre del anfitrión debe empezar con http(s) y no acabar en /",
+        "save": "{{common.save}}"
     },
     "list-item": {
         "read": "{{common.read}}"
@@ -1310,7 +1311,23 @@
         "enable-opds": "Habilitar OPDS",
         "send-data": "Enviar datos",
         "base-url-tooltip": "Usa esto si quieres alojar Kavita en una url base ej. tudominio.com/kavita. No soportado si se usa Docker como usuario no-root.",
-        "logging-level-label": "Nivel de registro"
+        "logging-level-label": "Nivel de registro",
+        "logging-level-tooltip": "Use la depuración para ayudar a identificar problemas. La depuración puede consumir mucho espacio en disco.",
+        "folder-watching-label": "Monitorizar carpetas",
+        "folder-watching-tooltip": "Permite a Kavita monitorizar las carpetas de biblioteca para detectar cambios e iniciar escaneos de dichos cambios. Esto permite que el contenido se actualice sin tener que iniciar escaneos manualmente o esperar a los escaneos nocturnos.",
+        "enable-folder-watching": "Habilitar monitoreo de carpetas",
+        "max-logs-validation": "No puedes tener más de {{num}} registros",
+        "min-logs-validation": "Tienes que tener al menos un registro",
+        "min-days-validation": "Debe ser al menos un día",
+        "min-cache-validation": "Debe estar a 50 MB.",
+        "max-backup-validation": "No puedes tener más de {{num}} copias de seguridad",
+        "min-backup-validation": "Debes tener al menos 1 copia de seguridad",
+        "ip-address-validation": "Las direcciones IP pueden contener solamente direcciones IPv4 o IPV6 válidas",
+        "base-url-validation": "La URL base debe comenzar y terminar con /",
+        "allow-stats-label": "Permitir la recopilación de datos de uso anónimos",
+        "allow-stats-tooltip-part-1": "Enviar datos anónimos de uso a los servidores de Kavita. Esto incluye información sobre el uso de ciertas características, número de archivos, versión de S.O., versión de Kavita instalada, CPU y memoria. Usaremos esta información para priorizar características, reparaciones y optimización del rendimiento. Es necesario reiniciar para que funcione. Mira el ",
+        "allow-stats-tooltip-part-2": "para ver qué datos se recopilan.",
+        "opds-tooltip": "El soporte de OPDS permitirá a los usuarios usar OPDS para leer y descargar contenido desde el servidor."
     },
     "manage-media-settings": {
         "encode-as-description-part-1": "WebP/AVIF puede reducir drásticamente el espacio requerido para archivos. WebP/AVIF no está soportado por todos los navegadores o versiones. Para comprobar si estos ajustes son apropiados para tu configuración, visita ",
@@ -1325,7 +1342,8 @@
         "bookmark-dir-tooltip": "Lugar en el que se almacenarán los marcadores. Los marcadores son archivos de origen y pueden ser grandes. Elige un lugar con el almacenamiento adecuado. El directorio es gestionado; otros archivos que existan en el directorio serán eliminados. Si estás utilizando Docker, monta un volumen adicional y úsalo.",
         "change": "Cambiar",
         "media-issue-title": "Problemas multimedia",
-        "scrobble-issue-title": "Problemas con el scrobbling"
+        "scrobble-issue-title": "Problemas con el scrobbling",
+        "cover-image-size-tooltip": "Con qué tamaño deberían generarse las imágenes de portada. Nota: Cualquier tamaño mayor que el establecido por defecto provocará tiempo de carga mayores."
     },
     "all-collections": {
         "title": "Colecciones",
@@ -1381,13 +1399,42 @@
         "discord-title": "Discord:",
         "donations-title": "Donaciones:",
         "source-title": "Fuente:",
-        "version-title": "Versión"
+        "version-title": "Versión",
+        "feature-request-title": "Solicitudes de funciones",
+        "installId-title": "Instalar ID",
+        "home-page-title": "Página de inicio:",
+        "title": "Sobre el sistema"
     },
     "manage-tasks-settings": {
         "action-header": "Acción",
         "check-for-updates-task": "Buscar actualizaciones",
         "cron-header": "Cron",
-        "description-header": "Descripción"
+        "description-header": "Descripción",
+        "download-logs-task-desc": "Compila todos los archivos de registro en un zip y lo descarga.",
+        "title": "Tareas recurrentes",
+        "library-scan-label": "Escaneo de biblioteca",
+        "download-logs-task": "Descargar registros",
+        "library-database-backup-label": "Copia de seguridad de la base de datos de la biblioteca",
+        "bust-cache-task-desc": "Eliminar la caché de Kavita+ - solamente se debería usar cuando se depuren malas coincidencias.",
+        "convert-media-task-desc": "Inicia una tarea de ejecución lenta que convertirá todos los archivos gestionados por Kavita a la codificación objetivo. Esto es lento (especialmente en dispositivos ARM).",
+        "adhoc-tasks-title": "Tareas ad-hoc",
+        "library-database-backup-tooltip": "Cada cuánto tiempo Kavita hará una copia de seguridad de la base de datos.",
+        "job-title-header": "Puesto de trabajo",
+        "bust-cache-task": "Eliminar caché",
+        "bust-cache-task-success": "Caché de Kavita+ eliminada",
+        "clear-reading-cache-task": "Limpiar caché de lectura",
+        "backup-database-task-success": "Se ha puesto en cola una tarea para realizar una copia de seguridad de la base de datos",
+        "analyze-files-task": "Analizar archivos",
+        "last-executed-header": "Última ejecución",
+        "backup-database-task": "Copia de seguridad de la base de datos",
+        "backup-database-task-desc": "Realiza una copia de seguridad de la base de datos, marcadores, temas, portadas subidas manualmente y archivos de configuración.",
+        "analyze-files-task-success": "El análisis de archivos se ha puesto en cola",
+        "clear-reading-cache-task-success": "La caché se ha limpiado",
+        "clean-up-want-to-read-task": "Limpiar Quiero Leer",
+        "clear-reading-cache-task-desc": "Limpia los archivos de caché de lectura. Esto es útil cuando acabas de actualizar un archivo que habías estado leyendo en las últimas 24 horas.",
+        "clean-up-want-to-read-task-desc": "Elimina cualquier serie que los usuarios hayan leído por completo, que se encuentre en Quiero Leer y que tenga el estado de publicación Completado. Se inicia cada 24 horas.",
+        "library-scan-tooltip": "Cada cuánto tiempo Kavita escaneará y recargará los metadatos de los archivos de biblioteca.",
+        "clean-up-want-to-read-task-success": "Se ha limpiado Quiero Leer"
     },
     "manage-users": {
         "edit-user-tooltip": "Editar",
@@ -1420,7 +1467,7 @@
         "no-data": "No existen bibliotecas. Prueba a crear una.",
         "scan-library": "Escanear biblioteca",
         "delete-library": "Borrar biblioteca",
-        "delete-library-by-name": "Eliminar {{name}}",
+        "delete-library-by-name": "Borrar {{name}}",
         "edit-library": "Editar",
         "edit-library-by-name": "Eliminar {{name}}"
     },
