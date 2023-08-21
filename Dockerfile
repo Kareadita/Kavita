@@ -11,6 +11,7 @@ COPY _output/*.tar.gz /files/
 COPY UI/Web/dist /files/wwwroot
 COPY copy_runtime.sh /copy_runtime.sh
 RUN /copy_runtime.sh
+RUN chmod +x /Kavita/Kavita
 
 #Production image
 FROM ubuntu:focal
