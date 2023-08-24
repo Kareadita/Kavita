@@ -1262,7 +1262,8 @@
         "host-name-label": "Nombre del host",
         "host-name-tooltip": "Nombre de dominio (del proxy inverso). Si se indica, el generador de correos electrónicos usará siempre este.",
         "host-name-validation": "El nombre del anfitrión debe empezar con http(s) y no acabar en /",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "reset-to-default": "{{common.reset-to-default}}"
     },
     "list-item": {
         "read": "{{common.read}}"
@@ -1327,7 +1328,11 @@
         "allow-stats-label": "Permitir la recopilación de datos de uso anónimos",
         "allow-stats-tooltip-part-1": "Enviar datos anónimos de uso a los servidores de Kavita. Esto incluye información sobre el uso de ciertas características, número de archivos, versión de S.O., versión de Kavita instalada, CPU y memoria. Usaremos esta información para priorizar características, reparaciones y optimización del rendimiento. Es necesario reiniciar para que funcione. Mira el ",
         "allow-stats-tooltip-part-2": "para ver qué datos se recopilan.",
-        "opds-tooltip": "El soporte de OPDS permitirá a los usuarios usar OPDS para leer y descargar contenido desde el servidor."
+        "opds-tooltip": "El soporte de OPDS permitirá a los usuarios usar OPDS para leer y descargar contenido desde el servidor.",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "field-required": "{{validation.field-required}}"
     },
     "manage-media-settings": {
         "encode-as-description-part-1": "WebP/AVIF puede reducir drásticamente el espacio requerido para archivos. WebP/AVIF no está soportado por todos los navegadores o versiones. Para comprobar si estos ajustes son apropiados para tu configuración, visita ",
@@ -1343,7 +1348,10 @@
         "change": "Cambiar",
         "media-issue-title": "Problemas multimedia",
         "scrobble-issue-title": "Problemas con el scrobbling",
-        "cover-image-size-tooltip": "Con qué tamaño deberían generarse las imágenes de portada. Nota: Cualquier tamaño mayor que el establecido por defecto provocará tiempo de carga mayores."
+        "cover-image-size-tooltip": "Con qué tamaño deberían generarse las imágenes de portada. Nota: Cualquier tamaño mayor que el establecido por defecto provocará tiempo de carga mayores.",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "reset-to-default": "{{common.reset-to-default}}"
     },
     "all-collections": {
         "title": "Colecciones",
@@ -1363,7 +1371,10 @@
         "tasks-tab": "Tareas",
         "statistics-tab": "Estadísticas",
         "system-tab": "Sistema",
-        "kavita+-tab": "Kavita+"
+        "kavita+-tab": "Kavita+",
+        "title": "Panel de administrador",
+        "media-tab": "Multimedia",
+        "kavita+-desc-part-1": "Kavita+ es un servicio de suscripción premium que desbloquea características para todos los usuarios en esta instancia de Kavita. Compra una suscripción para desblquear. "
     },
     "file-breakdown-stats": {
         "visualisation-label": "Visualización",
@@ -1434,7 +1445,15 @@
         "clear-reading-cache-task-desc": "Limpia los archivos de caché de lectura. Esto es útil cuando acabas de actualizar un archivo que habías estado leyendo en las últimas 24 horas.",
         "clean-up-want-to-read-task-desc": "Elimina cualquier serie que los usuarios hayan leído por completo, que se encuentre en Quiero Leer y que tenga el estado de publicación Completado. Se inicia cada 24 horas.",
         "library-scan-tooltip": "Cada cuánto tiempo Kavita escaneará y recargará los metadatos de los archivos de biblioteca.",
-        "clean-up-want-to-read-task-success": "Se ha limpiado Quiero Leer"
+        "clean-up-want-to-read-task-success": "Se ha limpiado Quiero Leer",
+        "convert-media-task": "Convertir multimedia al codificado objetivo",
+        "convert-media-success": "Se ha puesto en cola la conversión de multimedia al codificado objetivo",
+        "check-for-updates-task-desc": "Comprobar si hay versiones estables posteriores a tu versión.",
+        "analyze-files-task-desc": "Inicia una tarea de larga duración que analizará los archivos para detectar extensión y tamaño. Esto solo debería usarse una sola vez en la versión 0.7. No es necesario para versiones posteriores a la 0.7.",
+        "reset-to-default": "{{common.reset-to-default}}",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "recurring-tasks-title": "{{title}}"
     },
     "manage-users": {
         "edit-user-tooltip": "Editar",
@@ -1446,7 +1465,21 @@
         "none": "Ninguno",
         "never": "Nunca",
         "sharing-title": "Compartiendo:",
-        "no-data": "No hay otros usuarios."
+        "no-data": "No hay otros usuarios.",
+        "title": "Usuarios activos",
+        "resend-invite-tooltip": "Reenviar invitación",
+        "resend-invite-alt": "Reenviar invitación a {{user}}",
+        "edit-user-alt": "Editar usuario {{user}}",
+        "delete-user-tooltip": "Borrar usuario",
+        "delete-user-alt": "Borrar usuario {{user}}",
+        "invite": "Invitación",
+        "you-alt": "(Tú)",
+        "loading": "{{common.loading}}",
+        "roles-title": "Roles:",
+        "setup-user-tooltip": "Configurar usuario",
+        "setup-user-alt": "Configurar usuario {{user}}",
+        "resend": "Reenviar",
+        "last-active-title": "Activo por última vez:"
     },
     "manga-format-stats": {
         "title": "Formato",
@@ -1469,12 +1502,25 @@
         "delete-library": "Borrar biblioteca",
         "delete-library-by-name": "Borrar {{name}}",
         "edit-library": "Editar",
-        "edit-library-by-name": "Eliminar {{name}}"
+        "edit-library-by-name": "Eliminar {{name}}",
+        "loading": "{{common.loading}}"
     },
     "edit-collection-tags": {
         "general-tab": "General",
         "name-label": "Nombre",
-        "summary-label": "Resumen"
+        "summary-label": "Resumen",
+        "title": "Editar colección {{collectionName}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "cover-image-tab": "Imagen de portada",
+        "promote-label": "Ascender",
+        "series-tab": "Serie",
+        "promote-tooltip": "El ascenso significa que todo el servidor puede ver la etiqueta, no solo los administradores. Todas las series que tengan esta etiqueta seguirán teniendo restricciones de acceso establecidas.",
+        "name-validation": "El nombre debe ser único",
+        "series-title": "Se aplica a las series",
+        "deselect-all": "{{common.deselect-all}}"
     },
     "library-detail": {
         "library-tab": "Biblioteca",
@@ -1487,5 +1533,14 @@
         "tags": "Etiquetas",
         "people": "Personas",
         "genres": "Géneros"
+    },
+    "library-recommended": {
+        "rediscover": "Descubrir de nuevo",
+        "quick-catchups": "Sigue dónde lo dejaste",
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "quick-reads": "Lecturas rápidas",
+        "no-data": "Nada que ver aquí. Añade metadatos a tu biblioteca, lee algo o valora algo. Esta biblioteca puede que tenga las recomendaciones desactivadas.",
+        "more-in-genre": "Más en {{genre}}",
+        "highly-rated": "Mejor valorados"
     }
 }
