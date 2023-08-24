@@ -1,11 +1,16 @@
-version: '3'
+version: '3.9'
 services:
     kavita:
         image: kizaing/kavita:latest
         container_name: kavita
         volumes:
-            - ./manga:/manga
-            - ./config:/kavita/config
+            - ./manga:/manga            # Manga is just an example you can have the name you want. See the following
+            - ./comics:/comics          # Use as many as you want
+            - ./books:/books            #
+            - ./data:/kavita/config     # Change './data if you want to have the config files in a different place.
+                                        # /kavita/config must not be changed
+        environment:
+            - TZ=Your/Timezone
         ports:
             - "5000:5000"
         restart: unless-stopped
