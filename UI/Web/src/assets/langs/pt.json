@@ -1032,7 +1032,7 @@
         "discord-title": "Discord:",
         "donations-title": "Donativos:",
         "source-title": "Código fonte:",
-        "feature-request-title": ""
+        "feature-request-title": "Pedidos de Funcionalidades"
     },
     "manage-tasks-settings": {
         "title": "Tarefas Recorrentes",
@@ -1041,7 +1041,7 @@
         "library-database-backup-label": "Cópia de segurança da BD da Biblioteca",
         "library-database-backup-tooltip": "Com que frequência o Kavita faz uma cópia de segurança da BD.",
         "adhoc-tasks-title": "Tarefas Ad-hoc",
-        "job-title-header": "",
+        "job-title-header": "Título da Tarefa",
         "description-header": "Descrição",
         "action-header": "Ação",
         "reset-to-default": "{{common.reset-to-default}}",
@@ -1050,7 +1050,7 @@
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Última Execução",
         "cron-header": "Cron",
-        "convert-media-task": "",
+        "convert-media-task": "Converter Media para Codificação de Destino",
         "convert-media-task-desc": "Corre uma tarefa de longa duração que irá converter para a codificação de destino todos os media geridos pelo kavita. Este processo é lento (em especial em dispositivos ARM).",
         "convert-media-success": "Conversão de Media para Codificação de Destino está agendada",
         "bust-cache-task": "Eliminar Cache",
