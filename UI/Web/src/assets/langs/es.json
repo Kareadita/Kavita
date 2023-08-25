@@ -95,7 +95,8 @@
         "sort-by-label": "Ordenar Por",
         "ascending-alt": "Ascendente",
         "descending-alt": "Descendente",
-        "cover-artist-label": "Artista de la Portada"
+        "cover-artist-label": "Artista de la Portada",
+        "limit-label": "Limitar a"
     },
     "manga-reader": {
         "incognito-title": "Modo incógnito:",
@@ -123,7 +124,13 @@
         "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
         "first-time-reading-manga": "Pulsa en la imagen en cualquier momento para abrir el menú. Puedes configurar diferentes ajustes o ir a la página pulsando la barra de progreso. Pulsar en los laterales de la imagen te lleva a la siguiente/anterior página.",
         "no-prev-chapter": "No hay Capítulo Anterior",
-        "fullscreen": "Pantalla completa"
+        "fullscreen": "Pantalla completa",
+        "incognito-alt": "El modo incógnito está encendido. Desliza para apagar.",
+        "shortcuts-menu-alt": "Modo de atajos de teclado",
+        "collapse": "Ocultar",
+        "swipe-enabled-label": "Deslizamiento activado",
+        "prev-chapter-tooltip": "Capítulo/Volumen anterior",
+        "prev-page-tooltip": "Página anterior"
     },
     "import-cbl-modal": {
         "import": "Importar",
@@ -1022,7 +1029,8 @@
         "logout": "Cerrar sesión",
         "settings": "Ajustes",
         "help": "Ayuda",
-        "announcements": "Anuncios"
+        "announcements": "Anuncios",
+        "promoted": "(ascendido)"
     },
     "add-to-list-modal": {
         "title": "Añadir a Lista de Lectura",
@@ -1031,12 +1039,15 @@
         "no-data": "Todavía no se han creado listas",
         "loading": "{{common.loading}}",
         "reading-list-label": "Lista de Lectura",
-        "create": "{{common.create}}"
+        "create": "{{common.create}}",
+        "promoted-alt": "Ascendido"
     },
     "reading-lists": {
         "create-one-part-1": "Prueba a crear",
         "create-one-part-2": "uno",
-        "title": "Listas de lectura"
+        "title": "Listas de lectura",
+        "item-count": "{{common.item-count}}",
+        "no-data": "No hay listas de lectura."
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
@@ -1051,7 +1062,8 @@
         "continue": "Continuar",
         "read": "{{common.read}}",
         "read-options-alt": "Opciones de lectura",
-        "incognito-alt": "(Incógnito)"
+        "incognito-alt": "(Incógnito)",
+        "characters-title": "{{series-metadata-detail.characters-title}}"
     },
     "events-widget": {
         "title-alt": "Actividad",
@@ -1355,7 +1367,10 @@
     },
     "all-collections": {
         "title": "Colecciones",
-        "create-one-part-2": "una"
+        "create-one-part-2": "una",
+        "item-count": "{{common.item-count}}",
+        "create-one-part-1": "Prueba a crear",
+        "no-data": "No hay colecciones."
     },
     "reading-activity": {
         "x-axis-label": "Tiempo",
@@ -1374,7 +1389,8 @@
         "kavita+-tab": "Kavita+",
         "title": "Panel de administrador",
         "media-tab": "Multimedia",
-        "kavita+-desc-part-1": "Kavita+ es un servicio de suscripción premium que desbloquea características para todos los usuarios en esta instancia de Kavita. Compra una suscripción para desblquear. "
+        "kavita+-desc-part-1": "Kavita+ es un servicio de suscripción premium que desbloquea características para todos los usuarios en esta instancia de Kavita. Compra una suscripción para desblquear. ",
+        "kavita+-desc-part-2": "Ventajas del premium"
     },
     "file-breakdown-stats": {
         "visualisation-label": "Visualización",
@@ -1520,7 +1536,8 @@
         "promote-tooltip": "El ascenso significa que todo el servidor puede ver la etiqueta, no solo los administradores. Todas las series que tengan esta etiqueta seguirán teniendo restricciones de acceso establecidas.",
         "name-validation": "El nombre debe ser único",
         "series-title": "Se aplica a las series",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "select-all": "{{common.select-all}}"
     },
     "library-detail": {
         "library-tab": "Biblioteca",
@@ -1542,5 +1559,24 @@
         "no-data": "Nada que ver aquí. Añade metadatos a tu biblioteca, lee algo o valora algo. Esta biblioteca puede que tenga las recomendaciones desactivadas.",
         "more-in-genre": "Más en {{genre}}",
         "highly-rated": "Mejor valorados"
+    },
+    "draggable-ordered-list": {
+        "reorder-label": "Ordenar de nuevo",
+        "remove-item-alt": "Eliminar elemento"
+    },
+    "collection-detail": {
+        "no-data": "No hay elementos. Prueba a añadir una serie.",
+        "no-data-filtered": "No hay elementos coincidentes con tu filtro actual.",
+        "title-alt": "Kavita - Colección {{collectionName}}"
+    },
+    "infinite-scroller": {
+        "continuous-reading-next-chapter-alt": "Desplázate hacia arriba para ir al capítulo siguiente",
+        "continuous-reading-prev-chapter-alt": "Desplázate hacia arriba para ir al capítulo anterior",
+        "continuous-reading-prev-chapter": "Capítulo anterior",
+        "continuous-reading-next-chapter": "Capítulo siguiente"
+    },
+    "carousel-reel": {
+        "prev-items": "Elementos anteriores",
+        "next-items": "Elementos siguientes"
     }
 }
