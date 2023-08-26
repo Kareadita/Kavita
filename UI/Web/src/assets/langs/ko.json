@@ -1220,7 +1220,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "미디어 문제",
-        "scrobble-issue-title": "스크로블 문제"
+        "scrobble-issue-title": "스크로블 문제",
+        "cover-image-size-label": "커버 이미지 크기",
+        "cover-image-size-tooltip": "표지 이미지가 생성되어야 하는 크기입니다. 참고: 기본값보다 크면 페이지 로드 시간이 길어집니다."
     },
     "theme-manager": {
         "updated-toastr": "사이트 기본값이 {{name}}(으)로 업데이트되었습니다",
@@ -1431,7 +1433,8 @@
         "regen-warning": "API 키를 재생성하면 기존 클라이언트가 무효화됩니다.",
         "no-key": "오류 - 키가 설정되지 않음",
         "confirm-reset": "이렇게 하면 설정한 모든 OPDS 구성이 무효화됩니다. 정말 계속 하시겠습니까?",
-        "key-reset": "API 키 재설정"
+        "key-reset": "API 키 재설정",
+        "show": "보기"
     },
     "typeahead": {
         "add-custom-item": ", 사용자 정의 목록을 추가하려면 입력하세요",
@@ -1742,5 +1745,11 @@
         "add-rule": "규칙 추가",
         "and": "다음 모두 일치",
         "remove-rule": "행 {{num}} 제거"
+    },
+    "cover-image-size": {
+        "default": "기본 (320x455)",
+        "medium": "중간 (640x909)",
+        "xlarge": "매우 크게 (1265x1795)",
+        "large": "크게 (900x1277)"
     }
 }

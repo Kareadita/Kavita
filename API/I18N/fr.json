@@ -155,6 +155,8 @@
     "reading-list-name-exists": "Une liste de lecture de ce nom existe déjà",
     "user-no-access-library-from-series": "L'utilisateur n'a pas accès à la bibliothèque à laquelle appartient cette série",
     "volume-num": "Volume {0}",
-    "issue-num": "Issue {0}{1}",
-    "chapter-num": "Chapitre {0}"
+    "issue-num": "Numéro {0}{1}",
+    "chapter-num": "Chapitre {0}",
+    "want-to-read": "À Lire",
+    "browse-want-to-read": "Parcourir À Lire"
 }

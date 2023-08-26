@@ -10,7 +10,7 @@
     "dashboard": {
         "no-libraries": "还没有设置资料库，请先配置一些",
         "server-settings-link": "服务器设置",
-        "not-granted": "您没有权限访问资料库。",
+        "not-granted": "您没有权限访问资料库",
         "on-deck-title": "最近阅读",
         "recently-updated-title": "最近更新的系列",
         "recently-added-title": "新增系列"
@@ -27,7 +27,7 @@
         "update": "更新"
     },
     "user-scrobble-history": {
-        "title": "刮削历史",
+        "title": "Scrobble历史",
         "description": "在这里您将找到与您的帐户关联的所有追踪记录事件。为了确保记录存在，您必须配置一个可用的追踪记录服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与追踪记录进行匹配。请联系您的管理员进行修正。",
         "filter-label": "筛选器",
         "created-header": "创建",
@@ -73,7 +73,7 @@
         "rating-percentage": "评分 {{r}}%"
     },
     "want-to-read": {
-        "title": "准备阅读",
+        "title": "想读",
         "series-count": "{{common.series-count}}",
         "no-items": "尚无项目，试着添加系列。",
         "no-items-filtered": "没有项目与当前筛选器匹配。"
@@ -132,7 +132,7 @@
         "writing-style-tooltip": "更改书籍排版方向。横向是从左到右，竖向是从上到下。",
         "layout-mode-book-label": "布局模式",
         "layout-mode-book-tooltip": "确定内容如何布局，翻屏就如同翻书。为了适应设备高度，1列或者2列每一列包含1列或者2列文本",
-        "color-theme-book-label": "颜色主题",
+        "color-theme-book-label": "主题颜色",
         "color-theme-book-tooltip": "要应用于图书阅读器的内容和菜单的颜色主题",
         "font-size-book-label": "字体大小",
         "line-height-book-label": "行间距",
@@ -141,7 +141,7 @@
         "margin-book-tooltip": "屏幕两侧的间距是多少,无论此设置如何移动设备上的间距都会被重定义为0。",
         "clients-opds-alert": "此服务器未启用OPDS功能,这不会影响Tachiyomi用户。",
         "clients-opds-description": "所有第三方客户端都会使用下面的API密钥或连接。它们就像密码一样，请保密。",
-        "clients-api-key-tooltip": "API密钥就像是一个密码,请保持它的机密性和安全性。",
+        "clients-api-key-tooltip": "API密钥等同于密码,请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
@@ -153,7 +153,7 @@
     "theme-manager": {
         "title": "主题管理器",
         "looking-for-theme": "您是在寻找一个明亮的或者墨水屏主题吗？我们有一些自定义主题供您使用。 ",
-        "looking-for-theme-continued": "Github主题。",
+        "looking-for-theme-continued": "Github主题",
         "scan": "扫描",
         "site-themes": "网站主题",
         "set-default": "设为默认值",
@@ -212,7 +212,7 @@
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "密码必须一致",
-        "permission-error": "您无权更改密码,请与服务器管理员联系。"
+        "permission-error": "您无权更改密码，请与服务器管理员联系。"
     },
     "change-email": {
         "email-label": "{{common.email}}",
@@ -221,9 +221,9 @@
         "email-updated-title": "电子邮件已更新",
         "email-updated-description": "您可以使用下面的链接确认您账户的电子邮件。如果您的服务器可以外部访问，一封电子邮件将发送到该电子邮件地址，并且您可以使用该链接来确认电子邮件。",
         "setup-user-account": "设置用户帐户",
-        "invite-url-label": "邀请 URL",
+        "invite-url-label": "邀请链接",
         "invite-url-tooltip": "将其复制并粘贴到一个新的标签页中",
-        "permission-error": "您没有权限更改电子邮件。请与服务器管理员联系。",
+        "permission-error": "您无权更改电子邮件，请与服务器管理员联系。",
         "required-field": "{{validation.required-field}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
@@ -242,7 +242,7 @@
         "copy": "复制",
         "regen-warning": "重新生成您的API密钥将使任何现有客户端失效。",
         "no-key": "错误-未设置密钥",
-        "confirm-reset": "这将使您设置的所有OPDS配置失效。您确定要继续吗？",
+        "confirm-reset": "所有OPDS配置将会失效，您确定继续吗？",
         "key-reset": "API密钥重置",
         "show": "显示"
     },
@@ -270,7 +270,7 @@
     "generic-list-modal": {
         "close": "{{common.close}}",
         "clear": "清除",
-        "filter": "过滤器",
+        "filter": "筛选",
         "open-filtered-search": "为{{item}}打开一个带有筛选器的搜索"
     },
     "user-stats-info-cards": {
@@ -438,13 +438,13 @@
         "early-childhood": "幼儿",
         "adults-only": "仅限成人 18+",
         "everyone": "所有人",
-        "everyone-10-plus": "适合10岁及以上的所有人",
+        "everyone-10-plus": "10岁及以上",
         "g": "G",
         "kids-to-adults": "适合儿童至成人",
         "mature": "成人",
         "ma15-plus": "MA15+",
         "mature-17-plus": "Mature 17+",
-        "rating-pending": "尚未确定评级",
+        "rating-pending": "分级待定",
         "teen": "青少年",
         "x18-plus": "X18+",
         "not-applicable": "不适用",
@@ -453,7 +453,7 @@
     },
     "reset-password": {
         "title": "重置密码",
-        "description": "请输入您的账户电子邮件地址。如果存在有效的电子邮件地址，Kavita将向您发送一封邮件；否则，请向管理员索取日志中的链接。",
+        "description": "请输入您账户的电子邮件地址。如果电子邮件地址有效，Kavita将发送一封邮件给您，否则，请向管理员索取日志中的链接。",
         "email-label": "{{common.email}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
@@ -477,15 +477,15 @@
     "changelog": {
         "installed": "已安装",
         "download": "下载",
-        "published-label": "出版: ",
+        "published-label": "出版： ",
         "available": "可用",
         "description": "如果您没有看到{{installed}}",
-        "description-continued": "标签，您正在使用的是夜间版本。只有主要版本才会显示为可用。"
+        "description-continued": "标签，您正在使用测试版。只有稳定版才会显示为可用。"
     },
     "invite-user": {
         "title": "邀请用户",
         "close": "{{common.close}}",
-        "description": "邀请一个用户加入您的服务器。请输入他们的电子邮件地址，我们将发送一封邮件给他们以创建账户。如果您不希望使用我们的电子邮件服务，您可以<a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">自己托管</a>电子邮件服务或使用一个虚假的电子邮件地址（忘记用户将无法工作）。无论如何，都会提供一个链接，可用于手动设置账户。",
+        "description": "邀请用户加入，请输入他们的电子邮件地址，我们将发送一封电子邮件帮助他们创建账户。如果您不希望使用我们的电子邮件服务，您可以搭建<a href=\"https://wiki.kavitareader.com/en/guides/misc/email\" rel=\"noopener noreferrer\" target=\"_blank\">自托管</a>电子邮件服务或使用一个虚假的电子邮件地址（忘记用户将无法工作）。无论如何，都会提供一个用于手动设置账户的链接。",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "用户已邀请",
