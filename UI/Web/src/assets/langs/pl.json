@@ -24,17 +24,17 @@
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
         "saving": "Zapisuję…",
-        "update": ""
+        "update": "Aktualizacja"
     },
     "user-scrobble-history": {
         "title": "",
         "description": "",
-        "filter-label": "",
-        "created-header": "",
+        "filter-label": "Filtr",
+        "created-header": "Utworzono",
         "last-modified-header": "",
-        "type-header": "",
-        "series-header": "",
-        "data-header": "",
+        "type-header": "Rodzaj",
+        "series-header": "Serie",
+        "data-header": "Data",
         "is-processed-header": "",
         "no-data": "",
         "volume-and-chapter-num": "",
