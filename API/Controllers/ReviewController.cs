@@ -72,35 +72,7 @@ public class ReviewController : BaseApiController
         else
         {
             var reviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
-            var totalReviews = reviews.Count;
-
-            if (totalReviews > 10)
-            {
-                //var stepSize = Math.Max(totalReviews / 10, 1); // Calculate step size, ensuring it's at least 1
-                var stepSize = Math.Max((totalReviews - 4) / 8, 1);
-
-                var selectedReviews = new List<UserReviewDto>()
-                {
-                    reviews[0],
-                    reviews[1],
-                };
-                for (var i = 2; i < totalReviews - 2; i += stepSize)
-                {
-                    selectedReviews.Add(reviews[i]);
-
-                    if (selectedReviews.Count >= 8)
-                        break;
-                }
-                selectedReviews.Add(reviews[totalReviews - 2]);
-                selectedReviews.Add(reviews[totalReviews - 1]);
-
-                externalReviews = selectedReviews;
-            }
-            else
-            {
-                externalReviews = reviews;
-            }
-
+            externalReviews = SelectSpectrumOfReviews(reviews);
 
 
             await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
@@ -113,6 +85,42 @@ public class ReviewController : BaseApiController
 
 
         return Ok(userRatings);
+    }
+
+    private static IList<UserReviewDto> SelectSpectrumOfReviews(List<UserReviewDto> reviews)
+    {
+        IList<UserReviewDto> externalReviews;
+        var totalReviews = reviews.Count;
+
+        if (totalReviews > 10)
+        {
+            //var stepSize = Math.Max(totalReviews / 10, 1); // Calculate step size, ensuring it's at least 1
+            var stepSize = Math.Max((totalReviews - 4) / 8, 1);
+
+            var selectedReviews = new List<UserReviewDto>()
+            {
+                reviews[0],
+                reviews[1],
+            };
+            for (var i = 2; i < totalReviews - 2; i += stepSize)
+            {
+                selectedReviews.Add(reviews[i]);
+
+                if (selectedReviews.Count >= 8)
+                    break;
+            }
+
+            selectedReviews.Add(reviews[totalReviews - 2]);
+            selectedReviews.Add(reviews[totalReviews - 1]);
+
+            externalReviews = selectedReviews;
+        }
+        else
+        {
+            externalReviews = reviews;
+        }
+
+        return externalReviews;
     }
 
     /// <summary>
