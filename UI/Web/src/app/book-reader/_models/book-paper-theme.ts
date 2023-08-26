@@ -94,7 +94,7 @@ export const BookPaperTheme = `
 .reader-container {
   color: black !important;
   background-color: var(--theme-bg-color) !important;
-  background: url("/assets/images/paper-bg.png");
+  background: url("assets/images/paper-bg.png");
 }
 
 .book-content *:not(input), .book-content *:not(select), .book-content *:not(code), .book-content *:not(:link), .book-content *:not(.ngx-toastr) {
