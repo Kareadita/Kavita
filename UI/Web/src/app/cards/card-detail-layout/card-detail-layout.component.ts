@@ -1,4 +1,4 @@
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -18,18 +18,18 @@ import {
   TrackByFunction,
   ViewChild
 } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Library } from 'src/app/_models/library';
-import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem } from 'src/app/_models/metadata/series-filter';
-import { ActionItem } from 'src/app/_services/action-factory.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Library} from 'src/app/_models/library';
+import {Pagination} from 'src/app/_models/pagination';
+import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
+import {ActionItem} from 'src/app/_services/action-factory.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
 
@@ -164,7 +164,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter?.sortOptions || this.filterSettings?.presetsV2?.sortOptions;
+    return this.filter.sortOptions?.sortField != SortField.SortName || !this.filter.sortOptions.isAscending
+      || this.filterSettings.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings.presetsV2?.sortOptions?.isAscending;
   }
 
   performAction(action: ActionItem<any>) {
