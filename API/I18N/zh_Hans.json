@@ -145,13 +145,16 @@
     "reading-list-name-exists": "此名称的阅读清单已存在",
     "volume-num": "第{0}卷",
     "issue-num": "问题编号{0}{1}",
-    "book-num": "第 {0}本",
-    "user-migration-needed": "该用户需要进行迁移。请让他们注销登录并重新登录，以触发迁移流程",
+    "book-num": "第{0}本",
+    "user-migration-needed": "该用户需要进行迁移。通知他们注销并重新登录，以触发迁移流程",
     "generic-relationship": "更新关系时发生了问题",
     "encode-as-warning": "无法转换为PNG格式。对于封面，请使用刷新封面功能。书签和网站图标无法再进行编码。",
     "url-required": "必须提供一个URL才能使用",
     "series-restricted-age-restriction": "由于年龄限制用户无权查看此系列",
     "user-no-access-library-from-series": "用户无法访问此系列所属的资料库",
     "generic-create-temp-archive": "创建临时档案时出现问题",
-    "query-required": "您必须传递一个查询参数"
+    "query-required": "您必须传递一个查询参数",
+    "scrobble-bad-payload": "Scrobble服务提供商的数据无效",
+    "bad-copy-files-for-download": "无法复制文件至临时下载目录",
+    "progress-must-exist": "用户进程必须存在"
 }
