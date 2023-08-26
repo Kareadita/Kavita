@@ -156,5 +156,7 @@
     "browse-libraries": "Sfoglia Librerie",
     "collections": "Tutte le Collezioni",
     "browse-collections": "Sfoglia per Collezioni",
-    "reading-list-restricted": "L'elenco di lettura non esiste o non hai accesso"
+    "reading-list-restricted": "L'elenco di lettura non esiste o non hai accesso",
+    "browse-want-to-read": "Sfoglia Vuoi leggere",
+    "want-to-read": "Vuoi leggere"
 }
