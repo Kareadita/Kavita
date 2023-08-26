@@ -57,18 +57,6 @@ public class PresenceTracker : IPresenceTracker
                 });
             }
         }
-
-        // Update the last active for the user
-        try
-        {
-            user.UpdateLastActive();
-            _unitOfWork.UserRepository.Update(user);
-            await _unitOfWork.CommitAsync();
-        }
-        catch (Exception)
-        {
-            // Swallow the exception
-        }
     }
 
     public Task UserDisconnected(int userId, string connectionId)
