@@ -299,6 +299,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   cursorIsPointer: boolean = false;
 
   /**
+   * Used to keep track of the last time a paginator area was clicked to prevent the default
+   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
+   * triggered by repeated click pagination (when enabled).
+   */
+  lastPaginatorClickTime: number = 0;
+
+  /**
    * Used to refresh the Personal PoC
    */
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
@@ -1648,10 +1655,22 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mousePosition.x = $event.clientX;
     this.mousePosition.y = $event.clientY;
 
-    if (this.clickToPaginate && this.isCursorOverPaginationArea($event)) {
-      // This is to prevent selecting text when clicking repeatedly to switch pages
+    if (!this.clickToPaginate || !this.isCursorOverPaginationArea($event)) {
+      return
+    }
+
+    // This value is completely arbitrary and should cover most
+    // double-click speeds
+    const halfASecond = 500;
+    const now = Date.now();
+
+    // This is to prevent selecting text when clicking repeatedly to switch pages,
+    // while also allowing selections to begin in a pagination area
+    if (now - this.lastPaginatorClickTime < halfASecond) {
       $event.preventDefault();
     }
+
+    this.lastPaginatorClickTime = now;
   }
 
   refreshPersonalToC() {
