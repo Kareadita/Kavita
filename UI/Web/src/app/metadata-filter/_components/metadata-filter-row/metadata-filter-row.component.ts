@@ -13,7 +13,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {
   BehaviorSubject,
-  distinctUntilChanged,
+  distinctUntilChanged, filter,
   map,
   Observable,
   of,
@@ -88,7 +88,7 @@ const DropdownComparisons = [FilterComparison.Equal,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataFilterRowComponent implements OnInit, OnChanges {
+export class MetadataFilterRowComponent implements OnInit {
 
   @Input() index: number = 0; // This is only for debugging
   /**
@@ -110,9 +110,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
   dropdownOptions$ = of<Select2Option[]>([]);
 
   loaded: boolean = false;
-
-
-  get PredicateType() { return PredicateType };
+  protected readonly PredicateType = PredicateType;
 
   get MultipleDropdownAllowed() {
     const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
@@ -124,19 +122,24 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     console.log('[ngOnInit] creating stmt (' + this.index + '): ', this.preset)
-    console.log('[ngOnInit] preset', this.preset)
-    console.log('[ngOnInit] availableFields', this.availableFields)
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
-    //this.populateFromPreset(); TODO: This is needed to populate from preset, but is also causing lots of issues
+    this.populateFromPreset();
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
+      distinctUntilChanged(),
+      filter(val => {
+        const inputVal = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
+        return DropdownFields.includes(inputVal);
+      }),
       switchMap((_) => this.getDropdownObservable()),
       tap((opts) => {
         console.log('dropdownOptions$ triggered')
+
+
         if (!this.formGroup.get('filterValue')?.value) {
           console.log('filter value is empty, populating dropdown from preset')
           this. populateFromPreset();
@@ -170,9 +173,6 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
     this.cdRef.markForCheck();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    //console.log('changes occurred: ', changes);
-  }
 
 
   populateFromPreset() {

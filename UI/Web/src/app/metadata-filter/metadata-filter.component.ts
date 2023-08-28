@@ -156,7 +156,7 @@ export class MetadataFilterComponent implements OnInit {
         };
       }
       this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
-      this.filterV2!.limitTo = parseInt(this.sortGroup.get('limitTo')?.value, 10);
+      this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
       this.cdRef.markForCheck();
     });
 
