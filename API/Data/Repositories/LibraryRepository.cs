@@ -53,6 +53,7 @@ public interface ILibraryRepository
     Task<IList<string>> GetAllCoverImagesAsync();
     Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
     Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
+    Task<bool> GetAllowsScrobblingBySeriesId(int seriesId);
 }
 
 public class LibraryRepository : ILibraryRepository
@@ -373,5 +374,12 @@ public class LibraryRepository : ILibraryRepository
         return await _context.Library
             .Where(c => !string.IsNullOrEmpty(c.CoverImage) && !c.CoverImage.EndsWith(extension))
             .ToListAsync();
+    }
+
+    public async Task<bool> GetAllowsScrobblingBySeriesId(int seriesId)
+    {
+        return await _context.Series.Where(s => s.Id == seriesId)
+            .Select(s => s.Library.AllowScrobbling)
+            .SingleOrDefaultAsync();
     }
 }

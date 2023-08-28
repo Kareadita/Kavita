@@ -14,7 +14,7 @@ import {Clipboard} from '@angular/cdk/clipboard';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf } from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-api-key',
@@ -30,11 +30,14 @@ export class ApiKeyComponent implements OnInit {
   @Input() showRefresh: boolean = true;
   @Input() transform: (val: string) => string = (val: string) => val;
   @Input() tooltipText: string = '';
+  @Input() hideData = true;
   @ViewChild('apiKey') inputElem!: ElementRef;
   key: string = '';
   private readonly destroyRef = inject(DestroyRef);
-  private readonly translocoService = inject(TranslocoService);
 
+  get InputType() {
+    return this.hideData ? 'password' : 'text';
+  }
 
   constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard,
               private readonly cdRef: ChangeDetectorRef) { }
@@ -45,7 +48,7 @@ export class ApiKeyComponent implements OnInit {
       if (user) {
         key = user.apiKey;
       } else {
-        key = this.translocoService.translate('api-key.no-key');
+        key = translate('api-key.no-key');
       }
 
       if (this.transform != undefined) {
@@ -63,13 +66,13 @@ export class ApiKeyComponent implements OnInit {
   }
 
   async refresh() {
-    if (!await this.confirmService.confirm(this.translocoService.translate('api-key.confirm-reset'))) {
+    if (!await this.confirmService.confirm(translate('api-key.confirm-reset'))) {
       return;
     }
     this.accountService.resetApiKey().subscribe(newKey => {
       this.key = newKey;
       this.cdRef.markForCheck();
-      this.toastr.success(this.translocoService.translate('api-key.key-reset'));
+      this.toastr.success(translate('api-key.key-reset'));
     });
   }
 
@@ -78,6 +81,11 @@ export class ApiKeyComponent implements OnInit {
       this.inputElem.nativeElement.setSelectionRange(0, this.key.length);
       this.cdRef.markForCheck();
     }
+  }
+
+  show() {
+    this.inputElem.nativeElement.setAttribute('type', 'text');
+    this.cdRef.markForCheck();
   }
 
 }

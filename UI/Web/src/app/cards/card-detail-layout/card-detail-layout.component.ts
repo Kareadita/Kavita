@@ -1,11 +1,10 @@
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   ContentChild,
-  DestroyRef,
   ElementRef,
   EventEmitter,
   HostListener,
@@ -13,25 +12,24 @@ import {
   Inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output,
   TemplateRef,
   TrackByFunction,
   ViewChild
 } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Library } from 'src/app/_models/library';
-import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem } from 'src/app/_models/metadata/series-filter';
-import { ActionItem } from 'src/app/_services/action-factory.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Library} from 'src/app/_models/library';
+import {Pagination} from 'src/app/_models/pagination';
+import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
+import {ActionItem} from 'src/app/_services/action-factory.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
 
@@ -70,12 +68,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
-  @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
+  /**
+   * A trackBy to help with rendering. This is required as without it there are issues when scrolling
+   */
+  @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
   @Input() filterSettings!: FilterSettings;
   @Input() refresh!: EventEmitter<void>;
 
 
-  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels tall, original keys
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
@@ -115,7 +116,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
+      this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
     if (this.filterSettings === undefined) {
@@ -163,7 +164,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter?.sortOptions || this.filterSettings?.presetsV2?.sortOptions;
+    return this.filter.sortOptions?.sortField != SortField.SortName || !this.filter.sortOptions.isAscending
+      || this.filterSettings.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings.presetsV2?.sortOptions?.isAscending;
   }
 
   performAction(action: ActionItem<any>) {

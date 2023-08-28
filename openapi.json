@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.7.2"
+    "version": "0.7.7.14"
   },
   "servers": [
     {
@@ -3412,6 +3412,37 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Opds/{apiKey}/want-to-read": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
             }
           }
         ],
@@ -9823,6 +9854,17 @@
       "get": {
         "tags": [
           "Stats"
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -16626,6 +16668,17 @@
           "onDeckUpdateDays": {
             "type": "integer",
             "description": "How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically",
+            "format": "int32"
+          },
+          "coverImageSize": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "How large the cover images should be",
             "format": "int32"
           }
         },

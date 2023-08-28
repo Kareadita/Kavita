@@ -19,10 +19,12 @@ import {LibraryService} from 'src/app/_services/library.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
 import {allFields, FilterField} from 'src/app/_models/metadata/v2/filter-field';
-import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase} from "@angular/common";
+import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from "@angular/common";
 import {FilterFieldPipe} from "../../_pipes/filter-field.pipe";
 import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {Select2Module, Select2Option} from "ng-select2-component";
+import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 
 enum PredicateType {
   Text = 1,
@@ -70,12 +72,18 @@ const DropdownComparisons = [FilterComparison.Equal,
     NgSwitch,
     NgSwitchCase,
     NgForOf,
-    NgIf
+    NgIf,
+    Select2Module,
+    NgTemplateOutlet,
+    TagBadgeComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetadataFilterRowComponent implements OnInit {
 
+  /**
+   * Slightly misleading as this is the initial state and will be updated on the filterStatement event emitter
+   */
   @Input() preset!: FilterStatement;
   @Input() availableFields: Array<FilterField> = allFields;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
@@ -89,13 +97,17 @@ export class MetadataFilterRowComponent implements OnInit {
   });
   validComparisons$: BehaviorSubject<FilterComparison[]> = new BehaviorSubject([FilterComparison.Equal] as FilterComparison[]);
   predicateType$: BehaviorSubject<PredicateType> = new BehaviorSubject(PredicateType.Text as PredicateType);
-  dropdownOptions$ = of<{value: number, title: string}[]>([]);
-
+  dropdownOptions$ = of<Select2Option[]>([]);
 
   loaded: boolean = false;
 
 
   get PredicateType() { return PredicateType };
+
+  get MultipleDropdownAllowed() {
+    const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
+    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains;
+  }
 
   constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService,
     private readonly collectionTagService: CollectionTagService) {}
@@ -106,25 +118,26 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.get('input')?.valueChanges.subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
 
-    this.buildDisabledList();
-
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
       switchMap((_) => this.getDropdownObservable()),
       tap((opts) => {
-        const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-        const filterComparison = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-        if (this.preset.field === filterField && this.preset.comparison === filterComparison) {
-          //console.log('using preset value for dropdown option')
+        if (!this.formGroup.get('filterValue')?.value) {
+          this. populateFromPreset();
           return;
         }
 
-        this.formGroup.get('filterValue')?.setValue(opts[0].value);
+        if (this.MultipleDropdownAllowed) {
+          this.formGroup.get('filterValue')?.setValue((opts[0].value + '').split(','));
+        } else {
+          this.formGroup.get('filterValue')?.setValue(opts[0].value);
+        }
       }),
       takeUntilDestroyed(this.destroyRef)
     );
+
 
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
       this.filterStatement.emit({
@@ -138,13 +151,20 @@ export class MetadataFilterRowComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  buildDisabledList() {
-
-  }
 
   populateFromPreset() {
     if (StringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(this.preset.value);
+    } else if (DropdownFields.includes(this.preset.field)) {
+      if (this.MultipleDropdownAllowed) {
+        this.formGroup.get('filterValue')?.setValue(this.preset.value.split(','));
+      } else {
+        if (this.preset.field === FilterField.Languages) {
+          this.formGroup.get('filterValue')?.setValue(this.preset.value);
+        } else {
+          this.formGroup.get('filterValue')?.setValue(parseInt(this.preset.value, 10));
+        }
+      }
     } else {
       this.formGroup.get('filterValue')?.patchValue(parseInt(this.preset.value, 10));
     }
@@ -154,40 +174,40 @@ export class MetadataFilterRowComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  getDropdownObservable(): Observable<{value: any, title: string}[]> {
+  getDropdownObservable(): Observable<Select2Option[]> {
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
       switch (filterField) {
         case FilterField.PublicationStatus:
           return this.metadataService.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
-            return {value: pub.value, title: pub.title}
+            return {value: pub.value, label: pub.title}
           })));
         case FilterField.AgeRating:
           return this.metadataService.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
-            return {value: rating.value, title: rating.title}
+            return {value: rating.value, label: rating.title}
           })));
         case FilterField.Genres:
           return this.metadataService.getAllGenres().pipe(map(genres => genres.map(genre => {
-            return {value: genre.id, title: genre.title}
+            return {value: genre.id, label: genre.title}
           })));
         case FilterField.Languages:
           return this.metadataService.getAllLanguages().pipe(map(statuses => statuses.map(status => {
-            return {value: status.isoCode, title: status.title + `(${status.isoCode})`}
+            return {value: status.isoCode, label: status.title + ` (${status.isoCode})`}
           })));
         case FilterField.Formats:
           return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
-            return {value: status.value, title: status.title}
+            return {value: status.value, label: status.title}
           })));
         case FilterField.Libraries:
           return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
-            return {value: lib.id, title: lib.name}
+            return {value: lib.id, label: lib.name}
           })));
         case FilterField.Tags:
           return this.metadataService.getAllTags().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, title: status.title}
+            return {value: status.id, label: status.title}
           })));
         case FilterField.CollectionTags:
           return this.collectionTagService.allTags().pipe(map(statuses => statuses.map(status => {
-            return {value: status.id, title: status.title}
+            return {value: status.id, label: status.title}
           })));
         case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
         case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
@@ -205,7 +225,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   getPersonOptions(role: PersonRole) {
     return this.metadataService.getAllPeople().pipe(map(people => people.filter(p2 => p2.role === role).map(person => {
-      return {value: person.id, title: person.name}
+      return {value: person.id, label: person.name}
     })))
   }
 
@@ -218,7 +238,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
       this.predicateType$.next(PredicateType.Text);
       if (this.loaded) this.formGroup.get('filterValue')?.setValue('');
-
       return;
     }
 

@@ -104,7 +104,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     private readonly cdRef: ChangeDetectorRef, private scrollService: ScrollService, private hubService: MessageHubService,
     private jumpbarService: JumpbarService) {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
-      this.titleService.setTitle(translate('want-to-read.title'));
+      this.titleService.setTitle('Kavita - ' + translate('want-to-read.title'));
 
       this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
 

@@ -38,6 +38,7 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {MetadataDetailComponent} from "../../../series-detail/_components/metadata-detail/metadata-detail.component";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-reading-list-detail',
@@ -61,7 +62,6 @@ export class ReadingListDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
 
   readingListSummary: string = '';
-  readingListImage: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
   characters$!: Observable<Person[]>;
@@ -76,7 +76,9 @@ export class ReadingListDetailComponent implements OnInit {
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService) {}
+    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService, private titleService: Title) {
+    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
+  }
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -87,7 +89,6 @@ export class ReadingListDetailComponent implements OnInit {
     }
     this.listId = parseInt(listId, 10);
     this.characters$ = this.readingListService.getCharacters(this.listId);
-    this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     forkJoin([
       this.libraryService.getLibraries(),
@@ -159,7 +160,6 @@ export class ReadingListDetailComponent implements OnInit {
           this.readingListService.getReadingList(this.listId).subscribe(rl => {
             this.readingList = rl;
             this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
-            this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
             this.cdRef.markForCheck();
           })
         });

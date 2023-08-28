@@ -1,19 +1,19 @@
 {
     "login": {
-        "title": "Giriş",
-        "username": "{{common.username}}",
-        "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
-        "forgot-password": "Şifremi Unuttum?",
-        "submit": "{{common.submit}}"
+        "title": "Přihlásit se",
+        "username": "",
+        "password": "",
+        "password-validation": "",
+        "forgot-password": "Zapomenuté heslo?",
+        "submit": ""
     },
     "dashboard": {
-        "no-libraries": "Kurulmuş kütüphane yok. Lütfen kütüphane ayarlayın",
-        "server-settings-link": "Sunucu ayarları",
-        "not-granted": "Herhangi bir kütüphaneye erişim izniniz yok.",
-        "on-deck-title": "",
-        "recently-updated-title": "Yakın zamanda güncellenmiş Seriler",
-        "recently-added-title": "Yeni eklenmiş Seriler"
+        "no-libraries": "Zatím nejsou nastaveny žádné knihovny. Nakonfigurujte některé v",
+        "server-settings-link": "Nastavení serveru",
+        "not-granted": "Nebyl vám udělen přístup k žádným knihovnám.",
+        "on-deck-title": "Na palubě",
+        "recently-updated-title": "Nedávno aktualizovaná řada",
+        "recently-added-title": "Nově přidaná série"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -23,126 +23,126 @@
         "email": "{{common.email}}",
         "not-valid-email": "{{validation.valid-email}}",
         "cancel": "{{common.cancel}}",
-        "saving": "Kaydediliyor…",
-        "update": "Güncelle"
+        "saving": "Ukládání…",
+        "update": "Aktualizace"
     },
     "user-scrobble-history": {
-        "title": "Arşiv geçmişi",
-        "description": "",
-        "filter-label": "Filtre",
-        "created-header": "Oluşturulmuş",
-        "last-modified-header": "En son değiştirilmiş",
-        "type-header": "Tür",
-        "series-header": "Seriler",
-        "data-header": "Veri",
-        "is-processed-header": "",
-        "no-data": "Bilgi yok",
-        "volume-and-chapter-num": "",
-        "rating": "",
-        "not-applicable": "Uygulanamaz",
-        "processed": "İşlendi",
-        "not-processed": "İşlenmemiş"
+        "title": "Scrobble historie",
+        "description": "Zde najdete všechny scrobble události spojené s vaším účtem. Aby události existovaly, musíte mít nakonfigurovaného aktivního poskytovatele scrobble. Všechny události, které byly zpracovány, budou po měsíci vymazány. Pokud existují nezpracované události, je pravděpodobné, že nemohou tvořit shody proti proudu. Obraťte se prosím na svého administrátora a nechte je opravit.",
+        "filter-label": "Filtr",
+        "created-header": "Vytvořeno",
+        "last-modified-header": "Naposledy změněno",
+        "type-header": "Typ",
+        "series-header": "Série",
+        "data-header": "Data",
+        "is-processed-header": "Je zpracováno",
+        "no-data": "Žádná data",
+        "volume-and-chapter-num": "Svazek {{v}} Kapitola {{n}}",
+        "rating": "Hodnocení {{r}}",
+        "not-applicable": "Nelze použít",
+        "processed": "Zpracováno",
+        "not-processed": "Nezpracováno"
     },
     "scrobble-event-type-pipe": {
-        "chapter-read": "Okuma İlerlemesi",
-        "score-updated": "Değerlendirme Güncellemesi",
-        "want-to-read-add": "Okuyacaklarım: Ekle",
-        "want-to-read-remove": "Okuyacaklarım: Kaldır",
-        "review": "İnceleme güncellemesi"
+        "chapter-read": "Pokrok ve čtení",
+        "score-updated": "Aktualizace hodnocení",
+        "want-to-read-add": "Chcete si přečíst: Přidat",
+        "want-to-read-remove": "Chcete si přečíst: Odebrat",
+        "review": ""
     },
     "spoiler": {
-        "click-to-show": "Spoiler, açmak için tıklayın"
+        "click-to-show": ""
     },
     "review-series-modal": {
-        "title": "İncelemeyi düzenle",
+        "title": "",
         "tagline-label": "",
-        "review-label": "İnceleme",
+        "review-label": "",
         "close": "",
         "save": ""
     },
     "review-card-modal": {
         "close": "",
-        "user-review": "{{username}} İncelemesi",
-        "external-mod": "(harici)",
-        "go-to-review": "İncelemeye git"
+        "user-review": "",
+        "external-mod": "",
+        "go-to-review": ""
     },
     "review-card": {
-        "your-review": "Sizin incelemeniz",
-        "external-review": "Diğer İncelemeler",
-        "local-review": "İnceleme",
+        "your-review": "",
+        "external-review": "",
+        "local-review": "",
         "rating-percentage": ""
     },
     "want-to-read": {
-        "title": "Okuyacaklarım",
+        "title": "",
         "series-count": "",
-        "no-items": "Şuan herhangi bir şey yok. Bir seri ekleyin.",
-        "no-items-filtered": "Hiçbir şey sizin filtrelerinize uymuyor."
+        "no-items": "",
+        "no-items-filtered": ""
     },
     "user-preferences": {
-        "title": "Kullanıcı Paneli",
-        "pref-description": "Bunlar, hesabınıza bağlı olan genel ayarlardır.",
-        "account-tab": "Hesap",
-        "preferences-tab": "Tercihler",
-        "3rd-party-clients-tab": "3. Parti Uygulamalar",
-        "theme-tab": "Tema",
-        "devices-tab": "Cihazlar",
-        "stats-tab": "İstatistikler",
+        "title": "",
+        "pref-description": "",
+        "account-tab": "",
+        "preferences-tab": "",
+        "3rd-party-clients-tab": "",
+        "theme-tab": "",
+        "devices-tab": "",
+        "stats-tab": "",
         "scrobbling-tab": "",
-        "success-toast": "Kullanıcı tercihleri güncellendi",
-        "global-settings-title": "Genel ayarlar",
-        "page-layout-mode-label": "Sayfa düzeni Modu",
-        "page-layout-mode-tooltip": "Seri Detayı sayfasında öğeleri kart veya liste görünümü olarak gösterin.",
-        "locale-label": "Lokalizasyon",
-        "locale-tooltip": "Kavita'nın kullanması gereken dil",
-        "blur-unread-summaries-label": "Okunmamış özetleri bulanıklaştır",
-        "blur-unread-summaries-tooltip": "Okuma ilerlemesi olmayan ciltler veya bölümlerdeki özet metni bulanıklaştırır (spoiler oluşmasını önlemek için)",
-        "prompt-on-download-label": "İndirirken Sor",
-        "prompt-on-download-tooltip": "{{size}}MB aştığında İndirirken Sor",
-        "disable-animations-label": "Animasyonları devre dışı bırak",
-        "disable-animations-tooltip": "Sitedeki animasyonları kapat. E-kitap okuyucular için ideal.",
+        "success-toast": "",
+        "global-settings-title": "",
+        "page-layout-mode-label": "",
+        "page-layout-mode-tooltip": "",
+        "locale-label": "",
+        "locale-tooltip": "",
+        "blur-unread-summaries-label": "",
+        "blur-unread-summaries-tooltip": "",
+        "prompt-on-download-label": "",
+        "prompt-on-download-tooltip": "",
+        "disable-animations-label": "",
+        "disable-animations-tooltip": "",
         "collapse-series-relationships-label": "",
         "collapse-series-relationships-tooltip": "",
-        "share-series-reviews-label": "Seri incelemelerini paylaş",
-        "share-series-reviews-tooltip": "Kavita, Seriler hakkındaki yorumlarınızı diğer kullanıcılar için eklemeli mi?",
-        "image-reader-settings-title": "Resim okuyucu",
-        "reading-direction-label": "Okuma yönü",
+        "share-series-reviews-label": "",
+        "share-series-reviews-tooltip": "",
+        "image-reader-settings-title": "",
+        "reading-direction-label": "",
         "reading-direction-tooltip": "",
-        "scaling-option-label": "Ölçekleme Ayarları",
+        "scaling-option-label": "",
         "scaling-option-tooltip": "",
-        "page-splitting-label": "Sayfa bölmesi",
+        "page-splitting-label": "",
         "page-splitting-tooltip": "",
-        "reading-mode-label": "Okuma Modu",
-        "layout-mode-label": "Düzen modu",
+        "reading-mode-label": "",
+        "layout-mode-label": "",
         "layout-mode-tooltip": "",
-        "background-color-label": "Arka plan rengi",
-        "auto-close-menu-label": "Otomatik Kapatma Menüsü",
-        "show-screen-hints-label": "Ekran ipuçlarını göster",
-        "emulate-comic-book-label": "Çizgi romanı emüle et",
+        "background-color-label": "",
+        "auto-close-menu-label": "",
+        "show-screen-hints-label": "",
+        "emulate-comic-book-label": "",
         "swipe-to-paginate-label": "",
-        "book-reader-settings-title": "Kitap okuyucu",
+        "book-reader-settings-title": "",
         "tap-to-paginate-label": "",
         "tap-to-paginate-tooltip": "",
         "immersive-mode-label": "",
         "immersive-mode-tooltip": "",
-        "reading-direction-book-label": "Okuma yönü",
+        "reading-direction-book-label": "",
         "reading-direction-book-tooltip": "",
-        "font-family-label": "Font ailesi",
+        "font-family-label": "",
         "font-family-tooltip": "",
-        "writing-style-label": "Yazı stili",
+        "writing-style-label": "",
         "writing-style-tooltip": "",
         "layout-mode-book-label": "",
         "layout-mode-book-tooltip": "",
-        "color-theme-book-label": "Renk teması",
+        "color-theme-book-label": "",
         "color-theme-book-tooltip": "",
-        "font-size-book-label": "Font Boyutu",
-        "line-height-book-label": "Satır Aralığı",
-        "line-height-book-tooltip": "Kitapta satır aralıları ne kadar olmalıdır",
-        "margin-book-label": "Birleştir",
+        "font-size-book-label": "",
+        "line-height-book-label": "",
+        "line-height-book-tooltip": "",
+        "margin-book-label": "",
         "margin-book-tooltip": "",
-        "clients-opds-alert": "OPDS bu sunucuda aktif değil. Bu Tachiyomi kullanıcıları etkilemeyecek.",
-        "clients-opds-description": "Tüm 3. Parti istemciler API key ya da alttaki bağlantı linkini kullanmak zorundadır. Bunlar şifre gibidir, başkalarıyla paylaşmayın.",
-        "clients-api-key-tooltip": "API key şifre gibidir. Gizli tutun, başkalarıyla paylaşmayın.",
-        "clients-opds-url-tooltip": "OPDS linki",
+        "clients-opds-alert": "",
+        "clients-opds-description": "",
+        "clients-api-key-tooltip": "",
+        "clients-opds-url-tooltip": "",
         "reset": "",
         "save": ""
     },
@@ -151,41 +151,41 @@
         "description": ""
     },
     "theme-manager": {
-        "title": "Tema Yöneticisi",
-        "looking-for-theme": "Hafif ya da e-kitap okuyucu temasına mı bakıyorsunuz? Size önerebileceğimiz özel temalarımız var. ",
-        "looking-for-theme-continued": "Github teması.",
-        "scan": "Tara",
-        "site-themes": "Site Teması",
-        "set-default": "Varsayılan olarak ayarla",
+        "title": "",
+        "looking-for-theme": "",
+        "looking-for-theme-continued": "",
+        "scan": "",
+        "site-themes": "",
+        "set-default": "",
         "apply": "",
-        "applied": "Uygulanmış",
-        "updated-toastr": "Site varsayılanı {{name}} olarak güncellendi",
+        "applied": "",
+        "updated-toastr": "",
         "scan-queued": ""
     },
     "theme": {
-        "theme-dark": "Karanlık",
-        "theme-black": "Siyah",
-        "theme-paper": "Kağıt",
-        "theme-white": "Beyaz"
+        "theme-dark": "",
+        "theme-black": "",
+        "theme-paper": "",
+        "theme-white": ""
     },
     "restriction-selector": {
-        "title": "Yaş sınırlaması kısıtlaması",
+        "title": "",
         "description": "",
-        "not-applicable-for-admins": "Bu yöneticiler için uygullanamaz.",
-        "age-rating-label": "Yaş sınırlaması",
-        "no-restriction": "Hiçbir sınırlama yok",
-        "include-unknowns-label": "Bilinmeyenleri ekle",
+        "not-applicable-for-admins": "",
+        "age-rating-label": "",
+        "no-restriction": "",
+        "include-unknowns-label": "",
         "include-unknowns-tooltip": ""
     },
     "site-theme-provider-pipe": {
-        "system": "Sistem",
-        "user": "Kullanıcı"
+        "system": "",
+        "user": ""
     },
     "manage-devices": {
-        "title": "Aygıt Yöneticisi",
+        "title": "",
         "description": "",
-        "devices-title": "Aygıtlar",
-        "no-devices": "Herhangi bir aygıt ayarlanmamış",
+        "devices-title": "",
+        "no-devices": "",
         "platform-label": "",
         "email-label": "",
         "add": "",
@@ -193,7 +193,7 @@
         "edit": ""
     },
     "edit-device": {
-        "device-name-label": "Aygıt İsmi",
+        "device-name-label": "",
         "email-label": "",
         "email-tooltip": "",
         "device-platform-label": "",
@@ -240,6 +240,7 @@
     },
     "api-key": {
         "copy": "",
+        "show": "",
         "regen-warning": "",
         "no-key": "",
         "confirm-reset": "",
@@ -372,6 +373,7 @@
         "years": ""
     },
     "time-ago-pipe": {
+        "never": "",
         "just-now": "",
         "min-ago": "",
         "mins-ago": "",
@@ -466,6 +468,7 @@
         "save": ""
     },
     "all-series": {
+        "title": "",
         "series-count": ""
     },
     "announcements": {
@@ -549,7 +552,8 @@
         "incognito-mode-alt": "",
         "incognito-mode-label": "",
         "next": "",
-        "previous": ""
+        "previous": "",
+        "go-to-page-prompt": ""
     },
     "personal-table-of-contents": {
         "no-data": "",
@@ -956,7 +960,15 @@
         "reset": "",
         "save": "",
         "media-issue-title": "",
-        "scrobble-issue-title": ""
+        "scrobble-issue-title": "",
+        "cover-image-size-label": "",
+        "cover-image-size-tooltip": ""
+    },
+    "cover-image-size": {
+        "default": "",
+        "medium": "",
+        "large": "",
+        "xlarge": ""
     },
     "manage-scrobble-errors": {
         "description": "",
@@ -1181,7 +1193,8 @@
         "read": "",
         "read-options-alt": "",
         "incognito-alt": "",
-        "no-data": ""
+        "no-data": "",
+        "characters-title": ""
     },
     "events-widget": {
         "title-alt": "",
@@ -1283,6 +1296,12 @@
         "dark-theme-alt": "",
         "close-reader-alt": ""
     },
+    "infinite-scroller": {
+        "continuous-reading-prev-chapter-alt": "",
+        "continuous-reading-prev-chapter": "",
+        "continuous-reading-next-chapter-alt": "",
+        "continuous-reading-next-chapter": ""
+    },
     "manga-reader": {
         "back": "",
         "save-globally": "",
@@ -1315,10 +1334,17 @@
         "layout-mode-switched": "",
         "no-next-chapter": "",
         "no-prev-chapter": "",
-        "user-preferences-updated": ""
+        "user-preferences-updated": "",
+        "emulate-comic-book-label": ""
     },
     "metadata-filter": {
         "filter-title": "",
+        "sort-by-label": "",
+        "ascending-alt": "",
+        "descending-alt": "",
+        "reset": "",
+        "apply": "",
+        "limit-label": "",
         "format-label": "",
         "libraries-label": "",
         "collections-label": "",
@@ -1346,12 +1372,7 @@
         "series-name-tooltip": "",
         "release-label": "",
         "min": "",
-        "max": "",
-        "sort-by-label": "",
-        "ascending-alt": "",
-        "descending-alt": "",
-        "reset": "",
-        "apply": ""
+        "max": ""
     },
     "sort-field-pipe": {
         "sort-name": "",
@@ -1446,7 +1467,13 @@
         "x-axis-label": "",
         "y-axis-label": "",
         "no-data": "",
-        "time-frame-label": ""
+        "time-frame-label": "",
+        "this-week": "",
+        "last-7-days": "",
+        "last-30-days": "",
+        "last-90-days": "",
+        "last-year": "",
+        "all-time": ""
     },
     "manga-format-stats": {
         "title": "",
@@ -1505,6 +1532,55 @@
         "invalid-confirmation-url": "",
         "invalid-confirmation-email": "",
         "invalid-password-reset-url": ""
+    },
+    "metadata-builder": {
+        "or": "",
+        "and": "",
+        "add-rule": "",
+        "remove-rule": ""
+    },
+    "filter-field-pipe": {
+        "age-rating": "",
+        "characters": "",
+        "collection-tags": "",
+        "colorist": "",
+        "cover-artist": "",
+        "editor": "",
+        "formats": "",
+        "genres": "",
+        "inker": "",
+        "languages": "",
+        "libraries": "",
+        "letterer": "",
+        "publication-status": "",
+        "penciller": "",
+        "publisher": "",
+        "read-progress": "",
+        "read-time": "",
+        "release-year": "",
+        "series-name": "",
+        "summary": "",
+        "tags": "",
+        "translators": "",
+        "user-rating": "",
+        "writers": ""
+    },
+    "filter-comparison-pipe": {
+        "begins-with": "",
+        "contains": "",
+        "equal": "",
+        "greater-than": "",
+        "greater-than-or-equal": "",
+        "less-than": "",
+        "less-than-or-equal": "",
+        "matches": "",
+        "does-not-contain": "",
+        "not-equal": "",
+        "ends-with": "",
+        "is-before": "",
+        "is-after": "",
+        "is-in-last": "",
+        "is-not-in-last": ""
     },
     "toasts": {
         "regen-cover": "",
@@ -1581,7 +1657,8 @@
         "alert-bad-theme": "",
         "confirm-library-delete": "",
         "confirm-library-type-change": "",
-        "confirm-download-size": ""
+        "confirm-download-size": "",
+        "list-doesnt-exist": ""
     },
     "actionable": {
         "scan-library": "",
@@ -1606,7 +1683,11 @@
         "details": "",
         "view-series": "",
         "clear": "",
-        "import-cbl": ""
+        "import-cbl": "",
+        "read": "",
+        "add-rule-group-and": "",
+        "add-rule-group-or": "",
+        "remove-rule-group": ""
     },
     "preferences": {
         "left-to-right": "",

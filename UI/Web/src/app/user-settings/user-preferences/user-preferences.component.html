@@ -416,8 +416,8 @@
                 <ng-container *ngIf="tab.fragment === FragmentID.Clients">
                   <div class="alert alert-warning" role="alert" *ngIf="!opdsEnabled">{{t('clients-opds-alert')}}</div>
                   <p>{{t('clients-opds-description')}}</p>
-                  <app-api-key [tooltipText]="t('clients-api-key-tooltip')"></app-api-key>
-                  <app-api-key [title]="t('clients-opds-url-tooltip')" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
+                  <app-api-key [tooltipText]="t('clients-api-key-tooltip')" [hideData]="true"></app-api-key>
+                  <app-api-key [title]="t('clients-opds-url-tooltip')" [hideData]="true" [showRefresh]="false" [transform]="makeUrl"></app-api-key>
                 </ng-container>
                 <ng-container *ngIf="tab.fragment === FragmentID.Theme">
                   <app-theme-manager></app-theme-manager>

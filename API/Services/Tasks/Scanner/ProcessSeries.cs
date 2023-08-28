@@ -146,7 +146,6 @@ public class ProcessSeries : IProcessSeries
             _logger.LogInformation("[ScannerService] Processing series {SeriesName}", series.OriginalName);
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it using a ComicInfo check (as it uses firstParsedInfo for series sort)
-            // BUG: This check doesn't work for Books, as books usually have metadata on all files. (#2167)
             var firstParsedInfo = parsedInfos.FirstOrDefault(p => p.ComicInfo != null, firstInfo);
 
             UpdateVolumes(series, parsedInfos, forceUpdate);
@@ -231,7 +230,8 @@ public class ProcessSeries : IProcessSeries
             _logger.LogError(ex, "[ScannerService] There was an exception updating series for {SeriesName}", series.Name);
         }
 
-        await _metadataService.GenerateCoversForSeries(series, (await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs);
+        var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        await _metadataService.GenerateCoversForSeries(series, settings.EncodeMediaAs, settings.CoverImageSize);
         EnqueuePostSeriesProcessTasks(series.LibraryId, series.Id);
     }
 

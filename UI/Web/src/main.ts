@@ -54,6 +54,24 @@ export const preLoad = {
   deps: [AccountService, TranslocoService]
 };
 
+function transformLanguageCodes(arr: Array<string>) {
+    const transformedArray: Array<string> = [];
+
+    arr.forEach(code => {
+        // Add the original code
+        transformedArray.push(code);
+
+        // Check if the code has a hyphen (like uk-UA)
+        if (code.includes('-')) {
+            // Transform hyphen to underscore and add to the array
+            const transformedCode = code.replace('-', '_');
+            transformedArray.push(transformedCode);
+        }
+    });
+
+    return transformedArray;
+}
+
 // All Languages Kavita will support: http://www.lingoes.net/en/translator/langcode.htm
 const languageCodes = [
   'af', 'af-ZA', 'ar', 'ar-AE', 'ar-BH', 'ar-DZ', 'ar-EG', 'ar-IQ', 'ar-JO', 'ar-KW',
@@ -78,13 +96,13 @@ const languageCodes = [
   'syr', 'syr-SY', 'ta', 'ta-IN', 'te', 'te-IN', 'th', 'th-TH', 'tl', 'tl-PH', 'tn',
   'tn-ZA', 'tr', 'tr-TR', 'tt', 'tt-RU', 'ts', 'uk', 'uk-UA', 'ur', 'ur-PK', 'uz',
   'uz-UZ', 'uz-UZ', 'vi', 'vi-VN', 'xh', 'xh-ZA', 'zh', 'zh-CN', 'zh-HK', 'zh-MO',
-  'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans'
+  'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans',
 ];
 
 const translocoOptions = {
   config: {
     reRenderOnLangChange: true,
-    availableLangs: languageCodes,
+    availableLangs: transformLanguageCodes(languageCodes),
     prodMode: environment.production,
     defaultLang: 'en',
     fallbackLang: 'en',

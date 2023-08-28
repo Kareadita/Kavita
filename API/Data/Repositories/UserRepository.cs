@@ -14,6 +14,7 @@ using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -389,10 +390,11 @@ public class UserRepository : IUserRepository
                 .ToListAsync();
 
         var queryString = filterStatement.Value.ToNormalized();
-        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
+        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id,
+            (bookmark, series) => new BookmarkSeriesPair()
             {
-                bookmark,
-                series
+                bookmark = bookmark,
+                series = series
             });
 
         switch (filterStatement.Comparison)
@@ -441,12 +443,19 @@ public class UserRepository : IUserRepository
                 break;
         }
 
-        query = filterSeriesQuery.Select(o => o.bookmark);
 
 
-        return await query
+        return await ApplyLimit(filterSeriesQuery
+                .Sort(filter.SortOptions)
+                .AsSplitQuery(), filter.LimitTo)
+            .Select(o => o.bookmark)
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    private static IQueryable<BookmarkSeriesPair> ApplyLimit(IQueryable<BookmarkSeriesPair> query, int limit)
+    {
+        return limit <= 0 ? query : query.Take(limit);
     }
 
     /// <summary>

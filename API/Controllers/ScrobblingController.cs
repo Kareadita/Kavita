@@ -143,8 +143,7 @@ public class ScrobblingController : BaseApiController
     [HttpGet("library-allows-scrobbling")]
     public async Task<ActionResult<bool>> LibraryAllowsScrobbling(int seriesId)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library);
-        return Ok(series != null && series.Library.AllowScrobbling);
+        return Ok(await _unitOfWork.LibraryRepository.GetAllowsScrobblingBySeriesId(seriesId));
     }
 
     /// <summary>

@@ -62,7 +62,7 @@
       <td>
         <ng-container [ngSwitch]="item.scrobbleEventType">
           <ng-container *ngSwitchCase="ScrobbleEventType.ChapterRead">
-            {{t('volume-and-chapter-num', {v: item.volumeNumber, c: item.chapterNumber})}}
+            {{t('volume-and-chapter-num', {v: item.volumeNumber, n: item.chapterNumber})}}
           </ng-container>
           <ng-container *ngSwitchCase="ScrobbleEventType.ScoreUpdated">
             {{t('rating', {r: item.rating})}}

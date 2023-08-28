@@ -13,8 +13,11 @@ export class CompactNumberPipe implements PipeTransform {
 
   transform(value: number): string {
     // Weblate allows some non-standard languages, like 'zh_Hans', which should be just 'zh'. So we handle that here
-    const locale = localStorage.getItem(AccountService.localeKey)?.split('_')[0];
-    return this.transformValue(locale || 'en', value);
+    const key = localStorage.getItem(AccountService.localeKey)?.replace('_', '-');
+    if (key?.endsWith('Hans')) {
+      return this.transformValue(key?.split('-')[0] || 'en', value);
+    }
+    return this.transformValue(key || 'en', value);
   }
 
   private transformValue(locale: string, value: number) {

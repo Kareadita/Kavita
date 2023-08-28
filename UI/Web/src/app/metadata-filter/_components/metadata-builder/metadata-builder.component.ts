@@ -46,6 +46,10 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
 export class MetadataBuilderComponent implements OnInit {
 
   @Input({required: true}) filter!: SeriesFilterV2;
+  /**
+   * The number of statements that can be. 0 means unlimited. -1 means none.
+   */
+  @Input() statementLimit = 0;
   @Input() availableFilterFields = allFields;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
 

@@ -88,8 +88,8 @@
     "access-denied": "Você não tem acesso",
     "reset-chapter-lock": "Não é possível redefinir o bloqueio da tampa para o Capítulo",
     "generic-user-delete": "Não foi possível excluir o usuário",
-    "on-deck": "Na Prateleira",
-    "browse-on-deck": "Navegar Na Prateleira",
+    "on-deck": "Na Estante",
+    "browse-on-deck": "Navegar Na Estante",
     "recently-added": "Adicionado Recentemente",
     "browse-recently-added": "Navegar no Adicionado Recentemente",
     "reading-lists": "Listas de leitura",
@@ -156,5 +156,7 @@
     "reading-list-item-delete": "Não foi possível excluir os itens",
     "invalid-payload": "Carga inválida",
     "issue-num": "Número {0}{1}",
-    "chapter-num": "Capítulo {0}"
+    "chapter-num": "Capítulo {0}",
+    "want-to-read": "Quero Ler",
+    "browse-want-to-read": "Navegar no Quero Ler"
 }

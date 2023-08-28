@@ -3,7 +3,7 @@ import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject} from 'rxjs';
 import {debounceTime, map, shareReplay, take, tap} from 'rxjs/operators';
-import {FilterQueryParam, FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {Library} from 'src/app/_models/library';
@@ -169,23 +169,37 @@ export class DashboardComponent implements OnInit {
   handleSectionClick(sectionTitle: string) {
     if (sectionTitle.toLowerCase() === 'recently updated series') {
       const params: any = {};
-      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'Recently Updated';
-      this.router.navigate(['all-series'], {queryParams: params});
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.LastChapterAdded;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
-      params[FilterQueryParam.ReadStatus] = 'true,false,false';
-      params[FilterQueryParam.SortBy] = SortField.LastChapterAdded + ',false'; // sort by last chapter added, desc
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'On Deck';
-      this.router.navigate(['all-series'], {queryParams: params});
+
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
+      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.LessThan, value: '100'});
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.LastChapterAdded;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
-      params[FilterQueryParam.SortBy] = SortField.Created + ',false'; // sort by created, desc
-      params[FilterQueryParam.Page] = 1;
+      params['page'] = 1;
       params['title'] = 'Newly Added';
-      this.router.navigate(['all-series'], {queryParams: params});
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      if (filter.sortOptions) {
+        filter.sortOptions.sortField = SortField.Created;
+        filter.sortOptions.isAscending = false;
+      }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }
   }
 

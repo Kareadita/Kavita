@@ -1,4 +1,5 @@
 import { EncodeFormat } from "./encode-format";
+import {CoverImageSize} from "./cover-image-size";
 
 export interface ServerSettings {
     cacheDirectory: string;
@@ -20,4 +21,5 @@ export interface ServerSettings {
     cacheSize: number;
     onDeckProgressDays: number;
     onDeckUpdateDays: number;
+    coverImageSize: CoverImageSize;
 }
