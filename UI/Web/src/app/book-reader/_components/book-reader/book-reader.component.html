@@ -108,7 +108,7 @@
              tabindex="-1" [ngStyle]="{height: PageHeightForPagination}"></div>
       </ng-container>
         <div #bookContainer class="book-container {{WritingStyleClass}}"
-          [ngClass]="{'immersive' : immersiveMode, 'pointer' : pointer}"
+          [ngClass]="{'immersive' : immersiveMode, 'pointer' : cursorIsPointer}"
           (click)="handleReaderClick($event)"
           (mousedown)="mouseDown($event)">
 
