@@ -299,13 +299,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   cursorIsPointer: boolean = false;
 
   /**
-   * Used to keep track of the last time a paginator area was clicked to prevent the default
-   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
-   * triggered by repeated click pagination (when enabled).
-   */
-  lastPaginatorClickTime: number = 0;
-
-  /**
    * Used to refresh the Personal PoC
    */
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
