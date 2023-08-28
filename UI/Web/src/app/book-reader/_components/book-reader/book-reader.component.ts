@@ -17,7 +17,7 @@ import { DOCUMENT, Location, NgTemplateOutlet, NgIf, NgStyle, NgClass } from '@a
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, fromEvent, of } from 'rxjs';
-import { catchError, debounceTime, take } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, map, take } from 'rxjs/operators';
 import { Chapter } from 'src/app/_models/chapter';
 import { AccountService } from 'src/app/_services/account.service';
 import { NavService } from 'src/app/_services/nav.service';
@@ -293,6 +293,19 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   writingStyle: WritingStyle = WritingStyle.Horizontal;
 
   /**
+   * Controls whether the cursor is a pointer when tap to paginate is on and the cursor is over
+   * either of the pagination areas
+   */
+  cursorIsPointer: boolean = false;
+
+  /**
+   * Used to keep track of the last time a paginator area was clicked to prevent the default
+   * browser behavior of selecting words or lines when double- or triple-clicking, respectively,
+   * triggered by repeated click pagination (when enabled).
+   */
+  lastPaginatorClickTime: number = 0;
+
+  /**
    * Used to refresh the Personal PoC
    */
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
@@ -497,8 +510,14 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.handleScrollEvent();
     });
 
-    // TODO: In order to allow people to highlight content under pagination overlays, apply pointer-events: none while
-    // a highlight operation is in effect
+    fromEvent<MouseEvent>(this.bookContainerElemRef.nativeElement, 'mousemove')
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        map(this.isCursorOverPaginationArea.bind(this)),
+        distinctUntilChanged())
+      .subscribe((isPointer) => {
+        this.changeCursor(isPointer);
+    });
   }
 
   handleScrollEvent() {
@@ -823,6 +842,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const links = this.readingSectionElemRef.nativeElement.querySelectorAll('a');
       links.forEach((link: any) => {
         link.addEventListener('click', (e: any) => {
+          e.stopPropagation();
           let targetElem = e.target;
           if (e.target.nodeName !== 'A' && e.target.parentNode.nodeName === 'A') {
             // Certain combos like <a><sup>text</sup></a> can cause the target to be the sup tag and not the anchor
@@ -1568,7 +1588,49 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
+  private isCursorOverLeftPaginationArea(event: MouseEvent): boolean {
+    const leftPaginationAreaEnd = window.innerWidth * 0.2;
+    return event.clientX <= leftPaginationAreaEnd;
+  }
 
+  private isCursorOverRightPaginationArea(event: MouseEvent): boolean {
+    const rightPaginationAreaStart = event.clientX >= window.innerWidth * 0.8;
+    return rightPaginationAreaStart;
+  }
+
+  private isCursorOverPaginationArea(event: MouseEvent): boolean {
+    if (this.isLoading || !this.clickToPaginate) {
+      return false;
+    }
+
+    return this.isCursorOverLeftPaginationArea(event) || this.isCursorOverRightPaginationArea(event);
+  }
+
+  private changeCursor(isPointer: boolean) {
+    this.cursorIsPointer = isPointer;
+    this.cdRef.markForCheck();
+  }
+
+  handleReaderClick(event: MouseEvent) {
+    if (!this.clickToPaginate) {
+      this.toggleMenu(event);
+      return;
+    }
+
+    const isHighlighting = window.getSelection()?.toString() != '';
+
+    if (isHighlighting) {
+      return;
+    }
+
+    if (this.isCursorOverLeftPaginationArea(event)) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+    } else if (this.isCursorOverRightPaginationArea(event)) {
+        this.movePage(this.readingDirection === ReadingDirection.LeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)
+    } else {
+      this.toggleMenu(event);
+    }
+  }
 
   toggleMenu(event: MouseEvent) {
     const targetElement = (event.target as Element);
@@ -1581,8 +1643,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (
-      Math.abs(this.mousePosition.x - event.screenX) <= mouseOffset &&
-      Math.abs(this.mousePosition.y - event.screenY) <= mouseOffset
+      Math.abs(this.mousePosition.x - event.clientX) <= mouseOffset &&
+      Math.abs(this.mousePosition.y - event.clientY) <= mouseOffset
     ) {
       this.actionBarVisible = !this.actionBarVisible;
       this.cdRef.markForCheck();
@@ -1590,8 +1652,25 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   mouseDown($event: MouseEvent) {
-    this.mousePosition.x = $event.screenX;
-    this.mousePosition.y = $event.screenY;
+    this.mousePosition.x = $event.clientX;
+    this.mousePosition.y = $event.clientY;
+
+    if (!this.clickToPaginate || !this.isCursorOverPaginationArea($event)) {
+      return
+    }
+
+    // This value is completely arbitrary and should cover most
+    // double-click speeds
+    const halfASecond = 500;
+    const now = Date.now();
+
+    // This is to prevent selecting text when clicking repeatedly to switch pages,
+    // while also allowing selections to begin in a pagination area
+    if (now - this.lastPaginatorClickTime < halfASecond) {
+      $event.preventDefault();
+    }
+
+    this.lastPaginatorClickTime = now;
   }
 
   refreshPersonalToC() {
