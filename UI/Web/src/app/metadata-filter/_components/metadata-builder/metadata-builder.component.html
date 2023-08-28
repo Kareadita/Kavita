@@ -1,9 +1,8 @@
 <ng-container *transloco="let t; read: 'metadata-builder'">
     <ng-container *ngIf="filter">
-
-        <ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
-            <div class="container-fluid">
-                <form [formGroup]="formGroup">
+        <form [formGroup]="formGroup">
+            <ng-container *ngIf="utilityService.getActiveBreakpoint() === Breakpoint.Desktop; else mobileView">
+                <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-md-2">
                             <select class="form-select" formControlName="comparison">
@@ -18,26 +17,24 @@
                             </button>
                         </div>
                     </div>
-                </form>
-                <div class="row mb-2" *ngFor="let filterStmt of filter.statements; let i = index">
-                    <div class="col-md-10">
-                        <app-metadata-row-filter [index]="i + 100" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
-                            <div class="col-md-1 ms-2">
-                                <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
-                                    <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                                    <span class="visually-hidden">{{t('remove-rule', {num: i})}}</span>
-                                </button>
-                            </div>
-                        </app-metadata-row-filter>
+                    <div class="row mb-2" *ngFor="let filterStmt of filter.statements; let i = index">
+                        <div class="col-md-10">
+                            <app-metadata-row-filter [index]="i + 100" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
+                                <div class="col-md-1 ms-2">
+                                    <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
+                                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                                        <span class="visually-hidden">{{t('remove-rule', {num: i})}}</span>
+                                    </button>
+                                </div>
+                            </app-metadata-row-filter>
+                        </div>
+
                     </div>
-
                 </div>
-            </div>
-        </ng-container>
+            </ng-container>
 
-        <ng-template #mobileView>
-            <div class="container-fluid">
-                <form [formGroup]="formGroup">
+            <ng-template #mobileView>
+                <div class="container-fluid">
                     <div class="row mb-3">
                         <div class="col-md-2 col-10">
                             <select class="form-select" formControlName="comparison">
@@ -52,22 +49,21 @@
                             </button>
                         </div>
                     </div>
-                </form>
-                <div class="row mb-3" *ngFor="let filterStmt of filter.statements; let i = index">
-                    <div class="col-md-12">
-                        <app-metadata-row-filter [index]="i" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
-                            <div class="col-md-1 ms-2 col-1">
-                                <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
-                                    <i class="fa-solid fa-minus" aria-hidden="true"></i>
-                                    <span class="visually-hidden">{{t('remove-rule')}}</span>
-                                </button>
-                            </div>
-                        </app-metadata-row-filter>
+                    <div class="row mb-3" *ngFor="let filterStmt of filter.statements; let i = index">
+                        <div class="col-md-12">
+                            <app-metadata-row-filter [index]="i" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
+                                <div class="col-md-1 ms-2 col-1">
+                                    <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
+                                        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+                                        <span class="visually-hidden">{{t('remove-rule')}}</span>
+                                    </button>
+                                </div>
+                            </app-metadata-row-filter>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </ng-template>
-
+            </ng-template>
+        </form>
     </ng-container>
 
 </ng-container>

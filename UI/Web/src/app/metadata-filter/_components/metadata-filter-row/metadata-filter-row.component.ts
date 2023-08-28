@@ -123,18 +123,22 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
-    console.log('creating stmt (' + this.index + '): ', this.preset)
+    console.log('[ngOnInit] creating stmt (' + this.index + '): ', this.preset)
+    console.log('[ngOnInit] preset', this.preset)
+    console.log('[ngOnInit] availableFields', this.availableFields)
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
-    this.populateFromPreset();
+    //this.populateFromPreset(); TODO: This is needed to populate from preset, but is also causing lots of issues
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
       switchMap((_) => this.getDropdownObservable()),
       tap((opts) => {
+        console.log('dropdownOptions$ triggered')
         if (!this.formGroup.get('filterValue')?.value) {
+          console.log('filter value is empty, populating dropdown from preset')
           this. populateFromPreset();
           return;
         }
@@ -144,6 +148,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
         } else {
           this.formGroup.get('filterValue')?.setValue(opts[0].value);
         }
+        console.log('set filterValue');
       }),
       takeUntilDestroyed(this.destroyRef)
     );
@@ -155,8 +160,9 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
       };
+      console.log('filterValue valueChanges triggered');
       if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
-      console.log('value: ', stmt.value)
+      console.log('updating parent with new statement: ', stmt.value)
       this.filterStatement.emit(stmt);
     });
 
@@ -165,7 +171,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes occurred: ', changes);
+    //console.log('changes occurred: ', changes);
   }
 
 
@@ -195,6 +201,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
 
   getDropdownObservable(): Observable<Select2Option[]> {
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
+      console.log('Getting dropdown observable: ', filterField);
       switch (filterField) {
         case FilterField.PublicationStatus:
           return this.metadataService.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
@@ -243,6 +250,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
   }
 
   getPersonOptions(role: PersonRole) {
+    // TODO: I can actually pass role to the API and get a faster response
     return this.metadataService.getAllPeople().pipe(map(people => people.filter(p2 => p2.role === role).map(person => {
       return {value: person.id, label: person.name}
     })))
@@ -252,6 +260,7 @@ export class MetadataFilterRowComponent implements OnInit, OnChanges {
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
     // BUG: This is triggering populating preset to trigger like mad (over 400 calls just from switching Libraries -> Series Name)
+    console.log('HandleFieldChange: ', val);
 
     if (StringFields.includes(inputVal)) {
       this.validComparisons$.next(StringComparisons);
