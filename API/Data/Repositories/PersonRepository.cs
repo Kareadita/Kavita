@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Entities.Enums;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using AutoMapper;
@@ -17,9 +18,11 @@ public interface IPersonRepository
     void Remove(Person person);
     Task<IList<Person>> GetAllPeople();
     Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
+    Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
     Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId);
     Task<int> GetCountAsync();
+
 }
 
 public class PersonRepository : IPersonRepository
@@ -89,6 +92,17 @@ public class PersonRepository : IPersonRepository
     {
         var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
         return await _context.Person
+            .OrderBy(p => p.Name)
+            .RestrictAgainstAgeRestriction(ageRating)
+            .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
+    }
+
+    public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role)
+    {
+        var ageRating = await _context.AppUser.GetUserAgeRestriction(userId);
+        return await _context.Person
+            .Where(p => p.Role == role)
             .OrderBy(p => p.Name)
             .RestrictAgainstAgeRestriction(ageRating)
             .ProjectTo<PersonDto>(_mapper.ConfigurationProvider)

@@ -68,10 +68,9 @@ public class UsersController : BaseApiController
     [HttpGet("has-reading-progress")]
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
         if (library == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "library-doesnt-exist"));
-        return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, userId));
+        return Ok(await _unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, User.GetUserId()));
     }
 
     [HttpGet("has-library-access")]

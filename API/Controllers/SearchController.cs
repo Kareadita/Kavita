@@ -33,8 +33,7 @@ public class SearchController : BaseApiController
     [HttpGet("series-for-mangafile")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForMangaFile(int mangaFileId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForMangaFile(mangaFileId, User.GetUserId()));
     }
 
     /// <summary>
@@ -46,8 +45,7 @@ public class SearchController : BaseApiController
     [HttpGet("series-for-chapter")]
     public async Task<ActionResult<SeriesDto>> GetSeriesForChapter(int chapterId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForChapter(chapterId, User.GetUserId()));
     }
 
     [HttpGet("search")]

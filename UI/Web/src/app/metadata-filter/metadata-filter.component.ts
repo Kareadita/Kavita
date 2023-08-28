@@ -162,8 +162,6 @@ export class MetadataFilterComponent implements OnInit {
 
     this.fullyLoaded = true;
     this.apply();
-
-    //this.cdRef.markForCheck();
   }
 
 

@@ -37,17 +37,28 @@ public class MetadataController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<GenreTagDto>>> GetAllGenres(string? libraryIds)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, userId));
+            return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosForLibrariesAsync(ids, User.GetUserId()));
         }
 
-        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync(userId));
+        return Ok(await _unitOfWork.GenreRepository.GetAllGenreDtosAsync(User.GetUserId()));
     }
 
-
+    /// <summary>
+    /// Fetches people from the instance by role
+    /// </summary>
+    /// <param name="role">role</param>
+    /// <returns></returns>
+    [HttpGet("people")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"role"})]
+    public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(PersonRole? role)
+    {
+        return role.HasValue ?
+            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId())) :
+            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value));
+    }
 
     /// <summary>
     /// Fetches people from the instance
@@ -58,13 +69,12 @@ public class MetadataController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(string? libraryIds)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, userId));
+            return Ok(await _unitOfWork.PersonRepository.GetAllPeopleDtosForLibrariesAsync(ids, User.GetUserId()));
         }
-        return Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(userId));
+        return Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
     }
 
     /// <summary>
@@ -76,13 +86,12 @@ public class MetadataController : BaseApiController
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"libraryIds"})]
     public async Task<ActionResult<IList<TagDto>>> GetAllTags(string? libraryIds)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         var ids = libraryIds?.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToList();
         if (ids != null && ids.Count > 0)
         {
-            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, userId));
+            return Ok(await _unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(ids, User.GetUserId()));
         }
-        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync(userId));
+        return Ok(await _unitOfWork.TagRepository.GetAllTagDtosAsync(User.GetUserId()));
     }
 
     /// <summary>

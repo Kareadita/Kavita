@@ -67,7 +67,7 @@ public class SeriesController : BaseApiController
     [Obsolete("use v2")]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
@@ -90,7 +90,7 @@ public class SeriesController : BaseApiController
     [HttpPost("v2")]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
@@ -114,8 +114,7 @@ public class SeriesController : BaseApiController
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, User.GetUserId());
         if (series == null) return NoContent();
         return Ok(series);
     }
@@ -150,15 +149,13 @@ public class SeriesController : BaseApiController
     [HttpGet("volumes")]
     public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId));
+        return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, User.GetUserId()));
     }
 
     [HttpGet("volume")]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var vol = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId);
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId());
         if (vol == null) return NoContent();
         return Ok(vol);
     }
@@ -253,7 +250,7 @@ public class SeriesController : BaseApiController
     [Obsolete("use recently-added-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
@@ -277,7 +274,7 @@ public class SeriesController : BaseApiController
     [HttpPost("recently-added-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, userParams, filterDto);
 
@@ -299,8 +296,7 @@ public class SeriesController : BaseApiController
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, 20));
+        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(User.GetUserId(), 20));
     }
 
     /// <summary>
@@ -313,7 +309,7 @@ public class SeriesController : BaseApiController
     [HttpPost("all")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterV2Dto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
@@ -337,7 +333,7 @@ public class SeriesController : BaseApiController
     [HttpPost("on-deck")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, null);
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
@@ -449,7 +445,7 @@ public class SeriesController : BaseApiController
     [HttpGet("series-by-collection")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
 
@@ -472,8 +468,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
     {
         if (dto.SeriesIds == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, User.GetUserId()));
     }
 
     /// <summary>
@@ -503,10 +498,9 @@ public class SeriesController : BaseApiController
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         try
         {
-            return await _seriesService.GetSeriesDetail(seriesId, userId);
+            return await _seriesService.GetSeriesDetail(seriesId, User.GetUserId());
         }
         catch (KavitaException ex)
         {
@@ -525,9 +519,7 @@ public class SeriesController : BaseApiController
     [HttpGet("related")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
     {
-        // Send back a custom DTO with each type or maybe sorted in some way
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(userId, seriesId, relation));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(User.GetUserId(), seriesId, relation));
     }
 
     /// <summary>
@@ -538,8 +530,7 @@ public class SeriesController : BaseApiController
     [HttpGet("all-related")]
     public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _seriesService.GetRelatedSeries(userId, seriesId));
+        return Ok(await _seriesService.GetRelatedSeries(User.GetUserId(), seriesId));
     }
 
 

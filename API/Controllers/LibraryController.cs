@@ -161,8 +161,7 @@ public class LibraryController : BaseApiController
     [HttpGet("jump-bar")]
     public async Task<ActionResult<IEnumerable<JumpKeyDto>>> GetJumpBar(int libraryId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, userId))
+        if (!await _unitOfWork.UserRepository.HasAccessToLibrary(libraryId, User.GetUserId()))
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-library-access"));
 
         return Ok(_unitOfWork.LibraryRepository.GetJumpBarAsync(libraryId));
