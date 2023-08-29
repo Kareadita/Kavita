@@ -39,7 +39,7 @@ export class SeriesService {
     params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
     const data = filter || {};
 
-    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all', data, {observe: 'response', params}).pipe(
+    return this.httpClient.post<PaginatedResult<Series[]>>(this.baseUrl + 'series/all-v2', data, {observe: 'response', params}).pipe(
         map((response: any) => {
           return this.utilityService.createPaginatedResult(response, this.paginatedResults);
         })

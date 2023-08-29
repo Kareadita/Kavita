@@ -306,12 +306,37 @@ public class SeriesController : BaseApiController
     /// <param name="userParams"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
-    [HttpPost("all")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterV2Dto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    [HttpPost("all-v2")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
         var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Returns all series for the library. Obsolete, use all-v2
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
+    [HttpPost("all")]
+    [Obsolete("User all-v2")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    {
+        var userId = User.GetUserId();
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
         if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
