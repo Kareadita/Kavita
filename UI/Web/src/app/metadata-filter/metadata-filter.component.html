@@ -1,17 +1,18 @@
 <ng-container *transloco="let t; read: 'metadata-filter'">
   <ng-container *ngIf="toggleService.toggleState$ | async as isOpen">
-    <div class="phone-hidden">
+    <div class="phone-hidden" *ngIf="utilityService.getActiveBreakpoint() > Breakpoint.Tablet">
       <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
         <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
       </div>
     </div>
 
-    <div class="not-phone-hidden">
+    <div class="not-phone-hidden" *ngIf="utilityService.getActiveBreakpoint() < Breakpoint.Desktop">
       <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 56}" (drawerClosed)="toggleService.set(false)">
         <h5 header>
           {{t('filter-title')}}
         </h5>
         <div body class="drawer-body">
+          <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd -->
           <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
         </div>
       </app-drawer>
@@ -19,9 +20,13 @@
   </ng-container>
 
   <ng-template #filterSection>
-    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded">
+    <div class="filter-section mx-auto pb-3" *ngIf="fullyLoaded && filterV2">
       <div class="row justify-content-center g-0">
-        <app-metadata-builder [filter]="filterV2!" [availableFilterFields]="allFilterFields" (update)="handleFilters($event)" [statementLimit]="filterSettings.statementLimit"></app-metadata-builder>
+        <app-metadata-builder [filter]="filterV2"
+                              [availableFilterFields]="allFilterFields"
+                              [statementLimit]="filterSettings.statementLimit"
+                              (update)="handleFilters($event)">
+        </app-metadata-builder>
       </div>
       <form [formGroup]="sortGroup" class="container-fluid">
         <div class="row mb-3">

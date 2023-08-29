@@ -19,10 +19,9 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {allFields, FilterField} from "../../../_models/metadata/v2/filter-field";
+import {allFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {tap} from "rxjs/operators";
+import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
@@ -52,12 +51,14 @@ export class MetadataBuilderComponent implements OnInit {
   @Input() statementLimit = 0;
   @Input() availableFilterFields = allFields;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
+  @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
   protected readonly utilityService = inject(UtilityService);
   protected readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly  destroyRef = inject(DestroyRef);
+  protected readonly Breakpoint = Breakpoint;
 
   formGroup: FormGroup = new FormGroup({});
 
@@ -66,39 +67,30 @@ export class MetadataBuilderComponent implements OnInit {
     {value: FilterCombination.And, title: translate('metadata-builder.and')},
   ];
 
-  get Breakpoint() { return Breakpoint; }
-
-
   ngOnInit() {
-    if (this.filter === undefined) {
-      // I've left this in to see if it ever happens or not
-      console.error('No filter, creating one in metadata-builder')
-      // If there is no default preset, let's open with series name
-      this.filter = this.filterUtilityService.createSeriesV2Filter();
-      this.filter.statements.push({
-        value: '',
-        comparison: FilterComparison.Equal,
-        field: FilterField.SeriesName
-      });
-    }
-
+    console.log('[builder] ngOnInit');
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
-    this.formGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef), tap(values => {
-      this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10);
+    this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
+      this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterCombination;
+      console.log('[builder] emitting filter from comparison change');
       this.update.emit(this.filter);
-    })).subscribe()
+    })).subscribe();
   }
 
   addFilter() {
+    console.log('[builder] Adding Filter')
     this.filter.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filter.statements];
+    this.cdRef.markForCheck();
   }
 
   removeFilter(index: number) {
+    console.log('[builder] Removing filter')
     this.filter.statements = this.filter.statements.slice(0, index).concat(this.filter.statements.slice(index + 1))
     this.cdRef.markForCheck();
   }
 
   updateFilter(index: number, filterStmt: FilterStatement) {
+    console.log('[builder] updating filter: ', this.filter.statements);
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }

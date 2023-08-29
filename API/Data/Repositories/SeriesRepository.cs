@@ -840,7 +840,6 @@ public class SeriesRepository : ISeriesRepository
     private async Task<IQueryable<Series>> CreateFilteredSearchQueryable(int userId, int libraryId, FilterDto filter, QueryContext queryContext)
     {
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
-        // TODO: Remove this method
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext);
         var userRating = await _context.AppUser.GetUserAgeRestriction(userId);
         var onlyParentSeries = await _context.AppUserPreferences.Where(u => u.AppUserId == userId)
@@ -869,7 +868,7 @@ public class SeriesRepository : ISeriesRepository
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
 
-            // This needs different treatment
+            // TODO: This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
 
             .WhereIf(onlyParentSeries,
@@ -979,11 +978,12 @@ public class SeriesRepository : ISeriesRepository
             {
                 if (stmt.Comparison is FilterComparison.Equal or FilterComparison.Contains)
                 {
-                    filterIncludeLibs.Add(int.Parse(stmt.Value));
+
+                    filterIncludeLibs.AddRange(stmt.Value.Split(',').Select(int.Parse));
                 }
                 else
                 {
-                    filterExcludeLibs.Add(int.Parse(stmt.Value));
+                    filterExcludeLibs.AddRange(stmt.Value.Split(',').Select(int.Parse));
                 }
             }
 
@@ -1036,6 +1036,8 @@ public class SeriesRepository : ISeriesRepository
         {
             FilterField.Summary => query.HasSummary(true, statement.Comparison, (string) value),
             FilterField.SeriesName => query.HasName(true, statement.Comparison, (string) value),
+            FilterField.Path => query.HasPath(true, statement.Comparison, (string) value),
+            FilterField.FilePath => query.HasFilePath(true, statement.Comparison, (string) value),
             FilterField.PublicationStatus => query.HasPublicationStatus(true, statement.Comparison,
                 (IList<PublicationStatus>) value),
             FilterField.Languages => query.HasLanguage(true, statement.Comparison, (IList<string>) value),

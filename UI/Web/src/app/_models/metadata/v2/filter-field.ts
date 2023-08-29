@@ -24,7 +24,9 @@ export enum FilterField
     ReadProgress = 20,
     Formats = 21,
     ReleaseYear = 22,
-    ReadTime = 23
+    ReadTime = 23,
+    Path = 24,
+    FilePath = 25
 }
 
 export const allFields = Object.keys(FilterField)

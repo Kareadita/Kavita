@@ -62,7 +62,7 @@ public class ReviewController : BaseApiController
         }
 
         var cacheKey = CacheKey + seriesId;
-        IEnumerable<UserReviewDto> externalReviews;
+        IList<UserReviewDto> externalReviews;
 
         var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
         if (result.HasValue)
@@ -73,7 +73,6 @@ public class ReviewController : BaseApiController
         {
             var reviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
             externalReviews = SelectSpectrumOfReviews(reviews);
-
 
             await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
             _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
@@ -87,7 +86,7 @@ public class ReviewController : BaseApiController
         return Ok(userRatings);
     }
 
-    private static IList<UserReviewDto> SelectSpectrumOfReviews(List<UserReviewDto> reviews)
+    private static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
     {
         IList<UserReviewDto> externalReviews;
         var totalReviews = reviews.Count;

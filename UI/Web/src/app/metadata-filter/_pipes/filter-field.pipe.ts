@@ -58,6 +58,10 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.user-rating');
       case FilterField.Writers:
         return translate('filter-field-pipe.writers');
+      case FilterField.Path:
+        return translate('filter-field-pipe.path');
+      case FilterField.FilePath:
+        return translate('filter-field-pipe.file-path');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

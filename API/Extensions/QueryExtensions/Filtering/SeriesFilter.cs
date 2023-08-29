@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Entities.Enums;
+using API.Services.Tasks.Scanner.Parser;
 using Kavita.Common;
 using Microsoft.EntityFrameworkCore;
 
@@ -512,4 +513,116 @@ public static class SeriesFilter
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
         }
     }
+
+    public static IQueryable<Series> HasPath(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, string queryString)
+    {
+        if (!condition) return queryable;
+
+        var normalizedPath = Parser.NormalizePath(queryString);
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                return queryable.Where(s => s.FolderPath != null && s.FolderPath.Equals(normalizedPath));
+            case FilterComparison.BeginsWith:
+                return queryable.Where(s => s.FolderPath != null && EF.Functions.Like(s.FolderPath, $"{normalizedPath}%"));
+            case FilterComparison.EndsWith:
+                return queryable.Where(s => s.FolderPath != null && EF.Functions.Like(s.FolderPath, $"%{normalizedPath}"));
+            case FilterComparison.Matches:
+                return queryable.Where(s => s.FolderPath != null && EF.Functions.Like(s.FolderPath, $"%{normalizedPath}%"));
+            case FilterComparison.NotEqual:
+                return queryable.Where(s => s.FolderPath != null && s.FolderPath != normalizedPath);
+            case FilterComparison.NotContains:
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Contains:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+                throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
+        }
+    }
+
+    public static IQueryable<Series> HasFilePath(this IQueryable<Series> queryable, bool condition,
+        FilterComparison comparison, string queryString)
+    {
+        if (!condition) return queryable;
+
+        var normalizedPath = Parser.NormalizePath(queryString);
+
+        switch (comparison)
+        {
+            case FilterComparison.Equal:
+                return queryable.Where(s =>
+                    s.Volumes.Any(v =>
+                        v.Chapters.Any(c =>
+                            c.Files.Any(f =>
+                                f.FilePath != null && f.FilePath.Equals(normalizedPath)
+                            )
+                        )
+                    )
+                );
+            case FilterComparison.BeginsWith:
+                return queryable.Where(s =>
+                    s.Volumes.Any(v =>
+                        v.Chapters.Any(c =>
+                            c.Files.Any(f =>
+                                f.FilePath != null && EF.Functions.Like(f.FilePath, $"{normalizedPath}%")
+                            )
+                        )
+                    )
+                );
+            case FilterComparison.EndsWith:
+                return queryable.Where(s =>
+                    s.Volumes.Any(v =>
+                        v.Chapters.Any(c =>
+                            c.Files.Any(f =>
+                                f.FilePath != null && EF.Functions.Like(f.FilePath, $"%{normalizedPath}")
+                            )
+                        )
+                    )
+                );
+            case FilterComparison.Matches:
+                return queryable.Where(s =>
+                    s.Volumes.Any(v =>
+                        v.Chapters.Any(c =>
+                            c.Files.Any(f =>
+                                f.FilePath != null && EF.Functions.Like(f.FilePath, $"%{normalizedPath}%")
+                            )
+                        )
+                    )
+                );
+            case FilterComparison.NotEqual:
+                return queryable.Where(s =>
+                    s.Volumes.Any(v =>
+                        v.Chapters.Any(c =>
+                            c.Files.Any(f =>
+                                f.FilePath == null || !f.FilePath.Equals(normalizedPath)
+                            )
+                        )
+                    )
+                );
+            case FilterComparison.NotContains:
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Contains:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+                throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
+            default:
+                throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
+        }
+    }
+
+
 }

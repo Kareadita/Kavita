@@ -28,5 +28,13 @@ public enum FilterField
     ReadProgress = 20,
     Formats = 21,
     ReleaseYear = 22,
-    ReadTime = 23
+    ReadTime = 23,
+    /// <summary>
+    /// Series Folder
+    /// </summary>
+    Path = 24,
+    /// <summary>
+    /// File path
+    /// </summary>
+    FilePath = 25
 }

@@ -42,7 +42,7 @@
     "file-saver": "^2.0.5",
     "lazysizes": "^5.3.2",
     "ng-circle-progress": "^1.7.1",
-    "ng-select2-component": "^13.0.2",
+    "ng-select2-component": "^13.0.6",
     "ngx-color-picker": "^14.0.0",
     "ngx-extended-pdf-viewer": "^16.2.16",
     "ngx-file-drop": "^16.0.0",

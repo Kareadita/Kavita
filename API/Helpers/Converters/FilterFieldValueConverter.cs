@@ -13,6 +13,8 @@ public static class FilterFieldValueConverter
         return field switch
         {
             FilterField.SeriesName => (value, typeof(string)),
+            FilterField.Path => (value, typeof(string)),
+            FilterField.FilePath => (value, typeof(string)),
             FilterField.ReleaseYear => (int.Parse(value), typeof(int)),
             FilterField.Languages => (value.Split(',').ToList(), typeof(IList<string>)),
             FilterField.PublicationStatus => (value.Split(',')

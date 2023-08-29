@@ -87,8 +87,7 @@ public class DeviceController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<DeviceDto>>> GetDevices()
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(userId));
+        return Ok(await _unitOfWork.DeviceRepository.GetDevicesForUserAsync(User.GetUserId()));
     }
 
     [HttpPost("send-to")]
@@ -100,7 +99,7 @@ public class DeviceController : BaseApiController
         if (await _emailService.IsDefaultEmailService())
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
             MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
                 "started"), userId);
@@ -134,7 +133,7 @@ public class DeviceController : BaseApiController
         if (await _emailService.IsDefaultEmailService())
             return BadRequest(await _localizationService.Translate(User.GetUserId(), "send-to-kavita-email"));
 
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         await _eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
             MessageFactory.SendingToDeviceEvent(await _localizationService.Translate(User.GetUserId(), "send-to-device-status"),
                 "started"), userId);
