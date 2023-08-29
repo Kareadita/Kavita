@@ -137,23 +137,6 @@ export class MetadataFilterRowComponent implements OnInit {
         return DropdownFields.includes(inputVal);
       }),
       switchMap((_) => this.getDropdownObservable()),
-      tap((opts) => {
-        console.log('dropdownOptions$ triggered')
-
-
-        if (!this.formGroup.get('filterValue')?.value) {
-          console.log('filter value is empty, populating dropdown from preset')
-          this. populateFromPreset();
-          return;
-        }
-
-        if (this.MultipleDropdownAllowed) {
-          this.formGroup.get('filterValue')?.setValue((opts[0].value + '').split(',').map(d => parseInt(d, 10)));
-        } else {
-          this.formGroup.get('filterValue')?.setValue(opts[0].value);
-        }
-        console.log('set filterValue');
-      }),
       takeUntilDestroyed(this.destroyRef)
     );
 
@@ -164,7 +147,8 @@ export class MetadataFilterRowComponent implements OnInit {
         field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
         value: this.formGroup.get('filterValue')?.value!
       };
-      console.log('filterValue valueChanges triggered');
+
+      //console.log('filterValue valueChanges triggered');
       if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
       console.log('updating parent with new statement: ', stmt.value)
       this.filterStatement.emit(stmt);
