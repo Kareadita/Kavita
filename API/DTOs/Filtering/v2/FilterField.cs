@@ -29,5 +29,12 @@ public enum FilterField
     Formats = 21,
     ReleaseYear = 22,
     ReadTime = 23,
-    Path = 24
+    /// <summary>
+    /// Series Folder
+    /// </summary>
+    Path = 24,
+    /// <summary>
+    /// File path
+    /// </summary>
+    FilePath = 25
 }
