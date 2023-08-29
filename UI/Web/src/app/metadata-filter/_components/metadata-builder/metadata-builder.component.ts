@@ -2,14 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, DestroyRef,
-  EventEmitter, HostListener,
+  EventEmitter,
   inject,
   Input,
   OnInit,
   Output
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
 import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
 import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
@@ -19,8 +19,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {allFields, FilterField} from "../../../_models/metadata/v2/filter-field";
+import {allFields} from "../../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@ngneat/transloco";

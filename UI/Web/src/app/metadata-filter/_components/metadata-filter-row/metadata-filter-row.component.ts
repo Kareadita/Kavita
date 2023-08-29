@@ -3,8 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter, HostListener,
-  inject,
+  EventEmitter, inject,
   Input,
   OnInit,
   Output,
@@ -34,7 +33,6 @@ import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Select2Module, Select2Option} from "ng-select2-component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 enum PredicateType {
   Text = 1,
@@ -128,6 +126,8 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
 
+    this.formGroup.get('filterValue')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef), tap(v => console.log('filterValue: ', v))).subscribe();
+
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
@@ -148,7 +148,7 @@ export class MetadataFilterRowComponent implements OnInit {
         }
 
         if (this.MultipleDropdownAllowed) {
-          this.formGroup.get('filterValue')?.setValue((opts[0].value + '').split(','));
+          this.formGroup.get('filterValue')?.setValue((opts[0].value + '').split(',').map(d => parseInt(d, 10)));
         } else {
           this.formGroup.get('filterValue')?.setValue(opts[0].value);
         }
@@ -179,11 +179,15 @@ export class MetadataFilterRowComponent implements OnInit {
   populateFromPreset() {
     const val = this.preset.value === "undefined" || !this.preset.value ? '' : this.preset.value;
     console.log('populating preset: ', val);
+    this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
+    this.formGroup.get('input')?.patchValue(this.preset.field);
+
     if (StringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DropdownFields.includes(this.preset.field)) {
-      if (this.MultipleDropdownAllowed) {
-        this.formGroup.get('filterValue')?.patchValue(val.split(','));
+      if (this.MultipleDropdownAllowed || val.includes(',')) {
+        console.log('setting multiple values: ', val.split(',').map(d => parseInt(d, 10)));
+        this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
         if (this.preset.field === FilterField.Languages) {
           this.formGroup.get('filterValue')?.patchValue(val);
@@ -195,8 +199,7 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));
     }
 
-    this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
-    this.formGroup.get('input')?.patchValue(this.preset.field);
+
     this.cdRef.markForCheck();
   }
 
@@ -259,7 +262,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
-    // BUG: This is triggering populating preset to trigger like mad (over 400 calls just from switching Libraries -> Series Name)
     console.log('HandleFieldChange: ', val);
 
     if (StringFields.includes(inputVal)) {
