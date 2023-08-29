@@ -40,7 +40,7 @@ enum PredicateType {
   Dropdown = 3,
 }
 
-const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path];
+const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
 const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
@@ -148,7 +148,6 @@ export class MetadataFilterRowComponent implements OnInit {
         value: this.formGroup.get('filterValue')?.value!
       };
 
-      //console.log('filterValue valueChanges triggered');
       if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
       console.log('updating parent with new statement: ', stmt.value)
       this.filterStatement.emit(stmt);

@@ -1732,7 +1732,8 @@
         "translators": "Translators",
         "user-rating": "User Rating",
         "writers": "Writers",
-        "path": "Path"
+        "path": "Path",
+        "file-path": "File Path"
     },
 
     "filter-comparison-pipe": {
