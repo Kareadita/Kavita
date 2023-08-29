@@ -415,25 +415,24 @@ public class SeriesController : BaseApiController
     [HttpPost("metadata")]
     public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
-        if (await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
+        if (!await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
+
+        if (await _licenseService.HasActiveLicense())
         {
-            if (await _licenseService.HasActiveLicense())
+            _logger.LogDebug("Clearing cache as series weblinks may have changed");
+            await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+            await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+
+            var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
+            foreach (var userId in allUsers)
             {
-                _logger.LogDebug("Clearing cache as series weblinks may have changed");
-                await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-                await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-
-                var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
-                foreach (var userId in allUsers)
-                {
-                    await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
-                }
+                await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
             }
-
-            return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
+        return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
+
     }
 
     /// <summary>

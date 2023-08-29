@@ -543,7 +543,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
-                throw new KavitaException($"{comparison} not applicable for Series.Metadata.Summary");
+                throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
         }
