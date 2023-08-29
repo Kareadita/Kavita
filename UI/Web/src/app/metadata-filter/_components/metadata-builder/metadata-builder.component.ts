@@ -2,14 +2,14 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, DestroyRef,
-  EventEmitter,
+  EventEmitter, HostListener,
   inject,
   Input,
   OnInit,
   Output
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
-import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Breakpoint, KEY_CODES, UtilityService} from 'src/app/shared/_services/utility.service';
 import {SeriesFilterV2} from 'src/app/_models/metadata/v2/series-filter-v2';
 import {NgForOf, NgIf, UpperCasePipe} from "@angular/common";
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
@@ -52,6 +52,7 @@ export class MetadataBuilderComponent implements OnInit {
   @Input() statementLimit = 0;
   @Input() availableFilterFields = allFields;
   @Output() update: EventEmitter<SeriesFilterV2> = new EventEmitter<SeriesFilterV2>();
+  @Output() apply: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);

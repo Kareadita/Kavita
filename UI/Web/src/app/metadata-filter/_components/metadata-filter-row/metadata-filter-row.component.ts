@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
+  EventEmitter, HostListener,
   inject,
   Input,
   OnInit,
@@ -34,6 +34,7 @@ import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Select2Module, Select2Option} from "ng-select2-component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 enum PredicateType {
   Text = 1,

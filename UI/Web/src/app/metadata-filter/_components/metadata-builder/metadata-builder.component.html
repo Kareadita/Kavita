@@ -11,7 +11,7 @@
                         </div>
 
                         <div class="col-md-2">
-                            <button class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit === -1 || (statementLimit > 0 && filter.statements.length >= statementLimit)">
+                            <button type="button" class="btn btn-icon" (click)="addFilter()" [ngbTooltip]="t('add-rule')" [disabled]="statementLimit === -1 || (statementLimit > 0 && filter.statements.length >= statementLimit)">
                                 <i class="fa fa-solid fa-plus" aria-hidden="true"></i>
                                 <span class="visually-hidden" aria-hidden="true">{{t('add-rule')}}</span>
                             </button>
@@ -21,7 +21,7 @@
                         <div class="col-md-10">
                             <app-metadata-row-filter [index]="i + 100" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
                                 <div class="col-md-1 ms-2">
-                                    <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
+                                    <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule', {num: i})" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
                                         <i class="fa-solid fa-minus" aria-hidden="true"></i>
                                         <span class="visually-hidden">{{t('remove-rule', {num: i})}}</span>
                                     </button>
@@ -53,7 +53,7 @@
                         <div class="col-md-12">
                             <app-metadata-row-filter [index]="i" [preset]="filterStmt" [availableFields]="availableFilterFields" (filterStatement)="updateFilter(i, $event)">
                                 <div class="col-md-1 ms-2 col-1">
-                                    <button class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
+                                    <button type="button" class="btn btn-icon" #removeBtn [ngbTooltip]="t('remove-rule')" (click)="removeFilter(i)" *ngIf="i < (filter.statements.length - 1) && filter.statements.length > 1">
                                         <i class="fa-solid fa-minus" aria-hidden="true"></i>
                                         <span class="visually-hidden">{{t('remove-rule')}}</span>
                                     </button>
