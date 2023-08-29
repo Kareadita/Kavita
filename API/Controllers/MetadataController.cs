@@ -51,13 +51,13 @@ public class MetadataController : BaseApiController
     /// </summary>
     /// <param name="role">role</param>
     /// <returns></returns>
-    [HttpGet("people")]
+    [HttpGet("people-by-role")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Instant, VaryByQueryKeys = new []{"role"})]
     public async Task<ActionResult<IList<PersonDto>>> GetAllPeople(PersonRole? role)
     {
         return role.HasValue ?
-            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId())) :
-            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value));
+            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosByRoleAsync(User.GetUserId(), role!.Value)) :
+            Ok(await _unitOfWork.PersonRepository.GetAllPersonDtosAsync(User.GetUserId()));
     }
 
     /// <summary>

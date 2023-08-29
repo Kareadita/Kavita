@@ -5,9 +5,9 @@ import {
   DestroyRef,
   EventEmitter,
   inject,
-  Input, OnChanges,
+  Input,
   OnInit,
-  Output, SimpleChanges
+  Output,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
@@ -131,7 +131,7 @@ export class MetadataFilterRowComponent implements OnInit {
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
       startWith(this.preset.value),
       distinctUntilChanged(),
-      filter(val => {
+      filter(() => {
         const inputVal = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
         return DropdownFields.includes(inputVal);
       }),
@@ -250,10 +250,9 @@ export class MetadataFilterRowComponent implements OnInit {
   }
 
   getPersonOptions(role: PersonRole) {
-    // TODO: I can actually pass role to the API and get a faster response
-    return this.metadataService.getAllPeople().pipe(map(people => people.filter(p2 => p2.role === role).map(person => {
+    return this.metadataService.getAllPeopleByRole(role).pipe(map(people => people.map(person => {
       return {value: person.id, label: person.name}
-    })))
+    })));
   }
 
 
