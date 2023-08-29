@@ -29,9 +29,9 @@
     "user-scrobble-history": {
         "title": "Scrobble历史",
         "description": "在这里您将找到与您的帐户关联的所有追踪记录事件。为了确保记录存在，您必须配置一个可用的追踪记录服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与追踪记录进行匹配。请联系您的管理员进行修正。",
-        "filter-label": "筛选器",
-        "created-header": "创建",
-        "last-modified-header": "上次修改",
+        "filter-label": "筛选",
+        "created-header": "新建",
+        "last-modified-header": "最近修改",
         "type-header": "类型",
         "series-header": "系列",
         "data-header": "数据",
@@ -40,14 +40,14 @@
         "volume-and-chapter-num": "{{v}} 卷 {{n}} 话",
         "rating": "评分 {{r}}",
         "not-applicable": "不适用",
-        "processed": "处理",
+        "processed": "已处理",
         "not-processed": "尚未处理"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "阅读进度",
         "score-updated": "评分更新",
-        "want-to-read-add": "准备阅读：添加",
-        "want-to-read-remove": "准备阅读：移除",
+        "want-to-read-add": "想读：加入",
+        "want-to-read-remove": "想读：移除",
         "review": "评论更新"
     },
     "spoiler": {
@@ -87,7 +87,7 @@
         "theme-tab": "主题",
         "devices-tab": "设备",
         "stats-tab": "状态",
-        "scrobbling-tab": "正在刮削",
+        "scrobbling-tab": "Scrobbling",
         "success-toast": "用户首选项已更新",
         "global-settings-title": "全局设置",
         "page-layout-mode-label": "页面显示模式",
@@ -141,7 +141,7 @@
         "margin-book-tooltip": "屏幕两侧的间距是多少,无论此设置如何移动设备上的间距都会被重定义为0。",
         "clients-opds-alert": "此服务器未启用OPDS功能,这不会影响Tachiyomi用户。",
         "clients-opds-description": "所有第三方客户端都会使用下面的API密钥或连接。它们就像密码一样，请保密。",
-        "clients-api-key-tooltip": "API密钥等同于密码,请保持它的机密性和安全性。",
+        "clients-api-key-tooltip": "API密钥等同于密码，请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
