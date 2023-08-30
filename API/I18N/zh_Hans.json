@@ -14,7 +14,7 @@
     "invalid-password": "无效密码",
     "generate-token": "生成确认电子邮件令牌时出现问题，参见日志",
     "generic-user-update": "更新用户时出现了异常",
-    "share-multiple-emails": "不能在多个账户间共享电子邮件",
+    "share-multiple-emails": "无法在多个账户间共用电子邮件地址",
     "age-restriction-update": "更新年龄限制时出错",
     "no-user": "用户不存在",
     "username-taken": "用户名已被使用",
