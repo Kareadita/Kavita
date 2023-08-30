@@ -1,7 +1,7 @@
 {
     "password-updated": "Heslo aktualizováno",
     "reading-list-updated": "Aktualizováno",
-    "confirm-email": "Nejprve musíte potvrdit svůj e-mail",
+    "confirm-email": "Musíte potvrdit svůj e-mail",
     "locked-out": "Byli jste zablokováni z příliš mnoha pokusů o autorizaci. Počkejte prosím 10 minut.",
     "disabled-account": "Váš účet je deaktivován. Kontaktujte správce serveru.",
     "register-user": "Při registraci uživatele se něco pokazilo",
