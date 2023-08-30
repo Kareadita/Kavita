@@ -1,30 +1,30 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "登入",
+        "username": "帳號",
+        "password": "密碼",
+        "password-validation": "密碼驗證",
+        "forgot-password": "忘記密碼?",
+        "submit": "送出"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "no-libraries": "還沒有設定資料庫，設定位置在",
+        "server-settings-link": "伺服器設定",
+        "not-granted": "您沒有任何資料庫的訪問權限。",
+        "on-deck-title": "準備就緒",
+        "recently-updated-title": "最近更新系列",
+        "recently-added-title": "新增系列"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
-        "username": "",
-        "required": "",
-        "email": "",
-        "not-valid-email": "",
-        "cancel": "",
-        "saving": "",
-        "update": ""
+        "edit": "編輯",
+        "close": "關閉",
+        "username": "帳號",
+        "required": "必填",
+        "email": "電子信箱",
+        "not-valid-email": "有效的電子信箱",
+        "cancel": "取消",
+        "saving": "儲存",
+        "update": "更新"
     },
     "user-scrobble-history": {
         "title": "",
