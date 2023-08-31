@@ -17,6 +17,7 @@ namespace API.Services;
 public interface ICollectionTagService
 {
     Task<bool> TagExistsByName(string name);
+    Task<bool> DeleteTag(CollectionTag tag);
     Task<bool> UpdateTag(CollectionTagDto dto);
     Task<bool> AddTagToSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
     Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds);
@@ -47,6 +48,12 @@ public class CollectionTagService : ICollectionTagService
     {
         if (string.IsNullOrEmpty(name.Trim())) return true;
         return await _unitOfWork.CollectionTagRepository.TagExists(name);
+    }
+
+    public async Task<bool> DeleteTag(CollectionTag tag)
+    {
+        _unitOfWork.CollectionTagRepository.Remove(tag);
+        return await _unitOfWork.CommitAsync();
     }
 
     public async Task<bool> UpdateTag(CollectionTagDto dto)
@@ -130,6 +137,7 @@ public class CollectionTagService : ICollectionTagService
     public async Task<bool> RemoveTagFromSeries(CollectionTag? tag, IEnumerable<int> seriesIds)
     {
         if (tag == null) return false;
+        tag.SeriesMetadatas ??= new List<SeriesMetadata>();
         foreach (var seriesIdToRemove in seriesIds)
         {
             tag.SeriesMetadatas.Remove(tag.SeriesMetadatas.Single(sm => sm.SeriesId == seriesIdToRemove));

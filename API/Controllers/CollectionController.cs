@@ -32,7 +32,7 @@ public class CollectionController : BaseApiController
     }
 
     /// <summary>
-    /// Return a list of all collection tags on the server
+    /// Return a list of all collection tags on the server for the logged in user.
     /// </summary>
     /// <returns></returns>
     [HttpGet]
@@ -130,10 +130,34 @@ public class CollectionController : BaseApiController
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(updateSeriesForTagDto.Tag.Id, CollectionTagIncludes.SeriesMetadata);
             if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
-            tag.SeriesMetadatas ??= new List<SeriesMetadata>();
 
             if (await _collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
                 return Ok(await _localizationService.Translate(User.GetUserId(), "collection-updated"));
+        }
+        catch (Exception)
+        {
+            await _unitOfWork.RollbackAsync();
+        }
+
+        return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-error"));
+    }
+
+    /// <summary>
+    /// Removes the collection tag from all Series it was attached to
+    /// </summary>
+    /// <param name="tagId"></param>
+    /// <returns></returns>
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpDelete]
+    public async Task<ActionResult> DeleteTag(int tagId)
+    {
+        try
+        {
+            var tag = await _unitOfWork.CollectionTagRepository.GetTagAsync(tagId, CollectionTagIncludes.SeriesMetadata);
+            if (tag == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "collection-doesnt-exist"));
+
+            if (await _collectionService.DeleteTag(tag))
+                return Ok(await _localizationService.Translate(User.GetUserId(), "collection-deleted"));
         }
         catch (Exception)
         {

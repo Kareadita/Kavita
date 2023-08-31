@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.7.14"
+    "version": "0.7.7.17"
   },
   "servers": [
     {
@@ -1268,7 +1268,7 @@
         "tags": [
           "Collection"
         ],
-        "summary": "Return a list of all collection tags on the server",
+        "summary": "Return a list of all collection tags on the server for the logged in user.",
         "responses": {
           "200": {
             "description": "Success",
@@ -1298,6 +1298,28 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Collection"
+        ],
+        "summary": "Removes the collection tag from all Series it was attached to",
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -13726,6 +13748,7 @@
               5,
               6,
               7,
+              8,
               9,
               10,
               11,

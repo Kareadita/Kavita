@@ -43,6 +43,7 @@
     "file-missing": "File was not found in book",
 
     "collection-updated": "Collection updated successfully",
+    "collection-deleted": "Collection deleted",
     "generic-error": "Something went wrong, please try again",
     "collection-doesnt-exist": "Collection does not exist",
 
