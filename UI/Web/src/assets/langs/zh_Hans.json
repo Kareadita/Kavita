@@ -644,14 +644,14 @@
         "publishers-title": "出版社",
         "promoted": "{{common.promoted}}",
         "see-more": "查看更多",
-        "see-less": "减少显示"
+        "see-less": "收起"
     },
     "badge-expander": {
         "more-items": "和{{count}}个更多"
     },
     "read-more": {
-        "read-more": "阅读更多",
-        "read-less": "阅读更少"
+        "read-more": "查看全文",
+        "read-less": "收起"
     },
     "update-notification-modal": {
         "title": "发现新版本！",
@@ -704,9 +704,9 @@
         "manage-reading-list-label": "管理阅读列表",
         "manage-reading-list-tooltip": "是否允许Kavita根据ComicInfo.xml/opf文件中的StoryArc/StoryArcNumber和AlternativeSeries/AlternativeCount标签创建阅读清单",
         "allow-scrobbling-label": "允许跟踪记录",
-        "allow-scrobbling-tooltip": "是否允许Kavita将阅读事件、想读状态、评分和评论跟踪记录至已配置的服务提供商？本功能仅在服务器上有激活的Kavita+订阅时才会生效。",
+        "allow-scrobbling-tooltip": "是否允许Kavita将阅读事件、想读状态、评分和评论记录至已配置的服务提供商？本功能仅在服务器的Kavita+订阅激活时才会生效。",
         "folder-watching-label": "监控文件夹",
-        "folder-watching-tooltip": "覆盖此资料库服务器的监控文件夹设置。如果关闭此功能，则不会监控此资料库包含的文件夹。如果共享资料库的文件夹，那么文件夹可能仍将被监控。",
+        "folder-watching-tooltip": "覆盖此资料库服务器的监控文件夹设置。如果关闭此功能，则不会监控此资料库包含的文件夹。如果共享资料库的文件夹，那么文件夹仍可能被监控。",
         "include-in-dashboard-label": "在仪表板中显示",
         "include-in-dashboard-tooltip": "是否在仪表板上显示此资料库的系列。这会影响所有数据流，例如最近阅读、最近更新、最近添加或其他自定义内容。",
         "include-in-recommendation-label": "在推荐中显示",
@@ -767,7 +767,7 @@
         "no-data-2": "一个。",
         "confirm-delete": "您确定要清除多个系列的所有书签吗？此操作无法撤销。",
         "confirm-single-delete": "您确定要清除{{seriesName}}的所有书签吗？此操作无法撤销。",
-        "delete-success": "书签已被移除",
+        "delete-success": "已移除书签",
         "delete-single-success": "已删除{{seriesName}}的书签"
     },
     "bulk-operations": {
@@ -796,7 +796,7 @@
         "size": "文件大小:"
     },
     "card-detail-layout": {
-        "total-items": "总共{{count}}个项目"
+        "total-items": "总共{{count}}个条目"
     },
     "card-item": {
         "cannot-read": "无法阅读"
@@ -832,7 +832,7 @@
     },
     "edit-series-relation": {
         "description-part-1": "不确定要添加什么关系？请查看我们的",
-        "description-part-2": "维基页面。",
+        "description-part-2": "wiki。",
         "target-series": "目标系列",
         "relationship": "关系",
         "remove": "移除",
@@ -869,7 +869,7 @@
         "publication-status-title": "出版",
         "publication-status-tooltip": "出版状态",
         "scrobbling-title": "刮削",
-        "scrobbling-tooltip": "刮削状态",
+        "scrobbling-tooltip": "记录状态",
         "on": "开",
         "off": "关",
         "disabled": "已禁用",
@@ -891,7 +891,7 @@
         "close": "{{common.close}}",
         "filter-label": "筛选",
         "clear": "{{common.clear}}",
-        "no-data": "尚未创建任何收藏集",
+        "no-data": "尚未创建收藏",
         "loading": "{{common.loading}}",
         "collection-label": "收藏",
         "create": "{{common.create}}"
@@ -954,7 +954,7 @@
         "encode-as-label": "媒体另存为",
         "encode-as-tooltip": "Kavita管理的所有媒体（封面，书签，图标）都将采用此类型编码。",
         "bookmark-dir-label": "书签目录",
-        "bookmark-dir-tooltip": "存储书签的位置。书签是源文件，可能很大。请选择一个具有足够存储空间的位置。目录是受管理的，目录中的其他文件将被删除。如果使用Docker，请挂载一个额外的卷并使用它。",
+        "bookmark-dir-tooltip": "书签的存储路径。书签是资源文件，占用空间较大。请选择一个具有足够空间的存储位置。被管理目录中的其他文件将被删除。如果使用Docker，请挂载并使用一个额外的卷。",
         "change": "更改",
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
@@ -979,8 +979,8 @@
     },
     "manage-settings": {
         "notice": "注意：",
-        "restart-required": "更改端口、网址、缓存大小或者IP需要手动重启Kavita才能生效。",
-        "base-url-label": "网站根目录",
+        "restart-required": "更改端口、网址、缓存大小或者IP后，需要重启Kavita才能生效。",
+        "base-url-label": "基本URL",
         "base-url-tooltip": "如果您想在基本URL上托管Kavita，例如yourdomain.com/kavita，请使用此选项。在使用非root用户的Docker上不支持该功能。",
         "ip-address-label": "IP地址",
         "ip-address-tooltip": "服务器监听的IP地址列表，以逗号分隔。如果Kavita在Docker中运行，则此选项无法更改。需要重启服务才能生效。",
@@ -1165,7 +1165,7 @@
     "draggable-ordered-list": {
         "instructions-alt": "当您在重新排序输入框中输入一个数字时，该项将被插入到该位置，并且所有其他项的顺序将得到更新。",
         "reorder-label": "重新排序",
-        "remove-item-alt": "删除条目"
+        "remove-item-alt": "移除条目"
     },
     "reading-lists": {
         "title": "阅读清单",
@@ -1316,7 +1316,7 @@
         "original": "原始尺寸",
         "auto-close-menu-label": "{{user-preferences.auto-close-menu-label}}",
         "swipe-enabled-label": "启用滑动手势",
-        "enable-comic-book-label": "模拟漫画书效果",
+        "enable-comic-book-label": "模拟漫画书",
         "brightness-label": "亮度",
         "first-time-reading-manga": "您随时可以点击图片打开菜单。配置不同的设置，或者通过点击进度条跳转到某一页。点击图片的两侧可以翻到下一页/上一页。",
         "layout-mode-switched": "由于空间不足以呈现双页布局，布局模式已切换为单页",
@@ -1542,7 +1542,7 @@
         "reading-list-deleted": "阅读列表已删除",
         "reading-list-updated": "阅读列表已更新",
         "confirm-delete-reading-list": "您确定要删除阅读列表吗？此操作无法撤销。",
-        "item-removed": "项目已移除",
+        "item-removed": "已移除条目",
         "nothing-to-remove": "没有需要移除的内容",
         "series-added-to-reading-list": "系列已添加到阅读列表中",
         "volumes-added-to-reading-list": "卷已添加到阅读列表中",
@@ -1560,7 +1560,7 @@
         "entity-unread": "{{name}}已标记为未读",
         "mark-read": "标记为已读",
         "mark-unread": "标记为未读",
-        "series-removed-want-to-read": "系列已从“准备阅读”列表中移除",
+        "series-removed-want-to-read": "已移除“想读”中的系列",
         "series-deleted": "系列已移除",
         "file-send-to": "文件已通过邮件发送至{{name}}",
         "theme-missing": "当前的主题已不存在。请刷新页面。",
@@ -1569,7 +1569,7 @@
         "k+-unlocked": "Kavita+已解锁！",
         "k+-error": "激活许可证时出现错误，请重试。",
         "k+-delete-key": "这将只删除Kavita的许可密钥并显示购买链接。这不会取消您的订阅！请仅在得到支持团队指示时使用此选项！",
-        "library-deleted": "资料库{{name}}已被移除",
+        "library-deleted": "已移除资料库 {{name}}",
         "copied-to-clipboard": "已复制到剪贴板",
         "book-settings-info": "您可以在菜单中修改图书设置并将这些设置保存为所有图书的设置，以及查看目录。",
         "no-next-chapter": "找不到下一个{{entity}}",
@@ -1701,7 +1701,7 @@
         "or": "匹配以下任意项",
         "and": "匹配以下所有项",
         "add-rule": "添加规则",
-        "remove-rule": "移除第{{num}}行"
+        "remove-rule": "移除行"
     },
     "filter-field-pipe": {
         "characters": "角色",
