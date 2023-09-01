@@ -287,6 +287,7 @@ export class MetadataFilterRowComponent implements OnInit {
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
+      if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
       return;
     }
   }
