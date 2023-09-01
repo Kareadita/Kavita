@@ -55,7 +55,7 @@
     },
     "review-series-modal": {
         "title": "Rezension bearbeiten",
-        "tagline-label": "",
+        "tagline-label": "Schlagzeile",
         "review-label": "Rezension",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -87,7 +87,7 @@
         "theme-tab": "Motiv",
         "devices-tab": "Geräte",
         "stats-tab": "Statistiken",
-        "scrobbling-tab": "Scrobbling",
+        "scrobbling-tab": "Kritzeln",
         "success-toast": "Benutzerpräferenzen aktualisiert",
         "global-settings-title": "Globale Einstellungen",
         "page-layout-mode-label": "Seitenlayoutmodus",
@@ -137,7 +137,7 @@
         "font-size-book-label": "Schriftgröße",
         "line-height-book-label": "Zeilenabstände",
         "line-height-book-tooltip": "Wie viel Abstand zwischen den Zeilen im Buch",
-        "margin-book-label": "",
+        "margin-book-label": "Rahmen",
         "margin-book-tooltip": "Wie viel Abstand auf jeder Seite des Bildschirms. Auf mobilen Geräten wird dieser Wert unabhängig von dieser Einstellung auf 0 gesetzt.",
         "clients-opds-alert": "OPDS ist auf diesem Server nicht aktiviert. Tachiyomi-Benutzer sind davon nicht betroffen.",
         "clients-opds-description": "Alle Clienten von Drittanbietern verwenden entweder den API-Schlüssel oder die unten stehende Verbindungsurl. Diese sind wie Passwörter, vertraulich behandeln.",
@@ -170,15 +170,15 @@
     },
     "restriction-selector": {
         "title": "Altersbeschränkung",
-        "description": "",
+        "description": "Wenn diese Option ausgewählt ist, werden alle Serien und Leselisten die mindestens einen Eintrag enthalten, der größer als die ausgewählte Beschränkung ist, aus den Suchergebnissen entfernt.",
         "not-applicable-for-admins": "Admins sind davon nicht betroffen.",
         "age-rating-label": "Altersfreigabe",
         "no-restriction": "Keine Einschränkung",
         "include-unknowns-label": "Unbekannte einbeziehen",
-        "include-unknowns-tooltip": ""
+        "include-unknowns-tooltip": "Falls wahr, werden unbekannte Medien mit Altersbeschränkung zugelassen. Dies könnte dazu führen, dass nicht gekennzeichnete Medien an Benutzer mit Altersbeschränkungen durchsickern."
     },
     "site-theme-provider-pipe": {
-        "system": "",
+        "system": "System",
         "user": "Benutzer"
     },
     "manage-devices": {
@@ -193,10 +193,10 @@
         "edit": "{{common.edit}}"
     },
     "edit-device": {
-        "device-name-label": "",
+        "device-name-label": "Gerätename",
         "email-label": "{{common.email}}",
-        "email-tooltip": "",
-        "device-platform-label": "",
+        "email-tooltip": "Diese E-Mail wird verwendet, um die Datei über \"Senden an\" anzunehmen",
+        "device-platform-label": "Geräteplattform",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
@@ -205,25 +205,25 @@
         "password-label": "{{common.password}}",
         "current-password-label": "Aktuelles Passwort",
         "new-password-label": "Neues Passwort",
-        "confirm-password-label": "",
+        "confirm-password-label": "Passwort bestätigen",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Passwörter müssen übereinstimmen",
-        "permission-error": ""
+        "permission-error": "Sie haben nicht die Erlaubnis, Ihr Passwort zu ändern. Wenden Sie sich an den Administrator des Servers."
     },
     "change-email": {
         "email-label": "{{common.email}}",
         "current-password-label": "Aktuelles Passwort",
-        "email-not-confirmed": "",
-        "email-updated-title": "",
+        "email-not-confirmed": "Diese E-Mail-Adresse ist nicht bestätigt",
+        "email-updated-title": "E-Mail Adresse aktualisiert",
         "email-updated-description": "",
-        "setup-user-account": "",
+        "setup-user-account": "User Account einrichten",
         "invite-url-label": "",
-        "invite-url-tooltip": "",
-        "permission-error": "",
+        "invite-url-tooltip": "Kopieren Sie dies und fügen Sie es in einem neuen Tab ein",
+        "permission-error": "Sie haben keine Berechtigung ihre Email Addresse zu ändern. Bitte wenden Sie sich an den Admin des Servers.",
         "required-field": "{{validation.required-field}}",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
@@ -231,27 +231,27 @@
         "save": "{{common.save}}"
     },
     "change-age-restriction": {
-        "age-restriction-label": "",
-        "unknowns": "",
+        "age-restriction-label": "Altersbeschränkung",
+        "unknowns": "Unbekannt",
         "reset": "{{common.reset}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "",
+        "copy": "Kopie",
         "regen-warning": "",
-        "no-key": "",
+        "no-key": "ERROR - SCHLÜSSEL NICHT GESETZT",
         "confirm-reset": "",
-        "key-reset": ""
+        "key-reset": "API Schlüssel zurückgesetzt"
     },
     "scrobbling-providers": {
         "title": "",
-        "requires": "",
+        "requires": "Diese Funktion benötigt eine aktive {{product}} Lizenz",
         "token-expired": "",
         "no-token-set": "",
         "token-set": "",
-        "generate": "",
+        "generate": "Generieren",
         "instructions": "",
         "token-input-label": "",
         "edit": "{{common.edit}}",
@@ -259,7 +259,7 @@
         "save": "{{common.save}}"
     },
     "typeahead": {
-        "locked-field": "",
+        "locked-field": "Feld ist gesperrt",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "add-item": "",
