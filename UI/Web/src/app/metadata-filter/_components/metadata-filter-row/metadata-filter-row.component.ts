@@ -3,23 +3,15 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter, inject,
+  EventEmitter,
+  inject,
   Input,
   OnInit,
   Output,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
-import {
-  BehaviorSubject,
-  distinctUntilChanged, filter,
-  map,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap
-} from 'rxjs';
+import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {mangaFormatFilters} from 'src/app/_models/metadata/series-filter';
 import {PersonRole} from 'src/app/_models/metadata/person';
@@ -50,6 +42,16 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Formats, FilterField.CollectionTags, FilterField.Tags
 ];
 
+const DropdownFieldsWithoutMustContains = [
+  FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
+];
+const DropdownFieldsThatIncludeNumberComparisons = [
+  FilterField.AgeRating
+];
+const NumberFieldsThatIncludeDateComparisons = [
+  FilterField.ReleaseYear
+];
+
 const StringComparisons = [FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.BeginsWith,
@@ -65,7 +67,8 @@ const NumberComparisons = [FilterComparison.Equal,
 const DropdownComparisons = [FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.Contains,
-  FilterComparison.NotContains];
+  FilterComparison.NotContains,
+  FilterComparison.MustContains];
 
 @Component({
   selector: 'app-metadata-row-filter',
@@ -113,7 +116,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   get MultipleDropdownAllowed() {
     const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
-    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains;
+    return comp === FilterComparison.Contains || comp === FilterComparison.NotContains || comp === FilterComparison.MustContains;
   }
 
   constructor(private readonly metadataService: MetadataService, private readonly libraryService: LibraryService,
@@ -148,6 +151,12 @@ export class MetadataFilterRowComponent implements OnInit {
         value: this.formGroup.get('filterValue')?.value!
       };
 
+      // Some ids can get through and be numbers, convert them to strings for the backend
+      if (typeof stmt.value === 'number' && !Number.isNaN(stmt.value)) {
+        stmt.value = stmt.value + '';
+      }
+
+      console.log('Trying to update parent with new stmt: ', stmt.value);
       if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
       console.log('updating parent with new statement: ', stmt.value)
       this.filterStatement.emit(stmt);
@@ -188,7 +197,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
   getDropdownObservable(): Observable<Select2Option[]> {
       const filterField = parseInt(this.formGroup.get('input')?.value, 10) as FilterField;
-      console.log('Getting dropdown observable: ', filterField);
       switch (filterField) {
         case FilterField.PublicationStatus:
           return this.metadataService.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
@@ -252,15 +260,15 @@ export class MetadataFilterRowComponent implements OnInit {
       this.predicateType$.next(PredicateType.Text);
 
       if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue('',{emitEvent: false});
+        this.formGroup.get('filterValue')?.patchValue('');
         console.log('setting filterValue to empty string', this.formGroup.get('filterValue')?.value)
-      } // BUG: undefined is getting set and the input value isn't updating and emitting to the backend
+      }
       return;
     }
 
     if (NumberFields.includes(inputVal)) {
       const comps = [...NumberComparisons];
-      if (inputVal === FilterField.ReleaseYear) {
+      if (NumberFieldsThatIncludeDateComparisons.includes(inputVal)) {
         comps.push(...DateComparisons);
       }
       this.validComparisons$.next(comps);
@@ -270,12 +278,16 @@ export class MetadataFilterRowComponent implements OnInit {
     }
 
     if (DropdownFields.includes(inputVal)) {
-      const comps = [...DropdownComparisons];
-      if (inputVal === FilterField.AgeRating) {
+      let comps = [...DropdownComparisons];
+      if (DropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
         comps.push(...NumberComparisons);
+      }
+      if (DropdownFieldsWithoutMustContains.includes(inputVal)) {
+        comps = comps.filter(c => c !== FilterComparison.MustContains);
       }
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Dropdown);
+      if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
       return;
     }
   }

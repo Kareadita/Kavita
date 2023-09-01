@@ -28,7 +28,7 @@
     "@iplab/ngx-file-upload": "^16.0.1",
     "@microsoft/signalr": "^7.0.10",
     "@ng-bootstrap/ng-bootstrap": "^15.1.1",
-    "@ngneat/transloco": "^5.0.6",
+    "@ngneat/transloco": "^5.0.7",
     "@ngneat/transloco-locale": "^5.1.1",
     "@ngneat/transloco-persist-lang": "^5.0.0",
     "@ngneat/transloco-persist-translations": "^5.0.0",

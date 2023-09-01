@@ -1751,7 +1751,8 @@
         "is-before": "Is before",
         "is-after": "Is after",
         "is-in-last": "Is in last",
-        "is-not-in-last": "Is not in last"
+        "is-not-in-last": "Is not in last",
+        "must-contains": "Must Contains"
     },
 
     "toasts": {

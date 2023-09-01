@@ -166,8 +166,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions?.sortField != SortField.SortName || !this.filter.sortOptions.isAscending
-      || this.filterSettings.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings.presetsV2?.sortOptions?.isAscending;
+    return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending
+      || this.filterSettings?.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings?.presetsV2?.sortOptions?.isAscending;
   }
 
   performAction(action: ActionItem<any>) {

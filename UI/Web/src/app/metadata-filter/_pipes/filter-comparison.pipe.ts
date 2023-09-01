@@ -40,6 +40,8 @@ export class FilterComparisonPipe implements PipeTransform {
         return translate('filter-comparison-pipe.is-in-last');
       case FilterComparison.IsNotInLast:
         return translate('filter-comparison-pipe.is-not-in-last');
+      case FilterComparison.MustContains:
+        return translate('filter-comparison-pipe.must-contains');
       default:
         throw new Error(`Invalid FilterComparison value: ${value}`);
     }
