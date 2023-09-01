@@ -976,14 +976,15 @@ public class SeriesRepository : ISeriesRepository
         {
             foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == FilterField.Libraries))
             {
+                var libIds = stmt.Value.Split(',').Select(int.Parse);
                 if (stmt.Comparison is FilterComparison.Equal or FilterComparison.Contains)
                 {
 
-                    filterIncludeLibs.AddRange(stmt.Value.Split(',').Select(int.Parse));
+                    filterIncludeLibs.AddRange(libIds);
                 }
                 else
                 {
-                    filterExcludeLibs.AddRange(stmt.Value.Split(',').Select(int.Parse));
+                    filterExcludeLibs.AddRange(libIds);
                 }
             }
 

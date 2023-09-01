@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using API.DTOs.Filtering.v2;
 using API.Entities;
 using API.Entities.Enums;
@@ -28,6 +26,8 @@ public static class SeriesFilter
                 return queryable.Where(s => s.Metadata.Language.Equals(languages.First()));
             case FilterComparison.Contains:
                 return queryable.Where(s => languages.Contains(s.Metadata.Language));
+            case FilterComparison.MustContains:
+                return queryable.Where(s => languages.All(s2 => s2.Equals(s.Metadata.Language)));
             case FilterComparison.NotContains:
                 return queryable.Where(s => !languages.Contains(s.Metadata.Language));
             case FilterComparison.NotEqual:
@@ -78,6 +78,7 @@ public static class SeriesFilter
             case FilterComparison.NotEqual:
             case FilterComparison.BeginsWith:
             case FilterComparison.EndsWith:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.ReleaseYear");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -112,6 +113,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.Rating");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -149,6 +151,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.AgeRating");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -182,6 +185,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.AverageReadTime");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -204,6 +208,7 @@ public static class SeriesFilter
                 return queryable.Where(s => !pubStatues.Contains(s.Metadata.PublicationStatus));
             case FilterComparison.NotEqual:
                 return queryable.Where(s => s.Metadata.PublicationStatus != firstStatus);
+            case FilterComparison.MustContains:
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -273,6 +278,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.ReadProgress");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
@@ -295,6 +301,15 @@ public static class SeriesFilter
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.Tags.Any(t => !tags.Contains(t.Id)));
+            case FilterComparison.MustContains:
+                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                var queries = new List<IQueryable<Series>>()
+                {
+                    queryable
+                };
+                queries.AddRange(tags.Select(gId => queryable.Where(s => s.Metadata.Tags.Any(p => p.Id == gId))));
+
+                return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -325,6 +340,15 @@ public static class SeriesFilter
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.People.Any(t => !people.Contains(t.Id)));
+            case FilterComparison.MustContains:
+                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                var queries = new List<IQueryable<Series>>()
+                {
+                    queryable
+                };
+                queries.AddRange(people.Select(gId => queryable.Where(s => s.Metadata.People.Any(p => p.Id == gId))));
+
+                return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -355,6 +379,15 @@ public static class SeriesFilter
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
                 return queryable.Where(s => s.Metadata.Genres.All(p => !genres.Contains(p.Id)));
+            case FilterComparison.MustContains:
+                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                var queries = new List<IQueryable<Series>>()
+                {
+                    queryable
+                };
+                queries.AddRange(genres.Select(gId => queryable.Where(s => s.Metadata.Genres.Any(p => p.Id == gId))));
+
+                return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -385,6 +418,7 @@ public static class SeriesFilter
             case FilterComparison.NotContains:
             case FilterComparison.NotEqual:
                 return queryable.Where(s => !formats.Contains(s.Format));
+            case FilterComparison.MustContains:
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -407,7 +441,6 @@ public static class SeriesFilter
     {
         if (!condition || collectionTags.Count == 0) return queryable;
 
-        //var first = collectionTags.First();
         switch (comparison)
         {
             case FilterComparison.Equal:
@@ -416,6 +449,15 @@ public static class SeriesFilter
             case FilterComparison.NotContains:
             case FilterComparison.NotEqual:
                 return queryable.Where(s => !s.Metadata.CollectionTags.Any(t => collectionTags.Contains(t.Id)));
+            case FilterComparison.MustContains:
+                // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
+                var queries = new List<IQueryable<Series>>()
+                {
+                    queryable
+                };
+                queries.AddRange(collectionTags.Select(gId => queryable.Where(s => s.Metadata.CollectionTags.Any(p => p.Id == gId))));
+
+                return queries.Aggregate((q1, q2) => q1.Intersect(q2));
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
             case FilterComparison.LessThan:
@@ -475,6 +517,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.Name");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
@@ -508,6 +551,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.Metadata.Summary");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
@@ -543,6 +587,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");
@@ -618,6 +663,7 @@ public static class SeriesFilter
             case FilterComparison.IsAfter:
             case FilterComparison.IsInLast:
             case FilterComparison.IsNotInLast:
+            case FilterComparison.MustContains:
                 throw new KavitaException($"{comparison} not applicable for Series.FolderPath");
             default:
                 throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported");

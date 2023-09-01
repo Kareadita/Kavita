@@ -94,7 +94,6 @@ export class AllCollectionsComponent implements OnInit {
     switch (action.action) {
       case(Action.Delete):
         this.collectionService.deleteTag(collectionTag.id).subscribe(res => {
-          console.log('delete tag: ', res);
           this.toastr.success(res);
         });
         break;

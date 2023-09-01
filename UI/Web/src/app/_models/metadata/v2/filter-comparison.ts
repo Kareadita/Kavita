@@ -9,11 +9,12 @@ export enum FilterComparison {
     /// </summary>
     /// <remarks>Only works with IList</remarks>
     Contains = 5,
+    MustContains = 6,
     /// <summary>
     /// Performs a LIKE %value%
     /// </summary>
-    Matches = 6,
-    NotContains = 7,
+    Matches = 7,
+    NotContains = 8,
     /// <summary>
     /// Not Equal to
     /// </summary>
