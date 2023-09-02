@@ -158,5 +158,6 @@
     "bad-copy-files-for-download": "Nelze zkopírovat soubory do dočasného stažení archivu adresáře.",
     "send-to-permission": "Nelze odeslat non-EPUB nebo PDF do zařízení, která nejsou podporována na Kindle",
     "reading-list-title-required": "Název seznamu čtení nemůže být prázdný",
-    "series-restricted-age-restriction": "Uživatel nemá povoleno sledovat tuto sérii z důvodu věkového omezení"
+    "series-restricted-age-restriction": "Uživatel nemá povoleno sledovat tuto sérii z důvodu věkového omezení",
+    "collection-deleted": "Sbírka smazána"
 }
