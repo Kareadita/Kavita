@@ -226,7 +226,15 @@ public class SeriesService : ISeriesService
             await _unitOfWork.CommitAsync();
 
             // Trigger code to cleanup tags, collections, people, etc
-            await _taskScheduler.CleanupDbEntries();
+            try
+            {
+                await _taskScheduler.CleanupDbEntries();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
+            }
+
 
             if (updateSeriesMetadataDto.CollectionTags == null) return true;
             foreach (var tag in updateSeriesMetadataDto.CollectionTags)
