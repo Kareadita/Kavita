@@ -123,13 +123,12 @@ export class MetadataFilterRowComponent implements OnInit {
     private readonly collectionTagService: CollectionTagService) {}
 
   ngOnInit() {
-    console.log('[ngOnInit] creating stmt (' + this.index + '): ', this.preset)
     this.formGroup.addControl('input', new FormControl<FilterField>(FilterField.SeriesName, []));
 
     this.formGroup.get('input')?.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe((val: string) => this.handleFieldChange(val));
     this.populateFromPreset();
 
-    this.formGroup.get('filterValue')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef), tap(v => console.log('filterValue: ', v))).subscribe();
+    this.formGroup.get('filterValue')?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
     // Dropdown dynamic option selection
     this.dropdownOptions$ = this.formGroup.get('input')!.valueChanges.pipe(
@@ -156,9 +155,7 @@ export class MetadataFilterRowComponent implements OnInit {
         stmt.value = stmt.value + '';
       }
 
-      console.log('Trying to update parent with new stmt: ', stmt.value);
       if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
-      console.log('updating parent with new statement: ', stmt.value)
       this.filterStatement.emit(stmt);
     });
 
@@ -170,7 +167,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
   populateFromPreset() {
     const val = this.preset.value === "undefined" || !this.preset.value ? '' : this.preset.value;
-    console.log('populating preset: ', val);
     this.formGroup.get('comparison')?.patchValue(this.preset.comparison);
     this.formGroup.get('input')?.patchValue(this.preset.field);
 
@@ -178,7 +174,6 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed || val.includes(',')) {
-        console.log('setting multiple values: ', val.split(',').map(d => parseInt(d, 10)));
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
         if (this.preset.field === FilterField.Languages) {
@@ -253,7 +248,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
   handleFieldChange(val: string) {
     const inputVal = parseInt(val, 10) as FilterField;
-    console.log('HandleFieldChange: ', val);
 
     if (StringFields.includes(inputVal)) {
       this.validComparisons$.next(StringComparisons);
@@ -261,7 +255,6 @@ export class MetadataFilterRowComponent implements OnInit {
 
       if (this.loaded) {
         this.formGroup.get('filterValue')?.patchValue('');
-        console.log('setting filterValue to empty string', this.formGroup.get('filterValue')?.value)
       }
       return;
     }

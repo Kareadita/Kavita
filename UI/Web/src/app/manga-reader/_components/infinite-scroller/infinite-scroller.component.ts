@@ -196,7 +196,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * gets promoted to fullscreen.
    */
   initScrollHandler() {
-    console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
+    //console.log('Setting up Scroll handler on ', this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body);
     fromEvent(this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body, 'scroll')
     .pipe(debounceTime(20), takeUntilDestroyed(this.destroyRef))
     .subscribe((event) => this.handleScrollEvent(event));

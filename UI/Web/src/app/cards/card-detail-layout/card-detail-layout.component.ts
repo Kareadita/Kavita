@@ -115,14 +115,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    console.log('[card-detail-layout] ngOnInit')
     if (this.trackByIdentity === undefined) {
       this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
-      console.log('[card-detail-layout] creating blank FilterSettings');
       this.cdRef.markForCheck();
     }
 
@@ -180,7 +178,6 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
     this.applyFilter.emit(event);
     this.updateApplied++;
     this.filter = event.filterV2;
-    console.log('[card-detail-layout] apply filter')
     this.cdRef.markForCheck();
   }
 

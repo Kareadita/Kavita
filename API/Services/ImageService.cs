@@ -420,7 +420,7 @@ public class ImageService : IImageService
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
-        return $"{new Uri(url).Host}{encodeFormat.GetExtension()}";
+        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";
     }
 
 
