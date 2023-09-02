@@ -1721,7 +1721,9 @@
         "writers": "작가",
         "languages": "언어",
         "libraries": "라이브러리",
-        "series-name": "시리즈 이름"
+        "series-name": "시리즈 이름",
+        "path": "경로",
+        "file-path": "파일 경로"
     },
     "filter-comparison-pipe": {
         "is-not-in-last": "마지막에 없음",
@@ -1738,7 +1740,8 @@
         "ends-with": "로 끝남",
         "is-before": "이전",
         "is-after": "이후",
-        "is-in-last": "마지막에 있음"
+        "is-in-last": "마지막에 있음",
+        "must-contains": "반드시 포함"
     },
     "metadata-builder": {
         "or": "다음 중 하나와 일치",
