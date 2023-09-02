@@ -76,7 +76,6 @@ export class MetadataFilterComponent implements OnInit {
   allFilterFields = allFields;
 
   handleFilters(filter: SeriesFilterV2) {
-    console.log('[metadata-filter] updating filter');
     this.filterV2 = filter;
   }
 
@@ -87,7 +86,6 @@ export class MetadataFilterComponent implements OnInit {
   constructor(public toggleService: ToggleService) {}
 
   ngOnInit(): void {
-    console.log('[metadata-filter] ngOnInit')
     if (this.filterSettings === undefined) {
       this.filterSettings = new FilterSettings();
       this.cdRef.markForCheck();
@@ -139,7 +137,6 @@ export class MetadataFilterComponent implements OnInit {
   loadFromPresetsAndSetup() {
     this.fullyLoaded = false;
 
-    console.log('[metadata-filter] loading from preset and setting up');
     this.filterV2 = this.deepClone(this.filterSettings.presetsV2);
 
     this.sortGroup = new FormGroup({
@@ -148,7 +145,6 @@ export class MetadataFilterComponent implements OnInit {
     });
 
     this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-      console.log('[metadata-filter] sortGroup value change');
       if (this.filterV2?.sortOptions === null) {
         this.filterV2.sortOptions = {
           isAscending: this.isAscendingSort,
@@ -176,7 +172,6 @@ export class MetadataFilterComponent implements OnInit {
     }
 
     this.filterV2!.sortOptions!.isAscending = this.isAscendingSort;
-    console.log('[metadata-filter] updated filter sort order')
   }
 
   clear() {

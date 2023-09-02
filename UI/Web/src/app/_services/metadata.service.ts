@@ -25,52 +25,9 @@ import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 export class MetadataService {
 
   baseUrl = environment.apiUrl;
-
-  private currentThemeSource = new ReplaySubject<SeriesFilterV2>(1);
-
-  private ageRatingTypes: {[key: number]: string} | undefined = undefined;
   private validLanguages: Array<Language> = [];
 
   constructor(private httpClient: HttpClient, private router: Router) { }
-
-  // applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
-  //   const dto: SeriesFilterV2 = {
-  //     statements:  [this.createDefaultFilterStatement(filter, comparison, value + '')],
-  //     combination: FilterCombination.Or,
-  //     limitTo: 0
-  //   };
-  //   //
-  //   // console.log('navigating to: ', this.filterUtilityService.urlFromFilterV2(page.join('/'), dto));
-  //   // this.router.navigateByUrl(this.filterUtilityService.urlFromFilterV2(page.join('/'), dto));
-  //
-  //   // Creates a temp name for the filter
-  //   this.httpClient.post<string>(this.baseUrl + 'filter/create-temp', dto, TextResonse).pipe(map(name => {
-  //     dto.name = name;
-  //   }), switchMap((_) => {
-  //     let params: any = {};
-  //     params['filterName'] = dto.name;
-  //     return this.router.navigate(page, {queryParams: params});
-  //   })).subscribe();
-  //
-  // }
-
-  // getFilter(filterName: string) {
-  //   return this.httpClient.get<SeriesFilterV2>(this.baseUrl + 'filter?name=' + filterName);
-  // }
-
-  // getAgeRating(ageRating: AgeRating) {
-  //   if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {
-  //     return of(this.ageRatingTypes[ageRating]);
-  //   }
-  //   return this.httpClient.get<string>(this.baseUrl + 'series/age-rating?ageRating=' + ageRating, TextResonse).pipe(map(ratingString => {
-  //     if (this.ageRatingTypes === undefined) {
-  //       this.ageRatingTypes = {};
-  //     }
-  //
-  //     this.ageRatingTypes[ageRating] = ratingString;
-  //     return this.ageRatingTypes[ageRating];
-  //   }));
-  // }
 
   getAllAgeRatings(libraries?: Array<number>) {
     let method = 'metadata/age-ratings'

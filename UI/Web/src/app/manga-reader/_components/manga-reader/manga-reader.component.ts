@@ -1376,7 +1376,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // This will update the value for value except when in webtoon due to how the webtoon reader
     // responds to page changes
     if (this.readerMode !== ReaderMode.Webtoon) {
-      console.log('Setting Page Number as slider drag occurred');
       this.setPageNum(context.value);
     }
   }
@@ -1390,7 +1389,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
-    console.log('Setting Page Number as slider page update occurred');
     this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.refreshSlider.emit();
     this.goToPageEvent.next(this.pageNum);
@@ -1477,7 +1475,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
     }
 
-    console.log('Setting Page Number as goto page');
     this.setPageNum(this.adjustPagesForDoubleRenderer(page));
     this.goToPageEvent.next(page);
     this.render();
@@ -1561,7 +1558,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   handleWebtoonPageChange(updatedPageNum: number) {
-    console.log('Setting Page Number as webtoon page changed');
     this.setPageNum(updatedPageNum);
   }
 

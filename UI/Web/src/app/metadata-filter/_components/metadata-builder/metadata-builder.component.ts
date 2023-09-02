@@ -68,29 +68,24 @@ export class MetadataBuilderComponent implements OnInit {
   ];
 
   ngOnInit() {
-    console.log('[builder] ngOnInit');
     this.formGroup.addControl('comparison', new FormControl<FilterCombination>(this.filter?.combination || FilterCombination.Or, []));
     this.formGroup.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef), tap(values => {
       this.filter.combination = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterCombination;
-      console.log('[builder] emitting filter from comparison change');
       this.update.emit(this.filter);
     })).subscribe();
   }
 
   addFilter() {
-    console.log('[builder] Adding Filter')
     this.filter.statements = [this.metadataService.createDefaultFilterStatement(), ...this.filter.statements];
     this.cdRef.markForCheck();
   }
 
   removeFilter(index: number) {
-    console.log('[builder] Removing filter')
     this.filter.statements = this.filter.statements.slice(0, index).concat(this.filter.statements.slice(index + 1))
     this.cdRef.markForCheck();
   }
 
   updateFilter(index: number, filterStmt: FilterStatement) {
-    console.log('[builder] updating filter: ', this.filter.statements);
     this.metadataService.updateFilter(this.filter.statements, index, filterStmt);
     this.update.emit(this.filter);
   }

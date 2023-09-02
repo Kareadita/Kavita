@@ -135,11 +135,6 @@ export class LibraryDetailComponent implements OnInit {
     }
   }
 
-  get Debug() {
-    console.log('rendered section ');
-    return 0;
-  }
-
   constructor(private route: ActivatedRoute, private router: Router, private seriesService: SeriesService,
     private libraryService: LibraryService, private titleService: Title, private actionFactoryService: ActionFactoryService,
     private actionService: ActionService, public bulkSelectionService: BulkSelectionService, private hubService: MessageHubService,
