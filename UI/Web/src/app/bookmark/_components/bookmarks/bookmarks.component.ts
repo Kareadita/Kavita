@@ -32,7 +32,6 @@ import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/car
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 import {Title} from "@angular/platform-browser";
 
@@ -128,7 +127,8 @@ export class BookmarksComponent implements OnInit {
 
     switch (action.action) {
       case Action.DownloadBookmark:
-        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)), (d) => {
+        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)),
+          (d) => {
           if (!d) {
             this.bulkSelectionService.deselectAll();
           }
@@ -156,24 +156,18 @@ export class BookmarksComponent implements OnInit {
 
     this.readerService.getAllBookmarks(this.filter).pipe(take(1)).subscribe(bookmarks => {
       this.bookmarks = bookmarks;
-      this.seriesIds = {};
       this.bookmarks.forEach(bmk => {
-        if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
-          this.seriesIds[bmk.seriesId] = 1;
-        } else {
-          this.seriesIds[bmk.seriesId] += 1;
-        }
         this.downloadingSeries[bmk.seriesId] = false;
         this.clearingSeries[bmk.seriesId] = false;
       });
 
-      const ids = Object.keys(this.seriesIds).map(k => parseInt(k, 10));
-      this.seriesService.getAllSeriesByIds(ids).subscribe(series => {
-        this.jumpbarKeys = this.jumpbarService.getJumpKeys(series, (t: Series) => t.name);
-        this.series = series;
-        this.loadingBookmarks = false;
-        this.cdRef.markForCheck();
+      const distinctSeriesMap = new Map();
+      this.bookmarks.forEach(b => {
+        distinctSeriesMap.set(b.series.id, b.series);
       });
+      this.series = Array.from(distinctSeriesMap.values());
+      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (t: Series) => t.name);
+      this.loadingBookmarks = false;
       this.cdRef.markForCheck();
     });
   }
@@ -199,10 +193,6 @@ export class BookmarksComponent implements OnInit {
       this.refresh.emit();
       this.cdRef.markForCheck();
     });
-  }
-
-  getBookmarkPages(seriesId: number) {
-    return this.seriesIds[seriesId];
   }
 
   downloadBookmarks(series: Series) {

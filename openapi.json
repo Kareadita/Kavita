@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.7.19"
+    "version": "0.7.7.20"
   },
   "servers": [
     {
@@ -12115,6 +12115,9 @@
           "chapterId": {
             "type": "integer",
             "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/SeriesDto"
           }
         },
         "additionalProperties": false
