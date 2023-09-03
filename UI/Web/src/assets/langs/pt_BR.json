@@ -1727,7 +1727,9 @@
         "writers": "Escritores",
         "formats": "Formatos",
         "release-year": "Ano do Lançamento",
-        "user-rating": "Avaliação do Usuário"
+        "user-rating": "Avaliação do Usuário",
+        "path": "Caminho",
+        "file-path": "Caminho de Arquivo"
     },
     "filter-comparison-pipe": {
         "begins-with": "Começa com",
