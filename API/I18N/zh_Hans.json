@@ -156,5 +156,8 @@
     "query-required": "您必须传递一个查询参数",
     "scrobble-bad-payload": "Scrobble服务提供商的数据无效",
     "bad-copy-files-for-download": "无法复制文件至临时下载目录",
-    "progress-must-exist": "用户进程必须存在"
+    "progress-must-exist": "用户进程必须存在",
+    "generic-scrobble-hold": "启用锁定时发生错误",
+    "reset-chapter-lock": "无法重置章节的封面锁",
+    "collection-deleted": "收藏已删除"
 }
