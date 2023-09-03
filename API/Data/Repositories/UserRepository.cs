@@ -34,8 +34,8 @@ public enum AppUserIncludes
     WantToRead = 64,
     ReadingListsWithItems = 128,
     Devices = 256,
-    ScrobbleHolds = 512
-
+    ScrobbleHolds = 512,
+    SmartFilters = 1024
 }
 
 public interface IUserRepository

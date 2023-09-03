@@ -5,6 +5,8 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.CollectionTags;
 using API.DTOs.Device;
+using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
@@ -218,5 +220,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<Device, DeviceDto>();
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
+
+        CreateMap<AppUserSmartFilter, FilterV2Dto>();
     }
 }
