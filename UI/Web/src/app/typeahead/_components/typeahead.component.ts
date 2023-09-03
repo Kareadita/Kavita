@@ -509,11 +509,8 @@ export class TypeaheadComponent implements OnInit {
     // Check if this new option will interfere with any existing ones not shown
 
     if (typeof this.settings.compareFnForAdd == 'function') {
-      console.log('filtered options: ', this.optionSelection.selected());
       const willDuplicateExist = this.settings.compareFnForAdd(this.optionSelection.selected(), inputText);
-      console.log('duplicate check: ', willDuplicateExist);
       if (willDuplicateExist.length > 0) {
-        console.log("can't show add, duplicates will exist");
         return;
       }
     }
@@ -521,10 +518,7 @@ export class TypeaheadComponent implements OnInit {
     if (typeof this.settings.compareFn == 'function') {
       // The problem here is that compareFn can report that duplicate will exist as it does contains not match
       const matches = this.settings.compareFn(options, inputText);
-      console.log('matches for ', inputText, ': ', matches);
-      console.log('matches include input string: ', matches.includes(this.settings.addTransformFn(inputText)));
       if (matches.length > 0 && matches.includes(this.settings.addTransformFn(inputText))) {
-        console.log("can't show add, there are still ");
         return;
       }
     }

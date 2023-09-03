@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; read: 'table-of-contents'">
   <div class="table-of-contents">
     <div *ngIf="chapters.length === 0">
-      <em>{{t('no-data')}}}</em>
+      <em>{{t('no-data')}}</em>
     </div>
     <div *ngIf="chapters.length === 1; else nestedChildren">
       <ul>

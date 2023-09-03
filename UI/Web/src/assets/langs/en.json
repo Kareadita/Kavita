@@ -164,7 +164,7 @@
 
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next Scrobble-able event (reading progress, rating, want to read status) will trigger events."
+        "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger events."
     },
 
     "theme-manager": {
@@ -267,6 +267,7 @@
 
     "api-key": {
         "copy": "Copy",
+        "show": "Show",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
@@ -522,6 +523,7 @@
     },
 
     "all-series": {
+        "title": "All Series",
         "series-count": "{{common.series-count}}"
     },
 
@@ -704,7 +706,7 @@
         "collections-title": "{{side-nav.collections}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
 
-        "writers-title": "Writers/Authors",
+        "writers-title": "Writers",
         "cover-artists-title": "Cover Artists",
         "characters-title": "Characters",
         "colorists-title": "Colorists",
@@ -1067,7 +1069,16 @@
         "save": "{{common.save}}",
 
         "media-issue-title": "Media Issues",
-        "scrobble-issue-title": "Scrobble Issues"
+        "scrobble-issue-title": "Scrobble Issues",
+        "cover-image-size-label": "Cover Image Size",
+        "cover-image-size-tooltip": "How large should cover images generate as. Note: Anything larger than the default will incur longer page load times."
+    },
+
+    "cover-image-size": {
+        "default": "Default (320x455)",
+        "medium": "Medium (640x909)",
+        "large": "Large (900x1277)",
+        "xlarge": "Extra Large (1265x1795)"
     },
 
     "manage-scrobble-errors": {
@@ -1322,7 +1333,8 @@
         "read": "{{common.read}}",
         "read-options-alt": "Read options",
         "incognito-alt": "(Incognito)",
-        "no-data": "Nothing added"
+        "no-data": "Nothing added",
+        "characters-title": "{{series-metadata-detail.characters-title}}"
     },
 
     "events-widget": {
@@ -1435,7 +1447,7 @@
         "close-reader-alt": "Close Reader"
     },
 
-    "infinite-reader": {
+    "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Scroll up to move to previous chapter",
         "continuous-reading-prev-chapter": "Previous Chapter",
         "continuous-reading-next-chapter-alt": "Scroll up to move to next chapter",
@@ -1481,8 +1493,14 @@
 
     "metadata-filter": {
         "filter-title": "Filter",
+        "sort-by-label": "Sort By",
+        "ascending-alt": "Ascending",
+        "descending-alt": "Descending",
+        "reset": "{{common.reset}}",
+        "apply": "{{common.apply}}",
+        "limit-label": "Limit To",
+
         "format-label": "Format",
-        "format-tooltip": "This is library agnostic",
         "libraries-label": "Libraries",
         "collections-label": "Collections",
         "genres-label": "Genres",
@@ -1509,13 +1527,7 @@
         "series-name-tooltip": "Series name will filter against Name, Sort Name, or Localized Name",
         "release-label": "Release",
         "min": "Min",
-        "max": "Max",
-        "sort-by-label": "Sort By",
-        "ascending-alt": "Ascending",
-        "descending-alt": "Descending",
-        "reset": "{{common.reset}}",
-        "apply": "{{common.apply}}"
-
+        "max": "Max"
     },
 
     "sort-field-pipe": {
@@ -1688,6 +1700,61 @@
         "invalid-password-reset-url": "Invalid reset password url"
     },
 
+    "metadata-builder": {
+        "or": "Match any of the following",
+        "and": "Match all of the following",
+        "add-rule": "Add Rule",
+        "remove-rule": "Remove Row"
+    },
+
+    "filter-field-pipe": {
+        "age-rating": "Age Rating",
+        "characters": "Characters",
+        "collection-tags": "Collection Tags",
+        "colorist": "Colorist",
+        "cover-artist": "Cover Artist",
+        "editor": "Editor",
+        "formats": "Formats",
+        "genres": "Genres",
+        "inker": "Inker",
+        "languages": "Languages",
+        "libraries": "Libraries",
+        "letterer": "Letterer",
+        "publication-status": "Publication Status",
+        "penciller": "Penciller",
+        "publisher": "Publisher",
+        "read-progress": "Read Progress",
+        "read-time": "Read Time",
+        "release-year": "Release Year",
+        "series-name": "Series Name",
+        "summary": "Summary",
+        "tags": "Tags",
+        "translators": "Translators",
+        "user-rating": "User Rating",
+        "writers": "Writers",
+        "path": "Path",
+        "file-path": "File Path"
+    },
+
+    "filter-comparison-pipe": {
+        "begins-with": "Begins with",
+        "contains": "Contains",
+        "equal": "Equal",
+        "greater-than": "Greater than",
+        "greater-than-or-equal": "Greater than or equal",
+        "less-than": "Less than",
+        "less-than-or-equal": "Less than or equal",
+        "matches": "Matches",
+        "does-not-contain": "Does not contain",
+        "not-equal": "Not equal",
+        "ends-with": "Ends with",
+        "is-before": "Is before",
+        "is-after": "Is after",
+        "is-in-last": "Is in last",
+        "is-not-in-last": "Is not in last",
+        "must-contains": "Must Contains"
+    },
+
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
@@ -1763,7 +1830,8 @@
         "alert-bad-theme": "There is invalid or unsafe css in the theme. Please reach out to your admin to have this corrected. Defaulting to dark theme.",
         "confirm-library-delete": "Are you sure you want to delete the {{name}} library? You cannot undo this action.",
         "confirm-library-type-change": "Changing library type will trigger a new scan with different parsing rules and may lead to series being re-created and hence you may loose progress and bookmarks. You should backup before you do this. Are you sure you want to continue?",
-        "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?"
+        "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
+        "list-doesnt-exist": "This list doesn't exist"
     },
 
     "actionable": {
@@ -1790,7 +1858,11 @@
         "view-series": "View Series",
         "clear": "Clear",
         "import-cbl": "Import CBL",
-        "read": "Read"
+        "read": "Read",
+        "add-rule-group-and": "Add Rule Group (AND)",
+        "add-rule-group-or": "Add Rule Group (OR)",
+        "remove-rule-group": "Remove Rule Group"
+
     },
 
     "preferences": {

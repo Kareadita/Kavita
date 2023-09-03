@@ -1,16 +1,23 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { of } from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 import {map, tap} from 'rxjs/operators';
-import { environment } from 'src/environments/environment';
-import { Genre } from '../_models/metadata/genre';
-import { AgeRating } from '../_models/metadata/age-rating';
-import { AgeRatingDto } from '../_models/metadata/age-rating-dto';
-import { Language } from '../_models/metadata/language';
-import { PublicationStatusDto } from '../_models/metadata/publication-status-dto';
-import { Person } from '../_models/metadata/person';
-import { Tag } from '../_models/tag';
-import { TextResonse } from '../_types/text-response';
+import {of, ReplaySubject, switchMap} from 'rxjs';
+import {environment} from 'src/environments/environment';
+import {Genre} from '../_models/metadata/genre';
+import {AgeRating} from '../_models/metadata/age-rating';
+import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
+import {Language} from '../_models/metadata/language';
+import {PublicationStatusDto} from '../_models/metadata/publication-status-dto';
+import {Person, PersonRole} from '../_models/metadata/person';
+import {Tag} from '../_models/tag';
+import {TextResonse} from '../_types/text-response';
+import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
+import {FilterField} from '../_models/metadata/v2/filter-field';
+import {Router} from "@angular/router";
+import {SortField} from "../_models/metadata/series-filter";
+import {FilterCombination} from "../_models/metadata/v2/filter-combination";
+import {SeriesFilterV2} from "../_models/metadata/v2/series-filter-v2";
+import {FilterStatement} from "../_models/metadata/v2/filter-statement";
 
 @Injectable({
   providedIn: 'root'
@@ -18,25 +25,9 @@ import { TextResonse } from '../_types/text-response';
 export class MetadataService {
 
   baseUrl = environment.apiUrl;
-
-  private ageRatingTypes: {[key: number]: string} | undefined = undefined;
   private validLanguages: Array<Language> = [];
 
-  constructor(private httpClient: HttpClient) { }
-
-  getAgeRating(ageRating: AgeRating) {
-    if (this.ageRatingTypes != undefined && this.ageRatingTypes.hasOwnProperty(ageRating)) {
-      return of(this.ageRatingTypes[ageRating]);
-    }
-    return this.httpClient.get<string>(this.baseUrl + 'series/age-rating?ageRating=' + ageRating, TextResonse).pipe(map(ratingString => {
-      if (this.ageRatingTypes === undefined) {
-        this.ageRatingTypes = {};
-      }
-
-      this.ageRatingTypes[ageRating] = ratingString;
-      return this.ageRatingTypes[ageRating];
-    }));
-  }
+  constructor(private httpClient: HttpClient, private router: Router) { }
 
   getAllAgeRatings(libraries?: Array<number>) {
     let method = 'metadata/age-ratings'
@@ -78,6 +69,7 @@ export class MetadataService {
     return this.httpClient.get<Array<Language>>(this.baseUrl + method);
   }
 
+
   /**
    * All the potential language tags there can be
    */
@@ -97,7 +89,37 @@ export class MetadataService {
     return this.httpClient.get<Array<Person>>(this.baseUrl + method);
   }
 
-  getChapterSummary(chapterId: number) {
-    return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
+  getAllPeopleByRole(role: PersonRole) {
+    return this.httpClient.get<Array<Person>>(this.baseUrl + 'metadata/people-by-role?role=' + role);
+  }
+
+  // getChapterSummary(chapterId: number) {
+  //   return this.httpClient.get<string>(this.baseUrl + 'metadata/chapter-summary?chapterId=' + chapterId, TextResonse);
+  // }
+
+  createDefaultFilterDto(): SeriesFilterV2 {
+    return {
+      statements: [] as FilterStatement[],
+      combination: FilterCombination.And,
+      limitTo: 0,
+      sortOptions: {
+        isAscending: true,
+        sortField: SortField.SortName
+      }
+    };
+  }
+
+  createDefaultFilterStatement(field: FilterField = FilterField.SeriesName, comparison = FilterComparison.Equal, value = '') {
+    return {
+      comparison: comparison,
+      field: field,
+      value: value
+    };
+  }
+
+  updateFilter(arr: Array<FilterStatement>, index: number, filterStmt: FilterStatement) {
+    arr[index].comparison = filterStmt.comparison;
+    arr[index].field = filterStmt.field;
+    arr[index].value = filterStmt.value ? filterStmt.value + '' : '';
   }
 }

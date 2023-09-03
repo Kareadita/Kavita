@@ -41,4 +41,8 @@ export class CollectionTagService {
   tagNameExists(name: string) {
     return this.httpClient.get<boolean>(this.baseUrl + 'collection/name-exists?name=' + name);
   }
+
+  deleteTag(tagId: number) {
+    return this.httpClient.delete<string>(this.baseUrl + 'collection?tagId=' + tagId, TextResonse);
+  }
 }

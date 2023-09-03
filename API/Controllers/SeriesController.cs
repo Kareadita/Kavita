@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
@@ -6,6 +7,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
 using API.DTOs.SeriesDetail;
 using API.Entities;
@@ -53,10 +55,19 @@ public class SeriesController : BaseApiController
         _recommendationCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
     }
 
+    /// <summary>
+    /// Gets series with the applied Filter
+    /// </summary>
+    /// <remarks>This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2</remarks>
+    /// <param name="libraryId"></param>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
     [HttpPost]
+    [Obsolete("use v2")]
     public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibrary(int libraryId, [FromQuery] UserParams userParams, [FromBody] FilterDto filterDto)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
@@ -71,6 +82,30 @@ public class SeriesController : BaseApiController
     }
 
     /// <summary>
+    /// Gets series with the applied Filter
+    /// </summary>
+    /// <param name="userParams"></param>
+    /// <param name="filterDto"></param>
+    /// <returns></returns>
+    [HttpPost("v2")]
+    public async Task<ActionResult<IEnumerable<Series>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
+    {
+        var userId = User.GetUserId();
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+
+        //TODO: We might want something like libraryId as source so that I don't have to muck with the groups
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest("Could not get series for library");
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
     /// Fetches a Series for a given Id
     /// </summary>
     /// <param name="seriesId">Series Id to fetch details for</param>
@@ -79,8 +114,7 @@ public class SeriesController : BaseApiController
     [HttpGet("{seriesId:int}")]
     public async Task<ActionResult<SeriesDto>> GetSeries(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, User.GetUserId());
         if (series == null) return NoContent();
         return Ok(series);
     }
@@ -115,15 +149,13 @@ public class SeriesController : BaseApiController
     [HttpGet("volumes")]
     public async Task<ActionResult<IEnumerable<VolumeDto>>> GetVolumes(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, userId));
+        return Ok(await _unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, User.GetUserId()));
     }
 
     [HttpGet("volume")]
     public async Task<ActionResult<VolumeDto?>> GetVolume(int volumeId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var vol = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, userId);
+        var vol = await _unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, User.GetUserId());
         if (vol == null) return NoContent();
         return Ok(vol);
     }
@@ -207,7 +239,7 @@ public class SeriesController : BaseApiController
     }
 
     /// <summary>
-    /// Gets all recently added series
+    /// Gets all recently added series. Obsolete, use recently-added-v2
     /// </summary>
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
@@ -215,11 +247,36 @@ public class SeriesController : BaseApiController
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("recently-added")]
+    [Obsolete("use recently-added-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Gets all recently added series
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [ResponseCache(CacheProfileName = "Instant")]
+    [HttpPost("recently-added-v2")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
+    {
+        var userId = User.GetUserId();
+        var series =
+            await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, userParams, filterDto);
 
         // Apply progress/rating information (I can't work out how to do this in initial query)
         if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
@@ -239,8 +296,7 @@ public class SeriesController : BaseApiController
     [HttpPost("recently-updated-series")]
     public async Task<ActionResult<IEnumerable<RecentlyAddedItemDto>>> GetRecentlyAddedChapters()
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, 20));
+        return Ok(await _unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(User.GetUserId(), 20));
     }
 
     /// <summary>
@@ -250,10 +306,35 @@ public class SeriesController : BaseApiController
     /// <param name="userParams"></param>
     /// <param name="libraryId"></param>
     /// <returns></returns>
+    [HttpPost("all-v2")]
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    {
+        var userId = User.GetUserId();
+        var series =
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+
+        // Apply progress/rating information (I can't work out how to do this in initial query)
+        if (series == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-series"));
+
+        await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, series);
+
+        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
+
+        return Ok(series);
+    }
+
+    /// <summary>
+    /// Returns all series for the library. Obsolete, use all-v2
+    /// </summary>
+    /// <param name="filterDto"></param>
+    /// <param name="userParams"></param>
+    /// <param name="libraryId"></param>
+    /// <returns></returns>
     [HttpPost("all")]
+    [Obsolete("User all-v2")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeries(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
 
@@ -270,16 +351,15 @@ public class SeriesController : BaseApiController
     /// <summary>
     /// Fetches series that are on deck aka have progress on them.
     /// </summary>
-    /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
     /// <param name="libraryId">Default of 0 meaning all libraries</param>
     /// <returns></returns>
     [ResponseCache(CacheProfileName = "Instant")]
     [HttpPost("on-deck")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, filterDto);
+        var userId = User.GetUserId();
+        var pagedList = await _unitOfWork.SeriesRepository.GetOnDeck(userId, libraryId, userParams, null);
 
         await _unitOfWork.SeriesRepository.AddSeriesModifiers(userId, pagedList);
 
@@ -287,6 +367,7 @@ public class SeriesController : BaseApiController
 
         return Ok(pagedList);
     }
+
 
     /// <summary>
     /// Removes a series from displaying on deck until the next read event on that series
@@ -359,25 +440,24 @@ public class SeriesController : BaseApiController
     [HttpPost("metadata")]
     public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
-        if (await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
+        if (!await _seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
+            return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
+
+        if (await _licenseService.HasActiveLicense())
         {
-            if (await _licenseService.HasActiveLicense())
+            _logger.LogDebug("Clearing cache as series weblinks may have changed");
+            await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+            await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
+
+            var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
+            foreach (var userId in allUsers)
             {
-                _logger.LogDebug("Clearing cache as series weblinks may have changed");
-                await _reviewCacheProvider.RemoveAsync(ReviewController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-                await _ratingCacheProvider.RemoveAsync(RatingController.CacheKey + updateSeriesMetadataDto.SeriesMetadata.SeriesId);
-
-                var allUsers = (await _unitOfWork.UserRepository.GetAllUsersAsync()).Select(s => s.Id);
-                foreach (var userId in allUsers)
-                {
-                    await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
-                }
+                await _recommendationCacheProvider.RemoveAsync(RecommendedController.CacheKey + $"{updateSeriesMetadataDto.SeriesMetadata.SeriesId}-{userId}");
             }
-
-            return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
         }
 
-        return BadRequest(await _localizationService.Translate(User.GetUserId(), "update-metadata-fail"));
+        return Ok(await _localizationService.Translate(User.GetUserId(), "series-updated"));
+
     }
 
     /// <summary>
@@ -389,7 +469,7 @@ public class SeriesController : BaseApiController
     [HttpGet("series-by-collection")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetSeriesByCollectionTag(int collectionId, [FromQuery] UserParams userParams)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
+        var userId = User.GetUserId();
         var series =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, userParams);
 
@@ -412,8 +492,7 @@ public class SeriesController : BaseApiController
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
     {
         if (dto.SeriesIds == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "invalid-payload"));
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, userId));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, User.GetUserId()));
     }
 
     /// <summary>
@@ -443,10 +522,9 @@ public class SeriesController : BaseApiController
     [HttpGet("series-detail")]
     public async Task<ActionResult<SeriesDetailDto>> GetSeriesDetailBreakdown(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
         try
         {
-            return await _seriesService.GetSeriesDetail(seriesId, userId);
+            return await _seriesService.GetSeriesDetail(seriesId, User.GetUserId());
         }
         catch (KavitaException ex)
         {
@@ -465,9 +543,7 @@ public class SeriesController : BaseApiController
     [HttpGet("related")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRelatedSeries(int seriesId, RelationKind relation)
     {
-        // Send back a custom DTO with each type or maybe sorted in some way
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(userId, seriesId, relation));
+        return Ok(await _unitOfWork.SeriesRepository.GetSeriesForRelationKind(User.GetUserId(), seriesId, relation));
     }
 
     /// <summary>
@@ -478,8 +554,7 @@ public class SeriesController : BaseApiController
     [HttpGet("all-related")]
     public async Task<ActionResult<RelatedSeriesDto>> GetAllRelatedSeries(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _seriesService.GetRelatedSeries(userId, seriesId));
+        return Ok(await _seriesService.GetRelatedSeries(User.GetUserId(), seriesId));
     }
 
 

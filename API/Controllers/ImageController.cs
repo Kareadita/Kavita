@@ -158,11 +158,6 @@ public class ImageController : BaseApiController
     private async Task<string> GenerateReadingListCoverImage(int readingListId)
     {
         var covers = await _unitOfWork.ReadingListRepository.GetRandomCoverImagesAsync(readingListId);
-        if (covers.Count < 4)
-        {
-            return string.Empty;
-        }
-
         var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
             ImageService.GetReadingListFormat(readingListId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -171,6 +166,7 @@ public class ImageController : BaseApiController
         if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
         ImageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            settings.CoverImageSize,
             destFile);
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }
@@ -178,11 +174,6 @@ public class ImageController : BaseApiController
     private async Task<string> GenerateCollectionCoverImage(int collectionId)
     {
         var covers = await _unitOfWork.CollectionTagRepository.GetRandomCoverImagesAsync(collectionId);
-        if (covers.Count < 4)
-        {
-            return string.Empty;
-        }
-
         var destFile = _directoryService.FileSystem.Path.Join(_directoryService.TempDirectory,
             ImageService.GetCollectionTagFormat(collectionId));
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -190,6 +181,7 @@ public class ImageController : BaseApiController
         if (_directoryService.FileSystem.File.Exists(destFile)) return destFile;
         ImageService.CreateMergedImage(
             covers.Select(c => _directoryService.FileSystem.Path.Join(_directoryService.CoverImageDirectory, c)).ToList(),
+            settings.CoverImageSize,
             destFile);
         return !_directoryService.FileSystem.File.Exists(destFile) ? string.Empty : destFile;
     }

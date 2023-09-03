@@ -4,7 +4,7 @@
     <div class="form-check" *ngIf="allLibraries.length > 0">
       <input id="select-all" type="checkbox" class="form-check-input"
              [ngModel]="selectAll" (change)="toggleAll()" [indeterminate]="hasSomeSelected">
-      <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}} All</label>
+      <label for="select-all" class="form-check-label">{{selectAll ? t('deselect-all') : t('select-all')}}</label>
     </div>
     <ul>
       <li class="list-group-item" *ngFor="let library of allLibraries; let i = index">

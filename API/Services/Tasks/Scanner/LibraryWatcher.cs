@@ -229,14 +229,20 @@ public class LibraryWatcher : ILibraryWatcher
     public async Task ProcessChange(string filePath, bool isDirectoryChange = false)
     {
         var sw = Stopwatch.StartNew();
-        _logger.LogDebug("[LibraryWatcher] Processing change of {FilePath}", filePath);
+        _logger.LogTrace("[LibraryWatcher] Processing change of {FilePath}", filePath);
         try
         {
+            // If the change occurs in a blacklisted folder path, then abort processing
+            if (Parser.Parser.HasBlacklistedFolderInPath(filePath))
+            {
+                return;
+            }
+
             // If not a directory change AND file is not an archive or book, ignore
             if (!isDirectoryChange &&
                 !(Parser.Parser.IsArchive(filePath) || Parser.Parser.IsBook(filePath)))
             {
-                _logger.LogDebug("[LibraryWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
+                _logger.LogTrace("[LibraryWatcher] Change from {FilePath} is not an archive or book, ignoring change", filePath);
                 return;
             }
 
@@ -248,10 +254,10 @@ public class LibraryWatcher : ILibraryWatcher
                 .ToList();
 
             var fullPath = GetFolder(filePath, libraryFolders);
-            _logger.LogDebug("Folder path: {FolderPath}", fullPath);
+            _logger.LogTrace("Folder path: {FolderPath}", fullPath);
             if (string.IsNullOrEmpty(fullPath))
             {
-                _logger.LogDebug("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
+                _logger.LogTrace("[LibraryWatcher] Change from {FilePath} could not find root level folder, ignoring change", filePath);
                 return;
             }
 

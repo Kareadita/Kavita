@@ -104,7 +104,7 @@ public class ScrobblingService : IScrobblingService
 
 
     /// <summary>
-    ///
+    /// An automated job that will run against all user's tokens and validate if they are still active
     /// </summary>
     /// <remarks>This service can validate without license check as the task which calls will be guarded</remarks>
     /// <returns></returns>
@@ -115,6 +115,7 @@ public class ScrobblingService : IScrobblingService
         foreach (var user in users)
         {
             if (string.IsNullOrEmpty(user.AniListAccessToken) || !_tokenService.HasTokenExpired(user.AniListAccessToken)) continue;
+            _logger.LogInformation("User {UserName}'s AniList token has expired! They need to regenerate it for scrobbling to work", user.UserName);
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
                 MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), user.Id);
         }
@@ -184,17 +185,13 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleReviewUpdate(int userId, int seriesId, string reviewTitle, string reviewBody)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
-        {
-            throw new KavitaException(await _localizationService.Translate(userId, "unable-to-register-k+"));
-        }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
         var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true}) return;
-        if (library.Type == LibraryType.Comic) return;
+
+        _logger.LogInformation("Processing Scrobbling review event for {UserId} on {SeriesName}", userId, series.Name);
+        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.Review);
@@ -229,17 +226,12 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleRatingUpdate(int userId, int seriesId, float rating)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
-        {
-            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
-        }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true}) return;
-        if (library.Type == LibraryType.Comic) return;
+
+        _logger.LogInformation("Processing Scrobbling rating event for {UserId} on {SeriesName}", userId, series.Name);
+        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ScoreUpdated);
@@ -273,22 +265,12 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleReadingUpdate(int userId, int seriesId)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
-        {
-            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
-        }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
-        {
-            _logger.LogInformation("Series {SeriesName} is on UserId {UserId}'s hold list. Not scrobbling", series.Name, userId);
-            return;
-        }
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true}) return;
-        if (library.Type == LibraryType.Comic) return;
+
+        _logger.LogInformation("Processing Scrobbling reading event for {UserId} on {SeriesName}", userId, series.Name);
+        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.ChapterRead);
@@ -338,17 +320,12 @@ public class ScrobblingService : IScrobblingService
     public async Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead)
     {
         if (!await _licenseService.HasActiveLicense()) return;
-        var token = await GetTokenForProvider(userId, ScrobbleProvider.AniList);
-        if (await HasTokenExpired(token, ScrobbleProvider.AniList))
-        {
-            throw new KavitaException(await _localizationService.Translate(userId, "anilist-cred-expired"));
-        }
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true}) return;
-        if (library.Type == LibraryType.Comic) return;
+
+        _logger.LogInformation("Processing Scrobbling want-to-read event for {UserId} on {SeriesName}", userId, series.Name);
+        if (await CheckIfCanScrobble(userId, seriesId, series)) return;
 
         var existing = await _unitOfWork.ScrobbleRepository.Exists(userId, series.Id,
             onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead);
@@ -367,6 +344,21 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync();
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {UserId} ", series.Name, userId);
+    }
+
+    private async Task<bool> CheckIfCanScrobble(int userId, int seriesId, Series series)
+    {
+        if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
+        {
+            _logger.LogInformation("Series {SeriesName} is on UserId {UserId}'s hold list. Not scrobbling", series.Name,
+                userId);
+            return true;
+        }
+
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        if (library is not {AllowScrobbling: true}) return true;
+        if (library.Type == LibraryType.Comic) return true;
+        return false;
     }
 
     private async Task<int> GetRateLimit(string license, string aniListToken)

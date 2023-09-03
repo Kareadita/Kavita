@@ -25,9 +25,9 @@ import {CompactNumberPipe} from "../../pipe/compact-number.pipe";
 import {AgeRatingPipe} from "../../pipe/age-rating.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
-import {FilterQueryParam} from "../../shared/_services/filter-utilities.service";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {FilterField} from "../../_models/metadata/v2/filter-field";
 
 @Component({
   selector: 'app-entity-info-cards',
@@ -74,6 +74,8 @@ export class EntityInfoCardsComponent implements OnInit {
   get AgeRating() {
     return AgeRating;
   }
+
+  get FilterField() { return FilterField; }
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
@@ -129,6 +131,4 @@ export class EntityInfoCardsComponent implements OnInit {
     }
     this.cdRef.markForCheck();
   }
-
-  protected readonly FilterQueryParam = FilterQueryParam;
 }

@@ -20,7 +20,7 @@ import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
 import { PageBookmark } from 'src/app/_models/readers/page-bookmark';
 import { Pagination } from 'src/app/_models/pagination';
 import { Series } from 'src/app/_models/series';
-import { FilterEvent, SeriesFilter } from 'src/app/_models/metadata/series-filter';
+import { FilterEvent } from 'src/app/_models/metadata/series-filter';
 import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
 import { ImageService } from 'src/app/_services/image.service';
 import { JumpbarService } from 'src/app/_services/jumpbar.service';
@@ -31,7 +31,9 @@ import { CardItemComponent } from '../../../cards/card-item/card-item.component'
 import { CardDetailLayoutComponent } from '../../../cards/card-detail-layout/card-detail-layout.component';
 import { BulkOperationsComponent } from '../../../cards/bulk-operations/bulk-operations.component';
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-bookmarks',
@@ -53,11 +55,11 @@ export class BookmarksComponent implements OnInit {
   jumpbarKeys: Array<JumpKey> = [];
 
   pagination!: Pagination;
-  filter: SeriesFilter | undefined = undefined;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
 
   trackByIdentity = (index: number, item: Series) => `${item.name}_${item.localizedName}_${item.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
@@ -70,19 +72,16 @@ export class BookmarksComponent implements OnInit {
     public imageService: ImageService, private actionFactoryService: ActionFactoryService,
     private router: Router, private readonly cdRef: ChangeDetectorRef,
     private filterUtilityService: FilterUtilitiesService, private route: ActivatedRoute,
-    private jumpbarService: JumpbarService) {
-      this.filterSettings.ageRatingDisabled = true;
-      this.filterSettings.collectionDisabled = true;
-      this.filterSettings.formatDisabled = true;
-      this.filterSettings.genresDisabled = true;
-      this.filterSettings.languageDisabled = true;
-      this.filterSettings.libraryDisabled = true;
-      this.filterSettings.peopleDisabled = true;
-      this.filterSettings.publicationStatusDisabled = true;
-      this.filterSettings.ratingDisabled = true;
-      this.filterSettings.readProgressDisabled = true;
-      this.filterSettings.tagsDisabled = true;
-      this.filterSettings.sortDisabled = true;
+    private jumpbarService: JumpbarService, private titleService: Title) {
+      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+      if (this.filter.statements.length === 0) {
+        this.filter!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      }
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push(this.filterUtilityService.createSeriesV2DefaultStatement());
+      this.filterSettings.presetsV2 =  this.filter;
+      this.filterSettings.statementLimit = 1;
+      this.titleService.setTitle('Kavita - ' + translate('bookmarks.title'));
     }
 
   ngOnInit(): void {
@@ -128,7 +127,8 @@ export class BookmarksComponent implements OnInit {
 
     switch (action.action) {
       case Action.DownloadBookmark:
-        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)), (d) => {
+        this.downloadService.download('bookmark', this.bookmarks.filter(bmk => seriesIds.includes(bmk.seriesId)),
+          (d) => {
           if (!d) {
             this.bulkSelectionService.deselectAll();
           }
@@ -151,34 +151,23 @@ export class BookmarksComponent implements OnInit {
   }
 
   loadBookmarks() {
-    // The filter is out of sync with the presets from typeaheads on first load but syncs afterwards
-    if (this.filter == undefined) {
-      this.filter = this.filterUtilityService.createSeriesFilter();
-      this.cdRef.markForCheck();
-    }
     this.loadingBookmarks = true;
     this.cdRef.markForCheck();
 
     this.readerService.getAllBookmarks(this.filter).pipe(take(1)).subscribe(bookmarks => {
       this.bookmarks = bookmarks;
-      this.seriesIds = {};
       this.bookmarks.forEach(bmk => {
-        if (!this.seriesIds.hasOwnProperty(bmk.seriesId)) {
-          this.seriesIds[bmk.seriesId] = 1;
-        } else {
-          this.seriesIds[bmk.seriesId] += 1;
-        }
         this.downloadingSeries[bmk.seriesId] = false;
         this.clearingSeries[bmk.seriesId] = false;
       });
 
-      const ids = Object.keys(this.seriesIds).map(k => parseInt(k, 10));
-      this.seriesService.getAllSeriesByIds(ids).subscribe(series => {
-        this.jumpbarKeys = this.jumpbarService.getJumpKeys(series, (t: Series) => t.name);
-        this.series = series;
-        this.loadingBookmarks = false;
-        this.cdRef.markForCheck();
+      const distinctSeriesMap = new Map();
+      this.bookmarks.forEach(b => {
+        distinctSeriesMap.set(b.series.id, b.series);
       });
+      this.series = Array.from(distinctSeriesMap.values());
+      this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (t: Series) => t.name);
+      this.loadingBookmarks = false;
       this.cdRef.markForCheck();
     });
   }
@@ -206,10 +195,6 @@ export class BookmarksComponent implements OnInit {
     });
   }
 
-  getBookmarkPages(seriesId: number) {
-    return this.seriesIds[seriesId];
-  }
-
   downloadBookmarks(series: Series) {
     this.downloadingSeries[series.id] = true;
     this.cdRef.markForCheck();
@@ -222,9 +207,13 @@ export class BookmarksComponent implements OnInit {
   }
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.pagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    }
+
     this.loadBookmarks();
   }
 

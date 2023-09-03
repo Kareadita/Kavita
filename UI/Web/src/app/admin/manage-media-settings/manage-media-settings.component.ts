@@ -21,7 +21,8 @@ import {EncodeFormats} from '../_models/encode-format';
 import {ManageScrobbleErrorsComponent} from '../manage-scrobble-errors/manage-scrobble-errors.component';
 import {ManageAlertsComponent} from '../manage-alerts/manage-alerts.component';
 import {NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import { CoverImageSizes } from '../_models/cover-image-size';
 
 @Component({
   selector: 'app-manage-media-settings',
@@ -38,6 +39,11 @@ export class ManageMediaSettingsComponent implements OnInit {
 
   alertCount: number = 0;
   scrobbleCount: number = 0;
+  coverImageSizes = CoverImageSizes.map(o => {
+    const newObj = {...o};
+    newObj.title = translate(o.title);
+    return newObj;
+  })
 
   private readonly translocoService = inject(TranslocoService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -51,6 +57,7 @@ export class ManageMediaSettingsComponent implements OnInit {
       this.serverSettings = settings;
       this.settingsForm.addControl('encodeMediaAs', new FormControl(this.serverSettings.encodeMediaAs, [Validators.required]));
       this.settingsForm.addControl('bookmarksDirectory', new FormControl(this.serverSettings.bookmarksDirectory, [Validators.required]));
+      this.settingsForm.addControl('coverImageSize', new FormControl(this.serverSettings.coverImageSize, [Validators.required]));
       this.cdRef.markForCheck();
     });
   }
@@ -58,6 +65,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   resetForm() {
     this.settingsForm.get('encodeMediaAs')?.setValue(this.serverSettings.encodeMediaAs);
     this.settingsForm.get('bookmarksDirectory')?.setValue(this.serverSettings.bookmarksDirectory);
+    this.settingsForm.get('coverImageSize')?.setValue(this.serverSettings.coverImageSize);
     this.settingsForm.markAsPristine();
     this.cdRef.markForCheck();
   }
@@ -66,6 +74,7 @@ export class ManageMediaSettingsComponent implements OnInit {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.encodeMediaAs = parseInt(this.settingsForm.get('encodeMediaAs')?.value, 10);
     modelSettings.bookmarksDirectory = this.settingsForm.get('bookmarksDirectory')?.value;
+    modelSettings.coverImageSize = parseInt(this.settingsForm.get('coverImageSize')?.value, 10);
 
     this.settingsService.updateServerSettings(modelSettings).pipe(take(1)).subscribe(async (settings: ServerSettings) => {
       this.serverSettings = settings;

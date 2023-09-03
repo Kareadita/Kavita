@@ -24,9 +24,9 @@ import {CommonModule} from "@angular/common";
 import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
-import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-list-item',

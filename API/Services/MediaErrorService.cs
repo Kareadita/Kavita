@@ -37,6 +37,7 @@ public class MediaErrorService : IMediaErrorService
 
     public void ReportMediaIssue(string filename, MediaErrorProducer producer, string errorMessage, Exception ex)
     {
+        // TODO: Localize all these messages
         // To avoid overhead on commits, do async. We don't need to wait.
         BackgroundJob.Enqueue(() => ReportMediaIssueAsync(filename, producer, errorMessage, ex.Message));
     }

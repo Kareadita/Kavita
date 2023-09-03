@@ -27,10 +27,8 @@ if [ ! -f "/kavita/config/appsettings.json" ]; then
     fi
 fi
 
-echo "App setting permissions"
+echo "Starting Kavita"
 echo ls -l "/kavita/config/appsettings.json"
-
-chmod +x Kavita
 
 ./Kavita
 

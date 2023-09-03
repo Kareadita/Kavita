@@ -156,5 +156,7 @@
     "query-required": "คุณต้องส่งพารามิเตอร์การค้นหา",
     "theme-doesnt-exist": "ไฟล์ธีมหายไปหรือไม่ถูกต้อง",
     "epub-html-missing": "ไม่พบ html ที่เหมาะสมสำหรับหน้านั้น",
-    "collection-tag-title-required": "ชื่อคอลเลกชันต้องไม่ว่างเปล่า"
+    "collection-tag-title-required": "ชื่อคอลเลกชันต้องไม่ว่างเปล่า",
+    "want-to-read": "ต้องการอ่าน",
+    "browse-want-to-read": "ดูรายการต้องการอ่าน"
 }

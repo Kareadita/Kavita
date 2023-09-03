@@ -39,8 +39,7 @@ public class ReadingListController : BaseApiController
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetList(int readingListId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, userId));
+        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, User.GetUserId()));
     }
 
     /// <summary>
@@ -54,8 +53,7 @@ public class ReadingListController : BaseApiController
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForUser([FromQuery] UserParams userParams,
         bool includePromoted = true, bool sortByLastModified = false)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(userId, includePromoted,
+        var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(User.GetUserId(), includePromoted,
             userParams, sortByLastModified);
         Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
@@ -70,10 +68,8 @@ public class ReadingListController : BaseApiController
     [HttpGet("lists-for-series")]
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForSeries(int seriesId)
     {
-        var userId = await _unitOfWork.UserRepository.GetUserIdByUsernameAsync(User.GetUsername());
-        var items = await _unitOfWork.ReadingListRepository.GetReadingListDtosForSeriesAndUserAsync(userId, seriesId, true);
-
-        return Ok(items);
+        return Ok(await _unitOfWork.ReadingListRepository.GetReadingListDtosForSeriesAndUserAsync(User.GetUserId(),
+            seriesId, true));
     }
 
     /// <summary>

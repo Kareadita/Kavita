@@ -197,6 +197,12 @@ public class SettingsController : BaseApiController
                 _unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.CoverImageSize && updateSettingsDto.CoverImageSize + string.Empty != setting.Value)
+            {
+                setting.Value = updateSettingsDto.CoverImageSize + string.Empty;
+                _unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.TaskScan && updateSettingsDto.TaskScan != setting.Value)
             {
                 setting.Value = updateSettingsDto.TaskScan;

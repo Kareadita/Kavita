@@ -1,34 +1,44 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { take } from 'rxjs/operators';
-import { ConfirmService } from 'src/app/shared/confirm.service';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { LibraryType } from 'src/app/_models/library';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { ReadingList, ReadingListItem } from 'src/app/_models/reading-list';
-import { AccountService } from 'src/app/_services/account.service';
-import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/action-factory.service';
-import { ActionService } from 'src/app/_services/action.service';
-import { ImageService } from 'src/app/_services/image.service';
-import { ReadingListService } from 'src/app/_services/reading-list.service';
-import { IndexUpdateEvent, DraggableOrderedListComponent } from '../draggable-ordered-list/draggable-ordered-list.component';
-import { forkJoin, Observable } from 'rxjs';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LibraryService } from 'src/app/_services/library.service';
-import { Person } from 'src/app/_models/metadata/person';
-import { ReadingListItemComponent } from '../reading-list-item/reading-list-item.component';
-import { LoadingComponent } from '../../../shared/loading/loading.component';
-import { A11yClickDirective } from '../../../shared/a11y-click.directive';
-import { PersonBadgeComponent } from '../../../shared/person-badge/person-badge.component';
-import { BadgeExpanderComponent } from '../../../shared/badge-expander/badge-expander.component';
-import { ReadMoreComponent } from '../../../shared/read-more/read-more.component';
-import { NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem } from '@ng-bootstrap/ng-bootstrap';
-import { ImageComponent } from '../../../shared/image/image.component';
-import { CardActionablesComponent } from '../../../cards/card-item/card-actionables/card-actionables.component';
-import { NgIf, NgClass, AsyncPipe, DecimalPipe, DatePipe } from '@angular/common';
-import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from 'ngx-toastr';
+import {take} from 'rxjs/operators';
+import {ConfirmService} from 'src/app/shared/confirm.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {LibraryType} from 'src/app/_models/library';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {ReadingList, ReadingListItem} from 'src/app/_models/reading-list';
+import {AccountService} from 'src/app/_services/account.service';
+import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
+import {ActionService} from 'src/app/_services/action.service';
+import {ImageService} from 'src/app/_services/image.service';
+import {ReadingListService} from 'src/app/_services/reading-list.service';
+import {
+  DraggableOrderedListComponent,
+  IndexUpdateEvent
+} from '../draggable-ordered-list/draggable-ordered-list.component';
+import {forkJoin, Observable} from 'rxjs';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {LibraryService} from 'src/app/_services/library.service';
+import {Person} from 'src/app/_models/metadata/person';
+import {ReadingListItemComponent} from '../reading-list-item/reading-list-item.component';
+import {LoadingComponent} from '../../../shared/loading/loading.component';
+import {A11yClickDirective} from '../../../shared/a11y-click.directive';
+import {PersonBadgeComponent} from '../../../shared/person-badge/person-badge.component';
+import {BadgeExpanderComponent} from '../../../shared/badge-expander/badge-expander.component';
+import {ReadMoreComponent} from '../../../shared/read-more/read-more.component';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
+import {ImageComponent} from '../../../shared/image/image.component';
+import {AsyncPipe, DatePipe, DecimalPipe, NgClass, NgIf} from '@angular/common';
+import {
+  SideNavCompanionBarComponent
+} from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {MetadataDetailComponent} from "../../../series-detail/_components/metadata-detail/metadata-detail.component";
+import {Title} from "@angular/platform-browser";
 
 @Component({
     selector: 'app-reading-list-detail',
@@ -36,7 +46,7 @@ import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective, MetadataDetailComponent]
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
@@ -52,7 +62,6 @@ export class ReadingListDetailComponent implements OnInit {
   downloadInProgress: boolean = false;
 
   readingListSummary: string = '';
-  readingListImage: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
   characters$!: Observable<Person[]>;
@@ -67,7 +76,9 @@ export class ReadingListDetailComponent implements OnInit {
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
-    private readonly cdRef: ChangeDetectorRef) {}
+    private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService, private titleService: Title) {
+    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
+  }
 
   ngOnInit(): void {
     const listId = this.route.snapshot.paramMap.get('id');
@@ -78,7 +89,6 @@ export class ReadingListDetailComponent implements OnInit {
     }
     this.listId = parseInt(listId, 10);
     this.characters$ = this.readingListService.getCharacters(this.listId);
-    this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
 
     forkJoin([
       this.libraryService.getLibraries(),
@@ -93,7 +103,7 @@ export class ReadingListDetailComponent implements OnInit {
 
       if (readingList == null) {
         // The list doesn't exist
-        this.toastr.error('This list doesn\'t exist.');
+        this.toastr.error(translate('toasts.list-doesnt-exist'));
         this.router.navigateByUrl('library');
         return;
       }
@@ -150,7 +160,6 @@ export class ReadingListDetailComponent implements OnInit {
           this.readingListService.getReadingList(this.listId).subscribe(rl => {
             this.readingList = rl;
             this.readingListSummary = (this.readingList.summary === null ? '' : this.readingList.summary).replace(/\n/g, '<br>');
-            this.readingListImage =  this.imageService.randomize(this.imageService.getReadingListCoverImage(this.listId));
             this.cdRef.markForCheck();
           })
         });
@@ -223,5 +232,9 @@ export class ReadingListDetailComponent implements OnInit {
   updateAccessibilityMode() {
     this.accessibilityMode = !this.accessibilityMode;
     this.cdRef.markForCheck();
+  }
+
+  goToCharacter(character: Person) {
+    this.filterUtilityService.applyFilter(['all-series'], FilterField.Characters, FilterComparison.Contains, character.id + '');
   }
 }

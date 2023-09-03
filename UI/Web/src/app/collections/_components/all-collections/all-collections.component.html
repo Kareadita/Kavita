@@ -11,7 +11,9 @@
     [trackByIdentity]="trackByIdentity"
   >
     <ng-template #cardItem let-item let-position="idx">
-      <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions" [imageUrl]="imageSerivce.getCollectionCoverImage(item.id)" (clicked)="loadCollection(item)"></app-card-item>
+      <app-card-item [title]="item.title" [entity]="item" [actions]="collectionTagActions"
+                     [imageUrl]="imageService.getCollectionCoverImage(item.id)"
+                     (clicked)="loadCollection(item)"></app-card-item>
     </ng-template>
 
     <ng-template #noData>

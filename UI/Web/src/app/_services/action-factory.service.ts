@@ -92,6 +92,8 @@ export enum Action {
    * Removes the Series from On Deck inclusion
    */
   RemoveFromOnDeck = 19,
+  AddRuleGroup = 20,
+  RemoveRuleGroup = 21
 }
 
 export interface ActionItem<T> {
@@ -178,6 +180,15 @@ export class ActionFactoryService {
     return this.applyCallbackToList(this.bookmarkActions, callback);
   }
 
+  getMetadataFilterActions(callback: (action: ActionItem<any>, data: any) => void) {
+    const actions = [
+      {title: 'add-rule-group-and', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+      {title: 'add-rule-group-or', action: Action.AddRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+      {title: 'remove-rule-group', action: Action.RemoveRuleGroup, requiresAdmin: false, children: [], callback: this.dummyCallback},
+    ];
+    return this.applyCallbackToList(actions, callback);
+  }
+
   dummyCallback(action: ActionItem<any>, data: any) {}
 
   filterSendToAction(actions: Array<ActionItem<Chapter>>, chapter: Chapter) {
@@ -234,6 +245,14 @@ export class ActionFactoryService {
         title: 'edit',
         callback: this.dummyCallback,
         requiresAdmin: true,
+        children: [],
+      },
+      {
+        action: Action.Delete,
+        title: 'delete',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        class: 'danger',
         children: [],
       },
     ];

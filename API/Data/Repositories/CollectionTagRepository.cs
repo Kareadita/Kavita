@@ -127,7 +127,6 @@ public class CollectionTagRepository : ICollectionTagRepository
             .Select(sm => sm.Series.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
             .ToListAsync();
-        if (data.Count < 4) return new List<string>();
         return data
             .OrderBy(_ => random.Next())
             .Take(4)

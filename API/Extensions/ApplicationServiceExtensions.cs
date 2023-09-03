@@ -83,6 +83,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.License);
             options.UseInMemory(EasyCacheProfiles.Library);
             options.UseInMemory(EasyCacheProfiles.RevokedJwt);
+            options.UseInMemory(EasyCacheProfiles.Filter);
 
             // KavitaPlus stuff
             options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);

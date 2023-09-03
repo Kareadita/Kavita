@@ -7,12 +7,14 @@ using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
+using API.Extensions.QueryExtensions.Filtering;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -53,7 +55,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId);
-    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter);
+    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync();
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int userId);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId);
@@ -374,37 +376,91 @@ public class UserRepository : IUserRepository
     /// <param name="userId"></param>
     /// <param name="filter">Only supports SeriesNameQuery</param>
     /// <returns></returns>
-    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterDto filter)
+    public async Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter)
     {
         var query = _context.AppUserBookmark
             .Where(x => x.AppUserId == userId)
             .OrderBy(x => x.Created)
             .AsNoTracking();
 
-        if (string.IsNullOrEmpty(filter.SeriesNameQuery))
-            return await query
+        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id,
+            (bookmark, series) => new BookmarkSeriesPair()
+            {
+                bookmark = bookmark,
+                series = series
+            });
+
+        var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == FilterField.SeriesName);
+        if (filterStatement == null || string.IsNullOrWhiteSpace(filterStatement.Value))
+        {
+            return await ApplyLimit(filterSeriesQuery
+                    .Sort(filter.SortOptions)
+                    .AsSplitQuery(), filter.LimitTo)
                 .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
                 .ToListAsync();
+        }
 
-        var seriesNameQueryNormalized = filter.SeriesNameQuery.ToNormalized();
-        var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id, (bookmark, series) => new
-            {
-                bookmark,
-                series
-            })
-            .Where(o => (EF.Functions.Like(o.series.Name, $"%{filter.SeriesNameQuery}%"))
-                        || (o.series.OriginalName != null && EF.Functions.Like(o.series.OriginalName, $"%{filter.SeriesNameQuery}%"))
-                        || (o.series.LocalizedName != null && EF.Functions.Like(o.series.LocalizedName, $"%{filter.SeriesNameQuery}%"))
-                        || (EF.Functions.Like(o.series.NormalizedName, $"%{seriesNameQueryNormalized}%"))
-            );
+        var queryString = filterStatement.Value.ToNormalized();
+        switch (filterStatement.Comparison)
+        {
+            case FilterComparison.Equal:
+                filterSeriesQuery = filterSeriesQuery.Where(s => s.series.Name.Equals(queryString)
+                                                               || s.series.OriginalName.Equals(queryString)
+                                                               || s.series.LocalizedName.Equals(queryString)
+                                                               || s.series.SortName.Equals(queryString));
+                break;
+            case FilterComparison.BeginsWith:
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"{queryString}%")
+                                                                 ||EF.Functions.Like(s.series.OriginalName, $"{queryString}%")
+                                                                 || EF.Functions.Like(s.series.LocalizedName, $"{queryString}%")
+                                                                 || EF.Functions.Like(s.series.SortName, $"{queryString}%"));
+                break;
+            case FilterComparison.EndsWith:
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"%{queryString}")
+                                                                 ||EF.Functions.Like(s.series.OriginalName, $"%{queryString}")
+                                                                 || EF.Functions.Like(s.series.LocalizedName, $"%{queryString}")
+                                                                 || EF.Functions.Like(s.series.SortName, $"%{queryString}"));
+                break;
+            case FilterComparison.Matches:
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"%{queryString}%")
+                                                                 ||EF.Functions.Like(s.series.OriginalName, $"%{queryString}%")
+                                                                 || EF.Functions.Like(s.series.LocalizedName, $"%{queryString}%")
+                                                                 || EF.Functions.Like(s.series.SortName, $"%{queryString}%"));
+                break;
+            case FilterComparison.NotEqual:
+                filterSeriesQuery = filterSeriesQuery.Where(s => s.series.Name != queryString
+                                                                 || s.series.OriginalName != queryString
+                                                                 || s.series.LocalizedName != queryString
+                                                                 || s.series.SortName != queryString);
+                break;
+            case FilterComparison.MustContains:
+            case FilterComparison.NotContains:
+            case FilterComparison.GreaterThan:
+            case FilterComparison.GreaterThanEqual:
+            case FilterComparison.LessThan:
+            case FilterComparison.LessThanEqual:
+            case FilterComparison.Contains:
+            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
+            case FilterComparison.IsInLast:
+            case FilterComparison.IsNotInLast:
+            default:
+                break;
+        }
 
-        query = filterSeriesQuery.Select(o => o.bookmark);
-
-
-        return await query
+        return await ApplyLimit(filterSeriesQuery
+                .Sort(filter.SortOptions)
+                .AsSplitQuery(), filter.LimitTo)
+            .Select(o => o.bookmark)
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
+
+    private static IQueryable<BookmarkSeriesPair> ApplyLimit(IQueryable<BookmarkSeriesPair> query, int limit)
+    {
+        return limit <= 0 ? query : query.Take(limit);
+    }
+
 
     /// <summary>
     /// Fetches the UserId by API Key. This does not include any extra information

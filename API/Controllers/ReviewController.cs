@@ -62,16 +62,18 @@ public class ReviewController : BaseApiController
         }
 
         var cacheKey = CacheKey + seriesId;
-        IEnumerable<UserReviewDto> externalReviews;
+        IList<UserReviewDto> externalReviews;
 
         var result = await _cacheProvider.GetAsync<IEnumerable<UserReviewDto>>(cacheKey);
         if (result.HasValue)
         {
-            externalReviews = result.Value;
+            externalReviews = result.Value.ToList();
         }
         else
         {
-            externalReviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
+            var reviews = (await _reviewService.GetReviewsForSeries(userId, seriesId)).ToList();
+            externalReviews = SelectSpectrumOfReviews(reviews);
+
             await _cacheProvider.SetAsync(cacheKey, externalReviews, TimeSpan.FromHours(10));
             _logger.LogDebug("Caching external reviews for {Key}", cacheKey);
         }
@@ -80,7 +82,44 @@ public class ReviewController : BaseApiController
         // Fetch external reviews and splice them in
         userRatings.AddRange(externalReviews);
 
-        return Ok(userRatings.Take(10));
+
+        return Ok(userRatings);
+    }
+
+    private static IList<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
+    {
+        IList<UserReviewDto> externalReviews;
+        var totalReviews = reviews.Count;
+
+        if (totalReviews > 10)
+        {
+            //var stepSize = Math.Max(totalReviews / 10, 1); // Calculate step size, ensuring it's at least 1
+            var stepSize = Math.Max((totalReviews - 4) / 8, 1);
+
+            var selectedReviews = new List<UserReviewDto>()
+            {
+                reviews[0],
+                reviews[1],
+            };
+            for (var i = 2; i < totalReviews - 2; i += stepSize)
+            {
+                selectedReviews.Add(reviews[i]);
+
+                if (selectedReviews.Count >= 8)
+                    break;
+            }
+
+            selectedReviews.Add(reviews[totalReviews - 2]);
+            selectedReviews.Add(reviews[totalReviews - 1]);
+
+            externalReviews = selectedReviews;
+        }
+        else
+        {
+            externalReviews = reviews;
+        }
+
+        return externalReviews;
     }
 
     /// <summary>

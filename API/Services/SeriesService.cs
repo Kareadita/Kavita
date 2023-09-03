@@ -65,16 +65,19 @@ public class SeriesService : ISeriesService
     /// <returns></returns>
     public static Chapter? GetFirstChapterForMetadata(Series series)
     {
-        var sortedVolumes = series.Volumes.OrderBy(v => v.Number, ChapterSortComparer.Default);
+        var sortedVolumes = series.Volumes
+            .Where(v => float.TryParse(v.Name, out var parsedValue) && parsedValue != 0.0f)
+            .OrderBy(v => float.TryParse(v.Name, out var parsedValue) ? parsedValue : float.MaxValue);
         var minVolumeNumber = sortedVolumes
-            .Where(v => v.Number != 0)
-            .MinBy(v => v.Number);
+            .MinBy(v => float.Parse(v.Name));
 
-        var minChapter =  series.Volumes
-            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default))
+
+        var allChapters = series.Volumes
+            .SelectMany(v => v.Chapters.OrderBy(c => float.Parse(c.Number), ChapterSortComparer.Default)).ToList();
+        var minChapter =  allChapters
             .FirstOrDefault();
 
-        if (minVolumeNumber != null && minChapter != null && float.Parse(minChapter.Number) > minVolumeNumber.Number)
+        if (minVolumeNumber != null && minChapter != null && float.TryParse(minChapter.Number, out var chapNum) && chapNum >= minVolumeNumber.Number)
         {
             return minVolumeNumber.Chapters.MinBy(c => float.Parse(c.Number), ChapterSortComparer.Default);
         }
@@ -223,7 +226,15 @@ public class SeriesService : ISeriesService
             await _unitOfWork.CommitAsync();
 
             // Trigger code to cleanup tags, collections, people, etc
-            await _taskScheduler.CleanupDbEntries();
+            try
+            {
+                await _taskScheduler.CleanupDbEntries();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "There was an issue cleaning up DB entries. This may happen if Komf is spamming updates. Nightly cleanup will work");
+            }
+
 
             if (updateSeriesMetadataDto.CollectionTags == null) return true;
             foreach (var tag in updateSeriesMetadataDto.CollectionTags)

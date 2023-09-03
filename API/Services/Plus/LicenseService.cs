@@ -128,15 +128,18 @@ public class LicenseService : ILicenseService
     /// <remarks>Expected to be called at startup and on reoccurring basis</remarks>
     public async Task ValidateLicenseStatus()
     {
+        var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         try
         {
             var license = await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
-            if (string.IsNullOrEmpty(license.Value)) return;
+            if (string.IsNullOrEmpty(license.Value)) {
+                await provider.SetAsync(CacheKey, false, _licenseCacheTimeout);
+                return;
+            }
 
             _logger.LogInformation("Validating Kavita+ License");
-            var provider = _cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-            await provider.FlushAsync();
 
+            await provider.FlushAsync();
             var isValid = await IsLicenseValid(license.Value);
             await provider.SetAsync(CacheKey, isValid, _licenseCacheTimeout);
 
@@ -145,6 +148,7 @@ public class LicenseService : ILicenseService
         catch (Exception ex)
         {
             _logger.LogError(ex, "There was an error talking with Kavita+ API for license validation. Rescheduling check in 30 mins");
+            await provider.SetAsync(CacheKey, false, _licenseCacheTimeout);
             BackgroundJob.Schedule(() => ValidateLicenseStatus(), TimeSpan.FromMinutes(30));
         }
     }

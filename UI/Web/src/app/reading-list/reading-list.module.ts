@@ -15,7 +15,6 @@ import {ImageComponent} from "../shared/image/image.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {PersonBadgeComponent} from "../shared/person-badge/person-badge.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
-import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
 import {MangaFormatPipe} from "../pipe/manga-format.pipe";
 import {MangaFormatIconPipe} from "../pipe/manga-format-icon.pipe";
 import {SafeHtmlPipe} from "../pipe/safe-html.pipe";
@@ -28,6 +27,7 @@ import {
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {A11yClickDirective} from "../shared/a11y-click.directive";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 @NgModule({
     imports: [

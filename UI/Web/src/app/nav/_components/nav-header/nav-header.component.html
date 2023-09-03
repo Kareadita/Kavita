@@ -79,7 +79,7 @@
               </ng-template>
 
               <ng-template #tagTemplate let-item>
-                <div style="display: flex;padding: 5px;" (click)="goTo('tags', item.id)">
+                <div style="display: flex;padding: 5px;" (click)="goToOther(FilterField.Tags, item.id)">
                   <div class="ms-1">
                     <span>{{item.title}}</span>
                   </div>
@@ -97,7 +97,7 @@
               </ng-template>
 
               <ng-template #genreTemplate let-item>
-                <div style="display: flex;padding: 5px;" class="clickable" (click)="goTo('genres', item.id)">
+                <div style="display: flex;padding: 5px;" class="clickable" (click)="goToOther(FilterField.Genres, item.id)">
                   <div class="ms-1">
                     <div [innerHTML]="item.title"></div>
                   </div>

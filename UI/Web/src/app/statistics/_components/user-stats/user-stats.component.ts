@@ -1,26 +1,19 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit
-} from '@angular/core';
-import { map, Observable, shareReplay } from 'rxjs';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { UserReadStatistics } from 'src/app/statistics/_models/user-read-statistics';
-import { StatisticsService } from 'src/app/_services/statistics.service';
-import { ReadHistoryEvent } from '../../_models/read-history-event';
-import { MemberService } from 'src/app/_services/member.service';
-import { AccountService } from 'src/app/_services/account.service';
-import { PieDataItem } from '../../_models/pie-data-item';
-import { LibraryService } from 'src/app/_services/library.service';
-import { PercentPipe, NgIf, AsyncPipe } from '@angular/common';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {map, Observable, shareReplay} from 'rxjs';
+import {UserReadStatistics} from 'src/app/statistics/_models/user-read-statistics';
+import {StatisticsService} from 'src/app/_services/statistics.service';
+import {ReadHistoryEvent} from '../../_models/read-history-event';
+import {MemberService} from 'src/app/_services/member.service';
+import {AccountService} from 'src/app/_services/account.service';
+import {PieDataItem} from '../../_models/pie-data-item';
+import {LibraryService} from 'src/app/_services/library.service';
+import {AsyncPipe, NgIf, PercentPipe} from '@angular/common';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { StatListComponent } from '../stat-list/stat-list.component';
-import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
-import { UserStatsInfoCardsComponent } from '../user-stats-info-cards/user-stats-info-cards.component';
+import {StatListComponent} from '../stat-list/stat-list.component';
+import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
+import {UserStatsInfoCardsComponent} from '../user-stats-info-cards/user-stats-info-cards.component';
 import {TranslocoModule} from "@ngneat/transloco";
+import {DayBreakdownComponent} from "../day-breakdown/day-breakdown.component";
 
 @Component({
     selector: 'app-user-stats',
@@ -35,6 +28,7 @@ import {TranslocoModule} from "@ngneat/transloco";
         StatListComponent,
         AsyncPipe,
         TranslocoModule,
+        DayBreakdownComponent,
     ],
 })
 export class UserStatsComponent implements OnInit {
@@ -47,7 +41,7 @@ export class UserStatsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(private readonly cdRef: ChangeDetectorRef, private statService: StatisticsService,
-    private filterService: FilterUtilitiesService, private accountService: AccountService, private memberService: MemberService,
+    private accountService: AccountService, private memberService: MemberService,
     private libraryService: LibraryService) {
       this.isAdmin$ = this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), map(u => {
         if (!u) return false;
@@ -57,8 +51,6 @@ export class UserStatsComponent implements OnInit {
     }
 
   ngOnInit(): void {
-    const filter = this.filterService.createSeriesFilter();
-    filter.readStatus = {read: true, notRead: false, inProgress: true};
     this.memberService.getMember().subscribe(me => {
       this.userId = me.id;
       this.cdRef.markForCheck();

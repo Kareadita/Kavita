@@ -12,16 +12,16 @@
     <ng-container *ngIf="seriesMetadata">
       <ng-container *ngIf="seriesMetadata.ageRating">
         <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-          <app-icon-and-title [label]="t('age-rating-title')" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterQueryParam.AgeRating, seriesMetadata.ageRating)" [title]="t('age-rating-title')">
+          <app-icon-and-title [label]="t('age-rating-title')" [clickable]="true" fontClasses="fas fa-eye" (click)="handleGoTo(FilterField.AgeRating, seriesMetadata.ageRating)" [title]="t('age-rating-title')">
             {{this.seriesMetadata.ageRating | ageRating}}
           </app-icon-and-title>
         </div>
         <div class="vr d-none d-lg-block m-2"></div>
       </ng-container>
 
-      <ng-container *ngIf="seriesMetadata.language !== null">
+      <ng-container *ngIf="seriesMetadata.language !== null && seriesMetadata.language !== ''">
         <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
-          <app-icon-and-title [label]="t('language-title')" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterQueryParam.Languages, seriesMetadata.language)" [title]="t('language-title')">
+          <app-icon-and-title [label]="t('language-title')" [clickable]="true" fontClasses="fas fa-language" (click)="handleGoTo(FilterField.Languages, seriesMetadata.language)" [title]="t('language-title')">
             {{seriesMetadata.language | defaultValue:'en' | languageName | async}}
           </app-icon-and-title>
         </div>
@@ -33,7 +33,7 @@
       <div class="col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
         <ng-container *ngIf="seriesMetadata.publicationStatus | publicationStatus as pubStatus">
           <app-icon-and-title [label]="t('publication-status-title')" [clickable]="true" fontClasses="fa-solid fa-hourglass-{{pubStatus === t('ongoing') ? 'empty' : 'end'}}"
-                              (click)="handleGoTo(FilterQueryParam.PublicationStatus, seriesMetadata.publicationStatus)"
+                              (click)="handleGoTo(FilterField.PublicationStatus, seriesMetadata.publicationStatus)"
                               [ngbTooltip]="t('publication-status-tooltip') + ' (' + seriesMetadata.maxCount + ' / ' + seriesMetadata.totalCount + ')'">
             {{pubStatus}}
           </app-icon-and-title>
@@ -65,7 +65,7 @@
         <div class="d-none d-md-block col-lg-1 col-md-4 col-sm-4 col-4 mb-2">
           <app-icon-and-title [label]="t('format-title')" [clickable]="true"
                               [fontClasses]="'fa ' + (series.format | mangaFormatIcon)"
-                              (click)="handleGoTo(FilterQueryParam.Format, series.format)" [title]="t('format-title')">
+                              (click)="handleGoTo(FilterField.Formats, series.format)" [title]="t('format-title')">
             {{series.format | mangaFormat}}
           </app-icon-and-title>
         </div>

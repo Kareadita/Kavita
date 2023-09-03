@@ -21,7 +21,7 @@ namespace API.Services;
 public interface IImageService
 {
     void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
-    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat);
+    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size);
 
     /// <summary>
     /// Creates a Thumbnail version of a base64 image
@@ -40,7 +40,7 @@ public interface IImageService
     /// <param name="outputDirectory"></param>
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat);
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     /// <summary>
     /// Writes out a thumbnail by file path input
     /// </summary>
@@ -49,7 +49,7 @@ public interface IImageService
     /// <param name="outputDirectory"></param>
     /// <param name="encodeFormat"></param>
     /// <returns></returns>
-    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat);
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     /// <summary>
     /// Converts the passed image to encoding and outputs it in the same directory
     /// </summary>
@@ -86,6 +86,7 @@ public class ImageService : IImageService
     /// Width of a cover for Library
     /// </summary>
     public const int LibraryThumbnailWidth = 32;
+
 
     private static readonly string[] ValidIconRelations = {
         "icon",
@@ -124,13 +125,14 @@ public class ImageService : IImageService
         }
     }
 
-    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    public string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         if (string.IsNullOrEmpty(path)) return string.Empty;
 
         try
         {
-            using var thumbnail = Image.Thumbnail(path, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
+            var dims = size.GetDimensions();
+            using var thumbnail = Image.Thumbnail(path, dims.Width, height: dims.Height, size: Enums.Size.Force);
             var filename = fileName + encodeFormat.GetExtension();
             thumbnail.WriteToFile(_directoryService.FileSystem.Path.Join(outputDirectory, filename));
             return filename;
@@ -152,9 +154,10 @@ public class ImageService : IImageService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">Export the file as the passed encoding</param>
     /// <returns>File name with extension of the file. This will always write to <see cref="DirectoryService.CoverImageDirectory"/></returns>
-    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    public string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        using var thumbnail = Image.ThumbnailStream(stream, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
+        var dims = size.GetDimensions();
+        using var thumbnail = Image.ThumbnailStream(stream, dims.Width, height: dims.Height, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -165,9 +168,10 @@ public class ImageService : IImageService
         return filename;
     }
 
-    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    public string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
-        using var thumbnail = Image.Thumbnail(sourceFile, ThumbnailWidth, height: ThumbnailHeight, size: Enums.Size.Force);
+        var dims = size.GetDimensions();
+        using var thumbnail = Image.Thumbnail(sourceFile, dims.Width, height: dims.Height, size: Enums.Size.Force);
         var filename = fileName + encodeFormat.GetExtension();
         _directoryService.ExistOrCreate(outputDirectory);
         try
@@ -416,31 +420,62 @@ public class ImageService : IImageService
 
     public static string GetWebLinkFormat(string url, EncodeFormat encodeFormat)
     {
-        return $"{new Uri(url).Host}{encodeFormat.GetExtension()}";
+        return $"{new Uri(url).Host.Replace("www.", string.Empty)}{encodeFormat.GetExtension()}";
     }
 
 
-    public static string CreateMergedImage(IList<string> coverImages, string dest)
+    public static void CreateMergedImage(IList<string> coverImages, CoverImageSize size, string dest)
     {
-        var image = Image.Black(ThumbnailWidth, ThumbnailHeight); // 320x455
+        var dims = size.GetDimensions();
+        int rows, cols;
 
-        var thumbnailWidth = image.Width / 2;
-        var thumbnailHeight = image.Height / 2;
+        if (coverImages.Count == 1)
+        {
+            rows = 1;
+            cols = 1;
+        }
+        else if (coverImages.Count == 2)
+        {
+            rows = 1;
+            cols = 2;
+        }
+        else if (coverImages.Count == 3)
+        {
+            rows = 2;
+            cols = 2;
+        }
+        else
+        {
+            // Default to 2x2 layout for more than 3 images
+            rows = 2;
+            cols = 2;
+        }
+
+        var image = Image.Black(dims.Width, dims.Height);
+
+        var thumbnailWidth = image.Width / cols;
+        var thumbnailHeight = image.Height / rows;
 
         for (var i = 0; i < coverImages.Count; i++)
         {
             var tile = Image.NewFromFile(coverImages[i], access: Enums.Access.Sequential);
-
-            // Resize the tile to fit the thumbnail size
             tile = tile.ThumbnailImage(thumbnailWidth, height: thumbnailHeight);
 
-            var x = (i % 2) * thumbnailWidth;
-            var y = (i / 2) * thumbnailHeight;
+            var row = i / cols;
+            var col = i % cols;
+
+            var x = col * thumbnailWidth;
+            var y = row * thumbnailHeight;
+
+            if (coverImages.Count == 3 && i == 2)
+            {
+                x = (image.Width - thumbnailWidth) / 2;
+                y = thumbnailHeight;
+            }
 
             image = image.Insert(tile, x, y);
         }
 
         image.WriteToFile(dest);
-        return dest;
     }
 }

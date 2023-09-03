@@ -35,7 +35,7 @@ public class StatsService : IStatsService
     private readonly IUnitOfWork _unitOfWork;
     private readonly DataContext _context;
     private readonly IStatisticService _statisticService;
-    private const string ApiUrl = "https://stats.kavitareader.com";
+    private const string ApiUrl = "https://stats.kavitareader.com"; // ""
 
     public StatsService(ILogger<StatsService> logger, IUnitOfWork unitOfWork, DataContext context, IStatisticService statisticService)
     {

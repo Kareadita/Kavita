@@ -101,7 +101,6 @@ public class ReadingListRepository : IReadingListRepository
                 .SelectMany(r => r.Items.Select(ri => ri.Chapter.CoverImage))
                 .Where(t => !string.IsNullOrEmpty(t))
                 .ToListAsync();
-        if (data.Count < 4) return new List<string>();
         return data
             .OrderBy(_ => random.Next())
             .Take(4)

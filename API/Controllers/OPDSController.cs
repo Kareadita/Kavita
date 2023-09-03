@@ -10,6 +10,7 @@ using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.CollectionTags;
 using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.OPDS;
 using API.DTOs.Search;
 using API.Entities;
@@ -65,6 +66,8 @@ public class OpdsController : BaseApiController
         SortOptions = null,
         PublicationStatus = new List<PublicationStatus>()
     };
+
+    private readonly FilterV2Dto _filterV2Dto = new FilterV2Dto();
     private readonly ChapterSortComparer _chapterSortComparer = ChapterSortComparer.Default;
     private const int PageSize = 20;
 
@@ -140,6 +143,19 @@ public class OpdsController : BaseApiController
         });
         feed.Entries.Add(new FeedEntry()
         {
+            Id = "wantToRead",
+            Title = await _localizationService.Translate(userId, "want-to-read"),
+            Content = new FeedEntryContent()
+            {
+                Text = await _localizationService.Translate(userId, "browse-want-to-read")
+            },
+            Links = new List<FeedLink>()
+            {
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/want-to-read"),
+            }
+        });
+        feed.Entries.Add(new FeedEntry()
+        {
             Id = "allLibraries",
             Title = await _localizationService.Translate(userId, "libraries"),
             Content = new FeedEntryContent()
@@ -201,9 +217,32 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries/{library.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/library-cover?libraryId={library.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/library-cover?libraryId={library.Id}&apiKey={apiKey}")
                 }
             });
         }
+
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
+    [HttpGet("{apiKey}/want-to-read")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetWantToRead(string apiKey, [FromQuery] int pageNumber = 0)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+        var wantToReadSeries = await _unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(userId, GetUserParams(pageNumber), _filterV2Dto);
+        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(wantToReadSeries.Select(s => s.Id));
+
+        var feed = CreateFeed(await _localizationService.Translate(userId, "want-to-read"), $"{apiKey}/want-to-read", apiKey, prefix);
+        SetFeedId(feed, $"want-to-read");
+        AddPagination(feed, wantToReadSeries, $"{prefix}{apiKey}/want-to-read");
+
+        feed.Entries.AddRange(wantToReadSeries.Select(seriesDto =>
+            CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl)));
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -226,21 +265,19 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed(await _localizationService.Translate(userId, "collections"), $"{prefix}{apiKey}/collections", apiKey, prefix);
         SetFeedId(feed, "collections");
-        foreach (var tag in tags)
+
+        feed.Entries.AddRange(tags.Select(tag => new FeedEntry()
         {
-            feed.Entries.Add(new FeedEntry()
+            Id = tag.Id.ToString(),
+            Title = tag.Title,
+            Summary = tag.Summary,
+            Links = new List<FeedLink>()
             {
-                Id = tag.Id.ToString(),
-                Title = tag.Title,
-                Summary = tag.Summary,
-                Links = new List<FeedLink>()
-                {
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionId={tag.Id}&apiKey={apiKey}")
-                }
-            });
-        }
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,  $"{prefix}{apiKey}/collections/{tag.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/collection-cover?collectionTagId={tag.Id}&apiKey={apiKey}")
+            }
+        }));
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -315,6 +352,8 @@ public class OpdsController : BaseApiController
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
                 }
             });
         }
@@ -378,17 +417,27 @@ public class OpdsController : BaseApiController
             return BadRequest(await _localizationService.Translate(userId, "no-library-access"));
         }
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, GetUserParams(pageNumber), _filterDto);
+        var filter = new FilterV2Dto
+        {
+            Statements = new List<FilterStatementDto>() {
+                new ()
+                {
+                    Comparison = FilterComparison.Equal,
+                    Field = FilterField.Libraries,
+                    Value = libraryId + string.Empty
+                }
+            }
+        };
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(pageNumber), filter);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
 
         var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix);
         SetFeedId(feed, $"library-{library.Name}");
         AddPagination(feed, series, $"{prefix}{apiKey}/libraries/{libraryId}");
 
-        foreach (var seriesDto in series)
-        {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
-        }
+        feed.Entries.AddRange(series.Select(seriesDto =>
+            CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl)));
 
         return CreateXmlResult(SerializeXml(feed));
     }
@@ -401,7 +450,7 @@ public class OpdsController : BaseApiController
         if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
             return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
         var (baseUrl, prefix) = await GetPrefix();
-        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAdded(0, userId, GetUserParams(pageNumber), _filterDto);
+        var recentlyAdded = await _unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, GetUserParams(pageNumber), _filterV2Dto);
         var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id));
 
         var feed = CreateFeed(await _localizationService.Translate(userId, "recently-added"), $"{prefix}{apiKey}/recently-added", apiKey, prefix);
@@ -730,8 +779,10 @@ public class OpdsController : BaseApiController
         return new FeedEntry()
         {
             Id = seriesDto.Id.ToString(),
-            Title = $"{seriesDto.Name} ({seriesDto.Format})",
-            Summary = seriesDto.Summary,
+            Title = $"{seriesDto.Name}",
+            Summary = $"Format: {seriesDto.Format}" + (string.IsNullOrWhiteSpace(metadata.Summary)
+                ? string.Empty
+                : $"     Summary: {metadata.Summary}"),
             Authors = metadata.Writers.Select(p => new FeedAuthor()
             {
                 Name = p.Name,
@@ -756,7 +807,8 @@ public class OpdsController : BaseApiController
         return new FeedEntry()
         {
             Id = searchResultDto.SeriesId.ToString(),
-            Title = $"{searchResultDto.Name} ({searchResultDto.Format})",
+            Title = $"{searchResultDto.Name}",
+            Summary = $"Format: {searchResultDto.Format}",
             Links = new List<FeedLink>()
             {
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/series/{searchResultDto.SeriesId}"),

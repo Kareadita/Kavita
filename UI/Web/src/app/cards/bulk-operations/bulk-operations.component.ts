@@ -11,9 +11,9 @@ import { Action, ActionFactoryService, ActionItem } from 'src/app/_services/acti
 import { BulkSelectionService } from '../bulk-selection.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe, CommonModule} from "@angular/common";
-import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
 import {TranslocoModule} from "@ngneat/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
   selector: 'app-bulk-operations',

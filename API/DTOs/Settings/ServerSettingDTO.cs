@@ -84,4 +84,8 @@ public class ServerSettingDto
     /// How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically
     /// </summary>
     public int OnDeckUpdateDays { get; set; }
+    /// <summary>
+    /// How large the cover images should be
+    /// </summary>
+    public CoverImageSize CoverImageSize { get; set; }
 }

@@ -112,7 +112,7 @@ export class StatisticsService {
     return this.httpClient.get<Array<any>>(this.baseUrl + 'stats/reading-count-by-day?userId=' + userId + '&days=' + days);
   }
 
-  getDayBreakdown() {
-    return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown');
+  getDayBreakdown( userId = 0) {
+    return this.httpClient.get<Array<StatCount<DayOfWeek>>>(this.baseUrl + 'stats/day-breakdown?userId=' + userId);
   }
 }

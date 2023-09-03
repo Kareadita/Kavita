@@ -1,4 +1,4 @@
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import {CdkVirtualScrollViewport} from '@angular/cdk/scrolling';
 import {CommonModule, DOCUMENT} from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -7,7 +7,8 @@ import {
   ContentChild,
   ElementRef,
   EventEmitter,
-  HostListener, inject,
+  HostListener,
+  inject,
   Inject,
   Input,
   OnChanges,
@@ -17,24 +18,26 @@ import {
   TrackByFunction,
   ViewChild
 } from '@angular/core';
-import { Router } from '@angular/router';
+import {Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import { FilterSettings } from 'src/app/metadata-filter/filter-settings';
-import { FilterUtilitiesService } from 'src/app/shared/_services/filter-utilities.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { JumpKey } from 'src/app/_models/jumpbar/jump-key';
-import { Library } from 'src/app/_models/library';
-import { Pagination } from 'src/app/_models/pagination';
-import { FilterEvent, FilterItem, SeriesFilter } from 'src/app/_models/metadata/series-filter';
-import { ActionItem } from 'src/app/_services/action-factory.service';
-import { JumpbarService } from 'src/app/_services/jumpbar.service';
-import { ScrollService } from 'src/app/_services/scroll.service';
+import {FilterSettings} from 'src/app/metadata-filter/filter-settings';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
+import {Library} from 'src/app/_models/library';
+import {Pagination} from 'src/app/_models/pagination';
+import {FilterEvent, FilterItem, SortField} from 'src/app/_models/metadata/series-filter';
+import {ActionItem} from 'src/app/_services/action-factory.service';
+import {JumpbarService} from 'src/app/_services/jumpbar.service';
+import {ScrollService} from 'src/app/_services/scroll.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 
-import {CardActionablesComponent} from "../card-item/card-actionables/card-actionables.component";
+
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
+import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 
 @Component({
   selector: 'app-card-detail-layout',
@@ -65,12 +68,15 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
    * Any actions to exist on the header for the parent collection (library, collection)
    */
   @Input() actions: ActionItem<any>[] = [];
-  @Input() trackByIdentity!: TrackByFunction<any>; //(index: number, item: any) => string
+  /**
+   * A trackBy to help with rendering. This is required as without it there are issues when scrolling
+   */
+  @Input({required: true}) trackByIdentity!: TrackByFunction<any>;
   @Input() filterSettings!: FilterSettings;
   @Input() refresh!: EventEmitter<void>;
 
 
-  @Input() jumpBarKeys: Array<JumpKey> = []; // This is aprox 784 pixels tall, original keys
+  @Input() jumpBarKeys: Array<JumpKey> = []; // This is approx 784 pixels tall, original keys
   jumpBarKeysToRender: Array<JumpKey> = []; // What is rendered on screen
 
   @Output() itemClicked: EventEmitter<any> = new EventEmitter();
@@ -84,11 +90,12 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   @ViewChild(VirtualScrollerComponent) private virtualScroller!: VirtualScrollerComponent;
 
   private readonly filterUtilityService = inject(FilterUtilitiesService);
-  filter: SeriesFilter = this.filterUtilityService.createSeriesFilter();
+  filter: SeriesFilterV2 = this.filterUtilityService.createSeriesV2Filter();
   libraries: Array<FilterItem<Library>> = [];
 
   updateApplied: number = 0;
   hasResumedJumpKey: boolean = false;
+
 
   get Breakpoint() {
     return Breakpoint;
@@ -109,7 +116,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     if (this.trackByIdentity === undefined) {
-      this.trackByIdentity = (index: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
+      this.trackByIdentity = (_: number, item: any) => `${this.header}_${this.updateApplied}_${item?.libraryId}`;
     }
 
     if (this.filterSettings === undefined) {
@@ -157,7 +164,8 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   }
 
   hasCustomSort() {
-    return this.filter.sortOptions || this.filterSettings?.presets?.sortOptions;
+    return this.filter?.sortOptions?.sortField != SortField.SortName || !this.filter?.sortOptions.isAscending
+      || this.filterSettings?.presetsV2?.sortOptions?.sortField != SortField.SortName || !this.filterSettings?.presetsV2?.sortOptions?.isAscending;
   }
 
   performAction(action: ActionItem<any>) {
@@ -169,7 +177,7 @@ export class CardDetailLayoutComponent implements OnInit, OnChanges {
   applyMetadataFilter(event: FilterEvent) {
     this.applyFilter.emit(event);
     this.updateApplied++;
-    this.filter = event.filter;
+    this.filter = event.filterV2;
     this.cdRef.markForCheck();
   }
 

@@ -3,11 +3,16 @@
       <label for="api-key--{{title}}" class="form-label">{{title}}</label><span *ngIf="tooltipText.length > 0">&nbsp;<i class="fa fa-info-circle" aria-hidden="true" placement="right" [ngbTooltip]="tooltip" role="button" tabindex="0"></i></span>
       <ng-template #tooltip>{{tooltipText}}</ng-template>
       <div class="input-group">
-          <input #apiKey type="text" readonly class="form-control" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
-          <div id="button-addon4">
-              <button class="btn btn-outline-secondary" type="button" (click)="copy()" [title]="t('copy')"><span class="visually-hidden">Copy</span><i class="fa fa-copy" aria-hidden="true"></i></button>
-              <button class="btn btn-danger" type="button" [ngbTooltip]="tipContent" (click)="refresh()" *ngIf="showRefresh"><span class="visually-hidden">Regenerate</span><i class="fa fa-sync-alt" aria-hidden="true"></i></button>
-          </div>
+          <input #apiKey [type]="InputType" readonly class="form-control" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
+          <button class="btn btn-outline-secondary" type="button" (click)="show()" [title]="t('show')" *ngIf="hideData">
+              <span class="visually-hidden">t('show')</span><i class="fa fa-eye" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-outline-secondary" type="button" (click)="copy()" [title]="t('copy')">
+              <span class="visually-hidden">Copy</span><i class="fa fa-copy" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-danger" type="button" [ngbTooltip]="tipContent" (click)="refresh()" *ngIf="showRefresh">
+              <span class="visually-hidden">Regenerate</span><i class="fa fa-sync-alt" aria-hidden="true"></i>
+          </button>
           <ng-template #tipContent>
               {{t('regen-warning')}}
           </ng-template>

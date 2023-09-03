@@ -33,7 +33,7 @@ namespace API.Services;
 public interface IBookService
 {
     int GetNumberOfPages(string filePath);
-    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat);
+    string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
     ComicInfo? GetComicInfo(string filePath);
     ParserInfo? ParseInfo(string filePath);
     /// <summary>
@@ -1196,13 +1196,13 @@ public class BookService : IBookService
     /// <param name="outputDirectory">Where to output the file, defaults to covers directory</param>
     /// <param name="encodeFormat">When saving the file, use encoding</param>
     /// <returns></returns>
-    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    public string GetCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
     {
         if (!IsValidFile(fileFilePath)) return string.Empty;
 
         if (Parser.IsPdf(fileFilePath))
         {
-            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat);
+            return GetPdfCoverImage(fileFilePath, fileName, outputDirectory, encodeFormat, size);
         }
 
         using var epubBook = EpubReader.OpenBook(fileFilePath, BookReaderOptions);
@@ -1217,20 +1217,20 @@ public class BookService : IBookService
             if (coverImageContent == null) return string.Empty;
             using var stream = coverImageContent.GetContentStream();
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "[BookService] There was a critical error and prevented thumbnail generation on {BookFile}. Defaulting to no cover image", fileFilePath);
             _mediaErrorService.ReportMediaIssue(fileFilePath, MediaErrorProducer.BookService,
-                "There was a critical error and prevented thumbnail generation", ex);
+                "There was a critical error and prevented thumbnail generation", ex); // TODO: Localize this
         }
 
         return string.Empty;
     }
 
 
-    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat)
+    private string GetPdfCoverImage(string fileFilePath, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size)
     {
         try
         {
@@ -1240,7 +1240,7 @@ public class BookService : IBookService
             using var stream = StreamManager.GetStream("BookService.GetPdfPage");
             GetPdfPage(docReader, 0, stream);
 
-            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat);
+            return _imageService.WriteCoverThumbnail(stream, fileName, outputDirectory, encodeFormat, size);
 
         }
         catch (Exception ex)

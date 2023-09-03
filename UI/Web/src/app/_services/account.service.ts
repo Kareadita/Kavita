@@ -55,7 +55,6 @@ export class AccountService {
     private messageHub: MessageHubService, private themeService: ThemeService) {
       messageHub.messages$.pipe(filter(evt => evt.event === EVENTS.UserUpdate),
         map(evt => evt.payload as UserUpdateEvent),
-        tap(u => console.log('user update: ', u)),
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
@@ -307,7 +306,6 @@ export class AccountService {
 
 
   private refreshAccount() {
-    console.log('Refreshing account');
     if (this.currentUser === null || this.currentUser === undefined) return of();
     return this.httpClient.get<User>(this.baseUrl + 'account/refresh-account').pipe(map((user: User) => {
       if (user) {

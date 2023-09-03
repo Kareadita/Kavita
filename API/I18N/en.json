@@ -43,6 +43,7 @@
     "file-missing": "File was not found in book",
 
     "collection-updated": "Collection updated successfully",
+    "collection-deleted": "Collection deleted",
     "generic-error": "Something went wrong, please try again",
     "collection-doesnt-exist": "Collection does not exist",
 
@@ -140,6 +141,8 @@
     "on-deck": "On Deck",
     "browse-on-deck": "Browse On Deck",
     "recently-added": "Recently Added",
+    "want-to-read": "Want to Read",
+    "browse-want-to-read": "Browse Want to Read",
     "browse-recently-added": "Browse Recently Added",
     "reading-lists": "Reading Lists",
     "browse-reading-lists": "Browse by Reading Lists",

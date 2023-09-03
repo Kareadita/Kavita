@@ -18,6 +18,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Metadata;
 using API.Entities.Scrobble;
+using API.Extensions.QueryExtensions.Filtering;
 using API.Helpers.Converters;
 using AutoMapper;
 using CollectionTag = API.Entities.CollectionTag;
@@ -31,6 +32,13 @@ public class AutoMapperProfiles : Profile
 {
     public AutoMapperProfiles()
     {
+        CreateMap<BookmarkSeriesPair, BookmarkDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.bookmark.Id))
+            .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.bookmark.Page))
+            .ForMember(dest => dest.VolumeId, opt => opt.MapFrom(src => src.bookmark.VolumeId))
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.bookmark.SeriesId))
+            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.bookmark.ChapterId))
+            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.series));
         CreateMap<LibraryDto, Library>();
         CreateMap<Volume, VolumeDto>();
         CreateMap<MangaFile, MangaFileDto>();

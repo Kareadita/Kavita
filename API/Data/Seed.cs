@@ -108,8 +108,9 @@ public static class Seed
             new() {Key = ServerSettingKey.HostName, Value = string.Empty},
             new() {Key = ServerSettingKey.EncodeMediaAs, Value = EncodeFormat.PNG.ToString()},
             new() {Key = ServerSettingKey.LicenseKey, Value = string.Empty},
-            new() {Key = ServerSettingKey.OnDeckProgressDays, Value = $"{30}"},
-            new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = $"{7}"},
+            new() {Key = ServerSettingKey.OnDeckProgressDays, Value = "30"},
+            new() {Key = ServerSettingKey.OnDeckUpdateDays, Value = "7"},
+            new() {Key = ServerSettingKey.CoverImageSize, Value = CoverImageSize.Default.ToString()},
             new() {
                 Key = ServerSettingKey.CacheSize, Value = Configuration.DefaultCacheMemory + string.Empty
             }, // Not used from DB, but DB is sync with appSettings.json

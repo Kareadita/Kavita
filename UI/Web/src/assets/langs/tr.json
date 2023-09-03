@@ -32,9 +32,9 @@
         "filter-label": "Filtre",
         "created-header": "Oluşturulmuş",
         "last-modified-header": "En son değiştirilmiş",
-        "type-header": "",
+        "type-header": "Tür",
         "series-header": "Seriler",
-        "data-header": "",
+        "data-header": "Veri",
         "is-processed-header": "",
         "no-data": "Bilgi yok",
         "volume-and-chapter-num": "",
@@ -63,7 +63,7 @@
     "review-card-modal": {
         "close": "",
         "user-review": "{{username}} İncelemesi",
-        "external-mod": "",
+        "external-mod": "(harici)",
         "go-to-review": "İncelemeye git"
     },
     "review-card": {
@@ -1283,12 +1283,6 @@
         "dark-theme-alt": "",
         "close-reader-alt": ""
     },
-    "infinite-reader": {
-        "continuous-reading-prev-chapter-alt": "",
-        "continuous-reading-prev-chapter": "",
-        "continuous-reading-next-chapter-alt": "",
-        "continuous-reading-next-chapter": ""
-    },
     "manga-reader": {
         "back": "",
         "save-globally": "",
@@ -1326,7 +1320,6 @@
     "metadata-filter": {
         "filter-title": "",
         "format-label": "",
-        "format-tooltip": "",
         "libraries-label": "",
         "collections-label": "",
         "genres-label": "",

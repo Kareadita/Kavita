@@ -28,7 +28,7 @@ import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesFilter, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent} from 'src/app/_models/metadata/series-filter';
 import {Action, ActionFactoryService, ActionItem} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
@@ -42,12 +42,16 @@ import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
 import {ReadMoreComponent} from '../../../shared/read-more/read-more.component';
 import {ImageComponent} from '../../../shared/image/image.component';
-import {CardActionablesComponent} from '../../../cards/card-item/card-actionables/card-actionables.component';
+
 import {
   SideNavCompanionBarComponent
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {SeriesFilterV2} from "../../../_models/metadata/v2/series-filter-v2";
 
 @Component({
     selector: 'app-collection-detail',
@@ -66,17 +70,16 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   translocoService = inject(TranslocoService);
 
   collectionTag!: CollectionTag;
-  tagImage: string = '';
   isLoading: boolean = true;
   series: Array<Series> = [];
-  seriesPagination!: Pagination;
+  pagination!: Pagination;
   collectionTagActions: ActionItem<CollectionTag>[] = [];
-  filter: SeriesFilter | undefined = undefined;
+  filter: SeriesFilterV2 | undefined = undefined;
   filterSettings: FilterSettings = new FilterSettings();
   summary: string = '';
 
   actionInProgress: boolean = false;
-  filterActiveCheck!: SeriesFilter;
+  filterActiveCheck!: SeriesFilterV2;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -165,11 +168,16 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       }
       const tagId = parseInt(routeId, 10);
 
-      this.seriesPagination = this.filterUtilityService.pagination(this.route.snapshot);
-      [this.filterSettings.presets, this.filterSettings.openByDefault] = this.filterUtilityService.filterPresetsFromUrl(this.route.snapshot);
-      this.filterSettings.presets.collectionTags = [tagId];
-      this.filterActiveCheck = this.filterUtilityService.createSeriesFilter();
-      this.filterActiveCheck.collectionTags = [tagId];
+      this.pagination = this.filterUtilityService.pagination(this.route.snapshot);
+
+      this.filter = this.filterUtilityService.filterPresetsFromUrlV2(this.route.snapshot);
+      if (this.filter.statements.filter(stmt => stmt.field === FilterField.Libraries).length === 0) {
+        this.filter!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+      }
+      this.filterActiveCheck = this.filterUtilityService.createSeriesV2Filter();
+      this.filterActiveCheck!.statements.push({field: FilterField.CollectionTags, value: tagId + '', comparison: FilterComparison.Equal});
+      this.filterSettings.presetsV2 =  this.filter;
+
       this.cdRef.markForCheck();
 
       this.updateTag(tagId);
@@ -213,14 +221,14 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
       const matchingTags = tags.filter(t => t.id === tagId);
       if (matchingTags.length === 0) {
         this.toastr.error(this.translocoService.translate('errors.collection-invalid-access'));
+        // TODO: Why would access need to be checked? Even if a id was guessed, the series wouldn't return
         this.router.navigateByUrl('/');
         return;
       }
 
       this.collectionTag = matchingTags[0];
       this.summary = (this.collectionTag.summary === null ? '' : this.collectionTag.summary).replace(/\n/g, '<br>');
-      this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(this.collectionTag.id));
-      this.titleService.setTitle(this.translocoService.translate('errors.collection-invalid-access', {collectionName: this.collectionTag.title}));
+      this.titleService.setTitle(this.translocoService.translate('collection-detail.title-alt', {collectionName: this.collectionTag.title}));
       this.cdRef.markForCheck();
     });
   }
@@ -230,16 +238,9 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     this.isLoading = true;
     this.cdRef.markForCheck();
 
-    if (!this.filter) {
-      this.filter =  this.filterUtilityService.createSeriesFilter(this.filter);
-      this.filter.sortOptions = {
-        isAscending: true,
-        sortField: SortField.SortName
-      }
-    }
-    this.seriesService.getAllSeries(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
+    this.seriesService.getAllSeriesV2(undefined, undefined, this.filter).pipe(take(1)).subscribe(series => {
       this.series = series.result;
-      this.seriesPagination = series.pagination;
+      this.pagination = series.pagination;
       this.jumpbarKeys = this.jumpbarService.getJumpKeys(this.series, (series: Series) => series.name);
       this.isLoading = false;
       window.scrollTo(0, 0);
@@ -248,9 +249,13 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
   }
 
   updateFilter(data: FilterEvent) {
-    this.filter = data.filter;
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
 
-    if (!data.isFirst) this.filterUtilityService.updateUrlFromFilter(this.seriesPagination, this.filter);
+    if (!data.isFirst) {
+      this.filterUtilityService.updateUrlFromFilterV2(this.pagination, this.filter);
+    }
+
     this.loadPage();
   }
 
@@ -276,11 +281,6 @@ export class CollectionDetailComponent implements OnInit, AfterContentChecked {
     modalRef.closed.subscribe((results: {success: boolean, coverImageUpdated: boolean}) => {
       this.updateTag(this.collectionTag.id);
       this.loadPage();
-      if (results.coverImageUpdated) {
-        this.tagImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
-        this.collectionTag.coverImage = this.imageService.randomize(this.imageService.getCollectionCoverImage(collectionTag.id));
-        this.cdRef.markForCheck();
-      }
     });
   }
 

@@ -34,7 +34,6 @@ export class SpoilerComponent implements OnInit{
   ngOnInit() {
     this.isCollapsed = true;
     this.cdRef.markForCheck();
-    console.log('html: ', this.html)
   }
 
 

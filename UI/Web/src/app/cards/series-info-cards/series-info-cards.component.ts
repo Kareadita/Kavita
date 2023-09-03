@@ -1,7 +1,8 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -10,16 +11,16 @@ import {
   Output
 } from '@angular/core';
 import {debounceTime, filter, map} from 'rxjs';
-import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
-import { UtilityService } from 'src/app/shared/_services/utility.service';
-import { UserProgressUpdateEvent } from 'src/app/_models/events/user-progress-update-event';
-import { HourEstimateRange } from 'src/app/_models/series-detail/hour-estimate-range';
-import { MangaFormat } from 'src/app/_models/manga-format';
-import { Series } from 'src/app/_models/series';
-import { SeriesMetadata } from 'src/app/_models/metadata/series-metadata';
-import { AccountService } from 'src/app/_services/account.service';
-import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
-import { ReaderService } from 'src/app/_services/reader.service';
+import {UtilityService} from 'src/app/shared/_services/utility.service';
+import {UserProgressUpdateEvent} from 'src/app/_models/events/user-progress-update-event';
+import {HourEstimateRange} from 'src/app/_models/series-detail/hour-estimate-range';
+import {MangaFormat} from 'src/app/_models/manga-format';
+import {Series} from 'src/app/_models/series';
+import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
+import {AccountService} from 'src/app/_services/account.service';
+import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
+import {ReaderService} from 'src/app/_services/reader.service';
+import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {CommonModule} from "@angular/common";
@@ -53,7 +54,7 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
    * If this should make an API call to request readingTimeLeft
    */
   @Input() showReadingTimeLeft: boolean = true;
-  @Output() goTo: EventEmitter<{queryParamName: FilterQueryParam, filter: any}> = new EventEmitter();
+  @Output() goTo: EventEmitter<{queryParamName: FilterField, filter: any}> = new EventEmitter();
 
   readingTime: HourEstimateRange = {avgHours: 0, maxHours: 0, minHours: 0};
   isScrobbling: boolean = true;
@@ -64,8 +65,8 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
     return MangaFormat;
   }
 
-  get FilterQueryParam() {
-    return FilterQueryParam;
+  get FilterField() {
+    return FilterField;
   }
 
   constructor(public utilityService: UtilityService, private readerService: ReaderService,
@@ -110,7 +111,9 @@ export class SeriesInfoCardsComponent implements OnInit, OnChanges {
   }
 
 
-  handleGoTo(queryParamName: FilterQueryParam, filter: any) {
+  handleGoTo(queryParamName: FilterField, filter: any) {
+    // Ignore the default case added as this query combo would never be valid
+    if (filter + '' === '' && queryParamName === FilterField.SeriesName) return;
     this.goTo.emit({queryParamName, filter});
   }
 

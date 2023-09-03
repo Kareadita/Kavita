@@ -1,0 +1,68 @@
+:root {
+  /* size */
+  --select2-single-height: 36px;
+  --select2-multiple-height: 36px;
+
+  /* label */
+  --select2-label-text-color: #000;
+  --select2-required-color: red;
+
+  /* selection */
+  --select2-selection-border-radius: 4px;
+  --select2-selection-background: var(--input-bg-readonly-color);
+  --select2-selection-disabled-background: #eee;
+  --select2-selection-border-color: var(--input-border-color);
+  --select2-selection-focus-border-color: var(--input-focus-boxshadow-color);
+  --select2-selection-text-color: var(--input-text-color);
+
+  /* selection: choice item (multiple) */
+  --select2-selection-choice-background: var(--tagbadge-filled-bg-color);
+  --select2-selection-choice-text-color: var(--tagbadge-filled-text-color);
+  --select2-selection-choice-border-color: var(--tagbadge-border-color);
+  --select2-selection-choice-close-color: var(--tagbadge-filled-text-color);
+  --select2-selection-choice-hover-close-color: var(--tagbadge-filled-text-color);
+
+  /* placeholder */
+  --select2-placeholder-color: #999;
+  --select2-placeholder-overflow: ellipsis;
+
+  /* no result message */
+  --select2-no-result-color: #888;
+  --select2-no-result-font-style: italic;
+
+  /* no result message */
+  --select2-too-much-result-color: #888;
+  --select2-too-much-result-style: italic;
+
+  /* reset */
+  --select2-reset-color: #999;
+
+  /* arrow */
+  --select2-arrow-color: #ccc;
+
+  /* dropdown panel */
+  --select2-dropdown-background: var(--input-bg-readonly-color);
+  --select2-dropdown-border-color: var(--input-border-color);
+
+  /* overlay */
+  --select2-overlay-backdrop: transparent;
+
+  /* search field */
+  --select2-search-border-color: var(--input-border-color);
+  --select2-search-background: var(--input-bg-readonly-color);
+  --select2-search-border-radius: 0px;
+
+  /* dropdown option */
+  --select2-option-text-color: var(--body-text-color);
+  --select2-option-disabled-text-color: #999;
+  --select2-option-disabled-background: transparent;
+  --select2-option-selected-text-color: lightgrey;
+  --select2-option-selected-background: var(--btn-disabled-bg-color);
+  --select2-option-highlighted-text-color: #fff;
+  --select2-option-highlighted-background: #5897fb; // TODO: This needs to be done correctly and applied throughout the app
+  --select2-option-group-text-color: var(--body-text-color);
+  --select2-option-group-background: transparent;
+
+  /* hint */
+  --select2-hint-text-color: #888;
+}

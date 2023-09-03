@@ -5,7 +5,6 @@ import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryDetailRoutingModule } from './library-detail-routing.module';
 import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
 
-import {CardActionablesComponent} from "../cards/card-item/card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
 import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
 import {SeriesCardComponent} from "../cards/series-card/series-card.component";
@@ -13,6 +12,7 @@ import {BulkOperationsComponent} from "../cards/bulk-operations/bulk-operations.
 import {
   SideNavCompanionBarComponent
 } from "../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component";
+import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 
 
 

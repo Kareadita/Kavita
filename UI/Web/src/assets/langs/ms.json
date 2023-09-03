@@ -1,23 +1,23 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "Log masuk",
+        "username": "{{biasa.nama_pengguna}}",
+        "password": "{{biasa.kata_laluan}}",
+        "password-validation": "{{pengesahan.pengesahan-kata laluan}}",
+        "forgot-password": "Lupa Kata Laluan?",
+        "submit": "{{biasa.hantar}}"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
-        "recently-added-title": ""
+        "no-libraries": "Perpustakaan belum di persediakan lagi. Semak pada konfigurasi",
+        "server-settings-link": "Tetapan Server",
+        "not-granted": "Anda belum di berikan akses kepada mana-mana perpustakaan.",
+        "on-deck-title": "Atas Dek",
+        "recently-updated-title": "Siri Yang Baru-baru ini Di kemaskini",
+        "recently-added-title": "Siri Baru Di tambah"
     },
     "edit-user": {
-        "edit": "",
-        "close": "",
+        "edit": "{{biasa.sunting}}",
+        "close": "{{biasa.tutup}}",
         "username": "",
         "required": "",
         "email": "",
@@ -1283,12 +1283,6 @@
         "dark-theme-alt": "",
         "close-reader-alt": ""
     },
-    "infinite-reader": {
-        "continuous-reading-prev-chapter-alt": "",
-        "continuous-reading-prev-chapter": "",
-        "continuous-reading-next-chapter-alt": "",
-        "continuous-reading-next-chapter": ""
-    },
     "manga-reader": {
         "back": "",
         "save-globally": "",
@@ -1326,7 +1320,6 @@
     "metadata-filter": {
         "filter-title": "",
         "format-label": "",
-        "format-tooltip": "",
         "libraries-label": "",
         "collections-label": "",
         "genres-label": "",

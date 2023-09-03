@@ -803,6 +803,26 @@ public class SeriesServiceTests : AbstractDbTest
     }
 
     [Fact]
+    public void GetFirstChapterForMetadata_BookWithOnlyVolumeNumbers_Test()
+    {
+        var file = new MangaFileBuilder("Test.cbz", MangaFormat.Archive, 1).Build();
+
+        var series = new SeriesBuilder("Test")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("0").WithPages(1).WithFile(file).Build())
+                .Build())
+
+            .WithVolume(new VolumeBuilder("1.5")
+                .WithChapter(new ChapterBuilder("0").WithPages(2).WithFile(file).Build())
+                .Build())
+            .Build();
+        series.Library = new LibraryBuilder("Test LIb", LibraryType.Book).Build();
+
+        var firstChapter = SeriesService.GetFirstChapterForMetadata(series);
+        Assert.Equal(1, firstChapter.Pages);
+    }
+
+    [Fact]
     public void GetFirstChapterForMetadata_Book_Test()
     {
         var series = CreateSeriesMock();

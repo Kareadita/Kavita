@@ -1,29 +1,31 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject} from '@angular/core';
-import { Router } from '@angular/router';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { map, Observable, ReplaySubject, shareReplay } from 'rxjs';
-import { FilterQueryParam } from 'src/app/shared/_services/filter-utilities.service';
-import { Breakpoint, UtilityService } from 'src/app/shared/_services/utility.service';
-import { Series } from 'src/app/_models/series';
-import { ImageService } from 'src/app/_services/image.service';
-import { MetadataService } from 'src/app/_services/metadata.service';
-import { StatisticsService } from 'src/app/_services/statistics.service';
-import { PieDataItem } from '../../_models/pie-data-item';
-import { ServerStatistics } from '../../_models/server-statistics';
-import { GenericListModalComponent } from '../_modals/generic-list-modal/generic-list-modal.component';
+import {Router} from '@angular/router';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {map, Observable, ReplaySubject, shareReplay} from 'rxjs';
+import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
+import {Breakpoint, UtilityService} from 'src/app/shared/_services/utility.service';
+import {Series} from 'src/app/_models/series';
+import {ImageService} from 'src/app/_services/image.service';
+import {MetadataService} from 'src/app/_services/metadata.service';
+import {StatisticsService} from 'src/app/_services/statistics.service';
+import {PieDataItem} from '../../_models/pie-data-item';
+import {ServerStatistics} from '../../_models/server-statistics';
+import {GenericListModalComponent} from '../_modals/generic-list-modal/generic-list-modal.component';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { BytesPipe } from '../../../pipe/bytes.pipe';
-import { TimeDurationPipe } from '../../../pipe/time-duration.pipe';
-import { CompactNumberPipe } from '../../../pipe/compact-number.pipe';
-import { DayBreakdownComponent } from '../day-breakdown/day-breakdown.component';
-import { ReadingActivityComponent } from '../reading-activity/reading-activity.component';
-import { PublicationStatusStatsComponent } from '../publication-status-stats/publication-status-stats.component';
-import { FileBreakdownStatsComponent } from '../file-breakdown-stats/file-breakdown-stats.component';
-import { TopReadersComponent } from '../top-readers/top-readers.component';
-import { StatListComponent } from '../stat-list/stat-list.component';
-import { IconAndTitleComponent } from '../../../shared/icon-and-title/icon-and-title.component';
-import { NgIf, AsyncPipe, DecimalPipe } from '@angular/common';
+import {BytesPipe} from '../../../pipe/bytes.pipe';
+import {TimeDurationPipe} from '../../../pipe/time-duration.pipe';
+import {CompactNumberPipe} from '../../../pipe/compact-number.pipe';
+import {DayBreakdownComponent} from '../day-breakdown/day-breakdown.component';
+import {ReadingActivityComponent} from '../reading-activity/reading-activity.component';
+import {PublicationStatusStatsComponent} from '../publication-status-stats/publication-status-stats.component';
+import {FileBreakdownStatsComponent} from '../file-breakdown-stats/file-breakdown-stats.component';
+import {TopReadersComponent} from '../top-readers/top-readers.component';
+import {StatListComponent} from '../stat-list/stat-list.component';
+import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
+import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
 @Component({
     selector: 'app-server-stats',
@@ -65,7 +67,8 @@ export class ServerStatsComponent {
   get Breakpoint() { return Breakpoint; }
 
   constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
-    private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService) {
+    private metadataService: MetadataService, private modalService: NgbModal, private utilityService: UtilityService,
+    private filterUtilityService: FilterUtilitiesService) {
     this.seriesImage = (data: PieDataItem) => {
       if (data.extra) return this.imageService.getSeriesCoverImage(data.extra.id);
       return '';
@@ -114,10 +117,7 @@ export class ServerStatsComponent {
       ref.componentInstance.items = genres.map(t => t.title);
       ref.componentInstance.title = this.translocoService.translate('server-stats.genres');
       ref.componentInstance.clicked = (item: string) => {
-        const params: any = {};
-        params[FilterQueryParam.Genres] = genres.filter(g => g.title === item)[0].id;
-        params[FilterQueryParam.Page] = 1;
-        this.router.navigate(['all-series'], {queryParams: params});
+        this.filterUtilityService.applyFilter(['all-series'], FilterField.Genres, FilterComparison.Contains, genres.filter(g => g.title === item)[0].id + '');
       };
     });
   }
@@ -128,10 +128,7 @@ export class ServerStatsComponent {
       ref.componentInstance.items = tags.map(t => t.title);
       ref.componentInstance.title = this.translocoService.translate('server-stats.tags');
       ref.componentInstance.clicked = (item: string) => {
-        const params: any = {};
-        params[FilterQueryParam.Tags] = tags.filter(g => g.title === item)[0].id;
-        params[FilterQueryParam.Page] = 1;
-        this.router.navigate(['all-series'], {queryParams: params});
+        this.filterUtilityService.applyFilter(['all-series'], FilterField.Tags, FilterComparison.Contains, tags.filter(g => g.title === item)[0].id + '');
       };
     });
   }

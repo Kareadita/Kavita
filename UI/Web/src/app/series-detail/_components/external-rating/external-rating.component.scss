@@ -19,6 +19,14 @@
   }
 }
 
+.lg-popover {
+  width: 320px;
+
+  > .popover-body {
+    padding-top: 0px;
+  }
+}
+
 .rating-star {
   i {
     position: relative;
