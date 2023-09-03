@@ -228,7 +228,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) }}
     steps:
 
       - name: Find Current Pull Request
@@ -257,7 +257,7 @@ jobs:
           body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
-          
+
 
       - name: Check Out Repo
         uses: actions/checkout@v3
