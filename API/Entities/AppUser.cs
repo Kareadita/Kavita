@@ -67,6 +67,10 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// A list of Series the user doesn't want scrobbling for
     /// </summary>
     public ICollection<ScrobbleHold> ScrobbleHolds { get; set; } = null!;
+    /// <summary>
+    /// A collection of user Smart Filters for their account
+    /// </summary>
+    public ICollection<AppUserSmartFilter> SmartFilters { get; set; } = null!;
 
 
     /// <inheritdoc />

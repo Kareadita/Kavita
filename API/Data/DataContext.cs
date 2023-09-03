@@ -54,6 +54,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ScrobbleHold> ScrobbleHold { get; set; } = null!;
     public DbSet<AppUserOnDeckRemoval> AppUserOnDeckRemoval { get; set; } = null!;
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
+    public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

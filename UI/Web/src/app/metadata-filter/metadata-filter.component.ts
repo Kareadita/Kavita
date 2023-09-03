@@ -190,6 +190,10 @@ export class MetadataFilterComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  edit() {
+    
+  }
+
   toggleSelected() {
     this.toggleService.toggle();
     this.cdRef.markForCheck();
