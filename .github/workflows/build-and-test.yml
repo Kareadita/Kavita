@@ -75,10 +75,10 @@ jobs:
       - name: Test
         run: dotnet test --no-restore --verbosity normal
   version:
-    name: Bump version on Develop/Canary push
+    name: Bump version on Develop/Canary PR (and not coming from release/)
     needs: [ build ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/canary') }}
+    if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'develop'  || github.event.pull_request.base.ref == 'refs/heads/canary') && !startsWith(github.event.pull_request.head.ref, 'release/')
     steps:
       - uses: actions/checkout@v3
         with:
