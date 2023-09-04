@@ -1035,4 +1035,12 @@ public class AccountController : BaseApiController
         return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
 
     }
+
+
+    [HttpGet("dashboard")]
+    public async Task<ActionResult> GetDashboardLayout()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok();
+    }
 }

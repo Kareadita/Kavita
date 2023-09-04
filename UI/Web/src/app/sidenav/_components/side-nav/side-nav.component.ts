@@ -28,6 +28,7 @@ import {FormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 
 @Component({
   selector: 'app-side-nav',
@@ -110,7 +111,8 @@ export class SideNavComponent implements OnInit {
   }
 
   handleHomeActions() {
-    this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+    this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl'});
+    // TODO: If on /, then refresh the page layout
   }
 
 

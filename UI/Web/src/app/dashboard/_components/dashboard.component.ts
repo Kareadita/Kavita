@@ -20,13 +20,28 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CardItemComponent} from '../../cards/card-item/card-item.component';
 import {SeriesCardComponent} from '../../cards/series-card/series-card.component';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
-import {AsyncPipe, NgIf} from '@angular/common';
+import {AsyncPipe, NgForOf, NgIf, NgSwitch, NgSwitchCase, NgTemplateOutlet} from '@angular/common';
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+
+enum StreamId {
+  OnDeck = 1,
+  RecentlyUpdated = 2,
+  NewlyAdded = 3,
+  Custom = 4
+}
+
+interface DashboardStream {
+  id: StreamId;
+  name: string;
+  isProvided: boolean;
+  api: Observable<any[]>;
+
+}
 
 @Component({
     selector: 'app-dashboard',
@@ -34,7 +49,8 @@ import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent, CardItemComponent, AsyncPipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet]
 })
 export class DashboardComponent implements OnInit {
 
@@ -59,10 +75,30 @@ export class DashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
+
+
+  streams: Array<DashboardStream> = [
+    {id: StreamId.OnDeck, name: translate('dashboard.on-deck-title'), isProvided: true,
+      api: this.seriesService.getOnDeck(0, 1, 30)
+        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
+    {id: StreamId.RecentlyUpdated, name: 'Recently Updated Series', isProvided: true,
+      api: this.seriesService.getRecentlyUpdatedSeries()},
+    {id: StreamId.NewlyAdded, name: 'Newly Added Series', isProvided: true,
+      api: this.seriesService.getRecentlyAdded(1, 30)
+        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
+  ];
+
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
     private titleService: Title, public imageService: ImageService,
     private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
+
+    const defaultFilter = this.filterUtilityService.createSeriesV2Filter();
+    defaultFilter.limitTo = 20;
+    this.streams.push({id: StreamId.Custom, name: 'Test', isProvided: false,
+      api: this.seriesService.getAllSeriesV2(1, 30, defaultFilter)
+        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))})
+
 
       this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
         if (res.event === EVENTS.SeriesAdded) {
@@ -117,6 +153,10 @@ export class DashboardComponent implements OnInit {
     this.loadOnDeck();
     this.loadRecentlyUpdated();
     this.loadRecentlyAddedSeries();
+  }
+
+  reloadStream(streamId: number) {
+
   }
 
   reloadInProgress(series: Series | number) {
@@ -209,4 +249,6 @@ export class DashboardComponent implements OnInit {
       arr.splice(index);
     }
   }
+
+  protected readonly StreamId = StreamId;
 }

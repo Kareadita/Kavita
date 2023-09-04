@@ -1,0 +1,13 @@
+<ng-container *transloco="let t; read: 'customize-dashboard-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+  </div>
+</ng-container>

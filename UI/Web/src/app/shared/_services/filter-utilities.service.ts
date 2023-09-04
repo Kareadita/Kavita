@@ -107,6 +107,7 @@ export class FilterUtilitiesService {
         }).join(','));
     }
 
+
     filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
         const filter = this.metadataService.createDefaultFilterDto();
         if (!window.location.href.includes('?')) return filter;

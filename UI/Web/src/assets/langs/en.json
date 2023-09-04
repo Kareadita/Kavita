@@ -1709,6 +1709,11 @@
         "remove-rule": "Remove Row"
     },
 
+    "customize-dashboard-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}"
+    },
+
     "filter-field-pipe": {
         "age-rating": "Age Rating",
         "characters": "Characters",
@@ -1865,7 +1870,6 @@
         "add-rule-group-or": "Add Rule Group (OR)",
         "remove-rule-group": "Remove Rule Group",
         "customize": "Customize"
-
     },
 
     "preferences": {
