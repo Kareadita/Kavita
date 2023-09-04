@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.7.20"
+    "version": "0.7.8.2"
   },
   "servers": [
     {
@@ -1920,6 +1920,37 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/DownloadBookmarkDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Filter/update": {
+      "post": {
+        "tags": [
+          "Filter"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilterV2Dto"
               }
             }
           }
@@ -12061,6 +12092,9 @@
           "chapterId": {
             "type": "integer",
             "format": "int32"
+          },
+          "series": {
+            "$ref": "#/components/schemas/SeriesDto"
           }
         },
         "additionalProperties": false
@@ -18335,6 +18369,10 @@
     {
       "name": "Download",
       "description": "All APIs related to downloading entities from the system. Requires Download Role or Admin Role."
+    },
+    {
+      "name": "Filter",
+      "description": "This is responsible for Filter caching"
     },
     {
       "name": "Image",

@@ -1752,6 +1752,7 @@
         "does-not-contain": "Non contiene",
         "less-than-or-equal": "Minore o uguale",
         "is-in-last": "È ultimo",
-        "is-not-in-last": "Non è l'ultimo"
+        "is-not-in-last": "Non è l'ultimo",
+        "must-contains": "Deve Contenere"
     }
 }

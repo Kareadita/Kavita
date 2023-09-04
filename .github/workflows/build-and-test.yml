@@ -74,12 +74,11 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
-
   version:
-    name: Bump version on Develop/Canary push
+    name: Bump version on Develop/Canary PR (and not coming from release/)
     needs: [ build ]
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/canary') }}
+    if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'develop'  || github.event.pull_request.base.ref == 'refs/heads/canary') && !startsWith(github.event.pull_request.head.ref, 'release/')
     steps:
       - uses: actions/checkout@v3
         with:
@@ -96,6 +95,15 @@ jobs:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}
           version_mask: "0.0.0.1"
+
+  branch_name:
+      runs-on: ubuntu-latest
+      steps:
+          - name: Extract branch name
+            shell: bash
+            run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+            id: extract_branch
+
 
   develop:
     name: Build Nightly Docker if Develop push
@@ -207,7 +215,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
+          tags: jvmilazz0/kavita:nightly, jvmilazz0/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -228,7 +236,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
     steps:
 
       - name: Find Current Pull Request
@@ -257,7 +265,7 @@ jobs:
           body=${body//$'>'/'%3E'}
           echo $body
           echo "BODY=$body" >> $GITHUB_OUTPUT
-          
+
 
       - name: Check Out Repo
         uses: actions/checkout@v3
@@ -335,7 +343,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}
+          tags: jvmilazz0/kavita:latest, jvmilazz0/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -439,7 +447,7 @@ jobs:
                 context: .
                 platforms: linux/amd64,linux/arm/v7,linux/arm64
                 push: true
-                tags: kizaing/kavita:canary, kizaing/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
+                tags: jvmilazz0/kavita:canary, jvmilazz0/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
 
           - name: Image digest
             run: echo ${{ steps.docker_build.outputs.digest }}

@@ -383,13 +383,6 @@ public class UserRepository : IUserRepository
             .OrderBy(x => x.Created)
             .AsNoTracking();
 
-        var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == FilterField.SeriesName);
-        if (filterStatement == null || string.IsNullOrWhiteSpace(filterStatement.Value))
-            return await query
-                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
-                .ToListAsync();
-
-        var queryString = filterStatement.Value.ToNormalized();
         var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id,
             (bookmark, series) => new BookmarkSeriesPair()
             {
@@ -397,6 +390,17 @@ public class UserRepository : IUserRepository
                 series = series
             });
 
+        var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == FilterField.SeriesName);
+        if (filterStatement == null || string.IsNullOrWhiteSpace(filterStatement.Value))
+        {
+            return await ApplyLimit(filterSeriesQuery
+                    .Sort(filter.SortOptions)
+                    .AsSplitQuery(), filter.LimitTo)
+                .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+        }
+
+        var queryString = filterStatement.Value.ToNormalized();
         switch (filterStatement.Comparison)
         {
             case FilterComparison.Equal:
@@ -429,6 +433,7 @@ public class UserRepository : IUserRepository
                                                                  || s.series.LocalizedName != queryString
                                                                  || s.series.SortName != queryString);
                 break;
+            case FilterComparison.MustContains:
             case FilterComparison.NotContains:
             case FilterComparison.GreaterThan:
             case FilterComparison.GreaterThanEqual:
@@ -443,8 +448,6 @@ public class UserRepository : IUserRepository
                 break;
         }
 
-
-
         return await ApplyLimit(filterSeriesQuery
                 .Sort(filter.SortOptions)
                 .AsSplitQuery(), filter.LimitTo)
@@ -457,6 +460,7 @@ public class UserRepository : IUserRepository
     {
         return limit <= 0 ? query : query.Take(limit);
     }
+
 
     /// <summary>
     /// Fetches the UserId by API Key. This does not include any extra information

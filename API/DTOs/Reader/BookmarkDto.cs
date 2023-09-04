@@ -13,4 +13,8 @@ public class BookmarkDto
     public int SeriesId { get; set; }
     [Required]
     public int ChapterId { get; set; }
+    /// <summary>
+    /// This is only used when getting all bookmarks.
+    /// </summary>
+    public SeriesDto? Series { get; set; }
 }
