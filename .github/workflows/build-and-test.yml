@@ -81,6 +81,7 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
+
   version:
     name: Bump version on Develop/Canary push
     needs: [ build ]
