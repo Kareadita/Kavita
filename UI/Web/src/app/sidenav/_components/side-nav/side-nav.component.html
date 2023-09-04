@@ -1,18 +1,21 @@
 <ng-container *transloco="let t; read: 'side-nav'">
     <div class="side-nav" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async), 'hidden': (navService.sideNavVisibility$ | async) === false, 'no-donate': (accountService.hasValidLicense$ | async) === true}"  *ngIf="accountService.currentUser$ | async as user">
-        <!-- <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">
-            <ng-container actions>
-                Todo: This will be customize dashboard/side nav controls
-                <a href="/preferences/" title="User Settings"><span class="visually-hidden">User Settings</span></a>
-            </ng-container>
-        </app-side-nav-item> -->
+<!--        <app-side-nav-item icon="fa-user-circle align-self-center phone-hidden" [title]="user.username | sentenceCase" link="/preferences/">-->
+<!--            <ng-container actions>-->
+<!--                <a href="/preferences/" title="User Settings"><span class="visually-hidden">User Settings</span></a>-->
+<!--            </ng-container>-->
+<!--        </app-side-nav-item>-->
 
-        <app-side-nav-item icon="fa-home" [title]="t('home')" link="/libraries/"></app-side-nav-item>
+        <app-side-nav-item icon="fa-home" [title]="t('home')" link="/libraries/">
+          <ng-container actions>
+            <app-card-actionables [actions]="homeActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="handleHomeActions()"></app-card-actionables>
+          </ng-container>
+        </app-side-nav-item>
         <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
         <app-side-nav-item icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>
         <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">
             <ng-container actions>
-                <app-card-actionables [actions]="readingListActions" labelBy="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>
+                <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>
             </ng-container>
         </app-side-nav-item>
         <app-side-nav-item icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>

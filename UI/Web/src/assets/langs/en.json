@@ -1863,7 +1863,8 @@
         "read": "Read",
         "add-rule-group-and": "Add Rule Group (AND)",
         "add-rule-group-or": "Add Rule Group (OR)",
-        "remove-rule-group": "Remove Rule Group"
+        "remove-rule-group": "Remove Rule Group",
+        "customize": "Customize"
 
     },
 
