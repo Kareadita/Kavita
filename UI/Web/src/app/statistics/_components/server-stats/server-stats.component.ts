@@ -23,7 +23,7 @@ import {TopReadersComponent} from '../top-readers/top-readers.component';
 import {StatListComponent} from '../stat-list/stat-list.component';
 import {IconAndTitleComponent} from '../../../shared/icon-and-title/icon-and-title.component';
 import {AsyncPipe, DecimalPipe, NgIf} from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterField} from "../../../_models/metadata/v2/filter-field";
 
@@ -62,8 +62,6 @@ export class ServerStatsComponent {
     this.breakpointSubject.next(this.utilityService.getActiveBreakpoint());
   }
 
-
-  translocoService = inject(TranslocoService);
   get Breakpoint() { return Breakpoint; }
 
   constructor(private statService: StatisticsService, private router: Router, private imageService: ImageService,
@@ -115,7 +113,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllGenres().subscribe(genres => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = genres.map(t => t.title);
-      ref.componentInstance.title = this.translocoService.translate('server-stats.genres');
+      ref.componentInstance.title = translate('server-stats.genres');
       ref.componentInstance.clicked = (item: string) => {
         this.filterUtilityService.applyFilter(['all-series'], FilterField.Genres, FilterComparison.Contains, genres.filter(g => g.title === item)[0].id + '');
       };
@@ -126,7 +124,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllTags().subscribe(tags => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = tags.map(t => t.title);
-      ref.componentInstance.title = this.translocoService.translate('server-stats.tags');
+      ref.componentInstance.title = translate('server-stats.tags');
       ref.componentInstance.clicked = (item: string) => {
         this.filterUtilityService.applyFilter(['all-series'], FilterField.Tags, FilterComparison.Contains, tags.filter(g => g.title === item)[0].id + '');
       };
@@ -137,7 +135,7 @@ export class ServerStatsComponent {
     this.metadataService.getAllPeople().subscribe(people => {
       const ref = this.modalService.open(GenericListModalComponent, { scrollable: true });
       ref.componentInstance.items = [...new Set(people.map(person => person.name))];
-      ref.componentInstance.title = this.translocoService.translate('server-stats.people');
+      ref.componentInstance.title = translate('server-stats.people');
     });
   }
 
