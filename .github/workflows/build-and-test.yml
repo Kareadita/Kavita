@@ -11,7 +11,7 @@ jobs:
   test:
     name: Test trigger
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
+    if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
     steps:
       - name: Echo
         run: echo 'Triggered'
