@@ -8,13 +8,6 @@ on:
     types: [synchronize]
 
 jobs:
-  test:
-    name: Test trigger
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
-    steps:
-      - name: Echo
-        run: echo 'Triggered'
   build:
     name: Build .Net
     runs-on: windows-latest
@@ -243,7 +236,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main') }}
+    if: github.event_name == 'pull_request' && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
     steps:
 
       - name: Find Current Pull Request
