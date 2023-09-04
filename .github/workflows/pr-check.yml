@@ -11,6 +11,10 @@ jobs:
     check_pr:
         runs-on: ubuntu-latest
         steps:
+            - name: Extract branch name
+              shell: bash
+              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+              id: extract_branch
             - name: Check PR Body
               uses: JJ/github-pr-contains-action@releases/v10
               with:
