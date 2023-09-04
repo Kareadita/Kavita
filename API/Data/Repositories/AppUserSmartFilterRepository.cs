@@ -1,10 +1,13 @@
-﻿using AutoMapper;
+﻿using API.Entities;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
 
 public interface IAppUserSmartFilterRepository
 {
-
+    void Update(AppUserSmartFilter filter);
+    void Attach(AppUserSmartFilter filter);
 }
 
 public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
@@ -16,5 +19,15 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
     {
         _context = context;
         _mapper = mapper;
+    }
+
+    public void Update(AppUserSmartFilter filter)
+    {
+        _context.Entry(filter).State = EntityState.Modified;
+    }
+
+    public void Attach(AppUserSmartFilter filter)
+    {
+        _context.AppUserSmartFilter.Attach(filter);
     }
 }

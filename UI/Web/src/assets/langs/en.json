@@ -1494,10 +1494,12 @@
     "metadata-filter": {
         "filter-title": "Filter",
         "sort-by-label": "Sort By",
+        "filter-name-label": "Filter Name",
         "ascending-alt": "Ascending",
         "descending-alt": "Descending",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
+        "save": "{{common.save}}",
         "limit-label": "Limit To",
 
         "format-label": "Format",

@@ -1936,7 +1936,9 @@
         "tags": [
           "Filter"
         ],
+        "summary": "Creates or Updates the filter",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
