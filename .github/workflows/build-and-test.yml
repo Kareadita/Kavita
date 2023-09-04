@@ -74,6 +74,13 @@ jobs:
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal
+  test:
+    name: Test trigger
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/') && github.event.pull_request.base.ref == 'develop'
+    steps:
+      - name: Echo
+        run: echo 'Triggered'
 
   version:
     name: Bump version on Develop/Canary push
