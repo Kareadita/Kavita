@@ -97,6 +97,15 @@ jobs:
           github_token: ${{ secrets.REPO_GHA_PAT }}
           version_mask: "0.0.0.1"
 
+  branch_name:
+      runs-on: ubuntu-latest
+      steps:
+          - name: Extract branch name
+            shell: bash
+            run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+            id: extract_branch
+
+
   develop:
     name: Build Nightly Docker if Develop push
     needs: [ build, version ]
@@ -207,7 +216,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: kizaing/kavita:nightly, kizaing/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
+          tags: jvmilazz0/kavita:nightly, jvmilazz0/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:nightly, ghcr.io/kareadita/kavita:nightly-${{ steps.parse-version.outputs.VERSION }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
@@ -228,126 +237,133 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')) }}
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || ) }}
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
 
-      - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          state: all
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Parse PR body
-        id: parse-body
-        run: |
-          body="${{ steps.findPr.outputs.body }}"
-          if [[ ${#body} -gt 1870 ]] ; then
-            body=${body:0:1870}
-            body="${body}...and much more.
-
-            Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
-          fi
-
-          body=${body//\'/}
-          body=${body//'%'/'%25'}
-          body=${body//$'\n'/'%0A'}
-          body=${body//$'\r'/'%0D'}
-          body=${body//$'`'/'%60'}
-          body=${body//$'>'/'%3E'}
-          echo $body
-          echo "BODY=$body" >> $GITHUB_OUTPUT
-
-
-      - name: Check Out Repo
-        uses: actions/checkout@v3
-        with:
-          ref: main
-
-      - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-      - run: |
-
-          cd UI/Web || exit
-          echo 'Installing web dependencies'
-          npm install --legacy-peer-deps
-
-          echo 'Building UI'
-          npm run prod
-
-          echo 'Copying back to Kavita wwwroot'
-          rsync -a dist/ ../../API/wwwroot/
-
-          cd ../ || exit
-
-      - name: Get csproj Version
-        uses: kzrnm/get-net-sdk-project-versions-action@v1
-        id: get-version
-        with:
-          proj-path: Kavita.Common/Kavita.Common.csproj
-
-      - name: Echo csproj version
-        run: echo "${{steps.get-version.outputs.assembly-version}}"
-
-      - name: Parse Version
-        run: |
-          version='${{steps.get-version.outputs.assembly-version}}'
-          newVersion=${version%.*}
-          echo $newVersion
-          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
-        id: parse-version
-
-      - name: Compile dotnet app
-        uses: actions/setup-dotnet@v3
-        with:
-            dotnet-version: 7.0.x
-      - name: Install Swashbuckle CLI
-        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
-
-      - run: ./monorepo-build.sh
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
-          push: true
-          tags: kizaing/kavita:latest, kizaing/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
-
-      - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
-        with:
-            severity: info
-            description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
-            details: '${{ steps.findPr.outputs.body }}'
-            text: <@&939225192553644133> A new stable build has been released.
-            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
+      - name: Echo Test
+        run: echo "Main Ran"
+#
+#      - name: Find Current Pull Request
+#        uses: jwalton/gh-find-current-pr@v1
+#        id: findPr
+#        with:
+#          state: all
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Parse PR body
+#        id: parse-body
+#        run: |
+#          body="${{ steps.findPr.outputs.body }}"
+#          if [[ ${#body} -gt 1870 ]] ; then
+#            body=${body:0:1870}
+#            body="${body}...and much more.
+#
+#            Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
+#          fi
+#
+#          body=${body//\'/}
+#          body=${body//'%'/'%25'}
+#          body=${body//$'\n'/'%0A'}
+#          body=${body//$'\r'/'%0D'}
+#          body=${body//$'`'/'%60'}
+#          body=${body//$'>'/'%3E'}
+#          echo $body
+#          echo "BODY=$body" >> $GITHUB_OUTPUT
+#
+#
+#      - name: Check Out Repo
+#        uses: actions/checkout@v3
+#        with:
+#          ref: main
+#
+#      - name: NodeJS to Compile WebUI
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: '16'
+#      - run: |
+#
+#          cd UI/Web || exit
+#          echo 'Installing web dependencies'
+#          npm install --legacy-peer-deps
+#
+#          echo 'Building UI'
+#          npm run prod
+#
+#          echo 'Copying back to Kavita wwwroot'
+#          rsync -a dist/ ../../API/wwwroot/
+#
+#          cd ../ || exit
+#
+#      - name: Get csproj Version
+#        uses: kzrnm/get-net-sdk-project-versions-action@v1
+#        id: get-version
+#        with:
+#          proj-path: Kavita.Common/Kavita.Common.csproj
+#
+#      - name: Echo csproj version
+#        run: echo "${{steps.get-version.outputs.assembly-version}}"
+#
+#      - name: Parse Version
+#        run: |
+#          version='${{steps.get-version.outputs.assembly-version}}'
+#          newVersion=${version%.*}
+#          echo $newVersion
+#          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
+#        id: parse-version
+#
+#      - name: Compile dotnet app
+#        uses: actions/setup-dotnet@v3
+#        with:
+#            dotnet-version: 7.0.x
+#      - name: Install Swashbuckle CLI
+#        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+#
+#      - run: ./monorepo-build.sh
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+#
+#      - name: Login to GitHub Container Registry
+#        uses: docker/login-action@v2
+#        with:
+#          registry: ghcr.io
+#          username: ${{ github.actor }}
+#          password: ${{ secrets.GITHUB_TOKEN }}
+#
+#      - name: Set up QEMU
+#        uses: docker/setup-qemu-action@v2
+#
+#      - name: Set up Docker Buildx
+#        id: buildx
+#        uses: docker/setup-buildx-action@v2
+#
+#      - name: Build and push
+#        id: docker_build
+#        uses: docker/build-push-action@v4
+#        with:
+#          context: .
+#          platforms: linux/amd64,linux/arm/v7,linux/arm64
+#          push: true
+#          tags: jvmilazz0/kavita:latest, jvmilazz0/kavita:${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:latest, ghcr.io/kareadita/kavita:${{ steps.parse-version.outputs.VERSION }}
+#
+#      - name: Image digest
+#        run: echo ${{ steps.docker_build.outputs.digest }}
+#
+#      - name: Notify Discord
+#        uses: rjstone/discord-webhook-notify@v1
+#        with:
+#            severity: info
+#            description: v${{steps.get-version.outputs.assembly-version}} - ${{ steps.findPr.outputs.title }}
+#            details: '${{ steps.findPr.outputs.body }}'
+#            text: <@&939225192553644133> A new stable build has been released.
+#            webhookUrl: ${{ secrets.DISCORD_DOCKER_UPDATE_URL }}
 
   canary:
       name: Build Canary Docker if Canary push
@@ -439,7 +455,7 @@ jobs:
                 context: .
                 platforms: linux/amd64,linux/arm/v7,linux/arm64
                 push: true
-                tags: kizaing/kavita:canary, kizaing/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
+                tags: jvmilazz0/kavita:canary, jvmilazz0/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
 
           - name: Image digest
             run: echo ${{ steps.docker_build.outputs.digest }}
