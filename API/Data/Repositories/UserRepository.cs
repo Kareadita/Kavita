@@ -15,6 +15,7 @@ using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -35,7 +36,8 @@ public enum AppUserIncludes
     ReadingListsWithItems = 128,
     Devices = 256,
     ScrobbleHolds = 512,
-    SmartFilters = 1024
+    SmartFilters = 1024,
+    DashboardStreams = 2048
 }
 
 public interface IUserRepository
@@ -76,6 +78,7 @@ public interface IUserRepository
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
     Task<string> GetLocale(int userId);
+    Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId);
 }
 
 public class UserRepository : IUserRepository
@@ -298,6 +301,24 @@ public class UserRepository : IUserRepository
         return await _context.AppUserPreferences.Where(p => p.AppUserId == userId)
             .Select(p => p.Locale)
             .SingleAsync();
+    }
+
+    public async Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId)
+    {
+        return await _context.AppUserDashboardStream
+            .Where(d => d.AppUserId == userId)
+            .OrderBy(d => d.Order)
+            .Select(d => new DashboardStreamDto()
+            {
+                Name = d.Name,
+                IsProvided = d.IsProvided,
+                Id = d.Id,
+                SmartFilter = d.SmartFilter == null ? null : SmartFilterHelper.Decode(d.SmartFilter.Filter),
+                StreamType = d.StreamType,
+                SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                Order = d.Order
+            })
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

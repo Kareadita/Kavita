@@ -13,6 +13,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
+using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.SignalR;
@@ -1038,9 +1039,9 @@ public class AccountController : BaseApiController
 
 
     [HttpGet("dashboard")]
-    public async Task<ActionResult> GetDashboardLayout()
+    public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout()
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        return Ok();
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId());
+        return Ok(streams);
     }
 }

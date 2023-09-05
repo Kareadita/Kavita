@@ -38,6 +38,32 @@ public static class Seed
             }
         }.ToArray());
 
+    public static readonly ImmutableArray<AppUserDashboardStream> DefaultStreams = ImmutableArray.Create(
+        new List<AppUserDashboardStream>
+        {
+            new()
+            {
+                Name = "On Deck",
+                StreamType = DashboardStreamType.OnDeck,
+                Order = 0,
+                IsProvided = true,
+            },
+            new()
+            {
+                Name = "Recently Updated",
+                StreamType = DashboardStreamType.RecentlyUpdated,
+                Order = 1,
+                IsProvided = true,
+            },
+            new()
+            {
+                Name = "Newly Added",
+                StreamType = DashboardStreamType.NewlyAdded,
+                Order = 2,
+                IsProvided = true,
+            },
+        }.ToArray());
+
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
         var roles = typeof(PolicyConstants)

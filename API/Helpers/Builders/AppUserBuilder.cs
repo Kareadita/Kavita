@@ -28,8 +28,13 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Ratings = new List<AppUserRating>(),
             Progresses = new List<AppUserProgress>(),
             Devices = new List<Device>(),
-            Id = 0
+            Id = 0,
+            DashboardStreams = new List<AppUserDashboardStream>()
         };
+        foreach (var s in Seed.DefaultStreams)
+        {
+            _appUser.DashboardStreams.Add(s);
+        }
     }
 
     public AppUserBuilder WithLibrary(Library library)

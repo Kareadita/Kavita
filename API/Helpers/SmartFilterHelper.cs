@@ -14,7 +14,7 @@ public static class SmartFilterHelper
     private const string LimitToKey = "limitTo=";
     private const string CombinationKey = "combination=";
 
-    public static FilterV2Dto Decode(string encodedFilter)
+    public static FilterV2Dto Decode(string? encodedFilter)
     {
         if (string.IsNullOrWhiteSpace(encodedFilter))
         {

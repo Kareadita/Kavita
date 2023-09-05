@@ -27,20 +27,23 @@ import {
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
+import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 
-enum StreamId {
+export enum StreamType {
   OnDeck = 1,
   RecentlyUpdated = 2,
   NewlyAdded = 3,
   Custom = 4
 }
 
-interface DashboardStream {
-  id: StreamId;
+export interface DashboardStream {
+  id: number;
   name: string;
   isProvided: boolean;
   api: Observable<any[]>;
-
+  smartFilterEncoded?: string;
+  smartFilter?: SeriesFilterV2;
+  streamType: StreamType;
 }
 
 @Component({
@@ -78,14 +81,14 @@ export class DashboardComponent implements OnInit {
 
 
   streams: Array<DashboardStream> = [
-    {id: StreamId.OnDeck, name: translate('dashboard.on-deck-title'), isProvided: true,
-      api: this.seriesService.getOnDeck(0, 1, 30)
-        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
-    {id: StreamId.RecentlyUpdated, name: 'Recently Updated Series', isProvided: true,
-      api: this.seriesService.getRecentlyUpdatedSeries()},
-    {id: StreamId.NewlyAdded, name: 'Newly Added Series', isProvided: true,
-      api: this.seriesService.getRecentlyAdded(1, 30)
-        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
+    // {id: StreamType.OnDeck, name: translate('dashboard.on-deck-title'), isProvided: true,
+    //   api: this.seriesService.getOnDeck(0, 1, 30)
+    //     .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
+    // {id: StreamType.RecentlyUpdated, name: 'Recently Updated Series', isProvided: true,
+    //   api: this.seriesService.getRecentlyUpdatedSeries()},
+    // {id: StreamType.NewlyAdded, name: 'Newly Added Series', isProvided: true,
+    //   api: this.seriesService.getRecentlyAdded(1, 30)
+    //     .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
   ];
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
@@ -95,9 +98,25 @@ export class DashboardComponent implements OnInit {
 
     const defaultFilter = this.filterUtilityService.createSeriesV2Filter();
     defaultFilter.limitTo = 20;
-    this.streams.push({id: StreamId.Custom, name: 'Test', isProvided: false,
-      api: this.seriesService.getAllSeriesV2(1, 30, defaultFilter)
-        .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))})
+
+    this.accountService.getDashboardStreams().subscribe(streams => {
+      this.streams = streams;
+      this.streams.forEach(s => {
+        switch (s.streamType) {
+          case StreamType.OnDeck:
+            s.api = this.seriesService.getOnDeck(0, 1, 30)
+              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.NewlyAdded:
+            s.api = this.seriesService.getRecentlyAdded(1, 30)
+              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.RecentlyUpdated:
+            s.api = this.seriesService.getRecentlyUpdatedSeries();
+            break;
+        }
+      })
+    });
 
 
       this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
@@ -250,5 +269,5 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  protected readonly StreamId = StreamId;
+  protected readonly StreamId = StreamType;
 }

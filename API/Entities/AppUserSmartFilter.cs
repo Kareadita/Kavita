@@ -3,7 +3,7 @@
 namespace API.Entities;
 
 /// <summary>
-/// Represents
+/// Represents a Saved user Filter
 /// </summary>
 public class AppUserSmartFilter
 {

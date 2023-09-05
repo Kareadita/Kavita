@@ -55,6 +55,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserOnDeckRemoval> AppUserOnDeckRemoval { get; set; } = null!;
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
+    public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -120,6 +121,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<Chapter>()
             .Property(b => b.ISBN)
             .HasDefaultValue(string.Empty);
+
+        builder.Entity<AppUserDashboardStream>()
+            .Property(b => b.StreamType)
+            .HasDefaultValue(DashboardStreamType.Custom);
+        builder.Entity<AppUserDashboardStream>()
+            .Property(b => b.Visible)
+            .HasDefaultValue(true);
     }
 
 

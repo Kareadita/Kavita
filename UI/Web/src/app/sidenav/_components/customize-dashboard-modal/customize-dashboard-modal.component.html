@@ -4,7 +4,12 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
   </div>
   <div class="modal-body">
-
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
+                                [showRemoveButton]="true">
+      <ng-template #draggableItem let-position="idx" let-item: DashboardStream>
+        Test
+      </ng-template>
+    </app-draggable-ordered-list>
   </div>
 
   <div class="modal-footer">

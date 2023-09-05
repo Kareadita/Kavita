@@ -229,6 +229,13 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
 
-        CreateMap<AppUserSmartFilter, FilterV2Dto>();
+        // CreateMap<AppUserSmartFilter, FilterV2Dto>()
+        //     .ForMember(dest => dest,
+        //         opt =>
+        //             opt.MapFrom(src => SmartFilterHelper.Decode(src.Filter)));
+        CreateMap<AppUserDashboardStream, DashboardStreamDto>()
+            .ForMember(dest => dest.SmartFilterEncoded,
+                opt => opt.MapFrom(src => src.SmartFilter));
+
     }
 }

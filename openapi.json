@@ -875,6 +875,44 @@
         }
       }
     },
+    "/api/Account/dashboard": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Admin/exists": {
       "get": {
         "tags": [
@@ -11504,6 +11542,14 @@
             "description": "A collection of user Smart Filters for their account",
             "nullable": true
           },
+          "dashboardStreams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppUserDashboardStream"
+            },
+            "description": "An ordered list of Streams (pre-configured) or Smart Filters that makes up the User's Dashboard",
+            "nullable": true
+          },
           "rowVersion": {
             "type": "integer",
             "format": "int32",
@@ -11563,6 +11609,53 @@
         },
         "additionalProperties": false,
         "description": "Represents a saved page in a Chapter entity for a given user."
+      },
+      "AppUserDashboardStream": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "isProvided": {
+            "type": "boolean",
+            "description": "Is System Provided"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Sort Order on the Dashboard",
+            "format": "int32"
+          },
+          "streamType": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "For system provided",
+            "format": "int32"
+          },
+          "visible": {
+            "type": "boolean"
+          },
+          "smartFilter": {
+            "$ref": "#/components/schemas/AppUserSmartFilter"
+          },
+          "appUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appUser": {
+            "$ref": "#/components/schemas/AppUser"
+          }
+        },
+        "additionalProperties": false
       },
       "AppUserPreferences": {
         "type": "object",
@@ -11907,7 +12000,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Represents"
+        "description": "Represents a Saved user Filter"
       },
       "AppUserTableOfContent": {
         "type": "object",
@@ -13159,6 +13252,48 @@
           "title": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DashboardStreamDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "isProvided": {
+            "type": "boolean",
+            "description": "Is System Provided"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Sort Order on the Dashboard",
+            "format": "int32"
+          },
+          "smartFilterEncoded": {
+            "type": "string",
+            "description": "If Not IsProvided, the appropriate smart filter",
+            "nullable": true
+          },
+          "smartFilter": {
+            "$ref": "#/components/schemas/FilterV2Dto"
+          },
+          "streamType": {
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ],
+            "type": "integer",
+            "description": "For system provided",
+            "format": "int32"
           }
         },
         "additionalProperties": false

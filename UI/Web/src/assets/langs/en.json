@@ -1710,6 +1710,7 @@
     },
 
     "customize-dashboard-modal": {
+        "title": "Customize Dashboard",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
     },
