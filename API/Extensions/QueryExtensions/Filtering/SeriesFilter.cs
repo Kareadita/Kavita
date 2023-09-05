@@ -252,7 +252,7 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => s.Percentage == readProgress);
+                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < 0.01f);
                 break;
             case FilterComparison.GreaterThan:
                 subQuery = subQuery.Where(s => s.Percentage > readProgress);
@@ -267,7 +267,7 @@ public static class SeriesFilter
                 subQuery = subQuery.Where(s => s.Percentage <= readProgress);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => s.Percentage != readProgress);
+                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) > 0.01f);
                 break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:
