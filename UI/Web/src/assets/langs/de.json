@@ -273,26 +273,26 @@
         "open-filtered-search": ""
     },
     "user-stats-info-cards": {
-        "total-pages-read-label": "",
+        "total-pages-read-label": "Insgesamt gelesene Seiten",
         "total-pages-read-tooltip": "{{user-stats-info-cards.total-pages-read-label}}: {{value}}",
-        "total-words-read-label": "",
+        "total-words-read-label": "Insgesamt gelesene Wörter",
         "total-words-read-tooltip": "{{user-stats-info-cards.total-words-read-label}}: {{value}}",
         "time-spent-reading-label": "",
         "time-spent-reading-tooltip": "{{user-stats-info-cards.time-spent-reading-label}}: {{value}}",
-        "chapters-read-label": "",
+        "chapters-read-label": "Gelesene Kapitel",
         "chapters-read-tooltip": "{{user-stats-info-cards.chapters-read-label}}: {{value}}",
-        "avg-reading-per-week-label": "",
+        "avg-reading-per-week-label": "Durchschnittlich gelesen / Woche",
         "last-active-label": "",
         "chapters": "{{value}} Kapitel"
     },
     "user-stats": {
-        "library-read-progress-title": "",
-        "read-percentage": ""
+        "library-read-progress-title": "Lesefortschritt der Bibliothek",
+        "read-percentage": "% gelesen"
     },
     "top-readers": {
         "title": "",
-        "time-selection-label": "",
-        "comics-label": "",
+        "time-selection-label": "Zeitfenster",
+        "comics-label": "Comics: {{value}} Std.",
         "manga-label": "",
         "books-label": "",
         "this-week": "{{time-periods.this-week}}",
@@ -303,12 +303,12 @@
         "all-time": "{{time-periods.all-time}}"
     },
     "role-selector": {
-        "title": ""
+        "title": "Rollen"
     },
     "directory-picker": {
-        "title": "",
+        "title": "Wählen Sie ein Verzeichnis",
         "close": "{{common.close}}",
-        "path-label": "",
+        "path-label": "Pfad",
         "path-placeholder": "",
         "instructions": "",
         "type-header": "",
@@ -325,18 +325,18 @@
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "no-data": ""
+        "no-data": "Es sind noch keine Bibliotheken eingerichtet."
     },
     "time-periods": {
-        "this-week": "",
-        "last-7-days": "",
-        "last-30-days": "",
-        "last-90-days": "",
-        "last-year": "",
+        "this-week": "Diese Woche",
+        "last-7-days": "Letzte 7 Tage",
+        "last-30-days": "Letzte 30 Tage",
+        "last-90-days": "Letzte 90 Tage",
+        "last-year": "Dieses Jahr",
         "all-time": ""
     },
     "device-platform-pipe": {
-        "custom": ""
+        "custom": "Benutzerdefiniert"
     },
     "day-of-week-pipe": {
         "monday": "Montag",
@@ -348,17 +348,17 @@
         "sunday": "Sonntag"
     },
     "cbl-import-result-pipe": {
-        "success": "",
-        "partial": "",
-        "failure": ""
+        "success": "Erfolgreich",
+        "partial": "Teilweise",
+        "failure": "Fehlgeschlagen"
     },
     "cbl-conflict-reason-pipe": {
         "all-series-missing": "",
         "chapter-missing": "",
         "empty-file": "",
         "name-conflict": "",
-        "series-collision": "",
-        "series-missing": "",
+        "series-collision": "Die Serie {{seriesLink}} kollidiert mit einer anderen Serie gleichen Namens in einer anderen Bibliothek.",
+        "series-missing": "Die Serie, {{series}}, ist in Kavita nicht vorhanden oder Sie haben nicht die nötigen Rechte. Alle Elemente dieser Serie werden beim Import übersprungen.",
         "volume-missing": "",
         "all-chapter-missing": "",
         "invalid-file": "",
@@ -388,7 +388,7 @@
         "adaptation": "",
         "alternative-setting": "",
         "alternative-version": "",
-        "character": "",
+        "character": "Charakter",
         "contains": "",
         "doujinshi": "",
         "other": "",
