@@ -79,7 +79,6 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'releases/') && github.event.pull_request.base.ref == 'develop' 
     steps:
       - name: Find Current Pull Request
         uses: jwalton/gh-find-current-pr@v1
