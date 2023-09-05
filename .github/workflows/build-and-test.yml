@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build .Net
+    name: Build and Test PR
     runs-on: windows-latest
     steps:
       - name: Checkout Repo
