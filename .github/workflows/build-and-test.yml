@@ -112,7 +112,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/develop' && !contains('release/', github.event.pull_request.head.ref) }}
+    if: ${{ github.event_name == 'push' && !startsWith(github.head_ref, 'releases/') && github.event.pull_request.base.ref == 'develop' }}
     steps:
       - name: Find Current Pull Request
         uses: jwalton/gh-find-current-pr@v1
@@ -236,7 +236,7 @@ jobs:
     permissions:
       packages: write
       contents: read
-    if: github.event_name == 'pull_request' && contains('release/', github.event.pull_request.head.ref) && github.event.pull_request.base.ref == 'develop'
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'releases/') && github.event.pull_request.base.ref == 'develop' 
     steps:
 
       - name: Find Current Pull Request
