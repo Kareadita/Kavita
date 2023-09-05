@@ -4,8 +4,7 @@ on:
   push:
     branches:
         - canary
-    branches-ignore:    
-      - 'release/**'
+        - '!release/**' 
 
 jobs:
   build:

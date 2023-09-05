@@ -4,8 +4,7 @@ on:
   push:
     branches:
         - develop
-    branches-ignore:    
-      - 'release/**'
+        - '!release/**'
 
 jobs:
   build:
