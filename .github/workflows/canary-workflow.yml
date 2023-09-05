@@ -1,0 +1,192 @@
+name: Canary Workflow
+
+on:
+  push:
+    branches:
+        - canary
+    branches-ignore:    
+      - 'release/**'
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+            dotnet-version: 7.0.x
+
+      - name: Install Swashbuckle CLI
+        shell: powershell
+        run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: csproj
+          path: Kavita.Common/Kavita.Common.csproj
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+      - name: Sonar Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"Kareadita_Kavita" /o:"kareadita" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet build --configuration Release
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
+
+  version:
+    name: Bump version
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+            dotnet-version: 7.0.x
+
+      - name: Bump versions
+        uses: SiqiLu/dotnet-bump-version@2.0.0
+        with:
+          version_files: Kavita.Common/Kavita.Common.csproj
+          github_token: ${{ secrets.REPO_GHA_PAT }}
+          version_mask: "0.0.0.1"
+
+  canary:
+      name: Build Canary Docker
+      needs: [ build, version ]
+      runs-on: ubuntu-latest
+      permissions:
+          packages: write
+          contents: read
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/canary' }}
+      steps:
+          - name: Find Current Pull Request
+            uses: jwalton/gh-find-current-pr@v1
+            id: findPr
+            with:
+                state: all
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Check Out Repo
+            uses: actions/checkout@v3
+            with:
+                ref: canary
+
+          - name: NodeJS to Compile WebUI
+            uses: actions/setup-node@v3
+            with:
+                node-version: '16'
+          - run: |
+                cd UI/Web || exit
+                echo 'Installing web dependencies'
+                npm install --legacy-peer-deps
+
+                echo 'Building UI'
+                npm run prod
+
+                echo 'Copying back to Kavita wwwroot'
+                rsync -a dist/ ../../API/wwwroot/
+
+                cd ../ || exit
+
+          - name: Get csproj Version
+            uses: kzrnm/get-net-sdk-project-versions-action@v1
+            id: get-version
+            with:
+                proj-path: Kavita.Common/Kavita.Common.csproj
+
+          - name: Parse Version
+            run: |
+                version='${{steps.get-version.outputs.assembly-version}}'
+                echo "VERSION=$version" >> $GITHUB_OUTPUT
+            id: parse-version
+
+          - name: Echo csproj version
+            run: echo "${{steps.get-version.outputs.assembly-version}}"
+
+          - name: Compile dotnet app
+            uses: actions/setup-dotnet@v3
+            with:
+                dotnet-version: 7.0.x
+
+          - name: Install Swashbuckle CLI
+            run: dotnet tool install -g --version 6.5.0 Swashbuckle.AspNetCore.Cli
+
+          - run: ./monorepo-build.sh
+
+          - name: Login to Docker Hub
+            uses: docker/login-action@v2
+            with:
+                username: ${{ secrets.DOCKER_HUB_USERNAME }}
+                password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+          - name: Login to GitHub Container Registry
+            uses: docker/login-action@v2
+            with:
+                registry: ghcr.io
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Set up QEMU
+            uses: docker/setup-qemu-action@v2
+
+          - name: Set up Docker Buildx
+            id: buildx
+            uses: docker/setup-buildx-action@v2
+
+          - name: Build and push
+            id: docker_build
+            uses: docker/build-push-action@v4
+            with:
+                context: .
+                platforms: linux/amd64,linux/arm/v7,linux/arm64
+                push: true
+                tags: jvmilazz0/kavita:canary, jvmilazz0/kavita:canary-${{ steps.parse-version.outputs.VERSION }}, ghcr.io/kareadita/kavita:canary, ghcr.io/kareadita/kavita:canary-${{ steps.parse-version.outputs.VERSION }}
+
+          - name: Image digest
+            run: echo ${{ steps.docker_build.outputs.digest }}
