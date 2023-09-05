@@ -6,13 +6,17 @@
   <div class="modal-body">
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
                                 [showRemoveButton]="true">
-      <ng-template #draggableItem let-position="idx" let-item: DashboardStream>
-        Test
+      <ng-template #draggableItem let-position="idx" let-item>
+        <div class="row g-0">
+          {{item.name}}
+          <!-- Enabled or not -->
+
+        </div>
       </ng-template>
     </app-draggable-ordered-list>
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
   </div>
 </ng-container>

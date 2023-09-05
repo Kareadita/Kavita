@@ -4,6 +4,7 @@ using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.CollectionTags;
+using API.DTOs.Dashboard;
 using API.DTOs.Device;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
@@ -229,10 +230,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
 
 
-        // CreateMap<AppUserSmartFilter, FilterV2Dto>()
-        //     .ForMember(dest => dest,
-        //         opt =>
-        //             opt.MapFrom(src => SmartFilterHelper.Decode(src.Filter)));
+        CreateMap<AppUserSmartFilter, SmartFilterDto>();
         CreateMap<AppUserDashboardStream, DashboardStreamDto>()
             .ForMember(dest => dest.SmartFilterEncoded,
                 opt => opt.MapFrom(src => src.SmartFilter));

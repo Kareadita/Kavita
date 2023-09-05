@@ -1,5 +1,9 @@
-﻿using API.Entities;
+﻿using System.Collections.Generic;
+using System.Linq;
+using API.DTOs.Dashboard;
+using API.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -8,6 +12,7 @@ public interface IAppUserSmartFilterRepository
 {
     void Update(AppUserSmartFilter filter);
     void Attach(AppUserSmartFilter filter);
+    IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId);
 }
 
 public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
@@ -29,5 +34,13 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
     public void Attach(AppUserSmartFilter filter)
     {
         _context.AppUserSmartFilter.Attach(filter);
+    }
+
+    public IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId)
+    {
+        return _context.AppUserSmartFilter
+            .Where(f => f.AppUserId == userId)
+            .ProjectTo<SmartFilterDto>(_mapper.ConfigurationProvider)
+            .AsEnumerable();
     }
 }

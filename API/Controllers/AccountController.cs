@@ -8,6 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
+using API.DTOs.Dashboard;
 using API.DTOs.Email;
 using API.Entities;
 using API.Entities.Enums;
@@ -1037,11 +1038,21 @@ public class AccountController : BaseApiController
 
     }
 
-
+    /// <summary>
+    /// Returns the layout of the user's dashboard
+    /// </summary>
+    /// <returns></returns>
     [HttpGet("dashboard")]
     public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout()
     {
         var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId());
         return Ok(streams);
+    }
+
+    [HttpPost("update-dashboard")]
+    public async Task<ActionResult> UpdateDashboard()
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok();
     }
 }

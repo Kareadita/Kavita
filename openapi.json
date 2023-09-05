@@ -880,6 +880,7 @@
         "tags": [
           "Account"
         ],
+        "summary": "Returns the layout of the user's dashboard",
         "responses": {
           "200": {
             "description": "Success",
@@ -909,6 +910,18 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Account/update-dashboard": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -1998,6 +2011,44 @@
         "responses": {
           "200": {
             "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Filter": {
+      "get": {
+        "tags": [
+          "Filter"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SmartFilterDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SmartFilterDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SmartFilterDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -13294,6 +13345,9 @@
             "type": "integer",
             "description": "For system provided",
             "format": "int32"
+          },
+          "visible": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -17169,6 +17223,25 @@
         },
         "additionalProperties": false,
         "description": "Represents a set of css overrides the user can upload to Kavita and will load into webui"
+      },
+      "SmartFilterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "filter": {
+            "type": "string",
+            "description": "This is the Filter url encoded. It is decoded and reconstructed into a API.DTOs.Filtering.v2.FilterV2Dto",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
       },
       "SortOptions": {
         "type": "object",

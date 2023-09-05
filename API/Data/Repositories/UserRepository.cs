@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
+using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;

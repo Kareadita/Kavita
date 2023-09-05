@@ -44,6 +44,8 @@ export interface DashboardStream {
   smartFilterEncoded?: string;
   smartFilter?: SeriesFilterV2;
   streamType: StreamType;
+  order: number;
+  visible: boolean;
 }
 
 @Component({
@@ -78,37 +80,23 @@ export class DashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
 
-
-
-  streams: Array<DashboardStream> = [
-    // {id: StreamType.OnDeck, name: translate('dashboard.on-deck-title'), isProvided: true,
-    //   api: this.seriesService.getOnDeck(0, 1, 30)
-    //     .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
-    // {id: StreamType.RecentlyUpdated, name: 'Recently Updated Series', isProvided: true,
-    //   api: this.seriesService.getRecentlyUpdatedSeries()},
-    // {id: StreamType.NewlyAdded, name: 'Newly Added Series', isProvided: true,
-    //   api: this.seriesService.getRecentlyAdded(1, 30)
-    //     .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}))},
-  ];
+  streams: Array<DashboardStream> = [];
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
     private titleService: Title, public imageService: ImageService,
     private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
 
-    const defaultFilter = this.filterUtilityService.createSeriesV2Filter();
-    defaultFilter.limitTo = 20;
-
     this.accountService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
-            s.api = this.seriesService.getOnDeck(0, 1, 30)
+            s.api = this.seriesService.getOnDeck(0, 1, 20)
               .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.NewlyAdded:
-            s.api = this.seriesService.getRecentlyAdded(1, 30)
+            s.api = this.seriesService.getRecentlyAdded(1, 20)
               .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
           case StreamType.RecentlyUpdated:
@@ -119,40 +107,41 @@ export class DashboardComponent implements OnInit {
     });
 
 
-      this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-        if (res.event === EVENTS.SeriesAdded) {
-          const seriesAddedEvent = res.payload as SeriesAddedEvent;
+    // TODO: Solve how Websockets will work with these dyanamic streams
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
+      if (res.event === EVENTS.SeriesAdded) {
+        const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
 
-          this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-            if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
-            this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
-            this.cdRef.markForCheck();
-          });
-        } else if (res.event === EVENTS.SeriesRemoved) {
-          const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-
-          this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
-          this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
-          this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+        this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
+          if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
+          this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
           this.cdRef.markForCheck();
-        } else if (res.event === EVENTS.ScanSeries) {
-          // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
-          this.loadRecentlyAdded$.next();
-        }
-      });
+        });
+      } else if (res.event === EVENTS.SeriesRemoved) {
+        const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
 
-      this.isAdmin$ = this.accountService.currentUser$.pipe(
-        takeUntilDestroyed(this.destroyRef),
-        map(user => (user && this.accountService.hasAdminRole(user)) || false),
-        shareReplay()
-      );
-
-      this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-        this.loadRecentlyUpdated();
-        this.loadRecentlyAddedSeries();
+        this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
+        this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
+        this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
         this.cdRef.markForCheck();
-      });
+      } else if (res.event === EVENTS.ScanSeries) {
+        // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
+        this.loadRecentlyAdded$.next();
+      }
+    });
+
+    this.isAdmin$ = this.accountService.currentUser$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      map(user => (user && this.accountService.hasAdminRole(user)) || false),
+      shareReplay({bufferSize: 1, refCount: true})
+    );
+
+    // this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    //   this.loadRecentlyUpdated();
+    //   this.loadRecentlyAddedSeries();
+    //   this.cdRef.markForCheck();
+    // });
   }
 
   ngOnInit(): void {
@@ -165,7 +154,7 @@ export class DashboardComponent implements OnInit {
       this.cdRef.markForCheck();
     }));
 
-    this.reloadSeries();
+    //this.reloadSeries();
   }
 
   reloadSeries() {
@@ -179,7 +168,7 @@ export class DashboardComponent implements OnInit {
   }
 
   reloadInProgress(series: Series | number) {
-    this.loadOnDeck();
+    this.loadOnDeck(); // TODO: Use combineLatest so we can emit when to reload an api
   }
 
   loadOnDeck() {

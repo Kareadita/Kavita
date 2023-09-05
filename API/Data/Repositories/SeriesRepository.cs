@@ -8,6 +8,7 @@ using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
+using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;

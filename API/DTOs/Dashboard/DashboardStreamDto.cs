@@ -1,7 +1,7 @@
 ﻿using API.DTOs.Filtering.v2;
 using API.Entities.Enums;
 
-namespace API.DTOs.Account;
+namespace API.DTOs.Dashboard;
 
 public class DashboardStreamDto
 {
@@ -25,4 +25,5 @@ public class DashboardStreamDto
     /// For system provided
     /// </summary>
     public DashboardStreamType StreamType { get; set; }
+    public bool Visible { get; set; }
 }
