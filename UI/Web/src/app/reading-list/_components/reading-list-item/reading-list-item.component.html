@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; read: 'reading-list-item'">
-  <div class="d-flex flex-row g-0 mb-2">
+  <div class="d-flex flex-row g-0 mb-2 reading-list-item">
     <div class="pe-2">
       <app-image width="106px" maxHeight="125px" class="img-top me-3" [imageUrl]="imageService.getChapterCoverImage(item.chapterId)"></app-image>
       <ng-container *ngIf="item.pagesRead === 0 && item.pagesTotal > 0">
