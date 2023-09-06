@@ -47,6 +47,7 @@ public static class Seed
                 StreamType = DashboardStreamType.OnDeck,
                 Order = 0,
                 IsProvided = true,
+                Visible = true
             },
             new()
             {
@@ -54,6 +55,7 @@ public static class Seed
                 StreamType = DashboardStreamType.RecentlyUpdated,
                 Order = 1,
                 IsProvided = true,
+                Visible = true
             },
             new()
             {
@@ -61,8 +63,9 @@ public static class Seed
                 StreamType = DashboardStreamType.NewlyAdded,
                 Order = 2,
                 IsProvided = true,
+                Visible = true
             },
-        }.ToArray());
+        }.ToArray()); // TODO: Before we wrap this PR, we might want to add more with visible off
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {

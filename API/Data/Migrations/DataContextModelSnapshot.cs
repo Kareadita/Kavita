@@ -209,6 +209,11 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(4);
 
+                    b.Property<bool>("Visible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");

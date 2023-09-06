@@ -1045,7 +1045,7 @@ public class AccountController : BaseApiController
     [HttpGet("dashboard")]
     public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout()
     {
-        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId());
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId(), true);
         return Ok(streams);
     }
 

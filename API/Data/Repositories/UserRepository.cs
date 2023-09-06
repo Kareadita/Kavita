@@ -79,7 +79,7 @@ public interface IUserRepository
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
     Task<string> GetLocale(int userId);
-    Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId);
+    Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
 }
 
 public class UserRepository : IUserRepository
@@ -304,10 +304,11 @@ public class UserRepository : IUserRepository
             .SingleAsync();
     }
 
-    public async Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId)
+    public async Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false)
     {
         return await _context.AppUserDashboardStream
             .Where(d => d.AppUserId == userId)
+            .WhereIf(visibleOnly, d => d.Visible)
             .OrderBy(d => d.Order)
             .Select(d => new DashboardStreamDto()
             {
@@ -317,7 +318,8 @@ public class UserRepository : IUserRepository
                 SmartFilter = d.SmartFilter == null ? null : SmartFilterHelper.Decode(d.SmartFilter.Filter),
                 StreamType = d.StreamType,
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
-                Order = d.Order
+                Order = d.Order,
+                Visible = d.Visible
             })
             .ToListAsync();
     }
