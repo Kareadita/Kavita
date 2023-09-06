@@ -75,7 +75,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// <summary>
     /// An ordered list of Streams (pre-configured) or Smart Filters that makes up the User's Dashboard
     /// </summary>
-    public ICollection<AppUserDashboardStream> DashboardStreams { get; set; } = null!;
+    public IList<AppUserDashboardStream> DashboardStreams { get; set; } = null!;
 
 
     /// <inheritdoc />

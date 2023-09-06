@@ -16,6 +16,7 @@ import {forkJoin} from "rxjs";
 import {FilterService} from "../../../_services/filter.service";
 import {StreamListItemComponent} from "../stream-list-item/stream-list-item.component";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
+import {DashboardService} from "../../../_services/dashboard.service";
 
 @Component({
   selector: 'app-customize-dashboard-modal',
@@ -31,12 +32,12 @@ export class CustomizeDashboardModalComponent {
   smartFilters: SmartFilter[] = [];
   accessibilityMode: boolean = false;
 
-  private readonly accountService = inject(AccountService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   constructor(public modal: NgbActiveModal) {
 
-    forkJoin([this.accountService.getDashboardStreams(), this.filterService.getAllFilters()]).subscribe(results => {
+    forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
       this.items = results[0];
       const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
       this.smartFilters = results[1].filter(d => !smartFilterStreams.has(d.name));
@@ -62,11 +63,12 @@ export class CustomizeDashboardModalComponent {
 
 
   orderUpdated(event: IndexUpdateEvent) {
-    this.accountService.updateDashboardStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe();
+    this.dashboardService.updateDashboardStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe();
   }
 
   updateVisibility(item: DashboardStream, position: number) {
     this.items[position].visible = !this.items[position].visible;
+    this.dashboardService.updateDashboardStream(this.items[position]).subscribe();
     this.cdRef.markForCheck();
   }
 

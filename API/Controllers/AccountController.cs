@@ -1043,9 +1043,9 @@ public class AccountController : BaseApiController
     /// </summary>
     /// <returns></returns>
     [HttpGet("dashboard")]
-    public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout()
+    public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout(bool visibleOnly = true)
     {
-        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId(), true);
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId(), visibleOnly);
         return Ok(streams);
     }
 
@@ -1054,5 +1054,57 @@ public class AccountController : BaseApiController
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
         return Ok();
+    }
+
+    [HttpPost("add-dashboard-stream")]
+    public async Task<ActionResult> AddDashboard(int smartFilterId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        return Ok();
+    }
+
+    [HttpPost("update-dashboard-stream")]
+    public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
+    {
+        var stream = await _unitOfWork.UserRepository.GetDashboardStream(dto.Id);
+        if (stream == null) return BadRequest();
+        stream.Visible = dto.Visible;
+
+        _unitOfWork.UserRepository.Update(stream);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    [HttpPost("update-dashboard-position")]
+    public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateDashboardStreamPositionDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
+            AppUserIncludes.DashboardStreams);
+        var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.DashboardStreamId);
+        if (stream == null) return BadRequest();
+        if (stream.Order == dto.ToPosition) return Ok();
+
+        var list = user!.DashboardStreams.ToList();
+        ReorderItems(list, stream.Id, dto.ToPosition);
+        user.DashboardStreams = list;
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
+
+    private static void ReorderItems(List<AppUserDashboardStream> items, int itemId, int toPosition)
+    {
+        var item = items.Find(r => r.Id == itemId);
+        if (item != null)
+        {
+            items.Remove(item);
+            items.Insert(toPosition, item);
+        }
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            items[i].Order = i;
+        }
     }
 }

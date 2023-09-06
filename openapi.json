@@ -881,6 +881,16 @@
           "Account"
         ],
         "summary": "Returns the layout of the user's dashboard",
+        "parameters": [
+          {
+            "name": "visibleOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Success",
@@ -919,6 +929,90 @@
         "tags": [
           "Account"
         ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/add-dashboard-stream": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "parameters": [
+          {
+            "name": "smartFilterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/update-dashboard-stream": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/update-dashboard-position": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Success"
@@ -17395,6 +17489,28 @@
           },
           "includeUnknowns": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateDashboardStreamPositionDto": {
+        "type": "object",
+        "properties": {
+          "fromPosition": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toPosition": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dashboardStreamId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "streamName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

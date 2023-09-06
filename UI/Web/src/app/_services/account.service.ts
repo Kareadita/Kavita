@@ -15,7 +15,6 @@ import { AgeRating } from '../_models/metadata/age-rating';
 import { AgeRestriction } from '../_models/metadata/age-restriction';
 import { TextResonse } from '../_types/text-response';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {DashboardStream} from "../dashboard/_components/dashboard.component";
 
 export enum Role {
   Admin = 'Admin',
@@ -304,15 +303,6 @@ export class AccountService {
   getOpdsUrl() {
     return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
   }
-
-  getDashboardStreams() {
-    return this.httpClient.get<Array<DashboardStream>>(this.baseUrl + 'account/dashboard');
-  }
-
-  updateDashboardStreamPosition(streamName: string, readingListItemId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-position', {streamName, readingListItemId, fromPosition, toPosition}, TextResonse);
-  }
-
 
 
   private refreshAccount() {

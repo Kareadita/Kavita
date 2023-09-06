@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Dashboard;
-using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
@@ -46,6 +44,7 @@ public interface IUserRepository
     void Update(AppUser user);
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
+    void Update(AppUserDashboardStream stream);
     void Add(AppUserBookmark bookmark);
     public void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
@@ -80,6 +79,7 @@ public interface IUserRepository
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
     Task<string> GetLocale(int userId);
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
+    Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
 }
 
 public class UserRepository : IUserRepository
@@ -108,6 +108,11 @@ public class UserRepository : IUserRepository
     public void Update(AppUserBookmark bookmark)
     {
         _context.Entry(bookmark).State = EntityState.Modified;
+    }
+
+    public void Update(AppUserDashboardStream stream)
+    {
+        _context.Entry(stream).State = EntityState.Modified;
     }
 
     public void Add(AppUserBookmark bookmark)
@@ -322,6 +327,12 @@ public class UserRepository : IUserRepository
                 Visible = d.Visible
             })
             .ToListAsync();
+    }
+
+    public async Task<AppUserDashboardStream?> GetDashboardStream(int streamId)
+    {
+        return await _context.AppUserDashboardStream
+            .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

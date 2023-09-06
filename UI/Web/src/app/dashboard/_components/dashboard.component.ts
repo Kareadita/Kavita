@@ -28,6 +28,7 @@ import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
+import {DashboardService} from "../../_services/dashboard.service";
 
 export enum StreamType {
   OnDeck = 1,
@@ -85,9 +86,10 @@ export class DashboardComponent implements OnInit {
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
     private titleService: Title, public imageService: ImageService,
-    private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef) {
+    private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef,
+              private dashboardService: DashboardService) {
 
-    this.accountService.getDashboardStreams().subscribe(streams => {
+    this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
       this.streams.forEach(s => {
         switch (s.streamType) {
