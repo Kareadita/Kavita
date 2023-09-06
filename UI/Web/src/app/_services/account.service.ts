@@ -309,6 +309,11 @@ export class AccountService {
     return this.httpClient.get<Array<DashboardStream>>(this.baseUrl + 'account/dashboard');
   }
 
+  updateDashboardStreamPosition(streamName: string, readingListItemId: number, fromPosition: number, toPosition: number) {
+    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-position', {streamName, readingListItemId, fromPosition, toPosition}, TextResonse);
+  }
+
+
 
   private refreshAccount() {
     if (this.currentUser === null || this.currentUser === undefined) return of();

@@ -1324,6 +1324,10 @@
         "read": "{{common.read}}"
     },
 
+    "stream-list-item": {
+        "remove": "{{common.remove}}"
+    },
+
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
         "page-settings-title": "Page Settings",

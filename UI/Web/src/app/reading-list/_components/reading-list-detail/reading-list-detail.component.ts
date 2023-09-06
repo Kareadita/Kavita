@@ -178,7 +178,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   orderUpdated(event: IndexUpdateEvent) {
     if (!this.readingList) return;
-    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => { /* No Operation */ });
+    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe();
   }
 
   itemRemoved(item: ReadingListItem, position: number) {

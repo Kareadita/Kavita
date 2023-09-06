@@ -14,13 +14,10 @@
   box-sizing: border-box;
   font-size: 14px;
 
-  // These need to be in the
-  //max-height: 140px;
-  //height: 140px;
-
   .drag-handle {
     cursor: move;
     font-size: 24px;
+    // TODO: This needs to be calculation based
     margin-top: 215%;
   }
 }

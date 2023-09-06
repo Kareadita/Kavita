@@ -5,18 +5,26 @@
   </div>
   <div class="modal-body">
     <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-                                [showRemoveButton]="true">
+                                [showRemoveButton]="false">
       <ng-template #draggableItem let-position="idx" let-item>
-        <div class="row g-0">
-          {{item.name}}
-          <!-- Enabled or not -->
-
-        </div>
+        <app-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-stream-list-item>
       </ng-template>
     </app-draggable-ordered-list>
+
+    <h5>Smart Filters</h5>
+    <ul>
+      <li class="list-group-item" *ngFor="let filter of smartFilters">
+        {{filter.name}}
+        <button class="btn btn-icon" (click)="addFilterToStream(filter)">
+          <i class="fa fa-plus" aria-hidden="true"></i>
+          Add
+        </button>
+      </li>
+    </ul>
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+    <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
   </div>
 </ng-container>
