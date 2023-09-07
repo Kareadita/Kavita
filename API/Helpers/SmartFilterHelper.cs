@@ -54,7 +54,7 @@ public static class SmartFilterHelper
     public static string Encode(FilterV2Dto filter)
     {
         if (filter == null)
-            return "";
+            return string.Empty;
 
         var encodedStatements = EncodeFilterStatementDtos(filter.Statements);
         var encodedSortOptions = filter.SortOptions != null
@@ -62,20 +62,17 @@ public static class SmartFilterHelper
             : "";
         var encodedLimitTo = $"{LimitToKey}{filter.LimitTo}";
 
-        return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{filter.Combination}";
+        return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
     }
 
     private static string EncodeName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return "";
-
-        return $"name={HttpUtility.UrlEncode(name)}&";
+        return string.IsNullOrWhiteSpace(name) ? string.Empty : $"name={HttpUtility.UrlEncode(name)}&";
     }
 
     private static string EncodeSortOptions(SortOptions sortOptions)
     {
-        return $"sortField={sortOptions.SortField}&isAscending={sortOptions.IsAscending}";
+        return $"sortField={(int) sortOptions.SortField}&isAscending={sortOptions.IsAscending}";
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto> statements)
@@ -83,14 +80,14 @@ public static class SmartFilterHelper
         if (statements == null || statements.Count == 0)
             return string.Empty;
 
-        var encodedStatements = StatementsKey + string.Join(",", statements.Select(EncodeFilterStatementDto));
-        return HttpUtility.UrlEncode(encodedStatements);
+        var encodedStatements = StatementsKey + HttpUtility.UrlEncode(string.Join(",", statements.Select(EncodeFilterStatementDto)));
+        return encodedStatements;
     }
 
     private static string EncodeFilterStatementDto(FilterStatementDto statement)
     {
-        var encodedComparison = $"comparison={statement.Comparison}";
-        var encodedField = $"field={statement.Field}";
+        var encodedComparison = $"comparison={(int) statement.Comparison}";
+        var encodedField = $"field={(int) statement.Field}";
         var encodedValue = $"value={HttpUtility.UrlEncode(statement.Value)}";
 
         return $"{encodedComparison}&{encodedField}&{encodedValue}";

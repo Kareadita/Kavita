@@ -924,18 +924,6 @@
         }
       }
     },
-    "/api/Account/update-dashboard": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
     "/api/Account/add-dashboard-stream": {
       "post": {
         "tags": [
@@ -953,7 +941,24 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              }
+            }
           }
         }
       }

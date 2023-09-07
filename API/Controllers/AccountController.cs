@@ -1049,19 +1049,39 @@ public class AccountController : BaseApiController
         return Ok(streams);
     }
 
-    [HttpPost("update-dashboard")]
-    public async Task<ActionResult> UpdateDashboard()
+    [HttpPost("add-dashboard-stream")]
+    public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.DashboardStreams);
+        if (user == null) return Unauthorized();
+
+        var smartFilter = await _unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
+        if (smartFilter == null) return NoContent();
+
+        var stream = user?.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
+        if (stream != null) return BadRequest("There is an existing stream with this Filter");
+
+        var maxOrder = user!.DashboardStreams.Max(d => d.Order);
+        var createdStream = new AppUserDashboardStream()
+        {
+            Name = smartFilter.Name,
+            IsProvided = false,
+            StreamType = DashboardStreamType.Custom,
+            Visible = true,
+            Order = maxOrder + 1,
+            SmartFilter = smartFilter
+        };
+
+        user.DashboardStreams.Add(createdStream);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        var ret = _mapper.Map<DashboardStreamDto>(createdStream);
+        ret.SmartFilterEncoded = smartFilter.Filter;
+
         return Ok();
     }
 
-    [HttpPost("add-dashboard-stream")]
-    public async Task<ActionResult> AddDashboard(int smartFilterId)
-    {
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId());
-        return Ok();
-    }
 
     [HttpPost("update-dashboard-stream")]
     public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)

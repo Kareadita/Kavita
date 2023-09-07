@@ -46,19 +46,11 @@ export class CustomizeDashboardModalComponent {
   }
 
   addFilterToStream(filter: SmartFilter) {
-    const maxOrder = this.items[this.items.length - 1].order;
-    const data = {
-          streamType: StreamType.Custom,
-          id: 0,
-          name: filter.name,
-          isProvided: false,
-          smartFilterEncoded: filter.filter,
-          visible: true,
-          order: maxOrder + 1
-        } as DashboardStream;
-    this.items.push(data);
-    this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
-    this.cdRef.detectChanges();
+    this.dashboardService.createDashboardStream(filter.id).subscribe(stream => {
+      this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
+      this.items.push(stream);
+      this.cdRef.detectChanges();
+    });
   }
 
 

@@ -29,6 +29,7 @@ import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {DashboardService} from "../../_services/dashboard.service";
+import {SmartFilter} from "../../_models/metadata/v2/smart-filter";
 
 export enum StreamType {
   OnDeck = 1,
@@ -73,6 +74,7 @@ export class DashboardComponent implements OnInit {
   recentlyUpdatedSeries: SeriesGroup[] = [];
   inProgress: Series[] = [];
   recentlyAddedSeries: Series[] = [];
+  streams: Array<DashboardStream> = [];
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -80,8 +82,9 @@ export class DashboardComponent implements OnInit {
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  protected readonly StreamId = StreamType;
 
-  streams: Array<DashboardStream> = [];
+
 
   constructor(public accountService: AccountService, private libraryService: LibraryService,
     private seriesService: SeriesService, private router: Router,
@@ -91,6 +94,7 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
+      console.log('streams: ', streams);
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
@@ -103,6 +107,10 @@ export class DashboardComponent implements OnInit {
             break;
           case StreamType.RecentlyUpdated:
             s.api = this.seriesService.getRecentlyUpdatedSeries();
+            break;
+          case StreamType.Custom:
+            s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
+              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
             break;
         }
       })
@@ -212,8 +220,12 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
-    this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
+  async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
+    await this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
+  }
+
+  async handleFilterSectionClick(stream: DashboardStream) {
+    await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
   }
 
   handleSectionClick(sectionTitle: string) {
@@ -259,6 +271,4 @@ export class DashboardComponent implements OnInit {
       arr.splice(index);
     }
   }
-
-  protected readonly StreamId = StreamType;
 }

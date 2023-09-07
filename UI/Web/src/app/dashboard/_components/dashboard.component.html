@@ -15,20 +15,19 @@
   </ng-container>
 
   <ng-container *ngFor="let stream of streams">
-    <ng-container *ngIf="stream.isProvided; else smartFilter">
-        <ng-container [ngSwitch]="stream.id">
-          <ng-container *ngSwitchCase="StreamId.OnDeck" [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+    <ng-container [ngSwitch]="stream.streamType">
+      <ng-container *ngSwitchCase="StreamId.OnDeck" [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-          <ng-container *ngSwitchCase="StreamId.RecentlyUpdated" [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamId.RecentlyUpdated" [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-          <ng-container *ngSwitchCase="StreamId.NewlyAdded" [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamId.NewlyAdded" [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-        </ng-container>
-  </ng-container>
+      <ng-container *ngSwitchCase="StreamId.Custom" [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+    </ng-container>
 
     <ng-template #smartFilter let-stream: DashboardStream>
       <ng-container *ngIf="(stream.api | async) as data">
-        <app-carousel-reel [items]="data" [title]="stream.name" (sectionClick)="handleSectionClick(stream.name)">
+        <app-carousel-reel [items]="data" [title]="stream.name" (sectionClick)="handleFilterSectionClick(stream)">
           <ng-template #carouselItem let-item>
             <app-series-card [data]="item" [libraryId]="item.libraryId" [suppressLibraryLink]="libraryId !== 0" [isOnDeck]="false"
                              (reload)="reloadStream(item.id)" (dataChanged)="reloadStream(item.id)"></app-series-card>

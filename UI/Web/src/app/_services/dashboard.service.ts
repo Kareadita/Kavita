@@ -22,4 +22,8 @@ export class DashboardService {
   updateDashboardStream(stream: DashboardStream) {
     return this.httpClient.post(this.baseUrl + 'account/update-dashboard-stream', stream, TextResonse);
   }
+
+  createDashboardStream(smartFilterId: number) {
+    return this.httpClient.post<DashboardStream>(this.baseUrl + 'account/add-dashboard-stream?smartFilterId=' + smartFilterId, {});
+  }
 }

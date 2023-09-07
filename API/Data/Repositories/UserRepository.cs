@@ -315,6 +315,7 @@ public class UserRepository : IUserRepository
             .Where(d => d.AppUserId == userId)
             .WhereIf(visibleOnly, d => d.Visible)
             .OrderBy(d => d.Order)
+            .Include(d => d.SmartFilter)
             .Select(d => new DashboardStreamDto()
             {
                 Name = d.Name,
@@ -332,6 +333,7 @@ public class UserRepository : IUserRepository
     public async Task<AppUserDashboardStream?> GetDashboardStream(int streamId)
     {
         return await _context.AppUserDashboardStream
+            .Include(d => d.SmartFilter)
             .FirstOrDefaultAsync(d => d.Id == streamId);
     }
 

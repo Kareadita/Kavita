@@ -231,9 +231,10 @@ public class AutoMapperProfiles : Profile
 
 
         CreateMap<AppUserSmartFilter, SmartFilterDto>();
-        CreateMap<AppUserDashboardStream, DashboardStreamDto>()
-            .ForMember(dest => dest.SmartFilterEncoded,
-                opt => opt.MapFrom(src => src.SmartFilter));
+        CreateMap<AppUserDashboardStream, DashboardStreamDto>();
+        // CreateMap<AppUserDashboardStream, DashboardStreamDto>()
+        //     .ForMember(dest => dest.SmartFilterEncoded,
+        //         opt => opt.MapFrom(src => src.SmartFilter));
 
     }
 }

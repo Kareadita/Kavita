@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using API.DTOs.Dashboard;
 using API.Entities;
 using AutoMapper;
@@ -13,6 +14,7 @@ public interface IAppUserSmartFilterRepository
     void Update(AppUserSmartFilter filter);
     void Attach(AppUserSmartFilter filter);
     IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId);
+    Task<AppUserSmartFilter?> GetById(int smartFilterId);
 }
 
 public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
@@ -42,5 +44,10 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
             .Where(f => f.AppUserId == userId)
             .ProjectTo<SmartFilterDto>(_mapper.ConfigurationProvider)
             .AsEnumerable();
+    }
+
+    public async Task<AppUserSmartFilter?> GetById(int smartFilterId)
+    {
+        return await _context.AppUserSmartFilter.FirstOrDefaultAsync(d => d.Id == smartFilterId);
     }
 }
