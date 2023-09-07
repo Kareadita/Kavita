@@ -220,6 +220,8 @@ namespace API.Data.Migrations
 
                     b.HasIndex("SmartFilterId");
 
+                    b.HasIndex("Visible");
+
                     b.ToTable("AppUserDashboardStream");
                 });
 

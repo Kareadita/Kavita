@@ -1049,6 +1049,11 @@ public class AccountController : BaseApiController
         return Ok(streams);
     }
 
+    /// <summary>
+    /// Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible
+    /// </summary>
+    /// <param name="smartFilterId"></param>
+    /// <returns></returns>
     [HttpPost("add-dashboard-stream")]
     public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
     {
@@ -1082,7 +1087,11 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
-
+    /// <summary>
+    /// Updates the visibility of a dashboard stream
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update-dashboard-stream")]
     public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
     {
@@ -1095,6 +1104,11 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
+    /// <summary>
+    /// Updates the position of a dashboard stream
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("update-dashboard-position")]
     public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateDashboardStreamPositionDto dto)
     {

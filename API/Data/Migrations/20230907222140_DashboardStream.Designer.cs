@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230906212244_DashboardStream")]
+    [Migration("20230907222140_DashboardStream")]
     partial class DashboardStream
     {
         /// <inheritdoc />
@@ -222,6 +222,8 @@ namespace API.Data.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("SmartFilterId");
+
+                    b.HasIndex("Visible");
 
                     b.ToTable("AppUserDashboardStream");
                 });

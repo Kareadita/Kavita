@@ -128,6 +128,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserDashboardStream>()
             .Property(b => b.Visible)
             .HasDefaultValue(true);
+        builder.Entity<AppUserDashboardStream>()
+            .HasIndex(e => e.Visible)
+            .IsUnique(false);
     }
 
 

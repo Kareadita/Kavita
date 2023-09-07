@@ -13,8 +13,10 @@ public interface IAppUserSmartFilterRepository
 {
     void Update(AppUserSmartFilter filter);
     void Attach(AppUserSmartFilter filter);
+    void Delete(AppUserSmartFilter filter);
     IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId);
     Task<AppUserSmartFilter?> GetById(int smartFilterId);
+
 }
 
 public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
@@ -36,6 +38,11 @@ public class AppUserSmartFilterRepository : IAppUserSmartFilterRepository
     public void Attach(AppUserSmartFilter filter)
     {
         _context.AppUserSmartFilter.Attach(filter);
+    }
+
+    public void Delete(AppUserSmartFilter filter)
+    {
+        _context.AppUserSmartFilter.Remove(filter);
     }
 
     public IEnumerable<SmartFilterDto> GetAllDtosByUserId(int userId)

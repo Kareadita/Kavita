@@ -19,5 +19,8 @@ export class FilterService {
   getAllFilters() {
     return this.httpClient.get<Array<SmartFilter>>(this.baseUrl + 'filter');
   }
+  deleteFilter(filterId: number) {
+    return this.httpClient.delete(this.baseUrl + 'filter?filterId=' + filterId);
+  }
 
 }

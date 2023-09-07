@@ -929,10 +929,12 @@
         "tags": [
           "Account"
         ],
+        "summary": "Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible",
         "parameters": [
           {
             "name": "smartFilterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -968,7 +970,9 @@
         "tags": [
           "Account"
         ],
+        "summary": "Updates the visibility of a dashboard stream",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -999,7 +1003,9 @@
         "tags": [
           "Account"
         ],
+        "summary": "Updates the position of a dashboard stream",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -2148,6 +2154,26 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Filter"
+        ],
+        "parameters": [
+          {
+            "name": "filterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }

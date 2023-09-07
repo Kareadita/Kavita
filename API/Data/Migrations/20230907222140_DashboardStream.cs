@@ -49,6 +49,11 @@ namespace API.Data.Migrations
                 name: "IX_AppUserDashboardStream_SmartFilterId",
                 table: "AppUserDashboardStream",
                 column: "SmartFilterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppUserDashboardStream_Visible",
+                table: "AppUserDashboardStream",
+                column: "Visible");
         }
 
         /// <inheritdoc />

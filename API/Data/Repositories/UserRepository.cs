@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,8 +47,9 @@ public interface IUserRepository
     void Update(AppUserBookmark bookmark);
     void Update(AppUserDashboardStream stream);
     void Add(AppUserBookmark bookmark);
-    public void Delete(AppUser? user);
+    void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
+    void Delete(IList<AppUserDashboardStream> streams);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -80,6 +82,7 @@ public interface IUserRepository
     Task<string> GetLocale(int userId);
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
+    Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
 }
 
 public class UserRepository : IUserRepository
@@ -129,6 +132,11 @@ public class UserRepository : IUserRepository
     public void Delete(AppUserBookmark bookmark)
     {
         _context.AppUserBookmark.Remove(bookmark);
+    }
+
+    public void Delete(IList<AppUserDashboardStream> streams)
+    {
+        _context.AppUserDashboardStream.RemoveRange(streams);
     }
 
     /// <summary>
@@ -335,6 +343,14 @@ public class UserRepository : IUserRepository
         return await _context.AppUserDashboardStream
             .Include(d => d.SmartFilter)
             .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
+    public async Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId)
+    {
+        return await _context.AppUserDashboardStream
+            .Include(d => d.SmartFilter)
+            .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

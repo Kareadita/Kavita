@@ -79,5 +79,16 @@ public class FilterController : BaseApiController
         return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(User.GetUserId()));
     }
 
-    // TODO: Add APIs to add/update/delete filter
+    [HttpDelete]
+    public async Task<ActionResult> DeleteFilter(int filterId)
+    {
+        var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
+        if (filter == null) return Ok();
+        // This needs to delete any dashboard filters that have it too
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
+        _unitOfWork.UserRepository.Delete(streams);
+        _unitOfWork.AppUserSmartFilterRepository.Delete(filter);
+        await _unitOfWork.CommitAsync();
+        return Ok();
+    }
 }
