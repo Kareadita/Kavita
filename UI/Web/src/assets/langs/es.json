@@ -1248,7 +1248,7 @@
     "entity-title": {
         "special": "Especial",
         "chapter": "Capítulo",
-        "issue-num": "Problema #"
+        "issue-num": "Número #"
     },
     "external-series-card": {
         "open-external": "Abrir externamente"
