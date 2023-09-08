@@ -1747,7 +1747,8 @@
         "user-rating": "User Rating",
         "writers": "Writers",
         "path": "Path",
-        "file-path": "File Path"
+        "file-path": "File Path",
+        "want-to-read": "Want to Read"
     },
 
     "filter-comparison-pipe": {
