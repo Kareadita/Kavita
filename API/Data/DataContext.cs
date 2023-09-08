@@ -124,10 +124,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserDashboardStream>()
             .Property(b => b.StreamType)
-            .HasDefaultValue(DashboardStreamType.Custom);
-        builder.Entity<AppUserDashboardStream>()
-            .Property(b => b.Visible)
-            .HasDefaultValue(true);
+            .HasDefaultValue(DashboardStreamType.SmartFilter);
         builder.Entity<AppUserDashboardStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);

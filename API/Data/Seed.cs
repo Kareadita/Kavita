@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using API.Constants;
+using API.Data.Repositories;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Enums.Theme;
@@ -65,7 +66,15 @@ public static class Seed
                 IsProvided = true,
                 Visible = true
             },
-        }.ToArray()); // TODO: Before we wrap this PR, we might want to add more with visible off
+            new()
+            {
+                Name = "More In",
+                StreamType = DashboardStreamType.MoreInGenre,
+                Order = 3,
+                IsProvided = true,
+                Visible = false
+            },
+        }.ToArray());
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
@@ -101,6 +110,31 @@ public static class Seed
         }
 
         await context.SaveChangesAsync();
+    }
+
+    public static async Task SeedDefaultStreams(IUnitOfWork unitOfWork)
+    {
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.DashboardStreams);
+        foreach (var user in allUsers)
+        {
+            if (user.DashboardStreams.Count != 0) continue;
+            user.DashboardStreams ??= new List<AppUserDashboardStream>();
+            foreach (var defaultStream in DefaultStreams)
+            {
+                var newStream = new AppUserDashboardStream
+                {
+                    Name = defaultStream.Name,
+                    IsProvided = defaultStream.IsProvided,
+                    Order = defaultStream.Order,
+                    StreamType = defaultStream.StreamType,
+                    Visible = defaultStream.Visible,
+                };
+
+                user.DashboardStreams.Add(newStream);
+            }
+            unitOfWork.UserRepository.Update(user);
+            await unitOfWork.CommitAsync();
+        }
     }
 
     public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)

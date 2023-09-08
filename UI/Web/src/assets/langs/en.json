@@ -14,7 +14,8 @@
         "not-granted": "You haven't been granted access to any libraries.",
         "on-deck-title": "On Deck",
         "recently-updated-title": "Recently Updated Series",
-        "recently-added-title": "Newly Added Series"
+        "recently-added-title": "Newly Added Series",
+        "more-in-genre-title": "More In {{genre}}"
     },
 
     "edit-user": {

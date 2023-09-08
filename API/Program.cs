@@ -90,6 +90,7 @@ public class Program
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
+                await Seed.SeedDefaultStreams(services.GetRequiredService<IUnitOfWork>());
                 await Seed.SeedUserApiKeys(context);
             }
             catch (Exception ex)

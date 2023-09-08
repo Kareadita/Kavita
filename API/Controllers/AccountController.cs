@@ -1071,7 +1071,7 @@ public class AccountController : BaseApiController
         {
             Name = smartFilter.Name,
             IsProvided = false,
-            StreamType = DashboardStreamType.Custom,
+            StreamType = DashboardStreamType.SmartFilter,
             Visible = true,
             Order = maxOrder + 1,
             SmartFilter = smartFilter

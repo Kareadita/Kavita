@@ -210,9 +210,7 @@ namespace API.Data.Migrations
                         .HasDefaultValue(4);
 
                     b.Property<bool>("Visible")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

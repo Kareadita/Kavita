@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, of, ReplaySubject} from 'rxjs';
-import {debounceTime, map, shareReplay, take, tap} from 'rxjs/operators';
+import {Observable, of, ReplaySubject, switchMap} from 'rxjs';
+import {map, shareReplay, take, tap} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -29,13 +29,16 @@ import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {DashboardService} from "../../_services/dashboard.service";
-import {SmartFilter} from "../../_models/metadata/v2/smart-filter";
+import {MetadataService} from "../../_services/metadata.service";
+import {RecommendationService} from "../../_services/recommendation.service";
+import {Genre} from "../../_models/metadata/genre";
 
 export enum StreamType {
   OnDeck = 1,
   RecentlyUpdated = 2,
   NewlyAdded = 3,
-  Custom = 4
+  SmartFilter = 4,
+  MoreInGenre = 5
 }
 
 export interface DashboardStream {
@@ -75,6 +78,7 @@ export class DashboardComponent implements OnInit {
   inProgress: Series[] = [];
   recentlyAddedSeries: Series[] = [];
   streams: Array<DashboardStream> = [];
+  genre: Genre | undefined;
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -82,6 +86,8 @@ export class DashboardComponent implements OnInit {
   private loadRecentlyAdded$: ReplaySubject<void> = new ReplaySubject<void>();
   private readonly destroyRef = inject(DestroyRef);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly metadataService = inject(MetadataService);
+  private readonly recommendationService = inject(RecommendationService);
   protected readonly StreamId = StreamType;
 
 
@@ -94,7 +100,6 @@ export class DashboardComponent implements OnInit {
 
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
-      console.log('streams: ', streams);
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
@@ -108,9 +113,21 @@ export class DashboardComponent implements OnInit {
           case StreamType.RecentlyUpdated:
             s.api = this.seriesService.getRecentlyUpdatedSeries();
             break;
-          case StreamType.Custom:
+          case StreamType.SmartFilter:
             s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
               .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.MoreInGenre:
+            s.api = this.metadataService.getAllGenres().pipe(
+              map(genres => {
+                this.genre = genres[Math.floor(Math.random() * genres.length)];
+                return this.genre;
+              }),
+              switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
+              map(p => p.result),
+              takeUntilDestroyed(this.destroyRef),
+              shareReplay({bufferSize: 1, refCount: true})
+            );
             break;
         }
       })
@@ -242,7 +259,7 @@ export class DashboardComponent implements OnInit {
     } else if (sectionTitle.toLowerCase() === 'on deck') {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = 'On Deck';
+      params['title'] = translate('dashboard.on-deck-title');
 
       const filter = this.filterUtilityService.createSeriesV2Filter();
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
@@ -252,15 +269,22 @@ export class DashboardComponent implements OnInit {
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
-    }else if (sectionTitle.toLowerCase() === 'newly added series') {
+    } else if (sectionTitle.toLowerCase() === 'newly added series') {
       const params: any = {};
       params['page'] = 1;
-      params['title'] = 'Newly Added';
+      params['title'] = translate('dashboard.recently-added-title');
       const filter = this.filterUtilityService.createSeriesV2Filter();
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SortField.Created;
         filter.sortOptions.isAscending = false;
       }
+      this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
+    } else if (sectionTitle.toLowerCase() === 'more in genre') {
+      const params: any = {};
+      params['page'] = 1;
+      params['title'] = translate('more-in-genre-title', {genre: this.genre?.title});
+      const filter = this.filterUtilityService.createSeriesV2Filter();
+      filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params)
     }
   }

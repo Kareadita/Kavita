@@ -20,7 +20,7 @@ namespace API.Data.Migrations
                     IsProvided = table.Column<bool>(type: "INTEGER", nullable: false),
                     Order = table.Column<int>(type: "INTEGER", nullable: false),
                     StreamType = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 4),
-                    Visible = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: true),
+                    Visible = table.Column<bool>(type: "INTEGER", nullable: false),
                     SmartFilterId = table.Column<int>(type: "INTEGER", nullable: true),
                     AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
                 },

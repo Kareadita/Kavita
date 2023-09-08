@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20230907222140_DashboardStream")]
+    [Migration("20230908190713_DashboardStream")]
     partial class DashboardStream
     {
         /// <inheritdoc />
@@ -213,9 +213,7 @@ namespace API.Data.Migrations
                         .HasDefaultValue(4);
 
                     b.Property<bool>("Visible")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

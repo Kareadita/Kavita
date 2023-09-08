@@ -14,7 +14,7 @@ namespace API.Extensions.QueryExtensions.Filtering;
 
 public static class SeriesFilter
 {
-
+    private const float FloatingPointTolerance = 0.01f;
     public static IQueryable<Series> HasLanguage(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<string> languages)
     {
@@ -94,7 +94,7 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                return queryable.Where(s => s.Ratings.Any(r => r.Rating == rating && r.AppUserId == userId));
+                return queryable.Where(s => s.Ratings.Any(r => Math.Abs(r.Rating - rating) < FloatingPointTolerance && r.AppUserId == userId));
             case FilterComparison.GreaterThan:
                 return queryable.Where(s => s.Ratings.Any(r => r.Rating > rating && r.AppUserId == userId));
             case FilterComparison.GreaterThanEqual:
@@ -252,7 +252,7 @@ public static class SeriesFilter
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < 0.01f);
+                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) < FloatingPointTolerance);
                 break;
             case FilterComparison.GreaterThan:
                 subQuery = subQuery.Where(s => s.Percentage > readProgress);
@@ -267,7 +267,7 @@ public static class SeriesFilter
                 subQuery = subQuery.Where(s => s.Percentage <= readProgress);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) > 0.01f);
+                subQuery = subQuery.Where(s => Math.Abs(s.Percentage - readProgress) > FloatingPointTolerance);
                 break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:

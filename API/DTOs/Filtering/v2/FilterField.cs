@@ -36,5 +36,10 @@ public enum FilterField
     /// <summary>
     /// File path
     /// </summary>
-    FilePath = 25
+    FilePath = 25,
+    /// <summary>
+    /// On Want To Read or Not
+    /// </summary>
+    WantToRead = 26
+
 }
