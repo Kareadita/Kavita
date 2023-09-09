@@ -28,6 +28,7 @@ export class StreamListItemComponent {
   @Input({required: true}) position: number = 0;
   @Output() hide: EventEmitter<DashboardStream> = new EventEmitter<DashboardStream>();
 
+
   private readonly cdRef = inject(ChangeDetectorRef);
 
 

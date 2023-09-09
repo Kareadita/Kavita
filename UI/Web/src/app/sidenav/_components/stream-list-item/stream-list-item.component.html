@@ -11,10 +11,10 @@
           </span>
       </h5>
       <div class="ps-1">
-        {{item.isProvided ? 'Provided' : 'Smart Filter'}}
+        {{t(item.isProvided ? 'provided' : 'smart-filter')}}
       </div>
-      <div class="ps-1">
-        <a href="" target="_blank">Load Filter</a>
+      <div class="ps-1" *ngIf="!item.isProvided">
+        <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
       </div>
 
     </div>

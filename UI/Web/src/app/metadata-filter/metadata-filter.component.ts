@@ -22,13 +22,14 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
 import {MetadataService} from "../_services/metadata.service";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterService} from "../_services/filter.service";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -83,6 +84,7 @@ export class MetadataFilterComponent implements OnInit {
 
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
 
 
   constructor(public toggleService: ToggleService, private filterService: FilterService) {}
@@ -195,11 +197,10 @@ export class MetadataFilterComponent implements OnInit {
   }
 
   save() {
-    // TODO: Save to the backend
     if (!this.filterV2) return;
     this.filterV2.name = this.sortGroup.get('name')?.value;
     this.filterService.saveFilter(this.filterV2).subscribe(() => {
-
+      this.toastr.success(translate('toasts.smart-filter-updated'));
       this.apply();
     })
   }

@@ -70,7 +70,7 @@
       <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>
     </div>
     <div class="col-md-1 col-sm-6 mt-4 pt-1">
-      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled">
+      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled || !this.sortGroup.get('name')?.value">
         <!-- TODO: Icon here -->
         {{t('save')}}
       </button>

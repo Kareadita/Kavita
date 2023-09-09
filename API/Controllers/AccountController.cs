@@ -1081,10 +1081,17 @@ public class AccountController : BaseApiController
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
 
-        var ret = _mapper.Map<DashboardStreamDto>(createdStream);
-        ret.SmartFilterEncoded = smartFilter.Filter;
+        var ret = new DashboardStreamDto()
+        {
+            Name = createdStream.Name,
+            IsProvided = createdStream.IsProvided,
+            Visible = createdStream.Visible,
+            Order = createdStream.Order,
+            SmartFilterEncoded = smartFilter.Filter,
+            StreamType = createdStream.StreamType
+        };
 
-        return Ok();
+        return Ok(ret);
     }
 
     /// <summary>

@@ -1327,7 +1327,10 @@
     },
 
     "stream-list-item": {
-        "remove": "{{common.remove}}"
+        "remove": "{{common.remove}}",
+        "load-filter": "Load Filter",
+        "provided": "Provided",
+        "smart-filter": "Smart Filter"
     },
 
     "reading-list-detail": {
@@ -1770,6 +1773,8 @@
         "must-contains": "Must Contains"
     },
 
+
+
     "toasts": {
         "regen-cover": "A job has been enqueued to regenerate the cover image",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
@@ -1848,7 +1853,8 @@
         "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
         "list-doesnt-exist": "This list doesn't exist",
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
-        "smart-filter-deleted": "Smart Filter Deleted"
+        "smart-filter-deleted": "Smart Filter Deleted",
+        "smart-filter-updated": "Created/Updated smart filter"
     },
 
     "actionable": {
