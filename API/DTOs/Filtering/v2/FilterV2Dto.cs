@@ -11,6 +11,10 @@ namespace API.DTOs.Filtering.v2;
 public class FilterV2Dto
 {
     /// <summary>
+    /// Not used in the UI.
+    /// </summary>
+    public int Id { get; set; }
+    /// <summary>
     /// The name of the filter
     /// </summary>
     public string? Name { get; set; }

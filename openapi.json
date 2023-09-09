@@ -3643,6 +3643,60 @@
         }
       }
     },
+    "/api/Opds/{apiKey}/smart-filter/{filterId}": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "summary": "Returns the Series matching this smart filter. If FromDashboard, will only return 20 records.",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Opds/{apiKey}/smart-filters": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Opds/{apiKey}/libraries": {
       "get": {
         "tags": [
@@ -13458,8 +13512,10 @@
             "description": "If Not IsProvided, the appropriate smart filter",
             "nullable": true
           },
-          "smartFilter": {
-            "$ref": "#/components/schemas/FilterV2Dto"
+          "smartFilterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           },
           "streamType": {
             "enum": [
@@ -14102,6 +14158,11 @@
       "FilterV2Dto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Not used in the UI.",
+            "format": "int32"
+          },
           "name": {
             "type": "string",
             "description": "The name of the filter",

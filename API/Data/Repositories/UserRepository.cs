@@ -326,12 +326,12 @@ public class UserRepository : IUserRepository
             .Include(d => d.SmartFilter)
             .Select(d => new DashboardStreamDto()
             {
+                Id = d.Id,
                 Name = d.Name,
                 IsProvided = d.IsProvided,
-                Id = d.Id,
-                SmartFilter = d.SmartFilter == null ? null : SmartFilterHelper.Decode(d.SmartFilter.Filter),
-                StreamType = d.StreamType,
+                SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                StreamType = d.StreamType,
                 Order = d.Order,
                 Visible = d.Visible
             })

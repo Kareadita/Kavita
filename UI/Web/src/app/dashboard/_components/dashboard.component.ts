@@ -47,7 +47,7 @@ export interface DashboardStream {
   isProvided: boolean;
   api: Observable<any[]>;
   smartFilterEncoded?: string;
-  smartFilter?: SeriesFilterV2;
+  //smartFilter?: SeriesFilterV2;
   streamType: StreamType;
   order: number;
   visible: boolean;

@@ -1,4 +1,5 @@
 ﻿using API.DTOs.Filtering.v2;
+using API.Entities;
 using API.Entities.Enums;
 
 namespace API.DTOs.Dashboard;
@@ -20,7 +21,7 @@ public class DashboardStreamDto
     /// </summary>
     /// <remarks>Encoded filter</remarks>
     public string? SmartFilterEncoded { get; set; }
-    public FilterV2Dto? SmartFilter { get; set; }
+    public int? SmartFilterId { get; set; }
     /// <summary>
     /// For system provided
     /// </summary>
