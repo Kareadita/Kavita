@@ -12,8 +12,8 @@
     </app-draggable-ordered-list>
 
     <h5>Smart Filters</h5>
-    <ul>
-      <li class="list-group-item" *ngFor="let filter of smartFilters">
+    <ul class="filter-list">
+      <li class="filter list-group-item" *ngFor="let filter of smartFilters">
         {{filter.name}}
         <button class="btn btn-icon" (click)="addFilterToStream(filter)">
           <i class="fa fa-plus" aria-hidden="true"></i>

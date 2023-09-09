@@ -23,14 +23,16 @@
       </div>
 
       <div class="card-footer bg-transparent text-muted">
-        <ng-container *ngIf="isMyReview; else normalReview">
-          <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
-        </ng-container>
-        <ng-template #normalReview>
-          <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
-        </ng-template>
-        {{(isMyReview ? '' : review.username | defaultValue:'')}}
-        <span style="float: right" *ngIf="review.isExternal">{{t('rating-percentage', {r: review.score})}}</span>
+        <div class="review-user">
+          <ng-container *ngIf="isMyReview; else normalReview">
+            <i class="d-md-none fa-solid fa-star me-1" aria-hidden="true" [title]="t('your-review')"></i>
+          </ng-container>
+          <ng-template #normalReview>
+            <img class="me-1" [ngSrc]="review.provider | providerImage" width="20" height="20" alt="">
+          </ng-template>
+          {{(isMyReview ? '' : review.username | defaultValue:'')}}
+        </div>
+        <span class="review-score" *ngIf="review.isExternal">{{t('rating-percentage', {r: review.score})}}</span>
       </div>
     </div>
   </div>

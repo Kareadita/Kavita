@@ -1,5 +1,5 @@
 .example-list {
-    min-width: 500px;
+    width: 100%;
     max-width: 100%;
     min-height: 60px;
     display: block;
@@ -40,6 +40,7 @@
 
 .example-box:last-child {
   border: none;
+  margin-bottom: 20px;
 }
 
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {

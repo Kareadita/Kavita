@@ -10,13 +10,14 @@
             </button>
           </span>
       </h5>
-      <div class="ps-1">
-        {{t(item.isProvided ? 'provided' : 'smart-filter')}}
+      <div class="meta">
+        <div class="ps-1">
+          {{t(item.isProvided ? 'provided' : 'smart-filter')}}
+        </div>
+        <div class="ps-1" *ngIf="!item.isProvided">
+          <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+        </div>
       </div>
-      <div class="ps-1" *ngIf="!item.isProvided">
-        <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
-      </div>
-
     </div>
   </div>
 </ng-container>
