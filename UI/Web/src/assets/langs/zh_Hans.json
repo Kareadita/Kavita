@@ -28,7 +28,7 @@
     },
     "user-scrobble-history": {
         "title": "Scrobble历史",
-        "description": "在这里您将找到与您的帐户关联的所有追踪记录事件。为了确保记录存在，您必须配置一个可用的追踪记录服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法与追踪记录进行匹配。请联系您的管理员进行修正。",
+        "description": "在这里您将找到与您的帐户关联的所有Scrobble事件。为了确保Scrobble事件存在，您必须配置一个可用的Scrobble服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法在上游进行匹配，请联系您的管理员进行修正。",
         "filter-label": "筛选",
         "created-header": "新建",
         "last-modified-header": "最近修改",
@@ -95,7 +95,7 @@
         "locale-label": "本地语言",
         "locale-tooltip": "Kavita 当前语言",
         "blur-unread-summaries-label": "模糊未读摘要",
-        "blur-unread-summaries-tooltip": "模糊没有阅读进度的卷或章节的摘要文本（以避免剧透）",
+        "blur-unread-summaries-tooltip": "模糊没有阅读进度的卷或章节的摘要文本（避免剧透）",
         "prompt-on-download-label": "下载时提示",
         "prompt-on-download-tooltip": "当下载大小超过 {{size}}MB 时提示",
         "disable-animations-label": "关闭动画",
@@ -148,7 +148,7 @@
     },
     "user-holds": {
         "title": "刮削暂停",
-        "description": "这是一个由用户自主管理的系列列表，这些系列将不会被同步到你设定的刮削器记录中。您可以随时移除一个系列在下一个可刮削的事件（阅读进度、评分、想读状态）时触发事件。"
+        "description": "这是一个由用户自主管理的系列列表，这些系列的信息不会发送给Scrobble服务提供商。您可以随时移除某个系列，下个Scrobble事件（阅读进度、评分、想读状态）时将触发事件。"
     },
     "theme-manager": {
         "title": "主题管理器",
@@ -247,7 +247,7 @@
         "show": "显示"
     },
     "scrobbling-providers": {
-        "title": "刮削提供",
+        "title": "Scrobbling服务提供商",
         "requires": "此功能需要一个有效的{{product}}许可证",
         "token-expired": "Token已过期",
         "no-token-set": "未设置Token",
@@ -703,8 +703,8 @@
         "manage-collection-tooltip": "是否允许Kavita根据ComicInfo.xml/opf文件中的SeriesGroup标签创建收藏",
         "manage-reading-list-label": "管理阅读列表",
         "manage-reading-list-tooltip": "是否允许Kavita根据ComicInfo.xml/opf文件中的StoryArc/StoryArcNumber和AlternativeSeries/AlternativeCount标签创建阅读清单",
-        "allow-scrobbling-label": "允许跟踪记录",
-        "allow-scrobbling-tooltip": "是否允许Kavita将阅读事件、想读状态、评分和评论记录至已配置的服务提供商？本功能仅在服务器的Kavita+订阅激活时才会生效。",
+        "allow-scrobbling-label": "允许Scrobbling",
+        "allow-scrobbling-tooltip": "是否允许Kavita将阅读事件、想读状态、评分和评论记录至已配置的Scrobble服务提供商？本功能仅在激活服务器的Kavita+订阅后才会生效。",
         "folder-watching-label": "监控文件夹",
         "folder-watching-tooltip": "覆盖此资料库服务器的监控文件夹设置。如果关闭此功能，则不会监控此资料库包含的文件夹。如果共享资料库的文件夹，那么文件夹仍可能被监控。",
         "include-in-dashboard-label": "在仪表板中显示",
@@ -868,8 +868,8 @@
         "language-title": "语言",
         "publication-status-title": "出版",
         "publication-status-tooltip": "出版状态",
-        "scrobbling-title": "刮削",
-        "scrobbling-tooltip": "记录状态",
+        "scrobbling-title": "Scrobbling",
+        "scrobbling-tooltip": "Scrobbling状态",
         "on": "开",
         "off": "关",
         "disabled": "已禁用",
@@ -965,7 +965,7 @@
         "cover-image-size-label": "封面图片尺寸"
     },
     "manage-scrobble-errors": {
-        "description": "此表格记载跟踪记录时发现的问题。此列表不受管控。您可以随时清空列表，并在下一次跟踪记录上传后进行查看。如果存在一个未知系列，您最好更正系列名称或本地化系列名称，或者为跟踪记录的服务提供商添加一个网页链接。",
+        "description": "此表格记录Scrobbling期间发生的问题。此列表不受管控。您可以随时清空列表，并在下一次Scrobble记录上传后进行查看。如果存在一个未知系列，您最好更正系列名称或者本地化系列名称，或者为Scrobble服务提供商添加一个网页链接。",
         "filter-label": "筛选",
         "clear-errors": "清除错误",
         "series-header": "系列",
