@@ -13,5 +13,9 @@ ul {
         margin: 5px 0;
         color: var(--list-group-hover-text-color);
         background-color: var(--list-group-hover-bg-color);
+
+        span {
+            cursor: pointer;
+        }
     }
 }
