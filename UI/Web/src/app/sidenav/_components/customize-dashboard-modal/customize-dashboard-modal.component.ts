@@ -10,13 +10,13 @@ import {
 import {
   ReadingListItemComponent
 } from "../../../reading-list/_components/reading-list-item/reading-list-item.component";
-import {DashboardStream, StreamType} from "../../../dashboard/_components/dashboard.component";
-import {AccountService} from "../../../_services/account.service";
+import {DashboardStream} from "../../../dashboard/_components/dashboard.component";
 import {forkJoin} from "rxjs";
 import {FilterService} from "../../../_services/filter.service";
 import {StreamListItemComponent} from "../stream-list-item/stream-list-item.component";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-customize-dashboard-modal',
@@ -35,6 +35,8 @@ export class CustomizeDashboardModalComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly router = inject(Router);
+
   constructor(public modal: NgbActiveModal) {
 
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
@@ -69,8 +71,11 @@ export class CustomizeDashboardModalComponent {
   }
 
   save() {
+    const currentRoute = this.router.url;
+    if (!currentRoute.endsWith('/libraries')) { this.close(); return; }
 
     this.close();
+    this.router.navigate(['/libraries']);
   }
 
 }
