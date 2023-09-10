@@ -122,6 +122,19 @@ public static class MessageFactory
     /// A Scrobbling Key has expired and needs rotation
     /// </summary>
     public const string ScrobblingKeyExpired = "ScrobblingKeyExpired";
+    /// <summary>
+    /// Order, Visibility, etc has changed on the Dashboard. UI will refresh the layout
+    /// </summary>
+    public const string DashboardUpdate = "DashboardUpdate";
+
+    public static SignalRMessage DashboardUpdateEvent()
+    {
+        return new SignalRMessage()
+        {
+            Name = DashboardUpdate,
+            EventType = ProgressEventType.Single,
+        };
+    }
 
 
     public static SignalRMessage ScanSeriesEvent(int libraryId, int seriesId, string seriesName)
