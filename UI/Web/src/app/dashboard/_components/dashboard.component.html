@@ -16,15 +16,15 @@
 
   <ng-container *ngFor="let stream of streams">
     <ng-container [ngSwitch]="stream.streamType">
-      <ng-container *ngSwitchCase="StreamId.OnDeck" [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamType.OnDeck" [ngTemplateOutlet]="onDeck" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-      <ng-container *ngSwitchCase="StreamId.RecentlyUpdated" [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamType.RecentlyUpdated" [ngTemplateOutlet]="recentlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-      <ng-container *ngSwitchCase="StreamId.NewlyAdded" [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamType.NewlyAdded" [ngTemplateOutlet]="newlyUpdated" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-      <ng-container *ngSwitchCase="StreamId.SmartFilter" [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamType.SmartFilter" [ngTemplateOutlet]="smartFilter" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
 
-      <ng-container *ngSwitchCase="StreamId.MoreInGenre" [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
+      <ng-container *ngSwitchCase="StreamType.MoreInGenre" [ngTemplateOutlet]="moreInGenre" [ngTemplateOutletContext]="{ stream: stream }"></ng-container>
     </ng-container>
 
     <ng-template #smartFilter let-stream: DashboardStream>

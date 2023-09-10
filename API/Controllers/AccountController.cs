@@ -14,7 +14,6 @@ using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
 using API.Extensions;
-using API.Helpers;
 using API.Helpers.Builders;
 using API.Services;
 using API.SignalR;
@@ -1091,6 +1090,9 @@ public class AccountController : BaseApiController
             StreamType = createdStream.StreamType
         };
 
+
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
+            User.GetUserId());
         return Ok(ret);
     }
 
@@ -1108,6 +1110,8 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Update(stream);
         await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
+            User.GetUserId());
         return Ok();
     }
 
@@ -1131,6 +1135,8 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
+            User.GetUserId());
         return Ok();
     }
 

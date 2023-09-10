@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import {DashboardStream} from "../dashboard/_components/dashboard.component";
 import {TextResonse} from "../_types/text-response";
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
+import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 
 @Injectable({
   providedIn: 'root'

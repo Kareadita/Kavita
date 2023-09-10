@@ -8,12 +8,12 @@ import {
   Output
 } from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {DashboardStream} from "../../../dashboard/_components/dashboard.component";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {MangaFormatIconPipe} from "../../../pipe/manga-format-icon.pipe";
 import {MangaFormatPipe} from "../../../pipe/manga-format.pipe";
 import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@ngneat/transloco";
+import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 
 @Component({
   selector: 'app-stream-list-item',

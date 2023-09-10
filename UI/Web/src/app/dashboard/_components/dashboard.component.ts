@@ -27,31 +27,12 @@ import {
 import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
-import {SeriesFilterV2} from "../../_models/metadata/v2/series-filter-v2";
 import {DashboardService} from "../../_services/dashboard.service";
 import {MetadataService} from "../../_services/metadata.service";
 import {RecommendationService} from "../../_services/recommendation.service";
 import {Genre} from "../../_models/metadata/genre";
-
-export enum StreamType {
-  OnDeck = 1,
-  RecentlyUpdated = 2,
-  NewlyAdded = 3,
-  SmartFilter = 4,
-  MoreInGenre = 5
-}
-
-export interface DashboardStream {
-  id: number;
-  name: string;
-  isProvided: boolean;
-  api: Observable<any[]>;
-  smartFilterId: number;
-  smartFilterEncoded?: string;
-  streamType: StreamType;
-  order: number;
-  visible: boolean;
-}
+import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
+import {StreamType} from "../../_models/dashboard/stream-type.enum";
 
 @Component({
     selector: 'app-dashboard',
@@ -88,7 +69,7 @@ export class DashboardComponent implements OnInit {
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly metadataService = inject(MetadataService);
   private readonly recommendationService = inject(RecommendationService);
-  protected readonly StreamId = StreamType;
+  protected readonly StreamType = StreamType;
 
 
 

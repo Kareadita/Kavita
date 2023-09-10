@@ -10,13 +10,13 @@ import {
 import {
   ReadingListItemComponent
 } from "../../../reading-list/_components/reading-list-item/reading-list-item.component";
-import {DashboardStream} from "../../../dashboard/_components/dashboard.component";
 import {forkJoin} from "rxjs";
 import {FilterService} from "../../../_services/filter.service";
 import {StreamListItemComponent} from "../stream-list-item/stream-list-item.component";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
 import {Router} from "@angular/router";
+import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 
 @Component({
   selector: 'app-customize-dashboard-modal',
@@ -70,12 +70,5 @@ export class CustomizeDashboardModalComponent {
     this.modal.close();
   }
 
-  save() {
-    const currentRoute = this.router.url;
-    if (!currentRoute.endsWith('/libraries')) { this.close(); return; }
-
-    this.close();
-    this.router.navigate(['/libraries']);
-  }
 
 }
