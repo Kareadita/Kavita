@@ -148,7 +148,7 @@
     },
     "user-holds": {
         "title": "刮削暂停",
-        "description": "这是一个由用户自主管理的系列列表，这些系列的信息不会发送给Scrobble服务提供商。您可以随时移除某个系列，下个Scrobble事件（阅读进度、评分、想读状态）时将触发事件。"
+        "description": "这是一个由用户自主管理的系列列表，这些系列的信息不会发送给Scrobble服务提供商。您可以随时移除某个系列，下一次Scrobble事件（阅读进度、评分、想读状态）将触发事件。"
     },
     "theme-manager": {
         "title": "主题管理器",
@@ -170,7 +170,7 @@
     },
     "restriction-selector": {
         "title": "年龄分级限制",
-        "description": "选择后，全部系列和至少存在一个条目的阅读清单的年龄限制高于下面选择的，将从结果中移除。",
+        "description": "选中后，全部系列和至少存在一个条目的阅读清单，其年龄限制大于下面选择的，将从结果中移除。",
         "not-applicable-for-admins": "不适用于管理员。",
         "age-rating-label": "年龄分级",
         "no-restriction": "无限制",
