@@ -1547,7 +1547,8 @@
         "last-modified": "Last Modified",
         "last-chapter-added": "Item Added",
         "time-to-read": "Time to Read",
-        "release-year": "Release Year"
+        "release-year": "Release Year",
+        "read-progress": "Read Progress"
     },
 
     "edit-series-modal": {

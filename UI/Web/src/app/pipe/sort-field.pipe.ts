@@ -14,17 +14,19 @@ export class SortFieldPipe implements PipeTransform {
   transform(value: SortField): string {
     switch (value) {
       case SortField.SortName:
-        return this.translocoService.translate('sort-field-pipe.sort-name')
+        return this.translocoService.translate('sort-field-pipe.sort-name');
       case SortField.Created:
-        return this.translocoService.translate('sort-field-pipe.created')
+        return this.translocoService.translate('sort-field-pipe.created');
       case SortField.LastModified:
-        return this.translocoService.translate('sort-field-pipe.last-modified')
+        return this.translocoService.translate('sort-field-pipe.last-modified');
       case SortField.LastChapterAdded:
-        return this.translocoService.translate('sort-field-pipe.last-chapter-added')
+        return this.translocoService.translate('sort-field-pipe.last-chapter-added');
       case SortField.TimeToRead:
-        return this.translocoService.translate('sort-field-pipe.time-to-read')
+        return this.translocoService.translate('sort-field-pipe.time-to-read');
       case SortField.ReleaseYear:
-        return this.translocoService.translate('sort-field-pipe.release-year')
+        return this.translocoService.translate('sort-field-pipe.release-year');
+      case SortField.ReadProgress:
+        return this.translocoService.translate('sort-field-pipe.read-progress');
     }
 
   }

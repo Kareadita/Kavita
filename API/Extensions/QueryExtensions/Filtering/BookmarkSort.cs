@@ -37,6 +37,7 @@ public static class BookmarkSort
                 SortField.LastChapterAdded => query.OrderBy(s => s.series.LastChapterAdded),
                 SortField.TimeToRead => query.OrderBy(s => s.series.AvgHoursToRead),
                 SortField.ReleaseYear => query.OrderBy(s => s.series.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderBy(s => s.series.Progress.Where(p => p.SeriesId == s.series.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }
@@ -50,6 +51,7 @@ public static class BookmarkSort
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.series.LastChapterAdded),
                 SortField.TimeToRead => query.OrderByDescending(s => s.series.AvgHoursToRead),
                 SortField.ReleaseYear => query.OrderByDescending(s => s.series.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderByDescending(s => s.series.Progress.Where(p => p.SeriesId == s.series.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }
