@@ -159,5 +159,7 @@
     "chapter-num": "Capítulo {0}",
     "want-to-read": "Quero Ler",
     "browse-want-to-read": "Navegar no Quero Ler",
-    "collection-deleted": "Coleção excluída"
+    "collection-deleted": "Coleção excluída",
+    "smart-filters": "Filtros Inteligentes",
+    "browse-smart-filters": "Navegar pelos Filtros Inteligentes"
 }
