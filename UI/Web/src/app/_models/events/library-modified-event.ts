@@ -1,4 +1,4 @@
 export interface LibraryModifiedEvent {
     libraryId: number;
-    action: 'create' | 'delelte';
+    action: 'create' | 'delete';
 }

@@ -31,6 +31,7 @@ public static class SeriesSort
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
                 SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
                 SortField.ReleaseYear => query.OrderBy(s => s.Metadata.ReleaseYear),
+                //SortField.ReadProgress => query.OrderBy()
                 _ => query
             };
         }

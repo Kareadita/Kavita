@@ -1,0 +1,32 @@
+<ng-container *transloco="let t; read: 'customize-dashboard-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+  <div class="modal-body">
+    <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
+                                [showRemoveButton]="false">
+      <ng-template #draggableItem let-position="idx" let-item>
+        <app-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-stream-list-item>
+      </ng-template>
+    </app-draggable-ordered-list>
+
+    <h5>Smart Filters</h5>
+    <ul class="list-group filter-list">
+      <li class="filter list-group-item" *ngFor="let filter of smartFilters">
+        {{filter.name}}
+        <button class="btn btn-icon" (click)="addFilterToStream(filter)">
+          <i class="fa fa-plus" aria-hidden="true"></i>
+          Add
+        </button>
+      </li>
+      <li class="list-group-item" *ngIf="smartFilters.length === 0">
+        All Smart filters added to Dashboard or none created yet.
+      </li>
+    </ul>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="close()">{{t('close')}}</button>
+  </div>
+</ng-container>

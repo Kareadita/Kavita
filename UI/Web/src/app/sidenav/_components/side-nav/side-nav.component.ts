@@ -27,11 +27,13 @@ import {FilterPipe} from "../../../pipe/filter.pipe";
 import {FormsModule} from "@angular/forms";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
+import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective],
+  imports: [CommonModule, SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, SentenceCasePipe],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,6 +45,7 @@ export class SideNavComponent implements OnInit {
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = [];
   readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
+  homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
@@ -106,6 +109,12 @@ export class SideNavComponent implements OnInit {
         break;
     }
   }
+
+  handleHomeActions() {
+    this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl'});
+    // TODO: If on /, then refresh the page layout
+  }
+
 
   importCbl() {
     this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});

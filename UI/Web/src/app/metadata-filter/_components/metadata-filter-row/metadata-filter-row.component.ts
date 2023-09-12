@@ -30,6 +30,7 @@ enum PredicateType {
   Text = 1,
   Number = 2,
   Dropdown = 3,
+  Boolean = 4
 }
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
@@ -41,6 +42,7 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Writers, FilterField.Genres, FilterField.Libraries,
     FilterField.Formats, FilterField.CollectionTags, FilterField.Tags
 ];
+const BooleanFields = [FilterField.WantToRead]
 
 const DropdownFieldsWithoutMustContains = [
   FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
@@ -69,6 +71,9 @@ const DropdownComparisons = [FilterComparison.Equal,
   FilterComparison.Contains,
   FilterComparison.NotContains,
   FilterComparison.MustContains];
+const BooleanComparisons = [
+  FilterComparison.Equal
+]
 
 @Component({
   selector: 'app-metadata-row-filter',
@@ -155,7 +160,11 @@ export class MetadataFilterRowComponent implements OnInit {
         stmt.value = stmt.value + '';
       }
 
-      if (!stmt.value && stmt.field !== FilterField.SeriesName) return;
+      if (typeof stmt.value === 'boolean') {
+        stmt.value = stmt.value + '';
+      }
+
+      if (!stmt.value && (stmt.field !== FilterField.SeriesName && !BooleanFields.includes(stmt.field))) return;
       this.filterStatement.emit(stmt);
     });
 
@@ -171,6 +180,8 @@ export class MetadataFilterRowComponent implements OnInit {
     this.formGroup.get('input')?.patchValue(this.preset.field);
 
     if (StringFields.includes(this.preset.field)) {
+      this.formGroup.get('filterValue')?.patchValue(val);
+    } else if (BooleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed || val.includes(',')) {
@@ -267,6 +278,16 @@ export class MetadataFilterRowComponent implements OnInit {
       this.validComparisons$.next(comps);
       this.predicateType$.next(PredicateType.Number);
       if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
+      return;
+    }
+
+    if (BooleanFields.includes(inputVal)) {
+      this.validComparisons$.next(BooleanComparisons);
+      this.predicateType$.next(PredicateType.Boolean);
+
+      if (this.loaded) {
+        this.formGroup.get('filterValue')?.patchValue(false);
+      }
       return;
     }
 

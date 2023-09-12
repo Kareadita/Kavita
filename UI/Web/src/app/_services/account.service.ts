@@ -58,7 +58,7 @@ export class AccountService {
         filter(userUpdateEvent => userUpdateEvent.userName === this.currentUser?.username),
         switchMap(() => this.refreshAccount()))
         .subscribe(() => {});
-    }
+  }
 
   hasAdminRole(user: User) {
     return user && user.roles.includes(Role.Admin);

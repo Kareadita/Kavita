@@ -41,5 +41,9 @@
 }
 
 .card-footer {
-    font-size: 13px
+    font-size: 13px;
+    display: flex;
+    max-width: 305px;
+    justify-content: space-between;
+    margin: 0 auto;
 }

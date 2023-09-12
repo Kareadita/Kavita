@@ -1,0 +1,23 @@
+<ng-container *transloco="let t; read: 'stream-list-item'">
+  <div class="row pt-2 g-0 list-item">
+    <div class="g-0">
+      <h5 class="mb-1 pb-0" id="item.id--{{position}}">
+        {{item.name}}
+        <span class="float-end">
+            <button class="btn btn-icon p-0" (click)="hide.emit(item)">
+              <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('remove')}}</span>
+            </button>
+          </span>
+      </h5>
+      <div class="meta">
+        <div class="ps-1">
+          {{t(item.isProvided ? 'provided' : 'smart-filter')}}
+        </div>
+        <div class="ps-1" *ngIf="!item.isProvided">
+          <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>

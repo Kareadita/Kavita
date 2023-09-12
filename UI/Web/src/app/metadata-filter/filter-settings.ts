@@ -7,4 +7,5 @@ export class FilterSettings {
      * The number of statements that can be on the filter. Set to 1 to disable adding more.
      */
     statementLimit: number = 0;
+    saveDisabled: boolean = false;
   }

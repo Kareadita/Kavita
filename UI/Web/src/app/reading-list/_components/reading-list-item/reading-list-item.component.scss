@@ -1,5 +1,10 @@
 $image-height: 125px;
 
+.reading-list-item {
+  max-height: 140px;
+  height: 140px;
+}
+
 .progress-banner {
     height: 5px;
 
@@ -7,12 +12,6 @@ $image-height: 125px;
         color: var(--card-progress-bar-color);
         background-color: transparent;
     }
-}
-
-.list-item-container {
-    background: var(--card-list-item-bg-color);
-    border-radius: 5px;
-    position: relative;
 }
 
 .badge-container {

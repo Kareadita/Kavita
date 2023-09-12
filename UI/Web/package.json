@@ -26,7 +26,7 @@
     "@fortawesome/fontawesome-free": "^6.4.2",
     "@iharbeck/ngx-virtual-scroller": "^16.0.0",
     "@iplab/ngx-file-upload": "^16.0.1",
-    "@microsoft/signalr": "^7.0.10",
+    "@microsoft/signalr": "^7.0.11",
     "@ng-bootstrap/ng-bootstrap": "^15.1.1",
     "@ngneat/transloco": "^5.0.7",
     "@ngneat/transloco-locale": "^5.1.1",

@@ -7,6 +7,7 @@ import { NotificationProgressEvent } from '../_models/events/notification-progre
 import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { User } from '../_models/user';
+import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -82,6 +83,10 @@ export enum EVENTS {
    * A scrobbling token has expired
    */
   ScrobblingKeyExpired = 'ScrobblingKeyExpired',
+  /**
+   * User's dashboard needs to be re-rendered
+   */
+  DashboardUpdate = 'DashboardUpdate'
 }
 
 export interface Message<T> {
@@ -108,7 +113,6 @@ export class MessageHubService {
    * Users that are online
    */
   public onlineUsers$ = this.onlineUsersSource.asObservable();
-
 
   isAdmin: boolean = false;
 
@@ -181,6 +185,13 @@ export class MessageHubService {
       });
     });
 
+    this.hubConnection.on(EVENTS.DashboardUpdate, resp => {
+      console.log('dashboard update event came in')
+      this.messagesSource.next({
+        event: EVENTS.DashboardUpdate,
+        payload: resp.body as DashboardUpdateEvent
+      });
+    });
 
     this.hubConnection.on(EVENTS.NotificationProgress, (resp: NotificationProgressEvent) => {
       this.messagesSource.next({

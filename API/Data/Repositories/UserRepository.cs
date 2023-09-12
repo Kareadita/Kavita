@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using API.Constants;
 using API.DTOs;
 using API.DTOs.Account;
-using API.DTOs.Filtering;
+using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
@@ -15,6 +15,7 @@ using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
+using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -34,8 +35,9 @@ public enum AppUserIncludes
     WantToRead = 64,
     ReadingListsWithItems = 128,
     Devices = 256,
-    ScrobbleHolds = 512
-
+    ScrobbleHolds = 512,
+    SmartFilters = 1024,
+    DashboardStreams = 2048
 }
 
 public interface IUserRepository
@@ -43,9 +45,11 @@ public interface IUserRepository
     void Update(AppUser user);
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
+    void Update(AppUserDashboardStream stream);
     void Add(AppUserBookmark bookmark);
-    public void Delete(AppUser? user);
+    void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
+    void Delete(IList<AppUserDashboardStream> streams);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -76,6 +80,9 @@ public interface IUserRepository
     Task<bool> HasHoldOnSeries(int userId, int seriesId);
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
     Task<string> GetLocale(int userId);
+    Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
+    Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
+    Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
 }
 
 public class UserRepository : IUserRepository
@@ -106,6 +113,11 @@ public class UserRepository : IUserRepository
         _context.Entry(bookmark).State = EntityState.Modified;
     }
 
+    public void Update(AppUserDashboardStream stream)
+    {
+        _context.Entry(stream).State = EntityState.Modified;
+    }
+
     public void Add(AppUserBookmark bookmark)
     {
         _context.AppUserBookmark.Add(bookmark);
@@ -120,6 +132,11 @@ public class UserRepository : IUserRepository
     public void Delete(AppUserBookmark bookmark)
     {
         _context.AppUserBookmark.Remove(bookmark);
+    }
+
+    public void Delete(IList<AppUserDashboardStream> streams)
+    {
+        _context.AppUserDashboardStream.RemoveRange(streams);
     }
 
     /// <summary>
@@ -298,6 +315,42 @@ public class UserRepository : IUserRepository
         return await _context.AppUserPreferences.Where(p => p.AppUserId == userId)
             .Select(p => p.Locale)
             .SingleAsync();
+    }
+
+    public async Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false)
+    {
+        return await _context.AppUserDashboardStream
+            .Where(d => d.AppUserId == userId)
+            .WhereIf(visibleOnly, d => d.Visible)
+            .OrderBy(d => d.Order)
+            .Include(d => d.SmartFilter)
+            .Select(d => new DashboardStreamDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                IsProvided = d.IsProvided,
+                SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
+                SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                StreamType = d.StreamType,
+                Order = d.Order,
+                Visible = d.Visible
+            })
+            .ToListAsync();
+    }
+
+    public async Task<AppUserDashboardStream?> GetDashboardStream(int streamId)
+    {
+        return await _context.AppUserDashboardStream
+            .Include(d => d.SmartFilter)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
+    public async Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId)
+    {
+        return await _context.AppUserDashboardStream
+            .Include(d => d.SmartFilter)
+            .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

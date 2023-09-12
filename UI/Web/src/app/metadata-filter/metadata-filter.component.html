@@ -48,6 +48,11 @@
                 <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
               </select>
           </div>
+          <div class="col-md-3 col-sm-10">
+            <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
+            <input id="filter-name" type="text" class="form-control" formControlName="name">
+          </div>
+
           <ng-container *ngIf="utilityService.getActiveBreakpoint() > Breakpoint.Tablet" [ngTemplateOutlet]="buttons"></ng-container>
         </div>
         <div class="row mb-3" *ngIf="utilityService.getActiveBreakpoint() <= Breakpoint.Tablet">
@@ -58,11 +63,17 @@
   </ng-template>
   <ng-template #buttons>
     <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
-    <div class="col-md-2 col-sm-6 mt-4">
+    <div class="col-md-1 col-sm-6 mt-4 pt-1">
       <button class="btn btn-secondary col-12" (click)="clear()">{{t('reset')}}</button>
     </div>
-    <div class="col-md-2 col-sm-6 mt-4">
+    <div class="col-md-1 col-sm-6 mt-4 pt-1">
       <button class="btn btn-primary col-12" (click)="apply()">{{t('apply')}}</button>
+    </div>
+    <div class="col-md-1 col-sm-6 mt-4 pt-1">
+      <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled || !this.sortGroup.get('name')?.value">
+        <!-- TODO: Icon here -->
+        {{t('save')}}
+      </button>
     </div>
   </ng-template>
 </ng-container>

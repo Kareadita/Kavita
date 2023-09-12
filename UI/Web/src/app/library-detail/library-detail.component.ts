@@ -33,7 +33,6 @@ import {SentenceCasePipe} from '../pipe/sentence-case.pipe';
 import {BulkOperationsComponent} from '../cards/bulk-operations/bulk-operations.component';
 import {SeriesCardComponent} from '../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../cards/card-detail-layout/card-detail-layout.component';
-import {LibraryRecommendedComponent} from './library-recommended/library-recommended.component';
 import {DecimalPipe, NgFor, NgIf} from '@angular/common';
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOutlet} from '@ng-bootstrap/ng-bootstrap';
 import {
@@ -52,7 +51,8 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     styleUrls: ['./library-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf, LibraryRecommendedComponent, CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
+  imports: [SideNavCompanionBarComponent, CardActionablesComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgIf
+    , CardDetailLayoutComponent, SeriesCardComponent, BulkOperationsComponent, NgbNavOutlet, DecimalPipe, SentenceCasePipe, TranslocoDirective]
 })
 export class LibraryDetailComponent implements OnInit {
 
@@ -282,10 +282,6 @@ export class LibraryDetailComponent implements OnInit {
       this.cdRef.markForCheck();
       window.scrollTo(0, 0);
     });
-  }
-
-  seriesClicked(series: Series) {
-    this.router.navigate(['library', this.libraryId, 'series', series.id]);
   }
 
   trackByIdentity = (index: number, item: Series) => `${item.id}_${item.name}_${item.localizedName}_${item.pagesRead}`;

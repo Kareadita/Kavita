@@ -130,6 +130,17 @@ public static class IncludesExtensions
             query = query.Include(u => u.ScrobbleHolds);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.SmartFilters))
+        {
+            query = query.Include(u => u.SmartFilters);
+        }
+
+        if (includeFlags.HasFlag(AppUserIncludes.DashboardStreams))
+        {
+            query = query.Include(u => u.DashboardStreams)
+                .ThenInclude(s => s.SmartFilter);
+        }
+
         return query.AsSplitQuery();
     }
 

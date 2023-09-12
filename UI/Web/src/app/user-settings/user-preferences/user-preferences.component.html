@@ -428,6 +428,9 @@
                 <ng-container *ngIf="tab.fragment === FragmentID.Stats">
                   <app-user-stats></app-user-stats>
                 </ng-container>
+                <ng-container *ngIf="tab.fragment === FragmentID.SmartFilters">
+                  <app-manage-smart-filters></app-manage-smart-filters>
+                </ng-container>
                 <ng-container *ngIf="tab.fragment === FragmentID.Scrobbling">
                   <app-user-scrobble-history></app-user-scrobble-history>
                   <app-user-holds></app-user-holds>

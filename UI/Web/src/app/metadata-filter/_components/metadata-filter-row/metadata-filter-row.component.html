@@ -22,6 +22,9 @@
                     <ng-container *ngSwitchCase="PredicateType.Number">
                         <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
                     </ng-container>
+                  <ng-container *ngSwitchCase="PredicateType.Boolean">
+                    <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
+                  </ng-container>
                     <ng-container *ngSwitchCase="PredicateType.Dropdown">
                       <ng-container *ngIf="dropdownOptions$ | async as opts">
                           <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>

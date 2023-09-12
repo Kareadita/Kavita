@@ -4,45 +4,26 @@
       <app-card-actionables [actions]="actions" (actionHandler)="performAction($event)"></app-card-actionables>
       <span>{{libraryName}}</span>
     </h2>
-    <div main>
-      <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav nav-pills" style="flex-wrap: nowrap;">
-        <li *ngFor="let tab of tabs" [ngbNavItem]="tab">
-          <a ngbNavLink>
-            <span class="d-none d-sm-flex align-items-center"><i class="fa {{tab.icon}} me-1" style="padding-right: 5px;" aria-hidden="true"></i> {{t('library-detail.' + tab.title) | sentenceCase}}</span>
-            <span class="d-flex d-sm-none">
-                      <i class="fa {{tab.icon}}" aria-hidden="true"></i>
-                  </span>
-          </a>
-          <ng-template ngbNavContent>
-            <ng-container *ngIf="tab.title === 'recommended-tab'">
-              <app-library-recommended [libraryId]="libraryId"></app-library-recommended>
-            </ng-container>
-            <ng-container *ngIf="tab.title === 'library-tab'">
-              <app-card-detail-layout
-                [isLoading]="loadingSeries"
-                [items]="series"
-                [pagination]="pagination"
-                [filterSettings]="filterSettings"
-                [trackByIdentity]="trackByIdentity"
-                [filterOpen]="filterOpen"
-                [jumpBarKeys]="jumpKeys"
-                [refresh]="refresh"
-                (applyFilter)="updateFilter($event)"
-              >
-                <ng-template #cardItem let-item let-position="idx">
-                  <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
-                                   (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                                   [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
-                </ng-template>
-              </app-card-detail-layout>
-            </ng-container>
-          </ng-template>
-        </li>
-      </ul>
-    </div>
+    <h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{t('common.series-count', {num: pagination.totalItems | number})}} </h6>
   </app-side-nav-companion-bar>
-  <h6 subtitle class="subtitle-with-actionables" *ngIf="active.fragment === ''">{{t('common.series-count', {num: pagination.totalItems | number})}} </h6>
   <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
-  <div [ngbNavOutlet]="nav"></div>
+  <app-card-detail-layout
+    [isLoading]="loadingSeries"
+    [items]="series"
+    [pagination]="pagination"
+    [filterSettings]="filterSettings"
+    [trackByIdentity]="trackByIdentity"
+    [filterOpen]="filterOpen"
+    [jumpBarKeys]="jumpKeys"
+    [refresh]="refresh"
+    (applyFilter)="updateFilter($event)"
+  >
+    <ng-template #cardItem let-item let-position="idx">
+      <app-series-card [data]="item" [libraryId]="libraryId" [suppressLibraryLink]="true" (reload)="loadPage()"
+                       (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
+                       [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"></app-series-card>
+    </ng-template>
+  </app-card-detail-layout>
+
 
 </ng-container>

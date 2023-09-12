@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using API.DTOs.Filtering;
@@ -19,11 +20,26 @@ public class LocaleController : BaseApiController
     [HttpGet]
     public ActionResult<IEnumerable<string>> GetAllLocales()
     {
-        var languages = _localizationService.GetLocales().Select(c => new CultureInfo(c)).Select(c =>
-            new LanguageDto()
+        var languages = _localizationService.GetLocales().Select(c =>
             {
-                Title = c.DisplayName,
-                IsoCode = c.IetfLanguageTag
+                try
+                {
+                    var cult = new CultureInfo(c);
+                    return new LanguageDto()
+                    {
+                        Title = cult.DisplayName,
+                        IsoCode = cult.IetfLanguageTag
+                    };
+                }
+                catch (Exception ex)
+                {
+                    // Some OS' don't have all culture codes supported like PT_BR, thus we need to default
+                    return new LanguageDto()
+                    {
+                        Title = c,
+                        IsoCode = c
+                    };
+                }
             })
             .Where(l => !string.IsNullOrEmpty(l.IsoCode))
             .OrderBy(d => d.Title);

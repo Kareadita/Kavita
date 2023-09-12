@@ -49,6 +49,7 @@ import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
 import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -63,6 +64,7 @@ enum FragmentID {
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
+  SmartFilters = 'smart-filters',
   Scrobbling = 'scrobbling'
 
 }
@@ -76,7 +78,8 @@ enum FragmentID {
   imports: [SideNavCompanionBarComponent, NgbNav, NgFor, NgbNavItem, NgbNavItemRole, NgbNavLink, RouterLink, NgbNavContent, NgIf, ChangeEmailComponent,
     ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
-    ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe, TranslocoDirective]
+    ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
+    TranslocoDirective, ManageSmartFiltersComponent]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -107,6 +110,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: '3rd-party-clients-tab', fragment: FragmentID.Clients},
     {title: 'theme-tab', fragment: FragmentID.Theme},
     {title: 'devices-tab', fragment: FragmentID.Devices},
+    {title: 'smart-filters-tab', fragment: FragmentID.SmartFilters},
     {title: 'stats-tab', fragment: FragmentID.Stats},
   ];
   locales: Array<Language> = [{title: 'English', isoCode: 'en'}];
@@ -115,7 +119,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
   private readonly destroyRef = inject(DestroyRef);
-  private readonly trasnlocoService = inject(TranslocoService);
 
   get AccordionPanelID() {
     return AccordionPanelID;
@@ -304,7 +307,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     };
 
     this.observableHandles.push(this.accountService.updatePreferences(data).subscribe((updatedPrefs) => {
-      this.toastr.success(this.trasnlocoService.translate('user-preferences.success-toast'));
+      this.toastr.success(translate('user-preferences.success-toast'));
       if (this.user) {
         this.user.preferences = updatedPrefs;
         this.cdRef.markForCheck();

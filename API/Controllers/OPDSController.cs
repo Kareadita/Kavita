@@ -102,32 +102,68 @@ public class OpdsController : BaseApiController
 
         var feed = CreateFeed("Kavita", string.Empty, apiKey, prefix);
         SetFeedId(feed, "root");
-        feed.Entries.Add(new FeedEntry()
+
+        // Get the user's customized dashboard
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreams(userId, true);
+        foreach (var stream in streams)
         {
-            Id = "onDeck",
-            Title = await _localizationService.Translate(userId, "on-deck"),
-            Content = new FeedEntryContent()
+            switch (stream.StreamType)
             {
-                Text = await _localizationService.Translate(userId, "browse-on-deck")
-            },
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/on-deck"),
+                case DashboardStreamType.OnDeck:
+                    feed.Entries.Add(new FeedEntry()
+                    {
+                        Id = "onDeck",
+                        Title = await _localizationService.Translate(userId, "on-deck"),
+                        Content = new FeedEntryContent()
+                        {
+                            Text = await _localizationService.Translate(userId, "browse-on-deck")
+                        },
+                        Links = new List<FeedLink>()
+                        {
+                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/on-deck"),
+                        }
+                    });
+                    break;
+                case DashboardStreamType.NewlyAdded:
+                    feed.Entries.Add(new FeedEntry()
+                    {
+                        Id = "recentlyAdded",
+                        Title = await _localizationService.Translate(userId, "recently-added"),
+                        Content = new FeedEntryContent()
+                        {
+                            Text = await _localizationService.Translate(userId, "browse-recently-added")
+                        },
+                        Links = new List<FeedLink>()
+                        {
+                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-added"),
+                        }
+                    });
+                    break;
+                case DashboardStreamType.RecentlyUpdated:
+                    // TODO: See if we can implement this and use (count) on series name for number of updates
+                    break;
+                case DashboardStreamType.MoreInGenre:
+                    // TODO: See if we can implement this
+                    break;
+                case DashboardStreamType.SmartFilter:
+
+                    feed.Entries.Add(new FeedEntry()
+                    {
+                        Id = "smartFilter-" + stream.Id,
+                        Title = stream.Name,
+                        Content = new FeedEntryContent()
+                        {
+                            Text = stream.Name
+                        },
+                        Links = new List<FeedLink>()
+                        {
+                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filter/{stream.SmartFilterId}/"),
+                        }
+                    });
+                    break;
             }
-        });
-        feed.Entries.Add(new FeedEntry()
-        {
-            Id = "recentlyAdded",
-            Title = await _localizationService.Translate(userId, "recently-added"),
-            Content = new FeedEntryContent()
-            {
-                Text = await _localizationService.Translate(userId, "browse-recently-added")
-            },
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/recently-added"),
-            }
-        });
+        }
+
         feed.Entries.Add(new FeedEntry()
         {
             Id = "readingList",
@@ -180,6 +216,19 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/collections"),
             }
         });
+        feed.Entries.Add(new FeedEntry()
+        {
+            Id = "allSmartFilters",
+            Title = await _localizationService.Translate(userId, "smart-filters"),
+            Content = new FeedEntryContent()
+            {
+                Text = await _localizationService.Translate(userId, "browse-smart-filters")
+            },
+            Links = new List<FeedLink>()
+            {
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filters"),
+            }
+        });
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -194,6 +243,67 @@ public class OpdsController : BaseApiController
         }
 
         return new Tuple<string, string>(baseUrl, prefix);
+    }
+
+    /// <summary>
+    /// Returns the Series matching this smart filter. If FromDashboard, will only return 20 records.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("{apiKey}/smart-filter/{filterId}")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetSmartFilter(string apiKey, int filterId)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+
+
+        var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
+        if (filter == null) return BadRequest(_localizationService.Translate(userId, "smart-filter-doesnt-exist"));
+        var feed = CreateFeed(await _localizationService.Translate(userId, "smartFilter-" + filter.Id), $"{prefix}{apiKey}/smart-filter/{filter.Id}/", apiKey, prefix);
+        SetFeedId(feed, "smartFilter-" + filter.Id);
+
+        var decodedFilter = SmartFilterHelper.Decode(filter.Filter);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, UserParams.Default,
+            decodedFilter);
+        var seriesMetadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id));
+
+        foreach (var seriesDto in series)
+        {
+            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+        }
+
+        AddPagination(feed, series, $"{prefix}{apiKey}/smart-filter/{filterId}/");
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
+    [HttpGet("{apiKey}/smart-filters")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetSmartFilters(string apiKey)
+    {
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+
+        var filters = _unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(userId);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "smartFilters"), $"{prefix}{apiKey}/smart-filters", apiKey, prefix);
+        SetFeedId(feed, "smartFilters");
+        foreach (var filter in filters)
+        {
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = filter.Id.ToString(),
+                Title = filter.Name,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filter/{filter.Id}")
+                }
+            });
+        }
+
+        return CreateXmlResult(SerializeXml(feed));
     }
 
 

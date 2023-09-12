@@ -1,8 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Constants;
 using API.Data;
+using API.Data.Repositories;
+using API.DTOs.Dashboard;
 using API.DTOs.Filtering.v2;
+using API.Entities;
+using API.Extensions;
+using API.Helpers;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,38 +29,66 @@ public class FilterController : BaseApiController
         _cacheFactory = cacheFactory;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<FilterV2Dto?>> GetFilter(string name)
+    /// <summary>
+    /// Creates or Updates the filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update")]
+    public async Task<ActionResult> CreateOrUpdateSmartFilter(FilterV2Dto dto)
     {
-        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Filter);
-        if (string.IsNullOrEmpty(name)) return Ok(null);
-        var filter = await provider.GetAsync<FilterV2Dto>(name);
-        if (filter.HasValue)
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.SmartFilters);
+        if (user == null) return Unauthorized();
+
+        if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
+        if (Seed.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
         {
-            filter.Value.Name = name;
-            return Ok(filter.Value);
+            return BadRequest("You cannot use the name of a system provided stream");
         }
 
-        return Ok(null);
+        // I might just want to use DashboardStream instead of a separate entity. It will drastically simplify implementation
+
+        var existingFilter =
+            user.SmartFilters.FirstOrDefault(f => f.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase));
+        if (existingFilter != null)
+        {
+            // Update the filter
+            existingFilter.Filter = SmartFilterHelper.Encode(dto);
+            _unitOfWork.AppUserSmartFilterRepository.Update(existingFilter);
+        }
+        else
+        {
+            existingFilter = new AppUserSmartFilter()
+            {
+                Name = dto.Name,
+                Filter = SmartFilterHelper.Encode(dto)
+            };
+            user.SmartFilters.Add(existingFilter);
+            _unitOfWork.UserRepository.Update(user);
+        }
+
+        if (!_unitOfWork.HasChanges()) return Ok();
+        await _unitOfWork.CommitAsync();
+
+        return Ok();
     }
 
-    /// <summary>
-    /// Caches the filter in the backend and returns a temp string for retrieving.
-    /// </summary>
-    /// <remarks>The cache line lives for only 1 hour</remarks>
-    /// <param name="filterDto"></param>
-    /// <returns></returns>
-    [HttpPost("create-temp")]
-    public async Task<ActionResult<string>> CreateTempFilter(FilterV2Dto filterDto)
+    [HttpGet]
+    public ActionResult<IEnumerable<SmartFilterDto>> GetFilters()
     {
-        var provider = _cacheFactory.GetCachingProvider(EasyCacheProfiles.Filter);
-        var name = filterDto.Name;
-        if (string.IsNullOrEmpty(filterDto.Name))
-        {
-            name = Guid.NewGuid().ToString();
-        }
+        return Ok(_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(User.GetUserId()));
+    }
 
-        await provider.SetAsync(name, filterDto, TimeSpan.FromHours(1));
-        return name;
+    [HttpDelete]
+    public async Task<ActionResult> DeleteFilter(int filterId)
+    {
+        var filter = await _unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
+        if (filter == null) return Ok();
+        // This needs to delete any dashboard filters that have it too
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
+        _unitOfWork.UserRepository.Delete(streams);
+        _unitOfWork.AppUserSmartFilterRepository.Delete(filter);
+        await _unitOfWork.CommitAsync();
+        return Ok();
     }
 }

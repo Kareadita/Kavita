@@ -11,8 +11,7 @@ import {
   Output
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {NgbCollapse, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {FilterUtilitiesService} from '../shared/_services/filter-utilities.service';
+import {NgbCollapse, NgbModal, NgbRating, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {Breakpoint, UtilityService} from '../shared/_services/utility.service';
 import {Library} from '../_models/library';
 import {allSortFields, FilterEvent, FilterItem, SortField} from '../_models/metadata/series-filter';
@@ -23,10 +22,14 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
 import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
-import {TranslocoModule} from "@ngneat/transloco";
+import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {allFields} from "../_models/metadata/v2/filter-field";
+import {MetadataService} from "../_services/metadata.service";
+import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
+import {FilterService} from "../_services/filter.service";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -81,9 +84,10 @@ export class MetadataFilterComponent implements OnInit {
 
 
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly toastr = inject(ToastrService);
 
 
-  constructor(public toggleService: ToggleService) {}
+  constructor(public toggleService: ToggleService, private filterService: FilterService) {}
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
@@ -141,7 +145,8 @@ export class MetadataFilterComponent implements OnInit {
 
     this.sortGroup = new FormGroup({
       sortField: new FormControl({value: this.filterV2?.sortOptions?.sortField || SortField.SortName, disabled: this.filterSettings.sortDisabled}, []),
-      limitTo: new FormControl(this.filterV2?.limitTo || 0, [])
+      limitTo: new FormControl(this.filterV2?.limitTo || 0, []),
+      name: new FormControl(this.filterV2?.name || '', [])
     });
 
     this.sortGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -153,6 +158,7 @@ export class MetadataFilterComponent implements OnInit {
       }
       this.filterV2!.sortOptions!.sortField = parseInt(this.sortGroup.get('sortField')?.value, 10);
       this.filterV2!.limitTo = Math.max(parseInt(this.sortGroup.get('limitTo')?.value || '0', 10), 0);
+      this.filterV2!.name = this.sortGroup.get('name')?.value || '';
       this.cdRef.markForCheck();
     });
 
@@ -188,6 +194,15 @@ export class MetadataFilterComponent implements OnInit {
 
     this.updateApplied++;
     this.cdRef.markForCheck();
+  }
+
+  save() {
+    if (!this.filterV2) return;
+    this.filterV2.name = this.sortGroup.get('name')?.value;
+    this.filterService.saveFilter(this.filterV2).subscribe(() => {
+      this.toastr.success(translate('toasts.smart-filter-updated'));
+      this.apply();
+    })
   }
 
   toggleSelected() {

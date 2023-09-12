@@ -62,6 +62,8 @@ export class FilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.path');
       case FilterField.FilePath:
         return translate('filter-field-pipe.file-path');
+      case FilterField.WantToRead:
+        return translate('filter-field-pipe.want-to-read');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

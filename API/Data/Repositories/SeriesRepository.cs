@@ -8,6 +8,7 @@ using API.Data.Misc;
 using API.Data.Scanner;
 using API.DTOs;
 using API.DTOs.CollectionTags;
+using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
@@ -952,6 +953,9 @@ public class SeriesRepository : ISeriesRepository
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
         query = ApplyLibraryFilter(filter, query);
 
+        query = ApplyWantToReadFilter(filter, query, userId);
+
+
         query = BuildFilterQuery(userId, filter, query);
 
 
@@ -966,6 +970,24 @@ public class SeriesRepository : ISeriesRepository
         return ApplyLimit(query
             .Sort(filter.SortOptions)
             .AsSplitQuery(), filter.LimitTo);
+    }
+
+    private IQueryable<Series> ApplyWantToReadFilter(FilterV2Dto filter, IQueryable<Series> query, int userId)
+    {
+        var wantToReadStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == FilterField.WantToRead);
+        if (wantToReadStmt == null) return query;
+
+        var seriesIds = _context.AppUser.Where(u => u.Id == userId).SelectMany(u => u.WantToRead).Select(s => s.Id);
+        if (bool.Parse(wantToReadStmt.Value))
+        {
+            query = query.Where(s => seriesIds.Contains(s.Id));
+        }
+        else
+        {
+            query = query.Where(s => !seriesIds.Contains(s.Id));
+        }
+
+        return query;
     }
 
     private static IQueryable<Series> ApplyLibraryFilter(FilterV2Dto filter, IQueryable<Series> query)
@@ -1059,6 +1081,9 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Genres => query.HasGenre(true, statement.Comparison, (IList<int>) value),
             FilterField.Libraries =>
                 // This is handled in the code before this as it's handled in a more general, combined manner
+                query,
+            FilterField.WantToRead =>
+                // This is handled in the higher level of code as it's more general
                 query,
             FilterField.ReadProgress => query.HasReadingProgress(true, statement.Comparison, (int) value, userId),
             FilterField.Formats => query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value),

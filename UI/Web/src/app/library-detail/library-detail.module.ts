@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { LibraryDetailComponent } from './library-detail.component';
 import { NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { LibraryDetailRoutingModule } from './library-detail-routing.module';
-import { LibraryRecommendedComponent } from './library-recommended/library-recommended.component';
 
 import {SentenceCasePipe} from "../pipe/sentence-case.pipe";
 import {CardDetailLayoutComponent} from "../cards/card-detail-layout/card-detail-layout.component";
@@ -27,7 +26,7 @@ import {CardActionablesComponent} from "../_single-module/card-actionables/card-
     SeriesCardComponent,
     BulkOperationsComponent,
     SideNavCompanionBarComponent,
-    LibraryDetailComponent, LibraryRecommendedComponent
+    LibraryDetailComponent,
 ]
 })
 export class LibraryDetailModule { }

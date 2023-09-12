@@ -4,7 +4,10 @@ using API.Data.Migrations;
 using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.CollectionTags;
+using API.DTOs.Dashboard;
 using API.DTOs.Device;
+using API.DTOs.Filtering;
+using API.DTOs.Filtering.v2;
 using API.DTOs.MediaErrors;
 using API.DTOs.Metadata;
 using API.DTOs.Reader;
@@ -225,6 +228,13 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<Device, DeviceDto>();
         CreateMap<AppUserTableOfContent, PersonalToCDto>();
+
+
+        CreateMap<AppUserSmartFilter, SmartFilterDto>();
+        CreateMap<AppUserDashboardStream, DashboardStreamDto>();
+        // CreateMap<AppUserDashboardStream, DashboardStreamDto>()
+        //     .ForMember(dest => dest.SmartFilterEncoded,
+        //         opt => opt.MapFrom(src => src.SmartFilter));
 
     }
 }

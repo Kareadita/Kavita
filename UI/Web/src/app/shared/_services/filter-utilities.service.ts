@@ -107,6 +107,49 @@ export class FilterUtilitiesService {
         }).join(','));
     }
 
+  decodeSeriesFilter(encodedFilter: string) {
+    const filter = this.metadataService.createDefaultFilterDto();
+
+    if (encodedFilter.includes('name=')) {
+      filter.name = decodeURIComponent(encodedFilter).split('name=')[1].split('&')[0];
+    }
+
+    const stmtsStartIndex = encodedFilter.indexOf(statementsKey);
+    let endIndex = encodedFilter.indexOf('&' + sortOptionsKey);
+    if (endIndex < 0) {
+      endIndex = encodedFilter.indexOf('&' + limitToKey);
+    }
+
+    if (stmtsStartIndex !== -1 || endIndex !== -1) {
+      // +1 is for the =
+      const stmtsEncoded = encodedFilter.substring(stmtsStartIndex + statementsKey.length, endIndex);
+      filter.statements = this.decodeFilterStatements(stmtsEncoded);
+    }
+
+    if (encodedFilter.includes(sortOptionsKey)) {
+      const optionsStartIndex = encodedFilter.indexOf('&' + sortOptionsKey);
+      const endIndex = encodedFilter.indexOf('&' + limitToKey);
+      const sortOptionsEncoded = encodedFilter.substring(optionsStartIndex + sortOptionsKey.length + 1, endIndex);
+      const sortOptions = this.decodeSortOptions(sortOptionsEncoded);
+      if (sortOptions) {
+        filter.sortOptions = sortOptions;
+      }
+    }
+
+    if (encodedFilter.includes(limitToKey)) {
+      const limitTo = decodeURIComponent(encodedFilter).split(limitToKey)[1].split('&')[0];
+      filter.limitTo = parseInt(limitTo, 10);
+    }
+
+    if (encodedFilter.includes(combinationKey)) {
+      const combo = decodeURIComponent(encodedFilter).split(combinationKey)[1].split('&')[0];;
+      filter.combination = parseInt(combo, 10) as FilterCombination;
+    }
+
+    return filter;
+  }
+
+
     filterPresetsFromUrlV2(snapshot: ActivatedRouteSnapshot): SeriesFilterV2 {
         const filter = this.metadataService.createDefaultFilterDto();
         if (!window.location.href.includes('?')) return filter;
