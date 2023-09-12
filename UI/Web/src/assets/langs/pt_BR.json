@@ -13,7 +13,8 @@
         "not-granted": "Você não recebeu acesso a nenhuma biblioteca.",
         "on-deck-title": "Na Estante",
         "recently-updated-title": "Séries Atualizadas Recentemente",
-        "recently-added-title": "Séries Recém-Adicionadas"
+        "recently-added-title": "Séries Recém-Adicionadas",
+        "more-in-genre-title": "Mais em {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -144,7 +145,8 @@
         "clients-api-key-tooltip": "A chave API é como uma senha. Mantenha isso em segredo, mantenha-o seguro.",
         "clients-opds-url-tooltip": "URL OPDS",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Filtros Inteligentes"
     },
     "user-holds": {
         "title": "Segurar Scrobble",
