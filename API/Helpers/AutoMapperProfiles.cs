@@ -36,12 +36,12 @@ public class AutoMapperProfiles : Profile
     public AutoMapperProfiles()
     {
         CreateMap<BookmarkSeriesPair, BookmarkDto>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.bookmark.Id))
-            .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.bookmark.Page))
-            .ForMember(dest => dest.VolumeId, opt => opt.MapFrom(src => src.bookmark.VolumeId))
-            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.bookmark.SeriesId))
-            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.bookmark.ChapterId))
-            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.series));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Bookmark.Id))
+            .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.Bookmark.Page))
+            .ForMember(dest => dest.VolumeId, opt => opt.MapFrom(src => src.Bookmark.VolumeId))
+            .ForMember(dest => dest.SeriesId, opt => opt.MapFrom(src => src.Bookmark.SeriesId))
+            .ForMember(dest => dest.ChapterId, opt => opt.MapFrom(src => src.Bookmark.ChapterId))
+            .ForMember(dest => dest.Series, opt => opt.MapFrom(src => src.Series));
         CreateMap<LibraryDto, Library>();
         CreateMap<Volume, VolumeDto>();
         CreateMap<MangaFile, MangaFileDto>();
