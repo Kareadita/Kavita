@@ -1,16 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {BehaviorSubject, forkJoin, merge, Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
-import {combineLatest, debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
+import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
-import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {Library} from 'src/app/_models/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
 import {Series} from 'src/app/_models/series';
 import {SortField} from 'src/app/_models/metadata/series-filter';
-import {SeriesGroup} from 'src/app/_models/series-group';
 import {AccountService} from 'src/app/_services/account.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
@@ -33,6 +30,8 @@ import {RecommendationService} from "../../_services/recommendation.service";
 import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
+import {SeriesRemovedEvent} from "../../_models/events/series-removed-event";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 @Component({
     selector: 'app-dashboard',
@@ -41,7 +40,7 @@ import {StreamType} from "../../_models/dashboard/stream-type.enum";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [SideNavCompanionBarComponent, NgIf, RouterLink, CarouselReelComponent, SeriesCardComponent,
-    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet]
+    CardItemComponent, AsyncPipe, TranslocoDirective, NgSwitchCase, NgSwitch, NgForOf, NgTemplateOutlet, LoadingComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -51,12 +50,10 @@ export class DashboardComponent implements OnInit {
   @Input() libraryId: number = 0;
 
   libraries$: Observable<Library[]> = of([]);
-  isLoading = true;
+  isLoadingAdmin = true;
+  isLoadingDashboard = true;
   isAdmin$: Observable<boolean> = of(false);
 
-  recentlyUpdatedSeries: SeriesGroup[] = [];
-  inProgress: Series[] = [];
-  recentlyAddedSeries: Series[] = [];
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
   refreshStreams$ = new Subject<void>();
@@ -85,7 +82,6 @@ export class DashboardComponent implements OnInit {
 
     this.refreshStreams$.pipe(takeUntilDestroyed(this.destroyRef), throttleTime(10_000),
         tap(() => {
-          console.log('refreshing dashboard')
           this.loadDashboard()
         }))
         .subscribe();
@@ -107,7 +103,8 @@ export class DashboardComponent implements OnInit {
         // });
         this.refreshStreams$.next();
       } else if (res.event === EVENTS.SeriesRemoved) {
-        // const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
+        //const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
+
         //
         // this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
         // this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
@@ -130,22 +127,21 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Kavita');
-    this.isLoading = true;
+    this.isLoadingAdmin = true;
     this.cdRef.markForCheck();
 
     this.libraries$ = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef), tap((libs) => {
-      this.isLoading = false;
+      this.isLoadingAdmin = false;
       this.cdRef.markForCheck();
     }));
   }
 
 
   loadDashboard() {
-    this.isLoading = true;
+    this.isLoadingDashboard = true;
     this.cdRef.markForCheck();
     this.dashboardService.getDashboardStreams().subscribe(streams => {
       this.streams = streams;
-      //this.refreshStreams$.next();
       this.streams.forEach(s => {
         switch (s.streamType) {
           case StreamType.OnDeck:
@@ -177,57 +173,18 @@ export class DashboardComponent implements OnInit {
             break;
         }
       });
-      this.isLoading = false;
+      this.isLoadingDashboard = false;
       this.cdRef.markForCheck();
     });
   }
 
   reloadStream(streamId: number) {
-
+    const index = this.streams.findIndex(s => s.id === streamId);
+    if (index < 0) return;
+    this.streams[index] = {...this.streams[index]};
+    console.log('swapped out stream: ', this.streams[index]);
+    this.cdRef.detectChanges();
   }
-
-  reloadInProgress(series: Series | number) {
-    //this.loadOnDeck(); // TODO: Use combineLatest so we can emit when to reload an api
-  }
-
-  // loadOnDeck() {
-  //   let api = this.seriesService.getOnDeck(0, 1, 30);
-  //   if (this.libraryId > 0) {
-  //     api = this.seriesService.getOnDeck(this.libraryId, 1, 30);
-  //   }
-  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
-  //     this.inProgress = updatedSeries.result;
-  //     this.cdRef.markForCheck();
-  //   });
-  // }
-  //
-  // loadRecentlyAddedSeries() {
-  //   let api = this.seriesService.getRecentlyAdded(1, 30);
-  //   if (this.libraryId > 0) {
-  //     const filter = this.filterUtilityService.createSeriesV2Filter();
-  //     filter.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
-  //     api = this.seriesService.getRecentlyAdded(1, 30, filter);
-  //   }
-  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
-  //     this.recentlyAddedSeries = updatedSeries.result;
-  //     this.cdRef.markForCheck();
-  //   });
-  // }
-  //
-  //
-  // loadRecentlyUpdated() {
-  //   let api = this.seriesService.getRecentlyUpdatedSeries();
-  //   if (this.libraryId > 0) {
-  //     api = this.seriesService.getRecentlyUpdatedSeries();
-  //   }
-  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(updatedSeries => {
-  //     this.recentlyUpdatedSeries = updatedSeries.filter(group => {
-  //       if (this.libraryId === 0) return true;
-  //       return group.libraryId === this.libraryId;
-  //     });
-  //     this.cdRef.markForCheck();
-  //   });
-  // }
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
     await this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);
