@@ -161,5 +161,6 @@
     "browse-want-to-read": "Navegar no Quero Ler",
     "collection-deleted": "Coleção excluída",
     "smart-filters": "Filtros Inteligentes",
-    "browse-smart-filters": "Navegar pelos Filtros Inteligentes"
+    "browse-smart-filters": "Navegar pelos Filtros Inteligentes",
+    "smart-filter-doesnt-exist": "Filtro Inteligente não existe"
 }
