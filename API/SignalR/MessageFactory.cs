@@ -127,12 +127,18 @@ public static class MessageFactory
     /// </summary>
     public const string DashboardUpdate = "DashboardUpdate";
 
-    public static SignalRMessage DashboardUpdateEvent()
+    public static SignalRMessage DashboardUpdateEvent(int userId)
     {
         return new SignalRMessage()
         {
             Name = DashboardUpdate,
+            Title = "Dashboard Update",
+            Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
+            Body = new
+            {
+                UserId = userId
+            }
         };
     }
 

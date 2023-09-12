@@ -186,6 +186,7 @@ export class MessageHubService {
     });
 
     this.hubConnection.on(EVENTS.DashboardUpdate, resp => {
+      console.log('dashboard update event came in')
       this.messagesSource.next({
         event: EVENTS.DashboardUpdate,
         payload: resp.body as DashboardUpdateEvent

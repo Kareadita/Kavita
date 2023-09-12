@@ -1091,7 +1091,7 @@ public class AccountController : BaseApiController
         };
 
 
-        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
             User.GetUserId());
         return Ok(ret);
     }
@@ -1110,8 +1110,9 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Update(stream);
         await _unitOfWork.CommitAsync();
-        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
-            User.GetUserId());
+        var userId = User.GetUserId();
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(userId),
+            userId);
         return Ok();
     }
 
@@ -1135,8 +1136,8 @@ public class AccountController : BaseApiController
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
-        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(),
-            User.GetUserId());
+        await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
+            user.Id);
         return Ok();
     }
 

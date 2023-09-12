@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
-import {Observable, of, ReplaySubject, switchMap} from 'rxjs';
-import {map, shareReplay, take, tap} from 'rxjs/operators';
+import {BehaviorSubject, forkJoin, merge, Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
+import {combineLatest, debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {SeriesAddedEvent} from 'src/app/_models/events/series-added-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
@@ -52,7 +52,6 @@ export class DashboardComponent implements OnInit {
 
   libraries$: Observable<Library[]> = of([]);
   isLoading = true;
-
   isAdmin$: Observable<boolean> = of(false);
 
   recentlyUpdatedSeries: SeriesGroup[] = [];
@@ -60,6 +59,8 @@ export class DashboardComponent implements OnInit {
   recentlyAddedSeries: Series[] = [];
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
+  refreshStreams$ = new Subject<void>();
+
 
   /**
    * We use this Replay subject to slow the amount of times we reload the UI
@@ -79,63 +80,44 @@ export class DashboardComponent implements OnInit {
     private messageHub: MessageHubService, private readonly cdRef: ChangeDetectorRef,
               private dashboardService: DashboardService) {
 
-    this.dashboardService.getDashboardStreams().subscribe(streams => {
-      this.streams = streams;
-      this.streams.forEach(s => {
-        switch (s.streamType) {
-          case StreamType.OnDeck:
-            s.api = this.seriesService.getOnDeck(0, 1, 20)
-              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
-            break;
-          case StreamType.NewlyAdded:
-            s.api = this.seriesService.getRecentlyAdded(1, 20)
-              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
-            break;
-          case StreamType.RecentlyUpdated:
-            s.api = this.seriesService.getRecentlyUpdatedSeries();
-            break;
-          case StreamType.SmartFilter:
-            s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
-              .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
-            break;
-          case StreamType.MoreInGenre:
-            s.api = this.metadataService.getAllGenres().pipe(
-              map(genres => {
-                this.genre = genres[Math.floor(Math.random() * genres.length)];
-                return this.genre;
-              }),
-              switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
-              map(p => p.result),
-              takeUntilDestroyed(this.destroyRef),
-              shareReplay({bufferSize: 1, refCount: true})
-            );
-            break;
-        }
-      })
-    });
+
+    this.loadDashboard();
+
+    this.refreshStreams$.pipe(takeUntilDestroyed(this.destroyRef), throttleTime(10_000),
+        tap(() => {
+          console.log('refreshing dashboard')
+          this.loadDashboard()
+        }))
+        .subscribe();
 
 
     // TODO: Solve how Websockets will work with these dyanamic streams
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      if (res.event === EVENTS.SeriesAdded) {
-        const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
+      if (res.event === EVENTS.DashboardUpdate) {
+        console.log('dashboard update triggered')
+        this.refreshStreams$.next();
+      } else if (res.event === EVENTS.SeriesAdded) {
+        // const seriesAddedEvent = res.payload as SeriesAddedEvent;
 
-        this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-          if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
-          this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
-          this.cdRef.markForCheck();
-        });
+        // this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
+        //   if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
+        //   this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
+        //   this.cdRef.markForCheck();
+        // });
+        this.refreshStreams$.next();
       } else if (res.event === EVENTS.SeriesRemoved) {
-        const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-
-        this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
-        this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
-        this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
-        this.cdRef.markForCheck();
+        // const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
+        //
+        // this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
+        // this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
+        // this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
+        // this.cdRef.markForCheck();
+        this.refreshStreams$.next();
       } else if (res.event === EVENTS.ScanSeries) {
         // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
         this.loadRecentlyAdded$.next();
+        this.refreshStreams$.next();
       }
     });
 
@@ -144,16 +126,10 @@ export class DashboardComponent implements OnInit {
       map(user => (user && this.accountService.hasAdminRole(user)) || false),
       shareReplay({bufferSize: 1, refCount: true})
     );
-
-    // this.loadRecentlyAdded$.pipe(debounceTime(1000), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-    //   this.loadRecentlyUpdated();
-    //   this.loadRecentlyAddedSeries();
-    //   this.cdRef.markForCheck();
-    // });
   }
 
   ngOnInit(): void {
-    this.titleService.setTitle('Kavita - Dashboard');
+    this.titleService.setTitle('Kavita');
     this.isLoading = true;
     this.cdRef.markForCheck();
 
@@ -161,14 +137,49 @@ export class DashboardComponent implements OnInit {
       this.isLoading = false;
       this.cdRef.markForCheck();
     }));
-
-    //this.reloadSeries();
   }
 
-  reloadSeries() {
-    this.loadOnDeck();
-    this.loadRecentlyUpdated();
-    this.loadRecentlyAddedSeries();
+
+  loadDashboard() {
+    this.isLoading = true;
+    this.cdRef.markForCheck();
+    this.dashboardService.getDashboardStreams().subscribe(streams => {
+      this.streams = streams;
+      //this.refreshStreams$.next();
+      this.streams.forEach(s => {
+        switch (s.streamType) {
+          case StreamType.OnDeck:
+            s.api = this.seriesService.getOnDeck(0, 1, 20)
+                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.NewlyAdded:
+            s.api = this.seriesService.getRecentlyAdded(1, 20)
+                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.RecentlyUpdated:
+            s.api = this.seriesService.getRecentlyUpdatedSeries();
+            break;
+          case StreamType.SmartFilter:
+            s.api = this.seriesService.getAllSeriesV2(0, 20, this.filterUtilityService.decodeSeriesFilter(s.smartFilterEncoded!))
+                .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
+            break;
+          case StreamType.MoreInGenre:
+            s.api = this.metadataService.getAllGenres().pipe(
+                map(genres => {
+                  this.genre = genres[Math.floor(Math.random() * genres.length)];
+                  return this.genre;
+                }),
+                switchMap(genre => this.recommendationService.getMoreIn(0, genre.id, 0, 30)),
+                map(p => p.result),
+                takeUntilDestroyed(this.destroyRef),
+                shareReplay({bufferSize: 1, refCount: true})
+            );
+            break;
+        }
+      });
+      this.isLoading = false;
+      this.cdRef.markForCheck();
+    });
   }
 
   reloadStream(streamId: number) {
@@ -176,47 +187,47 @@ export class DashboardComponent implements OnInit {
   }
 
   reloadInProgress(series: Series | number) {
-    this.loadOnDeck(); // TODO: Use combineLatest so we can emit when to reload an api
+    //this.loadOnDeck(); // TODO: Use combineLatest so we can emit when to reload an api
   }
 
-  loadOnDeck() {
-    let api = this.seriesService.getOnDeck(0, 1, 30);
-    if (this.libraryId > 0) {
-      api = this.seriesService.getOnDeck(this.libraryId, 1, 30);
-    }
-    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
-      this.inProgress = updatedSeries.result;
-      this.cdRef.markForCheck();
-    });
-  }
-
-  loadRecentlyAddedSeries() {
-    let api = this.seriesService.getRecentlyAdded(1, 30);
-    if (this.libraryId > 0) {
-      const filter = this.filterUtilityService.createSeriesV2Filter();
-      filter.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
-      api = this.seriesService.getRecentlyAdded(1, 30, filter);
-    }
-    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
-      this.recentlyAddedSeries = updatedSeries.result;
-      this.cdRef.markForCheck();
-    });
-  }
-
-
-  loadRecentlyUpdated() {
-    let api = this.seriesService.getRecentlyUpdatedSeries();
-    if (this.libraryId > 0) {
-      api = this.seriesService.getRecentlyUpdatedSeries();
-    }
-    api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(updatedSeries => {
-      this.recentlyUpdatedSeries = updatedSeries.filter(group => {
-        if (this.libraryId === 0) return true;
-        return group.libraryId === this.libraryId;
-      });
-      this.cdRef.markForCheck();
-    });
-  }
+  // loadOnDeck() {
+  //   let api = this.seriesService.getOnDeck(0, 1, 30);
+  //   if (this.libraryId > 0) {
+  //     api = this.seriesService.getOnDeck(this.libraryId, 1, 30);
+  //   }
+  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
+  //     this.inProgress = updatedSeries.result;
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
+  //
+  // loadRecentlyAddedSeries() {
+  //   let api = this.seriesService.getRecentlyAdded(1, 30);
+  //   if (this.libraryId > 0) {
+  //     const filter = this.filterUtilityService.createSeriesV2Filter();
+  //     filter.statements.push({field: FilterField.Libraries, value: this.libraryId + '', comparison: FilterComparison.Equal});
+  //     api = this.seriesService.getRecentlyAdded(1, 30, filter);
+  //   }
+  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((updatedSeries) => {
+  //     this.recentlyAddedSeries = updatedSeries.result;
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
+  //
+  //
+  // loadRecentlyUpdated() {
+  //   let api = this.seriesService.getRecentlyUpdatedSeries();
+  //   if (this.libraryId > 0) {
+  //     api = this.seriesService.getRecentlyUpdatedSeries();
+  //   }
+  //   api.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(updatedSeries => {
+  //     this.recentlyUpdatedSeries = updatedSeries.filter(group => {
+  //       if (this.libraryId === 0) return true;
+  //       return group.libraryId === this.libraryId;
+  //     });
+  //     this.cdRef.markForCheck();
+  //   });
+  // }
 
   async handleRecentlyAddedChapterClick(item: RecentlyAddedItem) {
     await this.router.navigate(['library', item.libraryId, 'series', item.seriesId]);

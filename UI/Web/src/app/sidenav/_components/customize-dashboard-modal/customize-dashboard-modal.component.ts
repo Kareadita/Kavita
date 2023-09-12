@@ -15,7 +15,6 @@ import {FilterService} from "../../../_services/filter.service";
 import {StreamListItemComponent} from "../stream-list-item/stream-list-item.component";
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {DashboardService} from "../../../_services/dashboard.service";
-import {Router} from "@angular/router";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 
 @Component({
@@ -35,7 +34,6 @@ export class CustomizeDashboardModalComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly router = inject(Router);
 
   constructor(public modal: NgbActiveModal) {
 
