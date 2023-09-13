@@ -144,7 +144,8 @@
         "clients-api-key-tooltip": "La Clé d'API est comme un mot de passe. Gardez-la secrète, gardez-la en sécurité.",
         "clients-opds-url-tooltip": "URL OPDS",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Filtres intelligents"
     },
     "user-holds": {
         "title": "",
@@ -1674,7 +1675,7 @@
         "password": "Mot de passe",
         "promoted": "",
         "select-all": "Tout sélectionner",
-        "deselect-all": "Tout déselectionner",
+        "deselect-all": "Tout désélectionner",
         "series-count": "{{num}} Séries",
         "item-count": "{{num}} Éléments",
         "book-num": "Livre",
