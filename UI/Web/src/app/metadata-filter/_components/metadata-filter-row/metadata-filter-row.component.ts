@@ -164,7 +164,7 @@ export class MetadataFilterRowComponent implements OnInit {
         stmt.value = stmt.value + '';
       }
 
-      if (!stmt.value && (stmt.field !== FilterField.SeriesName && !BooleanFields.includes(stmt.field))) return;
+      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
       this.filterStatement.emit(stmt);
     });
 

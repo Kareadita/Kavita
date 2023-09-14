@@ -681,6 +681,8 @@
         "continue-from": "Continue {{title}}",
         "read": "{{common.read}}",
         "continue": "Continue",
+        "read-incognito": "Read Incognito",
+        "continue-incognito": "Continue Incognito",
         "read-options-alt": "Read options",
         "incognito": "Incognito",
         "remove-from-want-to-read": "Remove from Want to Read",

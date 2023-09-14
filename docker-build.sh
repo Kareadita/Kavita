@@ -15,9 +15,9 @@ ProgressEnd()
 
 Build()
 {
-	  local RID="$1"
+	local RID="$1"
 
-    ProgressStart 'Build for $RID'
+    ProgressStart "Build for $RID"
 
     slnFile=Kavita.sln
 
@@ -26,7 +26,7 @@ Build()
 
 	  dotnet msbuild -restore $slnFile -p:Configuration=Release -p:Platform="Any CPU" -p:RuntimeIdentifiers=$RID
 
-    ProgressEnd 'Build for $RID'
+    ProgressEnd "Build for $RID"
 }
 
 BuildUI()

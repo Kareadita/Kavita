@@ -50,17 +50,17 @@
           </div>
           <div class="col-md-3 col-sm-10">
             <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
-<!--            <input id="filter-name" type="text" class="form-control" formControlName="name">-->
-            <select2 [data]="smartFilters"
-                     id="filter-name"
-                     formControlName="name"
-                     (update)="updateFilterValue($event)"
-                     [autoCreate]="true"
-                     [multiple]="false"
-                     [infiniteScroll]="false"
-                     [hideSelectedItems]="true"
-                     [resettable]="true">
-            </select2>
+            <input id="filter-name" type="text" class="form-control" formControlName="name">
+<!--            <select2 [data]="smartFilters"-->
+<!--                     id="filter-name"-->
+<!--                     formControlName="name"-->
+<!--                     (update)="updateFilterValue($event)"-->
+<!--                     [autoCreate]="true"-->
+<!--                     [multiple]="false"-->
+<!--                     [infiniteScroll]="false"-->
+<!--                     [hideSelectedItems]="true"-->
+<!--                     [resettable]="true">-->
+<!--            </select2>-->
           </div>
 
           <ng-container *ngIf="utilityService.getActiveBreakpoint() > Breakpoint.Tablet" [ngTemplateOutlet]="buttons"></ng-container>
