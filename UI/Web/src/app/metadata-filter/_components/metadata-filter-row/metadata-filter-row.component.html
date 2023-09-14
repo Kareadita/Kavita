@@ -31,6 +31,7 @@
                           <ng-template #dropdown let-options="options" let-multipleAllowed="multipleAllowed">
                               <select2 [data]="options"
                                        formControlName="filterValue"
+                                       [hideSelectedItems]="true"
                                        [multiple]="multipleAllowed"
                                        [infiniteScroll]="true"
                                        [resettable]="true">
