@@ -1511,7 +1511,7 @@
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
         "save": "{{common.save}}",
-        "limit-label": "Limit To",
+        "limit-label": "Limit",
 
         "format-label": "Format",
         "libraries-label": "Libraries",
@@ -1541,6 +1541,11 @@
         "release-label": "Release",
         "min": "Min",
         "max": "Max"
+    },
+
+    "metadata-filter-row": {
+        "unit-reading-date": "Date",
+        "unit-reading-progress": "Percent"
     },
 
     "sort-field-pipe": {
@@ -1754,7 +1759,8 @@
         "writers": "Writers",
         "path": "Path",
         "file-path": "File Path",
-        "want-to-read": "Want to Read"
+        "want-to-read": "Want to Read",
+        "read-date": "Reading Date"
     },
 
     "filter-comparison-pipe": {

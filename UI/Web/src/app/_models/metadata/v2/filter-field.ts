@@ -27,7 +27,8 @@ export enum FilterField
     ReadTime = 23,
     Path = 24,
     FilePath = 25,
-    WantToRead = 26
+    WantToRead = 26,
+    ReadingDate = 27
 }
 
 export const allFields = Object.keys(FilterField)

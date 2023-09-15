@@ -1089,6 +1089,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Formats => query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value),
             FilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
             FilterField.ReadTime => query.HasAverageReadTime(true, statement.Comparison, (int) value),
+            FilterField.ReadingDate => query.HasReadingDate(true, statement.Comparison, (int) value, userId),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

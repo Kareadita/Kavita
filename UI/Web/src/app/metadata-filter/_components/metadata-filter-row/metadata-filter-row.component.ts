@@ -25,6 +25,8 @@ import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Select2Module, Select2Option} from "ng-select2-component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TranslocoDirective} from "@ngneat/transloco";
 
 enum PredicateType {
   Text = 1,
@@ -33,8 +35,22 @@ enum PredicateType {
   Boolean = 4
 }
 
+class FilterRowUi {
+  unit = '';
+  tooltip = ''
+  constructor(unit: string = '', tooltip: string = '') {
+    this.unit = unit;
+    this.tooltip = tooltip;
+  }
+}
+
+const unitLabels: Map<FilterField, FilterRowUi> = new Map([
+    [FilterField.ReadingDate, new FilterRowUi('unit-reading-date')],
+    [FilterField.ReadProgress, new FilterRowUi('unit-reading-progress')],
+]);
+
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
+const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating, FilterField.ReadingDate];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
@@ -59,7 +75,7 @@ const StringComparisons = [FilterComparison.Equal,
   FilterComparison.BeginsWith,
   FilterComparison.EndsWith,
   FilterComparison.Matches];
-const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.IsInLast, FilterComparison.IsNotInLast];
+const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter]; //, FilterComparison.IsInLast, FilterComparison.IsNotInLast
 const NumberComparisons = [FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.LessThan,
@@ -91,7 +107,9 @@ const BooleanComparisons = [
     NgIf,
     Select2Module,
     NgTemplateOutlet,
-    TagBadgeComponent
+    TagBadgeComponent,
+    NgbTooltip,
+    TranslocoDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -118,6 +136,7 @@ export class MetadataFilterRowComponent implements OnInit {
 
   loaded: boolean = false;
   protected readonly PredicateType = PredicateType;
+
 
   get MultipleDropdownAllowed() {
     const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
@@ -304,6 +323,12 @@ export class MetadataFilterRowComponent implements OnInit {
       if (this.loaded) this.formGroup.get('filterValue')?.patchValue(0);
       return;
     }
+  }
+
+  get UiLabel(): FilterRowUi | null {
+    const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
+    if (!unitLabels.has(field)) return null;
+    return unitLabels.get(field) as FilterRowUi;
   }
 
 }

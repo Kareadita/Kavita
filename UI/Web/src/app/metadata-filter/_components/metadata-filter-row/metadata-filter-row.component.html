@@ -1,48 +1,56 @@
+<ng-container *transloco="let t; read: 'metadata-filter-row'">
+    <form [formGroup]="formGroup">
+        <div class="row g-0">
+            <div class="col-md-3 me-2 col-10 mb-2">
+                <select class="form-select me-2" formControlName="input">
+                    <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
+                </select>
+            </div>
 
-<form [formGroup]="formGroup">
-    <div class="row g-0">
-        <div class="col-md-3 me-2 col-10 mb-2">
-            <select class="form-select me-2" formControlName="input">
-                <option *ngFor="let field of availableFields" [value]="field">{{field | filterField}}</option>
-            </select>
-        </div>
+            <div class="col-md-2 me-2 col-10 mb-2">
+                <select class="col-auto form-select" formControlName="comparison">
+                    <option *ngFor="let comparison of validComparisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
+                </select>
+            </div>
 
-        <div class="col-md-2 me-2 col-10 mb-2">
-            <select class="col-auto form-select" formControlName="comparison">
-                <option *ngFor="let comparison of validComparisons$ | async" [value]="comparison">{{comparison | filterComparison}}</option>
-            </select>
-        </div>
-
-        <div class="col-md-4 col-10 mb-2">
-            <ng-container *ngIf="predicateType$ | async as predicateType">
-                <ng-container [ngSwitch]="predicateType">
-                    <ng-container *ngSwitchCase="PredicateType.Text">
-                        <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
-                    </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Number">
-                        <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
-                    </ng-container>
-                  <ng-container *ngSwitchCase="PredicateType.Boolean">
-                    <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
-                  </ng-container>
-                    <ng-container *ngSwitchCase="PredicateType.Dropdown">
-                      <ng-container *ngIf="dropdownOptions$ | async as opts">
-                          <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>
-                          <ng-template #dropdown let-options="options" let-multipleAllowed="multipleAllowed">
-                              <select2 [data]="options"
-                                       formControlName="filterValue"
-                                       [hideSelectedItems]="true"
-                                       [multiple]="multipleAllowed"
-                                       [infiniteScroll]="true"
-                                       [resettable]="true">
-                              </select2>
-                          </ng-template>
-                      </ng-container>
+            <div class="col-md-4 col-10 mb-2">
+                <ng-container *ngIf="predicateType$ | async as predicateType">
+                    <ng-container [ngSwitch]="predicateType">
+                        <ng-container *ngSwitchCase="PredicateType.Text">
+                            <input type="text" class="form-control  me-2" autocomplete="true" formControlName="filterValue">
+                        </ng-container>
+                        <ng-container *ngSwitchCase="PredicateType.Number">
+                            <input type="number" inputmode="numeric" class="form-control me-2" formControlName="filterValue" min="0">
+                        </ng-container>
+                        <ng-container *ngSwitchCase="PredicateType.Boolean">
+                            <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
+                        </ng-container>
+                        <ng-container *ngSwitchCase="PredicateType.Dropdown">
+                            <ng-container *ngIf="dropdownOptions$ | async as opts">
+                                <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>
+                                <ng-template #dropdown let-options="options" let-multipleAllowed="multipleAllowed">
+                                    <select2 [data]="options"
+                                             formControlName="filterValue"
+                                             [hideSelectedItems]="true"
+                                             [multiple]="multipleAllowed"
+                                             [infiniteScroll]="true"
+                                             [resettable]="true">
+                                    </select2>
+                                </ng-template>
+                            </ng-container>
+                        </ng-container>
                     </ng-container>
                 </ng-container>
-            </ng-container>
-        </div>
+            </div>
 
-        <ng-content #removeBtn></ng-content>
-    </div>
-</form>
+            <div class="col pt-2 ms-2">
+                <ng-container *ngIf="UiLabel !== null">
+                    <span class="text-muted">{{t(UiLabel.unit)}}</span>
+                    <i *ngIf="UiLabel.tooltip" class="fa fa-info-circle ms-1" aria-hidden="true" [ngbTooltip]="t(UiLabel.tooltip)"></i>
+                </ng-container>
+            </div>
+
+            <ng-content #removeBtn></ng-content>
+        </div>
+    </form>
+</ng-container>

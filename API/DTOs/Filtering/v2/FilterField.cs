@@ -40,6 +40,10 @@ public enum FilterField
     /// <summary>
     /// On Want To Read or Not
     /// </summary>
-    WantToRead = 26
+    WantToRead = 26,
+    /// <summary>
+    /// Last time User Read
+    /// </summary>
+    ReadingDate = 27
 
 }
