@@ -312,14 +312,14 @@ public static class SeriesFilter
             case FilterComparison.Equal:
                 subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate.Equals(date));
                 break;
-            case FilterComparison.IsBefore:
+            case FilterComparison.IsAfter:
             case FilterComparison.GreaterThan:
                 subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
                 break;
             case FilterComparison.GreaterThanEqual:
                 subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
                 break;
-            case FilterComparison.IsAfter:
+            case FilterComparison.IsBefore:
             case FilterComparison.LessThan:
                 subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
                 break;

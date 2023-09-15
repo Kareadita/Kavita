@@ -84,7 +84,8 @@ const StringComparisons = [FilterComparison.Equal,
   FilterComparison.BeginsWith,
   FilterComparison.EndsWith,
   FilterComparison.Matches];
-const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter]; //, FilterComparison.IsInLast, FilterComparison.IsNotInLast
+const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.Equal,
+  FilterComparison.NotEqual,];
 const NumberComparisons = [FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.LessThan,
