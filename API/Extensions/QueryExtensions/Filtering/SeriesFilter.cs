@@ -289,11 +289,9 @@ public static class SeriesFilter
     }
 
     public static IQueryable<Series> HasReadingDate(this IQueryable<Series> queryable, bool condition,
-        FilterComparison comparison, int daysAgo, int userId)
+        FilterComparison comparison, DateTime? date, int userId)
     {
-        if (!condition) return queryable;
-
-        var date = DateTime.Today.Subtract(TimeSpan.FromDays(daysAgo));
+        if (!condition || !date.HasValue) return queryable;
 
         var subQuery = queryable
             .Include(s => s.Progress)
@@ -302,32 +300,34 @@ public static class SeriesFilter
             {
                 Series = s,
                 MaxDate = s.Progress.Where(p => p != null && p.AppUserId == userId)
-                    .Select(p => p.LastModified)
+                    .Select(p => (DateTime?) p.LastModified)
+                    .DefaultIfEmpty()
                     .Max()
             })
+            .Where(s => s.MaxDate != null)
             .AsEnumerable();
 
         switch (comparison)
         {
             case FilterComparison.Equal:
-                subQuery = subQuery.Where(s => s.MaxDate.Equals(date));
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate.Equals(date));
                 break;
             case FilterComparison.IsBefore:
             case FilterComparison.GreaterThan:
-                subQuery = subQuery.Where(s => s.MaxDate > date);
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
                 break;
             case FilterComparison.GreaterThanEqual:
-                subQuery = subQuery.Where(s => s.MaxDate >= date);
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
                 break;
             case FilterComparison.IsAfter:
             case FilterComparison.LessThan:
-                subQuery = subQuery.Where(s => s.MaxDate < date);
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
                 break;
             case FilterComparison.LessThanEqual:
-                subQuery = subQuery.Where(s => s.MaxDate <= date);
+                subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
                 break;
             case FilterComparison.NotEqual:
-                subQuery = subQuery.Where(s => !s.MaxDate.Equals(date));
+                subQuery = subQuery.Where(s => s.MaxDate != null && !s.MaxDate.Equals(date));
                 break;
             case FilterComparison.Matches:
             case FilterComparison.Contains:

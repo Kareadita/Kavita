@@ -25,6 +25,22 @@
                         <ng-container *ngSwitchCase="PredicateType.Boolean">
                             <input type="checkbox" class="form-check-input mt-2 me-2" style="font-size: 1.5rem" formControlName="filterValue">
                         </ng-container>
+                        <ng-container *ngSwitchCase="PredicateType.Date">
+                            <div class="input-group">
+                                <input
+                                        class="form-control"
+                                        placeholder="yyyy-mm-dd"
+                                        name="dp"
+                                        formControlName="filterValue"
+                                        (dateSelect)="onDateSelect($event)"
+                                        ngbDatepicker
+                                        #d="ngbDatepicker"
+                                />
+                                <button class="btn btn-outline-secondary fa-solid fa-calendar-days" (click)="d.toggle()" type="button"></button>
+                            </div>
+
+
+                        </ng-container>
                         <ng-container *ngSwitchCase="PredicateType.Dropdown">
                             <ng-container *ngIf="dropdownOptions$ | async as opts">
                                 <ng-container *ngTemplateOutlet="dropdown; context: { options: opts, multipleAllowed: MultipleDropdownAllowed }"></ng-container>

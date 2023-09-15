@@ -69,7 +69,7 @@ public static class FilterFieldValueConverter
                 .ToList(), typeof(IList<int>)),
             FilterField.WantToRead => (bool.Parse(value), typeof(bool)),
             FilterField.ReadProgress => (int.Parse(value), typeof(int)),
-            FilterField.ReadingDate => (int.Parse(value), typeof(int)),
+            FilterField.ReadingDate => (DateTime.Parse(value), typeof(DateTime?)),
             FilterField.Formats => (value.Split(',')
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))
                 .ToList(), typeof(IList<MangaFormat>)),

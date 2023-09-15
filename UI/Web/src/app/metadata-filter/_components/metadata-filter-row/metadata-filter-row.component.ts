@@ -7,7 +7,7 @@ import {
   inject,
   Input,
   OnInit,
-  Output,
+  Output, ViewChild,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
@@ -25,14 +25,22 @@ import {FilterComparisonPipe} from "../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {Select2Module, Select2Option} from "ng-select2-component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbDate,
+  NgbDateParserFormatter,
+  NgbDatepicker,
+  NgbDateStruct,
+  NgbInputDatepicker,
+  NgbTooltip
+} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@ngneat/transloco";
 
 enum PredicateType {
   Text = 1,
   Number = 2,
   Dropdown = 3,
-  Boolean = 4
+  Boolean = 4,
+  Date = 5
 }
 
 class FilterRowUi {
@@ -50,7 +58,7 @@ const unitLabels: Map<FilterField, FilterRowUi> = new Map([
 ]);
 
 const StringFields = [FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath];
-const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating, FilterField.ReadingDate];
+const NumberFields = [FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress, FilterField.UserRating];
 const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
     FilterField.Translators, FilterField.Characters, FilterField.Publisher,
     FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
@@ -58,7 +66,8 @@ const DropdownFields = [FilterField.PublicationStatus, FilterField.Languages, Fi
     FilterField.Writers, FilterField.Genres, FilterField.Libraries,
     FilterField.Formats, FilterField.CollectionTags, FilterField.Tags
 ];
-const BooleanFields = [FilterField.WantToRead]
+const BooleanFields = [FilterField.WantToRead];
+const DateFields = [FilterField.ReadingDate];
 
 const DropdownFieldsWithoutMustContains = [
   FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
@@ -109,7 +118,9 @@ const BooleanComparisons = [
     NgTemplateOutlet,
     TagBadgeComponent,
     NgbTooltip,
-    TranslocoDirective
+    TranslocoDirective,
+    NgbDatepicker,
+    NgbInputDatepicker
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -123,8 +134,10 @@ export class MetadataFilterRowComponent implements OnInit {
   @Input() availableFields: Array<FilterField> = allFields;
   @Output() filterStatement = new EventEmitter<FilterStatement>();
 
+
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dateParser = inject(NgbDateParserFormatter);
 
   formGroup: FormGroup = new FormGroup({
     'comparison': new FormControl<FilterComparison>(FilterComparison.Equal, []),
@@ -137,6 +150,11 @@ export class MetadataFilterRowComponent implements OnInit {
   loaded: boolean = false;
   protected readonly PredicateType = PredicateType;
 
+  get UiLabel(): FilterRowUi | null {
+    const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
+    if (!unitLabels.has(field)) return null;
+    return unitLabels.get(field) as FilterRowUi;
+  }
 
   get MultipleDropdownAllowed() {
     const comp = parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison;
@@ -174,6 +192,10 @@ export class MetadataFilterRowComponent implements OnInit {
         value: this.formGroup.get('filterValue')?.value!
       };
 
+      if (typeof stmt.value === 'object' && DateFields.includes(stmt.field)) {
+        stmt.value = this.dateParser.format(stmt.value);
+      }
+
       // Some ids can get through and be numbers, convert them to strings for the backend
       if (typeof stmt.value === 'number' && !Number.isNaN(stmt.value)) {
         stmt.value = stmt.value + '';
@@ -202,7 +224,10 @@ export class MetadataFilterRowComponent implements OnInit {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (BooleanFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
-    } else if (DropdownFields.includes(this.preset.field)) {
+    } else if (DateFields.includes(this.preset.field)) {
+      this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val)); // TODO: Figure out how this works
+    }
+    else if (DropdownFields.includes(this.preset.field)) {
       if (this.MultipleDropdownAllowed || val.includes(',')) {
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
@@ -300,6 +325,16 @@ export class MetadataFilterRowComponent implements OnInit {
       return;
     }
 
+    if (DateFields.includes(inputVal)) {
+      this.validComparisons$.next(DateComparisons);
+      this.predicateType$.next(PredicateType.Date);
+
+      if (this.loaded) {
+        this.formGroup.get('filterValue')?.patchValue(false);
+      }
+      return;
+    }
+
     if (BooleanFields.includes(inputVal)) {
       this.validComparisons$.next(BooleanComparisons);
       this.predicateType$.next(PredicateType.Boolean);
@@ -325,10 +360,11 @@ export class MetadataFilterRowComponent implements OnInit {
     }
   }
 
-  get UiLabel(): FilterRowUi | null {
-    const field = parseInt(this.formGroup.get('input')!.value, 10) as FilterField;
-    if (!unitLabels.has(field)) return null;
-    return unitLabels.get(field) as FilterRowUi;
+
+
+  onDateSelect(event: NgbDate) {
+    console.log('date selected: ', event);
+    this.formGroup.get('filterValue')?.setValue(this.dateParser.format(event));
   }
 
 }
