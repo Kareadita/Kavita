@@ -187,34 +187,36 @@ export class MetadataFilterRowComponent implements OnInit {
 
 
     this.formGroup!.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
-      const stmt = {
-        comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
-        field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
-        value: this.formGroup.get('filterValue')?.value!
-      };
-
-      if (typeof stmt.value === 'object' && DateFields.includes(stmt.field)) {
-        stmt.value = this.dateParser.format(stmt.value);
-      }
-
-      // Some ids can get through and be numbers, convert them to strings for the backend
-      if (typeof stmt.value === 'number' && !Number.isNaN(stmt.value)) {
-        stmt.value = stmt.value + '';
-      }
-
-      if (typeof stmt.value === 'boolean') {
-        stmt.value = stmt.value + '';
-      }
-
-      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
-      this.filterStatement.emit(stmt);
+      this.propagateFilterUpdate();
     });
 
     this.loaded = true;
     this.cdRef.markForCheck();
   }
 
+  propagateFilterUpdate() {
+    const stmt = {
+      comparison: parseInt(this.formGroup.get('comparison')?.value, 10) as FilterComparison,
+      field: parseInt(this.formGroup.get('input')?.value, 10) as FilterField,
+      value: this.formGroup.get('filterValue')?.value!
+    };
 
+    if (typeof stmt.value === 'object' && DateFields.includes(stmt.field)) {
+      stmt.value = this.dateParser.format(stmt.value);
+    }
+
+    // Some ids can get through and be numbers, convert them to strings for the backend
+    if (typeof stmt.value === 'number' && !Number.isNaN(stmt.value)) {
+      stmt.value = stmt.value + '';
+    }
+
+    if (typeof stmt.value === 'boolean') {
+      stmt.value = stmt.value + '';
+    }
+
+    if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field)  && !BooleanFields.includes(stmt.field))) return;
+    this.filterStatement.emit(stmt);
+  }
 
   populateFromPreset() {
     const val = this.preset.value === "undefined" || !this.preset.value ? '' : this.preset.value;
@@ -365,7 +367,11 @@ export class MetadataFilterRowComponent implements OnInit {
 
   onDateSelect(event: NgbDate) {
     console.log('date selected: ', event);
-    this.formGroup.get('filterValue')?.setValue(this.dateParser.format(event));
+    this.propagateFilterUpdate();
+  }
+  updateIfDateFilled() {
+    console.log('date inputted: ', this.formGroup.get('filterValue')?.value);
+    this.propagateFilterUpdate();
   }
 
 }

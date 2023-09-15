@@ -33,6 +33,7 @@
                                         name="dp"
                                         formControlName="filterValue"
                                         (dateSelect)="onDateSelect($event)"
+                                        (blur)="updateIfDateFilled()"
                                         ngbDatepicker
                                         #d="ngbDatepicker"
                                 />

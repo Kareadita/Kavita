@@ -82,9 +82,6 @@ export class MetadataFilterComponent implements OnInit {
 
   smartFilters!: Array<Select2Option>;
 
-
-
-
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
 
@@ -207,7 +204,7 @@ export class MetadataFilterComponent implements OnInit {
 
   apply() {
     this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
-
+    
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();
     }
