@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.8.2"
+    "version": "0.7.8.4"
   },
   "servers": [
     {
@@ -14142,7 +14142,8 @@
               23,
               24,
               25,
-              26
+              26,
+              27
             ],
             "type": "integer",
             "description": "Represents the field which will dictate the value type and the Extension used for filtering",

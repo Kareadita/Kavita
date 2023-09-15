@@ -205,7 +205,7 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'scan-library',
         callback: this.dummyCallback,
-        requiresAdmin: false,
+        requiresAdmin: true,
         children: [],
       },
       {

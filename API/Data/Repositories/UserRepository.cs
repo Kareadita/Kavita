@@ -439,8 +439,8 @@ public class UserRepository : IUserRepository
         var filterSeriesQuery = query.Join(_context.Series, b => b.SeriesId, s => s.Id,
             (bookmark, series) => new BookmarkSeriesPair()
             {
-                bookmark = bookmark,
-                series = series
+                Bookmark = bookmark,
+                Series = series
             });
 
         var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == FilterField.SeriesName);
@@ -457,34 +457,34 @@ public class UserRepository : IUserRepository
         switch (filterStatement.Comparison)
         {
             case FilterComparison.Equal:
-                filterSeriesQuery = filterSeriesQuery.Where(s => s.series.Name.Equals(queryString)
-                                                               || s.series.OriginalName.Equals(queryString)
-                                                               || s.series.LocalizedName.Equals(queryString)
-                                                               || s.series.SortName.Equals(queryString));
+                filterSeriesQuery = filterSeriesQuery.Where(s => s.Series.Name.Equals(queryString)
+                                                               || s.Series.OriginalName.Equals(queryString)
+                                                               || s.Series.LocalizedName.Equals(queryString)
+                                                               || s.Series.SortName.Equals(queryString));
                 break;
             case FilterComparison.BeginsWith:
-                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"{queryString}%")
-                                                                 ||EF.Functions.Like(s.series.OriginalName, $"{queryString}%")
-                                                                 || EF.Functions.Like(s.series.LocalizedName, $"{queryString}%")
-                                                                 || EF.Functions.Like(s.series.SortName, $"{queryString}%"));
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.Series.Name, $"{queryString}%")
+                                                                 ||EF.Functions.Like(s.Series.OriginalName, $"{queryString}%")
+                                                                 || EF.Functions.Like(s.Series.LocalizedName, $"{queryString}%")
+                                                                 || EF.Functions.Like(s.Series.SortName, $"{queryString}%"));
                 break;
             case FilterComparison.EndsWith:
-                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"%{queryString}")
-                                                                 ||EF.Functions.Like(s.series.OriginalName, $"%{queryString}")
-                                                                 || EF.Functions.Like(s.series.LocalizedName, $"%{queryString}")
-                                                                 || EF.Functions.Like(s.series.SortName, $"%{queryString}"));
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.Series.Name, $"%{queryString}")
+                                                                 ||EF.Functions.Like(s.Series.OriginalName, $"%{queryString}")
+                                                                 || EF.Functions.Like(s.Series.LocalizedName, $"%{queryString}")
+                                                                 || EF.Functions.Like(s.Series.SortName, $"%{queryString}"));
                 break;
             case FilterComparison.Matches:
-                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.series.Name, $"%{queryString}%")
-                                                                 ||EF.Functions.Like(s.series.OriginalName, $"%{queryString}%")
-                                                                 || EF.Functions.Like(s.series.LocalizedName, $"%{queryString}%")
-                                                                 || EF.Functions.Like(s.series.SortName, $"%{queryString}%"));
+                filterSeriesQuery = filterSeriesQuery.Where(s => EF.Functions.Like(s.Series.Name, $"%{queryString}%")
+                                                                 ||EF.Functions.Like(s.Series.OriginalName, $"%{queryString}%")
+                                                                 || EF.Functions.Like(s.Series.LocalizedName, $"%{queryString}%")
+                                                                 || EF.Functions.Like(s.Series.SortName, $"%{queryString}%"));
                 break;
             case FilterComparison.NotEqual:
-                filterSeriesQuery = filterSeriesQuery.Where(s => s.series.Name != queryString
-                                                                 || s.series.OriginalName != queryString
-                                                                 || s.series.LocalizedName != queryString
-                                                                 || s.series.SortName != queryString);
+                filterSeriesQuery = filterSeriesQuery.Where(s => s.Series.Name != queryString
+                                                                 || s.Series.OriginalName != queryString
+                                                                 || s.Series.LocalizedName != queryString
+                                                                 || s.Series.SortName != queryString);
                 break;
             case FilterComparison.MustContains:
             case FilterComparison.NotContains:
@@ -504,7 +504,7 @@ public class UserRepository : IUserRepository
         return await ApplyLimit(filterSeriesQuery
                 .Sort(filter.SortOptions)
                 .AsSplitQuery(), filter.LimitTo)
-            .Select(o => o.bookmark)
+            .Select(o => o.Bookmark)
             .ProjectTo<BookmarkDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }

@@ -868,8 +868,6 @@ public class SeriesRepository : ISeriesRepository
             .HasGenre(hasGenresFilter, FilterComparison.Contains, filter.Genres)
             .HasFormat(filter.Formats != null && filter.Formats.Count > 0, FilterComparison.Contains, filter.Formats!)
             .HasAverageReadTime(true, FilterComparison.GreaterThanEqual, 0)
-
-            // TODO: This needs different treatment
             .HasPeople(hasPeopleFilter, FilterComparison.Contains, allPeopleIds)
 
             .WhereIf(onlyParentSeries,
@@ -917,6 +915,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.LastChapterAdded => query.OrderBy(s => s.LastChapterAdded),
                 SortField.TimeToRead => query.OrderBy(s => s.AvgHoursToRead),
                 SortField.ReleaseYear => query.OrderBy(s => s.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderBy(s => s.Progress.Where(p => p.SeriesId == s.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }
@@ -930,6 +929,7 @@ public class SeriesRepository : ISeriesRepository
                 SortField.LastChapterAdded => query.OrderByDescending(s => s.LastChapterAdded),
                 SortField.TimeToRead => query.OrderByDescending(s => s.AvgHoursToRead),
                 SortField.ReleaseYear => query.OrderByDescending(s => s.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderByDescending(s => s.Progress.Where(p => p.SeriesId == s.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }
@@ -1089,6 +1089,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.Formats => query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value),
             FilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
             FilterField.ReadTime => query.HasAverageReadTime(true, statement.Comparison, (int) value),
+            FilterField.ReadingDate => query.HasReadingDate(true, statement.Comparison, (DateTime) value, userId),
             _ => throw new ArgumentOutOfRangeException()
         };
     }

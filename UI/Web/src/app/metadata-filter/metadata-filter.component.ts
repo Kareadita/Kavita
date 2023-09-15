@@ -30,6 +30,8 @@ import {MetadataService} from "../_services/metadata.service";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
+import {Select2Module, Select2Option, Select2UpdateEvent} from "ng-select2-component";
+import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 
 @Component({
     selector: 'app-metadata-filter',
@@ -38,7 +40,7 @@ import {ToastrService} from "ngx-toastr";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf]
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module]
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -78,16 +80,22 @@ export class MetadataFilterComponent implements OnInit {
   allSortFields = allSortFields;
   allFilterFields = allFields;
 
-  handleFilters(filter: SeriesFilterV2) {
-    this.filterV2 = filter;
-  }
-
+  smartFilters!: Array<Select2Option>;
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
 
 
-  constructor(public toggleService: ToggleService, private filterService: FilterService) {}
+  constructor(public toggleService: ToggleService, private filterService: FilterService) {
+    this.filterService.getAllFilters().subscribe(res => {
+      this.smartFilters = res.map(r => {
+        return {
+          value: r,
+          label: r.name,
+        }
+      });
+    });
+  }
 
   ngOnInit(): void {
     if (this.filterSettings === undefined) {
@@ -105,6 +113,11 @@ export class MetadataFilterComponent implements OnInit {
 
     this.loadFromPresetsAndSetup();
   }
+
+  updateFilterValue(event: Select2UpdateEvent<any>) {
+    console.log('event: ', event);
+  }
+
 
   close() {
     this.filterOpen.emit(false);
@@ -135,6 +148,10 @@ export class MetadataFilterComponent implements OnInit {
     }
 
     return clonedObj;
+  }
+
+  handleFilters(filter: SeriesFilterV2) {
+    this.filterV2 = filter;
   }
 
 
@@ -187,7 +204,7 @@ export class MetadataFilterComponent implements OnInit {
 
   apply() {
     this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
-
+    
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();
     }

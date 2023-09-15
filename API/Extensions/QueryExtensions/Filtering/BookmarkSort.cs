@@ -6,8 +6,8 @@ namespace API.Extensions.QueryExtensions.Filtering;
 
 public class BookmarkSeriesPair
 {
-    public AppUserBookmark bookmark { get; set; }
-    public Series series { get; set; }
+    public AppUserBookmark Bookmark { get; set; }
+    public Series Series { get; set; }
 }
 
 public static class BookmarkSort
@@ -31,12 +31,13 @@ public static class BookmarkSort
         {
             query = sortOptions.SortField switch
             {
-                SortField.SortName => query.OrderBy(s => s.series.SortName.ToLower()),
-                SortField.CreatedDate => query.OrderBy(s => s.series.Created),
-                SortField.LastModifiedDate => query.OrderBy(s => s.series.LastModified),
-                SortField.LastChapterAdded => query.OrderBy(s => s.series.LastChapterAdded),
-                SortField.TimeToRead => query.OrderBy(s => s.series.AvgHoursToRead),
-                SortField.ReleaseYear => query.OrderBy(s => s.series.Metadata.ReleaseYear),
+                SortField.SortName => query.OrderBy(s => s.Series.SortName.ToLower()),
+                SortField.CreatedDate => query.OrderBy(s => s.Series.Created),
+                SortField.LastModifiedDate => query.OrderBy(s => s.Series.LastModified),
+                SortField.LastChapterAdded => query.OrderBy(s => s.Series.LastChapterAdded),
+                SortField.TimeToRead => query.OrderBy(s => s.Series.AvgHoursToRead),
+                SortField.ReleaseYear => query.OrderBy(s => s.Series.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderBy(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }
@@ -44,12 +45,13 @@ public static class BookmarkSort
         {
             query = sortOptions.SortField switch
             {
-                SortField.SortName => query.OrderByDescending(s => s.series.SortName.ToLower()),
-                SortField.CreatedDate => query.OrderByDescending(s => s.series.Created),
-                SortField.LastModifiedDate => query.OrderByDescending(s => s.series.LastModified),
-                SortField.LastChapterAdded => query.OrderByDescending(s => s.series.LastChapterAdded),
-                SortField.TimeToRead => query.OrderByDescending(s => s.series.AvgHoursToRead),
-                SortField.ReleaseYear => query.OrderByDescending(s => s.series.Metadata.ReleaseYear),
+                SortField.SortName => query.OrderByDescending(s => s.Series.SortName.ToLower()),
+                SortField.CreatedDate => query.OrderByDescending(s => s.Series.Created),
+                SortField.LastModifiedDate => query.OrderByDescending(s => s.Series.LastModified),
+                SortField.LastChapterAdded => query.OrderByDescending(s => s.Series.LastChapterAdded),
+                SortField.TimeToRead => query.OrderByDescending(s => s.Series.AvgHoursToRead),
+                SortField.ReleaseYear => query.OrderByDescending(s => s.Series.Metadata.ReleaseYear),
+                SortField.ReadProgress => query.OrderByDescending(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max()),
                 _ => query
             };
         }

@@ -681,6 +681,8 @@
         "continue-from": "Continue {{title}}",
         "read": "{{common.read}}",
         "continue": "Continue",
+        "read-incognito": "Read Incognito",
+        "continue-incognito": "Continue Incognito",
         "read-options-alt": "Read options",
         "incognito": "Incognito",
         "remove-from-want-to-read": "Remove from Want to Read",
@@ -1509,7 +1511,7 @@
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
         "save": "{{common.save}}",
-        "limit-label": "Limit To",
+        "limit-label": "Limit",
 
         "format-label": "Format",
         "libraries-label": "Libraries",
@@ -1541,13 +1543,19 @@
         "max": "Max"
     },
 
+    "metadata-filter-row": {
+        "unit-reading-date": "Date",
+        "unit-reading-progress": "Percent"
+    },
+
     "sort-field-pipe": {
         "sort-name": "Sort Name",
         "created": "Created",
         "last-modified": "Last Modified",
         "last-chapter-added": "Item Added",
         "time-to-read": "Time to Read",
-        "release-year": "Release Year"
+        "release-year": "Release Year",
+        "read-progress": "Read Progress"
     },
 
     "edit-series-modal": {
@@ -1751,7 +1759,8 @@
         "writers": "Writers",
         "path": "Path",
         "file-path": "File Path",
-        "want-to-read": "Want to Read"
+        "want-to-read": "Want to Read",
+        "read-date": "Reading Date"
     },
 
     "filter-comparison-pipe": {

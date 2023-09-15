@@ -1,3 +1,23 @@
 ::ng-deep .select2-selection__rendered {
   padding-top: 4px !important;
 }
+
+
+::ng-deep .ngb-dp-content, ::ng-deep .ngb-dp-header, ::ng-deep .dropdown-menu{
+  background: var(--bs-body-bg);
+  color: var(--body-text-color);
+}
+
+::ng-deep .ngb-dp-header, ::ng-deep .ngb-dp-weekdays {
+  background-color: var(--bs-body-bg) !important;
+}
+
+::ng-deep .ngb-dp-day .btn-light, ::ng-deep .ngb-dp-weekday {
+  background: var(--bs-body-bg);
+  color: var(--body-text-color);
+}
+
+::ng-deep [ngbDatepickerDayView]:hover:not(.bg-primary), [ngbDatepickerDayView].active:not(.bg-primary) {
+  background: var(--primary-color-dark-shade) !important;
+  outline: 1px solid var(--primary-color-dark-shade) !important;
+}
