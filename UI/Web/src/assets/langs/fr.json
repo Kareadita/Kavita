@@ -161,7 +161,7 @@
         "apply": "",
         "applied": "Appliquer",
         "updated-toastr": "Site par défaut a été mise à jour vers {{name}}",
-        "scan-queued": ""
+        "scan-queued": "Une analyse du thème du site a été mise en attente"
     },
     "theme": {
         "theme-dark": "Foncé",
@@ -197,7 +197,7 @@
         "device-name-label": "Nom du Périphérique",
         "email-label": "{{common.email}}",
         "email-tooltip": "Cette adresse courriel va être utiliser pour accepter le ficher via Envoyer Vers",
-        "device-platform-label": "Platforme du périphérique",
+        "device-platform-label": "Plateforme du périphérique",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}"
@@ -412,27 +412,27 @@
     "person-role-pipe": {
         "artist": "",
         "character": "",
-        "colorist": "",
+        "colorist": "Coloriste",
         "cover-artist": "",
-        "editor": "",
+        "editor": "Éditeur",
         "inker": "",
         "letterer": "",
         "penciller": "",
         "publisher": "",
-        "writer": "",
-        "other": ""
+        "writer": "Scénariste",
+        "other": "Autre"
     },
     "manga-format-pipe": {
-        "epub": "",
+        "epub": "EPUB",
         "archive": "",
         "image": "",
-        "pdf": "",
+        "pdf": "PDF",
         "unknown": ""
     },
     "library-type-pipe": {
-        "book": "",
+        "book": "Livre",
         "comic": "",
-        "manga": ""
+        "manga": "Manga"
     },
     "age-rating-pipe": {
         "unknown": "",
@@ -454,7 +454,7 @@
     },
     "reset-password": {
         "title": "",
-        "description": "",
+        "description": "Entrez l'email de votre compte. Kavita vous enverra un e-mail s'il est valide dans le dossier, sinon demandez à l'administrateur le lien des journaux.",
         "email-label": "",
         "required-field": "",
         "valid-email": "",
@@ -1683,5 +1683,12 @@
         "issue-num": "Numéro",
         "chapter-num": "Chapitre",
         "volume-num": "Volume"
+    },
+    "filter-comparison-pipe": {
+        "must-contains": "Doit contenir"
+    },
+    "filter-field-pipe": {
+        "file-path": "Chemin du fichier",
+        "path": "Chemin"
     }
 }
