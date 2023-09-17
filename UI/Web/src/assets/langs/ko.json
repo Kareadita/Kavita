@@ -504,7 +504,7 @@
         "add-to-reading-list": "읽기 목록에 추가",
         "delete": "삭제",
         "download": "다운로드",
-        "read-incognito": "시크릿 읽기",
+        "read-incognito": "시크릿 모드로 읽기",
         "details": "상세",
         "view-series": "시리즈 보기",
         "clear": "지우기",
@@ -712,7 +712,9 @@
         "storyline-tab": "줄거리",
         "send-to": "{{deviceName}}에 파일을 이메일로 보냈습니다",
         "books-tab": "책",
-        "volumes-tab": "볼륨"
+        "volumes-tab": "볼륨",
+        "continue-incognito": "시크릿 모드로 계속",
+        "read-incognito": "시크릿 모드로 읽기"
     },
     "read-more": {
         "read-more": "더 읽기",
@@ -940,7 +942,7 @@
     "reading-list-detail": {
         "remove-read": "읽기 제거",
         "read": "{{common.read}}",
-        "incognito-alt": "(시크릿)",
+        "incognito-alt": "(시크릿 모드)",
         "no-data": "추가된 사항 없음",
         "page-settings-title": "페이지 설정",
         "order-numbers-label": "주문 번호",
