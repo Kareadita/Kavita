@@ -345,7 +345,8 @@
         "sort-name": "정렬 이름",
         "created": "생성됨",
         "time-to-read": "완독 예상 시간",
-        "last-chapter-added": "추가된 항목"
+        "last-chapter-added": "추가된 항목",
+        "read-progress": "읽기 진행 상황"
     },
     "manga-format-stats": {
         "title": "포맷",
@@ -1108,7 +1109,7 @@
         "series-name-label": "시리즈 이름",
         "release-label": "출시",
         "min": "최소",
-        "limit-label": "다음으로 제한",
+        "limit-label": "제한",
         "save": "{{common.save}}",
         "filter-name-label": "필터 이름"
     },
@@ -1734,7 +1735,8 @@
         "series-name": "시리즈 이름",
         "path": "경로",
         "file-path": "파일 경로",
-        "want-to-read": "읽고 싶어요"
+        "want-to-read": "읽고 싶어요",
+        "read-date": "읽은 날짜"
     },
     "filter-comparison-pipe": {
         "is-not-in-last": "마지막에 없음",
@@ -1776,5 +1778,9 @@
         "close": "{{common.close}}",
         "title": "대시보드 사용자 정의",
         "save": "{{common.save}}"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "퍼센트",
+        "unit-reading-date": "날짜"
     }
 }
