@@ -13,7 +13,8 @@
         "not-granted": "Vous n'avez accès à aucune bibliothèque.",
         "on-deck-title": "En Cours",
         "recently-updated-title": "Séries mises-à-jour récemment",
-        "recently-added-title": "Séries ajoutées récemment"
+        "recently-added-title": "Séries ajoutées récemment",
+        "more-in-genre-title": "Plus dans {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -87,7 +88,7 @@
         "theme-tab": "Thème",
         "devices-tab": "Appareils",
         "stats-tab": "Statistiques",
-        "scrobbling-tab": "",
+        "scrobbling-tab": "Défilement",
         "success-toast": "Préférences utilisateur mises à jour",
         "global-settings-title": "Paramètres généraux",
         "page-layout-mode-label": "Mode de mise en page des pages",
