@@ -12,7 +12,7 @@ export class DrawerOptions {
 @Component({
   selector: 'app-drawer',
   standalone: true,
-    imports: [CommonModule, TranslocoDirective],
+  imports: [CommonModule, TranslocoDirective],
   templateUrl: './drawer.component.html',
   styleUrls: ['./drawer.component.scss'],
   exportAs: "drawer",

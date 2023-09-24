@@ -21,7 +21,7 @@ import {SeriesFilterV2} from '../_models/metadata/v2/series-filter-v2';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from '../typeahead/_components/typeahead.component';
 import {DrawerComponent} from '../shared/drawer/drawer.component';
-import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, NgClass, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule} from "@ngneat/transloco";
 import {SortFieldPipe} from "../pipe/sort-field.pipe";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
@@ -40,7 +40,7 @@ import {SmartFilter} from "../_models/metadata/v2/smart-filter";
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, NgbCollapse, NgTemplateOutlet, DrawerComponent, NgbTooltip, TypeaheadComponent,
-    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module]
+    ReactiveFormsModule, FormsModule, NgbRating, AsyncPipe, TranslocoModule, SortFieldPipe, MetadataBuilderComponent, NgForOf, Select2Module, NgClass]
 })
 export class MetadataFilterComponent implements OnInit {
 
@@ -204,7 +204,7 @@ export class MetadataFilterComponent implements OnInit {
 
   apply() {
     this.applyFilter.emit({isFirst: this.updateApplied === 0, filterV2: this.filterV2!});
-    
+
     if (this.utilityService.getActiveBreakpoint() === Breakpoint.Mobile && this.updateApplied !== 0) {
       this.toggleSelected();
     }
