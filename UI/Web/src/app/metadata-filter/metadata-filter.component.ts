@@ -30,7 +30,13 @@ import {MetadataService} from "../_services/metadata.service";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterService} from "../_services/filter.service";
 import {ToastrService} from "ngx-toastr";
-import {Select2Module, Select2Option, Select2UpdateEvent} from "ng-select2-component";
+import {
+  Select2AutoCreateEvent,
+  Select2Module,
+  Select2Option,
+  Select2UpdateEvent,
+  Select2UpdateValue
+} from "ng-select2-component";
 import {SmartFilter} from "../_models/metadata/v2/smart-filter";
 
 @Component({
@@ -61,6 +67,7 @@ export class MetadataFilterComponent implements OnInit {
   @ContentChild('[ngbCollapse]') collapse!: NgbCollapse;
   private readonly destroyRef = inject(DestroyRef);
   public readonly utilityService = inject(UtilityService);
+  public readonly filterUtilitiesService = inject(FilterUtilitiesService);
 
 
    /**
@@ -114,8 +121,36 @@ export class MetadataFilterComponent implements OnInit {
     this.loadFromPresetsAndSetup();
   }
 
-  updateFilterValue(event: Select2UpdateEvent<any>) {
-    console.log('event: ', event);
+  loadSavedFilter(event: Select2UpdateEvent<any>) {
+    // Load the filter from the backend and update the screen
+    if (event.value === undefined || typeof(event.value) === 'string') return;
+    const smartFilter = event.value as SmartFilter;
+    this.filterV2 = this.filterUtilitiesService.decodeSeriesFilter(smartFilter.filter);
+    this.cdRef.markForCheck();
+    console.log('update event: ', event);
+  }
+
+  createFilterValue(event: Select2AutoCreateEvent<any>) {
+    // Create a new name and filter
+    if (!this.filterV2) return;
+    this.filterV2.name = event.value;
+    this.filterService.saveFilter(this.filterV2).subscribe(() => {
+
+      const item = {
+        value: {
+          filter: this.filterUtilitiesService.encodeSeriesFilter(this.filterV2!),
+          name: event.value,
+        } as SmartFilter,
+        label: event.value
+      };
+      this.smartFilters.push(item);
+      this.sortGroup.get('name')?.setValue(item);
+      this.cdRef.markForCheck();
+      this.toastr.success(translate('toasts.smart-filter-updated'));
+      this.apply();
+    });
+
+    console.log('create event: ', event);
   }
 
 
@@ -219,7 +254,7 @@ export class MetadataFilterComponent implements OnInit {
     this.filterService.saveFilter(this.filterV2).subscribe(() => {
       this.toastr.success(translate('toasts.smart-filter-updated'));
       this.apply();
-    })
+    });
   }
 
   toggleSelected() {
@@ -231,5 +266,5 @@ export class MetadataFilterComponent implements OnInit {
     this.toggleService.set(!this.filteringCollapsed);
   }
 
-    protected readonly Breakpoint = Breakpoint;
+  protected readonly Breakpoint = Breakpoint;
 }

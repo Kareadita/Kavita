@@ -58,11 +58,10 @@
 <!--            <select2 [data]="smartFilters"-->
 <!--                     id="filter-name"-->
 <!--                     formControlName="name"-->
-<!--                     (update)="updateFilterValue($event)"-->
+<!--                     (update)="loadSavedFilter($event)"-->
+<!--                     (autoCreateItem)="createFilterValue($event)"-->
 <!--                     [autoCreate]="true"-->
-<!--                     [multiple]="false"-->
-<!--                     [infiniteScroll]="false"-->
-<!--                     [hideSelectedItems]="true"-->
+<!--                     displaySearchStatus="always"-->
 <!--                     [resettable]="true">-->
 <!--            </select2>-->
           </div>
