@@ -95,9 +95,7 @@ export class DashboardComponent implements OnInit {
         .subscribe();
 
 
-    // TODO: Solve how Websockets will work with these dynamic streams
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-
       if (res.event === EVENTS.DashboardUpdate) {
         this.refreshStreamsFromDashboardUpdate$.next();
       } else if (res.event === EVENTS.SeriesAdded) {
