@@ -120,7 +120,6 @@ export class AccountService {
         const user = response;
         if (user) {
           this.setCurrentUser(user);
-          this.messageHub.createHubConnection(user, this.hasAdminRole(user));
         }
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -150,7 +149,8 @@ export class AccountService {
     this.stopRefreshTokenTimer();
 
     if (this.currentUser) {
-      this.messageHub.createHubConnection(this.currentUser, this.hasAdminRole(this.currentUser));
+      this.messageHub.stopHubConnection();
+      this.messageHub.createHubConnection(this.currentUser);
       this.hasValidLicense().subscribe();
       this.startRefreshTokenTimer();
     }
