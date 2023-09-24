@@ -20,9 +20,9 @@
             <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
           </button>
           <button *ngIf="!bookmarkMode && hasBookmarkRights" class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
-                  title="{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}" (click)="bookmarkPage()">
+                  title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
             <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
-            <span class="visually-hidden">{{CurrentPageBookmarked ? 'Unbookmark Page' : 'Bookmark Page'}}</span>
+            <span class="visually-hidden">{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}</span>
           </button>
         </div>
       </div>
