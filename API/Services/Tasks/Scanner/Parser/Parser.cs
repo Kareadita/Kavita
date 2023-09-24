@@ -997,6 +997,7 @@ public static class Parser
     {
         return path.Contains("__MACOSX") || path.StartsWith("@Recently-Snapshot") || path.StartsWith("@recycle")
                || path.StartsWith("._") || Path.GetFileName(path).StartsWith("._") || path.Contains(".qpkg")
+               || path.StartsWith("#recycle")
                || path.Contains(".caltrash");
     }
 
