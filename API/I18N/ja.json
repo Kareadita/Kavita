@@ -1,4 +1,19 @@
 {
     "chapter-num": "章 {0}",
-    "invalid-token": "無効トークン"
+    "invalid-token": "無効トークン",
+    "invalid-password": "無効なパスワード",
+    "validate-email": "メールの検証中に問題が発生しました: {0}",
+    "bad-credentials": "資格情報が正しくありません",
+    "confirm-email": "最初にメールを確認する必要があります",
+    "disabled-account": "あなたのアカウントは無効になりました。サーバー管理者に連絡してください。",
+    "locked-out": "認証試行が多すぎるとロックアウトされました。 10分ほどお待ちください。",
+    "password-required": "管理者でない限り、アカウントを変更するには既存のパスワードを入力する必要があります",
+    "share-multiple-emails": "複数のアカウント間でメールを共有することはできません",
+    "invalid-payload": "無効なペイロード",
+    "unable-to-reset-key": "問題が発生したため、キーをリセットできませんでした",
+    "confirm-token-gen": "確認トークンの生成中に問題が発生しました",
+    "denied": "禁じられている",
+    "register-user": "ユーザー登録時に問題が発生しました",
+    "nothing-to-do": "何もすることがない",
+    "permission-denied": "この操作は許可されていません"
 }
