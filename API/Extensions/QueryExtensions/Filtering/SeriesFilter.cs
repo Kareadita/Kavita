@@ -233,7 +233,7 @@ public static class SeriesFilter
     /// <exception cref="KavitaException"></exception>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static IQueryable<Series> HasReadingProgress(this IQueryable<Series> queryable, bool condition,
-        FilterComparison comparison, int readProgress, int userId)
+        FilterComparison comparison, float readProgress, int userId)
     {
         if (!condition) return queryable;
 

@@ -1054,7 +1054,7 @@ public class SeriesRepository : ISeriesRepository
 
     private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
     {
-        var (value, _) = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
+        var value = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
         return statement.Field switch
         {
             FilterField.Summary => query.HasSummary(true, statement.Comparison, (string) value),
@@ -1085,7 +1085,7 @@ public class SeriesRepository : ISeriesRepository
             FilterField.WantToRead =>
                 // This is handled in the higher level of code as it's more general
                 query,
-            FilterField.ReadProgress => query.HasReadingProgress(true, statement.Comparison, (int) value, userId),
+            FilterField.ReadProgress => query.HasReadingProgress(true, statement.Comparison, (float) value, userId),
             FilterField.Formats => query.HasFormat(true, statement.Comparison, (IList<MangaFormat>) value),
             FilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
             FilterField.ReadTime => query.HasAverageReadTime(true, statement.Comparison, (int) value),
