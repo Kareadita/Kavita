@@ -1,18 +1,18 @@
 {
     "login": {
-        "title": "",
-        "username": "",
-        "password": "",
-        "password-validation": "",
-        "forgot-password": "",
-        "submit": ""
+        "title": "Prihlásenie",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
+        "forgot-password": "Zabudli ste heslo?",
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
-        "no-libraries": "",
-        "server-settings-link": "",
-        "not-granted": "",
-        "on-deck-title": "",
-        "recently-updated-title": "",
+        "no-libraries": "Momentálne nie sú vytvorené žiadne knižnice. Vytvorte ich v",
+        "server-settings-link": "Nastavenia servera",
+        "not-granted": "Nemáte prístup do žiadnej z knižníc.",
+        "on-deck-title": "Vitajte na palube",
+        "recently-updated-title": "Naposledy aktualizované série",
         "recently-added-title": "",
         "more-in-genre-title": ""
     },
