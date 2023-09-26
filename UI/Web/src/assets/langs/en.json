@@ -792,7 +792,7 @@
         "allow-scrobbling-label": "Allow Scrobbling",
         "allow-scrobbling-tooltip": "Should Kavita scrobble reading events, want to read status, ratings, and reviews to configured providers. This will only occur if the server has an active Kavita+ Subscription.",
         "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against.",
+        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against. Will always wait 10 minutes before triggering scan.",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-recommendation-label": "Include in Recommended",
