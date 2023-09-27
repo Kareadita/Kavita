@@ -13,7 +13,8 @@
         "not-granted": "您没有权限访问资料库",
         "on-deck-title": "最近阅读",
         "recently-updated-title": "最近更新的系列",
-        "recently-added-title": "新增系列"
+        "recently-added-title": "新增系列",
+        "more-in-genre-title": "{{genre}} 的更多内容"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -144,7 +145,8 @@
         "clients-api-key-tooltip": "API密钥等同于密码，请保持它的机密性和安全性。",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "智能筛选器"
     },
     "user-holds": {
         "title": "刮削暂停",
@@ -624,7 +626,9 @@
         "send-to": "文件已通过电子邮件发送到{{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "本卷没有章节，无法读取。",
-        "cover-change": "刷新图片需要一点时间。在此期间，可能某些页面仍显示旧图片。"
+        "cover-change": "刷新图片需要一点时间。在此期间，可能某些页面仍显示旧图片。",
+        "continue-incognito": "以隐身模式继续",
+        "read-incognito": "以隐身模式阅读"
     },
     "series-metadata-detail": {
         "links-title": "链接",
@@ -1360,7 +1364,9 @@
         "descending-alt": "降序",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "limit-label": "只显示"
+        "limit-label": "限定",
+        "save": "{{common.save}}",
+        "filter-name-label": "筛选器名称"
     },
     "sort-field-pipe": {
         "sort-name": "排序名称",
@@ -1368,7 +1374,8 @@
         "last-modified": "上次修改时间",
         "last-chapter-added": "添加时间",
         "time-to-read": "阅读时间",
-        "release-year": "发行年份"
+        "release-year": "发行年份",
+        "read-progress": "阅读进度"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 详细信息",
@@ -1597,7 +1604,10 @@
         "confirm-library-delete": "您确定要删除{{name}}资料库吗？此操作无法撤销。",
         "confirm-library-type-change": "更改资料库类型将触发使用不同解析规则的新扫描，可能导致系列被重新创建，进而可能丢失进度和书签。在进行此操作之前，建议您进行备份。确定要继续吗？",
         "confirm-download-size": "{{entityType}}的大小为{{size}}。确定要继续吗？",
-        "list-doesnt-exist": "此列表不存在"
+        "list-doesnt-exist": "此列表不存在",
+        "smart-filter-updated": "已创建/已更新智能筛选器",
+        "confirm-delete-smart-filter": "您是否确定要删除此智能筛选器？",
+        "smart-filter-deleted": "智能筛选器已删除"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -1626,7 +1636,8 @@
         "read": "阅读",
         "add-rule-group-or": "添加规则组（或）",
         "add-rule-group-and": "添加规则组（与）",
-        "remove-rule-group": "移除规则组"
+        "remove-rule-group": "移除规则组",
+        "customize": "自定义"
     },
     "preferences": {
         "left-to-right": "从左到右",
@@ -1729,7 +1740,9 @@
         "letterer": "排版",
         "penciller": "线稿师",
         "path": "路径",
-        "file-path": "文件路径"
+        "file-path": "文件路径",
+        "read-date": "阅读日期",
+        "want-to-read": "想读"
     },
     "filter-comparison-pipe": {
         "begins-with": "开始于",
@@ -1754,5 +1767,20 @@
         "medium": "中（640x909）",
         "large": "大（900x1277）",
         "xlarge": "特大（1265x1795）"
+    },
+    "stream-list-item": {
+        "smart-filter": "智能筛选器",
+        "remove": "{{common.remove}}",
+        "provided": "提供",
+        "load-filter": "加载筛选"
+    },
+    "customize-dashboard-modal": {
+        "close": "{{common.close}}",
+        "title": "自定义仪表板",
+        "save": "{{common.save}}"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "百分比",
+        "unit-reading-date": "日期"
     }
 }
