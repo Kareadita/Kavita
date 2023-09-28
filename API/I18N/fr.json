@@ -159,5 +159,8 @@
     "chapter-num": "Chapitre {0}",
     "want-to-read": "À Lire",
     "browse-want-to-read": "Parcourir À Lire",
-    "collection-deleted": "Collection supprimée"
+    "collection-deleted": "Collection supprimée",
+    "smart-filters": "Filtres iintelligents",
+    "browse-smart-filters": "Parcourir Filtres intelligents",
+    "smart-filter-doesnt-exist": "Aucun Filtres iintelligents n'existe"
 }
