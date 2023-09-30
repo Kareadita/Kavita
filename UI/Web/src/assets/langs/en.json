@@ -1730,8 +1730,10 @@
 
     "customize-dashboard-modal": {
         "title": "Customize Dashboard",
+        "no-data": "All Smart filters added to Dashboard or none created yet.",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "add": "{{common.add}}"
     },
 
     "filter-field-pipe": {
