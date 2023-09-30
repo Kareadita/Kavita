@@ -159,5 +159,8 @@
     "reading-list-restricted": "La lista de lectura no existe o no tiene acceso",
     "browse-want-to-read": "Navegar en deseo leer",
     "want-to-read": "Deseo leer",
-    "collection-deleted": "Colección eliminada"
+    "collection-deleted": "Colección eliminada",
+    "smart-filters": "Filtros inteligentes",
+    "browse-smart-filters": "Buscar por filtros inteligentes",
+    "smart-filter-doesnt-exist": "El filtro inteligente no existe"
 }

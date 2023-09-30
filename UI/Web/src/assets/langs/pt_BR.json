@@ -13,7 +13,8 @@
         "not-granted": "Você não recebeu acesso a nenhuma biblioteca.",
         "on-deck-title": "Na Estante",
         "recently-updated-title": "Séries Atualizadas Recentemente",
-        "recently-added-title": "Séries Recém-Adicionadas"
+        "recently-added-title": "Séries Recém-Adicionadas",
+        "more-in-genre-title": "Mais em {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -144,7 +145,8 @@
         "clients-api-key-tooltip": "A chave API é como uma senha. Mantenha isso em segredo, mantenha-o seguro.",
         "clients-opds-url-tooltip": "URL OPDS",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Filtros Inteligentes"
     },
     "user-holds": {
         "title": "Segurar Scrobble",
@@ -624,7 +626,9 @@
         "send-to": "Arquivo enviado por e-mail para {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Não há capítulos neste volume. Não posso ler.",
-        "cover-change": "Pode levar até um minuto para o seu navegador atualizar a imagem. Até lá, a imagem antiga pode ser exibida em algumas páginas."
+        "cover-change": "Pode levar até um minuto para o seu navegador atualizar a imagem. Até lá, a imagem antiga pode ser exibida em algumas páginas.",
+        "continue-incognito": "Continuar Anonimamente",
+        "read-incognito": "Ler Anonimamente"
     },
     "series-metadata-detail": {
         "links-title": "Links",
@@ -1353,14 +1357,16 @@
         "series-name-label": "Nome das Séries",
         "series-name-tooltip": "O nome da série será filtrado por Nome, Nome de classificação ou Nome localizado",
         "release-label": "Lançamento",
-        "min": "",
-        "max": "",
+        "min": "Mín.",
+        "max": "Máx.",
         "sort-by-label": "Ordernar Por",
         "ascending-alt": "Ascendente",
         "descending-alt": "Descendente",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "limit-label": "Limitar A"
+        "limit-label": "Limitar A",
+        "save": "{{common.save}}",
+        "filter-name-label": "Nome do Filtro"
     },
     "sort-field-pipe": {
         "sort-name": "Nome Classificável",
@@ -1368,7 +1374,8 @@
         "last-modified": "Última Modificação",
         "last-chapter-added": "Item Adicionado",
         "time-to-read": "Tempo para Ler",
-        "release-year": "Ano de Lançamento"
+        "release-year": "Ano de Lançamento",
+        "read-progress": "Progresso da Leitura"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -1597,7 +1604,10 @@
         "confirm-library-delete": "Tem certeza de que deseja excluir a biblioteca {{name}}? Você não pode desfazer esta ação.",
         "confirm-library-type-change": "A alteração do tipo de biblioteca acionará uma nova verificação com regras de análise diferentes e pode levar à recriação de séries e, portanto, você pode perder o progresso e os favoritos. Você deve fazer backup antes de fazer isso. Você tem certeza que quer continuar?",
         "confirm-download-size": "O {{entityType}} é {{size}}. Você tem certeza que quer continuar?",
-        "list-doesnt-exist": "Esta lista não existe"
+        "list-doesnt-exist": "Esta lista não existe",
+        "smart-filter-updated": "Filtro Inteligente Criado/Atualizado",
+        "confirm-delete-smart-filter": "Tem certeza de que deseja excluir este Filtro Inteligente?",
+        "smart-filter-deleted": "Filtro Inteligente Excluído"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1626,7 +1636,8 @@
         "read": "Ler",
         "add-rule-group-or": "Adicionar Grupo de Regras (OU)",
         "add-rule-group-and": "Adicionar Grupo de Regras (E)",
-        "remove-rule-group": "Remover Grupo de Regras"
+        "remove-rule-group": "Remover Grupo de Regras",
+        "customize": "Personalizar"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -1727,7 +1738,11 @@
         "writers": "Escritores",
         "formats": "Formatos",
         "release-year": "Ano do Lançamento",
-        "user-rating": "Avaliação do Usuário"
+        "user-rating": "Avaliação do Usuário",
+        "path": "Caminho",
+        "file-path": "Caminho de Arquivo",
+        "read-date": "Data de Leitura",
+        "want-to-read": "Quero Ler"
     },
     "filter-comparison-pipe": {
         "begins-with": "Começa com",
@@ -1744,12 +1759,28 @@
         "is-after": "É depois de",
         "contains": "Contém",
         "is-in-last": "É no final de",
-        "is-not-in-last": "Não é no final de"
+        "is-not-in-last": "Não é no final de",
+        "must-contains": "Deve Conter"
     },
     "cover-image-size": {
         "default": "Padrão (320x455)",
         "medium": "Médio (640x909)",
         "xlarge": "Extra Grande (1265x1795)",
         "large": "Grande (900x1277)"
+    },
+    "stream-list-item": {
+        "smart-filter": "Filtro Intelegente",
+        "remove": "{{common.remove}}",
+        "provided": "Provido",
+        "load-filter": "Carregar Filtro"
+    },
+    "customize-dashboard-modal": {
+        "close": "{{common.close}}",
+        "title": "Personalizar Painel de Controle",
+        "save": "{{common.save}}"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "Porcento",
+        "unit-reading-date": "Data"
     }
 }

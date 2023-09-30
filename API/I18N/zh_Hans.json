@@ -159,5 +159,8 @@
     "progress-must-exist": "用户进程必须存在",
     "generic-scrobble-hold": "启用锁定时发生错误",
     "reset-chapter-lock": "无法重置章节的封面锁",
-    "collection-deleted": "收藏已删除"
+    "collection-deleted": "收藏已删除",
+    "smart-filters": "智能筛选",
+    "browse-smart-filters": "以智能筛选方式浏览",
+    "smart-filter-doesnt-exist": "智能筛选不存在"
 }

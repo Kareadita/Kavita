@@ -1248,7 +1248,7 @@
     "entity-title": {
         "special": "Especial",
         "chapter": "Capítulo",
-        "issue-num": "Problema #"
+        "issue-num": "Número #"
     },
     "external-series-card": {
         "open-external": "Abrir externamente"
@@ -1374,7 +1374,9 @@
     },
     "reading-activity": {
         "x-axis-label": "Tiempo",
-        "legend-label": "Formatos"
+        "legend-label": "Formatos",
+        "y-axis-label": "Horas leidas",
+        "title": "Actividad de lectura"
     },
     "admin-dashboard": {
         "kavita+-desc-part-3": "hoy!",
@@ -1396,7 +1398,11 @@
         "visualisation-label": "Visualización",
         "format-title": "Formato",
         "format-header": "Formato",
-        "total-size-header": "Tamaño total"
+        "total-size-header": "Tamaño total",
+        "not-classified": "Sin clasificación",
+        "total-files-header": "Ficheros totales",
+        "total-file-size-title": "Tamaño del fichero:",
+        "extension-header": "Extensión"
     },
     "filter-field-pipe": {
         "colorist": "Colorista",
@@ -1505,7 +1511,8 @@
     "publication-status-stats": {
         "visualisation-label": "Visualización",
         "data-table-label": "Tabla de datos",
-        "year-header": "Año"
+        "year-header": "Año",
+        "title": "Estado de publicación"
     },
     "manage-library": {
         "last-scanned-title": "Último escaneo:",
@@ -1549,7 +1556,10 @@
         "most-active-users-title": "Usuarios más activos",
         "tags": "Etiquetas",
         "people": "Personas",
-        "genres": "Géneros"
+        "genres": "Géneros",
+        "total-files-label": "Ficheros totales",
+        "total-volumes-tooltip": "Volumes totales: {{count}}",
+        "total-volumes-label": "Volúmenes totales"
     },
     "library-recommended": {
         "rediscover": "Descubrir de nuevo",
@@ -1562,7 +1572,8 @@
     },
     "draggable-ordered-list": {
         "reorder-label": "Ordenar de nuevo",
-        "remove-item-alt": "Eliminar elemento"
+        "remove-item-alt": "Eliminar elemento",
+        "instructions-alt": "Cuando introduzca un número en el cuadro de Reordenar, el ítem será insertado en la posición y el resto tendrá su orden actualizado."
     },
     "collection-detail": {
         "no-data": "No hay elementos. Prueba a añadir una serie.",
@@ -1578,5 +1589,8 @@
     "carousel-reel": {
         "prev-items": "Elementos anteriores",
         "next-items": "Elementos siguientes"
+    },
+    "day-breakdown": {
+        "x-axis-label": "Día de la semana"
     }
 }

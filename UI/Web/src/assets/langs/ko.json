@@ -13,7 +13,8 @@
         "recently-updated-title": "최근에 업데이트된 시리즈",
         "recently-added-title": "새롭게 추가된 시리즈",
         "not-granted": "라이브러리에 대한 접근 권한이 없습니다.",
-        "on-deck-title": "계속 읽기"
+        "on-deck-title": "계속 읽기",
+        "more-in-genre-title": "{{genre}} 더 보기"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -344,7 +345,8 @@
         "sort-name": "정렬 이름",
         "created": "생성됨",
         "time-to-read": "완독 예상 시간",
-        "last-chapter-added": "추가된 항목"
+        "last-chapter-added": "추가된 항목",
+        "read-progress": "읽기 진행 상황"
     },
     "manga-format-stats": {
         "title": "포맷",
@@ -480,7 +482,10 @@
         "alert-bad-theme": "테마에 유효하지 않거나 안전하지 않은 CSS가 있습니다. 이를 수정하려면 관리자에게 문의하세요. 어두운 테마로 기본 설정.",
         "confirm-library-delete": "정말로 {{name}} 라이브러리를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "confirm-regen-covers": "표지를 새로 고치면 모든 표지 이미지가 다시 계산됩니다. 이것은 무거운 작업입니다. 대신 스캔을 수행하지 않으시겠습니까?",
-        "list-doesnt-exist": "이 목록은 존재하지 않습니다"
+        "list-doesnt-exist": "이 목록은 존재하지 않습니다",
+        "smart-filter-updated": "스마트 필터 생성/업데이트 되었습니다",
+        "confirm-delete-smart-filter": "이 스마트 필터를 삭제하시겠습니까?",
+        "smart-filter-deleted": "스마트 필터가 삭제되었습니다"
     },
     "actionable": {
         "mark-as-read": "읽은 상태로 표시",
@@ -500,7 +505,7 @@
         "add-to-reading-list": "읽기 목록에 추가",
         "delete": "삭제",
         "download": "다운로드",
-        "read-incognito": "시크릿 읽기",
+        "read-incognito": "시크릿 모드로 읽기",
         "details": "상세",
         "view-series": "시리즈 보기",
         "clear": "지우기",
@@ -509,7 +514,8 @@
         "remove-from-on-deck": "계속 읽기에서 제거",
         "add-rule-group-and": "규칙 그룹 추가(AND)",
         "add-rule-group-or": "규칙 그룹 추가(OR)",
-        "remove-rule-group": "규칙 그룹 제거"
+        "remove-rule-group": "규칙 그룹 제거",
+        "customize": "사용자 정의"
     },
     "preferences": {
         "original": "원본",
@@ -707,7 +713,9 @@
         "storyline-tab": "줄거리",
         "send-to": "{{deviceName}}에 파일을 이메일로 보냈습니다",
         "books-tab": "책",
-        "volumes-tab": "볼륨"
+        "volumes-tab": "볼륨",
+        "continue-incognito": "시크릿 모드로 계속",
+        "read-incognito": "시크릿 모드로 읽기"
     },
     "read-more": {
         "read-more": "더 읽기",
@@ -935,7 +943,7 @@
     "reading-list-detail": {
         "remove-read": "읽기 제거",
         "read": "{{common.read}}",
-        "incognito-alt": "(시크릿)",
+        "incognito-alt": "(시크릿 모드)",
         "no-data": "추가된 사항 없음",
         "page-settings-title": "페이지 설정",
         "order-numbers-label": "주문 번호",
@@ -1101,7 +1109,9 @@
         "series-name-label": "시리즈 이름",
         "release-label": "출시",
         "min": "최소",
-        "limit-label": "다음으로 제한"
+        "limit-label": "제한",
+        "save": "{{common.save}}",
+        "filter-name-label": "필터 이름"
     },
     "day-breakdown": {
         "x-axis-label": "요일",
@@ -1200,7 +1210,8 @@
         "clients-api-key-tooltip": "API 키는 암호와 같습니다. 비밀로 유지하고 안전하게 유지하십시오.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "스마트 필터"
     },
     "download-indicator": {
         "progress": "{{percentage}}% 다운로드 됨"
@@ -1723,7 +1734,9 @@
         "libraries": "라이브러리",
         "series-name": "시리즈 이름",
         "path": "경로",
-        "file-path": "파일 경로"
+        "file-path": "파일 경로",
+        "want-to-read": "읽고 싶어요",
+        "read-date": "읽은 날짜"
     },
     "filter-comparison-pipe": {
         "is-not-in-last": "마지막에 없음",
@@ -1754,5 +1767,20 @@
         "medium": "중간 (640x909)",
         "xlarge": "매우 크게 (1265x1795)",
         "large": "크게 (900x1277)"
+    },
+    "stream-list-item": {
+        "smart-filter": "스마트 필터",
+        "remove": "{{common.remove}}",
+        "provided": "제공",
+        "load-filter": "필터 로드"
+    },
+    "customize-dashboard-modal": {
+        "close": "{{common.close}}",
+        "title": "대시보드 사용자 정의",
+        "save": "{{common.save}}"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "퍼센트",
+        "unit-reading-date": "날짜"
     }
 }

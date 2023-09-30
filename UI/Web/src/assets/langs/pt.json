@@ -714,7 +714,7 @@
         "include-in-search-label": "Incluir na Pesquisa",
         "include-in-search-tooltip": "Se as séries e informação derivada (género, pessoas, ficheiros) da biblioteca devem ser incluídas em resultados de pesquisas.",
         "force-scan": "Forçar Scan",
-        "force-scan-tooltip": "",
+        "force-scan-tooltip": "Isto irá forçar uma análise da biblioteca, tratando-a como uma análise nova",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "next": "Seguinte",
@@ -815,7 +815,7 @@
         "editors-title": "{{series-metadata-detail.editors-title}}"
     },
     "cover-image-chooser": {
-        "drag-n-drop": "",
+        "drag-n-drop": "Arrastar e soltar",
         "upload": "Carregue",
         "upload-continued": "uma imagem",
         "url-label": "Url",
@@ -849,7 +849,7 @@
         "pages-count": "{{num}} Páginas",
         "words-count": "{{num}} Palavras",
         "reading-time-title": "Tempo de Leitura",
-        "date-added-title": "",
+        "date-added-title": "Data de Adição",
         "size-title": "Tamanho",
         "id-title": "ID",
         "links-title": "{{series-metadata-detail.links-title}}",
