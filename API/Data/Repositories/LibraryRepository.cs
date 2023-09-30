@@ -51,7 +51,6 @@ public interface ILibraryRepository
     Task<bool> DoAnySeriesFoldersMatch(IEnumerable<string> folders);
     Task<string?> GetLibraryCoverImageAsync(int libraryId);
     Task<IList<string>> GetAllCoverImagesAsync();
-    Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds);
     Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat);
     Task<bool> GetAllowsScrobblingBySeriesId(int seriesId);
 }
@@ -344,28 +343,6 @@ public class LibraryRepository : ILibraryRepository
             .Select(t => t.CoverImage)
             .Where(t => !string.IsNullOrEmpty(t))
             .ToListAsync())!;
-    }
-
-    public async Task<IDictionary<int, LibraryType>> GetLibraryTypesForIdsAsync(IEnumerable<int> libraryIds)
-    {
-        var types = await _context.Library
-            .Where(l => libraryIds.Contains(l.Id))
-            .AsNoTracking()
-            .Select(l => new
-            {
-                LibraryId = l.Id,
-                LibraryType = l.Type
-            })
-            .ToListAsync();
-
-        var dict = new Dictionary<int, LibraryType>();
-
-        foreach (var type in types)
-        {
-            dict.TryAdd(type.LibraryId, type.LibraryType);
-        }
-
-        return dict;
     }
 
     public async Task<IList<Library>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat)

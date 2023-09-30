@@ -17,7 +17,7 @@ public interface ITagRepository
     void Remove(Tag tag);
     Task<IList<Tag>> GetAllTagsAsync();
     Task<IList<TagDto>> GetAllTagDtosAsync(int userId);
-    Task RemoveAllTagNoLongerAssociated(bool removeExternal = false);
+    Task RemoveAllTagNoLongerAssociated();
     Task<IList<TagDto>> GetAllTagDtosForLibrariesAsync(IList<int> libraryIds, int userId);
 }
 
@@ -42,7 +42,7 @@ public class TagRepository : ITagRepository
         _context.Tag.Remove(tag);
     }
 
-    public async Task RemoveAllTagNoLongerAssociated(bool removeExternal = false)
+    public async Task RemoveAllTagNoLongerAssociated()
     {
         var tagsWithNoConnections = await _context.Tag
             .Include(p => p.SeriesMetadatas)
