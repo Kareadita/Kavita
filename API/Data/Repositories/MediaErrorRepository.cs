@@ -15,7 +15,6 @@ public interface IMediaErrorRepository
     void Attach(MediaError error);
     void Remove(MediaError error);
     Task<MediaError> Find(string filename);
-    Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams);
     IEnumerable<MediaErrorDto> GetAllErrorDtosAsync();
     Task<bool> ExistsAsync(MediaError error);
     Task DeleteAll();
@@ -47,15 +46,6 @@ public class MediaErrorRepository : IMediaErrorRepository
     public Task<MediaError?> Find(string filename)
     {
         return _context.MediaError.Where(e => e.FilePath == filename).SingleOrDefaultAsync();
-    }
-
-    public Task<PagedList<MediaErrorDto>> GetAllErrorDtosAsync(UserParams userParams)
-    {
-        var query = _context.MediaError
-            .OrderByDescending(m => m.Created)
-            .ProjectTo<MediaErrorDto>(_mapper.ConfigurationProvider)
-            .AsNoTracking();
-        return PagedList<MediaErrorDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize);
     }
 
     public IEnumerable<MediaErrorDto> GetAllErrorDtosAsync()

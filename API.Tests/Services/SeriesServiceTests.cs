@@ -1134,10 +1134,10 @@ public class SeriesServiceTests : AbstractDbTest
         await _seriesService.UpdateRelatedSeries(addRelationDto);
 
 
-        Assert.Empty(_seriesService.GetRelatedSeries(1, 2).Result.Parent);
-        Assert.Empty(_seriesService.GetRelatedSeries(1, 3).Result.Parent);
-        Assert.Empty(_seriesService.GetRelatedSeries(1, 4).Result.Parent);
-        Assert.NotEmpty(_seriesService.GetRelatedSeries(1, 5).Result.Parent);
+        Assert.Empty((await _seriesService.GetRelatedSeries(1, 2)).Parent);
+        Assert.Empty((await _seriesService.GetRelatedSeries(1, 3)).Parent);
+        Assert.Empty((await _seriesService.GetRelatedSeries(1, 4)).Parent);
+        Assert.NotEmpty((await _seriesService.GetRelatedSeries(1, 5)).Parent);
     }
 
     [Fact]

@@ -80,7 +80,10 @@ public class PresenceTracker : IPresenceTracker
         string[] onlineUsers;
         lock (OnlineUsers)
         {
-            onlineUsers = OnlineUsers.OrderBy(k => k.Value.UserName).Select(k => k.Value.UserName).ToArray();
+            onlineUsers = OnlineUsers
+                .Select(k => k.Value.UserName)
+                .Order()
+                .ToArray();
         }
 
         return Task.FromResult(onlineUsers);
@@ -91,7 +94,10 @@ public class PresenceTracker : IPresenceTracker
         int[] onlineUsers;
         lock (OnlineUsers)
         {
-            onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin).OrderBy(k => k.Key).Select(k => k.Key).ToArray();
+            onlineUsers = OnlineUsers.Where(pair => pair.Value.IsAdmin)
+                .Select(k => k.Key)
+                .Order()
+                .ToArray();
         }
 
 

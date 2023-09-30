@@ -19,7 +19,7 @@ public interface IPersonRepository
     Task<IList<Person>> GetAllPeople();
     Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId);
     Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role);
-    Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false);
+    Task RemoveAllPeopleNoLongerAssociated();
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(List<int> libraryIds, int userId);
     Task<int> GetCountAsync();
 
@@ -46,7 +46,7 @@ public class PersonRepository : IPersonRepository
         _context.Person.Remove(person);
     }
 
-    public async Task RemoveAllPeopleNoLongerAssociated(bool removeExternal = false)
+    public async Task RemoveAllPeopleNoLongerAssociated()
     {
         var peopleWithNoConnections = await _context.Person
             .Include(p => p.SeriesMetadatas)

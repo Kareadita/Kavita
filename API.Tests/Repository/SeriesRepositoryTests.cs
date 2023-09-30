@@ -122,6 +122,10 @@ public class SeriesRepositoryTests
                 .WithLocalizedName("Heion Sedai no Idaten-tachi")
                 .WithFormat(MangaFormat.Archive)
                 .Build())
+            .WithSeries(new SeriesBuilder("Hitomi-chan is Shy With Strangers")
+                .WithLocalizedName("Hitomi-chan wa Hitomishiri")
+                .WithFormat(MangaFormat.Archive)
+                .Build())
             .Build();
 
         _unitOfWork.LibraryRepository.Add(library);
@@ -133,6 +137,7 @@ public class SeriesRepositoryTests
     [InlineData("The Idaten Deities Know Only Peace", MangaFormat.Archive, "", "The Idaten Deities Know Only Peace")] // Matching on series name in DB
     [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, "The Idaten Deities Know Only Peace", "The Idaten Deities Know Only Peace")] // Matching on localized name in DB
     [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Pdf, "", null)]
+    [InlineData("Hitomi-chan wa Hitomishiri", MangaFormat.Archive, "", "Hitomi-chan is Shy With Strangers")]
     public async Task GetFullSeriesByAnyName_Should(string seriesName, MangaFormat format, string localizedName, string? expected)
     {
         await ResetDb();

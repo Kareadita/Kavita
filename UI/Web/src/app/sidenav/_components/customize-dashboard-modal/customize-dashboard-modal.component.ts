@@ -36,7 +36,6 @@ export class CustomizeDashboardModalComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
 
   constructor(public modal: NgbActiveModal) {
-
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
       this.items = results[0];
       const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));

@@ -8,72 +8,72 @@ namespace API.Helpers.Converters;
 
 public static class FilterFieldValueConverter
 {
-    public static (object Value, Type Type) ConvertValue(FilterField field, string value)
+    public static object ConvertValue(FilterField field, string value)
     {
         return field switch
         {
-            FilterField.SeriesName => (value, typeof(string)),
-            FilterField.Path => (value, typeof(string)),
-            FilterField.FilePath => (value, typeof(string)),
-            FilterField.ReleaseYear => (int.Parse(value), typeof(int)),
-            FilterField.Languages => (value.Split(',').ToList(), typeof(IList<string>)),
-            FilterField.PublicationStatus => (value.Split(',')
+            FilterField.SeriesName => value,
+            FilterField.Path => value,
+            FilterField.FilePath => value,
+            FilterField.ReleaseYear => int.Parse(value),
+            FilterField.Languages => value.Split(',').ToList(),
+            FilterField.PublicationStatus => value.Split(',')
                 .Select(x => (PublicationStatus) Enum.Parse(typeof(PublicationStatus), x))
-                .ToList(), typeof(IList<PublicationStatus>)),
-            FilterField.Summary => (value, typeof(string)),
-            FilterField.AgeRating => (value.Split(',')
+                .ToList(),
+            FilterField.Summary => value,
+            FilterField.AgeRating => value.Split(',')
                 .Select(x => (AgeRating) Enum.Parse(typeof(AgeRating), x))
-                .ToList(), typeof(IList<AgeRating>)),
-            FilterField.UserRating => (int.Parse(value), typeof(int)),
-            FilterField.Tags => (value.Split(',')
+                .ToList(),
+            FilterField.UserRating => int.Parse(value),
+            FilterField.Tags => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.CollectionTags => (value.Split(',')
+                .ToList(),
+            FilterField.CollectionTags => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Translators => (value.Split(',')
+                .ToList(),
+            FilterField.Translators => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Characters => (value.Split(',')
+                .ToList(),
+            FilterField.Characters => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Publisher => (value.Split(',')
+                .ToList(),
+            FilterField.Publisher => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Editor => (value.Split(',')
+                .ToList(),
+            FilterField.Editor => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.CoverArtist => (value.Split(',')
+                .ToList(),
+            FilterField.CoverArtist => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Letterer => (value.Split(',')
+                .ToList(),
+            FilterField.Letterer => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Colorist => (value.Split(',')
+                .ToList(),
+            FilterField.Colorist => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Inker => (value.Split(',')
+                .ToList(),
+            FilterField.Inker => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Penciller => (value.Split(',')
+                .ToList(),
+            FilterField.Penciller => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Writers => (value.Split(',')
+                .ToList(),
+            FilterField.Writers => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Genres => (value.Split(',')
+                .ToList(),
+            FilterField.Genres => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.Libraries => (value.Split(',')
+                .ToList(),
+            FilterField.Libraries => value.Split(',')
                 .Select(int.Parse)
-                .ToList(), typeof(IList<int>)),
-            FilterField.WantToRead => (bool.Parse(value), typeof(bool)),
-            FilterField.ReadProgress => (int.Parse(value), typeof(int)),
-            FilterField.ReadingDate => (DateTime.Parse(value), typeof(DateTime?)),
-            FilterField.Formats => (value.Split(',')
+                .ToList(),
+            FilterField.WantToRead => bool.Parse(value),
+            FilterField.ReadProgress => float.Parse(value),
+            FilterField.ReadingDate => DateTime.Parse(value),
+            FilterField.Formats => value.Split(',')
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))
-                .ToList(), typeof(IList<MangaFormat>)),
-            FilterField.ReadTime => (int.Parse(value), typeof(int)),
+                .ToList(),
+            FilterField.ReadTime => int.Parse(value),
             _ => throw new ArgumentException("Invalid field type")
         };
     }

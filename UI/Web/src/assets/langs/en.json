@@ -792,7 +792,7 @@
         "allow-scrobbling-label": "Allow Scrobbling",
         "allow-scrobbling-tooltip": "Should Kavita scrobble reading events, want to read status, ratings, and reviews to configured providers. This will only occur if the server has an active Kavita+ Subscription.",
         "folder-watching-label": "Folder Watching",
-        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against.",
+        "folder-watching-tooltip": "Override Server folder watching for this library. If off, folder watching won't run on the folders this library contains. If libraries share folders, then folders may still be ran against. Will always wait 10 minutes before triggering scan.",
         "include-in-dashboard-label": "Include in Dashboard",
         "include-in-dashboard-tooltip": "Should series from the library be included on the Dashboard. This affects all streams, like On Deck, Recently Updated, Recently Added, or any custom additions.",
         "include-in-recommendation-label": "Include in Recommended",
@@ -1493,6 +1493,8 @@
         "swipe-enabled-label": "Swipe Enabled",
         "enable-comic-book-label": "Emulate comic book",
         "brightness-label": "Brightness",
+        "bookmark-page-tooltip": "Bookmark Page",
+        "unbookmark-page-tooltip": "Unbookmark Page",
 
         "first-time-reading-manga": "Tap the image at any time to open the menu. You can configure different settings or go to page by clicking progress bar. Tap sides of image move to next/prev page.",
         "layout-mode-switched": "Layout mode switched to Single due to insufficient space to render double layout",
@@ -1555,7 +1557,7 @@
         "last-chapter-added": "Item Added",
         "time-to-read": "Time to Read",
         "release-year": "Release Year",
-        "read-progress": "Read Progress"
+        "read-progress": "Last Read"
     },
 
     "edit-series-modal": {
@@ -1728,8 +1730,10 @@
 
     "customize-dashboard-modal": {
         "title": "Customize Dashboard",
+        "no-data": "All Smart filters added to Dashboard or none created yet.",
         "close": "{{common.close}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "add": "{{common.add}}"
     },
 
     "filter-field-pipe": {

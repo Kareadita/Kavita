@@ -114,8 +114,6 @@ export class MessageHubService {
    */
   public onlineUsers$ = this.onlineUsersSource.asObservable();
 
-  isAdmin: boolean = false;
-
   constructor() {}
 
   /**
@@ -132,9 +130,7 @@ export class MessageHubService {
     return event.event === eventType;
   }
 
-  createHubConnection(user: User, isAdmin: boolean) {
-    this.isAdmin = isAdmin;
-
+  createHubConnection(user: User) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'messages', {
         accessTokenFactory: () => user.token
@@ -186,7 +182,6 @@ export class MessageHubService {
     });
 
     this.hubConnection.on(EVENTS.DashboardUpdate, resp => {
-      console.log('dashboard update event came in')
       this.messagesSource.next({
         event: EVENTS.DashboardUpdate,
         payload: resp.body as DashboardUpdateEvent

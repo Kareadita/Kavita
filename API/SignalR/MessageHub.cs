@@ -22,7 +22,8 @@ public class MessageHub : Hub
 
     public override async Task OnConnectedAsync()
     {
-        await _tracker.UserConnected(Context.User!.GetUserId(), Context.ConnectionId);
+        var userId = Context.User!.GetUserId();
+        await _tracker.UserConnected(userId, Context.ConnectionId);
 
         var currentUsers = await PresenceTracker.GetOnlineUsers();
         await Clients.All.SendAsync(MessageFactory.OnlineUsers, currentUsers);

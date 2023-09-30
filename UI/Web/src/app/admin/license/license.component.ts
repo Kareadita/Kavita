@@ -92,7 +92,7 @@ export class LicenseComponent implements OnInit {
   }
 
   async deleteLicense() {
-    if (!await this.confirmService.confirm(translate('k+-delete-key'))) {
+    if (!await this.confirmService.confirm(translate('toasts.k+-delete-key'))) {
       return;
     }
 

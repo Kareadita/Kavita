@@ -737,7 +737,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    getPage(pageNum: number, chapterId: number = this.chapterId, forceNew: boolean = false) {
 
     let img;
-    if (this.bookmarkMode) img =  this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
+    if (this.bookmarkMode) img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum);
     else img = this.cachedImages.find(img => this.readerService.imageUrlToPageNum(img.src) === pageNum
       && (this.readerService.imageUrlToChapterId(img.src) == chapterId || this.readerService.imageUrlToChapterId(img.src) === -1)
     );
@@ -1208,9 +1208,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   setCanvasImage() {
     if (this.cachedImages === undefined) return;
     this.canvasImage = this.getPage(this.pageNum, this.chapterId, this.layoutMode !== LayoutMode.Single);
-    this.canvasImage.addEventListener('load', () => {
+    if (!this.canvasImage.complete) {
+      this.canvasImage.addEventListener('load', () => {
+        this.currentImage.next(this.canvasImage);
+      }, false);
+    } else {
       this.currentImage.next(this.canvasImage);
-    }, false);
+    }
+
 
     this.cdRef.markForCheck();
   }
@@ -1329,7 +1334,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    // const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
+    //const pages = this.cachedImages.map(img => [this.readerService.imageUrlToChapterId(img.src), this.readerService.imageUrlToPageNum(img.src)]);
     // console.log(this.pageNum, ' Prefetched pages: ', pages.map(p => {
     //   if (this.pageNum === p[1]) return '[' + p + ']';
     //   return '' + p

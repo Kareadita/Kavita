@@ -193,7 +193,11 @@ public class AccountController : BaseApiController
         }
 
 
-        if (user == null) return Unauthorized(await _localizationService.Get("en", "bad-credentials"));
+        if (user == null)
+        {
+            _logger.LogWarning("Attempted login by {UserName} failed due to unable to find account", loginDto.Username);
+            return Unauthorized(await _localizationService.Get("en", "bad-credentials"));
+        }
         var roles = await _userManager.GetRolesAsync(user);
         if (!roles.Contains(PolicyConstants.LoginRole)) return Unauthorized(await _localizationService.Translate(user.Id, "disabled-account"));
 
@@ -205,12 +209,19 @@ public class AccountController : BaseApiController
             if (result.IsLockedOut)
             {
                 await _userManager.UpdateSecurityStampAsync(user);
-                return Unauthorized(await _localizationService.Translate(user.Id, "locked-out"));
+                var errorStr = await _localizationService.Translate(user.Id, "locked-out");
+                _logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive,
+                    errorStr);
+                return Unauthorized(errorStr);
             }
 
             if (!result.Succeeded)
             {
-                return Unauthorized(await _localizationService.Translate(user.Id, result.IsNotAllowed ? "confirm-email" : "bad-credentials"));
+                var errorStr = await _localizationService.Translate(user.Id,
+                    result.IsNotAllowed ? "confirm-email" : "bad-credentials");
+                _logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive,
+                    errorStr);
+                return Unauthorized(errorStr);
             }
         }
 
@@ -398,7 +409,6 @@ public class AccountController : BaseApiController
         {
             _logger.LogError(ex, "There was an error during invite user flow, unable to send an email");
         }
-
 
         await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
 

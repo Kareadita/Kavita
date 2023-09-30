@@ -15,9 +15,9 @@ export class ProviderNamePipe implements PipeTransform {
         return 'MAL';
       case ScrobbleProvider.Kavita:
         return 'Kavita';
+      case ScrobbleProvider.GoogleBooks:
+        return 'Google Books';
     }
-
-    return '';
   }
 
 }

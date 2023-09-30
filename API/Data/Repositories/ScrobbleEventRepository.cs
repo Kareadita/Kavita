@@ -18,7 +18,7 @@ public interface IScrobbleRepository
     void Attach(ScrobbleEvent evt);
     void Attach(ScrobbleError error);
     void Remove(ScrobbleEvent evt);
-    void Remove(IList<ScrobbleEvent> evts);
+    void Remove(IEnumerable<ScrobbleEvent> events);
     void Update(ScrobbleEvent evt);
     Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false);
     Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo);
@@ -60,9 +60,9 @@ public class ScrobbleRepository : IScrobbleRepository
         _context.ScrobbleEvent.Remove(evt);
     }
 
-    public void Remove(IList<ScrobbleEvent> evts)
+    public void Remove(IEnumerable<ScrobbleEvent> events)
     {
-        _context.ScrobbleEvent.RemoveRange(evts);
+        _context.ScrobbleEvent.RemoveRange(events);
     }
 
     public void Update(ScrobbleEvent evt)

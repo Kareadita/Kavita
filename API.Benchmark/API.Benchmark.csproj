@@ -10,9 +10,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
-      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.7" />
-      <PackageReference Include="NSubstitute" Version="5.0.0" />
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.8" />
+      <PackageReference Include="BenchmarkDotNet.Annotations" Version="0.13.8" />
+      <PackageReference Include="NSubstitute" Version="5.1.0" />
     </ItemGroup>
 
     <ItemGroup>

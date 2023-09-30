@@ -1,22 +1,26 @@
 <ng-container *transloco="let t; read: 'metadata-filter'">
   <ng-container *ngIf="toggleService.toggleState$ | async as isOpen">
-    <div  *ngIf="utilityService.getActiveBreakpoint() >= Breakpoint.Tablet">
-      <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
-        <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
-      </div>
-    </div>
-
-    <div  *ngIf="utilityService.getActiveBreakpoint() < Breakpoint.Desktop">
-      <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 56}" (drawerClosed)="toggleService.set(false)">
-        <h5 header>
-          {{t('filter-title')}}
-        </h5>
-        <div body class="drawer-body">
-          <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd -->
+    <ng-container *ngIf="utilityService.getActiveBreakpoint() as activeBreakpoint">
+      <div *ngIf="activeBreakpoint >= Breakpoint.Tablet; else mobileView">
+        <div #collapse="ngbCollapse" [ngbCollapse]="!isOpen" (ngbCollapseChange)="setToggle($event)">
           <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
         </div>
-      </app-drawer>
-    </div>
+      </div>
+
+      <ng-template #mobileView>
+        <div>
+          <app-drawer #commentDrawer="drawer" [isOpen]="isOpen" [options]="{topOffset: 56}" (drawerClosed)="toggleService.set(false)" [width]="600">
+            <h5 header>
+              {{t('filter-title')}}
+            </h5>
+            <div body class="drawer-body">
+              <!-- TODO: BUG: Filter section is instantiated twice if this isn't ngIf'd -->
+              <ng-container [ngTemplateOutlet]="filterSection"></ng-container>
+            </div>
+          </app-drawer>
+        </div>
+      </ng-template>
+    </ng-container>
   </ng-container>
 
   <ng-template #filterSection>
@@ -30,13 +34,13 @@
       </div>
       <form [formGroup]="sortGroup" class="container-fluid">
         <div class="row mb-3">
-          <div class="col-md-2 col-sm-2">
+          <div class="col-md-2 col-sm-3">
             <div class="form-group pe-1">
               <label for="limit-to" class="form-label">{{t('limit-label')}}</label>
               <input id="limit-to" type="number" inputmode="numeric" class="form-control" formControlName="limitTo">
             </div>
           </div>
-          <div class="col-md-3 col-sm-10">
+          <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <button class="btn btn-sm btn-secondary-outline" (click)="updateSortOrder()" style="height: 25px; padding-bottom: 0;" [disabled]="filterSettings.sortDisabled">
                 <i class="fa fa-arrow-up" [title]="t('ascending-alt')" *ngIf="isAscendingSort; else descSort"></i>
@@ -48,17 +52,16 @@
                 <option *ngFor="let field of allSortFields" [value]="field">{{field | sortField}}</option>
               </select>
           </div>
-          <div class="col-md-3 col-sm-10">
+          <div class="col-md-4 col-sm-12" [ngClass]="{'mt-3': utilityService.getActiveBreakpoint() <= Breakpoint.Mobile}">
             <label for="filter-name" class="form-label">{{t('filter-name-label')}}</label>
             <input id="filter-name" type="text" class="form-control" formControlName="name">
 <!--            <select2 [data]="smartFilters"-->
 <!--                     id="filter-name"-->
 <!--                     formControlName="name"-->
-<!--                     (update)="updateFilterValue($event)"-->
+<!--                     (update)="loadSavedFilter($event)"-->
+<!--                     (autoCreateItem)="createFilterValue($event)"-->
 <!--                     [autoCreate]="true"-->
-<!--                     [multiple]="false"-->
-<!--                     [infiniteScroll]="false"-->
-<!--                     [hideSelectedItems]="true"-->
+<!--                     displaySearchStatus="always"-->
 <!--                     [resettable]="true">-->
 <!--            </select2>-->
           </div>
@@ -73,11 +76,11 @@
   </ng-template>
   <ng-template #buttons>
     <!-- TODO: I might want to put a Clear button which blanks out the whole filter -->
-    <div class="col-md-2 col-sm-6 mt-4 pt-2 d-flex justify-content-between">
+    <div class="col-md-6 col-sm-6 mt-4 pt-2 d-flex justify-content-between">
       <button class="btn btn-secondary col-6 me-1" (click)="clear()"><i class="fa-solid fa-arrow-rotate-left me-1" aria-hidden="true"></i>{{t('reset')}}</button>
       <button class="btn btn-primary col-6" (click)="apply()"><i class="fa-solid fa-play me-1" aria-hidden="true"></i>{{t('apply')}}</button>
     </div>
-    <div class="col-md-1 col-sm-6 mt-4 pt-2">
+    <div class="col-md-2 col-sm-6 mt-4 pt-2">
       <button class="btn btn-primary col-12" (click)="save()" [disabled]="filterSettings.saveDisabled || !this.sortGroup.get('name')?.value">
         <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
         {{t('save')}}

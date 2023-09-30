@@ -17,11 +17,11 @@
         {{filter.name}}
         <button class="btn btn-icon" (click)="addFilterToStream(filter)">
           <i class="fa fa-plus" aria-hidden="true"></i>
-          Add
+          {{t('add')}}
         </button>
       </li>
       <li class="list-group-item" *ngIf="smartFilters.length === 0">
-        All Smart filters added to Dashboard or none created yet.
+        {{t('no-data')}}
       </li>
     </ul>
   </div>

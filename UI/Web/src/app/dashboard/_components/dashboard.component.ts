@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, injec
 import {Title} from '@angular/platform-browser';
 import {Router, RouterLink} from '@angular/router';
 import {Observable, of, ReplaySubject, Subject, switchMap} from 'rxjs';
-import {map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
+import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/operators';
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
@@ -57,6 +57,7 @@ export class DashboardComponent implements OnInit {
   streams: Array<DashboardStream> = [];
   genre: Genre | undefined;
   refreshStreams$ = new Subject<void>();
+  refreshStreamsFromDashboardUpdate$ = new Subject<void>();
 
 
   /**
@@ -80,6 +81,13 @@ export class DashboardComponent implements OnInit {
 
     this.loadDashboard();
 
+    this.refreshStreamsFromDashboardUpdate$.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(1000),
+      tap(() => {
+        console.log('Loading Dashboard')
+        this.loadDashboard()
+      }))
+      .subscribe();
+
     this.refreshStreams$.pipe(takeUntilDestroyed(this.destroyRef), throttleTime(10_000),
         tap(() => {
           this.loadDashboard()
@@ -87,29 +95,12 @@ export class DashboardComponent implements OnInit {
         .subscribe();
 
 
-    // TODO: Solve how Websockets will work with these dyanamic streams
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-
       if (res.event === EVENTS.DashboardUpdate) {
-        console.log('dashboard update triggered')
-        this.refreshStreams$.next();
+        this.refreshStreamsFromDashboardUpdate$.next();
       } else if (res.event === EVENTS.SeriesAdded) {
-        // const seriesAddedEvent = res.payload as SeriesAddedEvent;
-
-        // this.seriesService.getSeries(seriesAddedEvent.seriesId).subscribe(series => {
-        //   if (this.recentlyAddedSeries.filter(s => s.id === series.id).length > 0) return;
-        //   this.recentlyAddedSeries = [series, ...this.recentlyAddedSeries];
-        //   this.cdRef.markForCheck();
-        // });
         this.refreshStreams$.next();
       } else if (res.event === EVENTS.SeriesRemoved) {
-        //const seriesRemovedEvent = res.payload as SeriesRemovedEvent;
-
-        //
-        // this.inProgress = this.inProgress.filter(item => item.id != seriesRemovedEvent.seriesId);
-        // this.recentlyAddedSeries = this.recentlyAddedSeries.filter(item => item.id != seriesRemovedEvent.seriesId);
-        // this.recentlyUpdatedSeries = this.recentlyUpdatedSeries.filter(item => item.seriesId != seriesRemovedEvent.seriesId);
-        // this.cdRef.markForCheck();
         this.refreshStreams$.next();
       } else if (res.event === EVENTS.ScanSeries) {
         // We don't have events for when series are updated, but we do get events when a scan update occurs. Refresh recentlyAdded at that time.
