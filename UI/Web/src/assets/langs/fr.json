@@ -172,12 +172,12 @@
     },
     "restriction-selector": {
         "title": "Restriction d'âge",
-        "description": "",
+        "description": "Lorsque cette option est sélectionnée, toutes les séries et les listes de lecture dont au moins un élément est supérieur à la restriction sélectionnée seront éliminées des résultats.",
         "not-applicable-for-admins": "Ceci ne s'applique pas pour les Administrateurs.",
         "age-rating-label": "Classification d'âge",
         "no-restriction": "Aucun restriction",
         "include-unknowns-label": "Inclure les Inconnus",
-        "include-unknowns-tooltip": ""
+        "include-unknowns-tooltip": "Si cette option est activée, les médias inconnus seront autorisés avec une restriction d'âge. Cela pourrait entraîner la fuite de médias non marqués vers des utilisateurs soumis à des restrictions d'âge."
     },
     "site-theme-provider-pipe": {
         "system": "Système",
