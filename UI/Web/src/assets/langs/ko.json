@@ -126,7 +126,7 @@
         "include-in-dashboard-label": "대시보드에 포함",
         "include-in-search-label": "검색에 포함",
         "type-tooltip": "라이브러리 유형은 파일 이름이 구문 분석되는 방식과 UI에 챕터(Manga) vs 이슈(Comic)가 표시되는지 여부를 결정합니다. 책은 만화와 같은 방식으로 작동하지만 UI에서 이름이 다릅니다.",
-        "folder-watching-tooltip": "이 라이브러리를 감시하는 서버 폴더를 재정의합니다. 끄면 폴더 감시가 이 라이브러리에 포함된 폴더에서 실행되지 않습니다. 라이브러리가 폴더를 공유하는 경우 폴더가 계속 실행될 수 있습니다.",
+        "folder-watching-tooltip": "이 라이브러리를 감시하는 서버 폴더를 재정의합니다. 꺼져 있으면 이 라이브러리에 포함된 폴더에서 폴더 감시가 실행되지 않습니다. 라이브러리가 폴더를 공유하는 경우 폴더는 계속 실행될 수 있습니다. 검색을 시작하기 전에 항상 10분을 기다립니다.",
         "include-in-recommendation-tooltip": "라이브러리의 시리즈가 권장 페이지에 포함되어야 합니다.",
         "include-in-search-tooltip": "시리즈 및 라이브러리에서 파생된 모든 정보(장르, 인물, 파일)가 검색 결과에 포함되어야 합니다.",
         "allow-scrobbling-tooltip": "Kavita가 읽기 이벤트를 스크로블해야 하는 경우 구성된 제공자에게 읽고 싶어요 상태, 평점 및 리뷰를 읽어야 합니다. 이는 서버에 활성 Kavita+ 구독이 있는 경우에만 발생합니다.",
@@ -346,7 +346,7 @@
         "created": "생성됨",
         "time-to-read": "완독 예상 시간",
         "last-chapter-added": "추가된 항목",
-        "read-progress": "읽기 진행 상황"
+        "read-progress": "마지막으로 읽음"
     },
     "manga-format-stats": {
         "title": "포맷",
@@ -1072,7 +1072,9 @@
         "original": "원본",
         "brightness-label": "밝기",
         "first-time-reading-manga": "메뉴를 열려면 언제든지 이미지를 탭하세요. 다른 설정을 구성하거나 진행 표시줄을 클릭하여 페이지로 이동할 수 있습니다. 이미지의 측면을 탭하면 다음/이전 페이지로 이동합니다.",
-        "no-prev-chapter": "이전 챕터 없음"
+        "no-prev-chapter": "이전 챕터 없음",
+        "unbookmark-page-tooltip": "페이지 북마크 해제",
+        "bookmark-page-tooltip": "페이지 북마크"
     },
     "metadata-filter": {
         "penciller-label": "펜슬러",
@@ -1777,7 +1779,9 @@
     "customize-dashboard-modal": {
         "close": "{{common.close}}",
         "title": "대시보드 사용자 정의",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "add": "{{common.add}}",
+        "no-data": "대시보드에 모든 스마트 필터가 추가되었거나 아직 생성되지 않았습니다."
     },
     "metadata-filter-row": {
         "unit-reading-progress": "퍼센트",
