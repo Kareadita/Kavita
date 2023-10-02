@@ -358,7 +358,7 @@ public static class SeriesFilter
                 return queryable.Where(s => s.Metadata.Tags.Any(t => tags.Contains(t.Id)));
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
-                return queryable.Where(s => s.Metadata.Tags.Any(t => !tags.Contains(t.Id)));
+                return queryable.Where(s => s.Metadata.Tags.All(t => !tags.Contains(t.Id)));
             case FilterComparison.MustContains:
                 // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
@@ -397,7 +397,7 @@ public static class SeriesFilter
                 return queryable.Where(s => s.Metadata.People.Any(p => people.Contains(p.Id)));
             case FilterComparison.NotEqual:
             case FilterComparison.NotContains:
-                return queryable.Where(s => s.Metadata.People.Any(t => !people.Contains(t.Id)));
+                return queryable.Where(s => s.Metadata.People.All(t => !people.Contains(t.Id)));
             case FilterComparison.MustContains:
                 // Deconstruct and do a Union of a bunch of where statements since this doesn't translate
                 var queries = new List<IQueryable<Series>>()
