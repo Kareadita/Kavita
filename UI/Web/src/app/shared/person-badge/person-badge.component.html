@@ -1,8 +1,21 @@
 <div class="tagbadge cursor clickable" *ngIf="person !== undefined">
     <div class="d-flex">
-        <i class="fa fa-user-circle align-self-center me-2" aria-hidden="true"></i>
+        <ng-container *ngIf="isStaff && staff.imageUrl && !staff.imageUrl.endsWith('default.jpg'); else localPerson">
+          <app-image height="24px" width="24px" objectFit="contain" [imageUrl]="staff.imageUrl"></app-image>
+        </ng-container>
+        <ng-template #localPerson>
+          <i class="fa fa-user-circle align-self-center me-2" aria-hidden="true"></i>
+        </ng-template>
         <div class="flex-grow-1">
-          <span class="mt-0 mb-0">{{person.name}}</span>
+          <span class="mt-0 mb-0">
+            {{person.name}}
+          </span>
         </div>
+        <ng-container *ngIf="isStaff">
+          <br/>
+          <div class="flex-grow-1">
+            {{staff.role}}
+          </div>
+        </ng-container>
     </div>
 </div>

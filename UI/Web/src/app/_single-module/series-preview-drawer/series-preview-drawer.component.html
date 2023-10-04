@@ -2,13 +2,37 @@
   <div style="margin-top: 10px">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">
-        {{externalSeries?.name}}
+        <app-loading [loading]="isLoading"></app-loading>
+        <ng-container *ngIf="externalSeries">
+
+          <app-image *ngIf="externalSeries.coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="externalSeries.coverUrl"></app-image>
+          <div class="">
+            {{externalSeries.name}}
+            <br/>
+
+          </div>
+        </ng-container>
+
       </h5>
       <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
     </div>
 
     <div class="offcanvas-body">
-      {{externalSeries?.summary}}
+
+      <ng-container *ngIf="externalSeries">
+        <p *ngIf="externalSeries.summary" [innerHTML]="externalSeries.summary | safeHtml"></p>
+
+        <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="'Staff'">
+          <ng-template #itemTemplate let-item>
+            <app-person-badge class="col-auto" [person]="item" [isStaff]="true"></app-person-badge>
+          </ng-template>
+        </app-metadata-detail>
+
+
+        <a class="btn btn-primary col-12 " [href]="externalSeries.siteUrl" target="_blank" rel="noopener noreferrer">View Site</a>
+      </ng-container>
+
+      <app-loading [loading]="isLoading"></app-loading>
     </div>
   </div>
 </ng-container>
