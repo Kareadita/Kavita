@@ -10,11 +10,12 @@ import {SafeHtmlPipe} from "../../pipe/safe-html.pipe";
 import {A11yClickDirective} from "../../shared/a11y-click.directive";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-series-preview-drawer',
   standalone: true,
-  imports: [CommonModule, TranslocoDirective, ImageComponent, LoadingComponent, SafeHtmlPipe, A11yClickDirective, MetadataDetailComponent, PersonBadgeComponent],
+  imports: [CommonModule, TranslocoDirective, ImageComponent, LoadingComponent, SafeHtmlPipe, A11yClickDirective, MetadataDetailComponent, PersonBadgeComponent, TagBadgeComponent],
   templateUrl: './series-preview-drawer.component.html',
   styleUrls: ['./series-preview-drawer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

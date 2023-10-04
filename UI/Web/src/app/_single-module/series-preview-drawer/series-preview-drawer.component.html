@@ -8,8 +8,6 @@
           <app-image *ngIf="externalSeries.coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="externalSeries.coverUrl"></app-image>
           <div class="">
             {{externalSeries.name}}
-            <br/>
-
           </div>
         </ng-container>
 
@@ -20,11 +18,47 @@
     <div class="offcanvas-body">
 
       <ng-container *ngIf="externalSeries">
+        <span class="text-muted">{{externalSeries.volumeCount}} Volumes / {{externalSeries.chapterCount}} Chapters</span>
         <p *ngIf="externalSeries.summary" [innerHTML]="externalSeries.summary | safeHtml"></p>
+
+        <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="'Genres'">
+          <ng-template #itemTemplate let-item>
+            <app-tag-badge>
+              {{item}}
+            </app-tag-badge>
+          </ng-template>
+        </app-metadata-detail>
+
+        <app-metadata-detail [tags]="externalSeries.tags" [libraryId]="0"  [heading]="'Tags'">
+          <ng-template #itemTemplate let-item>
+            <app-tag-badge>
+              {{item.name}}
+            </app-tag-badge>
+          </ng-template>
+        </app-metadata-detail>
+
 
         <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="'Staff'">
           <ng-template #itemTemplate let-item>
-            <app-person-badge class="col-auto" [person]="item" [isStaff]="true"></app-person-badge>
+            <div class="card mb-3" style="max-width: 180px;">
+              <div class="row g-0">
+                <div class="col-md-4">
+                  <ng-container *ngIf="item.imageUrl && !item.imageUrl.endsWith('default.jpg'); else localPerson">
+                    <app-image height="24px" width="24px" objectFit="contain" [imageUrl]="item.imageUrl"></app-image>
+                  </ng-container>
+                  <ng-template #localPerson>
+                    <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>
+                  </ng-template>
+                </div>
+                <div class="col-md-8">
+                  <div class="card-body">
+                    <h6 class="card-title">{{item.name}}</h6>
+                    <p *ngIf="item.description" class="card-text" style="font-size: 14px">{{item.description}}</p>
+                    <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </ng-template>
         </app-metadata-detail>
 
