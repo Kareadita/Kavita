@@ -327,14 +327,18 @@
                   <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
                     <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
                       <ng-container title>
-                        <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
+                        <span (click)="previewSeries(item, false); $event.stopPropagation(); $event.preventDefault();">
+                          <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
+                        </span>
                       </ng-container>
                     </app-external-list-item>
                   </ng-container>
                   <ng-template #externalRec>
                     <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
                       <ng-container title>
-                        <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                        <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
+                          <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                        </span>
                       </ng-container>
                     </app-external-list-item>
                   </ng-template>
