@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { FilterUtilitiesService } from '../shared/_services/filter-utilities.service';
 import { UtilityService } from '../shared/_services/utility.service';
 import { Chapter } from '../_models/chapter';
 import { ChapterMetadata } from '../_models/metadata/chapter-metadata';
@@ -21,6 +20,7 @@ import { SeriesFilterV2 } from '../_models/metadata/v2/series-filter-v2';
 import {UserReview} from "../_single-module/review-card/user-review";
 import {Rating} from "../_models/rating";
 import {Recommendation} from "../_models/series-detail/recommendation";
+import {ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
 
 @Injectable({
   providedIn: 'root'
@@ -227,5 +227,9 @@ export class SeriesService {
 
   removeFromOnDeck(seriesId: number) {
     return this.httpClient.post(this.baseUrl + 'series/remove-from-on-deck?seriesId=' + seriesId, {});
+  }
+
+  getExternalSeriesDetails(aniListId?: number, malId?: number) {
+    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + aniListId + '&malId=' + malId);
   }
 }

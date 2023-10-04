@@ -1,0 +1,14 @@
+<ng-container *transloco="let t">
+  <div style="margin-top: 10px">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">
+        {{externalSeries?.name}}
+      </h5>
+      <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
+    </div>
+
+    <div class="offcanvas-body">
+      {{externalSeries?.summary}}
+    </div>
+  </div>
+</ng-container>

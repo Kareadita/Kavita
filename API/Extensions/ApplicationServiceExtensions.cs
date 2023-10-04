@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace API.Extensions;
 
@@ -73,6 +72,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.8.5"
+    "version": "0.7.8.6"
   },
   "servers": [
     {
@@ -9107,6 +9107,53 @@
         }
       }
     },
+    "/api/Series/external-series-detail": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "parameters": [
+          {
+            "name": "aniListId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "malId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -13766,6 +13813,16 @@
           },
           "summary": {
             "type": "string",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           }
         },

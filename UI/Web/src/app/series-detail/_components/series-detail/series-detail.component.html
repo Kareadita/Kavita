@@ -11,6 +11,8 @@
         <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
       </ng-container>
 
+
+
       <ng-template #extrasDrawer let-offcanvas>
         <div style="margin-top: 56px">
           <div class="offcanvas-header">
@@ -315,7 +317,7 @@
                       <app-series-card class="col-auto mt-2 mb-2" [data]="item" [libraryId]="item.libraryId"></app-series-card>
                     </ng-container>
                     <ng-template #externalRec>
-                      <app-external-series-card class="col-auto mt-2 mb-2" [data]="item"></app-external-series-card>
+                      <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
                     </ng-template>
                   </ng-container>
                 </div>

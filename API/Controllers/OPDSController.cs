@@ -1022,7 +1022,8 @@ public class OpdsController : BaseApiController
     /// <param name="pageNumber"></param>
     /// <returns></returns>
     [HttpGet("{apiKey}/image")]
-    public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId, [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
+    public async Task<ActionResult> GetPageStreamedImage(string apiKey, [FromQuery] int libraryId, [FromQuery] int seriesId,
+        [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber)
     {
         var userId = await GetUser(apiKey);
         if (pageNumber < 0) return BadRequest(await _localizationService.Translate(userId, "greater-0", "Page"));

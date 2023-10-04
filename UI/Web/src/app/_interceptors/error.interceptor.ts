@@ -110,8 +110,6 @@ export class ErrorInterceptor implements HttpInterceptor {
       if (error.message !== 'User is not authenticated' && error.message !== 'errors.user-not-auth') {
         console.error('500 error: ', error);
       }
-      // This just throws duplicate errors for no reason
-      //this.toast(error.message);
     }
      else {
       this.toast('errors.unknown-crit');
@@ -120,7 +118,6 @@ export class ErrorInterceptor implements HttpInterceptor {
   }
 
   private handleAuthError(error: any) {
-
     // Special hack for register url, to not care about auth
     if (location.href.includes('/registration/confirm-email?token=')) {
       return;
