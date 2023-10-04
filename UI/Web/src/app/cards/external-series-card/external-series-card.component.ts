@@ -32,14 +32,14 @@ export class ExternalSeriesCardComponent {
   @ViewChild('link', {static: false}) link!: ElementRef<HTMLAnchorElement>;
 
   private readonly offcanvasService = inject(NgbOffcanvas);
-  private readonly seriesService = inject(SeriesService);
 
   handleClick() {
     if (this.previewOnClick) {
       const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
-      ref.componentInstance.isExternal = true;
+      ref.componentInstance.isExternalSeries = true;
       ref.componentInstance.aniListId = this.data.aniListId;
       ref.componentInstance.malId = this.data.malId;
+      ref.componentInstance.name = this.data.name;
       return;
     }
     if (this.link) {

@@ -3,23 +3,20 @@
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">
         <app-loading [loading]="isLoading"></app-loading>
-        <ng-container *ngIf="externalSeries">
-
-          <app-image *ngIf="externalSeries.coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="externalSeries.coverUrl"></app-image>
+        <ng-container *ngIf="CoverUrl as coverUrl">
+          <app-image *ngIf="coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="coverUrl"></app-image>
           <div class="">
-            {{externalSeries.name}}
+            {{name}}
           </div>
         </ng-container>
-
       </h5>
       <button type="button" class="btn-close text-reset" [attr.aria-label]="t('common.close')" (click)="close()"></button>
     </div>
 
     <div class="offcanvas-body">
-
-      <ng-container *ngIf="externalSeries">
-        <span class="text-muted">{{externalSeries.volumeCount}} Volumes / {{externalSeries.chapterCount}} Chapters</span>
-        <p *ngIf="externalSeries.summary" [innerHTML]="externalSeries.summary | safeHtml"></p>
+      <ng-container *ngIf="externalSeries; else localSeriesBody">
+        <span class="text-muted" style="font-size: 14px; color: lightgrey">{{externalSeries.volumeCount}} Volumes / {{externalSeries.chapterCount}} Chapters</span>
+        <app-read-more *ngIf="externalSeries.summary" [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
 
         <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="'Genres'">
           <ng-template #itemTemplate let-item>
@@ -61,11 +58,53 @@
             </div>
           </ng-template>
         </app-metadata-detail>
-
-
-        <a class="btn btn-primary col-12 " [href]="externalSeries.siteUrl" target="_blank" rel="noopener noreferrer">View Site</a>
       </ng-container>
 
+      <ng-template #localSeriesBody>
+        <ng-container *ngIf="localSeries">
+          <span class="text-muted" style="font-size: 14px; color: lightgrey">{{localSeries.publicationStatus | publicationStatus}}</span>
+<!--          <p *ngIf="localSeries.summary" [innerHTML]="localSeries.summary | safeHtml"></p>-->
+          <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
+
+          <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="'Genres'">
+            <ng-template #itemTemplate let-item>
+              <app-tag-badge>
+                {{item.title}}
+              </app-tag-badge>
+            </ng-template>
+          </app-metadata-detail>
+
+          <app-metadata-detail [tags]="localSeries.tags" [libraryId]="0" [heading]="'Tags'">
+            <ng-template #itemTemplate let-item>
+              <app-tag-badge>
+                {{item.title}}
+              </app-tag-badge>
+            </ng-template>
+          </app-metadata-detail>
+
+          <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="'Staff'">
+            <ng-template #itemTemplate let-item>
+              <div class="card mb-3" style="max-width: 180px;">
+                <div class="row g-0">
+                  <div class="col-md-4">
+                    <i class="fa fa-user-circle align-self-center" style="font-size: 28px; margin-top: 24px; margin-left: 24px" aria-hidden="true"></i>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="card-body">
+                      <h6 class="card-title">{{item.name}}</h6>
+                      <p *ngIf="item.description" class="card-text" style="font-size: 14px">{{item.description}}</p>
+                      <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </app-metadata-detail>
+
+        </ng-container>
+      </ng-template>
+
+      <a class="btn btn-primary col-12 " [href]="url" target="_blank" rel="noopener noreferrer">View Site</a>
       <app-loading [loading]="isLoading"></app-loading>
     </div>
   </div>
