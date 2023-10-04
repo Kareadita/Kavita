@@ -53,7 +53,7 @@
     "screenfull": "^6.0.2",
     "swiper": "^8.4.6",
     "tslib": "^2.6.1",
-    "zone.js": "^0.14.0"
+    "zone.js": "^0.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^16.2.4",
