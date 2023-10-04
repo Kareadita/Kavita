@@ -40,6 +40,8 @@ public class SeriesController : BaseApiController
     private readonly IEasyCachingProvider _ratingCacheProvider;
     private readonly IEasyCachingProvider _reviewCacheProvider;
     private readonly IEasyCachingProvider _recommendationCacheProvider;
+    private readonly IEasyCachingProvider _externalSeriesCacheProvider;
+    public const string CacheKey = "recommendation_";
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
@@ -57,6 +59,7 @@ public class SeriesController : BaseApiController
         _ratingCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
         _reviewCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
         _recommendationCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+        _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
     }
 
     /// <summary>
@@ -583,7 +586,21 @@ public class SeriesController : BaseApiController
     [HttpGet("external-series-detail")]
     public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId)
     {
-        return Ok(await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId));
+        if (!await _licenseService.HasActiveLicense())
+        {
+            return BadRequest();
+        }
+
+        var cacheKey = $"{CacheKey}-{aniListId}-{malId}";
+        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
+        if (results.HasValue)
+        {
+            return Ok(results.Value);
+        }
+
+        var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId);
+        await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
+        return Ok(ret);
     }
 
 }

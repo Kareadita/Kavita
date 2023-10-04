@@ -89,6 +89,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
         });
 
         services.AddMemoryCache(options =>
