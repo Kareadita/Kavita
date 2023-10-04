@@ -2,7 +2,6 @@
   <div style="margin-top: 10px">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">
-        <app-loading [loading]="isLoading"></app-loading>
         <ng-container *ngIf="CoverUrl as coverUrl">
           <app-image *ngIf="coverUrl" height="230px" width="160px" maxHeight="230px" objectFit="contain" [imageUrl]="coverUrl"></app-image>
           <div class="">
@@ -15,10 +14,10 @@
 
     <div class="offcanvas-body">
       <ng-container *ngIf="externalSeries; else localSeriesBody">
-        <span class="text-muted" style="font-size: 14px; color: lightgrey">{{externalSeries.volumeCount}} Volumes / {{externalSeries.chapterCount}} Chapters</span>
+        <span class="text-muted" style="font-size: 14px; color: lightgrey">{{t('series-preview-drawer.vols-and-chapters', {volCount: externalSeries.volumeCount, chpCount: externalSeries.chapterCount})}}</span>
         <app-read-more *ngIf="externalSeries.summary" [maxLength]="300" [text]="externalSeries.summary"></app-read-more>
 
-        <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="'Genres'">
+        <app-metadata-detail [tags]="externalSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
           <ng-template #itemTemplate let-item>
             <app-tag-badge>
               {{item}}
@@ -26,7 +25,7 @@
           </ng-template>
         </app-metadata-detail>
 
-        <app-metadata-detail [tags]="externalSeries.tags" [libraryId]="0"  [heading]="'Tags'">
+        <app-metadata-detail [tags]="externalSeries.tags" [libraryId]="0"  [heading]="t('series-preview-drawer.tags-label')">
           <ng-template #itemTemplate let-item>
             <app-tag-badge>
               {{item.name}}
@@ -35,7 +34,7 @@
         </app-metadata-detail>
 
 
-        <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="'Staff'">
+        <app-metadata-detail [tags]="externalSeries.staff" [libraryId]="0"  [heading]="t('series-preview-drawer.staff-label')">
           <ng-template #itemTemplate let-item>
             <div class="card mb-3" style="max-width: 180px;">
               <div class="row g-0">
@@ -50,7 +49,6 @@
                 <div class="col-md-8">
                   <div class="card-body">
                     <h6 class="card-title">{{item.name}}</h6>
-<!--                    <p *ngIf="item.description" class="card-text" style="font-size: 14px">{{item.description}}</p>-->
                     <p class="card-text" style="font-size: 14px"><small class="text-muted">{{item.role}}</small></p>
                   </div>
                 </div>
@@ -66,7 +64,7 @@
 <!--          <p *ngIf="localSeries.summary" [innerHTML]="localSeries.summary | safeHtml"></p>-->
           <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
 
-          <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="'Genres'">
+          <app-metadata-detail [tags]="localSeries.genres" [libraryId]="0"  [heading]="t('series-preview-drawer.genres-label')">
             <ng-template #itemTemplate let-item>
               <app-tag-badge>
                 {{item.title}}
@@ -74,7 +72,7 @@
             </ng-template>
           </app-metadata-detail>
 
-          <app-metadata-detail [tags]="localSeries.tags" [libraryId]="0" [heading]="'Tags'">
+          <app-metadata-detail [tags]="localSeries.tags" [libraryId]="0" [heading]="t('series-preview-drawer.tags-label')">
             <ng-template #itemTemplate let-item>
               <app-tag-badge>
                 {{item.title}}
@@ -82,7 +80,7 @@
             </ng-template>
           </app-metadata-detail>
 
-          <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="'Staff'">
+          <app-metadata-detail [tags]="localStaff" [libraryId]="0" [heading]="t('series-preview-drawer.staff-label')">
             <ng-template #itemTemplate let-item>
               <div class="card mb-3" style="max-width: 180px;">
                 <div class="row g-0">
@@ -104,7 +102,8 @@
         </ng-container>
       </ng-template>
 
-      <a class="btn btn-primary col-12 " [href]="url" target="_blank" rel="noopener noreferrer">View Site</a>
+      <a class="btn btn-primary col-12 " [href]="url" target="_blank" rel="noopener noreferrer">
+        {{t('series-preview-drawer.view-series')}}</a>
       <app-loading [loading]="isLoading"></app-loading>
     </div>
   </div>
