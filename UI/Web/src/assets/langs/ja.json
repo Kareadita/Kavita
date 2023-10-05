@@ -1,11 +1,11 @@
 {
     "login": {
         "title": "ログイン",
-        "username": "",
-        "password": "",
-        "password-validation": "",
+        "username": "{{common.username}}",
+        "password": "{{common.password}}",
+        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "",
-        "submit": ""
+        "submit": "{{common.submit}}"
     },
     "dashboard": {
         "no-libraries": "",
@@ -202,7 +202,7 @@
         "valid-email": ""
     },
     "change-password": {
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "current-password-label": "",
         "new-password-label": "",
         "confirm-password-label": "",
@@ -561,7 +561,7 @@
         "description": "",
         "error-label": "",
         "username-label": "",
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "email-label": "",
         "required-field": "",
         "valid-email": "",
@@ -577,7 +577,7 @@
     "confirm-reset-password": {
         "title": "",
         "description": "",
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "required-field": "",
         "submit": "",
         "password-validation": ""
@@ -588,7 +588,7 @@
         "username-label": "",
         "email-label": "",
         "email-tooltip": "",
-        "password-label": "",
+        "password-label": "{{common.password}}",
         "required-field": "",
         "valid-email": "",
         "password-validation": "",
