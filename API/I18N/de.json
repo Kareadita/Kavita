@@ -156,5 +156,8 @@
     "reading-list-title-required": "Leselisten Titel darf nicht leer sein",
     "volume-num": "Band {0}",
     "on-deck": "Weiterlesen",
-    "browse-on-deck": "Weiterlesen durchsuchen"
+    "browse-on-deck": "Weiterlesen durchsuchen",
+    "want-to-read": "Wunschliste",
+    "browse-want-to-read": "Wunschliste durchsuchen",
+    "collection-deleted": "Sammlung gelöscht"
 }
