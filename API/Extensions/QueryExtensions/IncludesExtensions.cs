@@ -141,6 +141,12 @@ public static class IncludesExtensions
                 .ThenInclude(s => s.SmartFilter);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.SideNavStreams))
+        {
+            query = query.Include(u => u.SideNavStreams)
+                .ThenInclude(s => s.SmartFilter);
+        }
+
         return query.AsSplitQuery();
     }
 

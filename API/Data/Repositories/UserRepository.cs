@@ -37,7 +37,8 @@ public enum AppUserIncludes
     Devices = 256,
     ScrobbleHolds = 512,
     SmartFilters = 1024,
-    DashboardStreams = 2048
+    DashboardStreams = 2048,
+    SideNavStreams = 4096
 }
 
 public interface IUserRepository

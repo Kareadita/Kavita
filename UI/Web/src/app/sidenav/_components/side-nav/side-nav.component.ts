@@ -29,6 +29,7 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
 import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
+import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 
 @Component({
   selector: 'app-side-nav',
@@ -50,6 +51,7 @@ export class SideNavComponent implements OnInit {
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
+  navStreams: SideNavStream[] = [];
 
   constructor(private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,

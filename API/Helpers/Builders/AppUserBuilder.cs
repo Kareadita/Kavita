@@ -29,17 +29,31 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Progresses = new List<AppUserProgress>(),
             Devices = new List<Device>(),
             Id = 0,
-            DashboardStreams = new List<AppUserDashboardStream>()
+            DashboardStreams = new List<AppUserDashboardStream>(),
+            SideNavStreams = new List<AppUserSideNavStream>()
         };
         foreach (var s in Seed.DefaultStreams)
         {
             _appUser.DashboardStreams.Add(s);
+        }
+        foreach (var s in Seed.DefaultSideNavStreams)
+        {
+            _appUser.SideNavStreams.Add(s);
         }
     }
 
     public AppUserBuilder WithLibrary(Library library)
     {
         _appUser.Libraries.Add(library);
+        _appUser.SideNavStreams.Add(new AppUserSideNavStream()
+        {
+            Name = library.Name,
+            IsProvided = true,
+            Visible = true,
+            LibraryId = library.Id,
+            StreamType = SideNavStreamType.Library,
+            Order = _appUser.SideNavStreams.Max(s => s.Order) + 1,
+        });
         return this;
     }
 
