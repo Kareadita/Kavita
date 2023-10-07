@@ -132,7 +132,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
         builder.Entity<AppUserSideNavStream>()
             .Property(b => b.StreamType)
-            .HasDefaultValue(DashboardStreamType.SmartFilter);
+            .HasDefaultValue(SideNavStreamType.SmartFilter);
         builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);

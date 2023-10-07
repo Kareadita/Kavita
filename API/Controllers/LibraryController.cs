@@ -97,6 +97,8 @@ public class LibraryController : BaseApiController
             admin.Libraries.Add(library);
         }
 
+        // TODO: Add library to the user's SideNavStream
+
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
@@ -328,6 +330,8 @@ public class LibraryController : BaseApiController
             await _unitOfWork.CommitAsync();
 
             _unitOfWork.LibraryRepository.Delete(library);
+
+            // TODO: Remove library from all users' SideNavStream
 
             await _unitOfWork.CommitAsync();
 

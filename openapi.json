@@ -924,6 +924,55 @@
         }
       }
     },
+    "/api/Account/sidenav": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Return's the user's side nav",
+        "parameters": [
+          {
+            "name": "visibleOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Account/add-dashboard-stream": {
       "post": {
         "tags": [
@@ -12261,6 +12310,9 @@
           "smartFilter": {
             "$ref": "#/components/schemas/AppUserSmartFilter"
           },
+          "library": {
+            "$ref": "#/components/schemas/Library"
+          },
           "appUserId": {
             "type": "integer",
             "format": "int32"
@@ -17361,6 +17413,79 @@
               "$ref": "#/components/schemas/SeriesDto"
             },
             "description": "Last 5 Series read",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SideNavStreamDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "isProvided": {
+            "type": "boolean",
+            "description": "Is System Provided"
+          },
+          "order": {
+            "type": "integer",
+            "description": "Sort Order on the Dashboard",
+            "format": "int32"
+          },
+          "smartFilterEncoded": {
+            "type": "string",
+            "description": "If Not IsProvided, the appropriate smart filter",
+            "nullable": true
+          },
+          "smartFilterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "streamType": {
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7
+            ],
+            "type": "integer",
+            "description": "For system provided",
+            "format": "int32"
+          },
+          "visible": {
+            "type": "boolean"
+          },
+          "library": {
+            "$ref": "#/components/schemas/LibraryDto"
+          },
+          "libraryType": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "libraryCover": {
+            "type": "string",
             "nullable": true
           }
         },

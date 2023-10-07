@@ -181,6 +181,31 @@ public static class Seed
         }
     }
 
+    public static async Task SeedDefaultSideNavStreams(IUnitOfWork unitOfWork)
+    {
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
+        foreach (var user in allUsers)
+        {
+            if (user.SideNavStreams.Count != 0) continue;
+            user.SideNavStreams ??= new List<AppUserSideNavStream>();
+            foreach (var defaultStream in DefaultSideNavStreams)
+            {
+                var newStream = new AppUserSideNavStream()
+                {
+                    Name = defaultStream.Name,
+                    IsProvided = defaultStream.IsProvided,
+                    Order = defaultStream.Order,
+                    StreamType = defaultStream.StreamType,
+                    Visible = defaultStream.Visible,
+                };
+
+                user.SideNavStreams.Add(newStream);
+            }
+            unitOfWork.UserRepository.Update(user);
+            await unitOfWork.CommitAsync();
+        }
+    }
+
     public static async Task SeedSettings(DataContext context, IDirectoryService directoryService)
     {
         await context.Database.EnsureCreatedAsync();

@@ -1,6 +1,9 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
+import {HttpClient} from "@angular/common/http";
+import {environment} from "../../environments/environment";
+import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 
 @Injectable({
   providedIn: 'root'
@@ -27,15 +30,20 @@ export class NavService {
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
   private renderer: Renderer2;
+  baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2) {
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
     this.renderer = rendererFactory.createRenderer(null, null);
     this.showNavBar();
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();
   }
- 
+
+  getSideNavStreams(visibleOnly = true) {
+    return this.httpClient.get<Array<SideNavStream>>(this.baseUrl + 'account/sidenav?visibleOnly=' + visibleOnly);
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
@@ -47,7 +55,7 @@ export class NavService {
   }
 
   /**
-   * Hides the top nav bar. 
+   * Hides the top nav bar.
    */
   hideNavBar() {
     this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');

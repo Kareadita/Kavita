@@ -10,6 +10,7 @@ using API.DTOs;
 using API.DTOs.Account;
 using API.DTOs.Dashboard;
 using API.DTOs.Email;
+using API.DTOs.SideNav;
 using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
@@ -1057,6 +1058,17 @@ public class AccountController : BaseApiController
         var streams = await _unitOfWork.UserRepository.GetDashboardStreams(User.GetUserId(), visibleOnly);
         return Ok(streams);
     }
+
+    /// <summary>
+    /// Return's the user's side nav
+    /// </summary>
+    [HttpGet("sidenav")]
+    public async Task<ActionResult<IEnumerable<SideNavStreamDto>>> GetSideNav(bool visibleOnly = true)
+    {
+        var streams = await _unitOfWork.UserRepository.GetSideNavStreams(User.GetUserId(), visibleOnly);
+        return Ok(streams);
+    }
+
 
     /// <summary>
     /// Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible

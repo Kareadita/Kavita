@@ -11,6 +11,7 @@ using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
+using API.DTOs.SideNav;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
@@ -84,6 +85,7 @@ public interface IUserRepository
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
+    Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
 }
 
 public class UserRepository : IUserRepository
@@ -351,6 +353,32 @@ public class UserRepository : IUserRepository
         return await _context.AppUserDashboardStream
             .Include(d => d.SmartFilter)
             .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false)
+    {
+        return await _context.AppUserSideNavStream
+            .Where(d => d.AppUserId == userId)
+            .WhereIf(visibleOnly, d => d.Visible)
+            .OrderBy(d => d.Order)
+            .Include(d => d.SmartFilter)
+            .Include(d => d.Library)
+            .Select(d => new SideNavStreamDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                IsProvided = d.IsProvided,
+                SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
+                SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                LibraryId = d.LibraryId ?? 0,
+                Library = _context.Library.Where(l => l.Id == d.LibraryId).ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).First(),
+                LibraryType = d.LibraryId > 0 ? d.Library.Type : null,
+                LibraryCover = d.Library.CoverImage,
+                StreamType = d.StreamType,
+                Order = d.Order,
+                Visible = d.Visible
+            })
             .ToListAsync();
     }
 

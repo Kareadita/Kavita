@@ -30,6 +30,7 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {SentenceCasePipe} from "../../../pipe/sentence-case.pipe";
 import {CustomizeDashboardModalComponent} from "../customize-dashboard-modal/customize-dashboard-modal.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
+import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 
 @Component({
   selector: 'app-side-nav',
@@ -58,6 +59,10 @@ export class SideNavComponent implements OnInit {
     private actionFactoryService: ActionFactoryService, private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
+
+    this.navService.getSideNavStreams().subscribe(s => {
+      this.navStreams = s;
+    });
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
@@ -143,8 +148,14 @@ export class SideNavComponent implements OnInit {
     return null;
   }
 
+  getNavStreamLibraryImage(navStream: SideNavStream) {
+    if (navStream.libraryCover) return this.imageService.getLibraryCoverImage(navStream.libraryId!);
+    return null;
+  }
+
   toggleNavBar() {
     this.navService.toggleSideNav();
   }
 
+  protected readonly SideNavStreamType = SideNavStreamType;
 }

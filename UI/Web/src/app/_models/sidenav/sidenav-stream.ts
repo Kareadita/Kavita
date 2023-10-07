@@ -1,4 +1,5 @@
 import {SideNavStreamType} from "./sidenav-stream-type.enum";
+import {LibraryType} from "../library";
 
 export interface SideNavStream {
   name: string;
@@ -6,4 +7,6 @@ export interface SideNavStream {
   libraryId?: number;
   isProvided: boolean;
   type: SideNavStreamType;
+  libraryType?: LibraryType;
+  libraryCover?: string;
 }

@@ -30,8 +30,23 @@
             </ng-container>
         </app-side-nav-item>
 
+
         <ng-container *ngFor="let navStream of navStreams">
-          <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="navStream.name" link="/all-series/"></app-side-nav-item>
+          <ng-container [ngSwitch]="navStream.type">
+            <ng-container *ngSwitchCase="SideNavStreamType.Library">
+              <app-side-nav-item [link]="'/library/' + navStream.libraryId + '/'"
+                                 [icon]="getLibraryTypeIcon(navStream.libraryType!)" [imageUrl]="getNavStreamLibraryImage(navStream)" [title]="navStream.name" [comparisonMethod]="'startsWith'">
+                <ng-container actions>
+                  <app-card-actionables [actions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"
+                                        (actionHandler)="performAction($event, library)"></app-card-actionables>
+                </ng-container>
+              </app-side-nav-item>
+            </ng-container>
+
+            <ng-container *ngSwitchDefault>
+              <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="navStream.name" link="/all-series/"></app-side-nav-item>
+            </ng-container>
+          </ng-container>
         </ng-container>
 
     </div>
