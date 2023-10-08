@@ -2,8 +2,13 @@
     width: 100%;
     word-wrap: break-word;
     white-space: pre-wrap;
+
 }
 
-img {
-  max-width: 100%;
+::ng-deep .update-body {
+  img {
+    max-width: 100%;
+  }
 }
+
+
