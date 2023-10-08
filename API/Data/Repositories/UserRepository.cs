@@ -358,12 +358,11 @@ public class UserRepository : IUserRepository
 
     public async Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false)
     {
-        return await _context.AppUserSideNavStream
+        var sideNavStreams = await _context.AppUserSideNavStream
             .Where(d => d.AppUserId == userId)
             .WhereIf(visibleOnly, d => d.Visible)
             .OrderBy(d => d.Order)
             .Include(d => d.SmartFilter)
-            .Include(d => d.Library)
             .Select(d => new SideNavStreamDto()
             {
                 Id = d.Id,
@@ -372,14 +371,27 @@ public class UserRepository : IUserRepository
                 SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
                 LibraryId = d.LibraryId ?? 0,
-                Library = _context.Library.Where(l => l.Id == d.LibraryId).ProjectTo<LibraryDto>(_mapper.ConfigurationProvider).First(),
-                LibraryType = d.LibraryId > 0 ? d.Library.Type : null,
-                LibraryCover = d.Library.CoverImage,
                 StreamType = d.StreamType,
                 Order = d.Order,
                 Visible = d.Visible
             })
             .ToListAsync();
+
+        var libraryIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.Library)
+            .Select(d => d.LibraryId)
+            .ToList();
+
+        var libraryDtos = _context.Library
+            .Where(l => libraryIds.Contains(l.Id))
+            .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .ToList();
+
+        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.Library))
+        {
+            dto.Library = libraryDtos.FirstOrDefault(l => l.Id == dto.LibraryId);
+        }
+
+        return sideNavStreams;
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

@@ -43,26 +43,30 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 export class SideNavComponent implements OnInit {
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
 
+  navStreams: SideNavStream[] = [];
   libraries: Library[] = [];
-  actions: ActionItem<Library>[] = [];
+  actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
   homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
+
   filterQuery: string = '';
   filterLibrary = (library: Library) => {
     return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
-  navStreams: SideNavStream[] = [];
+  protected readonly SideNavStreamType = SideNavStreamType;
+
 
   constructor(private libraryService: LibraryService,
     public utilityService: UtilityService, private messageHub: MessageHubService,
-    private actionFactoryService: ActionFactoryService, private actionService: ActionService,
+    private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
 
-    this.navService.getSideNavStreams().subscribe(s => {
-      this.navStreams = s;
-    });
+    // this.navService.getSideNavStreams().subscribe(s => {
+    //   this.navStreams = s;
+    // });
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
@@ -85,14 +89,20 @@ export class SideNavComponent implements OnInit {
         this.libraries = libraries;
         this.cdRef.markForCheck();
       });
-      this.actions = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
-      this.cdRef.markForCheck();
+      this.navService.getSideNavStreams().subscribe(s => {
+        this.navStreams = s;
+        this.cdRef.markForCheck();
+      });
     });
 
     // TODO: Investigate this, as it might be expensive
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
       this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = [...libraries];
+        this.cdRef.markForCheck();
+      });
+      this.navService.getSideNavStreams().subscribe(s => {
+        this.navStreams = [...s];
         this.cdRef.markForCheck();
       });
     });
@@ -119,9 +129,7 @@ export class SideNavComponent implements OnInit {
 
   handleHomeActions() {
     this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl'});
-    // TODO: If on /, then refresh the page layout
   }
-
 
   importCbl() {
     this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
@@ -148,14 +156,9 @@ export class SideNavComponent implements OnInit {
     return null;
   }
 
-  getNavStreamLibraryImage(navStream: SideNavStream) {
-    if (navStream.libraryCover) return this.imageService.getLibraryCoverImage(navStream.libraryId!);
-    return null;
-  }
 
   toggleNavBar() {
     this.navService.toggleSideNav();
   }
 
-  protected readonly SideNavStreamType = SideNavStreamType;
 }

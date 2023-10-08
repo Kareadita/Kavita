@@ -21,14 +21,14 @@ public class SideNavStreamDto
     /// <remarks>Encoded filter</remarks>
     public string? SmartFilterEncoded { get; set; }
     public int? SmartFilterId { get; set; }
-    public int? LibraryId { get; set; }
     /// <summary>
     /// For system provided
     /// </summary>
     public SideNavStreamType StreamType { get; set; }
     public bool Visible { get; set; }
-    public LibraryDto Library { get; set; }
-
-    public LibraryType? LibraryType { get; set; }
-    public string? LibraryCover { get; set; }
+    public int? LibraryId { get; set; }
+    /// <summary>
+    /// Only available for SideNavStreamType.Library
+    /// </summary>
+    public LibraryDto? Library { get; set; }
 }

@@ -5,15 +5,15 @@
           <app-card-actionables [actions]="homeActions" [labelBy]="t('home')" iconClass="fa-ellipsis-v" (actionHandler)="handleHomeActions()"></app-card-actionables>
         </ng-container>
       </app-side-nav-item>
-      <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
-      <app-side-nav-item icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>
-      <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">
-          <ng-container actions>
-              <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>
-          </ng-container>
-      </app-side-nav-item>
-      <app-side-nav-item icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>
-      <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>
+<!--      <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>-->
+<!--      <app-side-nav-item icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>-->
+<!--      <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">-->
+<!--          <ng-container actions>-->
+<!--              <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>-->
+<!--          </ng-container>-->
+<!--      </app-side-nav-item>-->
+<!--      <app-side-nav-item icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>-->
+<!--      <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>-->
 
       <div class="mb-2 mt-3 ms-2 me-2" *ngIf="libraries.length > 10 && (navService?.sideNavCollapsed$ | async) === false">
             <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
@@ -23,25 +23,50 @@
             </div>
         </div>
 
-        <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id + '/'"
-        [icon]="getLibraryTypeIcon(library.type)" [imageUrl]="getLibraryImage(library)" [title]="library.name" [comparisonMethod]="'startsWith'">
-            <ng-container actions>
-                <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>
-            </ng-container>
-        </app-side-nav-item>
+<!--        <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id + '/'"-->
+<!--        [icon]="getLibraryTypeIcon(library.type)" [imageUrl]="getLibraryImage(library)" [title]="library.name" [comparisonMethod]="'startsWith'">-->
+<!--            <ng-container actions>-->
+<!--                <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>-->
+<!--            </ng-container>-->
+<!--        </app-side-nav-item>-->
 
 
         <ng-container *ngFor="let navStream of navStreams">
-          <ng-container [ngSwitch]="navStream.type">
+          <ng-container [ngSwitch]="navStream.streamType">
             <ng-container *ngSwitchCase="SideNavStreamType.Library">
               <app-side-nav-item [link]="'/library/' + navStream.libraryId + '/'"
-                                 [icon]="getLibraryTypeIcon(navStream.libraryType!)" [imageUrl]="getNavStreamLibraryImage(navStream)" [title]="navStream.name" [comparisonMethod]="'startsWith'">
+                                 [icon]="getLibraryTypeIcon(navStream.library.type!)" [imageUrl]="getLibraryImage(navStream.library)" [title]="navStream.name" [comparisonMethod]="'startsWith'">
                 <ng-container actions>
                   <app-card-actionables [actions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"
-                                        (actionHandler)="performAction($event, library)"></app-card-actionables>
+                                        (actionHandler)="performAction($event, navStream.library)"></app-card-actionables>
                 </ng-container>
               </app-side-nav-item>
             </ng-container>
+
+            <ng-container *ngSwitchCase="SideNavStreamType.AllSeries">
+              <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="SideNavStreamType.Bookmarks">
+              <app-side-nav-item icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>
+            </ng-container>
+            <ng-container *ngSwitchCase="SideNavStreamType.ReadingLists">
+              <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">
+                <ng-container actions>
+                  <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>
+                </ng-container>
+              </app-side-nav-item>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="SideNavStreamType.Collections">
+              <app-side-nav-item icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>
+            </ng-container>
+
+            <ng-container *ngSwitchCase="SideNavStreamType.WantToRead">
+              <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
+            </ng-container>
+
+
 
             <ng-container *ngSwitchDefault>
               <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="navStream.name" link="/all-series/"></app-side-nav-item>

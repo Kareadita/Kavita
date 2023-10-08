@@ -25,7 +25,6 @@ public class AppUserSideNavStream
     /// If Not IsProvided, the appropriate smart filter
     /// </summary>
     public AppUserSmartFilter? SmartFilter { get; set; }
-    public Library? Library { get; set; }
     public int AppUserId { get; set; }
     public AppUser AppUser { get; set; }
 }

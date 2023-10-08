@@ -12291,14 +12291,14 @@
           },
           "streamType": {
             "enum": [
-              0,
               1,
               2,
               3,
               4,
               5,
               6,
-              7
+              7,
+              8
             ],
             "type": "integer",
             "description": "For system provided",
@@ -12309,9 +12309,6 @@
           },
           "smartFilter": {
             "$ref": "#/components/schemas/AppUserSmartFilter"
-          },
-          "library": {
-            "$ref": "#/components/schemas/Library"
           },
           "appUserId": {
             "type": "integer",
@@ -17448,21 +17445,16 @@
             "format": "int32",
             "nullable": true
           },
-          "libraryId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
           "streamType": {
             "enum": [
-              0,
               1,
               2,
               3,
               4,
               5,
               6,
-              7
+              7,
+              8
             ],
             "type": "integer",
             "description": "For system provided",
@@ -17471,22 +17463,13 @@
           "visible": {
             "type": "boolean"
           },
-          "library": {
-            "$ref": "#/components/schemas/LibraryDto"
-          },
-          "libraryType": {
-            "enum": [
-              0,
-              1,
-              2
-            ],
+          "libraryId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
           },
-          "libraryCover": {
-            "type": "string",
-            "nullable": true
+          "library": {
+            "$ref": "#/components/schemas/LibraryDto"
           }
         },
         "additionalProperties": false
