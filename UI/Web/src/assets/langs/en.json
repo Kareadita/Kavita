@@ -759,7 +759,9 @@
         "filter-label": "Filter",
         "all-series": "All Series",
         "clear": "Clear",
-        "donate": "Donate"
+        "donate": "Donate",
+        "back": "Back",
+        "more": "More"
     },
 
     "library-settings-modal": {

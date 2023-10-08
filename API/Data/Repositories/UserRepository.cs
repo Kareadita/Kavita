@@ -52,8 +52,8 @@ public interface IUserRepository
     void Add(AppUserBookmark bookmark);
     void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
-    void Delete(IList<AppUserDashboardStream> streams);
-    void Delete(IList<AppUserSideNavStream> streams);
+    void Delete(IEnumerable<AppUserDashboardStream> streams);
+    void Delete(IEnumerable<AppUserSideNavStream> streams);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -90,6 +90,8 @@ public interface IUserRepository
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
+
 }
 
 public class UserRepository : IUserRepository
@@ -146,12 +148,12 @@ public class UserRepository : IUserRepository
         _context.AppUserBookmark.Remove(bookmark);
     }
 
-    public void Delete(IList<AppUserDashboardStream> streams)
+    public void Delete(IEnumerable<AppUserDashboardStream> streams)
     {
         _context.AppUserDashboardStream.RemoveRange(streams);
     }
 
-    public void Delete(IList<AppUserSideNavStream> streams)
+    public void Delete(IEnumerable<AppUserSideNavStream> streams)
     {
         _context.AppUserSideNavStream.RemoveRange(streams);
     }
@@ -420,6 +422,13 @@ public class UserRepository : IUserRepository
         return await _context.AppUserSideNavStream
             .Include(d => d.SmartFilter)
             .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId)
+    {
+        return await _context.AppUserSideNavStream
+            .Where(d => d.LibraryId == libraryId)
             .ToListAsync();
     }
 

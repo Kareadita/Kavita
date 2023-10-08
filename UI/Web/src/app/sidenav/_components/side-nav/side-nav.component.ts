@@ -45,10 +45,7 @@ export class SideNavComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
 
-  navStreams: SideNavStream[] = [];
   cachedData: SideNavStream[] | null = null;
-  renderedNavStreams: SideNavStream[] = [];
-  libraries: Library[] = [];
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
   homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
@@ -58,6 +55,7 @@ export class SideNavComponent implements OnInit {
     return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
   showAll: boolean = false;
+  totalSize = 0;
   protected readonly SideNavStreamType = SideNavStreamType;
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
@@ -68,22 +66,16 @@ export class SideNavComponent implements OnInit {
 
   loadDataOnInit$: Observable<SideNavStream[]> = this.loadData$.pipe(
     switchMap(() => {
-        if (this.cachedData != null) { return of(this.cachedData)}
-        return this.navService.getSideNavStreams().pipe(
-            map(data => {
-                this.cachedData = data; // Cache the data after initial load
-                return data;
-            })
-        );
-    }),
-    //switchMap(() => this.navService.getSideNavStreams()),
-    tap(data => {
-      console.log('Data: ', data)
-      this.navStreams = data;
-      this.renderedNavStreams = data.slice(0, 10);
-    }),
-
-    //shareReplay({bufferSize: 1, refCount: true})
+      if (this.cachedData != null) {
+        return of(this.cachedData);
+      }
+      return this.navService.getSideNavStreams().pipe(
+        map(data => {
+          this.cachedData = data; // Cache the data after initial load
+          return data;
+        })
+      );
+    })
   );
 
   navStreams$ = merge(
@@ -91,27 +83,43 @@ export class SideNavComponent implements OnInit {
       startWith(false),
       distinctUntilChanged(),
       tap(showAll => this.showAll = showAll),
+      tap(showAll => console.log('Showing All: ', showAll)),
       switchMap(showAll =>
         showAll
-          ? this.loadDataOnInit$ // Load full data if 'showAll' is true
-          : this.loadDataOnInit$.pipe(map(d => d.slice(0, 10))) // Load initial data (first 10 items) if 'showAll' is false
+          ? this.loadDataOnInit$.pipe(
+            tap(d => this.totalSize = d.length),
+            tap(d => console.log('Using full data')))
+          : this.loadDataOnInit$.pipe(
+            tap(d => this.totalSize = d.length),
+            tap(d => console.log('Using first 10')),
+            map(d => d.slice(0, 10)))
       )
     ), this.messageHub.messages$.pipe(
       takeUntilDestroyed(this.destroyRef),
       filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
-      switchMap(() => this.loadDataOnInit$) // Reload data when events occur
+      tap(() => {
+          console.log('refresh update came in');
+          this.cachedData = null; // Reset cached data to null to get latest
+      }),
+      switchMap(() => {
+        if (this.showAll) return this.loadDataOnInit$;
+        else return this.loadDataOnInit$.pipe(map(d => d.slice(0, 10)))
+      }) // Reload data when events occur
     )
   ).pipe(
-      startWith(null), // Trigger the initial load of data
-      filter(data => data !== null) // Filter out the initial null value
+      startWith(null),
+      filter(data => data !== null),
+      tap(data => console.log('data: ', data, 'showAll: ', this.showAll)),
   );
 
 
-  constructor(private libraryService: LibraryService,
+  constructor(
     public utilityService: UtilityService, private messageHub: MessageHubService,
     private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
+
+    this.navStreams$.subscribe(d => console.log('navStream data: ', d));
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
@@ -130,23 +138,7 @@ export class SideNavComponent implements OnInit {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (!user) return;
-      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
-        this.libraries = libraries;
-        this.cdRef.markForCheck();
-      });
       this.loadDataSubject.next();
-    });
-
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate)).subscribe(event => {
-      this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
-        this.libraries = [...libraries];
-        this.cdRef.markForCheck();
-      });
-      // this.navService.getSideNavStreams().subscribe(s => {
-      //   this.navStreams = [...s];
-      //   this.renderedNavStreams = this.navStreams.slice(0, 10);
-      //   this.cdRef.markForCheck();
-      // });
     });
   }
 
