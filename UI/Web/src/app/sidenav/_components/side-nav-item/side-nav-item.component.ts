@@ -83,7 +83,6 @@ export class SideNavItemComponent implements OnInit {
       page = page + '/';
     }
 
-    console.log('page: ', page);
 
     if (this.comparisonMethod === 'equals' && page === this.link) {
       this.highlighted = true;

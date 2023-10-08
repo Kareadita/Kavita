@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import {filter, map, shareReplay, take} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, shareReplay, take, tap} from 'rxjs/operators';
 import { ImportCblModalComponent } from 'src/app/reading-list/_modals/import-cbl-modal/import-cbl-modal.component';
 import { ImageService } from 'src/app/_services/image.service';
 import { EVENTS, MessageHubService } from 'src/app/_services/message-hub.service';
@@ -20,7 +20,7 @@ import { ActionService } from '../../../_services/action.service';
 import { LibraryService } from '../../../_services/library.service';
 import { NavService } from '../../../_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {switchMap} from "rxjs";
+import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
 import {CommonModule} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../pipe/filter.pipe";
@@ -46,16 +46,65 @@ export class SideNavComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
 
   navStreams: SideNavStream[] = [];
+  cachedData: SideNavStream[] | null = null;
+  renderedNavStreams: SideNavStream[] = [];
   libraries: Library[] = [];
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions(this.handleAction.bind(this));
   readingListActions = [{action: Action.Import, title: 'import-cbl', children: [], requiresAdmin: true, callback: this.importCbl.bind(this)}];
   homeActions = [{action: Action.Edit, title: 'customize', children: [], requiresAdmin: false, callback: this.handleHomeActions.bind(this)}];
 
   filterQuery: string = '';
-  filterLibrary = (library: Library) => {
-    return library.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
+  filterLibrary = (stream: SideNavStream) => {
+    return stream.name.toLowerCase().indexOf((this.filterQuery || '').toLowerCase()) >= 0;
   }
+  showAll: boolean = false;
   protected readonly SideNavStreamType = SideNavStreamType;
+
+  private showAllSubject = new BehaviorSubject<boolean>(false);
+  showAll$ = this.showAllSubject.asObservable();
+
+  private loadDataSubject = new ReplaySubject<void>();
+  loadData$ = this.loadDataSubject.asObservable();
+
+  loadDataOnInit$: Observable<SideNavStream[]> = this.loadData$.pipe(
+    switchMap(() => {
+        if (this.cachedData != null) { return of(this.cachedData)}
+        return this.navService.getSideNavStreams().pipe(
+            map(data => {
+                this.cachedData = data; // Cache the data after initial load
+                return data;
+            })
+        );
+    }),
+    //switchMap(() => this.navService.getSideNavStreams()),
+    tap(data => {
+      console.log('Data: ', data)
+      this.navStreams = data;
+      this.renderedNavStreams = data.slice(0, 10);
+    }),
+
+    //shareReplay({bufferSize: 1, refCount: true})
+  );
+
+  navStreams$ = merge(
+    this.showAll$.pipe(
+      startWith(false),
+      distinctUntilChanged(),
+      tap(showAll => this.showAll = showAll),
+      switchMap(showAll =>
+        showAll
+          ? this.loadDataOnInit$ // Load full data if 'showAll' is true
+          : this.loadDataOnInit$.pipe(map(d => d.slice(0, 10))) // Load initial data (first 10 items) if 'showAll' is false
+      )
+    ), this.messageHub.messages$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
+      switchMap(() => this.loadDataOnInit$) // Reload data when events occur
+    )
+  ).pipe(
+      startWith(null), // Trigger the initial load of data
+      filter(data => data !== null) // Filter out the initial null value
+  );
 
 
   constructor(private libraryService: LibraryService,
@@ -63,10 +112,6 @@ export class SideNavComponent implements OnInit {
     private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
-
-    // this.navService.getSideNavStreams().subscribe(s => {
-    //   this.navStreams = s;
-    // });
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
@@ -89,10 +134,7 @@ export class SideNavComponent implements OnInit {
         this.libraries = libraries;
         this.cdRef.markForCheck();
       });
-      this.navService.getSideNavStreams().subscribe(s => {
-        this.navStreams = s;
-        this.cdRef.markForCheck();
-      });
+      this.loadDataSubject.next();
     });
 
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate)).subscribe(event => {
@@ -100,10 +142,11 @@ export class SideNavComponent implements OnInit {
         this.libraries = [...libraries];
         this.cdRef.markForCheck();
       });
-      this.navService.getSideNavStreams().subscribe(s => {
-        this.navStreams = [...s];
-        this.cdRef.markForCheck();
-      });
+      // this.navService.getSideNavStreams().subscribe(s => {
+      //   this.navStreams = [...s];
+      //   this.renderedNavStreams = this.navStreams.slice(0, 10);
+      //   this.cdRef.markForCheck();
+      // });
     });
   }
 
@@ -158,6 +201,14 @@ export class SideNavComponent implements OnInit {
 
   toggleNavBar() {
     this.navService.toggleSideNav();
+  }
+
+  showMore() {
+    this.showAllSubject.next(true);
+  }
+
+  showLess() {
+    this.showAllSubject.next(false);
   }
 
 }

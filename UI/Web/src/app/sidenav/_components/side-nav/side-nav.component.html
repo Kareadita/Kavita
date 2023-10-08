@@ -5,33 +5,20 @@
           <app-card-actionables [actions]="homeActions" [labelBy]="t('home')" iconClass="fa-ellipsis-v" (actionHandler)="handleHomeActions()"></app-card-actionables>
         </ng-container>
       </app-side-nav-item>
-<!--      <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>-->
-<!--      <app-side-nav-item icon="fa-list" [title]="t('collections')" link="/collections/"></app-side-nav-item>-->
-<!--      <app-side-nav-item icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">-->
-<!--          <ng-container actions>-->
-<!--              <app-card-actionables [actions]="readingListActions" [labelBy]="t('reading-lists')" iconClass="fa-ellipsis-v" (actionHandler)="importCbl()"></app-card-actionables>-->
-<!--          </ng-container>-->
-<!--      </app-side-nav-item>-->
-<!--      <app-side-nav-item icon="fa-bookmark" [title]="t('bookmarks')" link="/bookmarks/"></app-side-nav-item>-->
-<!--      <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="t('all-series')" link="/all-series/" *ngIf="libraries.length > 0"></app-side-nav-item>-->
 
-      <div class="mb-2 mt-3 ms-2 me-2" *ngIf="libraries.length > 10 && (navService?.sideNavCollapsed$ | async) === false">
-            <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
-            <div class="form-group">
-                <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
-                <button type="button" [attr.aria-label]="t('clear')" class="btn-close" id="reset-input" (click)="filterQuery = '';"></button>
-            </div>
+      <ng-container *ngIf="showAll">
+        <div class="mb-2 mt-3 ms-2 me-2" *ngIf="navStreams.length > 10 && (navService?.sideNavCollapsed$ | async) === false">
+          <label for="filter" class="form-label visually-hidden">{{t('filter-label')}}</label>
+          <div class="form-group">
+            <input id="filter" autocomplete="off" class="form-control" [(ngModel)]="filterQuery" type="text" aria-describedby="reset-input">
+            <button type="button" [attr.aria-label]="t('clear')" class="btn-close" id="reset-input" (click)="filterQuery = '';"></button>
+          </div>
         </div>
+        <app-side-nav-item icon="fa fa-chevron-left" title="Back" (click)="showLess()"></app-side-nav-item>
+      </ng-container>
 
-<!--        <app-side-nav-item *ngFor="let library of libraries | filter: filterLibrary" [link]="'/library/' + library.id + '/'"-->
-<!--        [icon]="getLibraryTypeIcon(library.type)" [imageUrl]="getLibraryImage(library)" [title]="library.name" [comparisonMethod]="'startsWith'">-->
-<!--            <ng-container actions>-->
-<!--                <app-card-actionables [actions]="actions" [labelBy]="library.name" iconClass="fa-ellipsis-v" (actionHandler)="performAction($event, library)"></app-card-actionables>-->
-<!--            </ng-container>-->
-<!--        </app-side-nav-item>-->
-
-
-        <ng-container *ngFor="let navStream of navStreams">
+      <ng-container *ngIf="navStreams$ | async as streams">
+        <ng-container *ngFor="let navStream of streams | filter: filterLibrary">
           <ng-container [ngSwitch]="navStream.streamType">
             <ng-container *ngSwitchCase="SideNavStreamType.Library">
               <app-side-nav-item [link]="'/library/' + navStream.libraryId + '/'"
@@ -73,7 +60,10 @@
 
           </ng-container>
         </ng-container>
-
+      </ng-container>
+        <ng-container *ngIf="navStreams.length > 10 && !showAll">
+          <app-side-nav-item icon="fa fa-chevron-right" title="More" (click)="showMore()"></app-side-nav-item>
+        </ng-container>
     </div>
     <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async)}"></div>
     <div class="bottom" [ngClass]="{'closed' : (navService.sideNavCollapsed$ | async),
