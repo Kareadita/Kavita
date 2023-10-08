@@ -66,11 +66,11 @@
               <app-side-nav-item icon="fa-star" [title]="t('want-to-read')" link="/want-to-read/"></app-side-nav-item>
             </ng-container>
 
-
-
-            <ng-container *ngSwitchDefault>
-              <app-side-nav-item icon="fa-regular fa-rectangle-list" [title]="navStream.name" link="/all-series/"></app-side-nav-item>
+            <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
+              <app-side-nav-item icon="fa-bars-staggered" [title]="navStream.name" link="/all-series/"></app-side-nav-item>
             </ng-container>
+
+
           </ng-container>
         </ng-container>
 
