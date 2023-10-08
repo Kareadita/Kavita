@@ -1058,17 +1058,124 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateDashboardStreamPositionDto"
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/add-sidenav-stream": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible",
+        "parameters": [
+          {
+            "name": "smartFilterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account/update-sidenav-stream": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Updates the visibility of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Account/update-sidenav-position": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Updates the position of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
               }
             }
           }
@@ -17763,28 +17870,6 @@
         },
         "additionalProperties": false
       },
-      "UpdateDashboardStreamPositionDto": {
-        "type": "object",
-        "properties": {
-          "fromPosition": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "toPosition": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "dashboardStreamId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "streamName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "UpdateDefaultThemeDto": {
         "type": "object",
         "properties": {
@@ -18330,6 +18415,28 @@
           "userRating": {
             "type": "number",
             "format": "float"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateStreamPositionDto": {
+        "type": "object",
+        "properties": {
+          "fromPosition": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toPosition": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "streamName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

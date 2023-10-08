@@ -87,6 +87,10 @@ public class FilterController : BaseApiController
         // This needs to delete any dashboard filters that have it too
         var streams = await _unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
         _unitOfWork.UserRepository.Delete(streams);
+
+        var streams2 = await _unitOfWork.UserRepository.GetSideNavStreamWithFilter(filter.Id);
+        _unitOfWork.UserRepository.Delete(streams2);
+
         _unitOfWork.AppUserSmartFilterRepository.Delete(filter);
         await _unitOfWork.CommitAsync();
         return Ok();

@@ -47,7 +47,7 @@ export class NavService {
   }
 
   updateSideNavStreamPosition(streamName: string, sideNavStreamId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'account/update-sidenav-position', {streamName, sideNavStreamId, fromPosition, toPosition}, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'account/update-sidenav-position', {streamName, id: sideNavStreamId, fromPosition, toPosition}, TextResonse);
   }
 
   updateSideNavStream(stream: SideNavStream) {

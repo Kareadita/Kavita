@@ -16,7 +16,7 @@ export class DashboardService {
   }
 
   updateDashboardStreamPosition(streamName: string, dashboardStreamId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-position', {streamName, dashboardStreamId, fromPosition, toPosition}, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-position', {streamName, id: dashboardStreamId, fromPosition, toPosition}, TextResonse);
   }
 
   updateDashboardStream(stream: DashboardStream) {

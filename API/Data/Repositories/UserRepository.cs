@@ -48,10 +48,12 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     void Update(AppUserDashboardStream stream);
+    void Update(AppUserSideNavStream stream);
     void Add(AppUserBookmark bookmark);
     void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
     void Delete(IList<AppUserDashboardStream> streams);
+    void Delete(IList<AppUserSideNavStream> streams);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -86,6 +88,8 @@ public interface IUserRepository
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
+    Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
 }
 
 public class UserRepository : IUserRepository
@@ -121,6 +125,11 @@ public class UserRepository : IUserRepository
         _context.Entry(stream).State = EntityState.Modified;
     }
 
+    public void Update(AppUserSideNavStream stream)
+    {
+        _context.Entry(stream).State = EntityState.Modified;
+    }
+
     public void Add(AppUserBookmark bookmark)
     {
         _context.AppUserBookmark.Add(bookmark);
@@ -140,6 +149,11 @@ public class UserRepository : IUserRepository
     public void Delete(IList<AppUserDashboardStream> streams)
     {
         _context.AppUserDashboardStream.RemoveRange(streams);
+    }
+
+    public void Delete(IList<AppUserSideNavStream> streams)
+    {
+        _context.AppUserSideNavStream.RemoveRange(streams);
     }
 
     /// <summary>
@@ -392,6 +406,21 @@ public class UserRepository : IUserRepository
         }
 
         return sideNavStreams;
+    }
+
+    public async Task<AppUserSideNavStream> GetSideNavStream(int streamId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

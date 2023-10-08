@@ -96,7 +96,7 @@ export class SideNavComponent implements OnInit {
     });
 
     // TODO: Investigate this, as it might be expensive
-    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified)).subscribe(event => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate)).subscribe(event => {
       this.libraryService.getLibraries().pipe(take(1), shareReplay()).subscribe((libraries: Library[]) => {
         this.libraries = [...libraries];
         this.cdRef.markForCheck();

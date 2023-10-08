@@ -1144,11 +1144,11 @@ public class AccountController : BaseApiController
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("update-dashboard-position")]
-    public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateDashboardStreamPositionDto dto)
+    public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateStreamPositionDto dto)
     {
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
             AppUserIncludes.DashboardStreams);
-        var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.DashboardStreamId);
+        var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null) return BadRequest();
         if (stream.Order == dto.ToPosition) return Ok();
 
@@ -1163,7 +1163,116 @@ public class AccountController : BaseApiController
         return Ok();
     }
 
+
+    /// <summary>
+    /// Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible
+    /// </summary>
+    /// <param name="smartFilterId"></param>
+    /// <returns></returns>
+    [HttpPost("add-sidenav-stream")]
+    public async Task<ActionResult<DashboardStreamDto>> AddSideNav([FromQuery] int smartFilterId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(), AppUserIncludes.SideNavStreams);
+        if (user == null) return Unauthorized();
+
+        var smartFilter = await _unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId);
+        if (smartFilter == null) return NoContent();
+
+        var stream = user?.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
+        if (stream != null) return BadRequest("There is an existing stream with this Filter");
+
+        var maxOrder = user!.SideNavStreams.Max(d => d.Order);
+        var createdStream = new AppUserSideNavStream()
+        {
+            Name = smartFilter.Name,
+            IsProvided = false,
+            StreamType = SideNavStreamType.SmartFilter,
+            Visible = true,
+            Order = maxOrder + 1,
+            SmartFilter = smartFilter
+        };
+
+        user.SideNavStreams.Add(createdStream);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        var ret = new SideNavStreamDto()
+        {
+            Name = createdStream.Name,
+            IsProvided = createdStream.IsProvided,
+            Visible = createdStream.Visible,
+            Order = createdStream.Order,
+            SmartFilterEncoded = smartFilter.Filter,
+            StreamType = createdStream.StreamType
+        };
+
+
+        await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(user.Id),
+            User.GetUserId());
+        return Ok(ret);
+    }
+
+    /// <summary>
+    /// Updates the visibility of a dashboard stream
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update-sidenav-stream")]
+    public async Task<ActionResult> UpdateSideNavStream(SideNavStreamDto dto)
+    {
+        var stream = await _unitOfWork.UserRepository.GetSideNavStream(dto.Id);
+        if (stream == null) return BadRequest();
+        stream.Visible = dto.Visible;
+
+        _unitOfWork.UserRepository.Update(stream);
+        await _unitOfWork.CommitAsync();
+        var userId = User.GetUserId();
+        await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
+            userId);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Updates the position of a dashboard stream
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update-sidenav-position")]
+    public async Task<ActionResult> UpdateSideNavStreamPosition(UpdateStreamPositionDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(User.GetUserId(),
+            AppUserIncludes.SideNavStreams);
+        var stream = user?.SideNavStreams.FirstOrDefault(d => d.Id == dto.Id);
+        if (stream == null) return BadRequest();
+        if (stream.Order == dto.ToPosition) return Ok();
+
+        var list = user!.SideNavStreams.ToList();
+        ReorderItems(list, stream.Id, dto.ToPosition);
+        user.SideNavStreams = list;
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(user.Id),
+            user.Id);
+        return Ok();
+    }
+
     private static void ReorderItems(List<AppUserDashboardStream> items, int itemId, int toPosition)
+    {
+        var item = items.Find(r => r.Id == itemId);
+        if (item != null)
+        {
+            items.Remove(item);
+            items.Insert(toPosition, item);
+        }
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            items[i].Order = i;
+        }
+    }
+
+    private static void ReorderItems(List<AppUserSideNavStream> items, int itemId, int toPosition)
     {
         var item = items.Find(r => r.Id == itemId);
         if (item != null)
