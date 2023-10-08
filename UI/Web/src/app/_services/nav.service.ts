@@ -4,6 +4,8 @@ import { ReplaySubject, take } from 'rxjs';
 import {HttpClient} from "@angular/common/http";
 import {environment} from "../../environments/environment";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
+import {TextResonse} from "../_types/text-response";
+import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +44,18 @@ export class NavService {
 
   getSideNavStreams(visibleOnly = true) {
     return this.httpClient.get<Array<SideNavStream>>(this.baseUrl + 'account/sidenav?visibleOnly=' + visibleOnly);
+  }
+
+  updateSideNavStreamPosition(streamName: string, sideNavStreamId: number, fromPosition: number, toPosition: number) {
+    return this.httpClient.post(this.baseUrl + 'account/update-sidenav-position', {streamName, sideNavStreamId, fromPosition, toPosition}, TextResonse);
+  }
+
+  updateSideNavStream(stream: SideNavStream) {
+    return this.httpClient.post(this.baseUrl + 'account/update-sidenav-stream', stream, TextResonse);
+  }
+
+  createSideNavStream(smartFilterId: number) {
+    return this.httpClient.post<SideNavStream>(this.baseUrl + 'account/add-sidenav-stream?smartFilterId=' + smartFilterId, {});
   }
 
   /**

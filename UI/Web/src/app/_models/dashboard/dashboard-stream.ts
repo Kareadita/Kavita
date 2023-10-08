@@ -1,7 +1,8 @@
 import {Observable} from "rxjs";
 import {StreamType} from "./stream-type.enum";
+import {CommonStream} from "../common-stream";
 
-export interface DashboardStream {
+export interface DashboardStream extends CommonStream {
   id: number;
   name: string;
   isProvided: boolean;
@@ -12,3 +13,5 @@ export interface DashboardStream {
   order: number;
   visible: boolean;
 }
+
+

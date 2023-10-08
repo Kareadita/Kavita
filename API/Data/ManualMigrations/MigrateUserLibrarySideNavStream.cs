@@ -36,7 +36,7 @@ public static class MigrateUserLibrarySideNavStream
                 {
                     Name = lib.Name,
                     LibraryId = lib.Id,
-                    IsProvided = true,
+                    IsProvided = false,
                     Visible = true,
                     StreamType = SideNavStreamType.Library,
                     Order = prevMaxOrder + 1

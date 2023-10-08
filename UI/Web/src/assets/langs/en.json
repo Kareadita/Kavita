@@ -1332,7 +1332,8 @@
         "remove": "{{common.remove}}",
         "load-filter": "Load Filter",
         "provided": "Provided",
-        "smart-filter": "Smart Filter"
+        "smart-filter": "Smart Filter",
+        "library": "Library"
     },
 
     "reading-list-detail": {
@@ -1729,11 +1730,34 @@
     },
 
     "customize-dashboard-modal": {
-        "title": "Customize Dashboard",
-        "no-data": "All Smart filters added to Dashboard or none created yet.",
+        "title-dashboard": "Customize Dashboard",
+        "title-sidenav": "Customize Side Nav",
         "close": "{{common.close}}",
+        "dashboard": "Dashboard",
+        "sidenav": "Side Nav"
+    },
+
+    "customize-dashboard-streams": {
+        "no-data": "All Smart filters added to Dashboard or none created yet.",
         "save": "{{common.save}}",
         "add": "{{common.add}}"
+    },
+    "customize-sidenav-streams": {
+        "no-data": "All Smart filters added to Side Nav or none created yet.",
+        "save": "{{common.save}}",
+        "add": "{{common.add}}"
+    },
+
+    "stream-pipe": {
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "recently-updated": "{{dashboard.recently-updated-title}}",
+        "newly-added": "{{dashboard.recently-added-title}}",
+        "more-in-genre": "{{dashboard.more-in-genre-title}}",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "collections": "{{side-nav.collections}}",
+        "reading-lists": "{{side-nav.reading-lists}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "all-series": "{{side-nav.all-series}}"
     },
 
     "filter-field-pipe": {

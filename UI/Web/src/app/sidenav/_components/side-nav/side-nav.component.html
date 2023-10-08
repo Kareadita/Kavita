@@ -35,10 +35,10 @@
           <ng-container [ngSwitch]="navStream.streamType">
             <ng-container *ngSwitchCase="SideNavStreamType.Library">
               <app-side-nav-item [link]="'/library/' + navStream.libraryId + '/'"
-                                 [icon]="getLibraryTypeIcon(navStream.library.type!)" [imageUrl]="getLibraryImage(navStream.library)" [title]="navStream.name" [comparisonMethod]="'startsWith'">
+                                 [icon]="getLibraryTypeIcon(navStream.library!.type)" [imageUrl]="getLibraryImage(navStream.library!)" [title]="navStream.name" [comparisonMethod]="'startsWith'">
                 <ng-container actions>
                   <app-card-actionables [actions]="actions" [labelBy]="navStream.name" iconClass="fa-ellipsis-v"
-                                        (actionHandler)="performAction($event, navStream.library)"></app-card-actionables>
+                                        (actionHandler)="performAction($event, navStream.library!)"></app-card-actionables>
                 </ng-container>
               </app-side-nav-item>
             </ng-container>

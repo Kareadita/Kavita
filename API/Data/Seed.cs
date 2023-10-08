@@ -44,7 +44,7 @@ public static class Seed
         {
             new()
             {
-                Name = "On Deck",
+                Name = "on-deck",
                 StreamType = DashboardStreamType.OnDeck,
                 Order = 0,
                 IsProvided = true,
@@ -52,7 +52,7 @@ public static class Seed
             },
             new()
             {
-                Name = "Recently Updated",
+                Name = "recently-updated",
                 StreamType = DashboardStreamType.RecentlyUpdated,
                 Order = 1,
                 IsProvided = true,
@@ -60,7 +60,7 @@ public static class Seed
             },
             new()
             {
-                Name = "Newly Added",
+                Name = "newly-added",
                 StreamType = DashboardStreamType.NewlyAdded,
                 Order = 2,
                 IsProvided = true,
@@ -68,7 +68,7 @@ public static class Seed
             },
             new()
             {
-                Name = "More In",
+                Name = "more-in-genre",
                 StreamType = DashboardStreamType.MoreInGenre,
                 Order = 3,
                 IsProvided = true,

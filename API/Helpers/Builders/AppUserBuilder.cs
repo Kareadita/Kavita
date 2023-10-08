@@ -48,7 +48,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
         _appUser.SideNavStreams.Add(new AppUserSideNavStream()
         {
             Name = library.Name,
-            IsProvided = true,
+            IsProvided = false,
             Visible = true,
             LibraryId = library.Id,
             StreamType = SideNavStreamType.Library,
