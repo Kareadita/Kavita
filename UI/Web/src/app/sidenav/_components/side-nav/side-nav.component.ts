@@ -93,9 +93,9 @@ export class SideNavComponent implements OnInit {
             tap(d => this.totalSize = d.length),
             tap(d => console.log('Using first 10')),
             map(d => d.slice(0, 10)))
-      )
-    ), this.messageHub.messages$.pipe(
+      ),
       takeUntilDestroyed(this.destroyRef),
+    ), this.messageHub.messages$.pipe(
       filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
       tap(() => {
           console.log('refresh update came in');
@@ -104,12 +104,14 @@ export class SideNavComponent implements OnInit {
       switchMap(() => {
         if (this.showAll) return this.loadDataOnInit$;
         else return this.loadDataOnInit$.pipe(map(d => d.slice(0, 10)))
-      }) // Reload data when events occur
+      }), // Reload data when events occur
+      takeUntilDestroyed(this.destroyRef),
     )
   ).pipe(
       startWith(null),
       filter(data => data !== null),
       tap(data => console.log('data: ', data, 'showAll: ', this.showAll)),
+      takeUntilDestroyed(this.destroyRef),
   );
 
 
