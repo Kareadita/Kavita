@@ -443,7 +443,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   get LayoutMode() { return LayoutMode; }
   get ReadingDirection() { return ReadingDirection; }
   get Breakpoint() { return Breakpoint; }
-  get FittingOption() { return this.generalSettingsForm.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
+  get FittingOption() { return this.generalSettingsForm?.get('fittingOption')?.value || FITTING_OPTION.HEIGHT; }
   get ReadingAreaWidth() {
     return this.readingArea?.nativeElement.scrollWidth - this.readingArea?.nativeElement.clientWidth;
   }
