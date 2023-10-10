@@ -22,6 +22,10 @@ public class SideNavStreamDto
     public string? SmartFilterEncoded { get; set; }
     public int? SmartFilterId { get; set; }
     /// <summary>
+    /// External Source Url if configured
+    /// </summary>
+    //public string? ExternalSourceUrl { get; set; }
+    /// <summary>
     /// For system provided
     /// </summary>
     public SideNavStreamType StreamType { get; set; }

@@ -17552,6 +17552,11 @@
             "format": "int32",
             "nullable": true
           },
+          "externalSourceUrl": {
+            "type": "string",
+            "description": "External Source Url if configured",
+            "nullable": true
+          },
           "streamType": {
             "enum": [
               1,

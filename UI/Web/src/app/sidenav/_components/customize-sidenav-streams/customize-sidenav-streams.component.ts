@@ -46,7 +46,7 @@ export class CustomizeSidenavStreamsComponent {
     this.sideNavService.createSideNavStream(filter.id).subscribe(stream => {
       this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
       this.items.push(stream);
-      this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
     });
   }
 

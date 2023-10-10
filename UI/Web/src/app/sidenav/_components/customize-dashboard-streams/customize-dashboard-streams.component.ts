@@ -44,7 +44,7 @@ export class CustomizeDashboardStreamsComponent {
     this.dashboardService.createDashboardStream(filter.id).subscribe(stream => {
       this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
       this.items.push(stream);
-      this.cdRef.detectChanges();
+      this.cdRef.markForCheck();
     });
   }
 
