@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+
 
 namespace API.Extensions;
 
@@ -52,6 +52,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IMediaErrorService, MediaErrorService>();
         services.AddScoped<IMediaConversionService, MediaConversionService>();
         services.AddScoped<IRecommendationService, RecommendationService>();
+        services.AddScoped<IStreamService, StreamService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IMetadataService, MetadataService>();
