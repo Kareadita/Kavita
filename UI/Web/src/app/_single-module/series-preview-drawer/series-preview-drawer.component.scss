@@ -1,0 +1,10 @@
+// You must add this on a component based drawer
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+::ng-deep .person-img {
+  margin-top: 24px; margin-left: 24px;
+}

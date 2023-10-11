@@ -591,16 +591,23 @@ public class SeriesController : BaseApiController
             return BadRequest();
         }
 
-        var cacheKey = $"{CacheKey}-{aniListId}-{malId}";
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}";
         var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
         if (results.HasValue)
         {
             return Ok(results.Value);
         }
 
-        var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId);
-        await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
-        return Ok(ret);
+        try
+        {
+            var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId);
+            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
+            return Ok(ret);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest("Unable to load External Series details");
+        }
     }
 
 }

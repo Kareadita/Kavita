@@ -59,7 +59,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .PostJsonAsync(new
                 {
                     AnilistId = anilistId,
-                    MalId = malId
+                    MalId = malId,
                 })
                 .ReceiveJson<ExternalSeriesDetailDto>();
 

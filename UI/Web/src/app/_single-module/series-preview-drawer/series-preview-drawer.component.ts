@@ -11,7 +11,6 @@ import {A11yClickDirective} from "../../shared/a11y-click.directive";
 import {MetadataDetailComponent} from "../../series-detail/_components/metadata-detail/metadata-detail.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
-import {Series} from "../../_models/series";
 import {ImageService} from "../../_services/image.service";
 import {PublicationStatusPipe} from "../../pipe/publication-status.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";

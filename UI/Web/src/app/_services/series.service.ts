@@ -230,6 +230,6 @@ export class SeriesService {
   }
 
   getExternalSeriesDetails(aniListId?: number, malId?: number) {
-    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + aniListId + '&malId=' + malId);
+    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + (aniListId || 0) + '&malId=' + (malId || 0));
   }
 }
