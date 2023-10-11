@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using API.Data.Misc;
 using API.Data.Repositories;
+using API.DTOs.Filtering;
 using API.Entities;
 using API.Entities.Enums;
 using API.Entities.Scrobble;
@@ -185,5 +186,17 @@ public static class QueryableExtensions
             ScrobbleEventSortField.IsProcessed => query.OrderBy(s => s.IsProcessed),
             _ => query
         };
+    }
+
+    /// <summary>
+    /// Performs either OrderBy or OrderByDescending on the given query based on the value of SortOptions.IsAscending.
+    /// </summary>
+    /// <param name="query"></param>
+    /// <param name="keySelector"></param>
+    /// <param name="sortOptions"></param>
+    /// <returns></returns>
+    public static IQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SortOptions sortOptions)
+    {
+        return sortOptions.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
     }
 }
