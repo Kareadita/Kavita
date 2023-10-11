@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using API.DTOs.Filtering;
 using API.Entities;
+using API.Extensions.QueryExtensions;
 
 namespace API.Extensions.QueryExtensions.Filtering;
 
@@ -27,34 +28,17 @@ public static class BookmarkSort
             SortField = SortField.SortName
         };
 
-        if (sortOptions.IsAscending)
+        query = sortOptions.SortField switch
         {
-            query = sortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderBy(s => s.Series.SortName.ToLower()),
-                SortField.CreatedDate => query.OrderBy(s => s.Series.Created),
-                SortField.LastModifiedDate => query.OrderBy(s => s.Series.LastModified),
-                SortField.LastChapterAdded => query.OrderBy(s => s.Series.LastChapterAdded),
-                SortField.TimeToRead => query.OrderBy(s => s.Series.AvgHoursToRead),
-                SortField.ReleaseYear => query.OrderBy(s => s.Series.Metadata.ReleaseYear),
-                SortField.ReadProgress => query.OrderBy(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max()),
-                _ => query
-            };
-        }
-        else
-        {
-            query = sortOptions.SortField switch
-            {
-                SortField.SortName => query.OrderByDescending(s => s.Series.SortName.ToLower()),
-                SortField.CreatedDate => query.OrderByDescending(s => s.Series.Created),
-                SortField.LastModifiedDate => query.OrderByDescending(s => s.Series.LastModified),
-                SortField.LastChapterAdded => query.OrderByDescending(s => s.Series.LastChapterAdded),
-                SortField.TimeToRead => query.OrderByDescending(s => s.Series.AvgHoursToRead),
-                SortField.ReleaseYear => query.OrderByDescending(s => s.Series.Metadata.ReleaseYear),
-                SortField.ReadProgress => query.OrderByDescending(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max()),
-                _ => query
-            };
-        }
+            SortField.SortName => query.DoOrderBy(s => s.Series.SortName.ToLower(), sortOptions),
+            SortField.CreatedDate => query.DoOrderBy(s => s.Series.Created, sortOptions),
+            SortField.LastModifiedDate => query.DoOrderBy(s => s.Series.LastModified, sortOptions),
+            SortField.LastChapterAdded => query.DoOrderBy(s => s.Series.LastChapterAdded, sortOptions),
+            SortField.TimeToRead => query.DoOrderBy(s => s.Series.AvgHoursToRead, sortOptions),
+            SortField.ReleaseYear => query.DoOrderBy(s => s.Series.Metadata.ReleaseYear, sortOptions),
+            SortField.ReadProgress => query.DoOrderBy(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max(), sortOptions),
+            _ => query
+        };
 
         return query;
     }
