@@ -17,9 +17,9 @@ public class AppUserSideNavStream
     /// </summary>
     public int? LibraryId { get; set; }
     /// <summary>
-    /// Only set for StreamType.ExternalSource. Includes the API key and full url.
+    /// Only set for StreamType.ExternalSource
     /// </summary>
-    //public string? ExternalSourceUrl { get; set; }
+    public int? ExternalSourceId { get; set; }
     /// <summary>
     /// For system provided
     /// </summary>

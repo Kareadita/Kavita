@@ -8,9 +8,7 @@ using API.Data;
 using API.Data.Repositories;
 using API.DTOs;
 using API.DTOs.Account;
-using API.DTOs.Dashboard;
 using API.DTOs.Email;
-using API.DTOs.SideNav;
 using API.Entities;
 using API.Entities.Enums;
 using API.Errors;
@@ -46,7 +44,6 @@ public class AccountController : BaseApiController
     private readonly IEmailService _emailService;
     private readonly IEventHub _eventHub;
     private readonly ILocalizationService _localizationService;
-    private readonly IStreamService _streamService;
 
     /// <inheritdoc />
     public AccountController(UserManager<AppUser> userManager,
@@ -55,8 +52,7 @@ public class AccountController : BaseApiController
         ILogger<AccountController> logger,
         IMapper mapper, IAccountService accountService,
         IEmailService emailService, IEventHub eventHub,
-        ILocalizationService localizationService,
-        IStreamService streamService)
+        ILocalizationService localizationService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
@@ -68,7 +64,6 @@ public class AccountController : BaseApiController
         _emailService = emailService;
         _eventHub = eventHub;
         _localizationService = localizationService;
-        _streamService = streamService;
     }
 
     /// <summary>
@@ -1050,97 +1045,4 @@ public class AccountController : BaseApiController
         return Ok(origin + "/" + baseUrl + "api/opds/" + user!.ApiKey);
 
     }
-
-    /// <summary>
-    /// Returns the layout of the user's dashboard
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet("dashboard")]
-    public async Task<ActionResult<IEnumerable<DashboardStreamDto>>> GetDashboardLayout(bool visibleOnly = true)
-    {
-        return Ok(await _streamService.GetDashboardStreams(User.GetUserId(), visibleOnly));
-    }
-
-    /// <summary>
-    /// Return's the user's side nav
-    /// </summary>
-    [HttpGet("sidenav")]
-    public async Task<ActionResult<IEnumerable<SideNavStreamDto>>> GetSideNav(bool visibleOnly = true)
-    {
-        return Ok(await _streamService.GetSidenavStreams(User.GetUserId(), visibleOnly));
-    }
-
-
-    /// <summary>
-    /// Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible
-    /// </summary>
-    /// <param name="smartFilterId"></param>
-    /// <returns></returns>
-    [HttpPost("add-dashboard-stream")]
-    public async Task<ActionResult<DashboardStreamDto>> AddDashboard([FromQuery] int smartFilterId)
-    {
-        return Ok(await _streamService.CreateDashboardStreamFromSmartFilter(User.GetUserId(), smartFilterId));
-    }
-
-    /// <summary>
-    /// Updates the visibility of a dashboard stream
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [HttpPost("update-dashboard-stream")]
-    public async Task<ActionResult> UpdateDashboardStream(DashboardStreamDto dto)
-    {
-        await _streamService.UpdateDashboardStream(User.GetUserId(), dto);
-        return Ok();
-    }
-
-    /// <summary>
-    /// Updates the position of a dashboard stream
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [HttpPost("update-dashboard-position")]
-    public async Task<ActionResult> UpdateDashboardStreamPosition(UpdateStreamPositionDto dto)
-    {
-        await _streamService.UpdateDashboardStreamPosition(User.GetUserId(), dto);
-        return Ok();
-    }
-
-
-    /// <summary>
-    /// Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible
-    /// </summary>
-    /// <param name="smartFilterId"></param>
-    /// <returns></returns>
-    [HttpPost("add-sidenav-stream")]
-    public async Task<ActionResult<SideNavStreamDto>> AddSideNav([FromQuery] int smartFilterId)
-    {
-        return Ok(await _streamService.CreateSideNavStreamFromSmartFilter(User.GetUserId(), smartFilterId));
-    }
-
-    /// <summary>
-    /// Updates the visibility of a dashboard stream
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [HttpPost("update-sidenav-stream")]
-    public async Task<ActionResult> UpdateSideNavStream(SideNavStreamDto dto)
-    {
-        await _streamService.UpdateSideNavStream(User.GetUserId(), dto);
-        return Ok();
-    }
-
-    /// <summary>
-    /// Updates the position of a dashboard stream
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [HttpPost("update-sidenav-position")]
-    public async Task<ActionResult> UpdateSideNavStreamPosition(UpdateStreamPositionDto dto)
-    {
-        await _streamService.UpdateSideNavStreamPosition(User.GetUserId(), dto);
-        return Ok();
-    }
-
-
 }

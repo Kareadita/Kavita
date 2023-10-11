@@ -147,6 +147,11 @@ public static class IncludesExtensions
                 .ThenInclude(s => s.SmartFilter);
         }
 
+        if (includeFlags.HasFlag(AppUserIncludes.ExternalSources))
+        {
+            query = query.Include(u => u.ExternalSources);
+        }
+
         return query.AsSplitQuery();
     }
 

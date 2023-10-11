@@ -1,0 +1,9 @@
+<p>
+  Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your peer's server.
+  <a>More Information</a>
+</p>
+
+
+<ng-container *ngFor="let externalSource of externalSources">
+  <app-edit-external-source-item [source]="externalSource"></app-edit-external-source-item>
+</ng-container>

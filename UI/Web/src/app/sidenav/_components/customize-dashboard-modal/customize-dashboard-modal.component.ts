@@ -19,17 +19,19 @@ import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {CustomizeDashboardStreamsComponent} from "../customize-dashboard-streams/customize-dashboard-streams.component";
 import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/customize-sidenav-streams.component";
+import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-external-sources.component";
 
 enum TabID {
   Dashboard = 'dashboard',
-  SideNav = 'sidenav'
+  SideNav = 'sidenav',
+  ExternalSources = 'external-sources'
 }
 
 @Component({
   selector: 'app-customize-dashboard-modal',
   standalone: true,
   imports: [CommonModule, SafeHtmlPipe, TranslocoDirective, DraggableOrderedListComponent, ReadingListItemComponent, DashboardStreamListItemComponent,
-    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent],
+    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent, ManageExternalSourcesComponent],
   templateUrl: './customize-dashboard-modal.component.html',
   styleUrls: ['./customize-dashboard-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,8 +40,6 @@ export class CustomizeDashboardModalComponent {
 
   activeTab = TabID.Dashboard;
 
-  private readonly dashboardService = inject(DashboardService);
-  private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly utilityService = inject(UtilityService);
   private readonly modal = inject(NgbActiveModal);

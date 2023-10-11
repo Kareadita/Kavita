@@ -1734,9 +1734,11 @@
     "customize-dashboard-modal": {
         "title-dashboard": "Customize Dashboard",
         "title-sidenav": "Customize Side Nav",
+        "title-external-sources": "External Sources",
         "close": "{{common.close}}",
         "dashboard": "Dashboard",
-        "sidenav": "Side Nav"
+        "sidenav": "Side Nav",
+        "external-sources": "External Sources"
     },
 
     "customize-dashboard-streams": {

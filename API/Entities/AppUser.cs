@@ -80,6 +80,7 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken
     /// An ordered list of Streams (pre-configured) or Smart Filters that makes up the User's SideNav
     /// </summary>
     public IList<AppUserSideNavStream> SideNavStreams { get; set; } = null!;
+    public IList<AppUserExternalSource> ExternalSources { get; set; } = null!;
 
 
     /// <inheritdoc />

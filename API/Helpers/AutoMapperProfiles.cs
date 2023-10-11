@@ -16,6 +16,7 @@ using API.DTOs.Scrobbling;
 using API.DTOs.Search;
 using API.DTOs.SeriesDetail;
 using API.DTOs.Settings;
+using API.DTOs.SideNav;
 using API.DTOs.Theme;
 using API.Entities;
 using API.Entities.Enums;
@@ -54,6 +55,7 @@ public class AutoMapperProfiles : Profile
         CreateMap<AgeRating, AgeRatingDto>();
         CreateMap<PublicationStatus, PublicationStatusDto>();
         CreateMap<MediaError, MediaErrorDto>();
+        CreateMap<AppUserExternalSource, ExternalSourceDto>();
         CreateMap<ScrobbleHold, ScrobbleHoldDto>()
             .ForMember(dest => dest.LibraryId,
                 opt =>

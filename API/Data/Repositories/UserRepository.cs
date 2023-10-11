@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +15,6 @@ using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
-using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -39,7 +37,8 @@ public enum AppUserIncludes
     ScrobbleHolds = 512,
     SmartFilters = 1024,
     DashboardStreams = 2048,
-    SideNavStreams = 4096
+    SideNavStreams = 4096,
+    ExternalSources = 8192 // 2^13
 }
 
 public interface IUserRepository
@@ -91,6 +90,7 @@ public interface IUserRepository
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
+    Task<IList<ExternalSourceDto>> GetExternalSources(int userId);
 
 }
 
@@ -387,6 +387,7 @@ public class UserRepository : IUserRepository
                 SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
                 LibraryId = d.LibraryId ?? 0,
+                ExternalSourceId = d.ExternalSourceId ?? 0,
                 StreamType = d.StreamType,
                 Order = d.Order,
                 Visible = d.Visible
@@ -405,6 +406,20 @@ public class UserRepository : IUserRepository
         foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.Library))
         {
             dto.Library = libraryDtos.FirstOrDefault(l => l.Id == dto.LibraryId);
+        }
+
+        var externalSourceIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.ExternalServer)
+            .Select(d => d.ExternalSourceId)
+            .ToList();
+
+        var externalSourceDtos = _context.AppUserExternalSource
+            .Where(l => externalSourceIds.Contains(l.Id))
+            .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
+            .ToList();
+
+        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.ExternalServer))
+        {
+            dto.ExternalSource = externalSourceDtos.FirstOrDefault(l => l.Id == dto.ExternalSourceId);
         }
 
         return sideNavStreams;
@@ -429,6 +444,13 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserSideNavStream
             .Where(d => d.LibraryId == libraryId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<ExternalSourceDto>> GetExternalSources(int userId)
+    {
+        return await _context.AppUserExternalSource.Where(s => s.AppUserId == userId)
+            .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
     }
 

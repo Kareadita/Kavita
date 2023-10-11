@@ -57,6 +57,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
     public DbSet<AppUserSideNavStream> AppUserSideNavStream { get; set; } = null!;
+    public DbSet<AppUserExternalSource> AppUserExternalSource { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)

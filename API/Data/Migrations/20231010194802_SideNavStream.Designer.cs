@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231008142302_SideNavStream")]
+    [Migration("20231010194802_SideNavStream")]
     partial class SideNavStream
     {
         /// <inheritdoc />
@@ -224,6 +224,28 @@ namespace API.Data.Migrations
                     b.HasIndex("Visible");
 
                     b.ToTable("AppUserDashboardStream");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserExternalSource", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ApiKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Host")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AppUserExternalSource");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserOnDeckRemoval", b =>
@@ -466,6 +488,9 @@ namespace API.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ExternalSourceId")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsProvided")
@@ -1836,6 +1861,17 @@ namespace API.Data.Migrations
                     b.Navigation("SmartFilter");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserExternalSource", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ExternalSources")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserOnDeckRemoval", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -2365,6 +2401,8 @@ namespace API.Data.Migrations
                     b.Navigation("DashboardStreams");
 
                     b.Navigation("Devices");
+
+                    b.Navigation("ExternalSources");
 
                     b.Navigation("Progresses");
 

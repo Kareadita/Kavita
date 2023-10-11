@@ -24,7 +24,8 @@ public class SideNavStreamDto
     /// <summary>
     /// External Source Url if configured
     /// </summary>
-    //public string? ExternalSourceUrl { get; set; }
+    public int ExternalSourceId { get; set; }
+    public ExternalSourceDto? ExternalSource { get; set; }
     /// <summary>
     /// For system provided
     /// </summary>

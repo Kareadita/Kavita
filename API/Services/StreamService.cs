@@ -19,6 +19,7 @@ public interface IStreamService
 {
     Task<IEnumerable<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = true);
     Task<IEnumerable<SideNavStreamDto>> GetSidenavStreams(int userId, bool visibleOnly = true);
+    Task<IEnumerable<ExternalSourceDto>> GetExternalSources(int userId);
     Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId);
     Task UpdateDashboardStream(int userId, DashboardStreamDto dto);
     Task UpdateDashboardStreamPosition(int userId, UpdateStreamPositionDto dto);
@@ -48,6 +49,11 @@ public class StreamService : IStreamService
     public async Task<IEnumerable<SideNavStreamDto>> GetSidenavStreams(int userId, bool visibleOnly = true)
     {
         return await _unitOfWork.UserRepository.GetSideNavStreams(userId, visibleOnly);
+    }
+
+    public async Task<IEnumerable<ExternalSourceDto>> GetExternalSources(int userId)
+    {
+        return await _unitOfWork.UserRepository.GetExternalSources(userId);
     }
 
     public async Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId)

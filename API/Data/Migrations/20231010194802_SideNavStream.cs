@@ -11,6 +11,27 @@ namespace API.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AppUserExternalSource",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Host = table.Column<string>(type: "TEXT", nullable: true),
+                    ApiKey = table.Column<string>(type: "TEXT", nullable: true),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppUserExternalSource", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppUserExternalSource_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppUserSideNavStream",
                 columns: table => new
                 {
@@ -20,6 +41,7 @@ namespace API.Data.Migrations
                     IsProvided = table.Column<bool>(type: "INTEGER", nullable: false),
                     Order = table.Column<int>(type: "INTEGER", nullable: false),
                     LibraryId = table.Column<int>(type: "INTEGER", nullable: true),
+                    ExternalSourceId = table.Column<int>(type: "INTEGER", nullable: true),
                     StreamType = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 5),
                     Visible = table.Column<bool>(type: "INTEGER", nullable: false),
                     SmartFilterId = table.Column<int>(type: "INTEGER", nullable: true),
@@ -42,6 +64,11 @@ namespace API.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppUserExternalSource_AppUserId",
+                table: "AppUserExternalSource",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppUserSideNavStream_AppUserId",
                 table: "AppUserSideNavStream",
                 column: "AppUserId");
@@ -60,6 +87,9 @@ namespace API.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AppUserExternalSource");
+
             migrationBuilder.DropTable(
                 name: "AppUserSideNavStream");
         }

@@ -18,6 +18,12 @@
           <app-customize-sidenav-streams></app-customize-sidenav-streams>
         </ng-template>
       </li>
+      <li [ngbNavItem]="TabID.ExternalSources">
+        <a ngbNavLink>{{t(TabID.ExternalSources)}}</a>
+        <ng-template ngbNavContent>
+          <app-manage-external-sources></app-manage-external-sources>
+        </ng-template>
+      </li>
     </ul>
     <div [ngbNavOutlet]="nav" class="tab-content {{utilityService.getActiveBreakpoint() === Breakpoint.Mobile ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
   </div>
