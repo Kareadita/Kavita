@@ -22,4 +22,5 @@ public static class EasyCacheProfiles
     public const string KavitaPlusReviews = "kavita+reviews";
     public const string KavitaPlusRecommendations = "kavita+recommendations";
     public const string KavitaPlusRatings = "kavita+ratings";
+    public const string KavitaPlusExternalSeries = "kavita+externalSeries";
 }

@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.8.7"
+    "version": "0.7.8.8"
   },
   "servers": [
     {
@@ -871,318 +871,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/Account/dashboard": {
-      "get": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Returns the layout of the user's dashboard",
-        "parameters": [
-          {
-            "name": "visibleOnly",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DashboardStreamDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DashboardStreamDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DashboardStreamDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/sidenav": {
-      "get": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Return's the user's side nav",
-        "parameters": [
-          {
-            "name": "visibleOnly",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "default": true
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/add-dashboard-stream": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible",
-        "parameters": [
-          {
-            "name": "smartFilterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/DashboardStreamDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DashboardStreamDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DashboardStreamDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/update-dashboard-stream": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Updates the visibility of a dashboard stream",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DashboardStreamDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DashboardStreamDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/DashboardStreamDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Account/update-dashboard-position": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Updates the position of a dashboard stream",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Account/add-sidenav-stream": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible",
-        "parameters": [
-          {
-            "name": "smartFilterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/SideNavStreamDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SideNavStreamDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SideNavStreamDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Account/update-sidenav-stream": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Updates the visibility of a dashboard stream",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SideNavStreamDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SideNavStreamDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/SideNavStreamDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/Account/update-sidenav-position": {
-      "post": {
-        "tags": [
-          "Account"
-        ],
-        "summary": "Updates the position of a dashboard stream",
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateStreamPositionDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
           }
         }
       }
@@ -9263,6 +8951,53 @@
         }
       }
     },
+    "/api/Series/external-series-detail": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "parameters": [
+          {
+            "name": "aniListId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "malId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Server/clear-cache": {
       "post": {
         "tags": [
@@ -10587,6 +10322,357 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Stream/dashboard": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Returns the layout of the user's dashboard",
+        "parameters": [
+          {
+            "name": "visibleOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardStreamDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/sidenav": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Return's the user's side nav",
+        "parameters": [
+          {
+            "name": "visibleOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/external-sources": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Return's the user's side nav",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SideNavStreamDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/add-dashboard-stream": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Creates a Dashboard Stream from a SmartFilter and adds it to the user's dashboard as visible",
+        "parameters": [
+          {
+            "name": "smartFilterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStreamDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/update-dashboard-stream": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Updates the visibility of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardStreamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Stream/update-dashboard-position": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Updates the position of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Stream/add-sidenav-stream": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible",
+        "parameters": [
+          {
+            "name": "smartFilterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/update-sidenav-stream": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Updates the visibility of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SideNavStreamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/Stream/update-sidenav-position": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Updates the position of a dashboard stream",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateStreamPositionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -14026,6 +14112,16 @@
           "summary": {
             "type": "string",
             "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -14033,6 +14129,10 @@
       "ExternalSourceDto": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
           "host": {
             "type": "string",
             "nullable": true
@@ -17603,6 +17703,11 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "externalSourceId": {
+            "type": "integer",
+            "description": "External Source Url if configured",
+            "format": "int32"
           },
           "externalSource": {
             "$ref": "#/components/schemas/ExternalSourceDto"

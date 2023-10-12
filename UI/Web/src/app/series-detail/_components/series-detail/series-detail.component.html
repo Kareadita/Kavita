@@ -11,6 +11,8 @@
         <h6 class="subtitle-with-actionables text-break" title="Localized Name">{{series.localizedName}}</h6>
       </ng-container>
 
+
+
       <ng-template #extrasDrawer let-offcanvas>
         <div style="margin-top: 56px">
           <div class="offcanvas-header">
@@ -312,10 +314,10 @@
                 <div class="card-container row g-0" #container>
                   <ng-container *ngFor="let item of scroll.viewPortItems; let idx = index; trackBy: trackBySeriesIdentify">
                     <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
-                      <app-series-card class="col-auto mt-2 mb-2" [data]="item" [libraryId]="item.libraryId"></app-series-card>
+                      <app-series-card class="col-auto mt-2 mb-2" [data]="item" [previewOnClick]="true" [libraryId]="item.libraryId"></app-series-card>
                     </ng-container>
                     <ng-template #externalRec>
-                      <app-external-series-card class="col-auto mt-2 mb-2" [data]="item"></app-external-series-card>
+                      <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item"></app-external-series-card>
                     </ng-template>
                   </ng-container>
                 </div>
@@ -325,14 +327,18 @@
                   <ng-container *ngIf="!item.hasOwnProperty('coverUrl'); else externalRec">
                     <app-external-list-item [imageUrl]="imageService.getSeriesCoverImage(item.id)" imageWidth="130px" imageHeight="" [summary]="item.summary">
                       <ng-container title>
-                        <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
+                        <span (click)="previewSeries(item, false); $event.stopPropagation(); $event.preventDefault();">
+                          <a href="/library/{{item.libraryId}}/series/{{item.id}}">{{item.name}}</a>
+                        </span>
                       </ng-container>
                     </app-external-list-item>
                   </ng-container>
                   <ng-template #externalRec>
                     <app-external-list-item [imageUrl]="item.coverUrl" imageWidth="130px" imageHeight="" [summary]="item.summary">
                       <ng-container title>
-                        <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                        <span (click)="previewSeries(item, true); $event.stopPropagation(); $event.preventDefault();">
+                          <a [href]="item.url" target="_blank" rel="noreferrer nofollow">{{item.name}}</a>
+                        </span>
                       </ng-container>
                     </app-external-list-item>
                   </ng-template>

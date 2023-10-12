@@ -1,0 +1,11 @@
+﻿namespace API.DTOs.Recommendation;
+
+public class SeriesStaffDto
+{
+    public required string Name { get; set; }
+    public required string Url { get; set; }
+    public required string Role { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? Gender { get; set; }
+    public string? Description { get; set; }
+}

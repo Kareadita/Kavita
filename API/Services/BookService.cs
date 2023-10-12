@@ -550,8 +550,12 @@ public class BookService : IBookService
                 }
             }
 
-            // Check if there is a SortTitle
-
+            // If this is a single book and not a collection, set publication status to Completed
+            if (string.IsNullOrEmpty(info.Volume) && Parser.ParseVolume(filePath).Equals(Parser.DefaultVolume))
+            {
+                info.Number = "1";
+                info.Count = 1;
+            }
 
             // Include regular Writer as well, for cases where there is no special tag
             info.Writer = string.Join(",",

@@ -1678,6 +1678,14 @@
         "count-header": "Count"
     },
 
+    "series-preview-drawer": {
+        "staff-label": "Staff",
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "View Series",
+        "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters"
+    },
+
     "server-stats": {
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",

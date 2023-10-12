@@ -15,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace API.Extensions;
 
 public static class ApplicationServiceExtensions
@@ -74,6 +73,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
 
         services.AddSqLite();
         services.AddSignalR(opt => opt.EnableDetailedErrors = true);
@@ -90,6 +90,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.KavitaPlusReviews);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusRecommendations);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusRatings);
+            options.UseInMemory(EasyCacheProfiles.KavitaPlusExternalSeries);
         });
 
         services.AddMemoryCache(options =>

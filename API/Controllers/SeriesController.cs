@@ -10,6 +10,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.Filtering;
 using API.DTOs.Filtering.v2;
 using API.DTOs.Metadata;
+using API.DTOs.Recommendation;
 using API.DTOs.SeriesDetail;
 using API.Entities;
 using API.Entities.Enums;
@@ -35,14 +36,17 @@ public class SeriesController : BaseApiController
     private readonly ISeriesService _seriesService;
     private readonly ILicenseService _licenseService;
     private readonly ILocalizationService _localizationService;
+    private readonly IExternalMetadataService _externalMetadataService;
     private readonly IEasyCachingProvider _ratingCacheProvider;
     private readonly IEasyCachingProvider _reviewCacheProvider;
     private readonly IEasyCachingProvider _recommendationCacheProvider;
+    private readonly IEasyCachingProvider _externalSeriesCacheProvider;
+    public const string CacheKey = "recommendation_";
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
         ISeriesService seriesService, ILicenseService licenseService,
-        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService)
+        IEasyCachingProviderFactory cachingProviderFactory, ILocalizationService localizationService, IExternalMetadataService externalMetadataService)
     {
         _logger = logger;
         _taskScheduler = taskScheduler;
@@ -50,10 +54,12 @@ public class SeriesController : BaseApiController
         _seriesService = seriesService;
         _licenseService = licenseService;
         _localizationService = localizationService;
+        _externalMetadataService = externalMetadataService;
 
         _ratingCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRatings);
         _reviewCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusReviews);
         _recommendationCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusRecommendations);
+        _externalSeriesCacheProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.KavitaPlusExternalSeries);
     }
 
     /// <summary>
@@ -576,6 +582,32 @@ public class SeriesController : BaseApiController
         return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-relationship"));
     }
 
+    [Authorize(Policy = "RequireAdminRole")]
+    [HttpGet("external-series-detail")]
+    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId)
+    {
+        if (!await _licenseService.HasActiveLicense())
+        {
+            return BadRequest();
+        }
 
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}";
+        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
+        if (results.HasValue)
+        {
+            return Ok(results.Value);
+        }
+
+        try
+        {
+            var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId);
+            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
+            return Ok(ret);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest("Unable to load External Series details");
+        }
+    }
 
 }

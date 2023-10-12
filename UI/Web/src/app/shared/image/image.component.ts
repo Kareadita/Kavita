@@ -64,6 +64,7 @@ export class ImageComponent implements OnChanges {
     * If the image component should respond to cover updates
     */
    @Input() processEvents: boolean = true;
+   @Input() classes: string = '';
 
   @ViewChild('img', {static: true}) imgElem!: ElementRef<HTMLImageElement>;
   private readonly destroyRef = inject(DestroyRef);
