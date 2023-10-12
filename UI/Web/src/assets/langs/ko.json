@@ -1786,5 +1786,12 @@
     "metadata-filter-row": {
         "unit-reading-progress": "퍼센트",
         "unit-reading-date": "날짜"
+    },
+    "series-preview-drawer": {
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "시리즈 보기",
+        "staff-label": "스태프",
+        "vols-and-chapters": "{{volCount}} 볼륨 / {{chpCount}} 챕터",
+        "tags-label": "{{filter-field-pipe.tags}}"
     }
 }
