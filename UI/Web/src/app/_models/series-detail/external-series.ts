@@ -3,4 +3,6 @@ export interface ExternalSeries {
   coverUrl: string;
   url: string;
   summary: string;
+  aniListId?: number;
+  malId?: number;
 }

@@ -10,9 +10,7 @@ using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
 using API.Extensions;
-using API.Helpers;
 using API.Helpers.Builders;
-using API.Services.Tasks.Scanner.Parser;
 using Flurl.Http;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
@@ -111,7 +109,9 @@ public class RecommendationService : IRecommendationService
                 Name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.First() : rec.Name,
                 Url = rec.SiteUrl,
                 CoverUrl = rec.CoverUrl,
-                Summary = rec.Summary
+                Summary = rec.Summary,
+                AniListId = rec.AniListId,
+                MalId = rec.MalId
             });
         }
 

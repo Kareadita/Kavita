@@ -9,7 +9,7 @@ import {
   Output
 } from '@angular/core';
 import {Router} from '@angular/router';
-import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbModal, NgbOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {Series} from 'src/app/_models/series';
 import {ImageService} from 'src/app/_services/image.service';
@@ -23,6 +23,7 @@ import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../pipe/relationship.pipe";
 import {Device} from "../../_models/device/device";
 import {TranslocoService} from "@ngneat/transloco";
+import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 
 function deepClone(obj: any): any {
   if (obj === null || typeof obj !== 'object') {
@@ -76,6 +77,10 @@ export class SeriesCardComponent implements OnInit, OnChanges {
    * When a series card is shown on deck, a special actionable is added to the list
    */
   @Input() isOnDeck: boolean = false;
+  /**
+   * Opens a drawer with a preview of the metadata for this series
+   */
+  @Input() previewOnClick: boolean = false;
 
   @Output() clicked = new EventEmitter<Series>();
   /**
@@ -92,6 +97,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   imageUrl: string = '';
 
   private readonly translocoService = inject(TranslocoService);
+  private readonly offcanvasService = inject(NgbOffcanvas);
 
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
               private seriesService: SeriesService, private toastr: ToastrService,
@@ -234,6 +240,14 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   }
 
   handleClick() {
+    if (this.previewOnClick) {
+      const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
+      ref.componentInstance.isExternalSeries = false;
+      ref.componentInstance.seriesId = this.data.id;
+      ref.componentInstance.libraryId = this.data.libraryId;
+      ref.componentInstance.name = this.data.name;
+      return;
+    }
     this.clicked.emit(this.data);
     this.router.navigate(['library', this.libraryId, 'series', this.data?.id]);
   }

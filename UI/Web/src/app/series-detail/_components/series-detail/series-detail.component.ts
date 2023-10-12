@@ -71,6 +71,10 @@ import { TagBadgeComponent } from '../../../shared/tag-badge/tag-badge.component
 import { SideNavCompanionBarComponent } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {ExternalSeries} from "../../../_models/series-detail/external-series";
+import {
+  SeriesPreviewDrawerComponent
+} from "../../../_single-module/series-preview-drawer/series-preview-drawer.component";
 
 interface RelatedSeriesPair {
   series: Series;
@@ -810,5 +814,22 @@ export class SeriesDetailComponent implements OnInit, AfterContentChecked {
     this.cdRef.markForCheck();
   }
 
-  protected readonly undefined = undefined;
+  previewSeries(item: Series | ExternalSeries, isExternal: boolean) {
+    const ref = this.offcanvasService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: 'navbar-offset'});
+    ref.componentInstance.isExternalSeries = isExternal;
+    ref.componentInstance.name = item.name;
+
+    if (isExternal) {
+      const external = item as ExternalSeries;
+      ref.componentInstance.aniListId = external.aniListId;
+      ref.componentInstance.malId = external.malId;
+    } else {
+      const local = item as Series;
+      ref.componentInstance.seriesId = local.id;
+      ref.componentInstance.libraryId = local.libraryId;
+    }
+
+  }
+
+
 }
