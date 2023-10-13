@@ -1,9 +1,15 @@
-<p>
-  Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your peer's server.
-  <a>More Information</a>
-</p>
+<ng-container *transloco="let t; read: 'manage-external-sources'">
+  <p>
+    {{t('description')}}
+    <a href="https://wiki.kavitareader.com/en/guides/customization/external-sources" target="_blank" rel="noopener noreferrer">{{t('help-link')}}</a>
+  </p>
+  <button class="btn btn-primary" (click)="addNewExternalSource()">{{t('add-source')}}</button>
 
-
-<ng-container *ngFor="let externalSource of externalSources">
-  <app-edit-external-source-item [source]="externalSource"></app-edit-external-source-item>
+  <ng-container *ngFor="let externalSource of externalSources; let idx = index">
+    <app-edit-external-source-item [source]="externalSource"
+                                   (sourceUpdate)="updateSource(idx, $event)"
+                                   (sourceDelete)="deleteSource(idx, $event)"
+                                   [isViewMode]="externalSource.id !== 0"></app-edit-external-source-item>
+  </ng-container>
 </ng-container>
+

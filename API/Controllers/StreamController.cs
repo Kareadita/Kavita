@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using API.Data;
 using API.DTOs.Dashboard;
 using API.DTOs.SideNav;
 using API.Extensions;
@@ -9,14 +10,19 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Controllers;
 
+/// <summary>
+/// Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)
+/// </summary>
 public class StreamController : BaseApiController
 {
     private readonly IStreamService _streamService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<StreamController> _logger;
 
-    public StreamController(IStreamService streamService, ILogger<StreamController> logger)
+    public StreamController(IStreamService streamService, IUnitOfWork unitOfWork, ILogger<StreamController> logger)
     {
         _streamService = streamService;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -40,12 +46,59 @@ public class StreamController : BaseApiController
     }
 
     /// <summary>
-    /// Return's the user's side nav
+    /// Return's the user's external sources
     /// </summary>
     [HttpGet("external-sources")]
-    public async Task<ActionResult<IEnumerable<SideNavStreamDto>>> GetExternalSources()
+    public async Task<ActionResult<IEnumerable<ExternalSourceDto>>> GetExternalSources()
     {
         return Ok(await _streamService.GetExternalSources(User.GetUserId()));
+    }
+
+    /// <summary>
+    /// Create an external Source
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("create-external-source")]
+    public async Task<ActionResult<ExternalSourceDto>> CreateExternalSource(ExternalSourceDto dto)
+    {
+        // Check if a host and api key exists for the current user
+        return Ok(await _streamService.CreateExternalSource(User.GetUserId(), dto));
+    }
+
+    /// <summary>
+    /// Updates an existing external source
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update-external-source")]
+    public async Task<ActionResult<ExternalSourceDto>> UpdateExternalSource(ExternalSourceDto dto)
+    {
+        // Check if a host and api key exists for the current user
+        return Ok(await _streamService.UpdateExternalSource(User.GetUserId(), dto));
+    }
+
+    /// <summary>
+    /// Validates the external source by host is unique (for this user)
+    /// </summary>
+    /// <param name="host"></param>
+    /// <returns></returns>
+    [HttpGet("external-source-exists")]
+    public async Task<ActionResult<bool>> ExternalSourceExists(string host)
+    {
+        return Ok(await _unitOfWork.UserRepository.ExternalSourceExists(User.GetUserId(), host));
+    }
+
+    /// <summary>
+    /// Delete's the external source
+    /// </summary>
+    /// <param name="externalSourceId"></param>
+    /// <returns></returns>
+    [HttpDelete("delete-external-source")]
+    public async Task<ActionResult> ExternalSourceExists(int externalSourceId)
+    {
+        await _streamService.DeleteExternalSource(User.GetUserId(), externalSourceId);
+        return Ok();
     }
 
 

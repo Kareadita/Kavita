@@ -1762,9 +1762,22 @@
         "add": "{{common.add}}"
     },
 
+    "manage-external-sources": {
+        "add-source": "Add Source",
+        "help-link": "More information",
+        "description": "Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your friend's server."
+    },
+
     "edit-external-source-item": {
         "required": "{{validations.required-field}}",
-        "not-unique": "External source exists with this host. Ensure you don't have duplicates"
+        "not-unique": "External source exists with this host. Ensure you don't have duplicates",
+        "title": "New External Source",
+        "host-label": "Host",
+        "api-key-label": "API Key",
+        "save": "{{common.save}}",
+        "edit": "{{common.edit}}",
+        "cancel": "{{common.cancel}}",
+        "delete": "{{common.delete}}"
     },
 
     "stream-pipe": {

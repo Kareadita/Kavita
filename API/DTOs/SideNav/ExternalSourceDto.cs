@@ -4,7 +4,7 @@ namespace API.DTOs.SideNav;
 
 public class ExternalSourceDto
 {
-    public int Id { get; set; }
-    public string Host { get; set; }
-    public string ApiKey { get; set; }
+    public required int Id { get; set; } = 0;
+    public required string Host { get; set; }
+    public required string ApiKey { get; set; }
 }

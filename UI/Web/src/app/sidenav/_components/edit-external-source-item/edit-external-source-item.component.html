@@ -1,11 +1,12 @@
-<ng-container *transloco="let t; read:'scrobbling-providers'">
+<ng-container *transloco="let t; read:'edit-external-source-item'">
   <div class="card mt-2">
     <div class="card-body">
       <div class="card-title">
         <div class="container-fluid row mb-2">
-          <div class="col-10 col-sm-11"><h4 id="anilist-token-header">External Source URL</h4></div>
-          <div class="col-1 text-end">
-            <button class="btn btn-primary btn-sm" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
+          <div class="col-9 col-sm-9"><h4 id="anilist-token-header">{{source.host || t('title')}}</h4></div>
+          <div class="col-3 text-end">
+            <button class="btn btn-primary btn-sm me-1" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
+            <button class="btn btn-danger btn-sm" (click)="delete()">{{t('delete')}}</button>
           </div>
         </div>
       </div>
@@ -14,12 +15,27 @@
       <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
         <form [formGroup]="formGroup">
           <div class="form-group mb-3">
-            <label for="host">Host</label>
-            <input type="url" id="host" class="form-control" formControlName="host"/>
+            <label for="host">{{t('host-label')}}</label>
+            <input id="host" class="form-control" formControlName="host" type="url"
+                   [class.is-invalid]="formGroup.get('host')?.invalid && formGroup.get('host')?.touched" aria-describedby="host-validations">
+            <div id="host-validations" class="invalid-feedback" *ngIf="formGroup.dirty || formGroup.touched">
+              <div *ngIf="formGroup.get('host')?.errors?.required">
+                {{t('required')}}
+              </div>
+              <div *ngIf="formGroup.get('host')?.errors?.notUnique">
+                {{t('not-unique')}}
+              </div>
+            </div>
           </div>
           <div class="form-group mb-3">
-            <label for="api-key">API Key</label>
-            <input type="password" id="api-key" class="form-control" formControlName="apiKey"/>
+            <label for="api-key">{{t('api-key-label')}}</label>
+            <input id="api-key" class="form-control" formControlName="apiKey" type="text"
+                   [class.is-invalid]="formGroup.get('apiKey')?.invalid && formGroup.get('apiKey')?.touched" aria-describedby="api-key-validations">
+            <div id="api-key-validations" class="invalid-feedback" *ngIf="formGroup.dirty || formGroup.touched">
+              <div *ngIf="formGroup.get('apiKey')?.errors?.required">
+                {{t('required')}}
+              </div>
+            </div>
           </div>
         </form>
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">

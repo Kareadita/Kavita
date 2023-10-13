@@ -92,6 +92,7 @@ public interface IUserRepository
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
     Task<IList<ExternalSourceDto>> GetExternalSources(int userId);
 
+    Task<bool> ExternalSourceExists(int userId, string host);
 }
 
 public class UserRepository : IUserRepository
@@ -452,6 +453,13 @@ public class UserRepository : IUserRepository
         return await _context.AppUserExternalSource.Where(s => s.AppUserId == userId)
             .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
             .ToListAsync();
+    }
+
+    public async Task<bool> ExternalSourceExists(int userId, string host)
+    {
+        return await _context.AppUserExternalSource.Where(s => s.AppUserId == userId)
+            .Where(s => EF.Functions.Like(s.Host, $"%{host.Trim()}%"))
+            .AnyAsync();
     }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()

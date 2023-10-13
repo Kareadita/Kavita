@@ -4196,6 +4196,47 @@
         }
       }
     },
+    "/api/Plugin/version": {
+      "get": {
+        "tags": [
+          "Plugin"
+        ],
+        "summary": "Returns the version of the Kavita install",
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "Required for authenticating to get result",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Rating": {
       "get": {
         "tags": [
@@ -10429,7 +10470,7 @@
         "tags": [
           "Stream"
         ],
-        "summary": "Return's the user's side nav",
+        "summary": "Return's the user's external sources",
         "responses": {
           "200": {
             "description": "Success",
@@ -10438,7 +10479,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
+                    "$ref": "#/components/schemas/ExternalSourceDto"
                   }
                 }
               },
@@ -10446,7 +10487,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
+                    "$ref": "#/components/schemas/ExternalSourceDto"
                   }
                 }
               },
@@ -10454,11 +10495,175 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/SideNavStreamDto"
+                    "$ref": "#/components/schemas/ExternalSourceDto"
                   }
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Stream/create-external-source": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Create an external Source",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/update-external-source": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Updates an existing external source",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalSourceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalSourceDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/external-source-exists": {
+      "get": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Validates the external source by host is unique (for this user)",
+        "parameters": [
+          {
+            "name": "host",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/delete-external-source": {
+      "delete": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Delete's the external source",
+        "parameters": [
+          {
+            "name": "externalSourceId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         }
       }
@@ -19252,6 +19457,10 @@
     {
       "name": "Search",
       "description": "Responsible for the Search interface from the UI"
+    },
+    {
+      "name": "Stream",
+      "description": "Responsible for anything that deals with Streams (SmartFilters, ExternalSource, DashboardStream, SideNavStream)"
     },
     {
       "name": "Tachiyomi",

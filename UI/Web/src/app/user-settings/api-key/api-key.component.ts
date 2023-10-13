@@ -87,7 +87,6 @@ export class ApiKeyComponent implements OnInit {
 
   toggleVisibility() {
     this.isDataHidden = !this.isDataHidden;
-    //this.inputElem.nativeElement.setAttribute('type', 'text');
     this.cdRef.markForCheck();
   }
 

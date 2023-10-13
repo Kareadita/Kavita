@@ -9,6 +9,7 @@ using API.Entities;
 using API.Entities.Enums;
 using API.SignalR;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 
 namespace API.Services;
 
@@ -26,6 +27,9 @@ public interface IStreamService
     Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId);
     Task UpdateSideNavStream(int userId, SideNavStreamDto dto);
     Task UpdateSideNavStreamPosition(int userId, UpdateStreamPositionDto dto);
+    Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
+    Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
+    Task DeleteExternalSource(int userId, int externalSourceId);
 }
 
 public class StreamService : IStreamService
@@ -200,6 +204,64 @@ public class StreamService : IStreamService
         await _unitOfWork.CommitAsync();
         await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId);
+    }
+
+    public async Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId,
+            AppUserIncludes.ExternalSources);
+        if (user == null) throw new KavitaException("not-authenticated");
+
+        if (user.ExternalSources.Any(s => s.Host == dto.Host))
+        {
+            throw new KavitaException("external-source-already-exists");
+        }
+
+        if (string.IsNullOrEmpty(dto.ApiKey)) throw new KavitaException("external-source-required");
+        if (!UrlHelper.StartsWithHttpOrHttps(dto.Host)) throw new KavitaException("external-source-host-format");
+
+
+        var newSource = new AppUserExternalSource()
+        {
+            Host = UrlHelper.EnsureEndsWithSlash(
+                UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host)),
+            ApiKey = dto.ApiKey
+        };
+        user.ExternalSources.Add(newSource);
+
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        dto.Id = newSource.Id;
+
+        return dto;
+    }
+
+    public async Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto)
+    {
+        var source = await _unitOfWork.AppUserExternalSourceRepository.GetById(dto.Id);
+        if (source == null) throw new KavitaException("external-source-doesnt-exist");
+
+        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Host)) throw new KavitaException("external-source-required");
+
+        source.Host = UrlHelper.EnsureEndsWithSlash(
+            UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host));
+        source.ApiKey = dto.ApiKey;
+
+        _unitOfWork.AppUserExternalSourceRepository.Update(source);
+        await _unitOfWork.CommitAsync();
+        dto.Host = source.Host;
+        return dto;
+    }
+
+    public async Task DeleteExternalSource(int userId, int externalSourceId)
+    {
+        var source = await _unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId);
+        if (source == null) throw new KavitaException("external-source-doesnt-exist");
+        if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
+
+        _unitOfWork.AppUserExternalSourceRepository.Delete(source);
+        await _unitOfWork.CommitAsync();
     }
 
     private static void ReorderItems(List<AppUserDashboardStream> items, int itemId, int toPosition)

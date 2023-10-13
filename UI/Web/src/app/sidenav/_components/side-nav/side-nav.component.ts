@@ -83,22 +83,20 @@ export class SideNavComponent implements OnInit {
       startWith(false),
       distinctUntilChanged(),
       tap(showAll => this.showAll = showAll),
-      tap(showAll => console.log('Showing All: ', showAll)),
       switchMap(showAll =>
         showAll
           ? this.loadDataOnInit$.pipe(
             tap(d => this.totalSize = d.length),
-            tap(d => console.log('Using full data')))
+          )
           : this.loadDataOnInit$.pipe(
             tap(d => this.totalSize = d.length),
-            tap(d => console.log('Using first 10')),
-            map(d => d.slice(0, 10)))
+            map(d => d.slice(0, 10))
+          )
       ),
       takeUntilDestroyed(this.destroyRef),
     ), this.messageHub.messages$.pipe(
       filter(event => event.event === EVENTS.LibraryModified || event.event === EVENTS.SideNavUpdate),
       tap(() => {
-          console.log('refresh update came in');
           this.cachedData = null; // Reset cached data to null to get latest
       }),
       switchMap(() => {
@@ -110,7 +108,6 @@ export class SideNavComponent implements OnInit {
   ).pipe(
       startWith(null),
       filter(data => data !== null),
-      tap(data => console.log('data: ', data, 'showAll: ', this.showAll)),
       takeUntilDestroyed(this.destroyRef),
   );
 
@@ -120,8 +117,6 @@ export class SideNavComponent implements OnInit {
     private actionService: ActionService,
     public navService: NavService, private router: Router, private readonly cdRef: ChangeDetectorRef,
     private ngbModal: NgbModal, private imageService: ImageService, public readonly accountService: AccountService) {
-
-    this.navStreams$.subscribe(d => console.log('navStream data: ', d));
 
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
