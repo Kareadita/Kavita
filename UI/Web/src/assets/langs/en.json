@@ -270,6 +270,7 @@
     "api-key": {
         "copy": "Copy",
         "show": "Show",
+        "hide": "Hide",
         "regen-warning": "Regenerating your API key will invalidate any existing clients.",
         "no-key": "ERROR - KEY NOT SET",
         "confirm-reset": "This will invalidate any OPDS configurations you have setup. Are you sure you want to continue?",
@@ -1754,10 +1755,16 @@
         "save": "{{common.save}}",
         "add": "{{common.add}}"
     },
+
     "customize-sidenav-streams": {
         "no-data": "All Smart filters added to Side Nav or none created yet.",
         "save": "{{common.save}}",
         "add": "{{common.add}}"
+    },
+
+    "edit-external-source-item": {
+        "required": "{{validations.required-field}}",
+        "not-unique": "External source exists with this host. Ensure you don't have duplicates"
     },
 
     "stream-pipe": {
