@@ -84,9 +84,9 @@ public class StreamController : BaseApiController
     /// <param name="host"></param>
     /// <returns></returns>
     [HttpGet("external-source-exists")]
-    public async Task<ActionResult<bool>> ExternalSourceExists(string host)
+    public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name)
     {
-        return Ok(await _unitOfWork.UserRepository.ExternalSourceExists(User.GetUserId(), host));
+        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), host, name));
     }
 
     /// <summary>
@@ -147,6 +147,17 @@ public class StreamController : BaseApiController
     public async Task<ActionResult<SideNavStreamDto>> AddSideNav([FromQuery] int smartFilterId)
     {
         return Ok(await _streamService.CreateSideNavStreamFromSmartFilter(User.GetUserId(), smartFilterId));
+    }
+
+    /// <summary>
+    /// Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible
+    /// </summary>
+    /// <param name="externalSourceId"></param>
+    /// <returns></returns>
+    [HttpPost("add-sidenav-stream-from-external-source")]
+    public async Task<ActionResult<SideNavStreamDto>> AddSideNavFromExternalSource([FromQuery] int externalSourceId)
+    {
+        return Ok(await _streamService.CreateSideNavStreamFromExternalSource(User.GetUserId(), externalSourceId));
     }
 
     /// <summary>

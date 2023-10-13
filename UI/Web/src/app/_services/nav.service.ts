@@ -58,6 +58,10 @@ export class NavService {
     return this.httpClient.post<SideNavStream>(this.baseUrl + 'stream/add-sidenav-stream?smartFilterId=' + smartFilterId, {});
   }
 
+  createSideNavStreamFromExternalSource(externalSourceId: number) {
+    return this.httpClient.post<SideNavStream>(this.baseUrl + 'stream/add-sidenav-stream-from-external-source?externalSourceId=' + externalSourceId, {});
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */

@@ -7,7 +7,7 @@ public enum SideNavStreamType
     Bookmarks = 3,
     Library = 4,
     SmartFilter = 5,
-    ExternalServer = 6,
+    ExternalSource = 6,
     AllSeries = 7,
     WantToRead = 8,
 }

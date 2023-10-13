@@ -6,11 +6,25 @@
     </ng-template>
   </app-draggable-ordered-list>
 
-  <h5>Smart Filters</h5>
+  <h5>{{t('smart-filters-title')}}</h5>
   <ul class="list-group filter-list">
     <li class="filter list-group-item" *ngFor="let filter of smartFilters">
       {{filter.name}}
       <button class="btn btn-icon" (click)="addFilterToStream(filter)">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        {{t('add')}}
+      </button>
+    </li>
+    <li class="list-group-item" *ngIf="smartFilters.length === 0">
+      {{t('no-data')}}
+    </li>
+  </ul>
+
+  <h5>{{t('external-sources-title')}}</h5>
+  <ul class="list-group filter-list">
+    <li class="filter list-group-item" *ngFor="let source of externalSources">
+      {{source.host}}
+      <button class="btn btn-icon" (click)="addExternalSourceToStream(source)">
         <i class="fa fa-plus" aria-hidden="true"></i>
         {{t('add')}}
       </button>

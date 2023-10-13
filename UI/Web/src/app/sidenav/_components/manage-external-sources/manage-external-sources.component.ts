@@ -32,7 +32,7 @@ export class ManageExternalSourcesComponent {
   }
 
   addNewExternalSource() {
-    this.externalSources.unshift({id: 0, host: '', apiKey: ''});
+    this.externalSources.unshift({id: 0, name: '', host: '', apiKey: ''});
     this.cdRef.markForCheck();
   }
 

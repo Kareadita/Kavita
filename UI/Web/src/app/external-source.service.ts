@@ -29,8 +29,8 @@ export class ExternalSourceService {
     return this.httpClient.delete(this.baseUrl + 'stream/delete-external-source?externalSourceId=' + externalSourceId);
   }
 
-  hostExists(host: string) {
-    return this.httpClient.get<string>(this.baseUrl + 'stream/external-source-exists?host=' + encodeURIComponent(host), TextResonse)
+  sourceExists(name: string, host: string) {
+    return this.httpClient.get<string>(this.baseUrl + `stream/external-source-exists?host=${encodeURIComponent(host)}&name=${name}`, TextResonse)
       .pipe(map(s => s == 'true'));
   }
 }

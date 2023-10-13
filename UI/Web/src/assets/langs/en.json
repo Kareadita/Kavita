@@ -1759,7 +1759,9 @@
     "customize-sidenav-streams": {
         "no-data": "All Smart filters added to Side Nav or none created yet.",
         "save": "{{common.save}}",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+        "smart-filters-title": "Smart Filters",
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}"
     },
 
     "manage-external-sources": {
@@ -1769,15 +1771,17 @@
     },
 
     "edit-external-source-item": {
-        "required": "{{validations.required-field}}",
         "not-unique": "External source exists with this host. Ensure you don't have duplicates",
         "title": "New External Source",
         "host-label": "Host",
+        "name-label": "Name",
         "api-key-label": "API Key",
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "pattern": "Host must be a valid http(s):// url",
+        "required": "{{validation.required-field}}"
     },
 
     "stream-pipe": {

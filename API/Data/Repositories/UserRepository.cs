@@ -90,9 +90,6 @@ public interface IUserRepository
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
-    Task<IList<ExternalSourceDto>> GetExternalSources(int userId);
-
-    Task<bool> ExternalSourceExists(int userId, string host);
 }
 
 public class UserRepository : IUserRepository
@@ -409,7 +406,7 @@ public class UserRepository : IUserRepository
             dto.Library = libraryDtos.FirstOrDefault(l => l.Id == dto.LibraryId);
         }
 
-        var externalSourceIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.ExternalServer)
+        var externalSourceIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.ExternalSource)
             .Select(d => d.ExternalSourceId)
             .ToList();
 
@@ -418,7 +415,7 @@ public class UserRepository : IUserRepository
             .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
             .ToList();
 
-        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.ExternalServer))
+        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.ExternalSource))
         {
             dto.ExternalSource = externalSourceDtos.FirstOrDefault(l => l.Id == dto.ExternalSourceId);
         }
@@ -448,19 +445,6 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<IList<ExternalSourceDto>> GetExternalSources(int userId)
-    {
-        return await _context.AppUserExternalSource.Where(s => s.AppUserId == userId)
-            .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
-            .ToListAsync();
-    }
-
-    public async Task<bool> ExternalSourceExists(int userId, string host)
-    {
-        return await _context.AppUserExternalSource.Where(s => s.AppUserId == userId)
-            .Where(s => EF.Functions.Like(s.Host, $"%{host.Trim()}%"))
-            .AnyAsync();
-    }
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {

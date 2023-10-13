@@ -164,6 +164,7 @@
     "external-source-already-exists": "External Source already exists",
     "external-source-required": "ApiKey and Host required",
     "external-source-doesnt-exist": "External Source doesn't exist",
+    "external-source-already-in-use": "There is an existing stream with this External Source",
 
     "not-authenticated": "User is not authenticated",
     "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",

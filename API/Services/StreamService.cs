@@ -10,6 +10,7 @@ using API.Entities.Enums;
 using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
+using NetVips;
 
 namespace API.Services;
 
@@ -25,6 +26,7 @@ public interface IStreamService
     Task UpdateDashboardStream(int userId, DashboardStreamDto dto);
     Task UpdateDashboardStreamPosition(int userId, UpdateStreamPositionDto dto);
     Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId);
+    Task<SideNavStreamDto> CreateSideNavStreamFromExternalSource(int userId, int externalSourceId);
     Task UpdateSideNavStream(int userId, SideNavStreamDto dto);
     Task UpdateSideNavStreamPosition(int userId, UpdateStreamPositionDto dto);
     Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
@@ -57,7 +59,7 @@ public class StreamService : IStreamService
 
     public async Task<IEnumerable<ExternalSourceDto>> GetExternalSources(int userId)
     {
-        return await _unitOfWork.UserRepository.GetExternalSources(userId);
+        return await _unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId);
     }
 
     public async Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId)
@@ -175,6 +177,54 @@ public class StreamService : IStreamService
         return ret;
     }
 
+    public async Task<SideNavStreamDto> CreateSideNavStreamFromExternalSource(int userId, int externalSourceId)
+    {
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams);
+        if (user == null) throw new KavitaException(await _localizationService.Translate(userId, "no-user"));
+
+        var externalSource = await _unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId);
+        if (externalSource == null) throw new KavitaException(await _localizationService.Translate(userId, "external-source-doesnt-exist"));
+
+        var stream = user?.SideNavStreams.FirstOrDefault(d => d.ExternalSourceId == externalSourceId);
+        if (stream != null) throw new KavitaException(await _localizationService.Translate(userId, "external-source-already-in-use"));
+
+        var maxOrder = user!.SideNavStreams.Max(d => d.Order);
+        var createdStream = new AppUserSideNavStream()
+        {
+            Name = externalSource.Name,
+            IsProvided = false,
+            StreamType = SideNavStreamType.ExternalSource,
+            Visible = true,
+            Order = maxOrder + 1,
+            ExternalSourceId = externalSource.Id
+        };
+
+        user.SideNavStreams.Add(createdStream);
+        _unitOfWork.UserRepository.Update(user);
+        await _unitOfWork.CommitAsync();
+
+        var ret = new SideNavStreamDto()
+        {
+            Name = createdStream.Name,
+            IsProvided = createdStream.IsProvided,
+            Visible = createdStream.Visible,
+            Order = createdStream.Order,
+            StreamType = createdStream.StreamType,
+            ExternalSource = new ExternalSourceDto()
+            {
+                Host = externalSource.Host,
+                Id = externalSource.Id,
+                Name = externalSource.Name,
+                ApiKey = externalSource.ApiKey
+            }
+        };
+
+
+        await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
+            userId);
+        return ret;
+    }
+
     public async Task UpdateSideNavStream(int userId, SideNavStreamDto dto)
     {
         var stream = await _unitOfWork.UserRepository.GetSideNavStream(dto.Id);
@@ -217,12 +267,13 @@ public class StreamService : IStreamService
             throw new KavitaException("external-source-already-exists");
         }
 
-        if (string.IsNullOrEmpty(dto.ApiKey)) throw new KavitaException("external-source-required");
+        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
         if (!UrlHelper.StartsWithHttpOrHttps(dto.Host)) throw new KavitaException("external-source-host-format");
 
 
         var newSource = new AppUserExternalSource()
         {
+            Name = dto.Name,
             Host = UrlHelper.EnsureEndsWithSlash(
                 UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host)),
             ApiKey = dto.ApiKey
@@ -241,15 +292,18 @@ public class StreamService : IStreamService
     {
         var source = await _unitOfWork.AppUserExternalSourceRepository.GetById(dto.Id);
         if (source == null) throw new KavitaException("external-source-doesnt-exist");
+        if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
 
-        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Host)) throw new KavitaException("external-source-required");
+        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Host) || string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
 
         source.Host = UrlHelper.EnsureEndsWithSlash(
             UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host));
         source.ApiKey = dto.ApiKey;
+        source.Name = dto.Name;
 
         _unitOfWork.AppUserExternalSourceRepository.Update(source);
         await _unitOfWork.CommitAsync();
+
         dto.Host = source.Host;
         return dto;
     }

@@ -238,6 +238,9 @@ namespace API.Data.Migrations
                     b.Property<string>("Host")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");

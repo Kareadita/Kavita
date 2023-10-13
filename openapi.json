@@ -10618,6 +10618,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -10784,6 +10791,47 @@
         "parameters": [
           {
             "name": "smartFilterId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SideNavStreamDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Stream/add-sidenav-stream-from-external-source": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "summary": "Creates a SideNav Stream from a SmartFilter and adds it to the user's sidenav as visible",
+        "parameters": [
+          {
+            "name": "externalSourceId",
             "in": "query",
             "description": "",
             "schema": {
@@ -12356,6 +12404,10 @@
           "id": {
             "type": "integer",
             "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           },
           "host": {
             "type": "string",
@@ -14337,6 +14389,10 @@
           "id": {
             "type": "integer",
             "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           },
           "host": {
             "type": "string",

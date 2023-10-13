@@ -29,25 +29,35 @@ export class EditExternalSourceItemComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly externalSourceService = inject(ExternalSourceService);
 
+  hasErrors(controlName: string) {
+    const errors = this.formGroup.get(controlName)?.errors;
+    return errors && Object.keys(errors).length > 0;
+  }
 
   constructor() {}
 
   ngOnInit(): void {
-    this.formGroup.addControl('host', new FormControl(this.source.host, [Validators.required]));
+    this.formGroup.addControl('name', new FormControl(this.source.name, [Validators.required]));
+    this.formGroup.addControl('host', new FormControl(this.source.host, [Validators.required, Validators.pattern(/^(http:|https:)+[^\s]+[\w]$/)]));
     this.formGroup.addControl('apiKey', new FormControl(this.source.apiKey, [Validators.required]));
     this.cdRef.markForCheck();
 
-    this.formGroup.get('host')?.valueChanges.pipe(
+    this.formGroup.valueChanges.pipe(
+      filter(() => this.formGroup.get('name')?.value && this.formGroup.get('host')?.value),
       distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef),
-      tap((val) => console.log('host value: ', val)),
-      switchMap((val) => this.externalSourceService.hostExists(val)),
-      tap(isError => this.formGroup.setErrors({notUnique: isError}))
+      switchMap((val) => this.externalSourceService.sourceExists(this.formGroup.get('name')!.value, this.formGroup.get('host')!.value)),
+      tap(isError => {
+          this.formGroup.get('host')?.setErrors({notUnique: isError});
+          this.formGroup.get('name')?.setErrors({notUnique: isError});
+          this.cdRef.markForCheck();
+      })
     ).subscribe();
   }
 
   resetForm() {
     this.formGroup.get('host')?.setValue(this.source.host);
+    this.formGroup.get('name')?.setValue(this.source.name);
     this.formGroup.get('apiKey')?.setValue(this.source.apiKey);
     this.cdRef.markForCheck();
   }
@@ -67,6 +77,7 @@ export class EditExternalSourceItemComponent implements OnInit {
     this.externalSourceService.updateSource({id: this.source.id, ...this.formGroup.value}).subscribe((updatedSource) => {
       this.source!.host = this.formGroup.value.host;
       this.source!.apiKey = this.formGroup.value.apiKey;
+      this.source!.name = this.formGroup.value.name;
 
       this.sourceUpdate.emit(this.source);
       this.toggleViewMode();
@@ -87,6 +98,4 @@ export class EditExternalSourceItemComponent implements OnInit {
       this.resetForm();
     }
   }
-
-
 }

@@ -14,6 +14,8 @@ import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/da
 import {CommonStream} from "../../../_models/common-stream";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SidenavStreamListItemComponent} from "../sidenav-stream-list-item/sidenav-stream-list-item.component";
+import {ExternalSourceService} from "../../../external-source.service";
+import {ExternalSource} from "../../../_models/sidenav/external-source";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -27,17 +29,21 @@ export class CustomizeSidenavStreamsComponent {
 
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
+  externalSources: ExternalSource[] = [];
   accessibilityMode: boolean = false;
 
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
+  private readonly externalSourceService = inject(ExternalSourceService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
   constructor(public modal: NgbActiveModal) {
-    forkJoin([this.sideNavService.getSideNavStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
+    forkJoin([this.sideNavService.getSideNavStreams(false), this.filterService.getAllFilters(), this.externalSourceService.getExternalSources()]).subscribe(results => {
       this.items = results[0];
-      const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
-      this.smartFilters = results[1].filter(d => !smartFilterStreams.has(d.name));
+      const nonProvidedStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
+      this.smartFilters = results[1].filter(d => !nonProvidedStreams.has(d.name));
+
+      this.externalSources = results[2].filter(d => !nonProvidedStreams.has(d.name));
       this.cdRef.markForCheck();
     });
   }
@@ -49,6 +55,14 @@ export class CustomizeSidenavStreamsComponent {
       this.cdRef.markForCheck();
     });
   }
+
+    addExternalSourceToStream(externalSource: ExternalSource) {
+        this.sideNavService.createSideNavStreamFromExternalSource(externalSource.id).subscribe(stream => {
+            this.externalSources = this.externalSources.filter(d => d.name !== externalSource.name);
+            this.items.push(stream);
+            this.cdRef.markForCheck();
+        });
+    }
 
 
   orderUpdated(event: IndexUpdateEvent) {
