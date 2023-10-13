@@ -32,17 +32,20 @@
             <label for="host">{{t('host-label')}}</label>
             <input id="host" class="form-control" formControlName="host" type="url"
                    [class.is-invalid]="formGroup.get('host')?.invalid && formGroup.get('host')?.touched" aria-describedby="host-validations">
-            <div id="host-validations" class="invalid-feedback" *ngIf="hasErrors('host')">
-              <div *ngIf="formGroup.get('host')?.errors?.required">
-                {{t('required')}}
+            <ng-container *ngIf="formGroup.get('host')?.errors as errors">
+              <div id="host-validations" class="invalid-feedback">
+                <div *ngIf="errors.required">
+                  {{t('required')}}
+                </div>
+                <div *ngIf="errors.pattern">
+                  {{t('pattern')}}
+                </div>
+                <div *ngIf="errors.notUnique">
+                  {{t('not-unique')}}
+                </div>
               </div>
-              <div *ngIf="formGroup.get('host')?.errors?.pattern">
-                {{t('pattern')}}
-              </div>
-              <div *ngIf="formGroup.get('host')?.errors?.notUnique">
-                {{t('not-unique')}}
-              </div>
-            </div>
+            </ng-container>
+
           </div>
           <div class="form-group mb-3">
             <label for="api-key">{{t('api-key-label')}}</label>
