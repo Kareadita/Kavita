@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'draggable-ordered-list'">
 
-    <ng-container *ngIf="items.length > 2; else dragList">
+    <ng-container *ngIf="items.length > 100; else dragList">
         <div class="example-list list-group-flush">
             <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
                 <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
