@@ -12,11 +12,13 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {CommonStream} from "../../../_models/common-stream";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FilterPipe} from "../../../pipe/filter.pipe";
 
 @Component({
   selector: 'app-customize-dashboard-streams',
   standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective],
+  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, ReactiveFormsModule, FilterPipe],
   templateUrl: './customize-dashboard-streams.component.html',
   styleUrls: ['./customize-dashboard-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +32,19 @@ export class CustomizeDashboardStreamsComponent {
   private readonly dashboardService = inject(DashboardService);
   private readonly filterService = inject(FilterService);
   private readonly cdRef = inject(ChangeDetectorRef);
+
+  listForm: FormGroup = new FormGroup({
+    'filterQuery': new FormControl('', [])
+  });
+
+  filterList = (listItem: SmartFilter) => {
+    const filterVal = (this.listForm.value.filterQuery || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
+  }
+  resetFilter() {
+    this.listForm.get('filterQuery')?.setValue('');
+    this.cdRef.markForCheck();
+  }
 
   constructor(public modal: NgbActiveModal) {
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
