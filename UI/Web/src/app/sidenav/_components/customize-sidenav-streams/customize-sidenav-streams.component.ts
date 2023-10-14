@@ -68,6 +68,12 @@ export class CustomizeSidenavStreamsComponent {
         this.filterService.getAllFilters(), this.externalSourceService.getExternalSources()
     ]).subscribe(results => {
       this.items = results[0];
+
+      // After 100 items, drag and drop is disabled to use virtualization
+      if (this.items.length > 100) {
+        this.accessibilityMode = true;
+      }
+
       const existingSmartFilterStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
       this.smartFilters = results[1].filter(d => !existingSmartFilterStreams.has(d.name));
 

@@ -1777,7 +1777,7 @@
     "manage-external-sources": {
         "add-source": "Add",
         "help-link": "More information",
-        "description": "Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your friend's server.",
+        "description": "Enhance your experience by adding external servers and conveniently include them in your Side Nav for quick access to both your server and your friend's server.",
         "clear": "{{common.clear}}",
         "filter": "{{common.filter}}"
     },

@@ -49,6 +49,12 @@ export class CustomizeDashboardStreamsComponent {
   constructor(public modal: NgbActiveModal) {
     forkJoin([this.dashboardService.getDashboardStreams(false), this.filterService.getAllFilters()]).subscribe(results => {
       this.items = results[0];
+
+      // After 100 items, drag and drop is disabled to use virtualization
+      if (this.items.length > 100) {
+        this.accessibilityMode = true;
+      }
+
       const smartFilterStreams = new Set(results[0].filter(d => !d.isProvided).map(d => d.name));
       this.smartFilters = results[1].filter(d => !smartFilterStreams.has(d.name));
       this.cdRef.markForCheck();
