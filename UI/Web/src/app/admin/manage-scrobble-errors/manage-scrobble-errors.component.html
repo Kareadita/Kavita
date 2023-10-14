@@ -38,7 +38,7 @@
           <a href="library/{{item.libraryId}}/series/{{item.seriesId}}" target="_blank">{{item.details}}</a>
         </td>
         <td>
-          {{item.createdUtc  | translocoDate: {dateStyle: 'short', timeStyle: 'medium' } | defaultValue }}
+          {{item.createdUtc  | utcToLocalTime | defaultValue }}
         </td>
         <td>
           {{item.comment}}

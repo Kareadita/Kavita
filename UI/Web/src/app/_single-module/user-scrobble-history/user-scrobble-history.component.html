@@ -44,14 +44,14 @@
     </thead>
     <tbody>
     <tr *ngIf="events.length === 0">
-      <td colspan="6">{{t('no-data')}}/td>
+      <td colspan="6">{{t('no-data')}}</td>
     </tr>
     <tr *ngFor="let item of events; let idx = index;">
       <td>
-        {{item.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium',  } | defaultValue }}
+        {{item.createdUtc | utcToLocalTime  | defaultValue}}
       </td>
       <td>
-        {{item.lastModifiedUtc | translocoDate: {dateStyle: 'short', timeStyle: 'medium' } | defaultValue }}
+        {{item.lastModifiedUtc | utcToLocalTime | defaultValue }}
       </td>
       <td>
         {{item.scrobbleEventType | scrobbleEventType}}

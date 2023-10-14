@@ -29,11 +29,12 @@ import {TranslocoModule} from "@ngneat/transloco";
 import {DefaultDatePipe} from "../../pipe/default-date.pipe";
 import {DefaultValuePipe} from "../../pipe/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-manage-scrobble-errors',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule, DefaultDatePipe, DefaultValuePipe, TranslocoLocaleModule],
+    imports: [CommonModule, ReactiveFormsModule, FilterPipe, LoadingComponent, SortableHeader, TranslocoModule, DefaultDatePipe, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe],
   templateUrl: './manage-scrobble-errors.component.html',
   styleUrls: ['./manage-scrobble-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

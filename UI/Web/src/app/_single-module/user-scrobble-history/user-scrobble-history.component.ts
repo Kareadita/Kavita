@@ -14,11 +14,12 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {TranslocoModule} from "@ngneat/transloco";
 import {DefaultValuePipe} from "../../pipe/default-value.pipe";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
+import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-user-scrobble-history',
   standalone: true,
-  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule],
+  imports: [CommonModule, ScrobbleEventTypePipe, NgbPagination, ReactiveFormsModule, SortableHeader, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
