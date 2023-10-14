@@ -15,8 +15,8 @@ import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient} from '@angular/common/http';
 import {
-  provideTransloco,
-  TranslocoService
+    provideTransloco, TranslocoConfig,
+    TranslocoService
 } from "@ngneat/transloco";
 import {environment} from "./environments/environment";
 import {HttpLoader} from "./httpLoader";
@@ -109,8 +109,8 @@ const translocoOptions = {
     missingHandler: {
       useFallbackTranslation: true,
       allowEmpty: false,
-    }
-  }
+    },
+  } as TranslocoConfig
 };
 
 bootstrapApplication(AppComponent, {
@@ -133,7 +133,8 @@ bootstrapApplication(AppComponent, {
         }),
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
-          storage: { useValue: localStorage }
+          storage: { useValue: localStorage },
+          ttl: 604800
         }),
         provideTranslocoPersistLang({
           storage: {

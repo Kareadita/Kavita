@@ -3458,14 +3458,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "host",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
           }
         ],
         "responses": {
@@ -3485,14 +3477,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "host",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "default": ""
             }
           }
         ],

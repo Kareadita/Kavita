@@ -1779,7 +1779,8 @@
         "help-link": "More information",
         "description": "Enhance your experience by adding external servers and conveniently include them in your Side Nav for quick access to both your server and your friend's server.",
         "clear": "{{common.clear}}",
-        "filter": "{{common.filter}}"
+        "filter": "{{common.filter}}",
+        "no-data": "No External Sources exist"
     },
 
     "manage-smart-filters": {

@@ -1,0 +1,20 @@
+ul {
+  margin:0;
+  padding: 0;
+
+  li {
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    margin: 5px 0;
+    color: var(--list-group-hover-text-color);
+    background-color: var(--card-bg-color);
+
+    span {
+      cursor: pointer;
+    }
+  }
+}
