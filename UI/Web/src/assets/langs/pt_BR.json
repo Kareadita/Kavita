@@ -1327,7 +1327,9 @@
         "no-next-chapter": "Nenhum Capítulo A Seguir",
         "no-prev-chapter": "Nenhum Capítulo Anterior",
         "user-preferences-updated": "Preferências de usuário atualizadas",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "unbookmark-page-tooltip": "Desmarcar Página",
+        "bookmark-page-tooltip": "Marcar Página"
     },
     "metadata-filter": {
         "filter-title": "Filtro",
@@ -1775,9 +1777,7 @@
         "load-filter": "Carregar Filtro"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "title": "Personalizar Painel de Controle",
-        "save": "{{common.save}}"
+        "close": "{{common.close}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
