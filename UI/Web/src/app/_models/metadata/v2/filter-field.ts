@@ -31,7 +31,15 @@ export enum FilterField
     ReadingDate = 27
 }
 
-export const allFields = Object.keys(FilterField)
+
+const enumArray = Object.keys(FilterField)
     .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-    .map(key => parseInt(key, 10))
-    .sort((a, b) => a - b) as FilterField[];
+    .map(key => {
+        // @ts-ignore
+        return ({key: key, value: FilterField[key]});
+    });
+
+enumArray.sort((a, b) => a.value.localeCompare(b.value));
+
+export const allFields = enumArray
+    .map(key => parseInt(key.key, 10))as FilterField[];
