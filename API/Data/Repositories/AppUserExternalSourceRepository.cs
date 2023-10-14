@@ -6,6 +6,7 @@ using API.DTOs.SideNav;
 using API.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Kavita.Common.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data.Repositories;
@@ -16,7 +17,7 @@ public interface IAppUserExternalSourceRepository
     void Delete(AppUserExternalSource source);
     Task<AppUserExternalSource> GetById(int externalSourceId);
     Task<IList<ExternalSourceDto>> GetExternalSources(int userId);
-    Task<bool> ExternalSourceExists(int userId, string host, string name);
+    Task<bool> ExternalSourceExists(int userId, string name, string host, string apiKey);
 }
 
 public class AppUserExternalSourceRepository : IAppUserExternalSourceRepository
@@ -54,14 +55,24 @@ public class AppUserExternalSourceRepository : IAppUserExternalSourceRepository
             .ToListAsync();
     }
 
-    public async Task<bool> ExternalSourceExists(int userId, string host, string name)
+    /// <summary>
+    /// Checks if all the properties match exactly. This will allow a user to setup 2 External Sources with different Users
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="host"></param>
+    /// <param name="name"></param>
+    /// <param name="apiKey"></param>
+    /// <returns></returns>
+    public async Task<bool> ExternalSourceExists(int userId, string name, string host, string apiKey)
     {
         host = host.Trim();
-        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(name)) return false;
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(name) || string.IsNullOrEmpty(apiKey)) return false;
+        var hostWithEndingSlash = UrlHelper.EnsureEndsWithSlash(host)!;
         return await _context.AppUserExternalSource
             .Where(s => s.AppUserId == userId )
-            .Where(s => EF.Functions.Like(s.Host, $"%{host}%")
-                        || s.Name.ToUpper().Equals(name.ToUpper()))
+            .Where(s => s.Host.ToUpper().Equals(hostWithEndingSlash.ToUpper())
+                        && s.Name.ToUpper().Equals(name.ToUpper())
+                        && s.ApiKey.Equals(apiKey))
             .AnyAsync();
     }
 }

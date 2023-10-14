@@ -84,9 +84,9 @@ public class StreamController : BaseApiController
     /// <param name="host"></param>
     /// <returns></returns>
     [HttpGet("external-source-exists")]
-    public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name)
+    public async Task<ActionResult<bool>> ExternalSourceExists(string host, string name, string apiKey)
     {
-        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), host, name));
+        return Ok(await _unitOfWork.AppUserExternalSourceRepository.ExternalSourceExists(User.GetUserId(), host, name, apiKey));
     }
 
     /// <summary>

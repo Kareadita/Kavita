@@ -10625,6 +10625,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

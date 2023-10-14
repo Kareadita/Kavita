@@ -1927,7 +1927,8 @@
         "list-doesnt-exist": "This list doesn't exist",
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
         "smart-filter-deleted": "Smart Filter Deleted",
-        "smart-filter-updated": "Created/Updated smart filter"
+        "smart-filter-updated": "Created/Updated smart filter",
+        "external-source-already-exists": "An External Source already exists with the same Name/Host/API Key"
     },
 
     "actionable": {
