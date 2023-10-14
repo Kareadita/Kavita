@@ -1043,7 +1043,7 @@ public static class Parser
     /// <returns></returns>
     public static string NormalizePath(string? path)
     {
-        return string.IsNullOrEmpty(path) ? string.Empty : path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+        return string.IsNullOrEmpty(path) ? string.Empty : path.Replace('\\', Path.AltDirectorySeparatorChar)
             .Replace(@"//", Path.AltDirectorySeparatorChar + string.Empty);
     }
 
