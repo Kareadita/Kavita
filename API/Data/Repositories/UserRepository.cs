@@ -84,6 +84,7 @@ public interface IUserRepository
     Task<IList<ScrobbleHoldDto>> GetHolds(int userId);
     Task<string> GetLocale(int userId);
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
+    Task<IList<AppUserDashboardStream>> GetAllDashboardStreams();
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
@@ -353,6 +354,13 @@ public class UserRepository : IUserRepository
                 Order = d.Order,
                 Visible = d.Visible
             })
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserDashboardStream>> GetAllDashboardStreams()
+    {
+        return await _context.AppUserDashboardStream
+            .OrderBy(d => d.Order)
             .ToListAsync();
     }
 
