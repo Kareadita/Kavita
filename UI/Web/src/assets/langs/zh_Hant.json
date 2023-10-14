@@ -269,8 +269,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "清除",
-        "filter": "篩選",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "打開對{{item}}的過濾"
     },
     "user-stats-info-cards": {
@@ -673,7 +673,7 @@
         "bookmarks": "",
         "filter-label": "",
         "all-series": "",
-        "clear": "清除",
+        "clear": "{{common.clear}}",
         "donate": ""
     },
     "library-settings-modal": {
