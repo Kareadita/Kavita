@@ -5,8 +5,21 @@
         <div class="container-fluid row mb-2">
           <div class="col-9 col-sm-9"><h4 id="anilist-token-header">{{source.name || t('title')}}</h4></div>
           <div class="col-3 text-end">
-            <button class="btn btn-primary btn-sm me-1" (click)="toggleViewMode()">{{isViewMode ? t('edit') : t('cancel')}}</button>
-            <button class="btn btn-danger btn-sm" (click)="delete()">{{t('delete')}}</button>
+            <button class="btn btn-primary btn-sm me-1" (click)="toggleViewMode()">
+              <ng-container *ngIf="isViewMode; else editMode">
+                <i *ngIf="isViewMode" class="fa-solid fa-pen" aria-hidden="true"></i>
+                <span class="visually-hidden">
+                  {{t('edit')}}
+                </span>
+              </ng-container>
+              <ng-template #editMode>
+                {{t('cancel')}}
+              </ng-template>
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="delete()">
+              <span class="visually-hidden">{{t('delete')}}</span>
+              <i class="fa-solid fa-trash" aria-hidden="true"></i>
+            </button>
           </div>
         </div>
       </div>

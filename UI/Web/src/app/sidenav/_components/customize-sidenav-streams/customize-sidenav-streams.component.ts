@@ -18,11 +18,13 @@ import {ExternalSourceService} from "../../../external-source.service";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {StreamType} from "../../../_models/dashboard/stream-type.enum";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
+import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FilterPipe} from "../../../pipe/filter.pipe";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
   standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent],
+  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +35,28 @@ export class CustomizeSidenavStreamsComponent {
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
   accessibilityMode: boolean = false;
+
+  listForm: FormGroup = new FormGroup({
+    'filterSideNavStream': new FormControl('', []),
+    'filterSmartFilter': new FormControl('', []),
+    'filterExternalSource': new FormControl('', []),
+  });
+
+  filterSideNavStreams = (listItem: SideNavStream) => {
+    const filterVal = (this.listForm.value.filterSideNavStream || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
+  }
+
+  filterSmartFilters = (listItem: SmartFilter) => {
+    const filterVal = (this.listForm.value.filterSmartFilter || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
+  }
+
+  filterExternalSources = (listItem: ExternalSource) => {
+    const filterVal = (this.listForm.value.filterExternalSource || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
+  }
+
 
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
@@ -53,6 +77,21 @@ export class CustomizeSidenavStreamsComponent {
     });
   }
 
+  resetSideNavFilter() {
+    this.listForm.get('filterSideNavStream')?.setValue('');
+    this.cdRef.markForCheck();
+  }
+
+  resetSmartFilterFilter() {
+    this.listForm.get('filterSmartFilter')?.setValue('');
+    this.cdRef.markForCheck();
+  }
+
+  resetExternalSourceFilter() {
+    this.listForm.get('filterExternalSource')?.setValue('');
+    this.cdRef.markForCheck();
+  }
+
   addFilterToStream(filter: SmartFilter) {
     this.sideNavService.createSideNavStream(filter.id).subscribe(stream => {
       this.smartFilters = this.smartFilters.filter(d => d.name !== filter.name);
@@ -69,14 +108,27 @@ export class CustomizeSidenavStreamsComponent {
     });
   }
 
+  updateAccessibilityMode() {
+    this.accessibilityMode = !this.accessibilityMode;
+    this.cdRef.markForCheck();
+  }
+
 
   orderUpdated(event: IndexUpdateEvent) {
-    this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe();
+    this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+      if (event.fromAccessibilityMode) {
+        this.sideNavService.getSideNavStreams(false).subscribe((data) => {
+          this.items = [...data];
+          this.cdRef.markForCheck();
+        })
+      }
+    });
   }
 
   updateVisibility(item: SideNavStream, position: number) {
-    this.items[position].visible = !this.items[position].visible;
-    this.sideNavService.updateSideNavStream(this.items[position]).subscribe();
+    const stream = this.items.filter(s => s.id == item.id)[0];
+    stream.visible = !stream.visible;
+    this.sideNavService.updateSideNavStream(stream).subscribe();
     this.cdRef.markForCheck();
   }
 

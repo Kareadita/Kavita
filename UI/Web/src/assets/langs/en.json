@@ -33,7 +33,7 @@
     "user-scrobble-history": {
         "title": "Scrobble History",
         "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "created-header": "Created",
         "last-modified-header": "Last Modified",
         "type-header": "Type",
@@ -302,8 +302,8 @@
 
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "Clear",
-        "filter": "Filter",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "Open a filtered search for {{item}}"
     },
 
@@ -757,9 +757,9 @@
         "collections": "Collections",
         "reading-lists": "Reading Lists",
         "bookmarks": "Bookmarks",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "all-series": "All Series",
-        "clear": "Clear",
+        "clear": "{{common.clear}}",
         "donate": "Donate",
         "back": "Back",
         "more": "More"
@@ -997,7 +997,7 @@
         "title": "Add to Collection",
         "promoted": "{{common.promoted}}",
         "close": "{{common.close}}",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "No collections created yet",
         "loading": "{{common.loading}}",
@@ -1022,7 +1022,7 @@
     "manage-alerts": {
         "description-part-1": "This table contains issues found during scan or reading of your media. This list is non-managed. You can clear it at any time and use Library (Force) Scan to perform analysis. A list of some common errors and what they mean can be found on the ",
         "description-part-2": "wiki.",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "clear-alerts": "Clear Alerts",
         "extension-header": "Extension",
         "file-header": "File",
@@ -1090,7 +1090,7 @@
 
     "manage-scrobble-errors": {
         "description": "This table contains issues found during scrobbling. This list is non-managed. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the series name or localized series name or adding a weblink for the providers.",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "clear-errors": "Clear Errors",
         "series-header": "Series",
         "created-header": "Created",
@@ -1409,7 +1409,7 @@
     "add-to-list-modal": {
         "title": "Add to Reading List",
         "close": "{{common.close}}",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "promoted-alt": "Promoted",
         "no-data": "No lists created yet",
         "loading": "{{common.loading}}",
@@ -1510,7 +1510,7 @@
     },
 
     "metadata-filter": {
-        "filter-title": "Filter",
+        "filter-title": "{{common.filter}}",
         "sort-by-label": "Sort By",
         "filter-name-label": "Filter Name",
         "ascending-alt": "Ascending",
@@ -1745,10 +1745,12 @@
         "title-dashboard": "Customize Dashboard",
         "title-sidenav": "Customize Side Nav",
         "title-external-sources": "External Sources",
+        "title-smart-filters": "Smart Filters",
         "close": "{{common.close}}",
         "dashboard": "Dashboard",
         "sidenav": "Side Nav",
-        "external-sources": "External Sources"
+        "external-sources": "External Sources",
+        "smart-filters": "Smart Filters"
     },
 
     "customize-dashboard-streams": {
@@ -1762,14 +1764,27 @@
         "no-data-external-source": "All External Sources added to Side Nav or none created yet.",
         "save": "{{common.save}}",
         "add": "{{common.add}}",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
         "smart-filters-title": "Smart Filters",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}"
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
     },
 
     "manage-external-sources": {
-        "add-source": "Add Source",
+        "add-source": "Add",
         "help-link": "More information",
-        "description": "Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your friend's server."
+        "description": "Add External Servers to your account and then add them to your Side Nav for a quick way to switch between your and your friend's server.",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}"
+    },
+
+    "manage-smart-filters": {
+        "delete": "{{common.delete}}",
+        "no-data": "No Smart Filters created",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}"
     },
 
     "edit-external-source-item": {
@@ -1955,7 +1970,7 @@
         "read-incognito": "Read Incognito",
         "details": "Details",
         "view-series": "View Series",
-        "clear": "Clear",
+        "clear": "{{common.clear}}",
         "import-cbl": "Import CBL",
         "read": "Read",
         "add-rule-group-and": "Add Rule Group (AND)",
@@ -2005,6 +2020,8 @@
     "common": {
         "reset-to-default": "Reset to Default",
         "close": "Close",
+        "clear": "Clear",
+        "filter": "Filter",
         "cancel": "Cancel",
         "create": "Create",
         "save": "Save",

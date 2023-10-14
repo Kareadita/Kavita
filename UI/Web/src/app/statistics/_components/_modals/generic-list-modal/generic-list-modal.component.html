@@ -12,7 +12,7 @@
           <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="listForm.get('filterQuery')?.setValue('');">{{t('clear')}}</button>
         </div>
       </div>
-      <div class="list-group">
+      <ul class="list-group">
         <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let item of items | filter: filterList; let i = index">
           {{item}}
           <button class="btn btn-primary" *ngIf="clicked !== undefined" (click)="handleClick(item)">
@@ -20,7 +20,7 @@
             <span class="visually-hidden">{{t('open-filtered-search',{item: item})}}</span>
           </button>
         </li>
-      </div>
+      </ul>
     </form>
   </div>
   <div class="modal-footer">

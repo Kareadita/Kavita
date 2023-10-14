@@ -20,10 +20,12 @@ import {Breakpoint, UtilityService} from "../../../shared/_services/utility.serv
 import {CustomizeDashboardStreamsComponent} from "../customize-dashboard-streams/customize-dashboard-streams.component";
 import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/customize-sidenav-streams.component";
 import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-external-sources.component";
+import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
 
 enum TabID {
   Dashboard = 'dashboard',
   SideNav = 'sidenav',
+  SmartFilters = 'smart-filters',
   ExternalSources = 'external-sources'
 }
 
@@ -31,7 +33,7 @@ enum TabID {
   selector: 'app-customize-dashboard-modal',
   standalone: true,
   imports: [CommonModule, SafeHtmlPipe, TranslocoDirective, DraggableOrderedListComponent, ReadingListItemComponent, DashboardStreamListItemComponent,
-    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent, ManageExternalSourcesComponent],
+    NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, CustomizeDashboardStreamsComponent, CustomizeSidenavStreamsComponent, ManageExternalSourcesComponent, ManageSmartFiltersComponent],
   templateUrl: './customize-dashboard-modal.component.html',
   styleUrls: ['./customize-dashboard-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

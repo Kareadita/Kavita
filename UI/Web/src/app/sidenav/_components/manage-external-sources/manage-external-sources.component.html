@@ -3,9 +3,22 @@
     {{t('description')}}
     <a href="https://wiki.kavitareader.com/en/guides/customization/external-sources" target="_blank" rel="noopener noreferrer">{{t('help-link')}}</a>
   </p>
-  <button class="btn btn-primary" (click)="addNewExternalSource()">{{t('add-source')}}</button>
 
-  <ng-container *ngFor="let externalSource of externalSources; let idx = index">
+
+  <form class="row g-0 justify-content-between mb-3" [formGroup]="listForm">
+    <div class="col-9">
+      <label for="filter" class="form-label">{{t('filter')}}</label>
+      <div class="input-group">
+        <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+      </div>
+    </div>
+    <div class="col-2 ms-2">
+      <button class="btn btn-primary" style="margin-top: 30px" (click)="addNewExternalSource()">{{t('add-source')}}</button>
+    </div>
+  </form>
+
+  <ng-container *ngFor="let externalSource of externalSources | filter: filterList; let idx = index">
     <app-edit-external-source-item [source]="externalSource"
                                    (sourceUpdate)="updateSource(idx, $event)"
                                    (sourceDelete)="deleteSource(idx, $event)"

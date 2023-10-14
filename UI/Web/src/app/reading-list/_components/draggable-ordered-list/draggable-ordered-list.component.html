@@ -15,7 +15,7 @@
 
                         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
 
-                        <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton">
+                        <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton" [disabled]="disabled">
                             <i class="fa fa-times" aria-hidden="true"></i>
                             <span class="visually-hidden" attr.aria-labelledby="item.id--{{i}}">{{t('remove-item-alt')}}</span>
                         </button>
@@ -34,12 +34,12 @@
                             <input id="reorder-{{i}}" class="form-control" type="number" inputmode="numeric" min="0" [max]="items.length - 1" [value]="i" style="width: 60px"
                             (focusout)="updateIndex(i, item)" (keydown.enter)="updateIndex(i, item)" aria-describedby="instructions">
                         </div>
-                        <i *ngIf="!accessibilityMode" class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
+                        <i *ngIf="!accessibilityMode && !disabled" class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
                     </div>
 
                     <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
 
-                    <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton">
+                    <button class="btn btn-icon float-end" (click)="removeItem(item, i)" *ngIf="showRemoveButton" [disabled]="disabled">
                         <i class="fa fa-times" aria-hidden="true"></i>
                         <span class="visually-hidden" attr.aria-labelledby="item.id--{{i}}">{{t('remove-item-alt')}}</span>
                     </button>

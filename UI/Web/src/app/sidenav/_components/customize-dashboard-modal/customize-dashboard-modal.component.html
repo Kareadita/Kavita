@@ -18,6 +18,12 @@
           <app-customize-sidenav-streams></app-customize-sidenav-streams>
         </ng-template>
       </li>
+      <li [ngbNavItem]="TabID.SmartFilters">
+        <a ngbNavLink>{{t(TabID.SmartFilters)}}</a>
+        <ng-template ngbNavContent>
+          <app-manage-smart-filters></app-manage-smart-filters>
+        </ng-template>
+      </li>
       <li [ngbNavItem]="TabID.ExternalSources">
         <a ngbNavLink>{{t(TabID.ExternalSources)}}</a>
         <ng-template ngbNavContent>

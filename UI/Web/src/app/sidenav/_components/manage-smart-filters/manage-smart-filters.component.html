@@ -1,0 +1,25 @@
+<ng-container *transloco="let t; read:'manage-smart-filters'">
+  <form [formGroup]="listForm">
+    <div class="mb-3" *ngIf="filters.length >= 3">
+      <label for="filter" class="form-label">{{t('filter')}}</label>
+      <div class="input-group">
+        <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+      </div>
+    </div>
+  </form>
+
+  <ul>
+    <li class="list-group-item" *ngFor="let f of filters | filter: filterList">
+      <a [href]="'all-series?' + f.filter" target="_blank">{{f.name}}</a>
+      <button class="btn btn-danger float-end" (click)="deleteFilter(f)">
+        <i class="fa-solid fa-trash" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('delete')}}</span>
+      </button>
+    </li>
+
+    <li class="list-group-item" *ngIf="filters.length === 0">
+      {{t('no-data')}}
+    </li>
+  </ul>
+</ng-container>

@@ -8,11 +8,13 @@ import {ToastrService} from "ngx-toastr";
 import {EditExternalSourceItemComponent} from "../edit-external-source-item/edit-external-source-item.component";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {ExternalSourceService} from "../../../external-source.service";
+import {FilterPipe} from "../../../pipe/filter.pipe";
+import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 
 @Component({
   selector: 'app-manage-external-sources',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent],
+  imports: [CommonModule, FormsModule, NgOptimizedImage, NgbTooltip, ReactiveFormsModule, TranslocoDirective, NgbCollapse, EditExternalSourceItemComponent, FilterPipe],
   templateUrl: './manage-external-sources.component.html',
   styleUrls: ['./manage-external-sources.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -23,12 +25,25 @@ export class ManageExternalSourcesComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly externalSourceService = inject(ExternalSourceService);
 
+  listForm: FormGroup = new FormGroup({
+    'filterQuery': new FormControl('', [])
+  });
+
+  filterList = (listItem: ExternalSource) => {
+    const filterVal = (this.listForm.value.filterQuery || '').toLowerCase();
+    return listItem.name.toLowerCase().indexOf(filterVal) >= 0 || listItem.host.toLowerCase().indexOf(filterVal) >= 0;
+  }
 
   constructor(public accountService: AccountService) {
     this.externalSourceService.getExternalSources().subscribe(data => {
       this.externalSources = data;
       this.cdRef.markForCheck();
     });
+  }
+
+  resetFilter() {
+    this.listForm.get('filterQuery')?.setValue('');
+    this.cdRef.markForCheck();
   }
 
   addNewExternalSource() {
@@ -43,6 +58,7 @@ export class ManageExternalSourcesComponent {
 
   deleteSource(index: number, updatedSource: ExternalSource) {
     this.externalSources.splice(index, 1);
+    this.resetFilter();
     this.cdRef.markForCheck();
   }
 

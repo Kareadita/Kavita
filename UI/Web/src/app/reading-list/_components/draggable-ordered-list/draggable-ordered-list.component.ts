@@ -8,6 +8,7 @@ export interface IndexUpdateEvent {
   fromPosition: number;
   toPosition: number;
   item: any;
+  fromAccessibilityMode: boolean;
 }
 
 export interface ItemRemoveEvent {
@@ -35,6 +36,10 @@ export class DraggableOrderedListComponent {
    * Parent scroll for virtualize pagination
    */
   @Input() parentScroll!: Element | Window;
+  /**
+   * Disables drag and drop functionality. Useful if a filter is present which will skew actual index.
+   */
+  @Input() disabled: boolean = false;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
@@ -52,7 +57,8 @@ export class DraggableOrderedListComponent {
     this.orderUpdated.emit({
       fromPosition: event.previousIndex,
       toPosition: event.currentIndex,
-      item: this.items[event.currentIndex]
+      item: this.items[event.currentIndex],
+      fromAccessibilityMode: false
     });
     this.cdRef.markForCheck();
   }
@@ -66,7 +72,8 @@ export class DraggableOrderedListComponent {
     this.orderUpdated.emit({
       fromPosition: previousIndex,
       toPosition: newIndex,
-      item: this.items[newIndex]
+      item: this.items[newIndex],
+      fromAccessibilityMode: true
     });
     this.cdRef.markForCheck();
   }
