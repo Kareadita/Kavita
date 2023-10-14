@@ -45,6 +45,7 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
     public AppUserBuilder WithLibrary(Library library)
     {
         _appUser.Libraries.Add(library);
+        if (library.Id != 0 && _appUser.SideNavStreams.Any(s => s.LibraryId == library.Id)) return this;
         _appUser.SideNavStreams.Add(new AppUserSideNavStream()
         {
             Name = library.Name,
