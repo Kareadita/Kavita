@@ -1336,7 +1336,8 @@
         "load-filter": "Load Filter",
         "provided": "Provided",
         "smart-filter": "Smart Filter",
-        "library": "Library"
+        "library": "Library",
+        "external-source": "External Source"
     },
 
     "reading-list-detail": {
@@ -1758,6 +1759,7 @@
 
     "customize-sidenav-streams": {
         "no-data": "All Smart filters added to Side Nav or none created yet.",
+        "no-data-external-source": "All External Sources added to Side Nav or none created yet.",
         "save": "{{common.save}}",
         "add": "{{common.add}}",
         "smart-filters-title": "Smart Filters",

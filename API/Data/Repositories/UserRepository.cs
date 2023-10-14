@@ -90,6 +90,7 @@ public interface IUserRepository
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
 }
 
 public class UserRepository : IUserRepository
@@ -442,6 +443,13 @@ public class UserRepository : IUserRepository
     {
         return await _context.AppUserSideNavStream
             .Where(d => d.LibraryId == libraryId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId)
+    {
+        return await _context.AppUserSideNavStream
+            .Where(d => d.ExternalSourceId == externalSourceId)
             .ToListAsync();
     }
 

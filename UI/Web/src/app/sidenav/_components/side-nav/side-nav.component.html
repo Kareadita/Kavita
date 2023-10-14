@@ -57,8 +57,8 @@
               <app-side-nav-item icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded"></app-side-nav-item>
             </ng-container>
 
-            <ng-container *ngSwitchCase="SideNavStreamType.ExternalServer">
-              <app-side-nav-item icon="fa-server" [title]="navStream.name" [link]="navStream.externalSourceUrl" [external]="true"></app-side-nav-item>
+            <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">
+              <app-side-nav-item icon="fa-server" [title]="navStream.name" [link]="navStream.externalSource.host + 'login?apiKey=' + navStream.externalSource.apiKey" [external]="true"></app-side-nav-item>
             </ng-container>
 
 

@@ -20,7 +20,7 @@
     </li>
   </ul>
 
-  <h5>{{t('external-sources-title')}}</h5>
+  <h5 class="mt-3">{{t('external-sources-title')}}</h5>
   <ul class="list-group filter-list">
     <li class="filter list-group-item" *ngFor="let source of externalSources">
       {{source.host}}
@@ -29,8 +29,8 @@
         {{t('add')}}
       </button>
     </li>
-    <li class="list-group-item" *ngIf="smartFilters.length === 0">
-      {{t('no-data')}}
+    <li class="list-group-item" *ngIf="externalSources.length === 0">
+      {{t('no-data-external-source')}}
     </li>
   </ul>
 </ng-container>

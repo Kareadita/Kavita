@@ -10,7 +10,6 @@ using API.Entities.Enums;
 using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
-using NetVips;
 
 namespace API.Services;
 
@@ -315,6 +314,11 @@ public class StreamService : IStreamService
         if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
 
         _unitOfWork.AppUserExternalSourceRepository.Delete(source);
+
+        // Find all SideNav's with this source and delete them as well
+        var streams2 = await _unitOfWork.UserRepository.GetSideNavStreamWithExternalSource(externalSourceId);
+        _unitOfWork.UserRepository.Delete(streams2);
+
         await _unitOfWork.CommitAsync();
     }
 

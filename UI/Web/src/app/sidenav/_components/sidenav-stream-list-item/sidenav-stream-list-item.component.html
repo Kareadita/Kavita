@@ -17,7 +17,14 @@
       </h5>
       <div class="meta">
         <div class="ps-1">
-          {{t(item.isProvided ? 'provided' : item.streamType === SideNavStreamType.Library ? 'library' : 'smart-filter')}}
+          <ng-container *ngIf="item.isProvided; else nonProvided">{{t('provided')}}</ng-container>
+          <ng-template #nonProvided>
+            <ng-container [ngSwitch]="item.streamType">
+              <ng-container *ngSwitchCase="SideNavStreamType.Library">{{t('library')}}</ng-container>
+              <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">{{t('smart-filter')}}</ng-container>
+              <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">{{t('external-source')}}</ng-container>
+            </ng-container>
+          </ng-template>
         </div>
         <div class="ps-1" *ngIf="!item.isProvided">
           <ng-container [ngSwitch]="item.streamType">
@@ -27,8 +34,8 @@
             <ng-container *ngSwitchCase="SideNavStreamType.SmartFilter">
               <a [href]="'/all-series?' + this.item.smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
             </ng-container>
-            <ng-container *ngSwitchCase="SideNavStreamType.ExternalServer">
-              TODO
+            <ng-container *ngSwitchCase="SideNavStreamType.ExternalSource">
+              <a [href]="item.externalSource!.host! + 'login?apiKey=' + item.externalSource!.apiKey" target="_blank" rel="noopener noreferrer">{{item.externalSource!.host!}}</a>
             </ng-container>
           </ng-container>
         </div>

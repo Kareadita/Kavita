@@ -1,6 +1,7 @@
 import {SideNavStreamType} from "./sidenav-stream-type.enum";
 import {Library, LibraryType} from "../library";
 import {CommonStream} from "../common-stream";
+import {ExternalSource} from "./external-source";
 
 export interface SideNavStream extends CommonStream {
   name: string;
@@ -12,6 +13,6 @@ export interface SideNavStream extends CommonStream {
   visible: boolean;
   smartFilterId: number;
   smartFilterEncoded?: string;
-  externalSourceUrl?: string;
+  externalSource?: ExternalSource;
 
 }
