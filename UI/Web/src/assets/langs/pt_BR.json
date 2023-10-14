@@ -1777,11 +1777,7 @@
         "load-filter": "Carregar Filtro"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "title": "Personalizar Painel de Controle",
-        "save": "{{common.save}}",
-        "no-data": "Todos os filtros inteligentes foram adicionados ao Painel de Controle ou nenhum foi criado ainda.",
-        "add": "{{common.add}}"
+        "close": "{{common.close}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",

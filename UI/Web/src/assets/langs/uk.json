@@ -1566,11 +1566,7 @@
         "remove-rule": ""
     },
     "customize-dashboard-modal": {
-        "title": "",
-        "no-data": "",
-        "close": "",
-        "save": "",
-        "add": ""
+        "close": ""
     },
     "filter-field-pipe": {
         "age-rating": "",

@@ -1557,9 +1557,7 @@
         "remove-rule": ""
     },
     "customize-dashboard-modal": {
-        "title": "",
-        "close": "",
-        "save": ""
+        "close": ""
     },
     "filter-field-pipe": {
         "age-rating": "",

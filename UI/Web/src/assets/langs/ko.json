@@ -1777,11 +1777,7 @@
         "load-filter": "필터 로드"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "title": "대시보드 사용자 정의",
-        "save": "{{common.save}}",
-        "add": "{{common.add}}",
-        "no-data": "대시보드에 모든 스마트 필터가 추가되었거나 아직 생성되지 않았습니다."
+        "close": "{{common.close}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "퍼센트",

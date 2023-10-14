@@ -1775,9 +1775,7 @@
         "load-filter": "加载筛选"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}",
-        "title": "自定义仪表板",
-        "save": "{{common.save}}"
+        "close": "{{common.close}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "百分比",
