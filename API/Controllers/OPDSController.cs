@@ -216,19 +216,41 @@ public class OpdsController : BaseApiController
                 CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/collections"),
             }
         });
-        feed.Entries.Add(new FeedEntry()
+
+        if ((_unitOfWork.AppUserSmartFilterRepository.GetAllDtosByUserId(userId)).Any())
         {
-            Id = "allSmartFilters",
-            Title = await _localizationService.Translate(userId, "smart-filters"),
-            Content = new FeedEntryContent()
+            feed.Entries.Add(new FeedEntry()
             {
-                Text = await _localizationService.Translate(userId, "browse-smart-filters")
-            },
-            Links = new List<FeedLink>()
-            {
-                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filters"),
-            }
-        });
+                Id = "allSmartFilters",
+                Title = await _localizationService.Translate(userId, "smart-filters"),
+                Content = new FeedEntryContent()
+                {
+                    Text = await _localizationService.Translate(userId, "browse-smart-filters")
+                },
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/smart-filters"),
+                }
+            });
+        }
+
+        // if ((await _unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId)).Any())
+        // {
+        //     feed.Entries.Add(new FeedEntry()
+        //     {
+        //         Id = "allExternalSources",
+        //         Title = await _localizationService.Translate(userId, "external-sources"),
+        //         Content = new FeedEntryContent()
+        //         {
+        //             Text = await _localizationService.Translate(userId, "browse-external-sources")
+        //         },
+        //         Links = new List<FeedLink>()
+        //         {
+        //             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/external-sources"),
+        //         }
+        //     });
+        // }
+
         return CreateXmlResult(SerializeXml(feed));
     }
 
@@ -306,6 +328,38 @@ public class OpdsController : BaseApiController
         return CreateXmlResult(SerializeXml(feed));
     }
 
+    [HttpGet("{apiKey}/external-sources")]
+    [Produces("application/xml")]
+    public async Task<IActionResult> GetExternalSources(string apiKey)
+    {
+        // NOTE: This doesn't seem possible in OPDS v2.1 due to the resulting stream using relative links and most apps resolve against source url. Even using full paths doesn't work
+        var userId = await GetUser(apiKey);
+        if (!(await _unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EnableOpds)
+            return BadRequest(await _localizationService.Translate(userId, "opds-disabled"));
+        var (baseUrl, prefix) = await GetPrefix();
+
+        var externalSources = await _unitOfWork.AppUserExternalSourceRepository.GetExternalSources(userId);
+        var feed = CreateFeed(await _localizationService.Translate(userId, "external-sources"), $"{prefix}{apiKey}/external-sources", apiKey, prefix);
+        SetFeedId(feed, "externalSources");
+        foreach (var externalSource in externalSources)
+        {
+            var opdsUrl = $"{externalSource.Host}api/opds/{externalSource.ApiKey}";
+            feed.Entries.Add(new FeedEntry()
+            {
+                Id = externalSource.Id.ToString(),
+                Title = externalSource.Name,
+                Summary = externalSource.Host,
+                Links = new List<FeedLink>()
+                {
+                    CreateLink(FeedLinkRelation.Start, FeedLinkType.AtomNavigation, opdsUrl),
+                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image, $"{opdsUrl}/favicon")
+                }
+            });
+        }
+
+        return CreateXmlResult(SerializeXml(feed));
+    }
+
 
     [HttpGet("{apiKey}/libraries")]
     [Produces("application/xml")]
@@ -318,12 +372,16 @@ public class OpdsController : BaseApiController
         var libraries = await _unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId);
         var feed = CreateFeed(await _localizationService.Translate(userId, "libraries"), $"{prefix}{apiKey}/libraries", apiKey, prefix);
         SetFeedId(feed, "libraries");
-        foreach (var library in libraries)
+
+        // Ensure libraries follow SideNav order
+        var userSideNavStreams = await _unitOfWork.UserRepository.GetSideNavStreams(userId, false);
+        foreach (var sideNavStream in userSideNavStreams.Where(s => s.StreamType == SideNavStreamType.Library))
         {
+            var library = sideNavStream.Library;
             feed.Entries.Add(new FeedEntry()
             {
-                Id = library.Id.ToString(),
-                Title = library.Name,
+                Id = library!.Id.ToString(),
+                Title = library.Name!,
                 Links = new List<FeedLink>()
                 {
                     CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{prefix}{apiKey}/libraries/{library.Id}"),
