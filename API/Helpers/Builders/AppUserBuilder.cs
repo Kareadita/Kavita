@@ -29,19 +29,38 @@ public class AppUserBuilder : IEntityBuilder<AppUser>
             Progresses = new List<AppUserProgress>(),
             Devices = new List<Device>(),
             Id = 0,
-            DashboardStreams = new List<AppUserDashboardStream>()
+            DashboardStreams = new List<AppUserDashboardStream>(),
+            SideNavStreams = new List<AppUserSideNavStream>()
         };
         foreach (var s in Seed.DefaultStreams)
         {
             _appUser.DashboardStreams.Add(s);
         }
+        foreach (var s in Seed.DefaultSideNavStreams)
+        {
+            _appUser.SideNavStreams.Add(s);
+        }
     }
 
-    public AppUserBuilder WithLibrary(Library library)
+    public AppUserBuilder WithLibrary(Library library, bool createSideNavStream = false)
     {
         _appUser.Libraries.Add(library);
+        if (!createSideNavStream) return this;
+
+        if (library.Id != 0 && _appUser.SideNavStreams.Any(s => s.LibraryId == library.Id)) return this;
+        _appUser.SideNavStreams.Add(new AppUserSideNavStream()
+        {
+            Name = library.Name,
+            IsProvided = false,
+            Visible = true,
+            LibraryId = library.Id,
+            StreamType = SideNavStreamType.Library,
+            Order = _appUser.SideNavStreams.Max(s => s.Order) + 1,
+        });
+
         return this;
     }
+
 
     public AppUserBuilder WithLocale(string locale)
     {

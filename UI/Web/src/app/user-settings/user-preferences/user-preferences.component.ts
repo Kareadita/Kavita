@@ -48,8 +48,7 @@ import { NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, NgbAccor
 import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
-import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
-import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -64,9 +63,7 @@ enum FragmentID {
   Theme = 'theme',
   Devices = 'devices',
   Stats = 'stats',
-  SmartFilters = 'smart-filters',
   Scrobbling = 'scrobbling'
-
 }
 
 @Component({
@@ -79,7 +76,7 @@ enum FragmentID {
     ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective, ManageSmartFiltersComponent]
+    TranslocoDirective]
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -110,7 +107,6 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
     {title: '3rd-party-clients-tab', fragment: FragmentID.Clients},
     {title: 'theme-tab', fragment: FragmentID.Theme},
     {title: 'devices-tab', fragment: FragmentID.Devices},
-    {title: 'smart-filters-tab', fragment: FragmentID.SmartFilters},
     {title: 'stats-tab', fragment: FragmentID.Stats},
   ];
   locales: Array<Language> = [{title: 'English', isoCode: 'en'}];

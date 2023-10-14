@@ -44,7 +44,7 @@ public static class Seed
         {
             new()
             {
-                Name = "On Deck",
+                Name = "on-deck",
                 StreamType = DashboardStreamType.OnDeck,
                 Order = 0,
                 IsProvided = true,
@@ -52,7 +52,7 @@ public static class Seed
             },
             new()
             {
-                Name = "Recently Updated",
+                Name = "recently-updated",
                 StreamType = DashboardStreamType.RecentlyUpdated,
                 Order = 1,
                 IsProvided = true,
@@ -60,7 +60,7 @@ public static class Seed
             },
             new()
             {
-                Name = "Newly Added",
+                Name = "newly-added",
                 StreamType = DashboardStreamType.NewlyAdded,
                 Order = 2,
                 IsProvided = true,
@@ -68,13 +68,57 @@ public static class Seed
             },
             new()
             {
-                Name = "More In",
+                Name = "more-in-genre",
                 StreamType = DashboardStreamType.MoreInGenre,
                 Order = 3,
                 IsProvided = true,
                 Visible = false
             },
         }.ToArray());
+
+    public static readonly ImmutableArray<AppUserSideNavStream> DefaultSideNavStreams = ImmutableArray.Create(new[]
+    {
+        new AppUserSideNavStream()
+        {
+            Name = "want-to-read",
+            StreamType = SideNavStreamType.WantToRead,
+            Order = 1,
+            IsProvided = true,
+            Visible = true
+        },
+        new AppUserSideNavStream()
+        {
+            Name = "collections",
+            StreamType = SideNavStreamType.Collections,
+            Order = 2,
+            IsProvided = true,
+            Visible = true
+        },
+        new AppUserSideNavStream()
+        {
+            Name = "reading-lists",
+            StreamType = SideNavStreamType.ReadingLists,
+            Order = 3,
+            IsProvided = true,
+            Visible = true
+        },
+        new AppUserSideNavStream()
+        {
+            Name = "bookmarks",
+            StreamType = SideNavStreamType.Bookmarks,
+            Order = 4,
+            IsProvided = true,
+            Visible = true
+        },
+        new AppUserSideNavStream()
+        {
+            Name = "all-series",
+            StreamType = SideNavStreamType.AllSeries,
+            Order = 5,
+            IsProvided = true,
+            Visible = true
+        }
+    });
 
     public static async Task SeedRoles(RoleManager<AppRole> roleManager)
     {
@@ -131,6 +175,31 @@ public static class Seed
                 };
 
                 user.DashboardStreams.Add(newStream);
+            }
+            unitOfWork.UserRepository.Update(user);
+            await unitOfWork.CommitAsync();
+        }
+    }
+
+    public static async Task SeedDefaultSideNavStreams(IUnitOfWork unitOfWork)
+    {
+        var allUsers = await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams);
+        foreach (var user in allUsers)
+        {
+            if (user.SideNavStreams.Count != 0) continue;
+            user.SideNavStreams ??= new List<AppUserSideNavStream>();
+            foreach (var defaultStream in DefaultSideNavStreams)
+            {
+                var newStream = new AppUserSideNavStream()
+                {
+                    Name = defaultStream.Name,
+                    IsProvided = defaultStream.IsProvided,
+                    Order = defaultStream.Order,
+                    StreamType = defaultStream.StreamType,
+                    Visible = defaultStream.Visible,
+                };
+
+                user.SideNavStreams.Add(newStream);
             }
             unitOfWork.UserRepository.Update(user);
             await unitOfWork.CommitAsync();

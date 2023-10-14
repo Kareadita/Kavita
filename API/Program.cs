@@ -64,6 +64,7 @@ public class Program
 
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
+            var unitOfWork = services.GetRequiredService<IUnitOfWork>();
 
             try
             {
@@ -87,10 +88,12 @@ public class Program
 
                 await context.Database.MigrateAsync();
 
+
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
                 await Seed.SeedSettings(context, directoryService);
                 await Seed.SeedThemes(context);
-                await Seed.SeedDefaultStreams(services.GetRequiredService<IUnitOfWork>());
+                await Seed.SeedDefaultStreams(unitOfWork);
+                await Seed.SeedDefaultSideNavStreams(unitOfWork);
                 await Seed.SeedUserApiKeys(context);
             }
             catch (Exception ex)
@@ -106,7 +109,6 @@ public class Program
             }
 
             // Update the logger with the log level
-            var unitOfWork = services.GetRequiredService<IUnitOfWork>();
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
 

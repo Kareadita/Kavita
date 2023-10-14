@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,11 +10,11 @@ using API.DTOs.Filtering.v2;
 using API.DTOs.Reader;
 using API.DTOs.Scrobbling;
 using API.DTOs.SeriesDetail;
+using API.DTOs.SideNav;
 using API.Entities;
 using API.Extensions;
 using API.Extensions.QueryExtensions;
 using API.Extensions.QueryExtensions.Filtering;
-using API.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +36,9 @@ public enum AppUserIncludes
     Devices = 256,
     ScrobbleHolds = 512,
     SmartFilters = 1024,
-    DashboardStreams = 2048
+    DashboardStreams = 2048,
+    SideNavStreams = 4096,
+    ExternalSources = 8192 // 2^13
 }
 
 public interface IUserRepository
@@ -46,10 +47,12 @@ public interface IUserRepository
     void Update(AppUserPreferences preferences);
     void Update(AppUserBookmark bookmark);
     void Update(AppUserDashboardStream stream);
+    void Update(AppUserSideNavStream stream);
     void Add(AppUserBookmark bookmark);
     void Delete(AppUser? user);
     void Delete(AppUserBookmark bookmark);
-    void Delete(IList<AppUserDashboardStream> streams);
+    void Delete(IEnumerable<AppUserDashboardStream> streams);
+    void Delete(IEnumerable<AppUserSideNavStream> streams);
     Task<IEnumerable<MemberDto>> GetEmailConfirmedMemberDtosAsync(bool emailConfirmed = true);
     Task<IEnumerable<AppUser>> GetAdminUsersAsync();
     Task<bool> IsUserAdminAsync(AppUser? user);
@@ -83,6 +86,11 @@ public interface IUserRepository
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false);
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId);
+    Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false);
+    Task<AppUserSideNavStream?> GetSideNavStream(int streamId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId);
+    Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId);
 }
 
 public class UserRepository : IUserRepository
@@ -118,6 +126,11 @@ public class UserRepository : IUserRepository
         _context.Entry(stream).State = EntityState.Modified;
     }
 
+    public void Update(AppUserSideNavStream stream)
+    {
+        _context.Entry(stream).State = EntityState.Modified;
+    }
+
     public void Add(AppUserBookmark bookmark)
     {
         _context.AppUserBookmark.Add(bookmark);
@@ -134,9 +147,14 @@ public class UserRepository : IUserRepository
         _context.AppUserBookmark.Remove(bookmark);
     }
 
-    public void Delete(IList<AppUserDashboardStream> streams)
+    public void Delete(IEnumerable<AppUserDashboardStream> streams)
     {
         _context.AppUserDashboardStream.RemoveRange(streams);
+    }
+
+    public void Delete(IEnumerable<AppUserSideNavStream> streams)
+    {
+        _context.AppUserSideNavStream.RemoveRange(streams);
     }
 
     /// <summary>
@@ -352,6 +370,89 @@ public class UserRepository : IUserRepository
             .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
             .ToListAsync();
     }
+
+    public async Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false)
+    {
+        var sideNavStreams = await _context.AppUserSideNavStream
+            .Where(d => d.AppUserId == userId)
+            .WhereIf(visibleOnly, d => d.Visible)
+            .OrderBy(d => d.Order)
+            .Include(d => d.SmartFilter)
+            .Select(d => new SideNavStreamDto()
+            {
+                Id = d.Id,
+                Name = d.Name,
+                IsProvided = d.IsProvided,
+                SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
+                SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                LibraryId = d.LibraryId ?? 0,
+                ExternalSourceId = d.ExternalSourceId ?? 0,
+                StreamType = d.StreamType,
+                Order = d.Order,
+                Visible = d.Visible
+            })
+            .ToListAsync();
+
+        var libraryIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.Library)
+            .Select(d => d.LibraryId)
+            .ToList();
+
+        var libraryDtos = _context.Library
+            .Where(l => libraryIds.Contains(l.Id))
+            .ProjectTo<LibraryDto>(_mapper.ConfigurationProvider)
+            .ToList();
+
+        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.Library))
+        {
+            dto.Library = libraryDtos.FirstOrDefault(l => l.Id == dto.LibraryId);
+        }
+
+        var externalSourceIds = sideNavStreams.Where(d => d.StreamType == SideNavStreamType.ExternalSource)
+            .Select(d => d.ExternalSourceId)
+            .ToList();
+
+        var externalSourceDtos = _context.AppUserExternalSource
+            .Where(l => externalSourceIds.Contains(l.Id))
+            .ProjectTo<ExternalSourceDto>(_mapper.ConfigurationProvider)
+            .ToList();
+
+        foreach (var dto in sideNavStreams.Where(dto => dto.StreamType == SideNavStreamType.ExternalSource))
+        {
+            dto.ExternalSource = externalSourceDtos.FirstOrDefault(l => l.Id == dto.ExternalSourceId);
+        }
+
+        return sideNavStreams;
+    }
+
+    public async Task<AppUserSideNavStream> GetSideNavStream(int streamId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .FirstOrDefaultAsync(d => d.Id == streamId);
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId)
+    {
+        return await _context.AppUserSideNavStream
+            .Include(d => d.SmartFilter)
+            .Where(d => d.SmartFilter != null && d.SmartFilter.Id == filterId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId)
+    {
+        return await _context.AppUserSideNavStream
+            .Where(d => d.LibraryId == libraryId)
+            .ToListAsync();
+    }
+
+    public async Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId)
+    {
+        return await _context.AppUserSideNavStream
+            .Where(d => d.ExternalSourceId == externalSourceId)
+            .ToListAsync();
+    }
+
 
     public async Task<IEnumerable<AppUser>> GetAdminUsersAsync()
     {

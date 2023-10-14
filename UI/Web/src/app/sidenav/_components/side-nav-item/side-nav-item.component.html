@@ -11,9 +11,16 @@
         </a>
     </ng-container>
     <ng-template #internal>
-        <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link">
+        <ng-container *ngIf="queryParams && queryParams !== {}; else regInternalLink">
+          <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" (click)="openLink()">
             <ng-container [ngTemplateOutlet]="inner"></ng-container>
+          </a>
+        </ng-container>
+      <ng-template #regInternalLink>
+        <a class="side-nav-item" href="javascript:void(0);" [ngClass]="{'closed': (navService.sideNavCollapsed$ | async), 'active': highlighted}" [routerLink]="link" [queryParams]="queryParams">
+          <ng-container [ngTemplateOutlet]="inner"></ng-container>
         </a>
+      </ng-template>
     </ng-template>
 
 </ng-template>

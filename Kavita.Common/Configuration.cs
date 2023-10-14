@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text.Json;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Hosting;
 
 namespace Kavita.Common;
@@ -214,13 +215,8 @@ public static class Configuration
             var baseUrl = jsonObj.BaseUrl;
             if (!string.IsNullOrEmpty(baseUrl))
             {
-                baseUrl = !baseUrl.StartsWith('/')
-                    ? $"/{baseUrl}"
-                    : baseUrl;
-
-                baseUrl = !baseUrl.EndsWith('/')
-                    ? $"{baseUrl}/"
-                    : baseUrl;
+                baseUrl = UrlHelper.EnsureStartsWithSlash(baseUrl);
+                baseUrl = UrlHelper.EnsureEndsWithSlash(baseUrl);
 
                 return baseUrl;
             }

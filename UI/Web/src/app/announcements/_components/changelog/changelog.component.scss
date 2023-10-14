@@ -9,13 +9,17 @@
 ::ng-deep .changelog  {
 
     h1 {
-        font-size: 26px;    
+        font-size: 26px;
     }
 
     p, ul {
         margin-bottom: 0px;
     }
-    
-    
+
+  img {
+    max-width: 100% !important;
+  }
+
+
 }
 

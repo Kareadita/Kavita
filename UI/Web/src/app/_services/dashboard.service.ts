@@ -12,18 +12,18 @@ export class DashboardService {
   constructor(private httpClient: HttpClient) { }
 
   getDashboardStreams(visibleOnly = true) {
-    return this.httpClient.get<Array<DashboardStream>>(this.baseUrl + 'account/dashboard?visibleOnly=' + visibleOnly);
+    return this.httpClient.get<Array<DashboardStream>>(this.baseUrl + 'stream/dashboard?visibleOnly=' + visibleOnly);
   }
 
   updateDashboardStreamPosition(streamName: string, dashboardStreamId: number, fromPosition: number, toPosition: number) {
-    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-position', {streamName, dashboardStreamId, fromPosition, toPosition}, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'stream/update-dashboard-position', {streamName, id: dashboardStreamId, fromPosition, toPosition}, TextResonse);
   }
 
   updateDashboardStream(stream: DashboardStream) {
-    return this.httpClient.post(this.baseUrl + 'account/update-dashboard-stream', stream, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'stream/update-dashboard-stream', stream, TextResonse);
   }
 
   createDashboardStream(smartFilterId: number) {
-    return this.httpClient.post<DashboardStream>(this.baseUrl + 'account/add-dashboard-stream?smartFilterId=' + smartFilterId, {});
+    return this.httpClient.post<DashboardStream>(this.baseUrl + 'stream/add-dashboard-stream?smartFilterId=' + smartFilterId, {});
   }
 }

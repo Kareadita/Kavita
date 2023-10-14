@@ -14,22 +14,22 @@ import {MangaFormatPipe} from "../../../pipe/manga-format.pipe";
 import {NgbProgressbar} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
+import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
+import {CommonStream} from "../../../_models/common-stream";
+import {StreamNamePipe} from "../../../pipe/stream-name.pipe";
 
 @Component({
-  selector: 'app-stream-list-item',
+  selector: 'app-dashboard-stream-list-item',
   standalone: true,
-  imports: [CommonModule, ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective],
-  templateUrl: './stream-list-item.component.html',
-  styleUrls: ['./stream-list-item.component.scss'],
+  imports: [CommonModule, ImageComponent, MangaFormatIconPipe, MangaFormatPipe, NgbProgressbar, TranslocoDirective, StreamNamePipe],
+  templateUrl: './dashboard-stream-list-item.component.html',
+  styleUrls: ['./dashboard-stream-list-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StreamListItemComponent {
+export class DashboardStreamListItemComponent {
   @Input({required: true}) item!: DashboardStream;
   @Input({required: true}) position: number = 0;
   @Output() hide: EventEmitter<DashboardStream> = new EventEmitter<DashboardStream>();
-
-
-  private readonly cdRef = inject(ChangeDetectorRef);
 
 
 }

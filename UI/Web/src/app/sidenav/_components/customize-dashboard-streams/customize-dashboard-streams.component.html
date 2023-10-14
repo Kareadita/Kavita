@@ -1,0 +1,31 @@
+<ng-container *transloco="let t; read: 'customize-dashboard-streams'">
+  <app-draggable-ordered-list [items]="items" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
+                              [showRemoveButton]="false">
+    <ng-template #draggableItem let-position="idx" let-item>
+      <app-dashboard-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-dashboard-stream-list-item>
+    </ng-template>
+  </app-draggable-ordered-list>
+
+  <h5>Smart Filters</h5>
+  <form [formGroup]="listForm">
+    <div class="mb-3" *ngIf="smartFilters.length >= 3">
+      <label for="filter" class="form-label">{{t('filter')}}</label>
+      <div class="input-group">
+        <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+      </div>
+    </div>
+  </form>
+  <ul class="list-group filter-list">
+    <li class="filter list-group-item" *ngFor="let filter of smartFilters | filter: filterList">
+      {{filter.name}}
+      <button class="btn btn-icon" (click)="addFilterToStream(filter)">
+        <i class="fa fa-plus" aria-hidden="true"></i>
+        {{t('add')}}
+      </button>
+    </li>
+    <li class="list-group-item" *ngIf="smartFilters.length === 0">
+      {{t('no-data')}}
+    </li>
+  </ul>
+</ng-container>

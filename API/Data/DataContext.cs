@@ -56,6 +56,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
+    public DbSet<AppUserSideNavStream> AppUserSideNavStream { get; set; } = null!;
+    public DbSet<AppUserExternalSource> AppUserExternalSource { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -126,6 +128,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.StreamType)
             .HasDefaultValue(DashboardStreamType.SmartFilter);
         builder.Entity<AppUserDashboardStream>()
+            .HasIndex(e => e.Visible)
+            .IsUnique(false);
+
+        builder.Entity<AppUserSideNavStream>()
+            .Property(b => b.StreamType)
+            .HasDefaultValue(SideNavStreamType.SmartFilter);
+        builder.Entity<AppUserSideNavStream>()
             .HasIndex(e => e.Visible)
             .IsUnique(false);
     }

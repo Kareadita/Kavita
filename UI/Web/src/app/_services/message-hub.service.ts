@@ -8,6 +8,7 @@ import { ThemeProgressEvent } from '../_models/events/theme-progress-event';
 import { UserUpdateEvent } from '../_models/events/user-update-event';
 import { User } from '../_models/user';
 import {DashboardUpdateEvent} from "../_models/events/dashboard-update-event";
+import {SideNavUpdateEvent} from "../_models/events/sidenav-update-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -86,7 +87,11 @@ export enum EVENTS {
   /**
    * User's dashboard needs to be re-rendered
    */
-  DashboardUpdate = 'DashboardUpdate'
+  DashboardUpdate = 'DashboardUpdate',
+  /**
+   * User's sidenav needs to be re-rendered
+   */
+  SideNavUpdate = 'SideNavUpdate'
 }
 
 export interface Message<T> {
@@ -185,6 +190,12 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.DashboardUpdate,
         payload: resp.body as DashboardUpdateEvent
+      });
+    });
+    this.hubConnection.on(EVENTS.SideNavUpdate, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SideNavUpdate,
+        payload: resp.body as SideNavUpdateEvent
       });
     });
 

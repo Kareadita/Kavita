@@ -29,6 +29,7 @@ public interface IUnitOfWork
     IScrobbleRepository ScrobbleRepository { get; }
     IUserTableOfContentRepository UserTableOfContentRepository { get; }
     IAppUserSmartFilterRepository AppUserSmartFilterRepository { get; }
+    IAppUserExternalSourceRepository AppUserExternalSourceRepository { get; }
     bool Commit();
     Task<bool> CommitAsync();
     bool HasChanges();
@@ -70,6 +71,7 @@ public class UnitOfWork : IUnitOfWork
     public IScrobbleRepository ScrobbleRepository => new ScrobbleRepository(_context, _mapper);
     public IUserTableOfContentRepository UserTableOfContentRepository => new UserTableOfContentRepository(_context, _mapper);
     public IAppUserSmartFilterRepository AppUserSmartFilterRepository => new AppUserSmartFilterRepository(_context, _mapper);
+    public IAppUserExternalSourceRepository AppUserExternalSourceRepository => new AppUserExternalSourceRepository(_context, _mapper);
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.

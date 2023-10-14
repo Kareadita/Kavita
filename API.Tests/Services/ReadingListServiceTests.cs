@@ -123,30 +123,32 @@ public class ReadingListServiceTests
     public async Task AddChaptersToReadingList_ShouldAddFirstItem_AsOrderZero()
     {
         await ResetDb();
-        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
-            .WithLibrary(new LibraryBuilder("Test LIb", LibraryType.Book)
-                .WithSeries(new SeriesBuilder("Test")
-                    .WithMetadata(new SeriesMetadataBuilder().Build())
-                    .WithVolumes(new List<Volume>()
-                    {
-                        new VolumeBuilder("0")
-                            .WithChapter(new ChapterBuilder("1")
-                                .WithAgeRating(AgeRating.Everyone)
-                                .Build()
-                            )
-                            .WithChapter(new ChapterBuilder("2")
-                                .WithAgeRating(AgeRating.X18Plus)
-                                .Build()
-                            )
-                            .WithChapter(new ChapterBuilder("3")
-                                .WithAgeRating(AgeRating.X18Plus)
-                                .Build()
-                            )
+        var library = new LibraryBuilder("Test Lib", LibraryType.Book)
+            .WithSeries(new SeriesBuilder("Test")
+                .WithMetadata(new SeriesMetadataBuilder().Build())
+                .WithVolumes(new List<Volume>()
+                {
+                    new VolumeBuilder("0")
+                        .WithChapter(new ChapterBuilder("1")
+                            .WithAgeRating(AgeRating.Everyone)
                             .Build()
-                    })
-                    .Build())
-                .Build()
-            )
+                        )
+                        .WithChapter(new ChapterBuilder("2")
+                            .WithAgeRating(AgeRating.X18Plus)
+                            .Build()
+                        )
+                        .WithChapter(new ChapterBuilder("3")
+                            .WithAgeRating(AgeRating.X18Plus)
+                            .Build()
+                        )
+                        .Build()
+                })
+                .Build())
+            .Build();
+        await _context.SaveChangesAsync();
+
+        _context.AppUser.Add(new AppUserBuilder("majora2007", "")
+            .WithLibrary(library)
             .Build()
         );
 
@@ -763,16 +765,17 @@ public class ReadingListServiceTests
                 .Build()
             );
 
+        // NOTE: WithLibrary creates a SideNavStream hence why we need to use the same instance for multiple users to avoid an id conflict
+        var library = new LibraryBuilder("Test LIb 2", LibraryType.Book)
+            .WithSeries(fablesSeries)
+            .Build();
+
         _context.AppUser.Add(new AppUserBuilder("majora2007", string.Empty)
-            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
-                .WithSeries(fablesSeries)
-                .Build())
+            .WithLibrary(library)
             .Build()
         );
         _context.AppUser.Add(new AppUserBuilder("admin", string.Empty)
-            .WithLibrary(new LibraryBuilder("Test LIb 2", LibraryType.Book)
-                .WithSeries(fablesSeries)
-                .Build())
+            .WithLibrary(library)
             .Build()
         );
         await _unitOfWork.CommitAsync();

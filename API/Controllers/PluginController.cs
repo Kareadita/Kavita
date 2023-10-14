@@ -50,4 +50,18 @@ public class PluginController : BaseApiController
             KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value
         };
     }
+
+    /// <summary>
+    /// Returns the version of the Kavita install
+    /// </summary>
+    /// <param name="apiKey">Required for authenticating to get result</param>
+    /// <returns></returns>
+    [AllowAnonymous]
+    [HttpGet("version")]
+    public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
+    {
+        var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
+        if (userId <= 0) return Unauthorized();
+        return Ok((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
+    }
 }

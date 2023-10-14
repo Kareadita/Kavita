@@ -15,7 +15,7 @@ namespace API.Data.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "7.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.11");
 
             modelBuilder.Entity("API.Entities.AppRole", b =>
                 {
@@ -221,6 +221,31 @@ namespace API.Data.Migrations
                     b.HasIndex("Visible");
 
                     b.ToTable("AppUserDashboardStream");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserExternalSource", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ApiKey")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Host")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.ToTable("AppUserExternalSource");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserOnDeckRemoval", b =>
@@ -454,6 +479,52 @@ namespace API.Data.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserSideNavStream", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AppUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ExternalSourceId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsProvided")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("LibraryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SmartFilterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StreamType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(5);
+
+                    b.Property<bool>("Visible")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("SmartFilterId");
+
+                    b.HasIndex("Visible");
+
+                    b.ToTable("AppUserSideNavStream");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserSmartFilter", b =>
@@ -1790,6 +1861,17 @@ namespace API.Data.Migrations
                     b.Navigation("SmartFilter");
                 });
 
+            modelBuilder.Entity("API.Entities.AppUserExternalSource", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("ExternalSources")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+                });
+
             modelBuilder.Entity("API.Entities.AppUserOnDeckRemoval", b =>
                 {
                     b.HasOne("API.Entities.AppUser", "AppUser")
@@ -1885,6 +1967,23 @@ namespace API.Data.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("API.Entities.AppUserSideNavStream", b =>
+                {
+                    b.HasOne("API.Entities.AppUser", "AppUser")
+                        .WithMany("SideNavStreams")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Entities.AppUserSmartFilter", "SmartFilter")
+                        .WithMany()
+                        .HasForeignKey("SmartFilterId");
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("SmartFilter");
                 });
 
             modelBuilder.Entity("API.Entities.AppUserSmartFilter", b =>
@@ -2303,6 +2402,8 @@ namespace API.Data.Migrations
 
                     b.Navigation("Devices");
 
+                    b.Navigation("ExternalSources");
+
                     b.Navigation("Progresses");
 
                     b.Navigation("Ratings");
@@ -2310,6 +2411,8 @@ namespace API.Data.Migrations
                     b.Navigation("ReadingLists");
 
                     b.Navigation("ScrobbleHolds");
+
+                    b.Navigation("SideNavStreams");
 
                     b.Navigation("SmartFilters");
 

@@ -4,8 +4,8 @@
       <ng-template #tooltip>{{tooltipText}}</ng-template>
       <div class="input-group">
           <input #apiKey [type]="InputType" readonly class="form-control" id="api-key--{{title}}" aria-describedby="button-addon4" [value]="key" (click)="selectAll()">
-          <button class="btn btn-outline-secondary" type="button" (click)="show()" [title]="t('show')" *ngIf="hideData">
-              <span class="visually-hidden">t('show')</span><i class="fa fa-eye" aria-hidden="true"></i>
+          <button class="btn btn-outline-secondary" type="button" (click)="toggleVisibility()" [title]="isDataHidden ? t('show') : t('hide')" *ngIf="hideData">
+              <span class="visually-hidden">{{isDataHidden ? t('show') : t('hide')}}</span><i class="fa {{isDataHidden ? 'fa-eye' : 'fa-eye-slash'}}" aria-hidden="true"></i>
           </button>
           <button class="btn btn-outline-secondary" type="button" (click)="copy()" [title]="t('copy')">
               <span class="visually-hidden">Copy</span><i class="fa fa-copy" aria-hidden="true"></i>

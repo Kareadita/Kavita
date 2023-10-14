@@ -158,6 +158,13 @@
     "search-description": "Search for Series, Collections, or Reading Lists",
     "favicon-doesnt-exist": "Favicon does not exist",
     "smart-filter-doesnt-exist": "Smart Filter doesn't exist",
+    "smart-filter-already-in-use": "There is an existing stream with this Smart Filter",
+    "dashboard-stream-doesnt-exist": "Dashboard Stream doesn't exist",
+    "sidenav-stream-doesnt-exist": "SideNav Stream doesn't exist",
+    "external-source-already-exists": "External Source already exists",
+    "external-source-required": "ApiKey and Host required",
+    "external-source-doesnt-exist": "External Source doesn't exist",
+    "external-source-already-in-use": "There is an existing stream with this External Source",
 
     "not-authenticated": "User is not authenticated",
     "unable-to-register-k+": "Unable to register license due to error. Reach out to Kavita+ Support",

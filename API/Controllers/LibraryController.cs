@@ -21,6 +21,7 @@ using AutoMapper;
 using EasyCaching.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.Logging;
 using TaskScheduler = API.Services.TaskScheduler;
 
@@ -97,6 +98,27 @@ public class LibraryController : BaseApiController
             admin.Libraries.Add(library);
         }
 
+        var userIds = admins.Select(u => u.Id).Append(User.GetUserId()).ToList();
+
+        var userNeedingNewLibrary = (await _unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams))
+            .Where(u => userIds.Contains(u.Id))
+            .ToList();
+
+        foreach (var user in userNeedingNewLibrary)
+        {
+            var maxCount = user.SideNavStreams.Select(s => s.Order).Max();
+            user.SideNavStreams.Add(new AppUserSideNavStream()
+            {
+                Name = library.Name,
+                Order = maxCount + 1,
+                IsProvided = false,
+                StreamType = SideNavStreamType.Library,
+                LibraryId = library.Id,
+                Visible = true,
+            });
+            _unitOfWork.UserRepository.Update(user);
+        }
+
 
         if (!await _unitOfWork.CommitAsync()) return BadRequest(await _localizationService.Translate(User.GetUserId(), "generic-library"));
 
@@ -105,6 +127,8 @@ public class LibraryController : BaseApiController
         _taskScheduler.ScanLibrary(library.Id);
         await _eventHub.SendMessageAsync(MessageFactory.LibraryModified,
             MessageFactory.LibraryModifiedEvent(library.Id, "create"), false);
+        await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
+            MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
         return Ok();
     }
@@ -329,9 +353,15 @@ public class LibraryController : BaseApiController
 
             _unitOfWork.LibraryRepository.Delete(library);
 
+            var streams = await _unitOfWork.UserRepository.GetSideNavStreamsByLibraryId(library.Id);
+            _unitOfWork.UserRepository.Delete(streams);
+
+
             await _unitOfWork.CommitAsync();
 
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+            await _eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
+                MessageFactory.SideNavUpdateEvent(User.GetUserId()), false);
 
             if (chapterIds.Any())
             {

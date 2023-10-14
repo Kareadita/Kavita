@@ -41,6 +41,11 @@ export class SideNavItemComponent implements OnInit {
    * If external, link will be used as full href and rel will be applied
    */
   @Input() external: boolean = false;
+  /**
+   * If using a link, then you can pass optional queryParameters
+   */
+  @Input() queryParams: any | undefined = undefined;
+
 
   @Input() comparisonMethod: 'startsWith' | 'equals' = 'equals';
   private readonly destroyRef = inject(DestroyRef);
@@ -54,8 +59,9 @@ export class SideNavItemComponent implements OnInit {
             takeUntilDestroyed(this.destroyRef),
             map(evt => evt as NavigationEnd))
       .subscribe((evt: NavigationEnd) => {
-        this.updateHighlight(evt.url.split('?')[0]);
-
+        const tokens = evt.url.split('?');
+        const [token1, token2 = undefined] = tokens;
+        this.updateHighlight(token1, token2);
       });
   }
 
@@ -66,16 +72,17 @@ export class SideNavItemComponent implements OnInit {
 
   }
 
-  updateHighlight(page: string) {
+  updateHighlight(page: string, queryParams?: string) {
     if (this.link === undefined) {
       this.highlighted = false;
       this.cdRef.markForCheck();
       return;
     }
 
-    if (!page.endsWith('/')) {
+    if (!page.endsWith('/') && !queryParams) {
       page = page + '/';
     }
+
 
     if (this.comparisonMethod === 'equals' && page === this.link) {
       this.highlighted = true;
@@ -83,6 +90,13 @@ export class SideNavItemComponent implements OnInit {
       return;
     }
     if (this.comparisonMethod === 'startsWith' && page.startsWith(this.link)) {
+
+      if (queryParams && queryParams === this.queryParams) {
+        this.highlighted = true;
+        this.cdRef.markForCheck();
+        return;
+      }
+
       this.highlighted = true;
       this.cdRef.markForCheck();
       return;
@@ -90,6 +104,14 @@ export class SideNavItemComponent implements OnInit {
 
     this.highlighted = false;
     this.cdRef.markForCheck();
+  }
+
+  openLink() {
+    if (Object.keys(this.queryParams).length === 0) {
+      this.router.navigateByUrl(this.link!);
+      return
+    }
+    this.router.navigateByUrl(this.link + '?' + this.queryParams);
   }
 
 }

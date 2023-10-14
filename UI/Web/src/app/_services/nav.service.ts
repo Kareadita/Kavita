@@ -1,6 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable, Renderer2, RendererFactory2 } from '@angular/core';
 import { ReplaySubject, take } from 'rxjs';
+import {HttpClient} from "@angular/common/http";
+import {environment} from "../../environments/environment";
+import {SideNavStream} from "../_models/sidenav/sidenav-stream";
+import {TextResonse} from "../_types/text-response";
+import {DashboardStream} from "../_models/dashboard/dashboard-stream";
 
 @Injectable({
   providedIn: 'root'
@@ -27,15 +32,36 @@ export class NavService {
   sideNavVisibility$ = this.sideNavVisibilitySource.asObservable();
 
   private renderer: Renderer2;
+  baseUrl = environment.apiUrl;
 
-  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2) {
+  constructor(@Inject(DOCUMENT) private document: Document, rendererFactory: RendererFactory2, private httpClient: HttpClient) {
     this.renderer = rendererFactory.createRenderer(null, null);
     this.showNavBar();
     const sideNavState = (localStorage.getItem(this.localStorageSideNavKey) === 'true') || false;
     this.sideNavCollapseSource.next(sideNavState);
     this.showSideNav();
   }
- 
+
+  getSideNavStreams(visibleOnly = true) {
+    return this.httpClient.get<Array<SideNavStream>>(this.baseUrl + 'stream/sidenav?visibleOnly=' + visibleOnly);
+  }
+
+  updateSideNavStreamPosition(streamName: string, sideNavStreamId: number, fromPosition: number, toPosition: number) {
+    return this.httpClient.post(this.baseUrl + 'stream/update-sidenav-position', {streamName, id: sideNavStreamId, fromPosition, toPosition}, TextResonse);
+  }
+
+  updateSideNavStream(stream: SideNavStream) {
+    return this.httpClient.post(this.baseUrl + 'stream/update-sidenav-stream', stream, TextResonse);
+  }
+
+  createSideNavStream(smartFilterId: number) {
+    return this.httpClient.post<SideNavStream>(this.baseUrl + 'stream/add-sidenav-stream?smartFilterId=' + smartFilterId, {});
+  }
+
+  createSideNavStreamFromExternalSource(externalSourceId: number) {
+    return this.httpClient.post<SideNavStream>(this.baseUrl + 'stream/add-sidenav-stream-from-external-source?externalSourceId=' + externalSourceId, {});
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
@@ -47,7 +73,7 @@ export class NavService {
   }
 
   /**
-   * Hides the top nav bar. 
+   * Hides the top nav bar.
    */
   hideNavBar() {
     this.renderer.setStyle(this.document.querySelector('body'), 'margin-top', '0px');

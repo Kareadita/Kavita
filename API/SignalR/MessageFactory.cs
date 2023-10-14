@@ -126,6 +126,10 @@ public static class MessageFactory
     /// Order, Visibility, etc has changed on the Dashboard. UI will refresh the layout
     /// </summary>
     public const string DashboardUpdate = "DashboardUpdate";
+    /// <summary>
+    /// Order, Visibility, etc has changed on the Sidenav. UI will refresh the layout
+    /// </summary>
+    public const string SideNavUpdate = "SideNavUpdate";
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
     {
@@ -133,6 +137,21 @@ public static class MessageFactory
         {
             Name = DashboardUpdate,
             Title = "Dashboard Update",
+            Progress = ProgressType.None,
+            EventType = ProgressEventType.Single,
+            Body = new
+            {
+                UserId = userId
+            }
+        };
+    }
+
+    public static SignalRMessage SideNavUpdateEvent(int userId)
+    {
+        return new SignalRMessage()
+        {
+            Name = SideNavUpdate,
+            Title = "SideNav Update",
             Progress = ProgressType.None,
             EventType = ProgressEventType.Single,
             Body = new

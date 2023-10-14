@@ -35,8 +35,10 @@ export class ApiKeyComponent implements OnInit {
   key: string = '';
   private readonly destroyRef = inject(DestroyRef);
 
+  isDataHidden: boolean = this.hideData;
+
   get InputType() {
-    return this.hideData ? 'password' : 'text';
+    return (this.hideData && this.isDataHidden) ? 'password' : 'text';
   }
 
   constructor(private confirmService: ConfirmService, private accountService: AccountService, private toastr: ToastrService, private clipboard: Clipboard,
@@ -83,8 +85,8 @@ export class ApiKeyComponent implements OnInit {
     }
   }
 
-  show() {
-    this.inputElem.nativeElement.setAttribute('type', 'text');
+  toggleVisibility() {
+    this.isDataHidden = !this.isDataHidden;
     this.cdRef.markForCheck();
   }
 

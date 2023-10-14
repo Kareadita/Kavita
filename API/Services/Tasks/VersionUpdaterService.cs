@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.DTOs.Update;
 using API.SignalR;
 using Flurl.Http;
+using HtmlAgilityPack;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Helpers;
 using MarkdownDeep;
@@ -102,6 +103,7 @@ public class VersionUpdaterService : IVersionUpdaterService
             PublishDate = update.Published_At
         };
     }
+
 
     public async Task PushUpdate(UpdateNotificationDto? update)
     {

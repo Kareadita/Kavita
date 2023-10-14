@@ -31,12 +31,13 @@ your reading collection with your friends and family!
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Full Localization Support
+- Ability to customize your dashboard and side nav with smart filters
 
 
 ## Support
 [![Reddit](https://img.shields.io/badge/reddit-discussion-FF4500.svg?maxAge=60)](https://www.reddit.com/r/KavitaManga/)
 [![Discord](https://img.shields.io/badge/discord-chat-7289DA.svg?maxAge=60)](https://discord.gg/eczRp9eeem)
-[![GitHub - Bugs and Feature Requests Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Kareadita/Kavita/issues)
+[![GitHub - Bugs Only](https://img.shields.io/badge/github-issues-red.svg?maxAge=60)](https://github.com/Kareadita/Kavita/issues)
 
 ## Demo
 If you want to try out Kavita, we have a demo up:
@@ -101,9 +102,6 @@ Thank you to [<img src="/Logo/jetbrains.svg" alt="" width="32"> JetBrains](http:
 
 * [<img src="/Logo/rider.svg" alt="" width="32"> Rider](http://www.jetbrains.com/rider/)
 * [<img src="/Logo/dottrace.svg" alt="" width="32"> dotTrace](http://www.jetbrains.com/dottrace/)
-
-## Palace-Designs
-We would like to extend a big thank you to [<img src="/Logo/hosting-sponsor.png" alt="" width="128">](https://www.palace-designs.com/) who hosts our infrastructure pro-bono.
 
 ## Localization
 Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro-bono. If you want to see Kavita in your language, please help us localize.

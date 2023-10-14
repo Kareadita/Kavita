@@ -2,7 +2,12 @@
   <div class="row pt-2 g-0 list-item">
     <div class="g-0">
       <h5 class="mb-1 pb-0" id="item.id--{{position}}">
-        {{item.name}}
+        <span *ngIf="item.isProvided; else nonProvidedTitle">
+          {{item.name | streamName }}
+        </span>
+        <ng-template #nonProvidedTitle>
+          {{item.name}}
+        </ng-template>
         <span class="float-end">
             <button class="btn btn-icon p-0" (click)="hide.emit(item)">
               <i class="me-1" [ngClass]="{'fas fa-eye': item.visible, 'fa-solid fa-eye-slash': !item.visible}" aria-hidden="true"></i>
