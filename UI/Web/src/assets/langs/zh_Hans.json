@@ -30,7 +30,7 @@
     "user-scrobble-history": {
         "title": "Scrobble历史",
         "description": "在这里您将找到与您的帐户关联的所有Scrobble事件。为了确保Scrobble事件存在，您必须配置一个可用的Scrobble服务器。所有已处理的事件将在 1 个月后清除。如果存在未处理的事件，很可能这些事件无法在上游进行匹配，请联系您的管理员进行修正。",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "created-header": "新建",
         "last-modified-header": "最近修改",
         "type-header": "类型",
@@ -246,7 +246,8 @@
         "no-key": "错误-未设置密钥",
         "confirm-reset": "所有OPDS配置将会失效，您确定继续吗？",
         "key-reset": "API密钥已重置",
-        "show": "显示"
+        "show": "显示",
+        "hide": "隐藏"
     },
     "scrobbling-providers": {
         "title": "Scrobbling服务提供商",
@@ -271,8 +272,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "清除",
-        "filter": "筛选",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "为{{item}}打开一个带有筛选器的搜索"
     },
     "user-stats-info-cards": {
@@ -675,10 +676,12 @@
         "collections": "收藏",
         "reading-lists": "阅读清单",
         "bookmarks": "书签",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "all-series": "所有系列",
-        "clear": "清空",
-        "donate": "捐助"
+        "clear": "{{common.clear}}",
+        "donate": "捐助",
+        "back": "后退",
+        "more": "更多"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -710,7 +713,7 @@
         "allow-scrobbling-label": "允许Scrobbling",
         "allow-scrobbling-tooltip": "是否允许Kavita将阅读事件、想读状态、评分和评论记录至已配置的Scrobble服务提供商？本功能仅在激活服务器的Kavita+订阅后才会生效。",
         "folder-watching-label": "监控文件夹",
-        "folder-watching-tooltip": "覆盖此资料库服务器的监控文件夹设置。如果关闭此功能，则不会监控此资料库包含的文件夹。如果共享资料库的文件夹，那么文件夹仍可能被监控。",
+        "folder-watching-tooltip": "覆盖此资料库服务器的监控文件夹设置。如果关闭此功能，则不会监控此资料库包含的文件夹。如果共享资料库的文件夹，那么文件夹仍可能被监控。每次触发扫描前等待10分钟。",
         "include-in-dashboard-label": "在仪表板中显示",
         "include-in-dashboard-tooltip": "是否在仪表板上显示此资料库的系列。这会影响所有数据流，例如最近阅读、最近更新、最近添加或其他自定义内容。",
         "include-in-recommendation-label": "在推荐中显示",
@@ -893,7 +896,7 @@
         "title": "添加到收藏",
         "promoted": "{{common.promoted}}",
         "close": "{{common.close}}",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "尚未创建收藏",
         "loading": "{{common.loading}}",
@@ -914,7 +917,7 @@
     "manage-alerts": {
         "description-part-1": "此表格列出了扫描或读取媒体时发现的问题。此列表不受管理。您可以随时清除它，并使用扫描（强制）资料库来进行分析。一些常见错误及其释义的列表可以访问 ",
         "description-part-2": "wiki。",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "clear-alerts": "清除警报",
         "extension-header": "扩展名",
         "file-header": "文件",
@@ -970,7 +973,7 @@
     },
     "manage-scrobble-errors": {
         "description": "此表格记录Scrobbling期间发生的问题。此列表不受管控。您可以随时清空列表，并在下一次Scrobble记录上传后进行查看。如果存在一个未知系列，您最好更正系列名称或者本地化系列名称，或者为Scrobble服务提供商添加一个网页链接。",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "clear-errors": "清除错误",
         "series-header": "系列",
         "created-header": "创建",
@@ -1010,7 +1013,7 @@
         "opds-tooltip": "OPDS支持所有用户使用OPDS功能从服务器阅读和下载内容。",
         "enable-opds": "启用OPDS",
         "folder-watching-label": "监控文件夹",
-        "folder-watching-tooltip": "允许Kavita监控资料库文件夹以检测更改，并在文件夹发生更改时激活扫描。这样可以在没有手动激活扫描或等待每晚扫描计划任务的情况下更新内容。",
+        "folder-watching-tooltip": "允许Kavita监控资料库文件夹以检测更改，并在文件夹发生更改时激活扫描。这样可以在没有手动激活扫描或等待每晚扫描计划任务的情况下更新内容。每次触发扫描前等待10分钟。",
         "enable-folder-watching": "启用监控文件夹",
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
@@ -1244,7 +1247,7 @@
     "add-to-list-modal": {
         "title": "添加到阅读清单",
         "close": "{{common.close}}",
-        "filter-label": "筛选",
+        "filter-label": "{{common.filter}}",
         "promoted-alt": "推广",
         "no-data": "尚未创建任何清单",
         "loading": "{{common.loading}}",
@@ -1327,10 +1330,12 @@
         "no-next-chapter": "没有下一章节",
         "no-prev-chapter": "没有上一章节",
         "user-preferences-updated": "用户偏好已更新",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "unbookmark-page-tooltip": "取消书签页面",
+        "bookmark-page-tooltip": "书签页面"
     },
     "metadata-filter": {
-        "filter-title": "筛选",
+        "filter-title": "{{common.filter}}",
         "format-label": "格式",
         "libraries-label": "资料库",
         "collections-label": "收藏",
@@ -1375,7 +1380,7 @@
         "last-chapter-added": "添加时间",
         "time-to-read": "阅读时间",
         "release-year": "发行年份",
-        "read-progress": "阅读进度"
+        "read-progress": "上次阅读"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 详细信息",
@@ -1607,7 +1612,8 @@
         "list-doesnt-exist": "此列表不存在",
         "smart-filter-updated": "已创建/已更新智能筛选器",
         "confirm-delete-smart-filter": "您是否确定要删除此智能筛选器？",
-        "smart-filter-deleted": "智能筛选器已删除"
+        "smart-filter-deleted": "智能筛选器已删除",
+        "external-source-already-exists": "已经存在具有相同名称、主机、API密匙的外部源"
     },
     "actionable": {
         "scan-library": "扫描资料库",
@@ -1631,7 +1637,7 @@
         "read-incognito": "隐身阅读",
         "details": "详情",
         "view-series": "查看系列",
-        "clear": "清空",
+        "clear": "{{common.clear}}",
         "import-cbl": "导入CBL文件",
         "read": "阅读",
         "add-rule-group-or": "添加规则组（或）",
@@ -1700,7 +1706,9 @@
         "issue-hash-num": "问题#",
         "issue-num": "问题",
         "chapter-num": "章节",
-        "volume-num": "卷"
+        "volume-num": "卷",
+        "clear": "清空",
+        "filter": "筛选"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "向上滚动以返回上一章节",
@@ -1772,13 +1780,86 @@
         "smart-filter": "智能筛选器",
         "remove": "{{common.remove}}",
         "provided": "提供",
-        "load-filter": "加载筛选"
+        "load-filter": "加载筛选",
+        "external-source": "外部源",
+        "library": "资料库"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "smart-filters": "智能筛选",
+        "dashboard": "仪表盘",
+        "title-external-sources": "外部源",
+        "sidenav": "侧边栏",
+        "title-sidenav": "定制侧边栏",
+        "external-sources": "外部源",
+        "title-dashboard": "定制仪表盘",
+        "title-smart-filters": "智筛选"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "百分比",
         "unit-reading-date": "日期"
+    },
+    "stream-pipe": {
+        "recently-updated": "{{dashboard.recently-updated-title}}",
+        "more-in-genre": "{{dashboard.more-in-genre-title}}",
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "collections": "{{side-nav.collections}}",
+        "newly-added": "{{dashboard.recently-added-title}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "all-series": "{{side-nav.all-series}}",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "reading-lists": "{{side-nav.reading-lists}}"
+    },
+    "edit-external-source-item": {
+        "required": "{{validation.required-field}}",
+        "save": "{{common.save}}",
+        "api-key-label": "API 密钥",
+        "name-label": "名称",
+        "cancel": "{{common.cancel}}",
+        "edit": "{{common.edit}}",
+        "pattern": "主机必须是一个有效的http(s)://地址",
+        "not-unique": "此主机外部源已存在，请确保您没有重复记录",
+        "host-label": "主机",
+        "title": "新建外部源",
+        "delete": "{{common.delete}}"
+    },
+    "manage-external-sources": {
+        "description": "将外部服务器添加到您的帐户中，然后将它们添加到您的侧边栏中，以便在您和您朋友的服务器之间快速切换。",
+        "add-source": "添加",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "help-link": "更多信息"
+    },
+    "customize-sidenav-streams": {
+        "save": "{{common.save}}",
+        "smart-filters-title": "智能筛选",
+        "no-data": "所有智能筛选已加入侧边栏或尚未创建。",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "filter": "{{common.filter}}",
+        "no-data-external-source": "所有外部源已加入侧边栏或尚未创建。",
+        "clear": "{{common.clear}}",
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "add": "{{common.add}}",
+        "reorder-when-filter-present": "当筛选存在时您不能通过拖放操作重新排序条目。使用{{customize-sidenav-streams.order-numbers-label}}"
+    },
+    "series-preview-drawer": {
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "查看系列",
+        "staff-label": "工作人员",
+        "vols-and-chapters": "{{volCount}}卷/{{chpCount}}章",
+        "tags-label": "{{filter-field-pipe.tags}}"
+    },
+    "customize-dashboard-streams": {
+        "no-data": "所有智能筛选已加入仪表板或尚未创建。",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
+        "add": "{{common.add}}",
+        "save": "{{common.save}}"
+    },
+    "manage-smart-filters": {
+        "no-data": "未创建智能筛选",
+        "filter": "{{common.filter}}",
+        "delete": "{{common.delete}}",
+        "clear": "{{common.clear}}"
     }
 }
