@@ -162,5 +162,10 @@
     "collection-deleted": "收藏已删除",
     "smart-filters": "智能筛选",
     "browse-smart-filters": "以智能筛选方式浏览",
-    "smart-filter-doesnt-exist": "智能筛选不存在"
+    "smart-filter-doesnt-exist": "智能筛选不存在",
+    "dashboard-stream-doesnt-exist": "仪表板数据流不存在",
+    "external-source-already-exists": "外部源已存在",
+    "sidenav-stream-doesnt-exist": "侧边栏数据流不存在",
+    "external-source-doesnt-exist": "外部源不存在",
+    "external-source-required": "API密钥和主机为必填项"
 }
