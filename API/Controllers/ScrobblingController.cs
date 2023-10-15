@@ -112,11 +112,6 @@ public class ScrobblingController : BaseApiController
         var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), filter, pagination);
         Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
 
-        // var utcDate = DateTime.UtcNow;
-        // var localTime = TimeZoneInfo.ConvertTimeFromUtc(utcDate, TimeZoneInfo.Local);
-        // var localTimeNormal = DateTime.Now;
-
-
         return Ok(events);
     }
 

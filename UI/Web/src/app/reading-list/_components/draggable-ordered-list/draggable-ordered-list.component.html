@@ -27,7 +27,9 @@
     </ng-container>
     <ng-template #dragList>
         <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
-            <div class="example-box" *ngFor="let item of items; index as i" cdkDrag [cdkDragData]="item" cdkDragBoundary=".example-list">
+            <div class="example-box" *ngFor="let item of items; index as i" cdkDrag
+                 [cdkDragData]="item" cdkDragBoundary=".example-list"
+                 [cdkDragDisabled]="accessibilityMode" cdkDragPreviewContainer="parent">
                 <div class="d-flex list-container">
                     <div class="me-3 align-middle">
                         <div class="align-middle" style="padding-top: 40px" *ngIf="accessibilityMode">

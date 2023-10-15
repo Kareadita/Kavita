@@ -114,7 +114,7 @@ export class AccountService {
     .pipe(map(res => res === "true"));
   }
 
-  login(model: {username: string, password: string}) {
+  login(model: {username: string, password: string, apiKey?: string}) {
     return this.httpClient.post<User>(this.baseUrl + 'account/login', model).pipe(
       map((response: User) => {
         const user = response;
