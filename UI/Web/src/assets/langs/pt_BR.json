@@ -1172,7 +1172,8 @@
     "draggable-ordered-list": {
         "instructions-alt": "Ao colocar um número na entrada de reordenar, o item será inserido naquele local e todos os demais itens terão sua ordem atualizada.",
         "reorder-label": "Reordenar",
-        "remove-item-alt": "Remover item"
+        "remove-item-alt": "Remover item",
+        "bulk-select-label": "Selecionar Item em Massa"
     },
     "reading-lists": {
         "title": "Listas de Leitura",
@@ -1612,7 +1613,8 @@
         "list-doesnt-exist": "Esta lista não existe",
         "smart-filter-updated": "Filtro Inteligente Criado/Atualizado",
         "confirm-delete-smart-filter": "Tem certeza de que deseja excluir este Filtro Inteligente?",
-        "smart-filter-deleted": "Filtro Inteligente Excluído"
+        "smart-filter-deleted": "Filtro Inteligente Excluído",
+        "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1642,7 +1644,9 @@
         "add-rule-group-or": "Adicionar Grupo de Regras (OU)",
         "add-rule-group-and": "Adicionar Grupo de Regras (E)",
         "remove-rule-group": "Remover Grupo de Regras",
-        "customize": "Personalizar"
+        "customize": "Personalizar",
+        "mark-invisible": "Marcar como Invisível",
+        "mark-visible": "Marcar como Visível"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -1705,7 +1709,9 @@
         "issue-hash-num": "Número #",
         "issue-num": "Número",
         "chapter-num": "Capítulo",
-        "volume-num": "Volume"
+        "volume-num": "Volume",
+        "clear": "Limpar",
+        "filter": "Filtro"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Role para cima para ir para o capítulo anterior",
@@ -1801,7 +1807,8 @@
         "add-source": "Adicionar",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "help-link": "Mais informações"
+        "help-link": "Mais informações",
+        "no-data": "Não existem Fontes Externas"
     },
     "customize-sidenav-streams": {
         "save": "{{common.save}}",
@@ -1813,7 +1820,8 @@
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
         "add": "{{common.add}}",
-        "reorder-when-filter-present": "Você não pode reordenar itens arrastando e soltando enquanto um filtro estiver presente. Usar {{customize-sidenav-streams.order-numbers-label}}"
+        "reorder-when-filter-present": "Você não pode reordenar itens arrastando e soltando enquanto um filtro estiver presente. Usar {{customize-sidenav-streams.order-numbers-label}}",
+        "bulk-mode-label": "Modo em Massa"
     },
     "series-preview-drawer": {
         "genres-label": "{{filter-field-pipe.genres}}",
@@ -1838,7 +1846,9 @@
         "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
         "host-label": "Host",
         "title": "Nova Fonte Externa",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}",
+        "pattern": "Host deve ser http(s):// url válido"
     },
     "manage-smart-filters": {
         "no-data": "Nenhum Filtro Inteligente criado",
@@ -1850,6 +1860,11 @@
         "collections": "{{side-nav.collections}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "want-to-read": "{{side-nav.want-to-read}}",
-        "reading-lists": "{{side-nav.reading-lists}}"
+        "reading-lists": "{{side-nav.reading-lists}}",
+        "recently-updated": "{{dashboard.recently-updated-title}}",
+        "more-in-genre": "{{dashboard.more-in-genre-title}}",
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "newly-added": "{{dashboard.recently-added-title}}",
+        "all-series": "{{side-nav.all-series}}"
     }
 }
