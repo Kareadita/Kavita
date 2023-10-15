@@ -65,15 +65,24 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   }
 
   bulkActionCallback = (action: ActionItem<SideNavStream>, data: SideNavStream) => {
-    console.log('bulk action callback:', action, data);
-    const streams = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream');
-    console.log('selected streams: ', streams);
+    const streams = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream').map(index => this.items[parseInt(index, 10)]);
+    let visibleState = false;
     switch (action.action) {
       case Action.MarkAsVisible:
+        visibleState = true;
         break;
       case Action.MarkAsInvisible:
+        visibleState = false;
         break;
     }
+
+    for(let index of this.bulkSelectionService.getSelectedCardsForSource('sideNavStream').map(s => parseInt(s, 10))) {
+      this.items[index].visible = visibleState;
+      this.items[index] = {...this.items[index]};
+    }
+    this.cdRef.markForCheck();
+    // Make bulk call
+    this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), visibleState).subscribe(() => this.bulkSelectionService.deselectAll());
   }
 
 

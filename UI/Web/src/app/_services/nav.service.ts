@@ -62,6 +62,10 @@ export class NavService {
     return this.httpClient.post<SideNavStream>(this.baseUrl + 'stream/add-sidenav-stream-from-external-source?externalSourceId=' + externalSourceId, {});
   }
 
+  bulkToggleSideNavStreamVisibility(streamIds: Array<number>, targetVisibility: boolean) {
+    return this.httpClient.post(this.baseUrl + 'stream/bulk-sidenav-stream-visibility', {ids: streamIds, visibility: targetVisibility});
+  }
+
   /**
    * Shows the top nav bar. This should be visible on all pages except the reader.
    */
