@@ -31,7 +31,7 @@ import {ActionItem} from "../../../_services/action-factory.service";
 })
 export class CustomizeSidenavStreamsComponent {
 
-  @Input({required: true}) parentScrollElem!: Element | Window;
+  //@Input({required: true}) parentScrollElem!: Element | Window;
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];

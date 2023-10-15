@@ -28,6 +28,7 @@ public class PluginController : BaseApiController
     /// Authenticate with the Server given an apiKey. This will log you in by returning the user object and the JWT token.
     /// </summary>
     /// <remarks>This API is not fully built out and may require more information in later releases</remarks>
+    /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <param name="apiKey">API key which will be used to authenticate and return a valid user token back</param>
     /// <param name="pluginName">Name of the Plugin</param>
     /// <returns></returns>
@@ -65,6 +66,7 @@ public class PluginController : BaseApiController
     /// <summary>
     /// Returns the version of the Kavita install
     /// </summary>
+    /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <param name="apiKey">Required for authenticating to get result</param>
     /// <returns></returns>
     [AllowAnonymous]
