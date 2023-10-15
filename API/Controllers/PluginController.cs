@@ -37,8 +37,19 @@ public class PluginController : BaseApiController
     {
         // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
         // Should log into access table so we can tell the user
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = HttpContext.Request.Headers["User-Agent"];
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId <= 0) return Unauthorized();
+        if (userId <= 0)
+        {
+            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {Information}", pluginName, new
+            {
+                IpAddress = ipAddress,
+                UserAgent = userAgent,
+                ApiKey = apiKey
+            });
+            throw new KavitaUnauthenticatedUserException();
+        }
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user!.UserName, userId);
         return new UserDto

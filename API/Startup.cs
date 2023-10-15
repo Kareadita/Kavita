@@ -270,9 +270,9 @@ public class Startup
             logger.LogCritical(ex, "An error occurred during migration");
         }
 
-
-
         app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<SecurityEventMiddleware>();
+
 
         if (env.IsDevelopment())
         {

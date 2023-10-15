@@ -1315,6 +1315,7 @@
     "draggable-ordered-list": {
         "instructions-alt": "When you put a number in the reorder input, the item will be inserted at that location and all other items will have their order updated.",
         "reorder-label": "Reorder",
+        "bulk-select-label": "Bulk Select item",
         "remove-item-alt": "Remove item"
     },
 
@@ -1771,7 +1772,8 @@
         "smart-filters-title": "Smart Filters",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
         "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
-        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "bulk-mode-label": "Bulk Mode"
     },
 
     "manage-external-sources": {

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
@@ -11,36 +11,40 @@ import {
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {NavService} from "../../../_services/nav.service";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
-import {CommonStream} from "../../../_models/common-stream";
 import {TranslocoDirective} from "@ngneat/transloco";
 import {SidenavStreamListItemComponent} from "../sidenav-stream-list-item/sidenav-stream-list-item.component";
 import {ExternalSourceService} from "../../../external-source.service";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
-import {StreamType} from "../../../_models/dashboard/stream-type.enum";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../pipe/filter.pipe";
+import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
+import {ActionItem} from "../../../_services/action-factory.service";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
   standalone: true,
-  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe],
+  imports: [CommonModule, DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule, FilterPipe, BulkOperationsComponent],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomizeSidenavStreamsComponent {
 
+  @Input({required: true}) parentScrollElem!: Element | Window;
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
-  accessibilityMode: boolean = false;
 
   listForm: FormGroup = new FormGroup({
     'filterSideNavStream': new FormControl('', []),
     'filterSmartFilter': new FormControl('', []),
     'filterExternalSource': new FormControl('', []),
   });
+  pageOperationsForm: FormGroup = new FormGroup({
+    'accessibilityMode': new FormControl(false, []),
+    'bulkMode': new FormControl(false, [])
+  })
 
   filterSideNavStreams = (listItem: SideNavStream) => {
     const filterVal = (this.listForm.value.filterSideNavStream || '').toLowerCase();
@@ -57,6 +61,10 @@ export class CustomizeSidenavStreamsComponent {
     return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
   }
 
+  bulkActionCallback = (action: ActionItem<any>, data: any) => {
+    console.log('event', data);
+  }
+
 
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
@@ -71,7 +79,8 @@ export class CustomizeSidenavStreamsComponent {
 
       // After 100 items, drag and drop is disabled to use virtualization
       if (this.items.length > 100) {
-        this.accessibilityMode = true;
+        //this.accessibilityMode = true;
+        this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
       const existingSmartFilterStreams = new Set(results[0].filter(d => !d.isProvided && d.streamType === SideNavStreamType.SmartFilter).map(d => d.name));
@@ -112,11 +121,6 @@ export class CustomizeSidenavStreamsComponent {
       this.items = [...this.items, stream];
       this.cdRef.markForCheck();
     });
-  }
-
-  updateAccessibilityMode() {
-    this.accessibilityMode = !this.accessibilityMode;
-    this.cdRef.markForCheck();
   }
 
 

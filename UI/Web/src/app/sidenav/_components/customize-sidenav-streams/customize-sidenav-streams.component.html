@@ -10,14 +10,24 @@
         <span role="alert" class="mt-1" *ngIf="listForm.get('filterSideNavStream')?.value">{{t('reorder-when-filter-present')}}</span>
       </div>
       <div class="col-3">
-        <div class="form-check form-check-inline" style="margin-top: 35px; margin-left: 10px">
-          <input class="form-check-input" type="checkbox" id="accessibility-mode" [value]="accessibilityMode" (change)="updateAccessibilityMode()">
-          <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
-        </div>
+        <form [formGroup]="pageOperationsForm">
+          <div class="form-check form-check-inline" style="margin-top: 35px; margin-left: 10px">
+            <input class="form-check-input" type="checkbox" id="accessibility-mode" formControlName="accessibilityMode">
+            <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
+          </div>
+          <div class="form-check form-check-inline" style="margin-left: 10px">
+            <input class="form-check-input" type="checkbox" id="bulk-mode" formControlName="bulkMode" >
+            <label class="form-check-label" for="bulk-mode">{{t('bulk-mode-label')}}</label>
+          </div>
+        </form>
       </div>
     </div>
-    <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)" [accessibilityMode]="accessibilityMode"
-                                [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')?.value">
+    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
+                                [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
+                                [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')?.value"
+                                [bulkMode]="pageOperationsForm.get('bulkMode')!.value"
+                                [parentScroll]="parentScrollElem">
       <ng-template #draggableItem let-position="idx" let-item>
         <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>
       </ng-template>
