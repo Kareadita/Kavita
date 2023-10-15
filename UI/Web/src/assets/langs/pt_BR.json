@@ -1845,5 +1845,11 @@
         "filter": "{{common.filter}}",
         "delete": "{{common.delete}}",
         "clear": "{{common.clear}}"
+    },
+    "stream-pipe": {
+        "collections": "{{side-nav.collections}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "reading-lists": "{{side-nav.reading-lists}}"
     }
 }
