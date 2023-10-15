@@ -1981,7 +1981,9 @@
         "add-rule-group-and": "Add Rule Group (AND)",
         "add-rule-group-or": "Add Rule Group (OR)",
         "remove-rule-group": "Remove Rule Group",
-        "customize": "Customize"
+        "customize": "Customize",
+        "mark-visible": "Mark as Visible",
+        "mark-invisible": "Mark as Invisible"
     },
 
     "preferences": {

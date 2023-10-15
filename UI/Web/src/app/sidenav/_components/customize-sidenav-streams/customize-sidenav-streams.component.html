@@ -11,7 +11,7 @@
       </div>
       <div class="col-3">
         <form [formGroup]="pageOperationsForm">
-          <div class="form-check form-check-inline" style="margin-top: 35px; margin-left: 10px">
+          <div class="form-check form-check-inline" style="margin-top: 23px; margin-left: 10px">
             <input class="form-check-input" type="checkbox" id="accessibility-mode" formControlName="accessibilityMode">
             <label class="form-check-label" for="accessibility-mode">{{t('order-numbers-label')}}</label>
           </div>
@@ -22,11 +22,12 @@
         </form>
       </div>
     </div>
-    <app-bulk-operations [actionCallback]="bulkActionCallback"></app-bulk-operations>
+    <app-bulk-operations [modalMode]="true" [topOffset]="0" [actionCallback]="bulkActionCallback"></app-bulk-operations>
     <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
                                 [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
                                 [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')?.value"
                                 [bulkMode]="pageOperationsForm.get('bulkMode')!.value"
+                                [virtualizeAfter]="100"
                                 >
       <ng-template #draggableItem let-position="idx" let-item>
         <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>

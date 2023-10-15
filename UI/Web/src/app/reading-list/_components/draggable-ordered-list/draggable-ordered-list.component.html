@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; read: 'draggable-ordered-list'">
 
-    <ng-container *ngIf="items.length > 3; else dragList">
+    <ng-container *ngIf="items.length > virtualizeAfter; else dragList">
         <div class="example-list list-group-flush">
             <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
                 <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
@@ -39,7 +39,7 @@
         </button>
     </ng-template>
 
-    <ng-template #handle let-item let-idx let-isVirtualized>
+    <ng-template #handle let-item let-idx="idx" let-isVirtualized="isVirtualized">
         <div class="me-3 align-middle">
             <div class="align-middle" [ngClass]="{'accessibility-padding': accessibilityMode, 'bulk-padding': bulkMode}" *ngIf="accessibilityMode || bulkMode">
                 <ng-container *ngIf="accessibilityMode">
@@ -50,7 +50,7 @@
                 </ng-container>
                 <ng-container *ngIf="bulkMode">
                     <label for="select-{{idx}}" class="form-label visually-hidden">{{t('bulk-select-label')}}</label>
-                    <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, idx)"
+                    <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, item, idx)"
                            [value]="bulkSelectionService.isCardSelected('sideNavStream', idx)">
                 </ng-container>
 

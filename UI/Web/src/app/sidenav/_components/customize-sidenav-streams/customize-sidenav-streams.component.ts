@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
@@ -19,7 +19,10 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../pipe/filter.pipe";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
-import {ActionItem} from "../../../_services/action-factory.service";
+import {Action, ActionItem} from "../../../_services/action-factory.service";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {filter, tap} from "rxjs/operators";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -29,7 +32,7 @@ import {ActionItem} from "../../../_services/action-factory.service";
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CustomizeSidenavStreamsComponent {
+export class CustomizeSidenavStreamsComponent implements OnDestroy {
 
   //@Input({required: true}) parentScrollElem!: Element | Window;
   items: SideNavStream[] = [];
@@ -61,8 +64,16 @@ export class CustomizeSidenavStreamsComponent {
     return listItem.name.toLowerCase().indexOf(filterVal) >= 0;
   }
 
-  bulkActionCallback = (action: ActionItem<any>, data: any) => {
-    console.log('event', data);
+  bulkActionCallback = (action: ActionItem<SideNavStream>, data: SideNavStream) => {
+    console.log('bulk action callback:', action, data);
+    const streams = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream');
+    console.log('selected streams: ', streams);
+    switch (action.action) {
+      case Action.MarkAsVisible:
+        break;
+      case Action.MarkAsInvisible:
+        break;
+    }
   }
 
 
@@ -70,8 +81,51 @@ export class CustomizeSidenavStreamsComponent {
   private readonly filterService = inject(FilterService);
   private readonly externalSourceService = inject(ExternalSourceService);
   private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly bulkSelectionService = inject(BulkSelectionService);
 
   constructor(public modal: NgbActiveModal) {
+
+    this.pageOperationsForm.get('accessibilityMode')?.valueChanges.pipe(
+        tap(_ => {
+          const accessibleValue = this.pageOperationsForm.get('accessibilityMode')?.value;
+          if (accessibleValue) {
+            if (this.pageOperationsForm.get('bulkMode')?.disabled) return;
+            this.pageOperationsForm.get('bulkMode')?.disable();
+          } else {
+            if (!this.pageOperationsForm.get('bulkMode')?.disabled) return;
+            this.pageOperationsForm.get('bulkMode')?.enable();
+          }
+          this.cdRef.markForCheck();
+        }),
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    this.pageOperationsForm.get('bulkMode')?.valueChanges.pipe(
+        tap(_ => {
+          const bulkValue = this.pageOperationsForm.get('bulkMode')?.value;
+          if (bulkValue) {
+            if (this.pageOperationsForm.get('accessibilityMode')?.disabled) return;
+            this.pageOperationsForm.get('accessibilityMode')?.disable();
+          } else {
+            if (this.pageOperationsForm.get('accessibilityMode')?.disabled) return;
+            this.pageOperationsForm.get('accessibilityMode')?.enable();
+          }
+        }),
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    this.pageOperationsForm.valueChanges.pipe(
+        tap(_ => {
+          if (this.pageOperationsForm.value.accessibilityMode || this.pageOperationsForm.value.bulkMode) {
+            this.listForm.get('filterSideNavStream')?.disable();
+            return;
+          }
+          this.listForm.get('filterSideNavStream')?.enable();
+        }),
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
     forkJoin([this.sideNavService.getSideNavStreams(false),
         this.filterService.getAllFilters(), this.externalSourceService.getExternalSources()
     ]).subscribe(results => {
@@ -79,7 +133,6 @@ export class CustomizeSidenavStreamsComponent {
 
       // After 100 items, drag and drop is disabled to use virtualization
       if (this.items.length > 100) {
-        //this.accessibilityMode = true;
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
@@ -90,6 +143,10 @@ export class CustomizeSidenavStreamsComponent {
       this.externalSources = results[2].filter(d => !existingExternalSourceStreams.has(d.name));
       this.cdRef.markForCheck();
     });
+  }
+
+  ngOnDestroy() {
+    this.bulkSelectionService.deselectAll();
   }
 
   resetSideNavFilter() {
@@ -138,8 +195,8 @@ export class CustomizeSidenavStreamsComponent {
   updateVisibility(item: SideNavStream, position: number) {
     const stream = this.items.filter(s => s.id == item.id)[0];
     stream.visible = !stream.visible;
-    this.sideNavService.updateSideNavStream(stream).subscribe();
     this.cdRef.markForCheck();
+    this.sideNavService.updateSideNavStream(stream).subscribe();
   }
 
 }

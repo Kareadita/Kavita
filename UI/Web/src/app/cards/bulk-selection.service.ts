@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
-import { ReplaySubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import {Injectable} from '@angular/core';
+import {NavigationStart, Router} from '@angular/router';
+import {ReplaySubject} from 'rxjs';
+import {filter} from 'rxjs/operators';
+import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 
 type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream';
 
@@ -149,6 +149,10 @@ export class BulkSelectionService {
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
       return this.actionFactory.getBookmarkActions(callback);
+    }
+
+    if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {
+      return this.applyFilterToList(this.actionFactory.getSideNavStreamActions(callback), [Action.MarkAsInvisible, Action.MarkAsVisible]);
     }
 
     return this.applyFilterToList(this.actionFactory.getVolumeActions(callback), allowedActions);

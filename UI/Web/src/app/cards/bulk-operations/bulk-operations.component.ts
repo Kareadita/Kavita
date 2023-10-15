@@ -32,19 +32,23 @@ import {CardActionablesComponent} from "../../_single-module/card-actionables/ca
 export class BulkOperationsComponent implements OnInit {
 
   @Input({required: true}) actionCallback!: (action: ActionItem<any>, data: any) => void;
-
-  topOffset: number = 56;
+  /**
+   * Modal mode means don't fix to the top
+   */
+  @Input() modalMode = false;
+  @Input() topOffset: number = 56;
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly actionFactoryService = inject(ActionFactoryService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
 
-  get Action() {
-    return Action;
-  }
+  protected readonly Action = Action;
 
-  constructor(public bulkSelectionService: BulkSelectionService, private readonly cdRef: ChangeDetectorRef,
-    private actionFactoryService: ActionFactoryService) { }
+
+  constructor() { }
 
   ngOnInit(): void {
     this.bulkSelectionService.actions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(actions => {

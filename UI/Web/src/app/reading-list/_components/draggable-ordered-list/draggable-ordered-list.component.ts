@@ -16,6 +16,7 @@ import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
+import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -39,6 +40,10 @@ export interface ItemRemoveEvent {
 })
 export class DraggableOrderedListComponent {
 
+  /**
+   * After this many elements, drag and drop is disabled and we use a virtualized list instead
+   */
+  @Input() virtualizeAfter = 100;
   @Input() accessibilityMode: boolean = false;
   /**
    * Shows the remove button on the list item
@@ -105,9 +110,11 @@ export class DraggableOrderedListComponent {
     this.cdRef.markForCheck();
   }
 
-  selectItem(updatedVal: any, index: number) {
-    console.log('select item event: ', updatedVal);
-    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items.length, updatedVal);
+  selectItem(updatedVal: Event, item: SideNavStream, index: number) {
+    console.log('select item event: ', item, index);
+    const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
+
+    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items.length, boolVal);
     this.cdRef.markForCheck();
   }
 }
