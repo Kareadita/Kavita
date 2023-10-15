@@ -162,5 +162,12 @@
     "collection-deleted": "Coleção excluída",
     "smart-filters": "Filtros Inteligentes",
     "browse-smart-filters": "Navegar pelos Filtros Inteligentes",
-    "smart-filter-doesnt-exist": "Filtro Inteligente não existe"
+    "smart-filter-doesnt-exist": "Filtro Inteligente não existe",
+    "external-source-already-in-use": "Existe stream com esta Fonte Externa",
+    "dashboard-stream-doesnt-exist": "Stream do Painel de Controle não existe",
+    "external-source-already-exists": "Fonte Externa já existe",
+    "sidenav-stream-doesnt-exist": "SideNav Stream não existe",
+    "external-source-doesnt-exist": "Fonte Externa não existe",
+    "external-source-required": "ApiKey e Host necessários",
+    "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente"
 }
