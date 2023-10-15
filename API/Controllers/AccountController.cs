@@ -311,7 +311,7 @@ public class AccountController : BaseApiController
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
+        if (user == null) throw new KavitaUnauthenticatedUserException();
 
         user.ApiKey = HashUtil.ApiKey();
 

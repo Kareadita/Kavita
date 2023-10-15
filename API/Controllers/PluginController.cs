@@ -72,7 +72,7 @@ public class PluginController : BaseApiController
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId <= 0) return Unauthorized();
+        if (userId <= 0) throw new KavitaUnauthenticatedUserException();
         return Ok((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
     }
 }
