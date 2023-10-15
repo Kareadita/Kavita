@@ -5,17 +5,11 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {
   DraggableOrderedListComponent,
-  IndexUpdateEvent
 } from "../../../reading-list/_components/draggable-ordered-list/draggable-ordered-list.component";
 import {
   ReadingListItemComponent
 } from "../../../reading-list/_components/reading-list-item/reading-list-item.component";
-import {forkJoin} from "rxjs";
-import {FilterService} from "../../../_services/filter.service";
 import {DashboardStreamListItemComponent} from "../dashboard-stream-list-item/dashboard-stream-list-item.component";
-import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
-import {DashboardService} from "../../../_services/dashboard.service";
-import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {Breakpoint, UtilityService} from "../../../shared/_services/utility.service";
 import {CustomizeDashboardStreamsComponent} from "../customize-dashboard-streams/customize-dashboard-streams.component";
 import {CustomizeSidenavStreamsComponent} from "../customize-sidenav-streams/customize-sidenav-streams.component";
@@ -40,7 +34,7 @@ enum TabID {
 })
 export class CustomizeDashboardModalComponent {
 
-  activeTab = TabID.Dashboard;
+  activeTab = TabID.SideNav;
 
   private readonly cdRef = inject(ChangeDetectorRef);
   public readonly utilityService = inject(UtilityService);
