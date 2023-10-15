@@ -9,6 +9,7 @@ import { Series } from '../_models/series';
 import { Volume } from '../_models/volume';
 import { AccountService } from './account.service';
 import { DeviceService } from './device.service';
+import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 
 export enum Action {
   Submenu = -1,
@@ -93,7 +94,9 @@ export enum Action {
    */
   RemoveFromOnDeck = 19,
   AddRuleGroup = 20,
-  RemoveRuleGroup = 21
+  RemoveRuleGroup = 21,
+  MarkAsVisible = 22,
+  MarkAsInvisible = 23,
 }
 
 export interface ActionItem<T> {
@@ -135,6 +138,8 @@ export class ActionFactoryService {
 
   bookmarkActions: Array<ActionItem<Series>> = [];
 
+  sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
+
   isAdmin = false;
   hasDownloadRole = false;
 
@@ -158,6 +163,10 @@ export class ActionFactoryService {
 
   getSeriesActions(callback: (action: ActionItem<Series>, series: Series) => void) {
 		return this.applyCallbackToList(this.seriesActions, callback);
+  }
+
+  getSideNavStreamActions(callback: (action: ActionItem<SideNavStream>, series: SideNavStream) => void) {
+    return this.applyCallbackToList(this.sideNavStreamActions, callback);
   }
 
   getVolumeActions(callback: (action: ActionItem<Volume>, volume: Volume) => void) {
@@ -560,6 +569,23 @@ export class ActionFactoryService {
         title: 'clear',
         callback: this.dummyCallback,
         class: 'danger',
+        requiresAdmin: false,
+        children: [],
+      },
+    ];
+
+    this.sideNavStreamActions = [
+      {
+        action: Action.MarkAsVisible,
+        title: 'mark-visible',
+        callback: this.dummyCallback,
+        requiresAdmin: false,
+        children: [],
+      },
+      {
+        action: Action.MarkAsInvisible,
+        title: 'mark-invisible',
+        callback: this.dummyCallback,
         requiresAdmin: false,
         children: [],
       },

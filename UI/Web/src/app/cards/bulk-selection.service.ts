@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
-import { ReplaySubject } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { Action, ActionFactoryService, ActionItem } from '../_services/action-factory.service';
+import {Injectable} from '@angular/core';
+import {NavigationStart, Router} from '@angular/router';
+import {ReplaySubject} from 'rxjs';
+import {filter} from 'rxjs/operators';
+import {Action, ActionFactoryService, ActionItem} from '../_services/action-factory.service';
 
-type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark';
+type DataSource = 'volume' | 'chapter' | 'special' | 'series' | 'bookmark' | 'sideNavStream';
 
 /**
  * Responsible for handling selections on cards. Can handle multiple card sources next to each other in different loops.
  * This will clear selections between pages.
  *
- * Remakrs: Page which renders cards is responsible for listening for shift keydown/keyup and updating our state variable.
+ * Remarks: Page which renders cards is responsible for listening for shift keydown/keyup and updating our state variable.
  */
 @Injectable({
   providedIn: 'root'
@@ -149,6 +149,10 @@ export class BulkSelectionService {
 
     if (Object.keys(this.selectedCards).filter(item => item === 'bookmark').length > 0) {
       return this.actionFactory.getBookmarkActions(callback);
+    }
+
+    if (Object.keys(this.selectedCards).filter(item => item === 'sideNavStream').length > 0) {
+      return this.applyFilterToList(this.actionFactory.getSideNavStreamActions(callback), [Action.MarkAsInvisible, Action.MarkAsVisible]);
     }
 
     return this.applyFilterToList(this.actionFactory.getVolumeActions(callback), allowedActions);

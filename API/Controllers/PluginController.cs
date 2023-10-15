@@ -28,6 +28,7 @@ public class PluginController : BaseApiController
     /// Authenticate with the Server given an apiKey. This will log you in by returning the user object and the JWT token.
     /// </summary>
     /// <remarks>This API is not fully built out and may require more information in later releases</remarks>
+    /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <param name="apiKey">API key which will be used to authenticate and return a valid user token back</param>
     /// <param name="pluginName">Name of the Plugin</param>
     /// <returns></returns>
@@ -37,8 +38,19 @@ public class PluginController : BaseApiController
     {
         // NOTE: In order to log information about plugins, we need some Plugin Description information for each request
         // Should log into access table so we can tell the user
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = HttpContext.Request.Headers["User-Agent"];
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId <= 0) return Unauthorized();
+        if (userId <= 0)
+        {
+            _logger.LogInformation("A Plugin ({PluginName}) tried to authenticate with an apiKey that doesn't match. Information {Information}", pluginName, new
+            {
+                IpAddress = ipAddress,
+                UserAgent = userAgent,
+                ApiKey = apiKey
+            });
+            throw new KavitaUnauthenticatedUserException();
+        }
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         _logger.LogInformation("Plugin {PluginName} has authenticated with {UserName} ({UserId})'s API Key", pluginName, user!.UserName, userId);
         return new UserDto
@@ -54,6 +66,7 @@ public class PluginController : BaseApiController
     /// <summary>
     /// Returns the version of the Kavita install
     /// </summary>
+    /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <param name="apiKey">Required for authenticating to get result</param>
     /// <returns></returns>
     [AllowAnonymous]
@@ -61,7 +74,7 @@ public class PluginController : BaseApiController
     public async Task<ActionResult<string>> GetVersion([Required] string apiKey)
     {
         var userId = await _unitOfWork.UserRepository.GetUserIdByApiKeyAsync(apiKey);
-        if (userId <= 0) return Unauthorized();
+        if (userId <= 0) throw new KavitaUnauthenticatedUserException();
         return Ok((await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value);
     }
 }

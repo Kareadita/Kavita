@@ -61,6 +61,12 @@
   width: 100%;
 }
 
+.accessibility-padding {
+  padding-top: 12px;
+}
+.bulk-padding {
+  padding-top: 20px;
+}
 
 
 .virtual-scroller, virtual-scroller {
@@ -70,4 +76,8 @@
 
 virtual-scroller.empty {
     display: none;
+}
+
+.manual-input {
+  width: 83px;
 }

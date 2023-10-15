@@ -28,11 +28,12 @@ import {MetadataDetailComponent} from "../../series-detail/_components/metadata-
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoLocaleModule} from "@ngneat/transloco-locale";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {UtcToLocalTimePipe} from "../../pipe/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-entity-info-cards',
   standalone: true,
-    imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule, CompactNumberPipe, TranslocoLocaleModule],
+    imports: [CommonModule, IconAndTitleComponent, SafeHtmlPipe, DefaultDatePipe, BytesPipe, CompactNumberPipe, AgeRatingPipe, NgbTooltip, MetadataDetailComponent, TranslocoModule, CompactNumberPipe, TranslocoLocaleModule, UtcToLocalTimePipe],
   templateUrl: './entity-info-cards.component.html',
   styleUrls: ['./entity-info-cards.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

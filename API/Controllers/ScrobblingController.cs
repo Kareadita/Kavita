@@ -111,6 +111,7 @@ public class ScrobblingController : BaseApiController
         pagination ??= UserParams.Default;
         var events = await _unitOfWork.ScrobbleRepository.GetUserEvents(User.GetUserId(), filter, pagination);
         Response.AddPaginationHeader(events.CurrentPage, events.PageSize, events.TotalCount, events.TotalPages);
+
         return Ok(events);
     }
 

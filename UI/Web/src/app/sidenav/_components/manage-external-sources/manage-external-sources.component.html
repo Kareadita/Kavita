@@ -24,5 +24,10 @@
                                    (sourceDelete)="deleteSource(idx, $event)"
                                    [isViewMode]="externalSource.id !== 0"></app-edit-external-source-item>
   </ng-container>
+  <ul>
+    <li class="list-group-item" *ngIf="externalSources.length === 0">
+      {{t('no-data')}}
+    </li>
+  </ul>
 </ng-container>
 

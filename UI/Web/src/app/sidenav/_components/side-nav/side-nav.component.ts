@@ -159,11 +159,11 @@ export class SideNavComponent implements OnInit {
   }
 
   handleHomeActions() {
-    this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl'});
+    this.ngbModal.open(CustomizeDashboardModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   importCbl() {
-    this.ngbModal.open(ImportCblModalComponent, {size: 'xl'});
+    this.ngbModal.open(ImportCblModalComponent, {size: 'xl', fullscreen: 'md'});
   }
 
   performAction(action: ActionItem<Library>, library: Library) {

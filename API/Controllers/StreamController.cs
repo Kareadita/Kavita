@@ -183,4 +183,11 @@ public class StreamController : BaseApiController
         await _streamService.UpdateSideNavStreamPosition(User.GetUserId(), dto);
         return Ok();
     }
+
+    [HttpPost("bulk-sidenav-stream-visibility")]
+    public async Task<ActionResult> BulkUpdateSideNavStream(BulkUpdateSideNavStreamVisibilityDto dto)
+    {
+        await _streamService.UpdateSideNavStreamBulk(User.GetUserId(), dto);
+        return Ok();
+    }
 }

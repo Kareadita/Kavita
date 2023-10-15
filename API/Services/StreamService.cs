@@ -24,6 +24,7 @@ public interface IStreamService
     Task<DashboardStreamDto> CreateDashboardStreamFromSmartFilter(int userId, int smartFilterId);
     Task UpdateDashboardStream(int userId, DashboardStreamDto dto);
     Task UpdateDashboardStreamPosition(int userId, UpdateStreamPositionDto dto);
+    Task UpdateSideNavStreamBulk(int userId, BulkUpdateSideNavStreamVisibilityDto dto);
     Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId);
     Task<SideNavStreamDto> CreateSideNavStreamFromExternalSource(int userId, int externalSourceId);
     Task UpdateSideNavStream(int userId, SideNavStreamDto dto);
@@ -31,6 +32,7 @@ public interface IStreamService
     Task<ExternalSourceDto> CreateExternalSource(int userId, ExternalSourceDto dto);
     Task<ExternalSourceDto> UpdateExternalSource(int userId, ExternalSourceDto dto);
     Task DeleteExternalSource(int userId, int externalSourceId);
+
 }
 
 public class StreamService : IStreamService
@@ -132,6 +134,20 @@ public class StreamService : IStreamService
         await _unitOfWork.CommitAsync();
         await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
             user.Id);
+    }
+
+    public async Task UpdateSideNavStreamBulk(int userId, BulkUpdateSideNavStreamVisibilityDto dto)
+    {
+        var streams = await _unitOfWork.UserRepository.GetDashboardStreamsByIds(dto.Ids);
+        foreach (var stream in streams)
+        {
+            stream.Visible = dto.Visibility;
+            _unitOfWork.UserRepository.Update(stream);
+        }
+
+        await _unitOfWork.CommitAsync();
+        await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
+            userId);
     }
 
     public async Task<SideNavStreamDto> CreateSideNavStreamFromSmartFilter(int userId, int smartFilterId)

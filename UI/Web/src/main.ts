@@ -15,8 +15,8 @@ import { JwtInterceptor } from './app/_interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './app/_interceptors/error.interceptor';
 import {HTTP_INTERCEPTORS, withInterceptorsFromDi, provideHttpClient} from '@angular/common/http';
 import {
-  provideTransloco,
-  TranslocoService
+    provideTransloco, TranslocoConfig,
+    TranslocoService
 } from "@ngneat/transloco";
 import {environment} from "./environments/environment";
 import {HttpLoader} from "./httpLoader";
@@ -96,7 +96,7 @@ const languageCodes = [
   'syr', 'syr-SY', 'ta', 'ta-IN', 'te', 'te-IN', 'th', 'th-TH', 'tl', 'tl-PH', 'tn',
   'tn-ZA', 'tr', 'tr-TR', 'tt', 'tt-RU', 'ts', 'uk', 'uk-UA', 'ur', 'ur-PK', 'uz',
   'uz-UZ', 'uz-UZ', 'vi', 'vi-VN', 'xh', 'xh-ZA', 'zh', 'zh-CN', 'zh-HK', 'zh-MO',
-  'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans',
+  'zh-SG', 'zh-TW', 'zu', 'zu-ZA', 'zh_Hans', 'zh_Hant',
 ];
 
 const translocoOptions = {
@@ -109,8 +109,8 @@ const translocoOptions = {
     missingHandler: {
       useFallbackTranslation: true,
       allowEmpty: false,
-    }
-  }
+    },
+  } as TranslocoConfig
 };
 
 bootstrapApplication(AppComponent, {
@@ -133,7 +133,8 @@ bootstrapApplication(AppComponent, {
         }),
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
-          storage: { useValue: localStorage }
+          storage: { useValue: localStorage },
+          ttl: 604800
         }),
         provideTranslocoPersistLang({
           storage: {

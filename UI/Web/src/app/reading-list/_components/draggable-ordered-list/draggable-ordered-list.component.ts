@@ -1,8 +1,22 @@
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ContentChild, EventEmitter, Input, Output, TemplateRef, TrackByFunction } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ContentChild,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  TemplateRef,
+  TrackByFunction
+} from '@angular/core';
 import { VirtualScrollerModule } from '@iharbeck/ngx-virtual-scroller';
-import { NgIf, NgFor, NgTemplateOutlet } from '@angular/common';
+import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
+import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -22,10 +36,14 @@ export interface ItemRemoveEvent {
     styleUrls: ['./draggable-ordered-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle, TranslocoDirective]
+  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent]
 })
 export class DraggableOrderedListComponent {
 
+  /**
+   * After this many elements, drag and drop is disabled and we use a virtualized list instead
+   */
+  @Input() virtualizeAfter = 100;
   @Input() accessibilityMode: boolean = false;
   /**
    * Shows the remove button on the list item
@@ -40,10 +58,16 @@ export class DraggableOrderedListComponent {
    * Disables drag and drop functionality. Useful if a filter is present which will skew actual index.
    */
   @Input() disabled: boolean = false;
+  /**
+   * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
+   */
+  @Input() bulkMode: boolean = false;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
+
+  public readonly bulkSelectionService = inject(BulkSelectionService);
 
   get BufferAmount() {
     return Math.min(this.items.length / 20, 20);
@@ -83,6 +107,13 @@ export class DraggableOrderedListComponent {
       position,
       item
     });
+    this.cdRef.markForCheck();
+  }
+
+  selectItem(updatedVal: Event, item: SideNavStream, index: number) {
+    const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
+
+    this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items.length, boolVal);
     this.cdRef.markForCheck();
   }
 }

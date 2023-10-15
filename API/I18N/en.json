@@ -151,6 +151,8 @@
     "collections": "All Collections",
     "browse-collections": "Browse by Collections",
     "smart-filters": "Smart Filters",
+    "external-sources": "External Sources",
+    "browse-external-sources": "Browse External Sources",
     "browse-smart-filters": "Browse by Smart Filters",
     "reading-list-restricted": "Reading list does not exist or you don't have access",
     "query-required": "You must pass a query parameter",

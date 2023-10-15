@@ -7,7 +7,7 @@
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.7.8.8"
+    "version": "0.7.8.10"
   },
   "servers": [
     {
@@ -285,6 +285,7 @@
           "Account"
         ],
         "summary": "Resets the API Key assigned with a user",
+        "description": "This will log unauthorized requests to Security log",
         "responses": {
           "200": {
             "description": "Success",
@@ -3541,6 +3542,28 @@
         }
       }
     },
+    "/api/Opds/{apiKey}/external-sources": {
+      "get": {
+        "tags": [
+          "Opds"
+        ],
+        "parameters": [
+          {
+            "name": "apiKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Opds/{apiKey}/libraries": {
       "get": {
         "tags": [
@@ -4202,6 +4225,7 @@
           "Plugin"
         ],
         "summary": "Returns the version of the Kavita install",
+        "description": "This will log unauthorized requests to Security log",
         "parameters": [
           {
             "name": "apiKey",
@@ -10937,6 +10961,37 @@
         }
       }
     },
+    "/api/Stream/bulk-sidenav-stream-visibility": {
+      "post": {
+        "tags": [
+          "Stream"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateSideNavStreamVisibilityDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateSideNavStreamVisibilityDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateSideNavStreamVisibilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/api/Tachiyomi/latest-chapter": {
       "get": {
         "tags": [
@@ -13104,6 +13159,23 @@
               "format": "int32"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkUpdateSideNavStreamVisibilityDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "visibility": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false

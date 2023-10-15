@@ -306,12 +306,13 @@ public class AccountController : BaseApiController
     /// <summary>
     /// Resets the API Key assigned with a user
     /// </summary>
+    /// <remarks>This will log unauthorized requests to Security log</remarks>
     /// <returns></returns>
     [HttpPost("reset-api-key")]
     public async Task<ActionResult<string>> ResetApiKey()
     {
         var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(User.GetUsername());
-        if (user == null) return Unauthorized();
+        if (user == null) throw new KavitaUnauthenticatedUserException();
 
         user.ApiKey = HashUtil.ApiKey();
 

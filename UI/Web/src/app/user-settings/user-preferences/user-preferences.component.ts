@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
+  DestroyRef, importProvidersFrom,
   inject,
   OnDestroy,
   OnInit
@@ -49,6 +49,11 @@ import { SideNavCompanionBarComponent } from '../../sidenav/_components/side-nav
 import {LocalizationService} from "../../_services/localization.service";
 import {Language} from "../../_models/metadata/language";
 import {translate, TranslocoDirective} from "@ngneat/transloco";
+import {
+  provideTranslocoPersistTranslations,
+  TranslocoPersistTranslations
+} from "@ngneat/transloco-persist-translations";
+import {HttpLoader} from "../../../httpLoader";
 
 enum AccordionPanelID {
   ImageReader = 'image-reader',
@@ -76,7 +81,7 @@ enum FragmentID {
     ChangePasswordComponent, ChangeAgeRestrictionComponent, AnilistKeyComponent, ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader,
     NgbAccordionToggle, NgbAccordionButton, NgbCollapse, NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, ColorPickerModule, ApiKeyComponent,
     ThemeManagerComponent, ManageDevicesComponent, UserStatsComponent, UserScrobbleHistoryComponent, UserHoldsComponent, NgbNavOutlet, TitleCasePipe, SentenceCasePipe,
-    TranslocoDirective]
+    TranslocoDirective],
 })
 export class UserPreferencesComponent implements OnInit, OnDestroy {
 
@@ -114,20 +119,22 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
   opdsEnabled: boolean = false;
   opdsUrl: string = '';
   makeUrl: (val: string) => string = (val: string) => { return this.opdsUrl; };
+
   private readonly destroyRef = inject(DestroyRef);
+  private readonly accountService = inject(AccountService);
+  private readonly toastr = inject(ToastrService);
+  private readonly bookService = inject(BookService);
+  private readonly titleService = inject(Title);
+  private readonly route = inject(ActivatedRoute);
+  private readonly settingsService = inject(SettingsService);
+  private readonly router = inject(Router);
+  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly localizationService = inject(LocalizationService);
+  protected readonly AccordionPanelID = AccordionPanelID;
+  protected readonly FragmentID = FragmentID;
 
-  get AccordionPanelID() {
-    return AccordionPanelID;
-  }
 
-  get FragmentID() {
-    return FragmentID;
-  }
-
-
-  constructor(private accountService: AccountService, private toastr: ToastrService, private bookService: BookService,
-    private titleService: Title, private route: ActivatedRoute, private settingsService: SettingsService,
-    private router: Router, private readonly cdRef: ChangeDetectorRef, public localizationService: LocalizationService) {
+  constructor() {
     this.fontFamilies = this.bookService.getFontFamilies().map(f => f.title);
     this.cdRef.markForCheck();
 
@@ -306,6 +313,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.toastr.success(translate('user-preferences.success-toast'));
       if (this.user) {
         this.user.preferences = updatedPrefs;
+
         this.cdRef.markForCheck();
       }
       this.resetForm();

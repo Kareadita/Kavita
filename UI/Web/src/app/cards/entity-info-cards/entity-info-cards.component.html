@@ -64,7 +64,7 @@
         <div class="vr d-none d-lg-block m-2"></div>
         <div class="col-auto">
           <app-icon-and-title [label]="t('date-added-title')" [clickable]="false" fontClasses="fa-solid fa-file-import" [title]="t('date-added-title')">
-            {{chapter.createdUtc | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
+            {{chapter.createdUtc | utcToLocalTime | translocoDate: {dateStyle: 'short', timeStyle: 'short' } | defaultDate}}
           </app-icon-and-title>
         </div>
       </ng-container>

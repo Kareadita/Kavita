@@ -53,7 +53,7 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {DefaultValuePipe} from "../../../pipe/default-value.pipe";
 import {TranslocoModule} from "@ngneat/transloco";
 import {TranslocoDatePipe} from "@ngneat/transloco-locale";
-import {Volume} from "../../../_models/volume";
+import {UtcToLocalTimePipe} from "../../../pipe/utc-to-local-time.pipe";
 
 enum TabID {
   General = 0,
@@ -68,32 +68,32 @@ enum TabID {
 @Component({
   selector: 'app-edit-series-modal',
   standalone: true,
-    imports: [
-        ReactiveFormsModule,
-        NgbNav,
-        NgbNavContent,
-        NgbNavItem,
-        NgbNavLink,
-        CommonModule,
-        TypeaheadComponent,
-        CoverImageChooserComponent,
-        EditSeriesRelationComponent,
-        SentenceCasePipe,
-        MangaFormatPipe,
-        DefaultDatePipe,
-        TimeAgoPipe,
-        TagBadgeComponent,
-        PublicationStatusPipe,
-        NgbTooltip,
-        BytesPipe,
-        ImageComponent,
-        NgbCollapse,
-        NgbNavOutlet,
-        DefaultValuePipe,
-        TranslocoModule,
-        TranslocoDatePipe,
-
-    ],
+  imports: [
+    ReactiveFormsModule,
+    NgbNav,
+    NgbNavContent,
+    NgbNavItem,
+    NgbNavLink,
+    CommonModule,
+    TypeaheadComponent,
+    CoverImageChooserComponent,
+    EditSeriesRelationComponent,
+    SentenceCasePipe,
+    MangaFormatPipe,
+    DefaultDatePipe,
+    TimeAgoPipe,
+    TagBadgeComponent,
+    PublicationStatusPipe,
+    NgbTooltip,
+    BytesPipe,
+    ImageComponent,
+    NgbCollapse,
+    NgbNavOutlet,
+    DefaultValuePipe,
+    TranslocoModule,
+    TranslocoDatePipe,
+    UtcToLocalTimePipe,
+  ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
