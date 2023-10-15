@@ -38,6 +38,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
+  virtualizeAfter = 250;
 
   listForm: FormGroup = new FormGroup({
     'filterSideNavStream': new FormControl('', []),
@@ -140,8 +141,8 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
     ]).subscribe(results => {
       this.items = results[0];
 
-      // After 100 items, drag and drop is disabled to use virtualization
-      if (this.items.length > 100) {
+      // After X items, drag and drop is disabled to use virtualization
+      if (this.items.length > this.virtualizeAfter) {
         this.pageOperationsForm.get('accessibilityMode')?.setValue(true);
       }
 
