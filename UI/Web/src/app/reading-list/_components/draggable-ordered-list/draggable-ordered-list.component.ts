@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  ContentChild, DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -17,6 +17,8 @@ import {TranslocoDirective} from "@ngneat/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
+import {FormsModule} from "@angular/forms";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -36,7 +38,8 @@ export interface ItemRemoveEvent {
     styleUrls: ['./draggable-ordered-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent]
+  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
+    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
 })
 export class DraggableOrderedListComponent {
 
@@ -63,27 +66,39 @@ export class DraggableOrderedListComponent {
    */
   @Input() bulkMode: boolean = false;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
+  @Input() refresh = new EventEmitter<void>();
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly destroyRef = inject(DestroyRef);
 
   get BufferAmount() {
     return Math.min(this.items.length / 20, 20);
   }
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
+  constructor(private readonly cdRef: ChangeDetectorRef) {
+    this.refresh.subscribe(() => this.cdRef.markForCheck());
+    this.bulkSelectionService.selections$.pipe(
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe((s) => {
+      console.log('selections changed: ', s)
+      this.cdRef.markForCheck()
+    });
+  }
 
   drop(event: CdkDragDrop<string[]>) {
-    if (event.previousIndex === event.currentIndex)  return;
-    moveItemInArray(this.items, event.previousIndex, event.currentIndex);
+    if (event.previousIndex === event.currentIndex) return;
+    const item = {...this.items[event.previousIndex]};
+    moveItemInArray(this.items, event.previousIndex, event.currentIndex); // BUG: This is not actually swapping the element, thus the emit is wrong
     this.orderUpdated.emit({
       fromPosition: event.previousIndex,
       toPosition: event.currentIndex,
-      item: this.items[event.currentIndex],
+      item: item, // Old Code: this.items[event.currentIndex],
       fromAccessibilityMode: false
     });
+    //this.items = [...this.items]; // Not sure if this is needed. Doesn't fix side nav not re-rendering
     this.cdRef.markForCheck();
   }
 
@@ -110,7 +125,7 @@ export class DraggableOrderedListComponent {
     this.cdRef.markForCheck();
   }
 
-  selectItem(updatedVal: Event, item: SideNavStream, index: number) {
+  selectItem(updatedVal: Event, index: number) {
     const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
 
     this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items.length, boolVal);

@@ -6,7 +6,6 @@
                 <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
 
                     <div class="d-flex list-container">
-
                         <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }"></ng-container>
                         <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
 
@@ -18,11 +17,10 @@
     </ng-container>
     <ng-template #dragList>
         <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
-            <div class="example-box" *ngFor="let item of items; index as i" cdkDrag
+            <div class="example-box" *ngFor="let item of items; index as i;" cdkDrag
                  [cdkDragData]="item" cdkDragBoundary=".example-list"
                  [cdkDragDisabled]="accessibilityMode || disabled || bulkMode" cdkDragPreviewContainer="parent">
                 <div class="d-flex list-container">
-
                     <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: false }"></ng-container>
                     <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>
 
@@ -50,7 +48,7 @@
                 </ng-container>
                 <ng-container *ngIf="bulkMode">
                     <label for="select-{{idx}}" class="form-label visually-hidden">{{t('bulk-select-label')}}</label>
-                    <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, item, idx)"
+                    <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, idx)"
                            [value]="bulkSelectionService.isCardSelected('sideNavStream', idx)">
                 </ng-container>
 
