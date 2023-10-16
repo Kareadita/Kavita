@@ -191,6 +191,7 @@ public class AccountController : BaseApiController
                 .SingleOrDefaultAsync(x => x.NormalizedUserName == loginDto.Username.ToUpper());
         }
 
+        _logger.LogInformation("{UserName} attempting to login from {IpAddress}", loginDto.Username, HttpContext.Connection.RemoteIpAddress?.ToString());
 
         if (user == null)
         {
