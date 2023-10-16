@@ -47,7 +47,7 @@ export class BulkSelectionService {
     if (this.isShiftDown) {
 
       if (dataSource === this.prevDataSource) {
-        this.debugLog('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index);
+        this.debugLog('Selecting ' + dataSource + ' cards from ' + this.prevIndex + ' to ' + index + ' as ' + !wasSelected);
         this.selectCards(dataSource, this.prevIndex, index, !wasSelected);
       } else {
         const isForwardSelection = index > this.prevIndex;
@@ -128,7 +128,7 @@ export class BulkSelectionService {
   getSelectedCardsForSource(dataSource: DataSource) {
     if (!this.selectedCards.hasOwnProperty(dataSource)) return [];
 
-    let ret = [];
+    const ret = [];
     for(let k in this.selectedCards[dataSource]) {
       if (this.selectedCards[dataSource][k]) {
         ret.push(k);

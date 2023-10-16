@@ -40,13 +40,12 @@ export class BulkOperationsComponent implements OnInit {
   hasMarkAsRead: boolean = false;
   hasMarkAsUnread: boolean = false;
   actions: Array<ActionItem<any>> = [];
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
-
   protected readonly Action = Action;
-
 
   constructor() { }
 
@@ -58,10 +57,6 @@ export class BulkOperationsComponent implements OnInit {
       this.hasMarkAsUnread = this.actionFactoryService.hasAction(this.actions, Action.MarkAsUnread);
       this.cdRef.markForCheck();
     });
-  }
-
-  handleActionCallback(action: ActionItem<any>, data: any) {
-    this.actionCallback(action, data);
   }
 
   performAction(action: ActionItem<any>) {

@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnDestroy} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef, EventEmitter,
+  HostListener,
+  inject,
+  OnDestroy
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {FilterService} from "../../../_services/filter.service";
@@ -23,6 +31,7 @@ import {Action, ActionItem} from "../../../_services/action-factory.service";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {filter, tap} from "rxjs/operators";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {KEY_CODES} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
@@ -39,6 +48,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
   virtualizeAfter = 250;
+  refreshState = new EventEmitter<void>();
 
   listForm: FormGroup = new FormGroup({
     'filterSideNavStream': new FormControl('', []),
@@ -66,7 +76,9 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   }
 
   bulkActionCallback = (action: ActionItem<SideNavStream>, data: SideNavStream) => {
-    const streams = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream').map(index => this.items[parseInt(index, 10)]);
+    const selectedItems = this.bulkSelectionService.getSelectedCardsForSource('sideNavStream');
+    const streams = selectedItems
+        .map(index => this.items[parseInt(index, 10)]);
     let visibleState = false;
     switch (action.action) {
       case Action.MarkAsVisible:
@@ -77,13 +89,17 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         break;
     }
 
-    for(let index of this.bulkSelectionService.getSelectedCardsForSource('sideNavStream').map(s => parseInt(s, 10))) {
+    for(let index of selectedItems.map(s => parseInt(s, 10))) {
       this.items[index].visible = visibleState;
       this.items[index] = {...this.items[index]};
     }
     this.cdRef.markForCheck();
     // Make bulk call
-    this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), visibleState).subscribe(() => this.bulkSelectionService.deselectAll());
+    this.sideNavService.bulkToggleSideNavStreamVisibility(streams.map(s => s.id), visibleState)
+        .subscribe(() => {
+          this.bulkSelectionService.deselectAll();
+          this.cdRef.markForCheck();
+        });
   }
 
 
@@ -92,7 +108,23 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   private readonly externalSourceService = inject(ExternalSourceService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly bulkSelectionService = inject(BulkSelectionService);
+
+  @HostListener('document:keydown.shift', ['$event'])
+  handleKeypress(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = true;
+    }
+  }
+
+  @HostListener('document:keyup.shift', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === KEY_CODES.SHIFT) {
+      this.bulkSelectionService.isShiftDown = false;
+      this.refreshState.emit();
+      this.cdRef.markForCheck();
+    }
+  }
 
   constructor(public modal: NgbActiveModal) {
 
@@ -197,7 +229,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
         this.sideNavService.getSideNavStreams(false).subscribe((data) => {
           this.items = [...data];
           this.cdRef.markForCheck();
-        })
+        });
       }
     });
   }
