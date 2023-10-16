@@ -169,5 +169,7 @@
     "sidenav-stream-doesnt-exist": "SideNav Stream não existe",
     "external-source-doesnt-exist": "Fonte Externa não existe",
     "external-source-required": "ApiKey e Host necessários",
-    "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente"
+    "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
+    "browse-external-sources": "Navegar em Fontes Externas",
+    "external-sources": "Fontes Externas"
 }
