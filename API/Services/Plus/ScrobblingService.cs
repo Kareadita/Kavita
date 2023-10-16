@@ -188,10 +188,18 @@ public class ScrobblingService : IScrobblingService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library);
         if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
 
         _logger.LogInformation("Processing Scrobbling review event for {UserId} on {SeriesName}", userId, series.Name);
         if (await CheckIfCanScrobble(userId, seriesId, series)) return;
+
+        if (string.IsNullOrEmpty(reviewTitle) || string.IsNullOrEmpty(reviewBody) || (reviewTitle.Length < 2200 ||
+                                                  reviewTitle.Length > 120 ||
+                                                  reviewTitle.Length < 20))
+        {
+            _logger.LogDebug(
+                "Rejecting Scrobble event for {Series}. Review is not long enough to meet requirements", series.Name);
+            return;
+        }
 
         var existingEvt = await _unitOfWork.ScrobbleRepository.GetEvent(userId, series.Id,
             ScrobbleEventType.Review);
