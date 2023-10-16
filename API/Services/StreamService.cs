@@ -132,6 +132,7 @@ public class StreamService : IStreamService
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+        if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
             user.Id);
     }
@@ -267,6 +268,7 @@ public class StreamService : IStreamService
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+        if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId);
     }

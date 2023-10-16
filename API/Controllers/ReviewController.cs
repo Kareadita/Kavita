@@ -93,7 +93,6 @@ public class ReviewController : BaseApiController
 
         if (totalReviews > 10)
         {
-            //var stepSize = Math.Max(totalReviews / 10, 1); // Calculate step size, ensuring it's at least 1
             var stepSize = Math.Max((totalReviews - 4) / 8, 1);
 
             var selectedReviews = new List<UserReviewDto>()

@@ -22,6 +22,7 @@ export class AuthGuard implements CanActivate {
         if (user) {
           return true;
         }
+        // TODO: Remove the error message stuff here and just redirect them. Don't need to tell them
         const errorMessage = this.translocoService.translate('toasts.unauthorized-1');
         const errorMessage2 = this.translocoService.translate('toasts.unauthorized-2');
         if (this.toastr.toasts.filter(toast => toast.message === errorMessage2 || toast.message === errorMessage).length === 0) {
