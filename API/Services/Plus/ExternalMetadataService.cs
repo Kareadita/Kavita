@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using API.Data;
+using API.Data.Repositories;
 using API.DTOs.Recommendation;
+using API.DTOs.Scrobbling;
 using API.Entities.Enums;
 using API.Helpers.Builders;
 using Flurl.Http;
@@ -13,9 +15,22 @@ using Microsoft.Extensions.Logging;
 
 namespace API.Services.Plus;
 
+/// <summary>
+/// Used for matching and fetching metadata on a series
+/// </summary>
+internal class ExternalMetadataIdsDto
+{
+    public long? MalId { get; set; }
+    public int? AniListId { get; set; }
+
+    public string? SeriesName { get; set; }
+    public string? LocalizedSeriesName { get; set; }
+    public MediaFormat? PlusMediaFormat { get; set; } = MediaFormat.Unknown;
+}
+
 public interface IExternalMetadataService
 {
-    Task<ExternalSeriesDetailDto> GetExternalSeriesDetail(int? aniListId, long? malId);
+    Task<ExternalSeriesDetailDto> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId);
 }
 
 public class ExternalMetadataService : IExternalMetadataService
@@ -32,7 +47,7 @@ public class ExternalMetadataService : IExternalMetadataService
             cli.Settings.HttpClientFactory = new UntrustedCertClientFactory());
     }
 
-    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId)
+    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId)
     {
         if (!aniListId.HasValue && !malId.HasValue)
         {
@@ -40,12 +55,38 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-        return await GetSeriesDetail(license, aniListId, malId);
+        return await GetSeriesDetail(license, aniListId, malId, seriesId);
 
     }
 
-    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(string license, int? anilistId, long? malId)
+    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(string license, int? aniListId, long? malId, int? seriesId)
     {
+        var payload = new ExternalMetadataIdsDto()
+        {
+            AniListId = aniListId,
+            MalId = malId,
+            SeriesName = string.Empty,
+            LocalizedSeriesName = string.Empty
+        };
+        if (seriesId is > 0)
+        {
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId.Value, SeriesIncludes.Metadata | SeriesIncludes.Library);
+            if (series != null)
+            {
+                if (payload.AniListId <= 0)
+                {
+                    payload.AniListId = ScrobblingService.ExtractId<int>(series.Metadata.WebLinks, ScrobblingService.AniListWeblinkWebsite);
+                }
+                if (payload.MalId <= 0)
+                {
+                    payload.MalId = ScrobblingService.ExtractId<long>(series.Metadata.WebLinks, ScrobblingService.MalWeblinkWebsite);
+                }
+                payload.SeriesName = series.Name;
+                payload.LocalizedSeriesName = series.LocalizedName;
+                payload.PlusMediaFormat = ConvertToMediaFormat(series.Library.Type, series.Format);
+            }
+
+        }
         try
         {
             return await (Configuration.KavitaPlusApiUrl + "/api/metadata/series/detail")
@@ -56,11 +97,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .WithHeader("x-kavita-version", BuildInfo.Version)
                 .WithHeader("Content-Type", "application/json")
                 .WithTimeout(TimeSpan.FromSeconds(Configuration.DefaultTimeOutSecs))
-                .PostJsonAsync(new
-                {
-                    AnilistId = anilistId,
-                    MalId = malId,
-                })
+                .PostJsonAsync(payload)
                 .ReceiveJson<ExternalSeriesDetailDto>();
 
         }
@@ -70,5 +107,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return null;
+    }
+
+    private static MediaFormat ConvertToMediaFormat(LibraryType libraryType, MangaFormat seriesFormat)
+    {
+        return libraryType switch
+        {
+            LibraryType.Manga => seriesFormat == MangaFormat.Epub ? MediaFormat.LightNovel : MediaFormat.Manga,
+            LibraryType.Comic => MediaFormat.Comic,
+            LibraryType.Book => MediaFormat.Book,
+            _ => MediaFormat.Unknown
+        };
     }
 }

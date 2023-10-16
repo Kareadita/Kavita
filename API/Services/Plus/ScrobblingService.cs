@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.Data.Repositories;
 using API.DTOs.Filtering;
+using API.DTOs.Recommendation;
 using API.DTOs.Scrobbling;
 using API.Entities;
 using API.Entities.Enums;
@@ -702,6 +703,7 @@ public class ScrobblingService : IScrobblingService
         await SaveToDb(progressCounter, true);
         _logger.LogInformation("Scrobbling Events is complete");
     }
+
 
     private async Task<int> ProcessEvents(IEnumerable<ScrobbleEvent> events, IDictionary<int, int> userRateLimits,
         int usersToScrobble, int progressCounter, int totalProgress, Func<ScrobbleEvent, Task<ScrobbleDto>> createEvent)

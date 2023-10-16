@@ -9037,6 +9037,14 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {

@@ -56,28 +56,35 @@ export class SeriesPreviewDrawerComponent implements OnInit {
     if (this.isExternalSeries) {
       this.seriesService.getExternalSeriesDetails(this.aniListId, this.malId).subscribe(externalSeries => {
         this.externalSeries = externalSeries;
+
         this.isLoading = false;
         if (this.externalSeries.siteUrl) {
           this.url = this.externalSeries.siteUrl;
         }
 
-        console.log('External Series Detail: ', this.externalSeries);
         this.cdRef.markForCheck();
       });
     } else {
       this.seriesService.getMetadata(this.seriesId!).subscribe(data => {
         this.localSeries = data;
+
+        // Consider the localSeries has no metadata, try to merge the external Series metadata
+        if (this.localSeries.summary === '' && this.localSeries.genres.length === 0) {
+          this.seriesService.getExternalSeriesDetails(0, 0, this.seriesId).subscribe(externalSeriesData => {
+            this.isExternalSeries = true;
+            this.externalSeries = externalSeriesData;
+            this.cdRef.markForCheck();
+          })
+        }
+
         this.isLoading = false;
         this.url = 'library/' + this.libraryId + '/series/' + this.seriesId;
         this.localStaff = data.writers.map(p => {
           return {name: p.name, role: 'Story & Art'} as SeriesStaff;
         });
         this.cdRef.markForCheck();
-      })
-
+      });
     }
-
-
 
   }
 

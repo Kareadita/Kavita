@@ -41,7 +41,7 @@ public class SeriesController : BaseApiController
     private readonly IEasyCachingProvider _reviewCacheProvider;
     private readonly IEasyCachingProvider _recommendationCacheProvider;
     private readonly IEasyCachingProvider _externalSeriesCacheProvider;
-    public const string CacheKey = "recommendation_";
+    private const string CacheKey = "recommendation_";
 
 
     public SeriesController(ILogger<SeriesController> logger, ITaskScheduler taskScheduler, IUnitOfWork unitOfWork,
@@ -584,14 +584,14 @@ public class SeriesController : BaseApiController
 
     [Authorize(Policy = "RequireAdminRole")]
     [HttpGet("external-series-detail")]
-    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId)
+    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
     {
         if (!await _licenseService.HasActiveLicense())
         {
             return BadRequest();
         }
 
-        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}";
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{seriesId ?? 0}";
         var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey);
         if (results.HasValue)
         {
@@ -600,7 +600,7 @@ public class SeriesController : BaseApiController
 
         try
         {
-            var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId);
+            var ret = await _externalMetadataService.GetExternalSeriesDetail(aniListId, malId, seriesId);
             await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15));
             return Ok(ret);
         }
