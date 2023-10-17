@@ -66,7 +66,6 @@ export class DraggableOrderedListComponent {
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   @Input() bulkMode: boolean = false;
-  @Input({required: true}) itemHeight: number = 60;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
