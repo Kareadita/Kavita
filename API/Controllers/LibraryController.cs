@@ -109,16 +109,7 @@ public class LibraryController : BaseApiController
 
         foreach (var user in userNeedingNewLibrary)
         {
-            var maxCount = user.SideNavStreams.Select(s => s.Order).Max();
-            user.SideNavStreams.Add(new AppUserSideNavStream()
-            {
-                Name = library.Name,
-                Order = maxCount + 1,
-                IsProvided = false,
-                StreamType = SideNavStreamType.Library,
-                LibraryId = library.Id,
-                Visible = true,
-            });
+            user.CreateSideNavFromLibrary(library);
             _unitOfWork.UserRepository.Update(user);
         }
 
@@ -201,7 +192,7 @@ public class LibraryController : BaseApiController
     [HttpPost("grant-access")]
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
-        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username);
+        var user = await _unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "user-doesnt-exist"));
 
         var libraryString = string.Join(',', updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
@@ -217,10 +208,12 @@ public class LibraryController : BaseApiController
             {
                 // Remove
                 library.AppUsers.Remove(user);
+                user.RemoveSideNavFromLibrary(library);
             }
             else if (!libraryContainsUser && libraryIsSelected)
             {
                 library.AppUsers.Add(user);
+                user.CreateSideNavFromLibrary(library);
             }
         }
 
@@ -235,6 +228,11 @@ public class LibraryController : BaseApiController
             _logger.LogInformation("Added: {SelectedLibraries} to {Username}",libraryString, updateLibraryForUserDto.Username);
             // Bust cache
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey);
+
+            // TODO: Update a user's SideNav based on library access
+
+            _unitOfWork.UserRepository.Update(user);
+
             return Ok(_mapper.Map<MemberDto>(user));
         }
 

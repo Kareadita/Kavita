@@ -459,7 +459,7 @@ public class AccountController : BaseApiController
         if (adminUser == null) return Unauthorized();
         if (!await _unitOfWork.UserRepository.IsUserAdminAsync(adminUser)) return Unauthorized(await _localizationService.Translate(User.GetUserId(), "permission-denied"));
 
-        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId);
+        var user = await _unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams);
         if (user == null) return BadRequest(await _localizationService.Translate(User.GetUserId(), "no-user"));
 
         // Check if username is changing
@@ -509,6 +509,7 @@ public class AccountController : BaseApiController
             {
                 lib.AppUsers ??= new List<AppUser>();
                 lib.AppUsers.Remove(user);
+                user.RemoveSideNavFromLibrary(lib);
             }
 
             libraries = (await _unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.Libraries, LibraryIncludes.AppUser)).ToList();
@@ -518,6 +519,7 @@ public class AccountController : BaseApiController
         {
             lib.AppUsers ??= new List<AppUser>();
             lib.AppUsers.Add(user);
+            user.CreateSideNavFromLibrary(lib);
         }
 
         user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
@@ -528,6 +530,9 @@ public class AccountController : BaseApiController
         if (!_unitOfWork.HasChanges() || await _unitOfWork.CommitAsync())
         {
             await _eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id);
+            await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(user.Id), user.Id);
+            // If we adjust library access, dashboards should re-render
+            await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id), user.Id);
             return Ok();
         }
 
@@ -627,7 +632,9 @@ public class AccountController : BaseApiController
             {
                 lib.AppUsers ??= new List<AppUser>();
                 lib.AppUsers.Add(user);
+                user.CreateSideNavFromLibrary(lib);
             }
+
 
             user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
             user.AgeRestrictionIncludeUnknowns = hasAdminRole || dto.AgeRestriction.IncludeUnknowns;
@@ -648,6 +655,7 @@ public class AccountController : BaseApiController
             _unitOfWork.UserRepository.Delete(user);
             await _unitOfWork.CommitAsync();
         }
+
 
         try
         {
