@@ -929,6 +929,12 @@ public class SeriesRepository : ISeriesRepository
         query ??= _context.Series
             .AsNoTracking();
 
+        // When the user has no access, just return instantly
+        if (userLibraries.Count == 0)
+        {
+            return query.Where(s => false);
+        }
+
 
 
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
