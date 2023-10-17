@@ -1828,7 +1828,9 @@
         "view-series": "Exibir Séries",
         "staff-label": "Pessoal",
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Capítulos",
-        "tags-label": "{{filter-field-pipe.tags}}"
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
     },
     "customize-dashboard-streams": {
         "no-data": "Todos os filtros inteligentes foram adicionados ao Painel de Controle ou nenhum foi criado ainda.",
