@@ -11,7 +11,9 @@ export class FilterPipe implements PipeTransform {
     if (!items || !callback) {
         return items;
     }
-    return items.filter(item => callback(item));
+    const ret = items.filter(item => callback(item));
+    if (ret.length === items.length) return items; // This will prevent a re-render
+    return ret;
 }
 
 }

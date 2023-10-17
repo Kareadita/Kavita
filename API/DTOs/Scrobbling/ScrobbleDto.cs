@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using API.DTOs.Recommendation;
 
 namespace API.DTOs.Scrobbling;
 #nullable enable
@@ -18,12 +19,20 @@ public enum ScrobbleEventType
     Review = 4
 }
 
+/// <summary>
+/// Represents PlusMediaFormat
+/// </summary>
 public enum MediaFormat
 {
+    [Description("Manga")]
     Manga = 1,
+    [Description("Comic")]
     Comic = 2,
+    [Description("LightNovel")]
     LightNovel = 3,
-    Book = 4
+    [Description("Book")]
+    Book = 4,
+    Unknown = 5
 }
 
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using API.DTOs.Scrobbling;
 
 namespace API.DTOs.Recommendation;
 
@@ -8,7 +9,7 @@ public class ExternalSeriesDetailDto
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
     public IList<string> Synonyms { get; set; }
-    public PlusMediaFormat PlusMediaFormat { get; set; }
+    public MediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }
     public string? CoverUrl { get; set; }
     public IList<string> Genres { get; set; }

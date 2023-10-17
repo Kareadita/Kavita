@@ -124,7 +124,7 @@ public class StreamService : IStreamService
         var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null)
             throw new KavitaException(await _localizationService.Translate(userId, "dashboard-stream-doesnt-exist"));
-        if (stream.Order == dto.ToPosition) return ;
+        if (stream.Order == dto.ToPosition) return;
 
         var list = user!.DashboardStreams.ToList();
         ReorderItems(list, stream.Id, dto.ToPosition);
@@ -132,6 +132,7 @@ public class StreamService : IStreamService
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
+        if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
             user.Id);
     }
@@ -264,9 +265,10 @@ public class StreamService : IStreamService
         var list = user!.SideNavStreams.ToList();
         ReorderItems(list, stream.Id, dto.ToPosition);
         user.SideNavStreams = list;
-
         _unitOfWork.UserRepository.Update(user);
+
         await _unitOfWork.CommitAsync();
+        if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId);
     }

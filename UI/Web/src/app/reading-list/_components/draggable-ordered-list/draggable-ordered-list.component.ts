@@ -3,7 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
+  ContentChild, DestroyRef,
   EventEmitter,
   inject,
   Input,
@@ -16,7 +16,9 @@ import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
-import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
+import {FormsModule} from "@angular/forms";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {NgxVirtualScrollModule} from "@lithiumjs/ngx-virtual-scroll";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -36,7 +38,9 @@ export interface ItemRemoveEvent {
     styleUrls: ['./draggable-ordered-list.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag, CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent]
+  imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
+    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule,
+    NgxVirtualScrollModule, NgxVirtualScrollModule]
 })
 export class DraggableOrderedListComponent {
 
@@ -62,26 +66,37 @@ export class DraggableOrderedListComponent {
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   @Input() bulkMode: boolean = false;
+  @Input({required: true}) itemHeight: number = 60;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
 
   public readonly bulkSelectionService = inject(BulkSelectionService);
+  public readonly destroyRef = inject(DestroyRef);
 
   get BufferAmount() {
     return Math.min(this.items.length / 20, 20);
   }
 
-  constructor(private readonly cdRef: ChangeDetectorRef) { }
+  log(a: any, b: any) {console.log('item: ', a, 'index', b)}
+
+
+  constructor(private readonly cdRef: ChangeDetectorRef) {
+    this.bulkSelectionService.selections$.pipe(
+        takeUntilDestroyed(this.destroyRef)
+    ).subscribe((s) => {
+      this.cdRef.markForCheck()
+    });
+  }
 
   drop(event: CdkDragDrop<string[]>) {
-    if (event.previousIndex === event.currentIndex)  return;
+    if (event.previousIndex === event.currentIndex) return;
     moveItemInArray(this.items, event.previousIndex, event.currentIndex);
     this.orderUpdated.emit({
       fromPosition: event.previousIndex,
       toPosition: event.currentIndex,
-      item: this.items[event.currentIndex],
+      item: event.item.data,
       fromAccessibilityMode: false
     });
     this.cdRef.markForCheck();
@@ -110,7 +125,7 @@ export class DraggableOrderedListComponent {
     this.cdRef.markForCheck();
   }
 
-  selectItem(updatedVal: Event, item: SideNavStream, index: number) {
+  selectItem(updatedVal: Event, index: number) {
     const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
 
     this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.items.length, boolVal);

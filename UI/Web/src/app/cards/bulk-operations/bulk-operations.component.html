@@ -3,21 +3,21 @@
     <div *ngIf="selectionCount > 0" class="bulk-select mb-3 {{modalMode ? '' : 'fixed-top}}" [ngStyle]="{'margin-top': topOffset + 'px'}">
       <div class="d-flex justify-content-around align-items-center">
 
-            <span class="highlight">
-                <i class="fa fa-check me-1" aria-hidden="true"></i>
-              {{t('items-selected',{num: selectionCount | number})}}
-            </span>
+        <span class="highlight">
+            <i class="fa fa-check me-1" aria-hidden="true"></i>
+          {{t('items-selected',{num: selectionCount | number})}}
+        </span>
 
         <span>
-                <button *ngIf="hasMarkAsUnread" class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
-                    <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{t('mark-as-unread')}}</span>
-                </button>
-                <button *ngIf="hasMarkAsRead" class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
-                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
-                    <span class="visually-hidden">{{t('mark-as-read')}}</span>
-                </button>
-                <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
+            <button *ngIf="hasMarkAsUnread" class="btn btn-icon" (click)="executeAction(Action.MarkAsUnread)" [ngbTooltip]="t('mark-as-unread')" placement="bottom">
+                <i class="fa-regular fa-circle-check" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('mark-as-unread')}}</span>
+            </button>
+            <button *ngIf="hasMarkAsRead" class="btn btn-icon" (click)="executeAction(Action.MarkAsRead)" [ngbTooltip]="t('mark-as-read')" placement="bottom">
+                <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('mark-as-read')}}</span>
+            </button>
+            <app-card-actionables [actions]="actions" labelBy="bulk-actions-header" iconClass="fa-ellipsis-h" (actionHandler)="performAction($event)"></app-card-actionables>
         </span>
 
         <span id="bulk-actions-header" class="visually-hidden">Bulk Actions</span>

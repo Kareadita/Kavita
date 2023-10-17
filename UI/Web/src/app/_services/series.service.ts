@@ -229,7 +229,8 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/remove-from-on-deck?seriesId=' + seriesId, {});
   }
 
-  getExternalSeriesDetails(aniListId?: number, malId?: number) {
-    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + (aniListId || 0) + '&malId=' + (malId || 0));
+  getExternalSeriesDetails(aniListId?: number, malId?: number, seriesId?: number) {
+    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + (aniListId || 0) + '&malId=' + (malId || 0) + '&seriesId=' + (seriesId || 0));
   }
+
 }

@@ -11,7 +11,6 @@ import {FilterService} from "../../../_services/filter.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {forkJoin} from "rxjs";
 import {TranslocoDirective} from "@ngneat/transloco";
-import {CommonStream} from "../../../_models/common-stream";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../pipe/filter.pipe";
 
@@ -76,8 +75,8 @@ export class CustomizeDashboardStreamsComponent {
 
   updateVisibility(item: DashboardStream, position: number) {
     this.items[position].visible = !this.items[position].visible;
-    this.dashboardService.updateDashboardStream(this.items[position]).subscribe();
     this.cdRef.markForCheck();
+    this.dashboardService.updateDashboardStream(this.items[position]).subscribe();
   }
 
 }

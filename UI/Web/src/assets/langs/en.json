@@ -686,8 +686,8 @@
         "continue-incognito": "Continue Incognito",
         "read-options-alt": "Read options",
         "incognito": "Incognito",
-        "remove-from-want-to-read": "Remove from Want to Read",
-        "add-to-want-to-read": "Add to Want to Read",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Edit Series Information",
         "download-series--tooltip": "Download Series",
         "downloading-status": "Downloading…",
@@ -1686,7 +1686,9 @@
         "tags-label": "{{filter-field-pipe.tags}}",
         "genres-label": "{{filter-field-pipe.genres}}",
         "view-series": "View Series",
-        "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters"
+        "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Chapters",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
     },
 
     "server-stats": {

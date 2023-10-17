@@ -23,18 +23,21 @@
       </div>
     </div>
     <app-bulk-operations [modalMode]="true" [topOffset]="0" [actionCallback]="bulkActionCallback"></app-bulk-operations>
-    <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
-                                [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
-                                [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')?.value"
-                                [bulkMode]="pageOperationsForm.get('bulkMode')!.value"
-                                [virtualizeAfter]="100"
-                                >
-      <ng-template #draggableItem let-position="idx" let-item>
-        <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>
-      </ng-template>
-    </app-draggable-ordered-list>
+    <div style="max-height: 500px; overflow-y: auto">
+      <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
+                                  [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
+                                  [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')!.value"
+                                  [bulkMode]="pageOperationsForm.get('bulkMode')!.value"
+                                  [virtualizeAfter]="virtualizeAfter"
+                                  [itemHeight]="60"
+      >
+        <ng-template #draggableItem let-position="idx" let-item>
+          <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>
+        </ng-template>
+      </app-draggable-ordered-list>
+    </div>
 
-    <h5>{{t('smart-filters-title')}}</h5>
+    <h5 class="mt-3">{{t('smart-filters-title')}}</h5>
     <div class="mb-3" *ngIf="smartFilters.length >= 6">
       <label for="smart-filter-filter" class="form-label">{{t('filter')}}</label>
       <div class="input-group">
