@@ -635,7 +635,7 @@ public class AccountController : BaseApiController
                 user.CreateSideNavFromLibrary(lib);
             }
 
-
+            _unitOfWork.UserRepository.Update(user);
             user.AgeRestriction = hasAdminRole ? AgeRating.NotApplicable : dto.AgeRestriction.AgeRating;
             user.AgeRestrictionIncludeUnknowns = hasAdminRole || dto.AgeRestriction.IncludeUnknowns;
 
