@@ -609,7 +609,7 @@
         "continue": "",
         "read-options-alt": "",
         "incognito": "",
-        "remove-from-want-to-read": "",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "",
         "edit-series-alt": "",
         "download-series--tooltip": "",
@@ -1753,5 +1753,8 @@
         "issue-num": "",
         "chapter-num": "",
         "volume-num": ""
+    },
+    "series-preview-drawer": {
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}"
     }
 }
