@@ -29,7 +29,7 @@ public class TagHelperTests
 
         });
 
-        Assert.Equal(1, tagAdded.Count);
+        Assert.Single(tagAdded);
         Assert.Equal(4, allTags.Count);
     }
 
@@ -100,7 +100,7 @@ public class TagHelperTests
                 tagRemoved.Add(tag);
             });
 
-        Assert.Equal(1, tagRemoved.Count);
+        Assert.Single(tagRemoved);
     }
 
     [Fact]

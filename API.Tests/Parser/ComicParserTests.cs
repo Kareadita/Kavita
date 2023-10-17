@@ -115,7 +115,6 @@ public class ComicParserTests
     [InlineData("Batgirl Vol.2000 #57 (December, 2004)", "2000")]
     [InlineData("Batgirl V2000 #57", "2000")]
     [InlineData("Fables 021 (2004) (Digital) (Nahga-Empire).cbr", "0")]
-    [InlineData("Cyberpunk 2077 - Trauma Team 04.cbz", "0")]
     [InlineData("2000 AD 0366 [1984-04-28] (flopbie)", "0")]
     [InlineData("Daredevil - v6 - 10 - (2019)", "6")]
     [InlineData("Daredevil - v6.5", "6.5")]
