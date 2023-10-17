@@ -15,6 +15,7 @@
             </virtual-scroller>
         </div>
     </ng-container>
+
     <ng-template #dragList>
         <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
             <div class="example-box" *ngFor="let item of items; index as i;" cdkDrag
@@ -30,13 +31,6 @@
         </div>
     </ng-template>
 
-    <ng-template #removeBtn let-item let-idx>
-        <button class="btn btn-icon float-end" (click)="removeItem(item, idx)" *ngIf="showRemoveButton" [disabled]="disabled">
-            <i class="fa fa-times" aria-hidden="true"></i>
-            <span class="visually-hidden" attr.aria-labelledby="item.id--{{idx}}">{{t('remove-item-alt')}}</span>
-        </button>
-    </ng-template>
-
     <ng-template #handle let-item let-idx="idx" let-isVirtualized="isVirtualized">
         <div class="me-3 align-middle">
             <div class="align-middle" [ngClass]="{'accessibility-padding': accessibilityMode, 'bulk-padding': bulkMode}" *ngIf="accessibilityMode || bulkMode">
@@ -49,13 +43,20 @@
                 <ng-container *ngIf="bulkMode">
                     <label for="select-{{idx}}" class="form-label visually-hidden">{{t('bulk-select-label')}}</label>
                     <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, idx)"
-                           [value]="bulkSelectionService.isCardSelected('sideNavStream', idx)">
+                           [ngModel]="bulkSelectionService.isCardSelected('sideNavStream', idx)" [ngModelOptions]="{standalone: true}">
                 </ng-container>
 
 
             </div>
             <i *ngIf="!isVirtualized && !(accessibilityMode || bulkMode) && !disabled" class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
         </div>
+    </ng-template>
+
+    <ng-template #removeBtn let-item let-idx>
+        <button class="btn btn-icon float-end" (click)="removeItem(item, idx)" *ngIf="showRemoveButton" [disabled]="disabled">
+            <i class="fa fa-times" aria-hidden="true"></i>
+            <span class="visually-hidden" attr.aria-labelledby="item.id--{{idx}}">{{t('remove-item-alt')}}</span>
+        </button>
     </ng-template>
 
     <p class="visually-hidden" id="instructions">
