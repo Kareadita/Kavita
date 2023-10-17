@@ -14,7 +14,7 @@ namespace API.Extensions.QueryExtensions.Filtering;
 
 public static class SeriesFilter
 {
-    private const float FloatingPointTolerance = 0.01f;
+    private const float FloatingPointTolerance = 0.001f;
     public static IQueryable<Series> HasLanguage(this IQueryable<Series> queryable, bool condition,
         FilterComparison comparison, IList<string> languages)
     {
@@ -243,9 +243,9 @@ public static class SeriesFilter
             .Select(s => new
             {
                 Series = s,
-                Percentage = Math.Truncate(((double) s.Progress
+                Percentage = ((float) s.Progress
                     .Where(p => p != null && p.AppUserId == userId)
-                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100))
+                    .Sum(p => p != null ? (p.PagesRead * 1.0f / s.Pages) : 0) * 100)
             })
             .AsEnumerable();
 
