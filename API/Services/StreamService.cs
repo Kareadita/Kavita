@@ -7,6 +7,7 @@ using API.DTOs.Dashboard;
 using API.DTOs.SideNav;
 using API.Entities;
 using API.Entities.Enums;
+using API.Helpers;
 using API.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
@@ -127,7 +128,7 @@ public class StreamService : IStreamService
         if (stream.Order == dto.ToPosition) return;
 
         var list = user!.DashboardStreams.ToList();
-        ReorderItems(list, stream.Id, dto.ToPosition);
+        OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
         user.DashboardStreams = list;
 
         _unitOfWork.UserRepository.Update(user);
@@ -263,7 +264,7 @@ public class StreamService : IStreamService
         if (stream.Order == dto.ToPosition) return;
 
         var list = user!.SideNavStreams.ToList();
-        ReorderItems(list, stream.Id, dto.ToPosition);
+        OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
         user.SideNavStreams = list;
         _unitOfWork.UserRepository.Update(user);
 
@@ -340,33 +341,5 @@ public class StreamService : IStreamService
         await _unitOfWork.CommitAsync();
     }
 
-    private static void ReorderItems(List<AppUserDashboardStream> items, int itemId, int toPosition)
-    {
-        var item = items.Find(r => r.Id == itemId);
-        if (item != null)
-        {
-            items.Remove(item);
-            items.Insert(toPosition, item);
-        }
 
-        for (var i = 0; i < items.Count; i++)
-        {
-            items[i].Order = i;
-        }
-    }
-
-    private static void ReorderItems(List<AppUserSideNavStream> items, int itemId, int toPosition)
-    {
-        var item = items.Find(r => r.Id == itemId);
-        if (item != null)
-        {
-            items.Remove(item);
-            items.Insert(toPosition, item);
-        }
-
-        for (var i = 0; i < items.Count; i++)
-        {
-            items[i].Order = i;
-        }
-    }
 }

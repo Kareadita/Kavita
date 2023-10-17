@@ -236,26 +236,11 @@ public class ReadingListService : IReadingListService
     public async Task<bool> UpdateReadingListItemPosition(UpdateReadingListPosition dto)
     {
         var items = (await _unitOfWork.ReadingListRepository.GetReadingListItemsByIdAsync(dto.ReadingListId)).ToList();
-        ReorderItems(items, dto.ReadingListItemId, dto.ToPosition);
+        OrderableHelper.ReorderItems(items, dto.ReadingListItemId, dto.ToPosition);
 
         if (!_unitOfWork.HasChanges()) return true;
 
         return await _unitOfWork.CommitAsync();
-    }
-
-    private static void ReorderItems(List<ReadingListItem> items, int readingListItemId, int toPosition)
-    {
-        var item = items.Find(r => r.Id == readingListItemId);
-        if (item != null)
-        {
-            items.Remove(item);
-            items.Insert(toPosition, item);
-        }
-
-        for (var i = 0; i < items.Count; i++)
-        {
-            items[i].Order = i;
-        }
     }
 
     /// <summary>
@@ -477,7 +462,7 @@ public class ReadingListService : IReadingListService
                     }
                     else
                     {
-                        ReorderItems(items, readingListItem.Id, order);
+                        OrderableHelper.ReorderItems(items, readingListItem.Id, order);
                     }
                 }
 

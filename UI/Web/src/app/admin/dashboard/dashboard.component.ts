@@ -1,7 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
-import {ServerService} from 'src/app/_services/server.service';
 import {Title} from '@angular/platform-browser';
 import {NavService} from '../../_services/nav.service';
 import {SentenceCasePipe} from '../../pipe/sentence-case.pipe';
@@ -20,7 +18,7 @@ import {NgbNav, NgbNavContent, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavOut
 import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 enum TabID {
   General = '',
@@ -66,8 +64,7 @@ export class DashboardComponent implements OnInit {
     return TabID;
   }
 
-  constructor(public route: ActivatedRoute, private serverService: ServerService,
-    private toastr: ToastrService, private titleService: Title, public navService: NavService) {
+  constructor(public route: ActivatedRoute, private titleService: Title, public navService: NavService) {
     this.route.fragment.subscribe(frag => {
       const tab = this.tabs.filter(item => item.fragment === frag);
       if (tab.length > 0) {
@@ -81,6 +78,6 @@ export class DashboardComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.titleService.setTitle('Kavita - ' + this.translocoService.translate('admin-dashboard.title'));
+    this.titleService.setTitle('Kavita - ' + translate('admin-dashboard.title'));
   }
 }
