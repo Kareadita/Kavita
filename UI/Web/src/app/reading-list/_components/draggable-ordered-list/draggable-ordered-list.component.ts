@@ -16,9 +16,9 @@ import {NgIf, NgFor, NgTemplateOutlet, NgClass} from '@angular/common';
 import {TranslocoDirective} from "@ngneat/transloco";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
-import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {FormsModule} from "@angular/forms";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {NgxVirtualScrollModule} from "@lithiumjs/ngx-virtual-scroll";
 
 export interface IndexUpdateEvent {
   fromPosition: number;
@@ -39,7 +39,8 @@ export interface ItemRemoveEvent {
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
   imports: [NgIf, VirtualScrollerModule, NgFor, NgTemplateOutlet, CdkDropList, CdkDrag,
-    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule]
+    CdkDragHandle, TranslocoDirective, NgClass, SeriesCardComponent, FormsModule,
+    NgxVirtualScrollModule, NgxVirtualScrollModule]
 })
 export class DraggableOrderedListComponent {
 
@@ -65,6 +66,7 @@ export class DraggableOrderedListComponent {
    * When enabled, draggability is disabled and a checkbox renders instead of order box or drag handle
    */
   @Input() bulkMode: boolean = false;
+  @Input({required: true}) itemHeight: number = 60;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
@@ -76,6 +78,9 @@ export class DraggableOrderedListComponent {
   get BufferAmount() {
     return Math.min(this.items.length / 20, 20);
   }
+
+  log(a: any, b: any) {console.log('item: ', a, 'index', b)}
+
 
   constructor(private readonly cdRef: ChangeDetectorRef) {
     this.bulkSelectionService.selections$.pipe(

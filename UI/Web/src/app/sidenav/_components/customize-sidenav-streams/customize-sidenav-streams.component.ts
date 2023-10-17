@@ -47,7 +47,7 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   items: SideNavStream[] = [];
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
-  virtualizeAfter = 250;
+  virtualizeAfter = 100;
 
   listForm: FormGroup = new FormGroup({
     'filterSideNavStream': new FormControl('', []),
