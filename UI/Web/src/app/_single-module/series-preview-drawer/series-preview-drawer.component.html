@@ -67,7 +67,14 @@
 
     <ng-template #localSeriesBody>
       <ng-container *ngIf="localSeries">
-        <div class="text-muted muted mb-2">{{localSeries.publicationStatus | publicationStatus}}</div>
+        <div class="d-inline-block mb-2" style="width: 100%">
+          <span class="text-muted muted">{{localSeries.publicationStatus | publicationStatus}}</span>
+          <button class="btn btn-secondary btn-sm float-end me-3"
+                  (click)="toggleWantToRead()"
+                  ngbTooltip="{{wantToRead ? t('series-preview-drawer.remove-from-want-to-read') : t('series-preview-drawer.add-to-want-to-read')}}">
+            <i class="{{wantToRead ? 'fa-solid' : 'fa-regular'}} fa-star" aria-hidden="true"></i>
+          </button>
+        </div>
         <app-read-more [maxLength]="300" [text]="localSeries.summary"></app-read-more>
 
         <div class="mt-3">
