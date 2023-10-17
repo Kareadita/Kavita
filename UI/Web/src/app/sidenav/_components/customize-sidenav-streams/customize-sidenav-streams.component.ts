@@ -48,7 +48,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   smartFilters: SmartFilter[] = [];
   externalSources: ExternalSource[] = [];
   virtualizeAfter = 250;
-  refreshState = new EventEmitter<void>();
 
   listForm: FormGroup = new FormGroup({
     'filterSideNavStream': new FormControl('', []),
@@ -121,7 +120,6 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
   handleKeyUp(event: KeyboardEvent) {
     if (event.key === KEY_CODES.SHIFT) {
       this.bulkSelectionService.isShiftDown = false;
-      this.refreshState.emit();
       this.cdRef.markForCheck();
     }
   }
@@ -225,12 +223,10 @@ export class CustomizeSidenavStreamsComponent implements OnDestroy {
 
   orderUpdated(event: IndexUpdateEvent) {
     this.sideNavService.updateSideNavStreamPosition(event.item.name, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
-      if (event.fromAccessibilityMode) {
-        this.sideNavService.getSideNavStreams(false).subscribe((data) => {
-          this.items = [...data];
-          this.cdRef.markForCheck();
-        });
-      }
+      this.sideNavService.getSideNavStreams(false).subscribe((data) => {
+        this.items = [...data];
+        this.cdRef.markForCheck();
+      });
     });
   }
 

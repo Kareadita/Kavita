@@ -66,7 +66,6 @@ export class DraggableOrderedListComponent {
    */
   @Input() bulkMode: boolean = false;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
-  @Input() refresh = new EventEmitter<void>();
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;
@@ -79,26 +78,22 @@ export class DraggableOrderedListComponent {
   }
 
   constructor(private readonly cdRef: ChangeDetectorRef) {
-    this.refresh.subscribe(() => this.cdRef.markForCheck());
     this.bulkSelectionService.selections$.pipe(
         takeUntilDestroyed(this.destroyRef)
     ).subscribe((s) => {
-      console.log('selections changed: ', s)
       this.cdRef.markForCheck()
     });
   }
 
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousIndex === event.currentIndex) return;
-    const item = {...this.items[event.previousIndex]};
-    moveItemInArray(this.items, event.previousIndex, event.currentIndex); // BUG: This is not actually swapping the element, thus the emit is wrong
+    moveItemInArray(this.items, event.previousIndex, event.currentIndex);
     this.orderUpdated.emit({
       fromPosition: event.previousIndex,
       toPosition: event.currentIndex,
-      item: item, // Old Code: this.items[event.currentIndex],
+      item: event.item.data,
       fromAccessibilityMode: false
     });
-    //this.items = [...this.items]; // Not sure if this is needed. Doesn't fix side nav not re-rendering
     this.cdRef.markForCheck();
   }
 

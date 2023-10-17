@@ -265,8 +265,8 @@ public class StreamService : IStreamService
         var list = user!.SideNavStreams.ToList();
         ReorderItems(list, stream.Id, dto.ToPosition);
         user.SideNavStreams = list;
-
         _unitOfWork.UserRepository.Update(user);
+
         await _unitOfWork.CommitAsync();
         if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
