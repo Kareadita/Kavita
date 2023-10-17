@@ -20,11 +20,13 @@ using Xunit;
 
 namespace API.Tests.Repository;
 
+#nullable enable
+
 public class SeriesRepositoryTests
 {
     private readonly IUnitOfWork _unitOfWork;
 
-    private readonly DbConnection _connection;
+    private readonly DbConnection? _connection;
     private readonly DataContext _context;
 
     private const string CacheDirectory = "C:/kavita/config/cache/";

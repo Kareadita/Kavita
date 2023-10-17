@@ -163,7 +163,7 @@ Substitute.For<IMediaConversionService>());
 
 
         Assert.True(result);
-        Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+        Assert.Single(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
         Assert.NotNull(await _unitOfWork.UserRepository.GetBookmarkAsync(1));
     }
 
@@ -223,7 +223,7 @@ Substitute.For<IMediaConversionService>());
 
 
         Assert.True(result);
-        Assert.Equal(0, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+        Assert.Empty(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
         Assert.Null(await _unitOfWork.UserRepository.GetBookmarkAsync(1));
     }
 
@@ -411,7 +411,7 @@ Substitute.For<IMediaConversionService>());
         await _unitOfWork.CommitAsync();
 
 
-        Assert.Equal(1, ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories).Count());
+        Assert.Single(ds.GetFiles(BookmarkDirectory, searchOption:SearchOption.AllDirectories));
         Assert.NotNull(await _unitOfWork.UserRepository.GetBookmarkAsync(1));
     }
 

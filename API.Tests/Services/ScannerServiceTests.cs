@@ -35,7 +35,7 @@ public class ScannerServiceTests
                 .Build()
         };
 
-        Assert.Equal(1, ScannerService.FindSeriesNotOnDisk(existingSeries, infos).Count());
+        Assert.Single(ScannerService.FindSeriesNotOnDisk(existingSeries, infos));
     }
 
     [Fact]

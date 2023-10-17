@@ -92,7 +92,7 @@ public class GenreHelperTests
                 genreRemoved.Add(genre);
             });
 
-        Assert.Equal(1, genreRemoved.Count);
+        Assert.Single(genreRemoved);
     }
 
     [Fact]
