@@ -162,5 +162,14 @@
     "collection-deleted": "Colección eliminada",
     "smart-filters": "Filtros inteligentes",
     "browse-smart-filters": "Buscar por filtros inteligentes",
-    "smart-filter-doesnt-exist": "El filtro inteligente no existe"
+    "smart-filter-doesnt-exist": "El filtro inteligente no existe",
+    "browse-external-sources": "Consultar las fuentes externas",
+    "external-source-already-in-use": "Existe un flujo con esta Fuente Externa",
+    "dashboard-stream-doesnt-exist": "Dashboard Stream no existe",
+    "external-source-already-exists": "La fuente externa ya existe",
+    "sidenav-stream-doesnt-exist": "SideNav Stream no existe",
+    "external-source-doesnt-exist": "La fuente externa no existe",
+    "external-sources": "Fuentes externas",
+    "external-source-required": "Se requiere la clave API y el host",
+    "smart-filter-already-in-use": "Existe una transmisión con este filtro inteligente"
 }
