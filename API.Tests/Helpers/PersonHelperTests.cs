@@ -220,7 +220,7 @@ public class PersonHelperTests
         });
 
         Assert.NotEqual(existingPeople, peopleRemoved);
-        Assert.Equal(1, peopleRemoved.Count);
+        Assert.Single(peopleRemoved);
     }
 
     [Fact]
@@ -238,14 +238,14 @@ public class PersonHelperTests
         });
 
         Assert.NotEqual(existingPeople, peopleRemoved);
-        Assert.Equal(1, peopleRemoved.Count);
+        Assert.Single(peopleRemoved);
 
         PersonHelper.RemovePeople(existingPeople, new[] {"Joe Shmo"}, PersonRole.CoverArtist, person =>
         {
             peopleRemoved.Add(person);
         });
 
-        Assert.Equal(0, existingPeople.Count);
+        Assert.Empty(existingPeople);
         Assert.Equal(2, peopleRemoved.Count);
     }
 

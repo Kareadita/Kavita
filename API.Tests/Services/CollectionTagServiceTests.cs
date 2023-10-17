@@ -85,8 +85,8 @@ public class CollectionTagServiceTests : AbstractDbTest
         await _service.AddTagToSeries(await _unitOfWork.CollectionTagRepository.GetTagAsync(1, CollectionTagIncludes.SeriesMetadata), ids);
 
         var metadatas = await _unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(ids);
-        Assert.True(metadatas.ElementAt(0).CollectionTags.Any(t => t.Title.Equals("Tag 1")));
-        Assert.True(metadatas.ElementAt(1).CollectionTags.Any(t => t.Title.Equals("Tag 1")));
+        Assert.Contains(metadatas.ElementAt(0).CollectionTags, t => t.Title.Equals("Tag 1"));
+        Assert.Contains(metadatas.ElementAt(1).CollectionTags, t => t.Title.Equals("Tag 1"));
     }
 
     [Fact]
@@ -112,7 +112,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         await SeedSeries();
         var tag = await _service.GetTagOrCreate(0, "GetTagOrCreate_ShouldReturnNewTag");
         Assert.NotNull(tag);
-        Assert.NotSame(0, tag.Id);
+        Assert.Equal(0, tag.Id);
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class CollectionTagServiceTests : AbstractDbTest
         await SeedSeries();
         var tag = await _service.GetTagOrCreate(1, string.Empty);
         Assert.NotNull(tag);
-        Assert.NotSame(1, tag.Id);
+        Assert.Equal(1, tag.Id);
     }
 
     [Fact]

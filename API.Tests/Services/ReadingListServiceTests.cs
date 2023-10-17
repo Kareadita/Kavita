@@ -164,7 +164,7 @@ public class ReadingListServiceTests
         await _readingListService.AddChaptersToReadingList(1, new List<int>() {1}, readingList);
         await _unitOfWork.CommitAsync();
 
-        Assert.Equal(1, readingList.Items.Count);
+        Assert.Single(readingList.Items);
         Assert.Equal(0, readingList.Items.First().Order);
     }
 
@@ -409,7 +409,7 @@ public class ReadingListServiceTests
             ReadingListId = 1, ReadingListItemId = 1
         });
 
-        Assert.Equal(1, readingList.Items.Count);
+        Assert.Single(readingList.Items);
         Assert.Equal(2, readingList.Items.First().ChapterId);
     }
 

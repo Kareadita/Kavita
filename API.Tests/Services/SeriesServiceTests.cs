@@ -305,7 +305,7 @@ public class SeriesServiceTests : AbstractDbTest
         // A book library where all books are Volumes, will show no "chapters" on the UI because it doesn't make sense
         Assert.Empty(detail.Chapters);
 
-        Assert.Equal(1, detail.Volumes.Count());
+        Assert.Single(detail.Volumes);
     }
 
     [Fact]
@@ -527,7 +527,7 @@ public class SeriesServiceTests : AbstractDbTest
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).Contains("New Genre".SentenceCase()));
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
 
     }
 
@@ -563,10 +563,10 @@ public class SeriesServiceTests : AbstractDbTest
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).Contains("New Genre".SentenceCase()));
+        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
         Assert.True(series.Metadata.People.All(g => g.Name is "Joe Shmo" or "Joe Shmo 2"));
-        Assert.True(series.Metadata.Tags.Select(g => g.Title).Contains("New Tag".SentenceCase()));
-        Assert.True(series.Metadata.CollectionTags.Select(g => g.Title).Contains("New Collection"));
+        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(g => g.Title));
+        Assert.Contains("New Collection", series.Metadata.CollectionTags.Select(g => g.Title));
 
     }
 

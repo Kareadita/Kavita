@@ -61,13 +61,13 @@ public class DirectoryServiceTests
                 API.Services.Tasks.Scanner.Parser.Parser.ImageFileExtensions, _logger);
             Assert.Equal(1, fileCount);
         }
-        catch (Exception ex)
+        catch
         {
             Assert.False(true);
         }
 
 
-        Assert.Equal(1, files.Count);
+        Assert.Single(files);
     }
 
 
@@ -654,7 +654,7 @@ public class DirectoryServiceTests
         fileSystem.AddFile($"{testDirectory}file_0.zip", new MockFileData(""));
 
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
-        Assert.Equal(1, ds.ListDirectory(testDirectory).Count());
+        Assert.Single(ds.ListDirectory(testDirectory));
     }
 
     #endregion
@@ -881,7 +881,7 @@ public class DirectoryServiceTests
 
         var allFiles = ds.ScanFiles("C:/Data/");
 
-        Assert.Equal(0, allFiles.Count);
+        Assert.Empty(allFiles);
 
         return Task.CompletedTask;
     }
@@ -905,7 +905,7 @@ public class DirectoryServiceTests
 
         var allFiles = ds.ScanFiles("C:/Data/");
 
-        Assert.Equal(1, allFiles.Count); // Ignore files are not counted in files, only valid extensions
+        Assert.Single(allFiles); // Ignore files are not counted in files, only valid extensions
 
         return Task.CompletedTask;
     }
