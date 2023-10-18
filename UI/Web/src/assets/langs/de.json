@@ -13,7 +13,8 @@
         "not-granted": "Sie haben keinen Zugang zu Bibliotheken erhalten.",
         "on-deck-title": "Weiterlesen",
         "recently-updated-title": "Kürzlich aktualisierte Serien",
-        "recently-added-title": "Neu hinzugefügte Serien"
+        "recently-added-title": "Neu hinzugefügte Serien",
+        "more-in-genre-title": "Mehr in {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -144,10 +145,11 @@
         "clients-api-key-tooltip": "Der API-Schlüssel ist wie ein Passwort. Bitte vertraulich behandeln.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Smarte Filter"
     },
     "user-holds": {
-        "title": "",
+        "title": "Scrobble pausiert",
         "description": "Dies ist eine vom Benutzer verwaltete Liste von Serien, die nicht an Upstream-Anbieter übertragen wird. Sie können eine Serie jederzeit entfernen und das nächste Scrobble-fähige Ereignis (Lesefortschritt, Bewertung, Lesewunschstatus) wird Ereignisse auslösen."
     },
     "theme-manager": {
@@ -183,7 +185,7 @@
     },
     "manage-devices": {
         "title": "Gerätemanager",
-        "description": "",
+        "description": "In diesem Abschnitt können Sie Geräte einrichten, die sich nicht über einen Webbrowser mit Kavita verbinden können und stattdessen eine E-Mail-Adresse haben, die Dateien annimmt.",
         "devices-title": "Geräte",
         "no-devices": "Es ist noch kein Gerät eingerichtet",
         "platform-label": "Plattform: ",
@@ -219,9 +221,9 @@
         "current-password-label": "Aktuelles Passwort",
         "email-not-confirmed": "Diese E-Mail-Adresse ist nicht bestätigt",
         "email-updated-title": "E-Mail Adresse aktualisiert",
-        "email-updated-description": "",
+        "email-updated-description": "Sie können den folgenden Link verwenden um ihre Email für ihren Account zu verifizieren. Wenn Ihr Server extern erreichbar ist, wurde eine Mail an ihre Addresse gesendet und der Link kann genutzt werden um sie zu bestätigen.",
         "setup-user-account": "User Account einrichten",
-        "invite-url-label": "",
+        "invite-url-label": "Einladungs URL",
         "invite-url-tooltip": "Kopieren Sie dies und fügen Sie es in einem neuen Tab ein",
         "permission-error": "Sie haben keine Berechtigung ihre Email Addresse zu ändern. Bitte wenden Sie sich an den Admin des Servers.",
         "required-field": "{{validation.required-field}}",
@@ -240,20 +242,22 @@
     },
     "api-key": {
         "copy": "Kopie",
-        "regen-warning": "",
+        "regen-warning": "Wenn Sie Ihren API-Schlüssel neu generieren, werden alle bestehenden Klienten ungültig.",
         "no-key": "ERROR - SCHLÜSSEL NICHT GESETZT",
-        "confirm-reset": "",
-        "key-reset": "API Schlüssel zurückgesetzt"
+        "confirm-reset": "Dadurch werden alle OPDS-Konfigurationen, die Sie eingerichtet haben, ungültig. Sind Sie sicher, dass Sie fortfahren möchten?",
+        "key-reset": "API Schlüssel zurückgesetzt",
+        "hide": "Ausblenden",
+        "show": "Show"
     },
     "scrobbling-providers": {
-        "title": "",
+        "title": "Scrobbling Anbieter",
         "requires": "Diese Funktion benötigt eine aktive {{product}} Lizenz",
-        "token-expired": "",
-        "no-token-set": "",
+        "token-expired": "Token Abgelaufen",
+        "no-token-set": "Kein Token eingestellt",
         "token-set": "",
         "generate": "Generieren",
-        "instructions": "",
-        "token-input-label": "",
+        "instructions": "Erstnutzer sollten unten auf \"{{scrobbling-providers.generate}}\" klicken, um Kavita+ die Kommunikation mit {{service}} zu erlauben. Sobald Sie das Programm autorisiert haben, kopieren Sie den Token und fügen ihn in das untere Feld ein. Sie können Ihren Token jederzeit neu erzeugen.",
+        "token-input-label": "{{Service}} Token hier einfügen",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}"
@@ -262,8 +266,8 @@
         "locked-field": "Feld ist gesperrt",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
-        "add-item": "",
-        "no-data": "",
+        "add-item": "Hinzufügen {{item}}…",
+        "no-data": "Keine Daten",
         "add-custom-item": ""
     },
     "generic-list-modal": {
@@ -292,7 +296,7 @@
     "top-readers": {
         "title": "",
         "time-selection-label": "Zeitfenster",
-        "comics-label": "Comics: {{value}} Std.",
+        "comics-label": "Comics: {{value}} Std",
         "manga-label": "",
         "books-label": "",
         "this-week": "{{time-periods.this-week}}",

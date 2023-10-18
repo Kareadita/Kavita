@@ -162,5 +162,14 @@
     "collection-deleted": "컬렉션이 삭제되었습니다",
     "smart-filters": "스마트 필터",
     "browse-smart-filters": "스마트 필터로 찾아보기",
-    "smart-filter-doesnt-exist": "스마트 필터가 존재하지 않습니다"
+    "smart-filter-doesnt-exist": "스마트 필터가 존재하지 않습니다",
+    "browse-external-sources": "외부 소스 찾아보기",
+    "external-source-already-in-use": "이 외부 소스가 포함된 기존 스트림이 있습니다",
+    "dashboard-stream-doesnt-exist": "대시보드 스트림이 존재하지 않습니다",
+    "external-source-already-exists": "외부 소스가 이미 존재합니다",
+    "sidenav-stream-doesnt-exist": "SideNav 스트림이 존재하지 않습니다",
+    "external-source-doesnt-exist": "외부 소스가 존재하지 않습니다",
+    "external-sources": "외부 소스",
+    "external-source-required": "ApiKey 및 호스트가 필요합니다",
+    "smart-filter-already-in-use": "이 스마트 필터가 포함된 기존 스트림이 있습니다"
 }

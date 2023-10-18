@@ -13,7 +13,8 @@
         "not-granted": "U heeft geen toegang gekregen tot bibliotheken.",
         "on-deck-title": "Aan het lezen",
         "recently-updated-title": "Onlangs bijgewerkte series",
-        "recently-added-title": "Nieuw toegevoegde series"
+        "recently-added-title": "Nieuw toegevoegde series",
+        "more-in-genre-title": "Meer in {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -29,7 +30,7 @@
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
         "description": "Hier vindt u alle scrobble-evenementen die aan uw account zijn gekoppeld. Om evenementen te laten bestaan, moet u een actieve scrobble provider geconfigureerd hebben. Alle verwerkte gebeurtenissen worden na een maand gewist. Als er niet-verwerkte gebeurtenissen zijn, is het waarschijnlijk dat deze online geen matches kunnen vormen. Neem contact op met uw beheerder om ze te laten corrigeren.",
-        "filter-label": "Filter",
+        "filter-label": "{{common.filter}}",
         "created-header": "Gemaakt",
         "last-modified-header": "Laatst gewijzigd",
         "type-header": "Type",
@@ -46,8 +47,8 @@
     "scrobble-event-type-pipe": {
         "chapter-read": "Leesvoortgang",
         "score-updated": "Beoordeling bijwerken",
-        "want-to-read-add": "Wil lezen: toevoegen",
-        "want-to-read-remove": "Wil lezen: verwijderen",
+        "want-to-read-add": "Willen Lezen: Toevoegen",
+        "want-to-read-remove": "Willen Lezen: Verwijderen",
         "review": "Recensie update"
     },
     "spoiler": {
@@ -55,7 +56,7 @@
     },
     "review-series-modal": {
         "title": "Beoordeling bewerken",
-        "tagline-label": "Slogan",
+        "tagline-label": "slogan",
         "review-label": "Beoordeling",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -73,7 +74,7 @@
         "rating-percentage": "Beoordeling {{r}}%"
     },
     "want-to-read": {
-        "title": "Wil lezen",
+        "title": "Willen lezen",
         "series-count": "{{common.series-count}}",
         "no-items": "Er zijn geen items. Probeer een serie toe te voegen.",
         "no-items-filtered": "Er komen geen items overeen met uw huidige filter."
@@ -83,7 +84,7 @@
         "pref-description": "Dit zijn algemene instellingen die aan he account zijn gekoppeld.",
         "account-tab": "Account",
         "preferences-tab": "Voorkeuren",
-        "3rd-party-clients-tab": "",
+        "3rd-party-clients-tab": "Clients van derden",
         "theme-tab": "Thema",
         "devices-tab": "Apparaten",
         "stats-tab": "Statistieken",
@@ -92,45 +93,45 @@
         "global-settings-title": "Algemene instellingen",
         "page-layout-mode-label": "Pagina-indelingsmodus",
         "page-layout-mode-tooltip": "Toon items als kaarten of lijstweergave op de seriedetailpagina.",
-        "locale-label": "",
+        "locale-label": "Landinstellingen",
         "locale-tooltip": "De taal die Kavita zou moeten gebruiken",
         "blur-unread-summaries-label": "Vervaag ongelezen samenvattingen",
         "blur-unread-summaries-tooltip": "Vervaagt samenvattende tekst op volumes of hoofdstukken die geen leesvoortgang hebben (om spoilers te voorkomen)",
         "prompt-on-download-label": "Prompt bij downloaden",
         "prompt-on-download-tooltip": "Vragen wanneer een download groter is dan {{size}} MB",
         "disable-animations-label": "Animaties uitschakelen",
-        "disable-animations-tooltip": "Schakelt animaties op de site uit.\nHandig voor e-ink-lezers.",
+        "disable-animations-tooltip": "Schakelt animaties op de site uit. Handig voor e-ink-lezers.",
         "collapse-series-relationships-label": "Serierelaties samenvouwen",
         "collapse-series-relationships-tooltip": "Moet Kavita series laten zien die geen relaties hebben of die geen ouder / prequel is",
         "share-series-reviews-label": "Deel serierecensies",
-        "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken?",
+        "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken",
         "image-reader-settings-title": "Afbeeldingslezer",
         "reading-direction-label": "Leesrichting",
-        "reading-direction-tooltip": "Richting om te klikken om naar de volgende pagina te gaan.\nRechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
+        "reading-direction-tooltip": "Richting om te klikken om naar de volgende pagina te gaan. Rechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
         "scaling-option-label": "Schaal opties",
         "scaling-option-tooltip": "Hoe de afbeelding naar uw scherm te schalen.",
         "page-splitting-label": "Pagina splitsen",
         "page-splitting-tooltip": "Een afbeelding over de volledige breedte splitsen (dwz zowel de linker- als de rechterafbeelding worden gecombineerd)",
         "reading-mode-label": "Leesmodus",
-        "layout-mode-label": "lay-out modus",
-        "layout-mode-tooltip": "Render een enkele afbeelding op het scherm of twee naast elkaar geplaatste afbeeldingen",
+        "layout-mode-label": "Lay-out Modus",
+        "layout-mode-tooltip": "Geef een enkele afbeelding of twee afbeeldingen naast elkaar weer",
         "background-color-label": "Achtergrondkleur",
         "auto-close-menu-label": "Menu automatisch sluiten",
         "show-screen-hints-label": "Toon schermhints",
-        "emulate-comic-book-label": "",
-        "swipe-to-paginate-label": "",
-        "book-reader-settings-title": "",
-        "tap-to-paginate-label": "",
-        "tap-to-paginate-tooltip": "",
-        "immersive-mode-label": "",
-        "immersive-mode-tooltip": "",
+        "emulate-comic-book-label": "Emuleer Stripverhaal",
+        "swipe-to-paginate-label": "Veeg om te bladeren",
+        "book-reader-settings-title": "Boekenlezer",
+        "tap-to-paginate-label": "Tik om te bladeren",
+        "tap-to-paginate-tooltip": "Tikken op de zijden van de lezen toestaan om te bladeren naar vorige/volgende pagina",
+        "immersive-mode-label": "Immersie-modus",
+        "immersive-mode-tooltip": "Hierdoor wordt het menu verborgen achter een klik op het lezerdocument en wordt de tik om te pagineren ingeschakeld",
         "reading-direction-book-label": "Leesrichting",
-        "reading-direction-book-tooltip": "",
-        "font-family-label": "",
-        "font-family-tooltip": "",
-        "writing-style-label": "",
-        "writing-style-tooltip": "",
-        "layout-mode-book-label": "",
+        "reading-direction-book-tooltip": "Richting waarin u klikt om naar de volgende pagina te gaan. Van rechts naar links betekent dat u aan de linkerkant van het scherm klikt om naar de volgende pagina te gaan.",
+        "font-family-label": "Lettertypefamilie",
+        "font-family-tooltip": "Lettertypefamilie om te laden. Standaard laadt het standaardlettertype van het boek",
+        "writing-style-label": "Schrijfstijl",
+        "writing-style-tooltip": "Verandert de richting van de tekst. Horizontaal is van links naar rechts, verticaal is van boven naar beneden.",
+        "layout-mode-book-label": "Lay-outmodus",
         "layout-mode-book-tooltip": "Hoe de inhoud moet worden ingedeeld. Scroll is zoals het boek het verpakt. 1 of 2 kolommen passen bij de hoogte van het apparaat en er passen 1 of 2 kolommen tekst per pagina",
         "color-theme-book-label": "Kleurenthema",
         "color-theme-book-tooltip": "Welk kleurenthema moet worden toegepast op de inhoud en het menu van de boeklezer",
@@ -144,11 +145,12 @@
         "clients-api-key-tooltip": "De API-sleutel is als een wachtwoord. Houd het geheim, houd het veilig.",
         "clients-opds-url-tooltip": "OPDS URL",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Slimme filters"
     },
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": ""
+        "description": "Dit is een door de gebruiker beheerde lijst met series die niet naar upstreamproviders wordt gescrobbeld. Je kunt op elk moment een serie verwijderen en de volgende scrobble-gebeurtenis (leesvoortgang, beoordeling, wil-lezen-status) zal gebeurtenissen activeren."
     },
     "theme-manager": {
         "title": "Thema Beheerder",
@@ -237,10 +239,12 @@
         "regen-warning": "Door uw API-sleutel opnieuw te genereren, worden alle bestaande clients ongeldig.",
         "no-key": "FOUT - SLEUTEL NIET INGESTELD",
         "confirm-reset": "Hierdoor worden alle OPDS-configuraties die u hebt ingesteld, ongeldig. Weet je zeker dat je door wilt gaan?",
-        "key-reset": "API-sleutel reset"
+        "key-reset": "API-sleutel reset",
+        "hide": "Verbergen",
+        "show": "Tonen"
     },
     "scrobbling-providers": {
-        "title": "",
+        "title": "Scrobbling-aanbieders",
         "requires": "Voor deze functie is een actieve {{product}} licentie vereist",
         "token-expired": "Token verlopen",
         "no-token-set": "Geen Token Ingesteld",
@@ -262,8 +266,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "Wissen",
-        "filter": "Filter",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "Open een gefilterde zoekopdracht voor {{item}}"
     },
     "user-stats-info-cards": {
@@ -304,7 +308,7 @@
         "close": "{{common.close}}",
         "path-label": "Pad",
         "path-placeholder": "Begin met typen of selecteer pad",
-        "instructions": "Selecteer een map om breadcrumb te bekijken. Zie je je directory niet? Probeer eerst / te controleren.",
+        "instructions": "Selecteer een map om breadcrumb te bekijken. Zie je de directory niet? Probeer eerst / te controleren.",
         "type-header": "Type",
         "name-header": "Naam",
         "cancel": "{{common.cancel}}",
@@ -461,7 +465,8 @@
         "save": "{{common.save}}"
     },
     "all-series": {
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Alle series"
     },
     "announcements": {
         "title": "Aankondigingen"
@@ -616,7 +621,9 @@
         "send-to": "Bestand gemaild naar {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Er zijn geen hoofdstukken in dit boek. Kan niet lezen.",
-        "cover-change": "Het kan tot een minuut duren voordat uw browser de afbeelding ververst. Tot die tijd kan op sommige pagina's de oude afbeelding worden getoond."
+        "cover-change": "Het kan tot een minuut duren voordat uw browser de afbeelding ververst. Tot die tijd kan op sommige pagina's de oude afbeelding worden getoond.",
+        "continue-incognito": "Ga incognito verder",
+        "read-incognito": "Incognito lezen"
     },
     "series-metadata-detail": {
         "links-title": "Koppelingen",
@@ -666,7 +673,9 @@
         "filter-label": "Filter",
         "all-series": "Alle series",
         "clear": "Wissen",
-        "donate": "Doneer"
+        "donate": "Doneer",
+        "back": "Terug",
+        "more": "Meer"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -834,7 +843,7 @@
     "entity-info-cards": {
         "tags-title": "{{series-metadata-detail.tags-title}}",
         "characters-title": "{{series-metadata-detail.characters-title}}",
-        "release-date-title": "Publicatie",
+        "release-date-title": "Uitgave",
         "release-date-tooltip": "Publicatiedatum",
         "age-rating-title": "Leeftijdsclassificatie",
         "length-title": "Lengte",
@@ -952,7 +961,9 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "Media-problemen",
-        "scrobble-issue-title": "Scrobble-problemen"
+        "scrobble-issue-title": "Scrobble-problemen",
+        "cover-image-size-label": "Omslagafbeeldingsgrootte",
+        "cover-image-size-tooltip": "Hoe groot moeten omslagafbeeldingen worden gegenereerd. Opmerking: alles wat groter is dan de standaardwaarde, leidt tot langere laadtijden van de pagina."
     },
     "manage-scrobble-errors": {
         "description": "Deze tabel bevat problemen die zijn gevonden tijdens het scrobbelen. Deze lijst wordt niet beheerd. Je kunt het op elk moment wissen en wachten op de volgende scrobble-upload om te zien. Als er een onbekende serie is, corrigeer je de serienaam of gelokaliseerde serienaam of voeg je een weblink toe voor de providers.",
@@ -1155,7 +1166,8 @@
     "draggable-ordered-list": {
         "instructions-alt": "Wanneer u een nummer invoert in de invoer voor opnieuw bestellen, wordt het artikel op die locatie ingevoegd en wordt de volgorde van alle andere artikelen bijgewerkt.",
         "reorder-label": "Herordenen",
-        "remove-item-alt": "Verwijder item"
+        "remove-item-alt": "Verwijder item",
+        "bulk-select-label": "Bulk Selecteer item"
     },
     "reading-lists": {
         "title": "Lees lijsten",
@@ -1313,7 +1325,9 @@
         "no-next-chapter": "Geen volgend hoofdstuk",
         "no-prev-chapter": "Geen vorig hoofdstuk",
         "user-preferences-updated": "Gebruikersvoorkeuren bijgewerkt",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "unbookmark-page-tooltip": "Bladwijzerpagina verwijderen",
+        "bookmark-page-tooltip": "Bladwijzerpagina"
     },
     "metadata-filter": {
         "filter-title": "Filter",
@@ -1350,7 +1364,9 @@
         "descending-alt": "Aflopend",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "limit-label": "Beperk tot"
+        "limit-label": "Beperk tot",
+        "save": "{{common.save}}",
+        "filter-name-label": "Filternaam"
     },
     "sort-field-pipe": {
         "sort-name": "Sorteernaam",
@@ -1358,7 +1374,8 @@
         "last-modified": "Laatst gewijzigd",
         "last-chapter-added": "Artikel toegevoegd",
         "time-to-read": "Tijd om te lezen",
-        "release-year": "Jaar van uitgave"
+        "release-year": "Jaar van uitgave",
+        "read-progress": "Laatst gelezen"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Details",
@@ -1406,20 +1423,20 @@
         "last-read-title": "Laatst gelezen:",
         "last-added-title": "Laatst toegevoegd item:",
         "last-scanned-title": "Laatst gescand:",
-        "folder-path-title": "",
-        "publication-status-title": "",
-        "total-pages-title": "",
-        "total-items-title": "",
-        "max-items-title": "",
-        "size-title": "",
-        "loading": "",
-        "added-title": "",
-        "last-modified-title": "",
-        "view-files": "",
-        "pages-title": "",
-        "chapter-title": "",
-        "volume-num": "",
-        "highest-count-tooltip": "",
+        "folder-path-title": "Mappad:",
+        "publication-status-title": "Publicatiestatus:",
+        "total-pages-title": "Totale pagina's:",
+        "total-items-title": "Totaal Items:",
+        "max-items-title": "Max Items:",
+        "size-title": "Grootte:",
+        "loading": "{{common.loading}}",
+        "added-title": "Toegevoegd:",
+        "last-modified-title": "Laatst gewijzigd:",
+        "view-files": "Bekijk bestanden",
+        "pages-title": "Pagina's:",
+        "chapter-title": "Hoofdstuk:",
+        "volume-num": "{{common.volume-num}}",
+        "highest-count-tooltip": "Hoogste aantal gevonden in alle ComicInfo in de serie",
         "max-issue-tooltip": ""
     },
     "day-breakdown": {
@@ -1638,5 +1655,22 @@
         "continuous-reading-prev-chapter": "Vorig hoofdstuk",
         "continuous-reading-next-chapter-alt": "Scroll omhoog om naar het volgende hoofdstuk te gaan",
         "continuous-reading-next-chapter": "Volgende hoofdstuk"
+    },
+    "stream-list-item": {
+        "external-source": "Externe bron",
+        "smart-filter": "Slim filteren",
+        "library": "Bibliotheek",
+        "remove": "{{common.remove}}",
+        "load-filter": "Laadfilter"
+    },
+    "cover-image-size": {
+        "default": "Standaard (320x455)",
+        "xlarge": "Extra groot (1265x1795)",
+        "medium": "Middelgroot (640x909)",
+        "large": "Groot (900x1277)"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "Procent",
+        "unit-reading-date": "Datum"
     }
 }

@@ -157,7 +157,19 @@
     "volume-num": "Band {0}",
     "on-deck": "Weiterlesen",
     "browse-on-deck": "Weiterlesen durchsuchen",
-    "want-to-read": "Wunschliste",
-    "browse-want-to-read": "Wunschliste durchsuchen",
-    "collection-deleted": "Sammlung gelöscht"
+    "want-to-read": "Möchte ich lesen",
+    "browse-want-to-read": "Möchte ich lesen durchsuchen",
+    "collection-deleted": "Sammlung wurde erfolgreich gelöscht",
+    "browse-external-sources": "Externe Quellen durchsuchen",
+    "smart-filters": "Intelligente Filter",
+    "browse-smart-filters": "Durchsuchen mit Smart Filtern",
+    "external-source-already-in-use": "Es gibt einen bestehenden Stream mit dieser externen Quelle",
+    "dashboard-stream-doesnt-exist": "Dashboard Stream existiert nicht",
+    "smart-filter-doesnt-exist": "Smart Filter existiert nicht",
+    "external-source-already-exists": "Externe Quelle existiert bereits",
+    "sidenav-stream-doesnt-exist": "SideNav Stream existiert nicht",
+    "external-source-doesnt-exist": "Externe Quelle existiert nicht",
+    "external-sources": "Externe Quellen",
+    "external-source-required": "ApiSchlüssel und Host erforderlich",
+    "smart-filter-already-in-use": "Es gibt einen bestehenden Stream mit diesem Smart Filter"
 }

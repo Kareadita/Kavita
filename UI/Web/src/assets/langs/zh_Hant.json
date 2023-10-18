@@ -269,8 +269,8 @@
     },
     "generic-list-modal": {
         "close": "{{common.close}}",
-        "clear": "清除",
-        "filter": "篩選",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
         "open-filtered-search": "打開對{{item}}的過濾"
     },
     "user-stats-info-cards": {
@@ -609,7 +609,7 @@
         "continue": "",
         "read-options-alt": "",
         "incognito": "",
-        "remove-from-want-to-read": "",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "",
         "edit-series-alt": "",
         "download-series--tooltip": "",
@@ -673,7 +673,7 @@
         "bookmarks": "",
         "filter-label": "",
         "all-series": "",
-        "clear": "清除",
+        "clear": "{{common.clear}}",
         "donate": ""
     },
     "library-settings-modal": {
@@ -1753,5 +1753,8 @@
         "issue-num": "",
         "chapter-num": "",
         "volume-num": ""
+    },
+    "series-preview-drawer": {
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}"
     }
 }
