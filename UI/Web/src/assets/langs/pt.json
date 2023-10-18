@@ -13,7 +13,8 @@
         "not-granted": "Não lhe foi atribuído acesso a nenhuma biblioteca.",
         "on-deck-title": "Continue a Ler",
         "recently-updated-title": "Séries Atualizadas Recentemente",
-        "recently-added-title": "Séries Adicionadas Recentemente"
+        "recently-added-title": "Séries Adicionadas Recentemente",
+        "more-in-genre-title": "Mais em {[genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -92,7 +93,7 @@
         "global-settings-title": "Definições globais",
         "page-layout-mode-label": "Modo de Exibição das Páginas",
         "page-layout-mode-tooltip": "Mostrar itens como cartões ou vista de lista na página Detalhes da Série.",
-        "locale-label": "",
+        "locale-label": "Idioma",
         "locale-tooltip": "O idioma que o Kavita deve usar",
         "blur-unread-summaries-label": "Ofuscar sumários não lidos",
         "blur-unread-summaries-tooltip": "Ofusca o sumário em volumes ou capítulos que não tenham leitura em curso (para evitar spoilers)",
@@ -144,7 +145,8 @@
         "clients-api-key-tooltip": "A chave de API é como uma palavra passe. Mantenha-a privada e em segurança.",
         "clients-opds-url-tooltip": "URL OPDS",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "smart-filters-tab": "Filtros Inteligentes"
     },
     "user-holds": {
         "title": "Retenções de Scrobble",
@@ -244,7 +246,8 @@
         "no-key": "ERRO - CHAVE NÃO DEFINIDA",
         "confirm-reset": "Isto irá invalidar todas as configurações OPDS. Tem a certeza que deseja continuar?",
         "key-reset": "Repor chave da API",
-        "show": "Mostrar"
+        "show": "Mostrar",
+        "hide": "Ocultar"
     },
     "scrobbling-providers": {
         "title": "Fornecedores de Scrobbling",
@@ -624,7 +627,9 @@
         "send-to": "Ficheiro enviado por email para {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Não existem capítulos neste volume. Impossível ler.",
-        "cover-change": "Pode levar até um minuto para a imagem ser refrescada pelo browser. Até isso acontecer, a imagem antiga será mostrada nalgumas páginas."
+        "cover-change": "Pode levar até um minuto para a imagem ser refrescada pelo browser. Até isso acontecer, a imagem antiga será mostrada nalgumas páginas.",
+        "continue-incognito": "Continuar Anonimamente",
+        "read-incognito": "Ler Anonimamente"
     },
     "series-metadata-detail": {
         "links-title": "Links",
@@ -674,7 +679,9 @@
         "filter-label": "Filtrar",
         "all-series": "Todas as Séries",
         "clear": "Limpar",
-        "donate": "Donativo"
+        "donate": "Donativo",
+        "back": "Voltar",
+        "more": "Mais"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -708,7 +715,7 @@
         "folder-watching-label": "Monitorizar Pastas",
         "folder-watching-tooltip": "Sobrepor a configuração de monitorização de pastas para esta biblioteca. Se desligada, a monitorização de pastas não correrá nas pastas desta biblioteca. Se houver pastas partilhadas entre bibliotecas, então a monitorização poderá correr na mesma.",
         "include-in-dashboard-label": "Incluir no Painel",
-        "include-in-dashboard-tooltip": "",
+        "include-in-dashboard-tooltip": "Se as séries da biblioteca devem ser incluídas no Painel Principal. Isto afeta todas as listas, como Leituras Futuras, Atualizadas Recentemente, Adicionadas Recentemente, ou outras.",
         "include-in-recommendation-label": "Incluir nas Recomendações",
         "include-in-recommendation-tooltip": "Indica se as séries da biblioteca devem ser incluídas na página das Recomendações.",
         "include-in-search-label": "Incluir na Pesquisa",
@@ -736,12 +743,12 @@
         "vertical": "Vertical",
         "writing-style-label": "{{user-preferences.writing-style-label}}",
         "writing-style-tooltip": "Altera a direção do texto. Horizontal é da esquerda para direita, veritcal é do topo para o fundo.",
-        "tap-to-paginate-label": "",
+        "tap-to-paginate-label": "Paginação por Toque",
         "tap-to-paginate-tooltip": "Clicar as extremidades do ecrã para paginar",
         "on": "Ligado",
         "off": "Desligado",
         "immersive-mode-label": "{{user-preferences.immersive-mode-label}}",
-        "immersive-mode-tooltip": "",
+        "immersive-mode-tooltip": "Esta opção ocultará o menu ao clicar no documento e ligará o Toque para Paginar",
         "fullscreen-label": "Ecrã Completo",
         "fullscreen-tooltip": "Colocar o leitor em modo ecrã completo",
         "exit": "Sair",
@@ -833,7 +840,7 @@
     "edit-series-relation": {
         "description-part-1": "Sem certeza sobre que relação adicionar? Veja o nosso",
         "description-part-2": "wiki para dicas.",
-        "target-series": "",
+        "target-series": "Série Alvo",
         "relationship": "Relação",
         "remove": "Eliminar",
         "add-relationship": "Adicionar Relação",
@@ -870,8 +877,8 @@
         "publication-status-tooltip": "Estado de Publicação",
         "scrobbling-title": "Scrobbling",
         "scrobbling-tooltip": "Estado de Scrobbling",
-        "on": "",
-        "off": "",
+        "on": "Ligado",
+        "off": "Desligado",
         "disabled": "Desabilitado",
         "format-title": "Formato",
         "last-read-title": "Última Leitura",
@@ -991,13 +998,13 @@
         "log-label": "Dias de Logs",
         "log-tooltip": "O número de logs a manter. Por defeito é 30, o mínimo é 1, o máximo é 30.",
         "logging-level-label": "Nível de Logging",
-        "logging-level-tooltip": "",
+        "logging-level-tooltip": "Use debug para ajudar a identificar problemas. O debug pode usar muito espaço em disco.",
         "cache-size-label": "Tamanho de Cache",
         "cache-size-tooltip": "A quantidade de memória permitida para fazer cache de APIs pesadas. Por defeito 75MB.",
-        "on-deck-last-progress-label": "",
-        "on-deck-last-progress-tooltip": "",
-        "on-deck-last-chapter-add-label": "",
-        "on-deck-last-chapter-add-tooltip": "",
+        "on-deck-last-progress-label": "Último Progresso para Leituras Futuras (dias)",
+        "on-deck-last-progress-tooltip": "O número de dias desde o último progresso antes de remover uma série das Leituras Futuras.",
+        "on-deck-last-chapter-add-label": "Último Capítulo Adicionado para Leituras Futuras (dias)",
+        "on-deck-last-chapter-add-tooltip": "O número de dias desde que o último capítulo foi adicionado para incluir uma série nas Leituras Futuras.",
         "allow-stats-label": "Permitir a obtenção de dados de uso anónimos",
         "allow-stats-tooltip-part-1": "Enviar dados de utilização anónimos para os servidores do Kavita. Isto inclui informação sobre as funcionalidades usadas, número de ficheiros, versão de SO, versão de instalação do Kavita, CPU e memória. Iremos usar esta informação para dar prioridade a novas funcionalidades, correção de bugs, e melhorias de desempenho. Requer uma reinicialização para ter efeito. Veja o ",
         "allow-stats-tooltip-part-2": "para ver que dados são recolhidos.",
@@ -1054,7 +1061,7 @@
         "convert-media-task-desc": "Corre uma tarefa de longa duração que irá converter para a codificação de destino todos os media geridos pelo kavita. Este processo é lento (em especial em dispositivos ARM).",
         "convert-media-success": "Conversão de Media para Codificação de Destino está agendada",
         "bust-cache-task": "Eliminar Cache",
-        "bust-cache-task-desc": "",
+        "bust-cache-task-desc": "Limpa a cache do Kavita+ - deve ser usado apenas para tentar detetar correspondências erradas.",
         "bust-cache-task-success": "Cache de Kavita+ eliminada",
         "clear-reading-cache-task": "Limpar Cache de Leitura",
         "clear-reading-cache-task-desc": "Limpa a cache de ficheiros para leitura. É útil quando atualiza um ficheiro que tenha sido lido nas últimas 24 horas.",
@@ -1068,7 +1075,7 @@
         "download-logs-task": "Descarregar Logs",
         "download-logs-task-desc": "Junta todos os ficheiros de log num ficheiro zip e descarrega-o.",
         "analyze-files-task": "Analisar Ficheiros",
-        "analyze-files-task-desc": "",
+        "analyze-files-task-desc": "Corre uma tarefa de longa duração que analisa ficheiros para gerar extensão e tamanho. Este processo deverá correr apenas uma vez para a versão v0.7. Não é necessário se tiver uma versão pós v0.7 instalada.",
         "analyze-files-task-success": "Foi agendada a análise de ficheiros",
         "check-for-updates-task": "Verificar se há Updates",
         "check-for-updates-task-desc": "Verificar se há algum lançamento Estável posterior à sua versão."
@@ -1076,7 +1083,7 @@
     "manage-users": {
         "title": "Utilizadores Ativos",
         "invite": "Convidar",
-        "you-alt": "",
+        "you-alt": "(Tu)",
         "pending-title": "Pendente",
         "delete-user-tooltip": "Eliminar Utilizador",
         "delete-user-alt": "Eliminar Utilizador {{user}}",
@@ -1094,7 +1101,7 @@
         "roles-title": "Funções:",
         "none": "Nenhuma",
         "never": "Nunca",
-        "online-now-tooltip": "",
+        "online-now-tooltip": "Online Agora",
         "sharing-title": "A Partilhar:",
         "no-data": "Não existem outros utilizadores.",
         "loading": "{{common.loading}}"
@@ -1123,10 +1130,10 @@
     },
     "library-recommended": {
         "no-data": "Nada a mostrar. Adicione metadados à sua biblioteca, leia ou classifique algo. Esta biblioteca também pode ter as recomendações desligadas.",
-        "more-in-genre": "",
+        "more-in-genre": "Mais em {{genre}}",
         "rediscover": "Redescobrir",
         "highly-rated": "Bem Classificado",
-        "quick-catchups": "",
+        "quick-catchups": "Atualizações Rápidas",
         "quick-reads": "Leituras Rápidas",
         "on-deck": "{{dashboard.on-deck-title}}"
     },
@@ -1165,7 +1172,8 @@
     "draggable-ordered-list": {
         "instructions-alt": "Quando coloca um número no campo para reordenar, o item será inserido nesse local e todos os outros itens terão a sua ordem atualizada.",
         "reorder-label": "Reordenar",
-        "remove-item-alt": "Remover item"
+        "remove-item-alt": "Remover item",
+        "bulk-select-label": "Selecionar vários"
     },
     "reading-lists": {
         "title": "Listas de Leitura",
@@ -1182,7 +1190,7 @@
         "item-count": "{{common.item-count}}",
         "page-settings-title": "Definições de Página",
         "remove-read": "Remover Leitura",
-        "order-numbers-label": "",
+        "order-numbers-label": "Ordem Numerada",
         "continue": "Continuar",
         "read": "{{common.read}}",
         "read-options-alt": "Opções de leitura",
@@ -1192,14 +1200,14 @@
     },
     "events-widget": {
         "title-alt": "Atividade",
-        "dismiss-all": "",
+        "dismiss-all": "Descartar Todos",
         "update-available": "Atualização disponível",
         "downloading-item": "A descarregar {{item}}",
         "more-info": "Clique para ver mais informação",
         "close": "{{common.close}}",
         "users-online-count": "{{num}} Utilizadores ligados",
         "active-events-title": "Eventos Ativos:",
-        "no-data": ""
+        "no-data": "Nada para ver aqui"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",
@@ -1260,8 +1268,8 @@
         "summary-label": "Sumário",
         "year-label": "Ano",
         "month-label": "Mês",
-        "ending-title": "",
-        "starting-title": "",
+        "ending-title": "Final",
+        "starting-title": "Começar",
         "promote-label": "Promover",
         "promote-tooltip": "A promoção significa que a etiqueta pode ser vista ao nível do servidor, e não apenas por administradores. As séries que tenham esta etiqueta continuarão a ter restrições de acesso ao nível de utilizador."
     },
@@ -1271,16 +1279,16 @@
         "import-description": "Importe um ficheiro .cbl para começar. O Kavita irá fazer várias verificações antes de importar. Alguns passos poderão impedir que se avance por haver problemas com o ficheiro.",
         "validate-description": "Todos os ficheiros foram validados para verificar se há operações pendentes na lista. As listas que tiverem falhado não passarão para o passo seguinte. Corrija o CBL e tente novamente.",
         "validate-warning": "Existem problemas com o CBL que impedem a importação. Corrija estes problemas e tente novamente.",
-        "validate-no-issue": "",
+        "validate-no-issue": "Parece bem",
         "validate-no-issue-description": "Não existem problemas com o CBL, pressione seguinte.",
-        "dry-run-description": "",
+        "dry-run-description": "Isto é uma simulação e mostra o que acontecerá se fizer a importação ao carregar em Seguinte. Todas as falhas serão importadas.",
         "prev": "Ant",
         "import": "Importar",
         "restart": "Reiniciar",
         "next": "Seguinte",
         "import-step": "Importar CBLs",
         "validate-cbl-step": "Validar CBL",
-        "dry-run-step": "",
+        "dry-run-step": "Simulação",
         "final-import-step": "Passo Final"
     },
     "pdf-reader": {
@@ -1293,7 +1301,7 @@
     "manga-reader": {
         "back": "Voltar",
         "save-globally": "Guardar Globalmente",
-        "incognito-alt": "",
+        "incognito-alt": "O modo anónimo está ligado. Pressione novamente para desligar.",
         "incognito-title": "Modo Incógnito:",
         "shortcuts-menu-alt": "Modal de Atalhos de Teclado",
         "prev-page-tooltip": "Página Anterior",
@@ -1310,7 +1318,7 @@
         "fullscreen": "Ecrã Completo",
         "settings-tooltip": "Definições",
         "image-splitting-label": "Separação de Imagens",
-        "image-scaling-label": "",
+        "image-scaling-label": "Dimensionamento da Imagem",
         "height": "Altura",
         "width": "Largura",
         "original": "Original",
@@ -1323,7 +1331,9 @@
         "no-next-chapter": "Não há Capítulo Seguinte",
         "no-prev-chapter": "Não há Capítulo Anterior",
         "user-preferences-updated": "Preferência de utilizador atualizadas",
-        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}"
+        "emulate-comic-book-label": "{{user-preferences.emulate-comic-book-label}}",
+        "unbookmark-page-tooltip": "Desmarcar Página",
+        "bookmark-page-tooltip": "Marcar Página"
     },
     "metadata-filter": {
         "filter-title": "Filtro",
@@ -1345,7 +1355,7 @@
         "read-progress-label": "Progresso da Leitura",
         "unread": "Não Lido",
         "read": "Lido",
-        "in-progress": "",
+        "in-progress": "Em Curso",
         "rating-label": "Classificação",
         "age-rating-label": "Classificação Etária",
         "language-label": "Idioma",
@@ -1360,15 +1370,18 @@
         "descending-alt": "Descendente",
         "reset": "{{common.reset}}",
         "apply": "{{common.apply}}",
-        "limit-label": "Limitar A"
+        "limit-label": "Limitar A",
+        "save": "{{common.save}}",
+        "filter-name-label": "Nome do Filtro"
     },
     "sort-field-pipe": {
         "sort-name": "Nome para Ordenação",
         "created": "Criado",
         "last-modified": "Última Alteração",
         "last-chapter-added": "Item Adicionado",
-        "time-to-read": "Tempo de Leitura",
-        "release-year": "Ano de Lançamento"
+        "time-to-read": "Tempo Total de Leitura",
+        "release-year": "Ano de Lançamento",
+        "read-progress": "Última Leitura"
     },
     "edit-series-modal": {
         "title": "Detalhes de {{seriesName}}",
@@ -1399,7 +1412,7 @@
         "close": "{{common.close}}",
         "name-label": "Nome",
         "sort-name-label": "Nome para Ordenação",
-        "localized-name-label": "",
+        "localized-name-label": "Nome Traduzido",
         "summary-label": "Sumário",
         "release-year-label": "Ano de Lançamento",
         "web-link-description": "Aqui pode adicionar diferentes links para serviços externos.",
@@ -1725,5 +1738,16 @@
     "metadata-builder": {
         "remove-rule": "Remover Linha",
         "add-rule": "Adicionar Regra"
+    },
+    "stream-list-item": {
+        "external-source": "Fonte Externa",
+        "smart-filter": "Filtro Inteligente",
+        "library": "Biblioteca",
+        "remove": "{{common.remove}}",
+        "load-filter": "Carregar Filtro"
+    },
+    "metadata-filter-row": {
+        "unit-reading-progress": "Percentagem",
+        "unit-reading-date": "Data"
     }
 }
