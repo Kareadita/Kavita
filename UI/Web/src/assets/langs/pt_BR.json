@@ -246,7 +246,8 @@
         "no-key": "ERRO - NENHUMA CHAVE DEFINIDA",
         "confirm-reset": "Isso invalidará todas as configurações OPDS que você configurou. Você tem certeza que quer continuar?",
         "key-reset": "Redefinir chave API",
-        "show": "Mostrar"
+        "show": "Mostrar",
+        "hide": "Ocultar"
     },
     "scrobbling-providers": {
         "title": "Provedores de Scrobbling",
@@ -678,7 +679,9 @@
         "filter-label": "Filtro",
         "all-series": "Todas as Séries",
         "clear": "Limpar",
-        "donate": "Doar"
+        "donate": "Doar",
+        "back": "Voltar",
+        "more": "Mais"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1169,7 +1172,8 @@
     "draggable-ordered-list": {
         "instructions-alt": "Ao colocar um número na entrada de reordenar, o item será inserido naquele local e todos os demais itens terão sua ordem atualizada.",
         "reorder-label": "Reordenar",
-        "remove-item-alt": "Remover item"
+        "remove-item-alt": "Remover item",
+        "bulk-select-label": "Selecionar Item em Massa"
     },
     "reading-lists": {
         "title": "Listas de Leitura",
@@ -1609,7 +1613,8 @@
         "list-doesnt-exist": "Esta lista não existe",
         "smart-filter-updated": "Filtro Inteligente Criado/Atualizado",
         "confirm-delete-smart-filter": "Tem certeza de que deseja excluir este Filtro Inteligente?",
-        "smart-filter-deleted": "Filtro Inteligente Excluído"
+        "smart-filter-deleted": "Filtro Inteligente Excluído",
+        "external-source-already-exists": "Já existe uma Fonte Externa com o mesmo nome/host/chave de API"
     },
     "actionable": {
         "scan-library": "Escanear Biblioteca",
@@ -1639,7 +1644,9 @@
         "add-rule-group-or": "Adicionar Grupo de Regras (OU)",
         "add-rule-group-and": "Adicionar Grupo de Regras (E)",
         "remove-rule-group": "Remover Grupo de Regras",
-        "customize": "Personalizar"
+        "customize": "Personalizar",
+        "mark-invisible": "Marcar como Invisível",
+        "mark-visible": "Marcar como Visível"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -1702,7 +1709,9 @@
         "issue-hash-num": "Número #",
         "issue-num": "Número",
         "chapter-num": "Capítulo",
-        "volume-num": "Volume"
+        "volume-num": "Volume",
+        "clear": "Limpar",
+        "filter": "Filtro"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter-alt": "Role para cima para ir para o capítulo anterior",
@@ -1774,13 +1783,90 @@
         "smart-filter": "Filtro Intelegente",
         "remove": "{{common.remove}}",
         "provided": "Provido",
-        "load-filter": "Carregar Filtro"
+        "load-filter": "Carregar Filtro",
+        "external-source": "Fonte Externa",
+        "library": "Biblioteca"
     },
     "customize-dashboard-modal": {
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "smart-filters": "Filtros Inteligentes",
+        "dashboard": "Painel de Controle",
+        "title-external-sources": "Fontes Externas",
+        "sidenav": "Navegador Lateral",
+        "title-sidenav": "Personalizar Navegador Lateral",
+        "external-sources": "Fontes Externas",
+        "title-dashboard": "Personalizar Painel de Controle",
+        "title-smart-filters": "Filtros Inteligentes"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
         "unit-reading-date": "Data"
+    },
+    "manage-external-sources": {
+        "description": "Adicionar Servidores Externos à sua conta e, em seguida, adicione-os ao seu Navegador Lateral para uma maneira rápida de alternar entre o seu servidor e o do seu amigo.",
+        "add-source": "Adicionar",
+        "filter": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "help-link": "Mais informações",
+        "no-data": "Não existem Fontes Externas"
+    },
+    "customize-sidenav-streams": {
+        "save": "{{common.save}}",
+        "smart-filters-title": "Filtros Inteligentes",
+        "no-data": "Todos os filtros inteligentes adicionados ao Navegador Lateral ou nenhum criado ainda.",
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "filter": "{{common.filter}}",
+        "no-data-external-source": "Todas as fontes externas adicionadas ao Navegador Lateral ou nenhuma criada ainda.",
+        "clear": "{{common.clear}}",
+        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "add": "{{common.add}}",
+        "reorder-when-filter-present": "Você não pode reordenar itens arrastando e soltando enquanto um filtro estiver presente. Usar {{customize-sidenav-streams.order-numbers-label}}",
+        "bulk-mode-label": "Modo em Massa"
+    },
+    "series-preview-drawer": {
+        "genres-label": "{{filter-field-pipe.genres}}",
+        "view-series": "Exibir Séries",
+        "staff-label": "Pessoal",
+        "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Capítulos",
+        "tags-label": "{{filter-field-pipe.tags}}",
+        "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
+        "add-to-want-to-read": "{{actionable.add-to-want-to-read}}"
+    },
+    "customize-dashboard-streams": {
+        "no-data": "Todos os filtros inteligentes foram adicionados ao Painel de Controle ou nenhum foi criado ainda.",
+        "clear": "{{common.clear}}",
+        "filter": "{{common.filter}}",
+        "add": "{{common.add}}",
+        "save": "{{common.save}}"
+    },
+    "edit-external-source-item": {
+        "save": "{{common.save}}",
+        "api-key-label": "Chave API",
+        "name-label": "Nome",
+        "cancel": "{{common.cancel}}",
+        "edit": "{{common.edit}}",
+        "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
+        "host-label": "Host",
+        "title": "Nova Fonte Externa",
+        "delete": "{{common.delete}}",
+        "required": "{{validation.required-field}}",
+        "pattern": "Host deve ser http(s):// url válido"
+    },
+    "manage-smart-filters": {
+        "no-data": "Nenhum Filtro Inteligente criado",
+        "filter": "{{common.filter}}",
+        "delete": "{{common.delete}}",
+        "clear": "{{common.clear}}"
+    },
+    "stream-pipe": {
+        "collections": "{{side-nav.collections}}",
+        "bookmarks": "{{side-nav.bookmarks}}",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "reading-lists": "{{side-nav.reading-lists}}",
+        "recently-updated": "{{dashboard.recently-updated-title}}",
+        "more-in-genre": "{{dashboard.more-in-genre-title}}",
+        "on-deck": "{{dashboard.on-deck-title}}",
+        "newly-added": "{{dashboard.recently-added-title}}",
+        "all-series": "{{side-nav.all-series}}"
     }
 }

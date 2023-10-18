@@ -13,7 +13,8 @@
         "not-granted": "No has sido autorizado para ver ninguna librería.",
         "on-deck-title": "En la portada",
         "recently-updated-title": "Series Actualizadas Recientemente",
-        "recently-added-title": "Series Añadidas Recientemente"
+        "recently-added-title": "Series Añadidas Recientemente",
+        "more-in-genre-title": "Más en {{genre}}"
     },
     "edit-user": {
         "edit": "{{common.edit}}",
@@ -29,7 +30,7 @@
     "user-scrobble-history": {
         "data-header": "Datos",
         "not-applicable": "No aplicable",
-        "filter-label": "Filtro",
+        "filter-label": "{{common.filter}}",
         "type-header": "Tipo",
         "rating": "Puntuación {{r}}",
         "no-data": "No hay datos",
