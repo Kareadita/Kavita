@@ -876,6 +876,7 @@ public class ReadingListServiceTests
 
     #region UserHasReadingListAccess
     // TODO: UserHasReadingListAccess tests are unavailable because I can't mock UserManager<AppUser>
+    [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldWorkIfTheirList()
     {
         await ResetDb();
@@ -889,7 +890,7 @@ public class ReadingListServiceTests
         Assert.Single(userWithList.ReadingLists);
     }
 
-
+    [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldNotWork_IfNotTheirList()
     {
         await ResetDb();
@@ -902,7 +903,7 @@ public class ReadingListServiceTests
         Assert.Null(userWithList);
     }
 
-
+    [Fact(Skip = "Unable to mock UserManager<AppUser>")]
     public async Task UserHasReadingListAccess_ShouldWork_IfNotTheirList_ButUserIsAdmin()
     {
         await ResetDb();

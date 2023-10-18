@@ -156,7 +156,7 @@ public class ArchiveServiceTests
     }
 
 
-    //[Theory]
+    [Theory(Skip = "No specific reason")]
     //[InlineData("v10.cbz", "v10.expected.png")] // Commented out as these break usually when NetVips is updated
     //[InlineData("v10 - with folder.cbz", "v10 - with folder.expected.png")]
     //[InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.png")]
@@ -189,7 +189,7 @@ public class ArchiveServiceTests
     }
 
 
-    //[Theory]
+    [Theory(Skip = "No specific reason")]
     //[InlineData("v10.cbz", "v10.expected.png")] // Commented out as these break usually when NetVips is updated
     //[InlineData("v10 - with folder.cbz", "v10 - with folder.expected.png")]
     //[InlineData("v10 - nested folder.cbz", "v10 - nested folder.expected.png")]
@@ -375,7 +375,7 @@ public class ArchiveServiceTests
 
     #region CreateZipForDownload
 
-    //[Fact]
+    [Fact(Skip = "No specific reason")]
     public void CreateZipForDownloadTest()
     {
         var fileSystem = new MockFileSystem();
