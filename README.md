@@ -31,7 +31,7 @@ your reading collection with your friends and family!
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Full Localization Support
-- Ability to customize your dashboard and side nav with smart filters
+- Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles.
 
 
 ## Support
@@ -109,10 +109,6 @@ Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our 
 <a href="https://hosted.weblate.org/engage/kavita/">
     <img src="https://hosted.weblate.org/widgets/kavita/-/horizontal-blue.svg" alt="Translation status" />
 </a>
-
-## Huntr
-We would like to extend a big thank you to [Huntr](https://huntr.dev/repos/kareadita/kavita) who has worked with Kavita in reporting security vulnerabilities. If you are interested in 
-being paid to help secure Kavita, please give them a try.
 
 ## PikaPods
 If you are looking to try your hand at self-hosting but lack the machine, [PikaPods](https://www.pikapods.com/pods?run=kavita) is a great service that 
