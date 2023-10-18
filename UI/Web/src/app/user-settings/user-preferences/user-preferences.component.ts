@@ -219,7 +219,7 @@ export class UserPreferencesComponent implements OnInit, OnDestroy {
       this.settingsForm.addControl('noTransitions', new FormControl(this.user.preferences.noTransitions, []));
       this.settingsForm.addControl('collapseSeriesRelationships', new FormControl(this.user.preferences.collapseSeriesRelationships, []));
       this.settingsForm.addControl('shareReviews', new FormControl(this.user.preferences.shareReviews, []));
-      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale, []));
+      this.settingsForm.addControl('locale', new FormControl(this.user.preferences.locale || 'en', []));
 
       if (this.locales.length === 1) {
         this.settingsForm.get('locale')?.disable();

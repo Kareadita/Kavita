@@ -268,6 +268,7 @@ public class AccountController : BaseApiController
         dto.RefreshToken = await _tokenService.CreateRefreshToken(user);
         dto.KavitaVersion = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion))
             .Value;
+        dto.Preferences = _mapper.Map<UserPreferencesDto>(user.UserPreferences);
         return Ok(dto);
     }
 

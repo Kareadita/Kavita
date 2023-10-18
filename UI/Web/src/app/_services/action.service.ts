@@ -43,8 +43,7 @@ export class ActionService implements OnDestroy {
 
   constructor(private libraryService: LibraryService, private seriesService: SeriesService,
     private readerService: ReaderService, private toastr: ToastrService, private modalService: NgbModal,
-    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService,
-    private translocoService: TranslocoService) { }
+    private confirmService: ConfirmService, private memberService: MemberService, private deviceService: DeviceService) { }
 
   ngOnDestroy() {
     this.onDestroy.next();
@@ -66,7 +65,7 @@ export class ActionService implements OnDestroy {
     const force = false; // await this.promptIfForce();
 
     this.libraryService.scan(library.id, force).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: library.name}));
+      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -95,7 +94,7 @@ export class ActionService implements OnDestroy {
     const forceUpdate = true; //await this.promptIfForce();
 
     this.libraryService.refreshMetadata(library?.id, forceUpdate).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: library.name}));
+      this.toastr.info(translate('toasts.scan-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -129,7 +128,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.libraryService.analyze(library?.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.library-file-analysis-queued', {name: library.name}));
+      this.toastr.info(translate('toasts.library-file-analysis-queued', {name: library.name}));
       if (callback) {
         callback(library);
       }
@@ -144,7 +143,7 @@ export class ActionService implements OnDestroy {
   markSeriesAsRead(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.markRead(series.id).pipe(take(1)).subscribe(res => {
       series.pagesRead = series.pages;
-      this.toastr.success(this.translocoService.translate('toasts.entity-read', {name: series.name}));
+      this.toastr.success(translate('toasts.entity-read', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -159,7 +158,7 @@ export class ActionService implements OnDestroy {
   markSeriesAsUnread(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.markUnread(series.id).pipe(take(1)).subscribe(res => {
       series.pagesRead = 0;
-      this.toastr.success(this.translocoService.translate('toasts.entity-unread', {name: series.name}));
+      this.toastr.success(translate('toasts.entity-unread', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -173,7 +172,7 @@ export class ActionService implements OnDestroy {
    */
   async scanSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.scan(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
+      this.toastr.info(translate('toasts.scan-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -187,7 +186,7 @@ export class ActionService implements OnDestroy {
    */
   analyzeFilesForSeries(series: Series, callback?: SeriesActionCallback) {
     this.seriesService.analyzeFiles(series.libraryId, series.id).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
+      this.toastr.info(translate('toasts.scan-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -208,7 +207,7 @@ export class ActionService implements OnDestroy {
     }
 
     this.seriesService.refreshMetadata(series).pipe(take(1)).subscribe((res: any) => {
-      this.toastr.info(this.translocoService.translate('toasts.refresh-covers-queued', {name: series.name}));
+      this.toastr.info(translate('toasts.refresh-covers-queued', {name: series.name}));
       if (callback) {
         callback(series);
       }
@@ -225,7 +224,7 @@ export class ActionService implements OnDestroy {
     this.readerService.markVolumeRead(seriesId, volume.id).pipe(take(1)).subscribe(() => {
       volume.pagesRead = volume.pages;
       volume.chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
+      this.toastr.success(translate('toasts.mark-read'));
 
       if (callback) {
         callback(volume);
@@ -243,7 +242,7 @@ export class ActionService implements OnDestroy {
     this.readerService.markVolumeUnread(seriesId, volume.id).subscribe(() => {
       volume.pagesRead = 0;
       volume.chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
+      this.toastr.success(translate('toasts.mark-unread'));
       if (callback) {
         callback(volume);
       }
@@ -259,7 +258,7 @@ export class ActionService implements OnDestroy {
   markChapterAsRead(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
     this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = chapter.pages;
-      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
+      this.toastr.success(translate('toasts.mark-read'));
       if (callback) {
         callback(chapter);
       }
@@ -275,7 +274,7 @@ export class ActionService implements OnDestroy {
   markChapterAsUnread(libraryId: number, seriesId: number, chapter: Chapter, callback?: ChapterActionCallback) {
     this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(take(1)).subscribe(results => {
       chapter.pagesRead = 0;
-      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
+      this.toastr.success(translate('toasts.mark-unread'));
       if (callback) {
         callback(chapter);
       }
@@ -296,7 +295,7 @@ export class ActionService implements OnDestroy {
         volume.chapters?.forEach(c => c.pagesRead = c.pages);
       });
       chapters?.forEach(c => c.pagesRead = c.pages);
-      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
+      this.toastr.success(translate('toasts.mark-read'));
 
       if (callback) {
         callback();
@@ -317,7 +316,7 @@ export class ActionService implements OnDestroy {
         volume.chapters?.forEach(c => c.pagesRead = 0);
       });
       chapters?.forEach(c => c.pagesRead = 0);
-      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
+      this.toastr.success(translate('toasts.mark-unread'));
 
       if (callback) {
         callback();
@@ -335,7 +334,7 @@ export class ActionService implements OnDestroy {
       series.forEach(s => {
         s.pagesRead = s.pages;
       });
-      this.toastr.success(this.translocoService.translate('toasts.mark-read'));
+      this.toastr.success(translate('toasts.mark-read'));
 
       if (callback) {
         callback();
@@ -353,7 +352,7 @@ export class ActionService implements OnDestroy {
       series.forEach(s => {
         s.pagesRead = s.pages;
       });
-      this.toastr.success(this.translocoService.translate('toasts.mark-unread'));
+      this.toastr.success(translate('toasts.mark-unread'));
 
       if (callback) {
         callback();
@@ -396,7 +395,7 @@ export class ActionService implements OnDestroy {
 
   removeMultipleSeriesFromWantToReadList(seriesIds: Array<number>, callback?: VoidActionCallback) {
     this.memberService.removeSeriesToWantToRead(seriesIds).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.series-removed-want-to-read'));
+      this.toastr.success(translate('toasts.series-removed-want-to-read'));
       if (callback) {
         callback();
       }
@@ -547,7 +546,7 @@ export class ActionService implements OnDestroy {
       return;
     }
     this.seriesService.deleteMultipleSeries(seriesIds.map(s => s.id)).pipe(take(1)).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
+      this.toastr.success(translate('toasts.series-deleted'));
 
       if (callback) {
         callback(true);
@@ -565,7 +564,7 @@ export class ActionService implements OnDestroy {
 
     this.seriesService.delete(series.id).subscribe((res: boolean) => {
       if (callback) {
-        this.toastr.success(this.translocoService.translate('toasts.series-deleted'));
+        this.toastr.success(translate('toasts.series-deleted'));
         callback(res);
       }
     });
@@ -573,7 +572,7 @@ export class ActionService implements OnDestroy {
 
   sendToDevice(chapterIds: Array<number>, device: Device, callback?: VoidActionCallback) {
     this.deviceService.sendTo(chapterIds, device.id).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.file-send-to', {name: device.name}));
+      this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
       }
@@ -582,7 +581,7 @@ export class ActionService implements OnDestroy {
 
   sendSeriesToDevice(seriesId: number, device: Device, callback?: VoidActionCallback) {
     this.deviceService.sendSeriesTo(seriesId, device.id).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.file-send-to', {name: device.name}));
+      this.toastr.success(translate('toasts.file-send-to', {name: device.name}));
       if (callback) {
         callback();
       }

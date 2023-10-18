@@ -25,7 +25,7 @@ import {ImageComponent} from "../../shared/image/image.component";
 import {DownloadIndicatorComponent} from "../download-indicator/download-indicator.component";
 import {EntityInfoCardsComponent} from "../entity-info-cards/entity-info-cards.component";
 import {NgbProgressbar, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 @Component({
@@ -90,7 +90,6 @@ export class ListItemComponent implements OnInit {
 
   @Output() read: EventEmitter<void> = new EventEmitter<void>();
   private readonly destroyRef = inject(DestroyRef);
-  private readonly translocoService = inject(TranslocoService);
 
   actionInProgress: boolean = false;
   summary: string = '';
@@ -136,7 +135,7 @@ export class ListItemComponent implements OnInit {
   performAction(action: ActionItem<any>) {
     if (action.action == Action.Download) {
       if (this.downloadInProgress) {
-        this.toastr.info(this.translocoService.translate('toasts.download-in-progress'));
+        this.toastr.info(translate('toasts.download-in-progress'));
         return;
       }
 

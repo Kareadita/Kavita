@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    <PackageReference Include="CsvHelper" Version="30.0.1" />
     <PackageReference Include="Docnet.Core" Version="2.6.0" />
     <PackageReference Include="EasyCaching.InMemory" Version="1.9.1" />
     <PackageReference Include="ExCSS" Version="4.2.2" />

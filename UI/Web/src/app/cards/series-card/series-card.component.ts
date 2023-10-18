@@ -22,7 +22,7 @@ import {CommonModule} from "@angular/common";
 import {CardItemComponent} from "../card-item/card-item.component";
 import {RelationshipPipe} from "../../pipe/relationship.pipe";
 import {Device} from "../../_models/device/device";
-import {TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoService} from "@ngneat/transloco";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 
 function deepClone(obj: any): any {
@@ -96,7 +96,6 @@ export class SeriesCardComponent implements OnInit, OnChanges {
   actions: ActionItem<Series>[] = [];
   imageUrl: string = '';
 
-  private readonly translocoService = inject(TranslocoService);
   private readonly offcanvasService = inject(NgbOffcanvas);
 
   constructor(private router: Router, private cdRef: ChangeDetectorRef,
@@ -206,7 +205,7 @@ export class SeriesCardComponent implements OnInit, OnChanges {
 
   async scanLibrary(series: Series) {
     this.seriesService.scan(series.libraryId, series.id).subscribe((res: any) => {
-      this.toastr.success(this.translocoService.translate('toasts.scan-queued', {name: series.name}));
+      this.toastr.success(translate('toasts.scan-queued', {name: series.name}));
     });
   }
 

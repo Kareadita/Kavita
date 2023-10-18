@@ -2,15 +2,6 @@
 
     <ng-container *ngIf="items.length > virtualizeAfter; else dragList">
         <div class="example-list list-group-flush">
-<!--            <li-virtual-scroll [items]="items" [itemHeight]="itemHeight" [viewCache]="BufferAmount">-->
-<!--                <div *liVirtualItem="let item; let i=index" class="d-flex list-container">-->
-<!--                    <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }"></ng-container>-->
-<!--                    <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }"></ng-container>-->
-
-<!--                    <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}"></ng-container>-->
-<!--                </div>-->
-
-<!--            </li-virtual-scroll>-->
             <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
                 <div class="example-box" *ngFor="let item of scroll.viewPortItems; index as i; trackBy: trackByIdentity">
 
@@ -46,7 +37,7 @@
                 <ng-container *ngIf="accessibilityMode">
                     <label for="reorder-{{idx}}" class="form-label visually-hidden">{{t('reorder-label')}}</label>
                     <input id="reorder-{{idx}}" class="form-control manual-input" type="number" inputmode="numeric" min="0"
-                           [max]="items.length - 1" [value]="idx"
+                           [max]="items.length - 1" [value]="item.order"
                            (focusout)="updateIndex(idx, item)" (keydown.enter)="updateIndex(idx, item)" aria-describedby="instructions">
                 </ng-container>
                 <ng-container *ngIf="bulkMode">

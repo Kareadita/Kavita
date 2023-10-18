@@ -29,7 +29,6 @@
                                   [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')!.value"
                                   [bulkMode]="pageOperationsForm.get('bulkMode')!.value"
                                   [virtualizeAfter]="virtualizeAfter"
-                                  [itemHeight]="60"
       >
         <ng-template #draggableItem let-position="idx" let-item>
           <app-sidenav-stream-list-item [item]="item" [position]="position" (hide)="updateVisibility($event, position)"></app-sidenav-stream-list-item>

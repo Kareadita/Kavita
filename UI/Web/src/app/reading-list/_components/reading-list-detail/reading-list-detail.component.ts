@@ -46,7 +46,11 @@ import {Title} from "@angular/platform-browser";
     styleUrls: ['./reading-list-detail.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
-  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent, PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent, ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective, MetadataDetailComponent]
+  imports: [SideNavCompanionBarComponent, NgIf, CardActionablesComponent, ImageComponent, NgbDropdown,
+    NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem, ReadMoreComponent, BadgeExpanderComponent,
+    PersonBadgeComponent, A11yClickDirective, LoadingComponent, DraggableOrderedListComponent,
+    ReadingListItemComponent, NgClass, AsyncPipe, DecimalPipe, DatePipe, TranslocoDirective,
+    MetadataDetailComponent]
 })
 export class ReadingListDetailComponent implements OnInit {
   items: Array<ReadingListItem> = [];
@@ -56,11 +60,7 @@ export class ReadingListDetailComponent implements OnInit {
   isAdmin: boolean = false;
   isLoading: boolean = false;
   accessibilityMode: boolean = false;
-
-  // Downloading
   hasDownloadingRole: boolean = false;
-  downloadInProgress: boolean = false;
-
   readingListSummary: string = '';
 
   libraryTypes: {[key: number]: LibraryType} = {};
@@ -131,7 +131,7 @@ export class ReadingListDetailComponent implements OnInit {
     this.cdRef.markForCheck();
 
     this.readingListService.getListItems(this.listId).subscribe(items => {
-      this.items = items;
+      this.items = [...items];
       this.isLoading = false;
       this.cdRef.markForCheck();
     });
@@ -178,7 +178,9 @@ export class ReadingListDetailComponent implements OnInit {
 
   orderUpdated(event: IndexUpdateEvent) {
     if (!this.readingList) return;
-    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe();
+    this.readingListService.updatePosition(this.readingList.id, event.item.id, event.fromPosition, event.toPosition).subscribe(() => {
+      this.getListItems();
+    });
   }
 
   itemRemoved(item: ReadingListItem, position: number) {

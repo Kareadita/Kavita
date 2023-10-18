@@ -41,7 +41,7 @@ export function preloadUser(userService: AccountService, transloco: TranslocoSer
       // If no user or locale is available, fallback to the default language ('en')
       const localStorageLocale = localStorage.getItem(AccountService.localeKey) || 'en';
       transloco.setActiveLang(localStorageLocale);
-      return transloco.load(localStorageLocale)
+      return transloco.load(localStorageLocale);
     })).subscribe();
   };
 }
