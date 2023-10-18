@@ -119,9 +119,10 @@ public class CollectionTagServiceTests : AbstractDbTest
     public async Task GetTagOrCreate_ShouldReturnExistingTag()
     {
         await SeedSeries();
-        var tag = await _service.GetTagOrCreate(1, string.Empty);
+        var tag = await _service.GetTagOrCreate(1, "Some new tag");
         Assert.NotNull(tag);
         Assert.Equal(1, tag.Id);
+        Assert.Equal("Tag 1", tag.Title);
     }
 
     [Fact]
