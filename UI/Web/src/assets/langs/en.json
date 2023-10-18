@@ -1753,7 +1753,8 @@
         "dashboard": "Dashboard",
         "sidenav": "Side Nav",
         "external-sources": "External Sources",
-        "smart-filters": "Smart Filters"
+        "smart-filters": "Smart Filters",
+        "help": "{{common.help}}"
     },
 
     "customize-dashboard-streams": {
