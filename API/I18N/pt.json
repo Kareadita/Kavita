@@ -158,5 +158,16 @@
     "generic-scrobble-hold": "Ocorreu um erro ao adicionar o hold",
     "bad-copy-files-for-download": "Não foi possível copiar os ficheiros para a diretoria temp para descarregar os arquivos.",
     "want-to-read": "Leituras Futuras",
-    "browse-want-to-read": "Explorar Leituras Futuras"
+    "browse-want-to-read": "Explorar Leituras Futuras",
+    "browse-external-sources": "Consultar Fontes Externas",
+    "smart-filters": "Filtros Inteligentes",
+    "browse-smart-filters": "Navegar por Filtros Inteligentes",
+    "external-source-already-in-use": "Existe um stream com esta Fonte Externa",
+    "smart-filter-doesnt-exist": "Filtro Inteligente inexistente",
+    "external-source-already-exists": "Fonte Externa já existe",
+    "external-source-doesnt-exist": "Fonte Externa inexistente",
+    "external-sources": "Fontes Externas",
+    "external-source-required": "ApiKey e Host requeridos",
+    "smart-filter-already-in-use": "Existe um stream com este Filtro Inteligente",
+    "collection-deleted": "Coleção eliminada"
 }
