@@ -1,1 +1,9 @@
+.modal-body {
+    overflow: hidden;
+    padding: 1rem 0 1rem 1rem;
 
+    .tab-content {
+        max-height: calc(var(--vh) * 100 - 235px);
+        overflow: auto;
+    }
+}
