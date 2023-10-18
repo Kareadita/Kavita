@@ -67,6 +67,9 @@ export class DraggableOrderedListComponent {
    */
   @Input() bulkMode: boolean = false;
   @Input() trackByIdentity: TrackByFunction<any> = (index: number, item: any) => `${item.id}_${item.order}_${item.title}`;
+  /**
+   * After an item is re-ordered, you MUST reload from backend the new data. This is because accessibility mode will use item.order which needs to be in sync.
+   */
   @Output() orderUpdated: EventEmitter<IndexUpdateEvent> = new EventEmitter<IndexUpdateEvent>();
   @Output() itemRemove: EventEmitter<ItemRemoveEvent> = new EventEmitter<ItemRemoveEvent>();
   @ContentChild('draggableItem') itemTemplate!: TemplateRef<any>;

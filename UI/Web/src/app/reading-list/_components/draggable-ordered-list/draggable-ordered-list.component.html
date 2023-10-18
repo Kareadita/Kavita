@@ -37,7 +37,7 @@
                 <ng-container *ngIf="accessibilityMode">
                     <label for="reorder-{{idx}}" class="form-label visually-hidden">{{t('reorder-label')}}</label>
                     <input id="reorder-{{idx}}" class="form-control manual-input" type="number" inputmode="numeric" min="0"
-                           [max]="items.length - 1" [value]="idx"
+                           [max]="items.length - 1" [value]="item.order"
                            (focusout)="updateIndex(idx, item)" (keydown.enter)="updateIndex(idx, item)" aria-describedby="instructions">
                 </ng-container>
                 <ng-container *ngIf="bulkMode">
