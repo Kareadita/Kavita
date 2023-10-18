@@ -21,7 +21,7 @@ import { SeriesService } from 'src/app/_services/series.service';
 import { ThemeService } from 'src/app/_services/theme.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { NgIf, NgStyle, AsyncPipe } from '@angular/common';
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-pdf-reader',
@@ -86,8 +86,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
    * https://github.com/stephanrauh/ngx-extended-pdf-viewer/issues/1415
    */
   bookMode: PageViewModeType = 'multiple';
-
-  private readonly translocoService = inject(TranslocoService);
 
   constructor(private route: ActivatedRoute, private router: Router, public accountService: AccountService,
     private seriesService: SeriesService, public readerService: ReaderService,
@@ -178,7 +176,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
+    this.toastr.info(translate('toasts.incognito-off'));
     this.saveProgress();
     this.cdRef.markForCheck();
   }

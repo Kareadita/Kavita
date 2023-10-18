@@ -121,7 +121,10 @@ enum KeyDirection {
         ])
     ],
     standalone: true,
-  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent, DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent, NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe, FullscreenIconPipe, TranslocoDirective]
+  imports: [NgStyle, NgIf, LoadingComponent, SwipeDirective, CanvasRendererComponent, SingleRendererComponent,
+    DoubleRendererComponent, DoubleReverseRendererComponent, DoubleNoCoverRendererComponent, InfiniteScrollerComponent,
+    NgxSliderModule, ReactiveFormsModule, NgFor, NgSwitch, NgSwitchCase, FittingIconPipe, ReaderModeIconPipe,
+    FullscreenIconPipe, TranslocoDirective]
 })
 export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -382,8 +385,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private pageNumSubject: Subject<{pageNum: number, maxPages: number}> = new ReplaySubject();
   pageNum$: Observable<{pageNum: number, maxPages: number}> = this.pageNumSubject.asObservable();
 
-  private readonly translocoService = inject(TranslocoService);
-
   getPageUrl = (pageNum: number, chapterId: number = this.chapterId) => {
     if (this.bookmarkMode) return this.readerService.getBookmarkPageUrl(this.seriesId, this.user.apiKey, pageNum);
     return this.readerService.getPageUrl(chapterId, pageNum);
@@ -591,7 +592,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.memberService.hasReadingProgress(this.libraryId).pipe(take(1)).subscribe(progress => {
         if (!progress) {
           this.toggleMenu();
-          this.toastr.info(this.translocoService.translate('manga-reader.first-time-reading-manga'));
+          this.toastr.info(translate('manga-reader.first-time-reading-manga'));
         }
       });
     });
@@ -723,7 +724,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.generalSettingsForm.get('layoutMode')?.setValue(LayoutMode.Single);
     this.generalSettingsForm.get('layoutMode')?.disable();
-    this.toastr.info(this.translocoService.translate('manga-reader.layout-mode-switched'));
+    this.toastr.info(translate('manga-reader.layout-mode-switched'));
     this.cdRef.markForCheck();
   }
 
@@ -1223,7 +1224,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadNextChapter() {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode) {
-      this.toastr.info(this.translocoService.translate('manga-reader.no-next-chapter'));
+      this.toastr.info(translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1241,7 +1242,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   loadPrevChapter() {
     if (this.prevPageDisabled || this.prevChapterDisabled || this.bookmarkMode) {
-      this.toastr.info(this.translocoService.translate('manga-reader.no-prev-chapter'));
+      this.toastr.info(translate('manga-reader.no-prev-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
@@ -1608,7 +1609,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.incognitoMode = false;
     const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
     window.history.replaceState({}, '', newRoute);
-    this.toastr.info(this.translocoService.translate('toasts.incognito-off'));
+    this.toastr.info(translate('toasts.incognito-off'));
     if (!this.bookmarkMode) {
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.pageNum).pipe(take(1)).subscribe(() => {/* No operation */});
     }
@@ -1624,7 +1625,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {key: '↓', description: 'next-page'},
       {key: 'G', description: 'go-to'},
       {key: 'B', description: 'bookmark'},
-      {key: this.translocoService.translate('shortcuts-modal.double-click'), description: 'bookmark'},
+      {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
       {key: 'ESC', description: 'close-reader'},
       {key: 'SPACE', description: 'toggle-menu'},
     ];
@@ -1646,7 +1647,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       data.pageSplitOption = parseInt(modelSettings.pageSplitOption, 10);
 
       this.accountService.updatePreferences(data).subscribe(updatedPrefs => {
-        this.toastr.success(this.translocoService.translate('manga-reader.user-preferences-updated'));
+        this.toastr.success(translate('manga-reader.user-preferences-updated'));
         if (this.user) {
           this.user.preferences = updatedPrefs;
           this.cdRef.markForCheck();

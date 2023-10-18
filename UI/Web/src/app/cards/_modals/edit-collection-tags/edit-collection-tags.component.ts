@@ -33,7 +33,7 @@ import { UploadService } from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CommonModule} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 
 enum TabID {
@@ -65,7 +65,6 @@ export class EditCollectionTagsComponent implements OnInit {
   imageUrls: Array<string> = [];
   selectedCover: string = '';
   private readonly destroyRef = inject(DestroyRef);
-  translocoService = inject(TranslocoService);
 
   get hasSomeSelected() {
     return this.selections != null && this.selections.hasSomeSelected();
@@ -172,7 +171,7 @@ export class EditCollectionTagsComponent implements OnInit {
     tag.id = this.tag.id;
 
     if (unselectedIds.length == this.series.length &&
-      !await this.confirmService.confirm(this.translocoService.translate('toasts.no-series-collection-warning'))) {
+      !await this.confirmService.confirm(translate('toasts.no-series-collection-warning'))) {
       return;
     }
 
@@ -187,7 +186,7 @@ export class EditCollectionTagsComponent implements OnInit {
 
     forkJoin(apis).subscribe(() => {
       this.modal.close({success: true, coverImageUpdated: selectedIndex > 0});
-      this.toastr.success(this.translocoService.translate('toasts.collection-updated'));
+      this.toastr.success(translate('toasts.collection-updated'));
     });
   }
 

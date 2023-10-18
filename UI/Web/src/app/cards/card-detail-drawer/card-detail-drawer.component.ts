@@ -48,7 +48,7 @@ import {BytesPipe} from "../../pipe/bytes.pipe";
 import {BadgeExpanderComponent} from "../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.component";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
 
 enum TabID {
@@ -73,7 +73,6 @@ export class CardDetailDrawerComponent implements OnInit {
   @Input() libraryId: number = 0;
   @Input({required: true}) data!: Volume | Chapter;
   private readonly destroyRef = inject(DestroyRef);
-  private readonly translocoService = inject(TranslocoService);
 
 
   /**
@@ -209,7 +208,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   resetCoverImage() {
     this.uploadService.resetChapterCoverLock(this.chapter.id).subscribe(() => {
-      this.toastr.info(this.translocoService.translate('toasts.regen-cover'));
+      this.toastr.info(translate('toasts.regen-cover'));
     });
   }
 
@@ -262,7 +261,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   readChapter(chapter: Chapter, incognito: boolean = false) {
     if (chapter.pages === 0) {
-      this.toastr.error(this.translocoService.translate('toasts.no-pages'));
+      this.toastr.error(translate('toasts.no-pages'));
       return;
     }
 
@@ -273,7 +272,7 @@ export class CardDetailDrawerComponent implements OnInit {
 
   download(chapter: Chapter) {
     if (this.downloadInProgress) {
-      this.toastr.info(this.translocoService.translate('toasts.download-in-progress'));
+      this.toastr.info(translate('toasts.download-in-progress'));
       return;
     }
 

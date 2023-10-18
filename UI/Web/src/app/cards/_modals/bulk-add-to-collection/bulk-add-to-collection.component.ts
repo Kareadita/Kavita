@@ -18,7 +18,7 @@ import { ReadingList } from 'src/app/_models/reading-list';
 import { CollectionTagService } from 'src/app/_services/collection-tag.service';
 import {CommonModule} from "@angular/common";
 import {FilterPipe} from "../../../pipe/filter.pipe";
-import {TranslocoDirective, TranslocoService} from "@ngneat/transloco";
+import {translate, TranslocoDirective, TranslocoService} from "@ngneat/transloco";
 
 @Component({
   selector: 'app-bulk-add-to-collection',
@@ -46,7 +46,6 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
 
   collectionTitleTrackby = (index: number, item: CollectionTag) => `${item.title}`;
 
-  translocoService = inject(TranslocoService);
 
   @ViewChild('title') inputElem!: ElementRef<HTMLInputElement>;
 
@@ -83,7 +82,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
   create() {
     const tagName = this.listForm.value.title;
     this.collectionService.addByMultiple(0, this.seriesIds, tagName).subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.series-added-to-collection', {collectionName: tagName}));
+      this.toastr.success(translate('toasts.series-added-to-collection', {collectionName: tagName}));
       this.modal.close();
     });
   }
@@ -92,7 +91,7 @@ export class BulkAddToCollectionComponent implements OnInit, AfterViewInit {
     if (this.seriesIds.length === 0) return;
 
     this.collectionService.addByMultiple(tag.id, this.seriesIds, '').subscribe(() => {
-      this.toastr.success(this.translocoService.translate('toasts.series-added-to-collection', {collectionName: tag.title}));
+      this.toastr.success(translate('toasts.series-added-to-collection', {collectionName: tag.title}));
       this.modal.close();
     });
 

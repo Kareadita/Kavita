@@ -1,6 +1,6 @@
 import {Component, DestroyRef, HostListener, inject, Inject, OnInit} from '@angular/core';
 import { NavigationStart, Router, RouterOutlet } from '@angular/router';
-import {map, pluck, shareReplay, take} from 'rxjs/operators';
+import {map, shareReplay, take} from 'rxjs/operators';
 import { AccountService } from './_services/account.service';
 import { LibraryService } from './_services/library.service';
 import { NavService } from './_services/nav.service';
@@ -12,7 +12,6 @@ import {ThemeService} from "./_services/theme.service";
 import { SideNavComponent } from './sidenav/_components/side-nav/side-nav.component';
 import {NavHeaderComponent} from "./nav/_components/nav-header/nav-header.component";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {translate, TranslocoService} from "@ngneat/transloco";
 
 @Component({
     selector: 'app-root',
@@ -26,7 +25,6 @@ export class AppComponent implements OnInit {
   transitionState$!: Observable<boolean>;
 
   destroyRef = inject(DestroyRef);
-  translocoService = inject(TranslocoService);
 
   constructor(private accountService: AccountService, public navService: NavService,
     private libraryService: LibraryService,
