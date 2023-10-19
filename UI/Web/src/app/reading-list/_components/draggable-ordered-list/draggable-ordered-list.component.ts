@@ -108,12 +108,12 @@ export class DraggableOrderedListComponent {
     // get the new value of the input
     const inputElem = <HTMLInputElement>document.querySelector('#reorder-' + previousIndex);
     const newIndex = parseInt(inputElem.value, 10);
-    if (previousIndex === newIndex)  return;
-    moveItemInArray(this.items, previousIndex, newIndex);
+    if (item.order === newIndex) return;
+    moveItemInArray(this.items, item.order, newIndex);
     this.orderUpdated.emit({
-      fromPosition: previousIndex,
+      fromPosition: item.order,
       toPosition: newIndex,
-      item: this.items[newIndex],
+      item: item,
       fromAccessibilityMode: true
     });
     this.cdRef.markForCheck();
