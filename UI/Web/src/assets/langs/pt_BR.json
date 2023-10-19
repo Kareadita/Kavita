@@ -1796,7 +1796,8 @@
         "title-sidenav": "Personalizar Navegador Lateral",
         "external-sources": "Fontes Externas",
         "title-dashboard": "Personalizar Painel de Controle",
-        "title-smart-filters": "Filtros Inteligentes"
+        "title-smart-filters": "Filtros Inteligentes",
+        "help": "{{common.help}}"
     },
     "metadata-filter-row": {
         "unit-reading-progress": "Porcento",
