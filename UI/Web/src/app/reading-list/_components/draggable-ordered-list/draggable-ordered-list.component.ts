@@ -121,7 +121,7 @@ export class DraggableOrderedListComponent {
 
   removeItem(item: any, position: number) {
     this.itemRemove.emit({
-      position,
+      position: item!.order,
       item
     });
     this.cdRef.markForCheck();
