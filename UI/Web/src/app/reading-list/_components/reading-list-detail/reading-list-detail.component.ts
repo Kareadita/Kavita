@@ -67,17 +67,13 @@ export class ReadingListDetailComponent implements OnInit {
   characters$!: Observable<Person[]>;
 
   private translocoService = inject(TranslocoService);
-
-  get MangaFormat(): typeof MangaFormat {
-    return MangaFormat;
-  }
+  protected readonly MangaFormat = MangaFormat;
 
   constructor(private route: ActivatedRoute, private router: Router, private readingListService: ReadingListService,
     private actionService: ActionService, private actionFactoryService: ActionFactoryService, public utilityService: UtilityService,
     public imageService: ImageService, private accountService: AccountService, private toastr: ToastrService,
     private confirmService: ConfirmService, private libraryService: LibraryService, private readerService: ReaderService,
     private readonly cdRef: ChangeDetectorRef, private filterUtilityService: FilterUtilitiesService, private titleService: Title) {
-    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
   }
 
   ngOnInit(): void {
@@ -87,6 +83,7 @@ export class ReadingListDetailComponent implements OnInit {
       this.router.navigateByUrl('/libraries');
       return;
     }
+    this.titleService.setTitle('Kavita - ' + translate('side-nav.reading-lists'));
     this.listId = parseInt(listId, 10);
     this.characters$ = this.readingListService.getCharacters(this.listId);
 

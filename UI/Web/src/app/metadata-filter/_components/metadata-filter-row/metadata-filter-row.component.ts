@@ -7,7 +7,7 @@ import {
   inject,
   Input,
   OnInit,
-  Output, ViewChild,
+  Output,
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
@@ -29,7 +29,6 @@ import {
   NgbDate,
   NgbDateParserFormatter,
   NgbDatepicker,
-  NgbDateStruct,
   NgbInputDatepicker,
   NgbTooltip
 } from "@ng-bootstrap/ng-bootstrap";
@@ -79,20 +78,26 @@ const NumberFieldsThatIncludeDateComparisons = [
   FilterField.ReleaseYear
 ];
 
-const StringComparisons = [FilterComparison.Equal,
+const StringComparisons = [
+  FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.BeginsWith,
   FilterComparison.EndsWith,
   FilterComparison.Matches];
-const DateComparisons = [FilterComparison.IsBefore, FilterComparison.IsAfter, FilterComparison.Equal,
+const DateComparisons = [
+  FilterComparison.IsBefore,
+  FilterComparison.IsAfter,
+  FilterComparison.Equal,
   FilterComparison.NotEqual,];
-const NumberComparisons = [FilterComparison.Equal,
+const NumberComparisons = [
+  FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.LessThan,
   FilterComparison.LessThanEqual,
   FilterComparison.GreaterThan,
   FilterComparison.GreaterThanEqual];
-const DropdownComparisons = [FilterComparison.Equal,
+const DropdownComparisons = [
+  FilterComparison.Equal,
   FilterComparison.NotEqual,
   FilterComparison.Contains,
   FilterComparison.NotContains,

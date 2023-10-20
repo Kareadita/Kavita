@@ -247,6 +247,7 @@ public class StreamService : IStreamService
         var stream = await _unitOfWork.UserRepository.GetSideNavStream(dto.Id);
         if (stream == null)
             throw new KavitaException(await _localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
+
         stream.Visible = dto.Visible;
 
         _unitOfWork.UserRepository.Update(stream);
@@ -266,8 +267,8 @@ public class StreamService : IStreamService
         var list = user!.SideNavStreams.ToList();
         OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
         user.SideNavStreams = list;
-        _unitOfWork.UserRepository.Update(user);
 
+        _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync();
         if (!stream.Visible) return;
         await _eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
