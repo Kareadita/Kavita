@@ -127,7 +127,7 @@ public class StreamService : IStreamService
             throw new KavitaException(await _localizationService.Translate(userId, "dashboard-stream-doesnt-exist"));
         if (stream.Order == dto.ToPosition) return;
 
-        var list = user!.DashboardStreams.ToList();
+        var list = user!.DashboardStreams.OrderBy(s => s.Order).ToList();
         OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
         user.DashboardStreams = list;
 
@@ -262,9 +262,10 @@ public class StreamService : IStreamService
             AppUserIncludes.SideNavStreams);
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null) throw new KavitaException(await _localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
+
         if (stream.Order == dto.ToPosition) return;
 
-        var list = user!.SideNavStreams.ToList();
+        var list = user!.SideNavStreams.OrderBy(s => s.Order).ToList();
         OrderableHelper.ReorderItems(list, stream.Id, dto.ToPosition);
         user.SideNavStreams = list;
 
