@@ -81,9 +81,6 @@ export class DraggableOrderedListComponent {
     return Math.min(this.items.length / 20, 20);
   }
 
-  log(a: any, b: any) {console.log('item: ', a, 'index', b)}
-
-
   constructor(private readonly cdRef: ChangeDetectorRef) {
     this.bulkSelectionService.selections$.pipe(
         takeUntilDestroyed(this.destroyRef)

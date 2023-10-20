@@ -23,7 +23,7 @@ public static class OrderableHelper
     public static void ReorderItems(List<AppUserSideNavStream> items, int itemId, int toPosition)
     {
         var item = items.Find(r => r.Id == itemId);
-        if (item != null)
+        if (item != null &&  toPosition < items.Count)
         {
             items.Remove(item);
             items.Insert(toPosition, item);
