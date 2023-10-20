@@ -57,6 +57,17 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'bust-cache-task-success'
     },
     {
+      name: 'bust-locale-task',
+      description: 'bust-locale-task-desc',
+      api: defer(() => {
+        localStorage.removeItem('@transloco/translations/timestamp');
+        localStorage.removeItem('@transloco/translations');
+        localStorage.removeItem('translocoLang');
+        return of();
+      }),
+      successMessage: 'bust-locale-task-success',
+    },
+    {
       name: 'clear-reading-cache-task',
       description: 'clear-reading-cache-task-desc',
       api: this.serverService.clearCache(),
