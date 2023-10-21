@@ -67,13 +67,13 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate
     /// </summary>
     public string? Language { get; set; }
     /// <summary>
-    /// Total number of issues or volumes in the series
+    /// Total number of issues or volumes in the series. This is straight from ComicInfo
     /// </summary>
-    /// <remarks>Users may use Volume count or issue count. Kavita performs some light logic to help Count match up with TotalCount</remarks>
     public int TotalCount { get; set; } = 0;
     /// <summary>
     /// Number of the Total Count (progress the Series is complete)
     /// </summary>
+    /// <remarks>This is either the highest of ComicInfo Count field and (nonparsed volume/chapter number)</remarks>
     public int Count { get; set; } = 0;
     /// <summary>
     /// SeriesGroup tag in ComicInfo

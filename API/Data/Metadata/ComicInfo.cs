@@ -185,7 +185,7 @@ public class ComicInfo
 
             if (float.TryParse(Volume, out var volCount) && volCount > 0)
             {
-                return Math.Max(Count, (int) Math.Floor(volCount));
+                return (int) Math.Floor(volCount);
             }
         }
         catch (Exception)

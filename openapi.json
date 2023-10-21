@@ -13389,7 +13389,7 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues or volumes in the series",
+            "description": "Total number of issues or volumes in the series. This is straight from ComicInfo",
             "format": "int32"
           },
           "count": {
@@ -17244,7 +17244,7 @@
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues/volumes in the series",
+            "description": "Total expected number of issues/volumes in the series from ComicInfo.xml",
             "format": "int32"
           },
           "maxCount": {
