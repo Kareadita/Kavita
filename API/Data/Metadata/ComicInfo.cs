@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using API.Entities;
 using API.Entities.Enums;
 using API.Services;
@@ -167,6 +169,12 @@ public class ComicInfo
             {
                 info.Isbn = info.GTIN;
             }
+        }
+
+        if (!string.IsNullOrEmpty(info.Number))
+        {
+            float.TryParse(info.Number, NumberStyles.Any, Thread.CurrentThread.CurrentCulture, out var number);
+            info.Number = $"{number}";
         }
     }
 
