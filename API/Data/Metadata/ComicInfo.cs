@@ -176,13 +176,21 @@ public class ComicInfo
     /// <returns></returns>
     public int CalculatedCount()
     {
-        if (!string.IsNullOrEmpty(Number) && float.Parse(Number) > 0)
+        try
         {
-            return (int) Math.Floor(float.Parse(Number));
+            if (float.TryParse(Number, out var chpCount) && chpCount > 0)
+            {
+                return (int) Math.Floor(chpCount);
+            }
+
+            if (float.TryParse(Volume, out var volCount) && volCount > 0)
+            {
+                return Math.Max(Count, (int) Math.Floor(volCount));
+            }
         }
-        if (!string.IsNullOrEmpty(Volume) && float.Parse(Volume) > 0)
+        catch (Exception)
         {
-            return Math.Max(Count, (int) Math.Floor(float.Parse(Volume)));
+            return 0;
         }
 
         return 0;

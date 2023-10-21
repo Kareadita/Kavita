@@ -36,7 +36,7 @@ public class SeriesMetadata : IHasConcurrencyToken
     /// </summary>
     public string Language { get; set; } = string.Empty;
     /// <summary>
-    /// Total number of issues/volumes in the series
+    /// Total expected number of issues/volumes in the series from ComicInfo.xml
     /// </summary>
     public int TotalCount { get; set; } = 0;
     /// <summary>
