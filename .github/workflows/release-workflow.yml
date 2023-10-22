@@ -2,10 +2,8 @@ name: Release Workflow
 
 on:
   pull_request:
-    types:
-      - closed
-    branches:
-        - 'release/**'
+    branches: [ release/** ]
+    types: [ closed ]
 
 jobs:
   if_merged:
